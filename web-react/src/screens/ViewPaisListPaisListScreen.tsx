@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewPaisListPaisListScreen(){return <PermissionGate permission="READ"><main><h1>List Pais</h1><DataTable path="/api/view/pais/listPais"/></main></PermissionGate>}

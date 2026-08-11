@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewComunicacaoFormComunicacaoMensagemListScreen(){return <PermissionGate permission="READ"><main><h1>Form Comunicacao Mensagem</h1><DataTable path="/api/view/comunicacao/formComunicacaoMensagem"/></main></PermissionGate>}

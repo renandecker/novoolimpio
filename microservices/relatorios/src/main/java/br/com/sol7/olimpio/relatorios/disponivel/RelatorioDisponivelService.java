@@ -1,0 +1,104 @@
+package br.com.sol7.olimpio.relatorios.disponivel;
+
+import io.quarkus.hibernate.reactive.panache.Panache;
+import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
+import io.smallrye.mutiny.Uni;
+import jakarta.enterprise.context.ApplicationScoped;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+@ApplicationScoped
+@WithTransaction
+public class RelatorioDisponivelService {
+
+    static final String SQL_BUSCAR_USUARIO =
+            "SELECT u.id FROM bas_usuario u WHERE lower(u.login) = lower(?1)";
+
+    // Regras de visibilidade migradas de RelatorioController.carregarRelatorio
+    // (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/RelatorioController.java:34)
+    static final String SQL_TABELA =
+            "SELECT DISTINCT rel.id, rel.nome FROM rel_tabela rel " +
+            "INNER JOIN bas_usuario usu ON (usu.id = ?1) " +
+            "INNER JOIN bas_usuario_perfil per ON (per.id_usuario = usu.id) " +
+            "INNER JOIN bas_usuario_unidade uni ON (uni.id_usuario = usu.id) " +
+            "LEFT JOIN rel_tabela_perfil relperfil ON (relperfil.id_tabela = rel.id AND per.id_perfil = relperfil.id_perfil) " +
+            "LEFT JOIN rel_tabela_unidade relunidade ON (relunidade.id_tabela = rel.id AND uni.id_unidade = relunidade.id_unidade) " +
+            "LEFT JOIN rel_tabela_usuario relusuario ON (relusuario.id_tabela = rel.id AND usu.id = relusuario.id_usuario) " +
+            "WHERE (rel.fl_todos_perfis = false AND relperfil.id_perfil = per.id_perfil) " +
+            "   OR (rel.fl_todos_unidades = false AND relunidade.id_unidade = uni.id_unidade) " +
+            "   OR (rel.fl_todos_usuarios = false AND relusuario.id_usuario = usu.id) " +
+            "   OR usu.hierarquia = 'ADMIN' " +
+            "ORDER BY rel.nome";
+
+    static final String SQL_GRAFICO =
+            "SELECT DISTINCT rel.id, rel.nome FROM rel_grafico rel " +
+            "INNER JOIN bas_usuario usu ON (usu.id = ?1) " +
+            "INNER JOIN bas_usuario_perfil per ON (per.id_usuario = usu.id) " +
+            "INNER JOIN bas_usuario_unidade uni ON (uni.id_usuario = usu.id) " +
+            "LEFT JOIN rel_grafico_perfil relperfil ON (relperfil.id_grafico = rel.id AND per.id_perfil = relperfil.id_perfil) " +
+            "LEFT JOIN rel_grafico_unidade relunidade ON (relunidade.id_grafico = rel.id AND uni.id_unidade = relunidade.id_unidade) " +
+            "LEFT JOIN rel_grafico_usuario relusuario ON (relusuario.id_grafico = rel.id AND usu.id = relusuario.id_usuario) " +
+            "WHERE (rel.fl_todos_perfis = false AND relperfil.id_perfil = per.id_perfil) " +
+            "   OR (rel.fl_todos_unidades = false AND relunidade.id_unidade = uni.id_unidade) " +
+            "   OR (rel.fl_todos_usuarios = false AND relusuario.id_usuario = usu.id) " +
+            "   OR usu.hierarquia = 'ADMIN' " +
+            "ORDER BY rel.nome";
+
+    static final String SQL_MAPA =
+            "SELECT DISTINCT rel.id, rel.nome FROM rel_mapa rel " +
+            "INNER JOIN bas_usuario usu ON (usu.id = ?1) " +
+            "INNER JOIN bas_usuario_perfil per ON (per.id_usuario = usu.id) " +
+            "INNER JOIN bas_usuario_unidade uni ON (uni.id_usuario = usu.id) " +
+            "LEFT JOIN rel_mapa_perfil relperfil ON (relperfil.id_mapa = rel.id AND per.id_perfil = relperfil.id_perfil) " +
+            "LEFT JOIN rel_mapa_unidade relunidade ON (relunidade.id_mapa = rel.id AND uni.id_unidade = relunidade.id_unidade) " +
+            "LEFT JOIN rel_mapa_usuario relusuario ON (relusuario.id_mapa = rel.id AND usu.id = relusuario.id_usuario) " +
+            "WHERE (rel.fl_todos_perfis = false AND relperfil.id_perfil = per.id_perfil) " +
+            "   OR (rel.fl_todos_unidades = false AND relunidade.id_unidade = uni.id_unidade) " +
+            "   OR (rel.fl_todos_usuarios = false AND relusuario.id_usuario = usu.id) " +
+            "   OR usu.hierarquia = 'ADMIN' " +
+            "ORDER BY rel.nome";
+
+    public Uni<List<RelatorioDisponivelResponse>> listarDisponiveis(String username) {
+        if (username == null || username.isBlank()) {
+            return Uni.createFrom().item(List.of());
+        }
+        return Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_USUARIO)
+                        .setParameter(1, username)
+                        .getSingleResultOrNull())
+                .onItem().transformToUni(usuarioId -> {
+                    if (usuarioId == null) {
+                        return Uni.createFrom().item(List.of());
+                    }
+                    Long id = ((Number) usuarioId).longValue();
+                    return consultar(SQL_TABELA, id, "TABELA")
+                            .chain(tabelas -> consultar(SQL_GRAFICO, id, "GRAFICO").map(graficos -> {
+                                List<RelatorioDisponivelResponse> todos = new ArrayList<>(tabelas);
+                                todos.addAll(graficos);
+                                return todos;
+                            }))
+                            .chain(todos -> consultar(SQL_MAPA, id, "MAPA").map(mapas -> {
+                                todos.addAll(mapas);
+                                todos.sort(Comparator.comparing(RelatorioDisponivelResponse::nome,
+                                        Comparator.nullsLast(String::compareTo)));
+                                return todos;
+                            }));
+                });
+    }
+
+    private Uni<List<RelatorioDisponivelResponse>> consultar(String sql, Long usuarioId, String tipo) {
+        return Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql)
+                        .setParameter(1, usuarioId)
+                        .getResultList())
+                .map(linhas -> linhas.stream()
+                        .map(linha -> (Object[]) linha)
+                        .map(linha -> new RelatorioDisponivelResponse(
+                                ((Number) linha[0]).longValue(),
+                                linha[1] == null ? "" : linha[1].toString(),
+                                tipo))
+                        .toList());
+    }
+}

@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewRelatoriosFormDashboardListScreen(){return <PermissionGate permission="READ"><main><h1>Form Dashboard</h1><DataTable path="/api/view/relatorios/formDashboard"/></main></PermissionGate>}

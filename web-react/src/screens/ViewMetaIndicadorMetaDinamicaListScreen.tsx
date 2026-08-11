@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewMetaIndicadorMetaDinamicaListScreen(){return <PermissionGate permission="READ"><main><h1>Indicador Meta Dinamica</h1><DataTable path="/api/view/meta/indicadorMetaDinamica"/></main></PermissionGate>}

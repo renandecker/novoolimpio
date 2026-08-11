@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewEstruturaListEstruturaListScreen(){return <PermissionGate permission="READ"><main><h1>List Estrutura</h1><DataTable path="/api/view/estrutura/listEstrutura"/></main></PermissionGate>}

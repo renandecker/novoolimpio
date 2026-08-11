@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewAgendaListAgendaListScreen(){return <PermissionGate permission="READ"><main><h1>List Agenda</h1><DataTable path="/api/view/agenda/listAgenda"/></main></PermissionGate>}

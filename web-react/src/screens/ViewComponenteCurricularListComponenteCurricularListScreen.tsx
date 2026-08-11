@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewComponenteCurricularListComponenteCurricularListScreen(){return <PermissionGate permission="READ"><main><h1>List Componente Curricular</h1><DataTable path="/api/view/componenteCurricular/listComponenteCurricular"/></main></PermissionGate>}

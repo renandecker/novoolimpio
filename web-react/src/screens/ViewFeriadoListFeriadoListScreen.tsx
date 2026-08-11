@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewFeriadoListFeriadoListScreen(){return <PermissionGate permission="READ"><main><h1>List Feriado</h1><DataTable path="/api/view/feriado/listFeriado"/></main></PermissionGate>}

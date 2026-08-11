@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewCompromissoColunasCompromissoListScreen(){return <PermissionGate permission="READ"><main><h1>Colunas Compromisso</h1><DataTable path="/api/view/compromisso/colunasCompromisso"/></main></PermissionGate>}

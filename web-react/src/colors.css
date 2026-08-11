@@ -1,0 +1,194 @@
+.evento-red {
+    font-weight: bold;
+    background-color: #C90000 !important;
+}
+
+.evento-green {
+    font-weight: bold;
+    background-color: #3C854D !important;
+}
+
+.evento-orange {
+    font-weight: bold;
+    background-color: #e76600 !important;
+}
+
+.evento-purple {
+    font-weight: bold;
+    color: white;
+    background-color: #553D7A !important;
+}
+
+.evento-yellow {
+    font-weight: bold;
+    background-color: #efb70b !important;
+}
+
+.evento-black {
+    font-weight: bold;
+    background-color: #000 !important;
+}
+
+.evento-blue {
+    font-weight: bold;
+    background-color: #36c !important;
+}
+
+.evento-grey {
+    font-weight: bold;
+    background-color: #595e60 !important;
+}
+
+.legenda-pink,
+.legenda-purple,
+.legenda-blue,
+.legenda-black,
+.legenda-brown,
+.legenda-orange,
+.legenda-red,
+.legenda-sky,
+.legenda-yellow,
+.legenda-green {
+    font-size: 12px;
+    margin: 2px;
+    color: white;
+    border-style: solid;
+    border-width: 1px 1px;
+    border-color: black;
+    padding: 2px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.legenda-pink {
+    background-color: #C71585 !important;
+}
+
+.legenda-purple {
+    background-color: #553D7A !important;
+}
+
+.legenda-blue {
+    background-color: #36c !important;
+}
+
+.legenda-black {
+    background-color: #000 !important;
+}
+
+.legenda-grey {
+    font-size: 12px;
+    margin: 2px;
+    background-color: #525252 !important;
+    color: white;
+    border-style: solid;
+    border-width: 1px 1px;
+    border-color: black;
+    padding: 2px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.legenda-brown {
+    background-color: #8A4513 !important;
+}
+
+.legenda-orange {
+    background-color: #e76600 !important;
+}
+
+.legenda-red {
+    background-color: #C90000 !important;
+}
+
+.legenda-sky {
+    background-color: #4AB1CF !important;
+}
+
+.legenda-yellow {
+    background-color: #efb70b !important;
+}
+
+.legenda-green {
+    background-color: #3C854D !important;
+}
+
+.timelinered {
+    background: #F03030 none !important;
+    border-color: #bd2828 !important;
+}
+
+.timelinegreen {
+    background: #1AA11A none !important;
+    border-color: #136e13 !important;
+}
+
+.timelineyellow {
+    background: #FFA500 none !important;
+    border-color: #efb70b !important;
+}
+
+.timelineblue {
+    background: #5D99C3 none !important;
+    border-color: #3A6DA0 !important;
+}
+
+.timelinepurple {
+    background: #9585BF none !important;
+    border-color: #563D7C !important;
+}
+
+.timelineorange {
+    background: #FF7F50 none !important;
+    border-color: #D96B21 !important;
+}
+
+.timelinesky {
+    background: #53BFBF none !important;
+    border-color: #307171 !important;
+}
+
+.timelineblack {
+    background: #000000 none !important;
+    border-color: #FFFFFF !important;
+}
+
+.statusCONCLUIDA {
+    color: #545454;
+    font-weight: bold;
+}
+
+.statusPENDENTE {
+    color: #FF0000;
+    font-weight: bold;
+}
+
+.statusLOTADA {
+    color: #FFA500;
+    font-weight: bold;
+}
+
+.statusCANCELADA {
+    color: #000000;
+    font-weight: bold;
+}
+
+.statusLIBERADA {
+    color: #32CD32;
+    font-weight: bold;
+}
+
+.statusEM_ANDAMENTO {
+    color: #000bc8;
+    font-weight: bold;
+}
+
+.statusINICIANDO {
+    color: #61210B;
+    font-weight: bold;
+}
+
+.statusFINALIZADA {
+    color: #8000FF;
+    font-weight: bold;
+}

@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewTipoMatrizCurricularListTipoMatrizCurricularListScreen(){return <PermissionGate permission="READ"><main><h1>List Tipo Matriz Curricular</h1><DataTable path="/api/view/tipoMatrizCurricular/listTipoMatrizCurricular"/></main></PermissionGate>}

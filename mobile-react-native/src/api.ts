@@ -1,0 +1,2 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'; import axios from 'axios'; export const api = axios.create({ baseURL: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8080' });
+api.interceptors.request.use(async config => { const raw = await AsyncStorage.getItem('olimpio.session'); if (raw) { const session = JSON.parse(raw); if (session.expiresAt * 1000 > Date.now()) config.headers.Authorization = `Bearer ${session.accessToken}`; else await AsyncStorage.removeItem('olimpio.session'); } return config; });

@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewOperacionalListOperacionalListScreen(){return <PermissionGate permission="READ"><main><h1>List Operacional</h1><DataTable path="/api/view/operacional/listOperacional"/></main></PermissionGate>}

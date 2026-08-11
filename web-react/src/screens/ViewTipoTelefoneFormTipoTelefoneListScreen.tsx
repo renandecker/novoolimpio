@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewTipoTelefoneFormTipoTelefoneListScreen(){return <PermissionGate permission="READ"><main><h1>Form Tipo Telefone</h1><DataTable path="/api/view/tipoTelefone/formTipoTelefone"/></main></PermissionGate>}

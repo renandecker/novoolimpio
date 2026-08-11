@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewResultadoLigacaoNapFormResultadoLigacaoNapListScreen(){return <PermissionGate permission="READ"><main><h1>Form Resultado Ligacao Nap</h1><DataTable path="/api/view/resultadoLigacaoNap/formResultadoLigacaoNap"/></main></PermissionGate>}

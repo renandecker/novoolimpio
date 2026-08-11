@@ -1,0 +1,55 @@
+COMO APLICAR ESSAS MUDANÇAS NO SEU PROJETO
+============================================
+
+1. Extraia este zip DENTRO da pasta:
+   C:\Users\redru\OneDrive\Desktop\novo olimpio\mobile-react-native
+
+   Ele vai adicionar/substituir estes arquivos:
+   - package.json      (atualizado: entry point + deps de build que faltavam)
+   - app.json           (NOVO: configuração do Expo — nome, ícones, bundle id)
+   - babel.config.js    (NOVO: sem ele o Metro bundler não compila nada)
+   - .gitignore          (NOVO)
+   - assets/icon.png, adaptive-icon.png, splash.png, favicon.png
+     (placeholders coloridos — troque pelos ícones reais do app quando tiver)
+
+2. Abra o terminal (cmd/PowerShell) na pasta mobile-react-native e rode:
+
+   npm install
+
+3. Para iniciar o app:
+
+   npx expo start
+
+   Isso abre o Metro Bundler com um QR code. Você pode:
+   - Pressionar "a" para abrir no emulador Android (precisa do Android Studio configurado)
+   - Pressionar "i" para abrir no simulador iOS (só funciona em Mac)
+   - Pressionar "w" para abrir a versão web
+   - Ou escanear o QR code com o app "Expo Go" no seu celular físico
+     (Android: Play Store | iOS: App Store) — forma mais rápida de testar
+     no celular, sem precisar instalar Android Studio/Xcode.
+
+4. IMPORTANTE - URL da API:
+   O arquivo src/api.ts usa a variável de ambiente EXPO_PUBLIC_API_URL,
+   com fallback para http://localhost:8080. Se for testar no celular físico
+   (não no emulador), "localhost" vai apontar para o próprio celular, não
+   para o seu PC. Crie um arquivo .env na raiz de mobile-react-native com:
+
+   EXPO_PUBLIC_API_URL=http://SEU_IP_LOCAL:8080
+
+   Troque SEU_IP_LOCAL pelo IP da sua máquina na rede local (ex: 192.168.0.10),
+   desde que o celular esteja na mesma rede Wi-Fi do seu PC. Descubra o IP
+   rodando "ipconfig" no cmd e olhando o "Endereço IPv4".
+
+O QUE ESTAVA FALTANDO E FOI CORRIGIDO
+=======================================
+- package.json não tinha o campo "main" (ponto de entrada do Expo)
+- Faltavam babel-preset-expo e @babel/core nas devDependencies
+  (sem elas, o bundler quebra ao tentar compilar)
+- Não havia app.json (obrigatório em qualquer projeto Expo)
+- Não havia babel.config.js
+- Não havia pasta assets/ com os ícones referenciados pelo app.json
+- Adicionados scripts "android", "ios", "web" no package.json
+
+Testado neste ambiente: npm install (1160 pacotes, sem erros), 
+npx tsc --noEmit (sem erros de tipo) e npx expo config --json
+(configuração resolvida corretamente para SDK 51, plataformas ios/android).

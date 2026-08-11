@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewFavoritoPerfilFormFavoritoPerfilListScreen(){return <PermissionGate permission="READ"><main><h1>Form Favorito Perfil</h1><DataTable path="/api/view/favoritoPerfil/formFavoritoPerfil"/></main></PermissionGate>}

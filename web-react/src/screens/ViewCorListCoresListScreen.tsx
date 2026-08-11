@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewCorListCoresListScreen(){return <PermissionGate permission="READ"><main><h1>List Cores</h1><DataTable path="/api/view/cor/listCores"/></main></PermissionGate>}

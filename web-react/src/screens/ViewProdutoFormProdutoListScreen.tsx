@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewProdutoFormProdutoListScreen(){return <PermissionGate permission="READ"><main><h1>Form Produto</h1><DataTable path="/api/view/produto/formProduto"/></main></PermissionGate>}

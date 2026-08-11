@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewModeloCartaFormModeloCartaListScreen(){return <PermissionGate permission="READ"><main><h1>Form Modelo Carta</h1><DataTable path="/api/view/modeloCarta/formModeloCarta"/></main></PermissionGate>}

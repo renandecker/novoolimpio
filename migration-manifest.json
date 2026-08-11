@@ -1,0 +1,16 @@
+{
+    "modules": [
+        "basico",
+        "central",
+        "comercial",
+        "educacao",
+        "estoque",
+        "financeiro",
+        "login",
+        "relatorios",
+        "schedule"
+    ],
+    "functionalXhtml": 412,
+    "generatedAt": "2026-07-26T22:29:18",
+    "note_biblioteca_removida": "Modulo biblioteca removido a pedido - features (livro, configuracaolivro, entradasaidaslivro, controlelivros) descontinuadas."
+}

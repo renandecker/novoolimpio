@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewTipoPagamentoColunasTipoPagamentoListScreen(){return <PermissionGate permission="READ"><main><h1>Colunas Tipo Pagamento</h1><DataTable path="/api/view/tipoPagamento/colunasTipoPagamento"/></main></PermissionGate>}

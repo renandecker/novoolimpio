@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewArquivoProconListArquivoProconListScreen(){return <PermissionGate permission="READ"><main><h1>List Arquivo Procon</h1><DataTable path="/api/view/arquivoProcon/listArquivoProcon"/></main></PermissionGate>}

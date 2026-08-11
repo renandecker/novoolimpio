@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewProspectoProspectoRadarListScreen(){return <PermissionGate permission="READ"><main><h1>Prospecto Radar</h1><DataTable path="/api/view/prospecto/prospectoRadar"/></main></PermissionGate>}

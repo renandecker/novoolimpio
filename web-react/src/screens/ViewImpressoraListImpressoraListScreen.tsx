@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewImpressoraListImpressoraListScreen(){return <PermissionGate permission="READ"><main><h1>List Impressora</h1><DataTable path="/api/view/impressora/listImpressora"/></main></PermissionGate>}

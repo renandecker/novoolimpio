@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewMatriculaColunasPessoaListScreen(){return <PermissionGate permission="READ"><main><h1>Colunas Pessoa</h1><DataTable path="/api/view/matricula/colunasPessoa"/></main></PermissionGate>}

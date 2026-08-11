@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewModuloListOrdemModuloListScreen(){return <PermissionGate permission="READ"><main><h1>List Ordem Modulo</h1><DataTable path="/api/view/modulo/listOrdemModulo"/></main></PermissionGate>}

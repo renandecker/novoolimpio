@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewCriterioListCriterioListScreen(){return <PermissionGate permission="READ"><main><h1>List Criterio</h1><DataTable path="/api/view/criterio/listCriterio"/></main></PermissionGate>}

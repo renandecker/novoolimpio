@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewTurmaListTurmaFinalizandoListScreen(){return <PermissionGate permission="READ"><main><h1>List Turma Finalizando</h1><DataTable path="/api/view/turma/listTurmaFinalizando"/></main></PermissionGate>}

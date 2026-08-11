@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewChamadaAssinadaListChamadaAssinadaListScreen(){return <PermissionGate permission="READ"><main><h1>List Chamada Assinada</h1><DataTable path="/api/view/chamadaAssinada/listChamadaAssinada"/></main></PermissionGate>}

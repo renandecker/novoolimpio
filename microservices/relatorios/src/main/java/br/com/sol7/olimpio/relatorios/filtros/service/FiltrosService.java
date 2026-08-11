@@ -1,0 +1,161 @@
+package br.com.sol7.olimpio.relatorios.filtros;
+import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
+import br.com.sol7.olimpio.shared.PagedResponse;
+import io.smallrye.mutiny.Uni; import jakarta.enterprise.context.ApplicationScoped; import jakarta.inject.Inject; import jakarta.ws.rs.NotFoundException; import java.util.List;
+import io.smallrye.mutiny.Uni;
+@ApplicationScoped @WithTransaction public class FiltrosService { @Inject FiltrosRepository repository; public Uni<List<FiltrosResponse>> list(){return repository.listAll().map(items->items.stream().map(this::toResponse).toList());}
+
+    public Uni<PagedResponse<FiltrosResponse>> paged(int page, int size) {
+        int p = Math.max(0, page);
+        int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
+        return repository.findAll(io.quarkus.panache.common.Sort.by("id").descending()).page(io.quarkus.panache.common.Page.of(p, s)).list()
+                .onItem().transformToUni(items -> repository.count()
+                        .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
+    }
+ public Uni<FiltrosResponse> find(Long id){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("Filtros not found")).map(this::toResponse);} public Uni<FiltrosResponse> create(FiltrosRequest r){var e=new Filtros();apply(e,r);return repository.persist(e).replaceWith(()->toResponse(e));} public Uni<FiltrosResponse> update(Long id,FiltrosRequest r){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("Filtros not found")).invoke(e->apply(e,r)).map(this::toResponse);} public Uni<Void> delete(Long id){return repository.deleteById(id).onItem().transformToUni(deleted->deleted?Uni.createFrom().voidItem():Uni.createFrom().failure(new NotFoundException("Filtros not found")));} private void apply(Filtros e,FiltrosRequest r){e.nome=r.nome();e.dadosJson=r.dadosJson();} private FiltrosResponse toResponse(Filtros e){return new FiltrosResponse(e.id,e.nome,e.dadosJson);} 
+
+    // Migrado de FiltrosController.autoCompleteDimensao (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/FiltrosController.java:106, camada controller)
+    // Logica original (adaptar):
+    // public List<Dimensao> autoCompleteDimensao(String query) {
+    //         if (getEntity().getEstrutura() != null) {
+    //             return dimensaoService.autoCompleteDimensao(query, getEntity().getEstrutura());
+    //         }
+    //         return new ArrayList<>();
+    //     }
+    public Uni<List<Long>> autoCompleteDimensao(String query) {
+        // Obs: nao existe entidade/repositorio Dimensao neste microservico (dimensaoService.autoCompleteDimensao)
+        return Uni.createFrom().item(java.util.List.of());
+    }
+
+
+    // Migrado de FiltrosController.autoCompleteDimensaoRelatorio (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/FiltrosController.java:113, camada controller)
+    // Logica original (adaptar):
+    // public List<Dimensao> autoCompleteDimensaoRelatorio(String query) {
+    //         FacesContext context = FacesContext.getCurrentInstance();
+    //         Estrutura estrutura = (Estrutura) UIComponent.getCurrentComponent(context).getAttributes().get("filter");
+    //         if (estrutura != null) {
+    //             getEntity().setEstrutura(estrutura);
+    //             return dimensaoService.autoCompleteDimensao(query, estrutura);
+    //         }
+    //         return new ArrayList<>();
+    //     }
+    public Uni<List<Long>> autoCompleteDimensaoRelatorio(String query) {
+        // Obs: logica de UI do controlador JSF legado (atributo filter do componente) e nao existe entidade/repositorio Dimensao neste microservico (dimensaoService.autoCompleteDimensao)
+        return Uni.createFrom().item(java.util.List.of());
+    }
+
+
+    // Migrado de FiltrosController.autoCompleteTabela (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/FiltrosController.java:124, camada controller)
+    // Logica original (adaptar):
+    // public List<Tabela> autoCompleteTabela(String query) {
+    //         if (getEntity().getEstrutura() != null) {
+    //             return tabelaService.autoComplete(query, getEntity().getEstrutura());
+    //         }
+    //         return new ArrayList<>();
+    //     }
+    public Uni<List<Long>> autoCompleteTabela(String query) {
+        // Obs: logica de UI do controlador JSF legado (depende do estado estrutura da tela) - tabelaService.autoComplete(query, estrutura)
+        return Uni.createFrom().item(java.util.List.of());
+    }
+
+
+    // Migrado de FiltrosController.autoCompleteGrafico (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/FiltrosController.java:131, camada controller)
+    // Logica original (adaptar):
+    // public List<Grafico> autoCompleteGrafico(String query) {
+    //         if (getEntity().getEstrutura() != null) {
+    //             return graficoService.autoComplete(query, getEntity().getEstrutura());
+    //         }
+    //         return new ArrayList<>();
+    //     }
+    public Uni<List<Long>> autoCompleteGrafico(String query) {
+        // Obs: logica de UI do controlador JSF legado (depende do estado estrutura da tela) - graficoService.autoComplete(query, estrutura)
+        return Uni.createFrom().item(java.util.List.of());
+    }
+
+
+    // Migrado de FiltrosController.autoCompleteMapa (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/FiltrosController.java:138, camada controller)
+    // Logica original (adaptar):
+    // public List<Mapa> autoCompleteMapa(String query) {
+    //         if (getEntity().getEstrutura() != null) {
+    //             return mapaService.autoComplete(query, getEntity().getEstrutura());
+    //         }
+    //         return new ArrayList<>();
+    //     }
+    public Uni<List<Long>> autoCompleteMapa(String query) {
+        // Obs: logica de UI do controlador JSF legado (depende do estado estrutura da tela) - mapaService.autoComplete(query, estrutura)
+        return Uni.createFrom().item(java.util.List.of());
+    }
+
+
+    // Migrado de FiltrosController.autoCompleteOrganograma (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/FiltrosController.java:145, camada controller)
+    // Logica original (adaptar):
+    // public List<Organograma> autoCompleteOrganograma(String query) {
+    //         if (getEntity().getEstrutura() != null) {
+    //             return organogramaService.autoComplete(query);
+    //         }
+    //         return new ArrayList<>();
+    //     }
+    public Uni<List<Long>> autoCompleteOrganograma(String query) {
+        // Obs: logica de UI do controlador JSF legado (depende do estado estrutura da tela) - organogramaService.autoComplete(query)
+        return Uni.createFrom().item(java.util.List.of());
+    }
+
+
+    // Migrado de FiltrosController.carregarTipo (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/FiltrosController.java:276, camada controller)
+    // Logica original (adaptar):
+    // public void carregarTipo() {
+    //         listTipoFiltro = new ArrayList<>();
+    //         listTipoFiltro.add(TipoFiltro.NENHUM);
+    //         if (!ObjectUtil.nullOrEmpty(getEntity().getDimensao())) {
+    //             listTipoFiltro.add(TipoFiltro.NORMAL);
+    //             if (!getEntity().getDimensao().getTipoInfo().equals("DESCRITIVO")) {
+    //                 listTipoFiltro.add(TipoFiltro.FAIXA);
+    //                 listTipoFiltro.add(TipoFiltro.PERIODICO);
+    //             } else {
+    //                 listTipoFiltro.add(TipoFiltro.FIXO);
+    //                 listTipoFiltro.add(TipoFiltro.MULTIPLO);
+    //             }
+    // // ... (truncado, ver fonte original)
+    public Uni<Void> carregarTipo() {
+        // Obs: logica de UI do controlador JSF legado (monta listTipoFiltro na tela com base no estado da entidade), sem equivalente reativo
+        return Uni.createFrom().voidItem();
+    }
+
+
+    // Migrado de FiltrosController.carregarOperacaoQuery (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/FiltrosController.java:487, camada controller)
+    // Logica original (adaptar):
+    // public void carregarOperacaoQuery() {
+    //         listOperation = new ArrayList<>();
+    //         listOperation.add(QueryOperation.EQ);
+    //         listOperation.add(QueryOperation.NOT_EQUAL);
+    //         listOperation.add(QueryOperation.GREATER_THAN);
+    //         listOperation.add(QueryOperation.GREATER_THAN_OR_EQUAL);
+    //         listOperation.add(QueryOperation.LESS_THAN);
+    //         listOperation.add(QueryOperation.LESS_THAN_OR_EQUAL);
+    //     }
+    public Uni<Void> carregarOperacaoQuery() {
+        // Obs: logica de UI do controlador JSF legado (monta listOperation na tela), sem equivalente reativo
+        return Uni.createFrom().voidItem();
+    }
+
+
+    // Migrado de FiltrosController.buscarDadosTipo (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/FiltrosController.java:692, camada controller)
+    // Logica original (adaptar):
+    // public void buscarDadosTipo() {
+    //         if (getEntity().getTipo() != null && getEntity().isFixo()) {
+    //             if (getEntity().getDimensao().getTipoInfo().equals("TEMPO")) {
+    //                 periodosDinamicos = montaPeriodoDinamico();
+    //                 carregarOperacaoQuery();
+    //             } else {
+    //                 filtrosRelatorioWapper.setListaTodosSelected(new ArrayList<>());
+    //                 conexaoBancos = new JdbcTemplate(dataSource);
+    //                 colunaTabelaWapperLazyDataModel = new RelatorioTabelaDimenaoLazyModel(hibernateService, conexaoBancos, getEntity().getDimensao(), "");
+    //             }
+    //         }
+    //     }
+    public Uni<Void> buscarDadosTipo() {
+        // Obs: logica de UI do controlador JSF legado (JdbcTemplate/RelatorioTabelaDimenaoLazyModel e estado da tela), sem equivalente reativo
+        return Uni.createFrom().voidItem();
+    }
+
+}

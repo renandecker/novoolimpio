@@ -1,0 +1,106 @@
+{"_e":"root:init","_t":1786017982076,"format":"v0-jsonl","version":"57.0.13"}
+{"_e":"env:mode","_t":1786017982077,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1786017982081,"mode":"development","files":["../..\\..\\.env"],"env":{"EXPO_PUBLIC_API_URL":"192.168.0.151:8080"}}
+{"_e":"devserver:start","_t":1786017982608,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../..\\..\\app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786017983369,"serverRoot":"../..\\..","projectRoot":"../..\\..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"expo:dev-tools-plugin:load","_t":1786017984501,"plugins":[]}
+{"_e":"metro:instantiate","_t":1786017990283,"atlas":false,"workers":10,"host":"::","port":8081}
+{"_e":"metro:client_log","_t":1786018099238,"level":"error","data":["Project is incompatible with this version of Expo Go\n\nThis project requires a newer version of Expo Go.\n\nHow to fix this error:\nDownload the latest version of Expo Go from the Play Store."]}
+{"_e":"root:init","_t":1786018183110,"format":"v0-jsonl","version":"57.0.13"}
+{"_e":"env:mode","_t":1786018183112,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1786018183115,"mode":"development","files":["../..\\..\\.env"],"env":{"EXPO_PUBLIC_API_URL":"192.168.0.151:8080"}}
+{"_e":"devserver:start","_t":1786018183392,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../..\\..\\app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786018183792,"serverRoot":"../..\\..","projectRoot":"../..\\..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"expo:dev-tools-plugin:load","_t":1786018184052,"plugins":[]}
+{"_e":"metro:instantiate","_t":1786018189110,"atlas":false,"workers":10,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786018368798,"id":"5","platform":"android","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:progress","_t":1786018368799,"id":"5","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786018368802,"id":"5","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786018370447,"id":"5","progress":0.010000000000000002,"total":1,"current":1}
+{"_e":"metro:bundling:progress","_t":1786018370550,"id":"5","progress":0.010000000000000002,"total":3,"current":1}
+{"_e":"metro:bundling:progress","_t":1786018370815,"id":"5","progress":0.04000000000000001,"total":3,"current":2}
+{"_e":"metro:bundling:progress","_t":1786018370920,"id":"5","progress":0.04000000000000001,"total":430,"current":2}
+{"_e":"metro:bundling:progress","_t":1786018371078,"id":"5","progress":0.04000000000000001,"total":430,"current":3}
+{"_e":"metro:bundling:progress","_t":1786018371179,"id":"5","progress":0.04000000000000001,"total":457,"current":13}
+{"_e":"metro:bundling:progress","_t":1786018371285,"id":"5","progress":0.04000000000000001,"total":457,"current":28}
+{"_e":"metro:bundling:progress","_t":1786018371385,"id":"5","progress":0.04000000000000001,"total":457,"current":43}
+{"_e":"metro:bundling:progress","_t":1786018371488,"id":"5","progress":0.04000000000000001,"total":457,"current":62}
+{"_e":"metro:bundling:progress","_t":1786018371588,"id":"5","progress":0.04000000000000001,"total":457,"current":75}
+{"_e":"metro:bundling:progress","_t":1786018371688,"id":"5","progress":0.04000000000000001,"total":459,"current":91}
+{"_e":"metro:bundling:progress","_t":1786018371792,"id":"5","progress":0.056393315011795085,"total":459,"current":109}
+{"_e":"metro:bundling:progress","_t":1786018371898,"id":"5","progress":0.07776686079902793,"total":459,"current":128}
+{"_e":"metro:bundling:progress","_t":1786018372003,"id":"5","progress":0.10966342479862921,"total":459,"current":152}
+{"_e":"metro:bundling:progress","_t":1786018372103,"id":"5","progress":0.1420583726107243,"total":459,"current":173}
+{"_e":"metro:bundling:progress","_t":1786018372203,"id":"5","progress":0.17738105789549793,"total":463,"current":195}
+{"_e":"metro:bundling:progress","_t":1786018372305,"id":"5","progress":0.22855984762967388,"total":479,"current":229}
+{"_e":"metro:bundling:progress","_t":1786018372404,"id":"5","progress":0.36401950828317514,"total":479,"current":289}
+{"_e":"metro:bundling:progress","_t":1786018372504,"id":"5","progress":0.5743045052976583,"total":479,"current":363}
+{"_e":"metro:bundling:progress","_t":1786018372615,"id":"5","progress":0.7798475425054808,"total":479,"current":423}
+{"_e":"metro:bundling:progress","_t":1786018372715,"id":"5","progress":0.7798475425054808,"total":507,"current":443}
+{"_e":"metro:bundling:progress","_t":1786018372819,"id":"5","progress":0.8089756561252156,"total":527,"current":474}
+{"_e":"metro:bundling:progress","_t":1786018372925,"id":"5","progress":0.8089756561252156,"total":657,"current":486}
+{"_e":"metro:bundling:progress","_t":1786018373031,"id":"5","progress":0.8089756561252156,"total":669,"current":501}
+{"_e":"metro:bundling:progress","_t":1786018373131,"id":"5","progress":0.8089756561252156,"total":685,"current":537}
+{"_e":"metro:bundling:progress","_t":1786018373245,"id":"5","progress":0.8089756561252156,"total":710,"current":554}
+{"_e":"metro:bundling:progress","_t":1786018373346,"id":"5","progress":0.8089756561252156,"total":744,"current":567}
+{"_e":"metro:bundling:progress","_t":1786018373445,"id":"5","progress":0.8089756561252156,"total":762,"current":583}
+{"_e":"metro:bundling:progress","_t":1786018373547,"id":"5","progress":0.8089756561252156,"total":794,"current":613}
+{"_e":"metro:bundling:progress","_t":1786018373650,"id":"5","progress":0.8089756561252156,"total":867,"current":663}
+{"_e":"metro:bundling:progress","_t":1786018373751,"id":"5","progress":0.8089756561252156,"total":917,"current":702}
+{"_e":"metro:bundling:progress","_t":1786018373851,"id":"5","progress":0.8089756561252156,"total":966,"current":763}
+{"_e":"metro:bundling:progress","_t":1786018373954,"id":"5","progress":0.8089756561252156,"total":999,"current":800}
+{"_e":"metro:bundling:progress","_t":1786018374054,"id":"5","progress":0.8089756561252156,"total":1052,"current":829}
+{"_e":"metro:bundling:progress","_t":1786018374154,"id":"5","progress":0.8089756561252156,"total":1082,"current":880}
+{"_e":"metro:bundling:progress","_t":1786018374256,"id":"5","progress":0.8089756561252156,"total":1097,"current":929}
+{"_e":"metro:bundling:progress","_t":1786018374356,"id":"5","progress":0.8089756561252156,"total":1105,"current":944}
+{"_e":"metro:bundling:progress","_t":1786018374461,"id":"5","progress":0.8089756561252156,"total":1107,"current":963}
+{"_e":"metro:bundling:progress","_t":1786018374561,"id":"5","progress":0.8089756561252156,"total":1119,"current":995}
+{"_e":"metro:bundling:progress","_t":1786018374663,"id":"5","progress":0.8098405747186855,"total":1129,"current":1016}
+{"_e":"metro:bundling:progress","_t":1786018374763,"id":"5","progress":0.8309392070322444,"total":1142,"current":1041}
+{"_e":"metro:bundling:progress","_t":1786018374863,"id":"5","progress":0.8501250836154781,"total":1167,"current":1076}
+{"_e":"metro:bundling:progress","_t":1786018374963,"id":"5","progress":0.8603461112345268,"total":1187,"current":1101}
+{"_e":"metro:bundling:progress","_t":1786018375063,"id":"5","progress":0.8867361111111111,"total":1200,"current":1130}
+{"_e":"metro:bundling:progress","_t":1786018375163,"id":"5","progress":0.8867361111111111,"total":1247,"current":1169}
+{"_e":"metro:bundling:progress","_t":1786018375264,"id":"5","progress":0.8867361111111111,"total":1282,"current":1198}
+{"_e":"metro:bundling:progress","_t":1786018375365,"id":"5","progress":0.8886089133911286,"total":1308,"current":1233}
+{"_e":"metro:bundling:progress","_t":1786018375468,"id":"5","progress":0.9155635884772908,"total":1321,"current":1264}
+{"_e":"metro:bundling:progress","_t":1786018375575,"id":"5","progress":0.9367112542229139,"total":1337,"current":1294}
+{"_e":"metro:bundling:progress","_t":1786018375675,"id":"5","progress":0.9533252542857532,"total":1355,"current":1323}
+{"_e":"metro:bundling:progress","_t":1786018375776,"id":"5","progress":0.9926605752595156,"total":1360,"current":1355}
+{"_e":"metro:bundling:progress","_t":1786018375882,"id":"5","progress":0.9955995652933299,"total":1362,"current":1359}
+{"_e":"metro:bundling:progress","_t":1786018376229,"id":"5","progress":0.9970652987206772,"total":1362,"current":1360}
+{"_e":"metro:bundling:progress","_t":1786018376335,"id":"5","progress":0.9985353352386319,"total":1365,"current":1364}
+{"_e":"metro:bundling:progress","_t":1786018376390,"id":"5","progress":0.999,"total":1365,"current":1365}
+{"_e":"metro:bundling:done","_t":1786018376631,"id":"5","total":1365,"ms":7832.1445}
+{"_e":"metro:client_log","_t":1786018378560,"level":"error","data":["[TypeError: Cannot read property 'S' of undefined]"]}
+{"_e":"metro:client_log","_t":1786018378560,"level":"error","data":["[TypeError: Cannot read property 'default' of undefined]"]}
+{"_e":"metro:client_log","_t":1786018379017,"level":"error","data":["[TypeError: Cannot read property 'S' of undefined]"]}
+{"_e":"metro:client_log","_t":1786018379019,"level":"error","data":["[TypeError: Cannot read property 'default' of undefined]"]}
+{"_e":"root:init","_t":1786018423921,"format":"v0-jsonl","version":"57.0.13"}
+{"_e":"env:mode","_t":1786018423922,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1786018423925,"mode":"development","files":["../..\\..\\.env"],"env":{"EXPO_PUBLIC_API_URL":"192.168.0.151:8080"}}
+{"_e":"devserver:start","_t":1786018424205,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../..\\..\\app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1786018424582,"serverRoot":"../..\\..","projectRoot":"../..\\..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"expo:dev-tools-plugin:load","_t":1786018424817,"plugins":[]}
+{"_e":"metro:instantiate","_t":1786018429654,"atlas":false,"workers":10,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1786018439409,"id":"2","platform":"android","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:progress","_t":1786018439409,"id":"2","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786018439412,"id":"2","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1786018439512,"id":"2","progress":0.00004800281616521503,"total":433,"current":3}
+{"_e":"metro:bundling:progress","_t":1786018439612,"id":"2","progress":0.5663461426458083,"total":586,"current":441}
+{"_e":"metro:bundling:progress","_t":1786018439712,"id":"2","progress":0.5663461426458083,"total":774,"current":579}
+{"_e":"metro:bundling:progress","_t":1786018439812,"id":"2","progress":0.5663461426458083,"total":1040,"current":774}
+{"_e":"metro:bundling:progress","_t":1786018439912,"id":"2","progress":0.8252938373027244,"total":1147,"current":1042}
+{"_e":"metro:bundling:progress","_t":1786018440014,"id":"2","progress":0.8781785280274681,"total":1288,"current":1207}
+{"_e":"metro:bundling:done","_t":1786018440149,"id":"2","total":1288,"ms":739.8564}
+{"_e":"metro:client_log","_t":1786018442237,"level":"error","data":["[TypeError: Cannot read property 'S' of undefined]"]}
+{"_e":"metro:client_log","_t":1786018442238,"level":"error","data":["[TypeError: Cannot read property 'default' of undefined]"]}
+{"_e":"metro:client_log","_t":1786018442238,"level":"error","data":["[TypeError: Cannot read property 'S' of undefined]"]}
+{"_e":"metro:client_log","_t":1786018442238,"level":"error","data":["[TypeError: Cannot read property 'default' of undefined]"]}
+{"_e":"metro:bundling:started","_t":1786018464301,"id":"7","platform":"android","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:progress","_t":1786018464301,"id":"7","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1786018464340,"id":"7","total":1,"ms":38.6796}
+{"_e":"metro:client_log","_t":1786018468367,"level":"error","data":["[TypeError: Cannot read property 'S' of undefined]"]}
+{"_e":"metro:client_log","_t":1786018468367,"level":"error","data":["[TypeError: Cannot read property 'default' of undefined]"]}
+{"_e":"metro:client_log","_t":1786018468440,"level":"error","data":["[TypeError: Cannot read property 'S' of undefined]"]}
+{"_e":"metro:client_log","_t":1786018468444,"level":"error","data":["[TypeError: Cannot read property 'default' of undefined]"]}

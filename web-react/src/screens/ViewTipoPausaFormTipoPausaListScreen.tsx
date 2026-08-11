@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewTipoPausaFormTipoPausaListScreen(){return <PermissionGate permission="READ"><main><h1>Form Tipo Pausa</h1><DataTable path="/api/view/tipoPausa/formTipoPausa"/></main></PermissionGate>}

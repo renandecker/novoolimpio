@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewRelatoriosFormTabelaListScreen(){return <PermissionGate permission="READ"><main><h1>Form Tabela</h1><DataTable path="/api/view/relatorios/formTabela"/></main></PermissionGate>}

@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewTipoCanalListTipoCanalListScreen(){return <PermissionGate permission="READ"><main><h1>List Tipo Canal</h1><DataTable path="/api/view/tipoCanal/listTipoCanal"/></main></PermissionGate>}

@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewLigacaoLigacaoListScreen(){return <PermissionGate permission="READ"><main><h1>Ligacao</h1><DataTable path="/api/view/ligacao/ligacao"/></main></PermissionGate>}

@@ -1,0 +1,1 @@
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScreen(){return <PermissionGate permission="READ"><main><h1>Digitalizacao Documento</h1><DataTable path="/api/view/digitalizacaoDocumento/digitalizacaoDocumento"/></main></PermissionGate>}

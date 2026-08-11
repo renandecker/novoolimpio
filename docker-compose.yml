@@ -1,0 +1,446 @@
+# Sobe: 1 Postgres (com um banco por microsservico), os microsservicos Quarkus
+# (cada um numa porta fixa), um gateway Nginx (porta 8080) e o app React (porta 3000).
+#
+# Uso:
+#   docker compose up --build          # sobe tudo
+#   docker compose up --build -d       # sobe tudo em background
+#   docker compose logs -f basico      # acompanha logs de um servico
+#   docker compose down                # para tudo
+#   docker compose down -v             # para tudo e apaga os dados do banco
+#
+# Portas no host:
+#   5432  Postgres
+#   9092  Kafka (broker usado pelo schedule para publicar triggers e pelo basico
+#         para consumir o topico olimpio.schedule.feriado)
+#   8080  Gateway (roteia /api/<modulo>/... para o microsservico certo)
+#   8081  basico
+#   8082  notificacoes
+#   8083  central
+#   8084  comercial
+#   8085  educacao
+#   8086  estoque
+#   8087  financeiro
+#   8088  relatorios
+#   8089  schedule
+#   8090  login
+#   8091  professor
+#   8092  aluno
+#   8093  aula
+#   8094  asaas
+#   8095  curriculo (dominio Empresa/Curriculo cur_*)
+#   3000  web-react (app React)
+
+name: olimpio
+
+x-service-env: &service-env
+  DATABASE_USER: postgres
+  DATABASE_PASSWORD: postgres
+  JWT_SECRET: ${JWT_SECRET:-troque-esta-chave-em-producao-olimpio}
+  QUARKUS_HTTP_CORS_ORIGINS: "*"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: olimpio-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - olimpio-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Restaura o backup docker/postgres/olimpio.sql no banco 'olimpio' a cada start.
+  # Sobe depois do Postgres ficar saudavel, termina (exit 0) e so entao os
+  # microsservicos iniciam (depends_on: restore -> service_completed_successfully).
+  restore:
+    image: postgres:16-alpine
+    container_name: olimpio-restore
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: postgres
+    volumes:
+      - ./docker/postgres/olimpio.sql:/backup/olimpio.sql:ro
+      - ./docker/postgres/olimpio.sql:V1__base.sql:ro
+      - ./docker/postgres/olimpio.sql:V2__login.sql:ro
+      - ./docker/postgres/olimpio.sql:V3__temas.sql:ro
+      - ./docker/postgres/olimpio.sql:V4__seed_admin_login.sql:ro
+      - ./docker/postgres/olimpio.sql:V5__garantir_admin_login.sql:ro
+      - ./docker/postgres/olimpio.sql:V6__login_session.sql:ro
+      - ./docker/postgres/olimpio.sql:V7__menu_react_e_perfil_admin.sql:ro
+      - ./docker/postgres/olimpio.sql:V8__asaas_menu.sql:ro
+      - ./docker/postgres/olimpio.sql:V8__provisionar_usuarios_legados.sql:ro
+      - ./docker/postgres/olimpio.sql:V9__acesso_aluno.sql:ro
+      - ./docker/postgres/olimpio.sql:V10__remove_whatsapp_telegram.sql:ro
+      - ./docker/postgres/olimpio.sql:V11__menu_recriar_calendario_academico.sql:ro
+      - ./docker/postgres/olimpio.sql:V12__remove_pagina_inicial.sql:ro
+      - ./docker/postgres/olimpio.sql:V13__corrigir_modulo_genero.sql:ro
+      - ./docker/postgres/olimpio.sql:V14__temas_posicao_e_menu.sql:ro
+      - ./docker/postgres/olimpio.sql:V15__foto_base64_usuario.sql:ro
+      - ./docker/postgres/olimpio.sql:V15__menu_lote_nap_cobranca.sql:ro
+      - ./docker/postgres/olimpio.sql:V17__fiserv.sql:ro
+      - ./docker/postgres/olimpio.sql:V18__financeiro_aluno.sql:ro
+    entrypoint: ["/bin/sh", "-e", "-c"]
+    command:
+      - |
+        echo "[restore] Aguardando o Postgres aceitar conexoes..."
+        until pg_isready -h postgres -U postgres; do sleep 1; done
+        echo "[restore] Restaurando olimpio.sql no banco 'olimpio'..."
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -c "DROP DATABASE IF EXISTS olimpio WITH (FORCE);"
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -c "CREATE DATABASE olimpio;"
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/olimpio.sql
+        echo "[restore] Aplicando schema do dominio Empresa/Curriculo (cur_*)..."
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/curriculo.sql
+        echo "[restore] Aplicando migracoes do microsservico notificacoes..."
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/002_create_notificacoes.sql
+        echo "[restore] Aplicando migracoes do microsservico aula..."
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/003_create_aula.sql
+        echo "[restore] Aplicando migracao do schedule (corrigirAvaliacoes)..."
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/004_add_avaliacao_fl_ativo.sql
+        echo "[restore] Restore concluido."
+
+  # Broker Kafka (KRaft). O schedule publica os triggers de rotina e o basico
+  # consome o topico olimpio.schedule.feriado.
+  kafka:
+    image: apache/kafka:3.9.0
+    container_name: olimpio-kafka
+    restart: unless-stopped
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29093
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:29093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    ports:
+      - "9092:9092"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list > /dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 30s
+      
+  basico:
+    build: ./microservices/basico
+    container_name: olimpio-basico
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8081:8081"
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      kafka:
+        condition: service_healthy
+      login:
+        condition: service_healthy
+
+
+  notificacoes:
+    build: ./microservices/notificacoes
+    container_name: olimpio-notificacoes
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+    ports:
+      - "8082:8082"
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      login:
+        condition: service_healthy
+
+  central:
+    build: ./microservices/central
+    container_name: olimpio-central
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+    ports:
+      - "8083:8083"
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      login:
+        condition: service_healthy
+
+  comercial:
+    build: ./microservices/comercial
+    container_name: olimpio-comercial
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+    ports:
+      - "8084:8084"
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      login:
+        condition: service_healthy
+
+  educacao:
+    build: ./microservices/educacao
+    container_name: olimpio-educacao
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+    ports:
+      - "8085:8085"
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      login:
+        condition: service_healthy
+
+  estoque:
+    build: ./microservices/estoque
+    container_name: olimpio-estoque
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+    ports:
+      - "8086:8086"
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      login:
+        condition: service_healthy
+
+  financeiro:
+    build: ./microservices/financeiro
+    container_name: olimpio-financeiro
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+    ports:
+      - "8087:8087"
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      login:
+        condition: service_healthy
+
+  relatorios:
+    build: ./microservices/relatorios
+    container_name: olimpio-relatorios
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+    ports:
+      - "8088:8088"
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      login:
+        condition: service_healthy
+
+  schedule:
+    build: ./microservices/schedule
+    container_name: olimpio-schedule
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+      BASICO_DATABASE_URL: postgresql://postgres:5432/olimpio
+      FINANCEIRO_DATABASE_URL: postgresql://postgres:5432/olimpio
+      CENTRAL_DATABASE_URL: postgresql://postgres:5432/olimpio
+      EDUCACAO_DATABASE_URL: postgresql://postgres:5432/olimpio
+      COMERCIAL_DATABASE_URL: postgresql://postgres:5432/olimpio
+      RELATORIOS_DATABASE_URL: postgresql://postgres:5432/olimpio
+      EMPRESA_DATABASE_URL: postgresql://postgres:5432/olimpio
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8089:8089"
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      kafka:
+        condition: service_healthy
+      login:
+        condition: service_healthy
+
+  professor:
+    build: ./microservices/professor
+    container_name: olimpio-professor
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+    ports:
+      - "8091:8091"
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      login:
+        condition: service_healthy
+
+  login:
+    build: ./microservices/login
+    container_name: olimpio-login
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+      LOGIN_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
+    ports:
+      - "8090:8090"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8090/q/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+
+  aluno:
+    build: ./microservices/aluno
+    container_name: olimpio-aluno
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+    ports:
+      - "8092:8092"
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      login:
+        condition: service_healthy
+
+  aula:
+    build: ./microservices/aula
+    container_name: olimpio-aula
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+    ports:
+      - "8093:8093"
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      login:
+        condition: service_healthy
+
+  curriculo:
+    build: ./microservices/curriculo
+    container_name: olimpio-curriculo
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+    ports:
+      - "8095:8095"
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      login:
+        condition: service_healthy
+
+  asaas:
+    build: ./microservices/asaas
+    container_name: olimpio-asaas
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+      ASAAS_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
+      ASAAS_API_KEY:  $aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjE1MjVlNjliLTRhMDItNDkzZC1hMTI0LTcyYjgzNjVmMDNhNDo6JGFhY2hfYmM0OGJjMTQtZDk1OC00MDVmLWEyYmUtODQxN2U1YTY4MTFk
+      ASAAS_BASE_URL: ${ASAAS_BASE_URL:-https://api-sandbox.asaas.com}
+    ports:
+      - "8094:8094"
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      login:
+        condition: service_healthy
+        
+  fiserv:
+    build: ./microservices/fiserv
+    container_name: olimpio-fiserv
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+      ASAAS_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
+      FISERV_BASE_URL: https://cert.emea.api.fiservapps.com
+      FISERV_API_KEY: RGkq5yaacHoXmvqJGqdHxziacmhhhSbXZlLOnxGVYMvQyfTy
+      FISERV_API_SECRET: w58j8cHQ05Y8kRAeWGj8jVVUzGTo4dl8wJQOVO7GwA8hP31fKsuVy4Jd8xxMgUBV
+      FISERV_STORE_ID: 
+      FISERV_CURRENCY: BRL
+      FISERV_TIMEOUT_MS: 15000
+    ports:
+      - "8096:8096"
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      login:
+        condition: service_healthy
+        
+  gateway:
+    build: ./docker/gateway
+    container_name: olimpio-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - aluno
+      - asaas
+      - fiserv
+      - aula
+      - basico
+      - central
+      - comercial
+      - curriculo
+      - educacao
+      - estoque
+      - financeiro
+      - login
+      - notificacoes
+      - professor
+      - relatorios
+      - schedule
+
+  web-react:
+    build:
+      context: ./web-react
+      args:
+        VITE_API_URL: http://localhost:8080
+    container_name: olimpio-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - gateway
+
+volumes:
+  olimpio-postgres-data:
