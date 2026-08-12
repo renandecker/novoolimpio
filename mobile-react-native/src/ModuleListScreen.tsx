@@ -62,7 +62,15 @@ type ModalState =
   | { mode: 'edit'; item: ApiItem }
   | null;
 
-export function ModuleList({ path, title }: { path: string; title?: string }) {
+export function ModuleList({
+  path,
+  title,
+  params,
+}: {
+  path: string;
+  title?: string;
+  params?: Record<string, string | number | boolean | undefined>;
+}) {
   const { session } = useAuth();
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(PAGE_SIZES[0]);
@@ -84,7 +92,7 @@ export function ModuleList({ path, title }: { path: string; title?: string }) {
   const canDelete = can(session, 'DELETE', outcome);
   const canExecute = can(session, 'EXECUTE', outcome);
 
-  const q = useModulePaged(path, page, size);
+  const q = useModulePaged(path, page, size, params);
   const items = q.data?.content ?? [];
   const totalElements = q.data?.totalElements ?? 0;
   const totalPages = Math.max(1, q.data?.totalPages ?? 0);

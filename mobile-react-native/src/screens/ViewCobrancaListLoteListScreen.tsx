@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api';
+import { Tabs } from '../Tabs';
 import { LoteEmailModal, LoteLigacaoModal, SITUACOES_COBRANCA } from '../LoteModals';
 
 interface EtapaCobranca {
@@ -32,22 +33,21 @@ export default function ViewCobrancaListLoteListScreen() {
     <View style={styles.page}>
       <Text style={styles.title}>Cobrança em lote</Text>
       {etapasQuery.isError ? <Text style={styles.errorText}>Erro ao carregar as etapas.</Text> : null}
-      <FlatList
-        data={etapas}
-        keyExtractor={(e) => String(e.id)}
-        renderItem={({ item }) => (
-          <View style={styles.etapaCard}>
-            <Text style={styles.etapaLabel}>{item.descricao || `Etapa ${item.id}`}</Text>
+      <Tabs
+        tabs={etapas.map((etapa) => ({
+          key: String(etapa.id),
+          label: etapa.descricao || `Etapa ${etapa.id}`,
+          content: (
             <View style={styles.actions}>
-              <Pressable style={[styles.actionButton, styles.emailButton]} onPress={() => setEmailEtapa(item)}>
+              <Pressable style={[styles.actionButton, styles.emailButton]} onPress={() => setEmailEtapa(etapa)}>
                 <Text style={styles.actionButtonText}>@ E-mail</Text>
               </Pressable>
-              <Pressable style={[styles.actionButton, styles.ligacaoButton]} onPress={() => setLigacaoEtapa(item)}>
+              <Pressable style={[styles.actionButton, styles.ligacaoButton]} onPress={() => setLigacaoEtapa(etapa)}>
                 <Text style={styles.actionButtonText}>Ligação</Text>
               </Pressable>
             </View>
-          </View>
-        )}
+          ),
+        }))}
       />
       {emailEtapa && (
         <LoteEmailModal
@@ -78,16 +78,7 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   title: { fontSize: 22, fontWeight: 'bold', color: '#2b2b2b', marginBottom: 12 },
   errorText: { color: '#a61b29', fontSize: 14, marginBottom: 8 },
-  etapaCard: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 6,
-    padding: 12,
-    marginBottom: 10,
-    backgroundColor: '#ffffff',
-  },
-  etapaLabel: { fontSize: 16, fontWeight: '700', color: '#2b2b2b', marginBottom: 8 },
-  actions: { flexDirection: 'row', gap: 8 },
+  actions: { flexDirection: 'row', gap: 8, paddingVertical: 16 },
   actionButton: { borderRadius: 4, paddingHorizontal: 16, paddingVertical: 8 },
   emailButton: { backgroundColor: '#2a5a88' },
   ligacaoButton: { backgroundColor: '#faa523' },

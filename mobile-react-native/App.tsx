@@ -11,6 +11,7 @@ import ViewAgendaFormAgendaListScreen from './src/screens/ViewAgendaFormAgendaLi
 import ViewAgendaListAgendaListScreen from './src/screens/ViewAgendaListAgendaListScreen';
 import ViewAlterarSenhaAlterarSenhaListScreen from './src/screens/ViewAlterarSenhaAlterarSenhaListScreen';
 import ViewApresentacaoListApresentacaoListScreen from './src/screens/ViewApresentacaoListApresentacaoListScreen';
+import AuditoriaScreen from './src/screens/AuditoriaScreen';
 import ViewArquivoProconListArquivoProconListScreen from './src/screens/ViewArquivoProconListArquivoProconListScreen';
 import ViewAtividadeComplementarFormAtividadeComplementarListScreen from './src/screens/ViewAtividadeComplementarFormAtividadeComplementarListScreen';
 import ViewAtividadeComplementarListAtividadeComplementarListScreen from './src/screens/ViewAtividadeComplementarListAtividadeComplementarListScreen';
@@ -441,6 +442,7 @@ const Stack=createNativeStackNavigator<ParamList>();const q=new QueryClient();fu
 <Stack.Screen name='view/agenda/listAgenda' component={ViewAgendaListAgendaListScreen}/>
 <Stack.Screen name='view/alterarSenha/alterarSenha' component={ViewAlterarSenhaAlterarSenhaListScreen}/>
 <Stack.Screen name='view/apresentacao/listApresentacao' component={ViewApresentacaoListApresentacaoListScreen}/>
+<Stack.Screen name='auditoria' component={AuditoriaScreen}/>
 <Stack.Screen name='view/arquivoProcon/listArquivoProcon' component={ViewArquivoProconListArquivoProconListScreen}/>
 <Stack.Screen name='view/atividadeComplementar/formAtividadeComplementar' component={ViewAtividadeComplementarFormAtividadeComplementarListScreen}/>
 <Stack.Screen name='view/atividadeComplementar/listAtividadeComplementar' component={ViewAtividadeComplementarListAtividadeComplementarListScreen}/>

@@ -4,11 +4,17 @@ import type { ApiItem, ApiRequest, PagedResponse } from './types';
 
 export const PAGE_SIZES = [10, 20, 50, 100];
 
-export const useModulePaged = (path: string, page: number, size: number) => {
+export const useModulePaged = (
+  path: string,
+  page: number,
+  size: number,
+  extraParams?: Record<string, string | number | boolean | undefined>,
+) => {
   const queryClient = useQueryClient();
   const query = useQuery({
-    queryKey: [path, 'paged', page, size],
-    queryFn: async () => (await api.get<PagedResponse<ApiItem>>(`${path}/paged`, { params: { page, size } })).data,
+    queryKey: [path, 'paged', page, size, extraParams],
+    queryFn: async () =>
+      (await api.get<PagedResponse<ApiItem>>(`${path}/paged`, { params: { page, size, ...extraParams } })).data,
     placeholderData: keepPreviousData,
   });
   const invalidate = () => queryClient.invalidateQueries({ queryKey: [path] });

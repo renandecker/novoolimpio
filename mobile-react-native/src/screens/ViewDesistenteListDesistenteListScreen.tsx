@@ -1,5 +1,13 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import { ModuleTabs } from '../ModuleTabs';
+
 export default function ViewDesistenteListDesistenteListScreen() {
-  return <ModuleList path="/api/view/desistente/listDesistente" />;
+  return (
+    <ModuleTabs
+      tabs={[
+        { key: 'indivname', label: 'Regra', path: '/api/educacao/desistente' },
+        { key: 'cancelamento', label: 'Cancelamento', path: '/api/educacao/matricula' },
+      ]}
+    />
+  );
 }

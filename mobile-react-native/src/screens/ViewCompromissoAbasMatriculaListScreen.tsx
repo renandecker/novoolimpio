@@ -1,5 +1,15 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import { ModuleTabs } from '../ModuleTabs';
+
 export default function ViewCompromissoAbasMatriculaListScreen() {
-  return <ModuleList path="/api/view/compromisso/abasMatricula" />;
+  return (
+    <ModuleTabs
+      tabs={[
+        { key: 'contrato', label: 'Contrato', empty: 'Dados do contrato.' },
+        { key: 'matricula', label: 'Matrícula', empty: 'Dados da matrícula.' },
+        { key: 'grupo', label: 'Grupo', empty: 'Grupo do compromisso.' },
+        { key: 'material', label: 'Material', empty: 'Material escolar.' },
+      ]}
+    />
+  );
 }
