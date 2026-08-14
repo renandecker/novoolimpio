@@ -9,7 +9,7 @@
 #   docker compose down -v             # para tudo e apaga os dados do banco
 #
 # Portas no host:
-#   5432  Postgres
+#   5454  Postgres
 #   9092  Kafka (broker usado pelo schedule para publicar triggers e pelo basico
 #         para consumir o topico olimpio.schedule.feriado)
 #   8080  Gateway (roteia /api/<modulo>/... para o microsservico certo)
@@ -48,7 +48,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
     ports:
-      - "5432:5432"
+      - "5454:5432"
     volumes:
       - olimpio-postgres-data:/var/lib/postgresql/data
     healthcheck:

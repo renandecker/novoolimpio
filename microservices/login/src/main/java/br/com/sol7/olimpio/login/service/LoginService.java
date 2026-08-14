@@ -24,6 +24,7 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -122,7 +123,15 @@ public class LoginService {
                 .onItem().transformToUni(administrator -> modulePermissions.resolve(login.idUsuario)
                 .onItem().transformToUni(perModule -> {
                     Set<String> permissions = administrator ? ALL_PERMISSIONS : configuredPermissions;
-                    var token = jwt.issue(login.username, permissions, perModule);
+                    // Para o admin, o mapa por-modulo pode cobrir centenas de telas e nao vai
+                    // dentro do JWT: o Authorization header estouraria o limite padrao de 8KB
+                    // do Quarkus/Vert.x em TODA requisicao subsequente, derrubando o menu
+                    // inteiro (nao so o item novo). O PermissionGuard.requireModule ja trata
+                    // mapa vazio + permissoes globais ALL_PERMISSIONS como acesso total, entao
+                    // omitir o mapa do token nao reduz o acesso do admin. O front continua
+                    // recebendo o mapa completo no corpo desta resposta (perModule abaixo).
+                    Map<String, Set<String>> tokenModulePermissions = administrator ? Map.of() : perModule;
+                    var token = jwt.issue(login.username, permissions, tokenModulePermissions);
                     var session = new LoginSession();
                     session.id = UUID.fromString(token.jti());
                     session.username = login.username;
