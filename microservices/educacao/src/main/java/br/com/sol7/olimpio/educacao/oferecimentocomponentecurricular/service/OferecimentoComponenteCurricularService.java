@@ -11,6 +11,7 @@ import br.com.sol7.olimpio.educacao.curriculo.CurriculoRepository;
 import br.com.sol7.olimpio.educacao.diaaula.DiaAula;
 import br.com.sol7.olimpio.educacao.diaaula.DiaAulaRepository;
 import br.com.sol7.olimpio.educacao.diaaula.DiaAulaResponse;
+import br.com.sol7.olimpio.educacao.enumm.TipoPlanejamentoAula;
 import br.com.sol7.olimpio.educacao.grupo.Grupo;
 import br.com.sol7.olimpio.educacao.grupo.GrupoRepository;
 import br.com.sol7.olimpio.educacao.ocorrenciacomponentecurricular.OcorrenciaComponenteCurricular;
@@ -59,10 +60,37 @@ public class OferecimentoComponenteCurricularService {
     @Inject CriterioService criterioService;
     @Inject OcorrenciaComponenteCurricularRepository ocorrenciaRepository;
 
-    // TODO: portar SchedulingService.replicarOferecimentoAuto() (legado) - percorre oferecimentos futuros, replica turmas/oferecimentos automaticamente, verifica disciplinas pendentes e chamadas assinadas. Logica recursiva e com varias regras de negocio (datas de curso, feriados, vagas) - nao portada automaticamente, ver RELATORIO_SCHEDULE.md.
-    public Uni<Void> replicarOferecimentoAutomatico() {
-        // Obs: logica recursiva do SchedulingService (datas de curso, feriados, vagas) - nao portada automaticamente
-        return Uni.createFrom().voidItem();
+    // Migrado de SchedulingService.replicarOferecimentoAuto() (legado, L279-326): rotina automatica
+    // de replicacao de oferecimentos. Roda verificarDisciplina (status de disciplinas), seleciona os
+    // oferecimentos elegiveis usando o SQL configurado em bas_config (chave SQL_REPLICAR_OFERECIMENTOS,
+    // com fallback para o SQL padrao do legado), replica cada id via replicarOferecimento e repete ate
+    // nao restarem oferecimentos elegiveis (recursao com salvaguarda de iteracoes, como no legado que
+    // repete em 2 runs/15min). A geracao de chamadas assinadas (PDF) nao foi portada (dominio chamadaassinada).
+    public Uni<Integer> replicarOferecimentoAutomatico() {
+        return replicarOferecimentoAutomatico(0, 0);
+    }
+
+    private Uni<Integer> replicarOferecimentoAutomatico(int iteracao, int total) {
+        if (iteracao >= 50) {
+            return Uni.createFrom().item(total);
+        }
+        return repository.verificarDisciplina()
+                .chain(v -> repository.verificarchamadaAssinada())
+                .chain(v -> repository.buscarSqlConfigReplicacao())
+                .chain(sql -> repository.listarIdsParaReplicacao(
+                        sql == null || sql.isBlank() ? OferecimentoComponenteCurricularRepository.SQL_REPLICAR_OFERECIMENTOS_PADRAO : sql))
+                .chain(ids -> {
+                    if (ids == null || ids.isEmpty()) {
+                        return Uni.createFrom().item(total);
+                    }
+                    Uni<Integer> acc = Uni.createFrom().item(total);
+                    for (Long id : ids) {
+                        acc = acc.chain(t -> replicarOferecimento(id)
+                                .onFailure().recoverWithItem(0)
+                                .map(n -> t + n));
+                    }
+                    return acc.chain(t -> replicarOferecimentoAutomatico(iteracao + 1, t));
+                });
     }
 
     public Uni<List<OferecimentoComponenteCurricularResponse>> list() {
@@ -105,10 +133,10 @@ public class OferecimentoComponenteCurricularService {
                         : Uni.createFrom().failure(new NotFoundException("OferecimentoComponenteCurricular not found")));
     }
 
-    private void apply(OferecimentoComponenteCurricular e, OferecimentoComponenteCurricularRequest r) { e.unidadeId = r.unidadeId(); e.periodoId = r.periodoId(); e.grupoId = r.grupoId(); e.salaId = r.salaId(); e.dataInicio = r.dataInicio(); e.dataFim = r.dataFim(); e.dataAlteracao = r.dataAlteracao(); e.tipoReplicacao = r.tipoReplicacao(); e.diasReplicar = r.diasReplicar(); e.qtdeSequencia = r.qtdeSequencia(); e.qtdeEspacoCaderno = r.qtdeEspacoCaderno(); e.curriculoId = r.curriculoId(); e.professorId = r.professorId(); e.componenteCurricularId = r.componenteCurricularId(); e.componenteCurricularReplicarId = r.componenteCurricularReplicarId(); e.vagas = r.vagas(); e.inscritos = r.inscritos(); e.dataCancelamento = r.dataCancelamento(); e.registraFrequencia = r.registraFrequencia(); e.possuiAvaliacao = r.possuiAvaliacao(); e.replicar = r.replicar(); e.replicado = r.replicado(); e.detalharReplicacao = r.detalharReplicacao(); e.salas = r.salas(); e.status = r.status(); e.sequencia = r.sequencia(); }
+    private void apply(OferecimentoComponenteCurricular e, OferecimentoComponenteCurricularRequest r) { e.unidadeId = r.unidadeId(); e.periodoId = r.periodoId(); e.grupoId = r.grupoId(); e.salaId = r.salaId(); e.dataInicio = r.dataInicio(); e.dataFim = r.dataFim(); e.dataAlteracao = r.dataAlteracao(); e.tipoReplicacao = r.tipoReplicacao(); e.tipoPlanejamento = r.tipoPlanejamento() != null && !r.tipoPlanejamento().isBlank() ? TipoPlanejamentoAula.fromNameOrDefault(r.tipoPlanejamento()).name() : null; e.diasReplicar = r.diasReplicar(); e.qtdeSequencia = r.qtdeSequencia(); e.qtdeEspacoCaderno = r.qtdeEspacoCaderno(); e.curriculoId = r.curriculoId(); e.professorId = r.professorId(); e.componenteCurricularId = r.componenteCurricularId(); e.componenteCurricularReplicarId = r.componenteCurricularReplicarId(); e.vagas = r.vagas(); e.inscritos = r.inscritos(); e.dataCancelamento = r.dataCancelamento(); e.registraFrequencia = r.registraFrequencia(); e.possuiAvaliacao = r.possuiAvaliacao(); e.replicar = r.replicar(); e.replicado = r.replicado(); e.detalharReplicacao = r.detalharReplicacao(); e.salas = r.salas(); e.status = r.status(); e.sequencia = r.sequencia(); }
 
     private OferecimentoComponenteCurricularResponse toResponse(OferecimentoComponenteCurricular e, Refs refs) {
-        return new OferecimentoComponenteCurricularResponse(e.id, e.unidadeId, e.periodoId, e.grupoId, e.salaId, e.dataInicio, e.dataFim, e.dataAlteracao, e.tipoReplicacao, e.diasReplicar, e.qtdeSequencia, e.qtdeEspacoCaderno, e.curriculoId, e.professorId, e.componenteCurricularId, e.componenteCurricularReplicarId, e.vagas, e.inscritos, e.dataCancelamento, e.registraFrequencia, e.possuiAvaliacao, e.replicar, e.replicado, e.detalharReplicacao, e.salas, e.status, e.sequencia,
+        return new OferecimentoComponenteCurricularResponse(e.id, e.unidadeId, e.periodoId, e.grupoId, e.salaId, e.dataInicio, e.dataFim, e.dataAlteracao, e.tipoReplicacao, e.tipoPlanejamento, e.diasReplicar, e.qtdeSequencia, e.qtdeEspacoCaderno, e.curriculoId, e.professorId, e.componenteCurricularId, e.componenteCurricularReplicarId, e.vagas, e.inscritos, e.dataCancelamento, e.registraFrequencia, e.possuiAvaliacao, e.replicar, e.replicado, e.detalharReplicacao, e.salas, e.status, e.sequencia,
                 null, // unidade_descricao - cross-service (basico)
                 refs != null && e.periodoId != null ? refs.periodo(e.periodoId).descricao : null,
                 refs != null && e.grupoId != null ? refs.grupo(e.grupoId).nome : null,
@@ -170,24 +198,31 @@ public class OferecimentoComponenteCurricularService {
     }
 
     // Calcula e retorna as OcorrenciaComponenteCurricular a persistir (nao persiste aqui).
+    // Migrado de OferecimentoComponenteCurricularService.gerarAula (legado, L915-1027), com os
+    // branches por TipoPlanejamentoAula (DISPONIBILIDADE_LIVRE/AULA/SEQUENTE).
     public Uni<List<OcorrenciaComponenteCurricular>> gerarAula(OferecimentoComponenteCurricular of, Date dataInicio, List<Long> diasAulaSelecionado) {
         if (of == null || diasAulaSelecionado == null || diasAulaSelecionado.isEmpty()) {
             return Uni.createFrom().item(List.of());
         }
+        TipoPlanejamentoAula tipo = TipoPlanejamentoAula.fromNameOrDefault(of.tipoPlanejamento);
         Uni<List<TurnoEducacao>> turnosU = turnoEducacaoRepository.listAll();
         Uni<List<TempoAula>> temposU = tempoAulaRepository.listAll();
         Uni<List<DiaAula>> diasU = diaAulaRepository.listAll();
         Uni<ComponenteCurricular> ccU = of.componenteCurricularId != null
                 ? componenteCurricularRepository.findById(of.componenteCurricularId)
                 : Uni.createFrom().nullItem();
+        Uni<Curriculo> curriculoU = of.curriculoId != null
+                ? curriculoRepository.findById(of.curriculoId)
+                : Uni.createFrom().nullItem();
         Uni<Criterio> criterioU = carregarCriterio(of);
-        return Uni.combine().all().unis(turnosU, temposU, diasU, ccU, criterioU).asTuple()
+        return Uni.combine().all().unis(turnosU, temposU, diasU, ccU, curriculoU, criterioU).asTuple()
                 .flatMap(tuple -> {
                     List<TurnoEducacao> turnos = tuple.getItem1();
                     List<TempoAula> tempos = tuple.getItem2();
                     List<DiaAula> todas = tuple.getItem3();
                     ComponenteCurricular cc = tuple.getItem4();
-                    Criterio criterio = tuple.getItem5();
+                    Curriculo curriculo = tuple.getItem5();
+                    Criterio criterio = tuple.getItem6();
                     if (cc == null || cc.cargaHoraria == null) {
                         return Uni.createFrom().item(List.of());
                     }
@@ -207,13 +242,18 @@ public class OferecimentoComponenteCurricularService {
                     }
                     of.diasAula = new LinkedHashSet<>(selecionados);
 
+                    if (tipo == TipoPlanejamentoAula.DISPONIBILIDADE_LIVRE) {
+                        return Uni.createFrom().item(gerarOcorrenciasLivre(of, quantidadeAulas));
+                    }
+
                     Calendar cal = Calendar.getInstance();
                     cal.setTime(dataInicio);
                     cal.add(Calendar.DAY_OF_YEAR, (int) Math.min(quantidadeAulas + 14, 370));
                     Date fimJanela = cal.getTime();
                     cal.setTime(dataInicio);
 
-                    return repository.buscarFeriadosNacionais(dataInicio, fimJanela)
+                    Long tipoCursoId = curriculo != null ? curriculo.tipoCursoId : null;
+                    return repository.buscarFeriados(dataInicio, fimJanela, of.unidadeId, tipoCursoId)
                             .flatMap(feriados -> {
                                 Set<Date> feriadoSet = new HashSet<>(feriados);
                                 if (of.salaId == null) {
@@ -228,6 +268,24 @@ public class OferecimentoComponenteCurricularService {
                                         });
                             });
                 });
+    }
+
+    // Migrado de OferecimentoComponenteCurricularService.gerarAula (legado, L975-985) -
+    // DISPONIBILIDADE_LIVRE: gera as ocorrencias sem data nem diaAula (agendamento livre,
+    // definido depois na UI), como no legado.
+    private List<OcorrenciaComponenteCurricular> gerarOcorrenciasLivre(OferecimentoComponenteCurricular of, long quantidadeAulas) {
+        List<OcorrenciaComponenteCurricular> geradas = new ArrayList<>();
+        for (int i = 0; i < quantidadeAulas; i++) {
+            OcorrenciaComponenteCurricular oc = new OcorrenciaComponenteCurricular();
+            oc.oferecimentoComponenteCurricularId = of.id;
+            oc.professorId = of.professorId;
+            oc.salaId = of.salaId;
+            oc.ativo = true;
+            oc.aulaPresencial = true;
+            oc.aulaCoringa = false;
+            geradas.add(oc);
+        }
+        return geradas;
     }
 
     private List<OcorrenciaComponenteCurricular> gerarOcorrencias(OferecimentoComponenteCurricular of,
@@ -348,6 +406,125 @@ public class OferecimentoComponenteCurricularService {
                     }));
         }
         return acc.flatMap(lista -> ocorrenciaRepository.persist(lista).replaceWith(lista.size()));
+    }
+
+    // ----- replicacao de oferecimentos (migrado de OferecimentoComponenteCurricularService.replicarOferecimento, legado L743-837) -----
+
+    // Replica um oferecimento (id): cria um novo a partir do "velho", calcula a dataInicio conforme
+    // o tipoReplicacao (0-3) usando o ultimo oferecimento do grupo, gera as ocorrencias (gerarAula)
+    // e atualiza datas/status. Dependencias cross-service nao mapeadas aqui (professores disponiveis
+    // e chamadas assinadas) sao mantidas como no-ops.
+    public Uni<Integer> replicarOferecimento(Long oferecimentoComponenteCurricularId) {
+        return repository.findById(oferecimentoComponenteCurricularId)
+                .onItem().ifNull().failWith(() -> new NotFoundException("OferecimentoComponenteCurricular not found"))
+                .flatMap(this::replicarOferecimento);
+    }
+
+    private Uni<Integer> replicarOferecimento(OferecimentoComponenteCurricular velho) {
+        if (velho.salaId == null) {
+            return Uni.createFrom().item(0);
+        }
+        return repository.buscarDiasAulaPorOferecimento(velho.id)
+                .flatMap(diasAulaSelecionado -> {
+                    if (diasAulaSelecionado == null || diasAulaSelecionado.isEmpty()) {
+                        return Uni.createFrom().item(0);
+                    }
+                    return salaRepository.findById(velho.salaId)
+                            .map(sala -> sala != null && sala.quantidadeAlunos != null ? sala.quantidadeAlunos : velho.vagas)
+                            .flatMap(vagas -> {
+                                OferecimentoComponenteCurricular novo = new OferecimentoComponenteCurricular();
+                                copiarParaReplicacao(velho, novo, vagas);
+                                novo.diasAula = new LinkedHashSet<>(diasAulaSelecionado);
+                                return calcularDataInicioReplicacao(velho)
+                                        .flatMap(dataInicio -> {
+                                            if (dataInicio == null) {
+                                                return Uni.createFrom().item(0);
+                                            }
+                                            List<Long> diasIds = diasAulaSelecionado.stream().map(d -> d.id).toList();
+                                            return gerarAula(novo, dataInicio, diasIds)
+                                                    .flatMap(ocorrencias -> {
+                                                        if (ocorrencias == null || ocorrencias.isEmpty()) {
+                                                            return Uni.createFrom().item(0);
+                                                        }
+                                                        novo.professorId = velho.professorId;
+                                                        velho.replicar = false;
+                                                        return repository.persist(novo)
+                                                                .flatMap(n -> {
+                                                                    for (OcorrenciaComponenteCurricular o : ocorrencias) {
+                                                                        o.oferecimentoComponenteCurricularId = n.id;
+                                                                    }
+                                                                    return ocorrenciaRepository.persist(ocorrencias);
+                                                                })
+                                                                .flatMap(list -> repository.atualizaStatosInscritosOferecimento(novo.id))
+                                                                .chain(() -> repository.atualizaDataOferecimento(novo.id))
+                                                                .replaceWith(ocorrencias.size());
+                                                    });
+                                        });
+                            });
+                });
+    }
+
+    private void copiarParaReplicacao(OferecimentoComponenteCurricular velho, OferecimentoComponenteCurricular novo, Integer vagas) {
+        novo.componenteCurricularId = velho.componenteCurricularId;
+        novo.curriculoId = velho.curriculoId;
+        novo.dataAlteracao = new Date();
+        novo.salaId = velho.salaId;
+        novo.vagas = vagas;
+        novo.qtdeSequencia = velho.qtdeSequencia;
+        novo.qtdeEspacoCaderno = velho.qtdeEspacoCaderno;
+        novo.grupoId = velho.grupoId;
+        novo.possuiAvaliacao = velho.possuiAvaliacao;
+        novo.registraFrequencia = velho.registraFrequencia;
+        novo.sequencia = velho.sequencia;
+        novo.unidadeId = velho.unidadeId;
+        novo.replicar = true;
+        novo.tipoPlanejamento = velho.tipoPlanejamento;
+        novo.replicado = true;
+        novo.detalharReplicacao = velho.detalharReplicacao;
+        novo.tipoReplicacao = velho.tipoReplicacao;
+        novo.componenteCurricularReplicarId = velho.componenteCurricularReplicarId;
+        novo.diasReplicar = velho.diasReplicar;
+    }
+
+    // Data de inicio da replicacao a partir do ultimo oferecimento do grupo (ou do proprio
+    // oferecimento quando nao ha anterior), conforme o tipoReplicacao (0=ini, 1=ini+1d,
+    // 2=fim, 3=fim+1d) - migrado de obtemDataInicioRecplicacao (legado).
+    private Uni<Date> calcularDataInicioReplicacao(OferecimentoComponenteCurricular velho) {
+        Uni<java.util.List<OferecimentoComponenteCurricular>> ultimoU;
+        if (velho.detalharReplicacao && velho.componenteCurricularReplicarId != null) {
+            ultimoU = repository.ultimoOferecimentoDoGrupoComponente(velho.grupoId, velho.componenteCurricularReplicarId)
+                    .flatMap(lista -> lista.isEmpty()
+                            ? repository.ultimoOferecimentoDoGrupo(velho.grupoId)
+                            : Uni.createFrom().item(lista));
+        } else {
+            ultimoU = repository.ultimoOferecimentoDoGrupo(velho.grupoId);
+        }
+        return ultimoU.map(ultimo -> {
+            if (!velho.detalharReplicacao) {
+                if (ultimo != null && !ultimo.isEmpty()) {
+                    return ultimo.get(0).dataFim;
+                }
+                return velho.dataFim;
+            }
+            return obtemDataInicioReplicacao(velho, ultimo);
+        });
+    }
+
+    private Date obtemDataInicioReplicacao(OferecimentoComponenteCurricular velho, List<OferecimentoComponenteCurricular> ultimo) {
+        OferecimentoComponenteCurricular u = ultimo != null && !ultimo.isEmpty() ? ultimo.get(0) : null;
+        Date base;
+        if (velho.tipoReplicacao == 0 || velho.tipoReplicacao == 1) {
+            base = u != null ? u.dataInicio : velho.dataInicio;
+        } else {
+            base = u != null ? u.dataFim : velho.dataFim;
+        }
+        if (velho.tipoReplicacao == 1 || velho.tipoReplicacao == 3) {
+            Calendar c = Calendar.getInstance();
+            c.setTime(base);
+            c.add(Calendar.DAY_OF_YEAR, 1);
+            return c.getTime();
+        }
+        return base;
     }
 
     // Migrado de OferecimentoCursoController.buscarTurnoEducacao (legado) - "descricao: HH:mm as HH:mm".

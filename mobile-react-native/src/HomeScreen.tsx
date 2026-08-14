@@ -9,9 +9,9 @@ import {
   View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './auth';
-import { countNaoLidas } from './notificacoes';
+import { countNaoLidas, subscribeNotificacoesStream } from './notificacoes';
 import { moduleIcon } from './moduleIcons';
 import { ReportButton } from './ReportButton';
 import type { Modulo } from './types';
@@ -24,6 +24,7 @@ const normalizeOutcome = (value: string) => value.replace(/(\.xhtml)+$/i, '').re
 
 export default function HomeScreen({ navigation }: NativeStackScreenProps<ParamList, 'home'>) {
   const { session, ready, signOut, refreshModules } = useAuth();
+  const queryClient = useQueryClient();
   const modulos: Modulo[] = useMemo(() => session?.modules ?? [], [session]);
   const loading = !ready || session?.modules === undefined;
   const [refreshing, setRefreshing] = useState(false);
@@ -38,6 +39,14 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<ParamL
     refetchIntervalInBackground: true,
     retry: false,
   });
+
+  useEffect(() => {
+    const unsubscribe = subscribeNotificacoesStream(() => {
+      queryClient.invalidateQueries({ queryKey: ['notificacoes', 'nao-lidas'] });
+      queryClient.invalidateQueries({ queryKey: ['notificacoes', 'minhas'] });
+    });
+    return unsubscribe;
+  }, [queryClient]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);

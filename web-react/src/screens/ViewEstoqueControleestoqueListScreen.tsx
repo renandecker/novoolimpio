@@ -1,25 +1,21 @@
 import { PermissionGate } from '../permissions';
-import { DataTable, type DataTableColumn } from '../DataTable';
-
-const CONTROLE_ESTOQUE_COLUMNS: DataTableColumn[] = [
-  { key: 'valor', label: 'Valor' },
-  { key: 'quantidade', label: 'Quantidade' },
-  { key: 'qtdeSolicitado', label: 'Solicitado' },
-  { key: 'qtdeDefeito', label: 'Defeito' },
-  { key: 'qtdeFalta', label: 'Falta' },
-  { key: 'qtdeNaoEncontrado', label: 'Não Encontrado' },
-  { key: 'qtdeReservado', label: 'Reservado' },
-  { key: 'qtdeAprovadoNaoEntregue', label: 'Aprovado N. Entregue' },
-  { key: 'produtoId', label: 'Produto' },
-  { key: 'unidadeId', label: 'Unidade' },
-];
+import { ModuleTabs } from '../ModuleTabs';
+import { UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH } from '../masterDetailSources';
 
 export default function ViewEstoqueControleestoqueListScreen() {
   return (
     <PermissionGate permission="READ">
       <main>
         <h1>Controle Estoque</h1>
-        <DataTable path="/api/estoque/controle-estoque" columns={CONTROLE_ESTOQUE_COLUMNS} />
+        <ModuleTabs
+          tabs={[
+            { key: 'produtosEstoqueCentral', label: 'Produtos Estoque Central', path: '/api/estoque/controle-estoque' },
+            { key: 'solicitacoes', label: 'Solicitações', empty: 'Conteúdo de Solicitações.' },
+            { key: 'pedidos', label: 'Pedidos', empty: 'Conteúdo de Pedidos.' },
+            { key: 'entregas', label: 'Entregas', empty: 'Conteúdo de Entregas.' },
+            { key: 'produtosUnidade', label: 'Produtos Unidade', masterDetail: { label: 'Produtos Unidade', source: UNIDADE_SOURCE, valueKey: 'id', searchKeys: UNIDADE_SEARCH, columns: UNIDADE_COLUMNS } },
+          ]}
+        />
       </main>
     </PermissionGate>
   );

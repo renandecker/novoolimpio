@@ -11,11 +11,10 @@ import org.jboss.logging.Logger;
 /**
  * Portado de br.com.sol7.olimpio.service.services.SchedulingService (legado).
  *
- * Cada rotina do legado virou um metodo separado (@Scheduled + @RunOnVirtualThread), que apenas
- * publica um evento Kafka (canal job-<dominio>). A execucao real ficou nos consumidores
- * (MaintenanceConsumer) - tambem em virtual thread - que acessam diretamente o banco do dominio
- * atraves dos maintenance services. O evento job-feriado e consumido pelo microsservico basico,
- * dono da regra de ajuste de feriados/oferecimentos.
+ * Cada rotina do legado virou um metodo separado (@Scheduled + @RunOnVirtualThread) e chama
+ * diretamente os objetos de manutencao que usam a conexao compartilhada com o banco. O evento
+ * job-feriado continua sendo consumido pelo microsservico basico, dono da regra de ajuste de
+ * feriados/oferecimentos.
  *
  * As rotinas de manutencao rodam a partir da 1h da manha (America/Sao_Paulo); o fechamento de
  * caixa e a correcao de avaliacoes permanecem as 23h.
@@ -26,48 +25,11 @@ public class SchedulingJobs {
     private static final Logger LOG = Logger.getLogger(SchedulingJobs.class);
 
     @Inject
-    @Channel("job-basico-out")
-    MutinyEmitter<String> jobBasico;
-
-    @Inject
-    @Channel("job-educacao-out")
-    MutinyEmitter<String> jobEducacao;
-
-    @Inject
-    @Channel("job-financeiro-out")
-    MutinyEmitter<String> jobFinanceiro;
-
-    @Inject
-    @Channel("job-central-out")
-    MutinyEmitter<String> jobCentral;
-
-    @Inject
-    @Channel("job-comercial-out")
-    MutinyEmitter<String> jobComercial;
-
-    @Inject
-    @Channel("job-relatorios-out")
-    MutinyEmitter<String> jobRelatorios;
-
-    @Inject
-    @Channel("job-emails-out")
-    MutinyEmitter<String> jobEmails;
-
-    @Inject
     @Channel("job-feriado-out")
     MutinyEmitter<String> jobFeriado;
 
     @Inject
-    @Channel("job-caixa-out")
-    MutinyEmitter<String> jobCaixa;
-
-    @Inject
-    @Channel("job-avaliacoes-out")
-    MutinyEmitter<String> jobAvaliacoes;
-
-    @Inject
-    @Channel("job-empresa-out")
-    MutinyEmitter<String> jobEmpresa;
+    MaintenanceConsumer maintenance;
 
     // Migrado de SchedulingService.tudo() - dominio empresa/curriculo (VagaService), 1h da manha
     @Scheduled(cron = "{scheduler.tudo.cron:0 0 1 * * ?}", timeZone = "America/Sao_Paulo")
@@ -77,8 +39,7 @@ public class SchedulingJobs {
             LOG.info("SchedulingJobs.rotinaEmpresa() - desabilitado via scheduler.jobs.enabled=false, pulando.");
             return;
         }
-        LOG.info("SchedulingJobs.rotinaEmpresa() - publicando trigger Kafka para a rotina do dominio empresa");
-        send(jobEmpresa, "job-empresa", "criarEntrevistas;enviarVagasAlunos");
+        maintenance.processarEmpresa("scheduled");
     }
 
     // Migrado de SchedulingService.tudo() - dominio basico, 1h da manha
@@ -89,8 +50,7 @@ public class SchedulingJobs {
             LOG.info("SchedulingJobs.rotinaBasico() - desabilitado via scheduler.jobs.enabled=false, pulando.");
             return;
         }
-        LOG.info("SchedulingJobs.rotinaBasico() - publicando trigger Kafka para a rotina do dominio basico");
-        send(jobBasico, "job-basico", "atualizarSituacaoConta;inativarUsuariosSemAcesso;verificarConta;verificarCotaEmailAutomatico;atualizarCompromissosAutomaticos;atualizarLogradouros");
+        maintenance.processarBasico("scheduled");
     }
 
     // Migrado de SchedulingService.tudo() - dominio educacao, 1h da manha
@@ -101,8 +61,7 @@ public class SchedulingJobs {
             LOG.info("SchedulingJobs.rotinaEducacao() - desabilitado via scheduler.jobs.enabled=false, pulando.");
             return;
         }
-        LOG.info("SchedulingJobs.rotinaEducacao() - publicando trigger Kafka para a rotina do dominio educacao");
-        send(jobEducacao, "job-educacao", "verificarCotaTaxaCurso;verificarCotaDescontoCurso;limparCancelamentoContratoVencido;replicarOferecimentoAutomatico;carregarChamadasPendentesAutomatico");
+        maintenance.processarEducacao("scheduled");
     }
 
     // Migrado de SchedulingService.tudo() - dominio financeiro, 1h da manha
@@ -113,8 +72,7 @@ public class SchedulingJobs {
             LOG.info("SchedulingJobs.rotinaFinanceiro() - desabilitado via scheduler.jobs.enabled=false, pulando.");
             return;
         }
-        LOG.info("SchedulingJobs.rotinaFinanceiro() - publicando trigger Kafka para a rotina do dominio financeiro");
-        send(jobFinanceiro, "job-financeiro", "verificarCotaFormaPagamento;atualizarCobrancasAutomatico");
+        maintenance.processarFinanceiro("scheduled");
     }
 
     // Migrado de SchedulingService.tudo() - dominio central, 1h da manha
@@ -125,8 +83,7 @@ public class SchedulingJobs {
             LOG.info("SchedulingJobs.rotinaCentral() - desabilitado via scheduler.jobs.enabled=false, pulando.");
             return;
         }
-        LOG.info("SchedulingJobs.rotinaCentral() - publicando trigger Kafka para a rotina do dominio central");
-        send(jobCentral, "job-central", "verificarOperacionalVencidos");
+        maintenance.processarCentral("scheduled");
     }
 
     // Migrado de SchedulingService.tudo() - dominio comercial, 1h da manha
@@ -137,8 +94,7 @@ public class SchedulingJobs {
             LOG.info("SchedulingJobs.rotinaComercial() - desabilitado via scheduler.jobs.enabled=false, pulando.");
             return;
         }
-        LOG.info("SchedulingJobs.rotinaComercial() - publicando trigger Kafka para a rotina do dominio comercial");
-        send(jobComercial, "job-comercial", "atualizarIdadeProspectos");
+        maintenance.processarComercial("scheduled");
     }
 
     // Migrado de SchedulingService.tudo() - dominio relatorios, 1h da manha
@@ -149,8 +105,7 @@ public class SchedulingJobs {
             LOG.info("SchedulingJobs.rotinaRelatorios() - desabilitado via scheduler.jobs.enabled=false, pulando.");
             return;
         }
-        LOG.info("SchedulingJobs.rotinaRelatorios() - publicando trigger Kafka para a rotina do dominio relatorios");
-        send(jobRelatorios, "job-relatorios", "removerExtratoresAntigos");
+        maintenance.processarRelatorios("scheduled");
     }
 
     // Migrado de SchedulingService.tudo() - rotinas de email (NAP + cobranca), 1h da manha
@@ -161,8 +116,7 @@ public class SchedulingJobs {
             LOG.info("SchedulingJobs.rotinaEmails() - desabilitado via scheduler.jobs.enabled=false, pulando.");
             return;
         }
-        LOG.info("SchedulingJobs.rotinaEmails() - publicando trigger Kafka para as rotinas de e-mail (NAP e cobranca)");
-        send(jobEmails, "job-emails", "rotinaEmailNap;rotinaEmailCobranca");
+        maintenance.processarEmails("scheduled");
     }
 
     // Migrado de SchedulingService.tudo() - verificaFeriadosParaajustar (basico.FeriadoAjuste).
@@ -187,8 +141,7 @@ public class SchedulingJobs {
             LOG.info("SchedulingJobs.rotinaFechamentoCaixa() - desabilitado via scheduler.jobs.enabled=false, pulando.");
             return;
         }
-        LOG.info("SchedulingJobs.rotinaFechamentoCaixa() - publicando trigger Kafka para o fechamento de caixas em aberto");
-        send(jobCaixa, "job-caixa", "fechamentoCaixaAbertos");
+        maintenance.processarFechamentoCaixa("scheduled");
     }
 
     // Migrado de SchedulingService.desativarCorrigirAvaliacoes() - 23h
@@ -199,8 +152,7 @@ public class SchedulingJobs {
             LOG.info("SchedulingJobs.rotinaCorrigirAvaliacoes() - desabilitado via scheduler.jobs.enabled=false, pulando.");
             return;
         }
-        LOG.info("SchedulingJobs.rotinaCorrigirAvaliacoes() - publicando trigger Kafka para a correcao de avaliacoes");
-        send(jobAvaliacoes, "job-avaliacoes", "corrigirAvaliacoes");
+        maintenance.processarCorrigirAvaliacoes("scheduled");
     }
 
     private boolean jobsEnabled() {

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { listMinhasNotificacoes, marcarNotificacaoLida, type Notificacao } from '../notificacoes';
+import { listMinhasNotificacoes, marcarNotificacaoLida, subscribeNotificacoesStream, type Notificacao } from '../notificacoes';
 import type { ParamList } from '../HomeScreen';
 
 const PAGE_SIZES = [10, 20, 50];
@@ -23,6 +23,14 @@ export default function ViewNotificacaoListNotificacaoListScreen({
   const queryClient = useQueryClient();
   const [page, setPage] = useState(0);
   const [size] = useState(PAGE_SIZES[0]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeNotificacoesStream(() => {
+      queryClient.invalidateQueries({ queryKey: ['notificacoes', 'nao-lidas'] });
+      queryClient.invalidateQueries({ queryKey: ['notificacoes', 'minhas'] });
+    });
+    return unsubscribe;
+  }, [queryClient]);
 
   const query = useQuery({
     queryKey: ['notificacoes', 'minhas', page, size],

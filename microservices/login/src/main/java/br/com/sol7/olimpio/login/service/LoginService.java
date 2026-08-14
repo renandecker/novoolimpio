@@ -116,9 +116,12 @@ public class LoginService {
     }
 
     private Uni<LoginResponse> issueSession(Login login) {
-        Set<String> permissions = parsePermissions(login.permissions);
-        return modulePermissions.resolve(login.id)
+        Set<String> configuredPermissions = parsePermissions(login.permissions);
+        // bas_usuario_perfil referencia bas_usuario.id, nao bas_login.id.
+        return modulePermissions.isAdministrator(login.idUsuario)
+                .onItem().transformToUni(administrator -> modulePermissions.resolve(login.idUsuario)
                 .onItem().transformToUni(perModule -> {
+                    Set<String> permissions = administrator ? ALL_PERMISSIONS : configuredPermissions;
                     var token = jwt.issue(login.username, permissions, perModule);
                     var session = new LoginSession();
                     session.id = UUID.fromString(token.jti());
@@ -131,7 +134,7 @@ public class LoginService {
                             .map(perfil -> new LoginResponse(token.token(), token.expiresAt(), login.username, permissions, perModule,
                                     perfil == null ? null : str(perfil[2]), perfil == null ? null : str(perfil[1]),
                                     perfil == null ? null : str(perfil[3]), perfil == null ? null : str(perfil[0])));
-                });
+                }));
     }
     private String normalise(String username) { return username.trim().toLowerCase(); }
     private String str(Object value) { return value == null ? null : value.toString(); }

@@ -285,7 +285,7 @@ function GestaoTab() {
     setOcorrenciaAulaSel(null);
     setAulaForm({ id: null, nome: '', descricao: '', anexos: [] });
     try {
-      const { data } = await api.get<OcorrenciaAula[]>('/api/aula/aula/ocorrencias', {
+      const { data } = await api.get<OcorrenciaAula[]>('/api/professor/aula/ocorrencias', {
         params: { oferecimentoId: turma.id },
       });
       setOcorrenciasAula(data);
@@ -300,7 +300,7 @@ function GestaoTab() {
     setAulaForm({ id: null, nome: '', descricao: '', anexos: [] });
     setAviso({ tipo: 'sucesso', texto: '' });
     try {
-      const { data } = await api.get<AulaItem[]>('/api/aula/aula/por-ocorrencia', { params: { ocorrenciaId } });
+      const { data } = await api.get<AulaItem[]>('/api/professor/aula/por-ocorrencia', { params: { ocorrenciaId } });
       setAulasDaOcorrencia(data);
     } catch (e) {
       notificar('erro', 'Erro ao carregar as aulas da ocorrência.');
@@ -324,7 +324,7 @@ function GestaoTab() {
     if (!window.confirm(`Excluir a aula "${aula.nome}"?`)) return;
     setAviso({ tipo: 'sucesso', texto: '' });
     try {
-      await api.delete(`/api/aula/aula/${aula.id}`);
+      await api.delete(`/api/professor/aula/${aula.id}`);
       setAulasDaOcorrencia((prev) => prev.filter((a) => a.id !== aula.id));
       if (aulaForm.id === aula.id) setAulaForm({ id: null, nome: '', descricao: '', anexos: [] });
       notificar('sucesso', 'Aula excluída com sucesso.');
@@ -344,10 +344,10 @@ function GestaoTab() {
       const payload = { nome: aulaForm.nome, descricao: aulaForm.descricao, ocorrenciaComponenteCurricularId: ocorrenciaAulaSel };
       let aulaId: number;
       if (aulaForm.id) {
-        const { data } = await api.put<AulaItem>(`/api/aula/aula/${aulaForm.id}`, payload);
+        const { data } = await api.put<AulaItem>(`/api/professor/aula/${aulaForm.id}`, payload);
         aulaId = data.id;
       } else {
-        const { data } = await api.post<AulaItem>('/api/aula/aula', payload);
+        const { data } = await api.post<AulaItem>('/api/professor/aula', payload);
         aulaId = data.id;
       }
       await salvarAnexosAula(aulaId);
@@ -364,10 +364,10 @@ function GestaoTab() {
     if (aulaForm.anexos.length === 0) return;
     for (const a of aulaForm.anexos) {
       if (!a.nome.trim()) continue;
-      await api.post('/api/aula/aula-anexo', { aulaId, nome: a.nome, anexo: a.anexo, tipo: a.tipo });
+      await api.post('/api/professor/aula-anexo', { aulaId, nome: a.nome, anexo: a.anexo, tipo: a.tipo });
     }
     try {
-      const { data } = await api.get<AulaAnexoItem[]>('/api/aula/aula-anexo/por-aula', { params: { aulaId } });
+      const { data } = await api.get<AulaAnexoItem[]>('/api/professor/aula-anexo/por-aula', { params: { aulaId } });
       setAnexosDaAula((prev) => ({ ...prev, [aulaId]: data }));
     } catch (e) {
       // silencioso: apenas anexos são recarregados

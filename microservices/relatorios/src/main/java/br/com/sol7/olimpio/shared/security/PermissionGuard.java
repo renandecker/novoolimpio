@@ -21,7 +21,9 @@ public class PermissionGuard {
     public void requireModule(Map<String, Set<String>> modulePermissions, String globalPermissions, String outcome, Permission permission) {
         boolean granted;
         if (modulePermissions != null && !modulePermissions.isEmpty()) {
-            granted = modulePermissions.getOrDefault(outcome, Set.of()).contains(permission.name());
+            Set<String> perms = modulePermissions.get(outcome);
+            granted = perms != null ? perms.contains(permission.name())
+                    : globalPermissions != null && Arrays.stream(globalPermissions.split(",")).map(String::trim).anyMatch(permission.name()::equals);
         } else {
             granted = globalPermissions != null && Arrays.stream(globalPermissions.split(",")).map(String::trim).anyMatch(permission.name()::equals);
         }

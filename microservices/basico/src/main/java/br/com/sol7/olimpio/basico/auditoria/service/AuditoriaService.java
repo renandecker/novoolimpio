@@ -56,9 +56,9 @@ public class AuditoriaService {
                         : Uni.createFrom().failure(new NotFoundException("Auditoria not found")));
     }
 
-    private void apply(Auditoria e, AuditoriaRequest r) { e.username = r.username(); e.action = r.action(); }
+    private void apply(Auditoria e, AuditoriaRequest r) { e.username = r.username(); e.action = r.action(); e.timestamp = r.timestamp(); }
 
     private AuditoriaResponse toResponse(Auditoria e) {
-        return new AuditoriaResponse(e.id, e.username, e.action);
+        return new AuditoriaResponse(e.id, e.username, e.action, e.timestamp);
     }
 }

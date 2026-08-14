@@ -102,6 +102,15 @@ export const ETAPAS_COLUMNS: MasterDetailColumn[] = [
 ];
 export const ETAPAS_SEARCH = ['descricao'];
 
+export const ETAPAS_NAP_SOURCE = '/api/view/etapasNap/listEtapasNap';
+export const ETAPAS_NAP_COLUMNS: MasterDetailColumn[] = [
+  { key: 'id', label: 'Id' },
+  { key: 'descricao', label: 'Descrição' },
+  { key: 'ordem', label: 'Ordem' },
+];
+export const ETAPAS_NAP_SEARCH = ['descricao'];
+
+
 export const RESULTADO_COBRANCA_SOURCE = '/api/view/resultadoCobranca/listResultadoCobranca';
 export const RESULTADO_COBRANCA_COLUMNS: MasterDetailColumn[] = [
   { key: 'id', label: 'Id' },

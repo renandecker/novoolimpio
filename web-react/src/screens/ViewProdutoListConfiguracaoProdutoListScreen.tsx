@@ -1,1 +1,17 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewProdutoListConfiguracaoProdutoListScreen(){return <PermissionGate permission="READ"><main><h1>List Configuracao Produto</h1><DataTable path="/api/view/produto/listConfiguracaoProduto"/></main></PermissionGate>}
+import { PermissionGate } from '../permissions';
+import { ModuleTabs } from '../ModuleTabs';
+
+export default function ViewProdutoListConfiguracaoProdutoListScreen() {
+  return (
+    <PermissionGate permission="READ">
+      <main>
+        <h1>List Configuracao Produto</h1>
+        <ModuleTabs
+          tabs={[
+            { key: 'campos', label: 'Campos', path: '/api/view/produto/listConfiguracaoProduto' },
+          ]}
+        />
+      </main>
+    </PermissionGate>
+  );
+}

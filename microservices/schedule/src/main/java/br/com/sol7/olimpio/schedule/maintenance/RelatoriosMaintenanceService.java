@@ -1,6 +1,5 @@
 package br.com.sol7.olimpio.schedule.maintenance;
 
-import io.quarkus.reactive.datasource.ReactiveDataSource;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -15,7 +14,6 @@ import jakarta.inject.Inject;
 public class RelatoriosMaintenanceService {
 
     @Inject
-    @ReactiveDataSource("relatorios-db")
     Pool pool;
 
     // Migrado de ExtratorService.remove() - so a parte de banco (2 updates); a limpeza de

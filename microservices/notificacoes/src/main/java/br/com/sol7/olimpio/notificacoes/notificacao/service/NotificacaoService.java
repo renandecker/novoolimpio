@@ -14,14 +14,18 @@ import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.NotFoundException;
 import java.time.OffsetDateTime;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 @WithTransaction
 public class NotificacaoService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotificacaoService.class);
+
     @Inject NotificacaoRepository repository;
     @Inject ConfigCanalService configCanalService;
-    @Inject CanalEmailService canalEmailService;
+    @Inject NotificacaoKafkaProducer kafkaProducer;
 
     public Uni<List<NotificacaoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -68,7 +72,10 @@ public class NotificacaoService {
                     e.canalEmail = r.canalEmail() != null ? r.canalEmail() : canais.email();
                 })
                 .chain(canais -> repository.persist(e))
-                .chain(saved -> dispatch(saved))
+                .chain(saved -> kafkaProducer.dispatch(saved)
+                        .onFailure().invoke(err ->
+                                LOGGER.warn("Falha ao publicar a notificação {} no Kafka: {}", e.id, err.getMessage()))
+                        .onFailure().recoverWithNull())
                 .replaceWith(() -> toResponse(e));
     }
 
@@ -102,11 +109,6 @@ public class NotificacaoService {
                     e.dataLeitura = OffsetDateTime.now();
                 })
                 .map(this::toResponse);
-    }
-
-    private Uni<Void> dispatch(Notificacao e) {
-        if (e.canalMobile && !e.mobileEnviado) e.mobileEnviado = true;
-        return canalEmailService.enviar(e, null);
     }
 
     private NotificacaoResponse toResponse(Notificacao e) {

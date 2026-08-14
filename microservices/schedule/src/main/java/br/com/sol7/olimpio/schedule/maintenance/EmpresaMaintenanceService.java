@@ -1,6 +1,5 @@
 package br.com.sol7.olimpio.schedule.maintenance;
 
-import io.quarkus.reactive.datasource.ReactiveDataSource;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;
 import io.vertx.mutiny.sqlclient.Row;
@@ -28,7 +27,6 @@ public class EmpresaMaintenanceService {
     private static final Logger LOG = Logger.getLogger(EmpresaMaintenanceService.class);
 
     @Inject
-    @ReactiveDataSource("empresa-db")
     Pool pool;
 
     // Migrado de VagaService.criarEntrevistas() - desativa vagas expiradas e cria as entrevistas
@@ -98,7 +96,23 @@ public class EmpresaMaintenanceService {
             """;
 
     public Uni<Map<String, Object>> enviarVagasAlunos() {
-        return processarLote(0, 0, 0L);
+        return buscarConfigLong("ID_VAGA_ALUNO", 0L)
+                .flatMap(cursor -> processarLote(0, 0, cursor));
+    }
+
+    private Uni<Long> buscarConfigLong(String chave, long defaultValue) {
+        return pool.preparedQuery("SELECT valor FROM bas_config WHERE chave = $1")
+                .execute(Tuple.of(chave))
+                .map(rows -> {
+                    if (!rows.iterator().hasNext()) {
+                        return defaultValue;
+                    }
+                    try {
+                        return Long.parseLong(rows.iterator().next().getString("valor"));
+                    } catch (NumberFormatException e) {
+                        return defaultValue;
+                    }
+                });
     }
 
     private Uni<Map<String, Object>> processarLote(int total, int round, long ultimoId) {

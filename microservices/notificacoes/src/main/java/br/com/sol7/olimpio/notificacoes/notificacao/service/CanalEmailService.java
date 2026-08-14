@@ -1,6 +1,6 @@
 package br.com.sol7.olimpio.notificacoes.notificacao.service;
 
-import br.com.sol7.olimpio.notificacoes.notificacao.entity.Notificacao;
+import br.com.sol7.olimpio.notificacoes.notificacao.dto.NotificacaoMessage;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.Vertx;
@@ -22,27 +22,31 @@ public class CanalEmailService {
 
     @Inject Vertx vertx;
 
-    public Uni<Void> enviar(Notificacao n, String destinatarioOverride) {
-        if (n == null || !n.canalEmail || n.emailEnviado) {
+    public Uni<Void> enviar(NotificacaoMessage msg) {
+        return enviar(msg, null);
+    }
+
+    public Uni<Void> enviar(NotificacaoMessage msg, String destinatarioOverride) {
+        if (msg == null) {
             return Uni.createFrom().voidItem();
         }
         return configSmtpPadrao()
                 .chain(config -> {
                     if (config == null || config.host() == null || config.host().isBlank()) {
-                        LOGGER.warn("Sem configuração de e-mail (bas_email). Notificação '{}' não enviada por e-mail.", n.titulo);
+                        LOGGER.warn("Sem configuração de e-mail (bas_email). Notificação '{}' não enviada por e-mail.", msg.titulo());
                         return Uni.createFrom().voidItem();
                     }
-                    return resolveDestinatario(n.username, destinatarioOverride)
+                    return resolveDestinatario(msg.username(), destinatarioOverride)
                             .chain(to -> {
                                 if (to == null || to.isBlank()) {
-                                    LOGGER.warn("Sem e-mail do destinatário '{}'. Notificação '{}' não enviada por e-mail.", n.username, n.titulo);
+                                    LOGGER.warn("Sem e-mail do destinatário '{}'. Notificação '{}' não enviada por e-mail.", msg.username(), msg.titulo());
                                     return Uni.createFrom().voidItem();
                                 }
-                                return send(config, to, n.titulo, corpo(n))
+                                return send(config, to, msg.titulo(), corpo(msg))
                                         .onFailure().invoke(err ->
-                                                LOGGER.warn("Falha ao enviar e-mail da notificação '{}' para '{}': {}", n.titulo, to, err.getMessage()))
+                                                LOGGER.warn("Falha ao enviar e-mail da notificação '{}' para '{}': {}", msg.titulo(), to, err.getMessage()))
                                         .replaceWithVoid()
-                                        .invoke(() -> n.emailEnviado = true);
+                                        .chain(() -> marcaEmailEnviado(msg.id()));
                             });
                 });
     }
@@ -91,15 +95,27 @@ public class CanalEmailService {
                 .map(list -> list.isEmpty() || list.get(0) == null ? null : list.get(0).toString().trim());
     }
 
-    private String corpo(Notificacao n) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Olá ").append(n.username).append(",\n\n");
-        sb.append(n.titulo).append("\n\n");
-        if (n.mensagem != null && !n.mensagem.isBlank()) {
-            sb.append(n.mensagem).append("\n\n");
+    private Uni<Void> marcaEmailEnviado(Long id) {
+        if (id == null) {
+            return Uni.createFrom().voidItem();
         }
-        if (n.link != null && !n.link.isBlank()) {
-            sb.append("Acesse: ").append(n.link).append("\n");
+        return Panache.getSession()
+                .chain(session -> session.createNativeQuery(
+                                "UPDATE not_notificacao SET email_enviado = true WHERE id = ?1 AND email_enviado = false")
+                        .setParameter(1, id)
+                        .executeUpdate())
+                .replaceWithVoid();
+    }
+
+    private String corpo(NotificacaoMessage msg) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Olá ").append(msg.username()).append(",\n\n");
+        sb.append(msg.titulo()).append("\n\n");
+        if (msg.mensagem() != null && !msg.mensagem().isBlank()) {
+            sb.append(msg.mensagem()).append("\n\n");
+        }
+        if (msg.link() != null && !msg.link().isBlank()) {
+            sb.append("Acesse: ").append(msg.link()).append("\n");
         }
         sb.append("\nAtenciosamente,\nEquipe Olímpio");
         return sb.toString();

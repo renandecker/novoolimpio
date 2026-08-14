@@ -15,9 +15,15 @@ export const MAX_MAIN_COLUMNS = 6;
 
 const FILE_KEY_RE = /foto|imagem|logo|assinatura|anexo|arquivo|_base64/i;
 
+export interface DataTableColumnOption {
+  value: string;
+  label: string;
+}
+
 export interface DataTableColumn {
   key: string;
   label: string;
+  options?: DataTableColumnOption[];
 }
 
 export interface ComboSource {
@@ -143,9 +149,14 @@ const deriveColumns = (item: ApiItem) => {
 
 const editableColumns = (item: ApiItem | null, fallback: DataTableColumn[]) => {
   if (!item) return fallback;
+  const byKey = new Map(fallback.map((column) => [column.key, column]));
   return Object.keys(asRecord(item))
     .filter((key) => key !== 'id' && key !== 'dadosJson' && !key.endsWith('_descricao'))
-    .map((key) => ({ key, label: toTitle(key) }));
+    .map((key) => {
+      const existing = byKey.get(key);
+      if (existing && existing.options) return existing;
+      return { key, label: toTitle(key) };
+    });
 };
 
 type ModalState =
@@ -541,6 +552,7 @@ function RecordModal({
                   const isBoolean = raw === true || raw === false || raw === 'true' || raw === 'false';
                   const isFile = !isBoolean && ((typeof raw === 'string' && raw.startsWith('data:')) || FILE_KEY_RE.test(field.key));
                   const combo = combos?.[field.key];
+                  const options = field.options;
                   return (
                     <label key={field.key} className="form-field">
                       <span className="form-label">{field.label}</span>
@@ -550,6 +562,19 @@ function RecordModal({
                           value={values[field.key]}
                           onChange={(rawValue) => setValues((prev) => ({ ...prev, [field.key]: rawValue }))}
                         />
+                      ) : options ? (
+                        <select
+                          className="form-input form-select"
+                          value={String(values[field.key] ?? '')}
+                          onChange={(event) => setValues((prev) => ({ ...prev, [field.key]: event.target.value }))}
+                        >
+                          <option value="">-- Selecione --</option>
+                          {options.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
                       ) : isFk && refsQuery.isLoading ? (
                         <select className="form-input form-select" disabled>
                           <option>Carregando...</option>

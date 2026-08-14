@@ -53,9 +53,7 @@ public class VagaService {
     VagaUsuarioRepository usuarioRepository;
 
     public Uni<List<VagaResponse>> list() {
-        return repository.listAll().onItem().transformToUni(items ->
-                Uni.combine().all().unis(items.stream().map(this::toResponse).toList())
-                        .combinedWith(results -> results.stream().map(r -> (VagaResponse) r).toList()));
+        return repository.listAll().onItem().transformToUni(items -> toResponses(items));
     }
 
     public Uni<PagedResponse<VagaResponse>> paged(int page, int size) {
@@ -65,13 +63,22 @@ public class VagaService {
             default -> 10;
         };
         return repository.findAll().page(p, s).list()
-                .onItem().transformToUni(items -> {
-                    Uni<PagedResponse<VagaResponse>> all = Uni.combine().all()
-                            .unis(items.stream().map(this::toResponse).toList())
-                            .combinedWith(results -> results.stream().map(r -> (VagaResponse) r).toList())
-                            .chain(responses -> repository.count()
-                                    .map(count -> new PagedResponse<>(responses, count, p, s)));
-                    return all;
+                .onItem().transformToUni(items -> toResponses(items)
+                        .chain(responses -> repository.count()
+                                .map(count -> new PagedResponse<>(responses, count, p, s))));
+    }
+
+    private Uni<List<VagaResponse>> toResponses(List<Vaga> items) {
+        if (items.isEmpty()) {
+            return Uni.createFrom().item(List.of());
+        }
+        return Uni.createFrom().item(new ArrayList<VagaResponse>())
+                .chain(acc -> {
+                    Uni<List<VagaResponse>> chain = Uni.createFrom().item(acc);
+                    for (Vaga item : items) {
+                        chain = chain.chain(list -> toResponse(item).map(list::add).replaceWith(list));
+                    }
+                    return chain;
                 });
     }
 
@@ -365,28 +372,47 @@ public class VagaService {
 
     private Uni<VagaResponse> toResponse(Vaga vaga) {
         Uni<List<VagaPerfil>> perfis = VagaPerfil.find("vagaId", vaga.id).list();
-        Uni<List<VagaUnidade>> unidades = VagaUnidade.find("vagaId", vaga.id).list();
-        Uni<List<VagaComponente>> componentes = VagaComponente.find("vagaId", vaga.id).list();
-        Uni<List<VagaOferecimento>> oferecimentos = VagaOferecimento.find("vagaId", vaga.id).list();
-        Uni<List<VagaGrupo>> grupos = VagaGrupo.find("vagaId", vaga.id).list();
-        Uni<List<VagaCurriculo>> curriculos = VagaCurriculo.find("vagaId", vaga.id).list();
-        Uni<List<VagaEmpresa>> empresas = VagaEmpresa.find("vagaId", vaga.id).list();
-        Uni<List<VagaUsuario>> usuarios = VagaUsuario.find("vagaId", vaga.id).list();
-        return Uni.combine().all().unis(perfis, unidades, componentes, oferecimentos, grupos, curriculos, empresas, usuarios)
-                .combinedWith(results -> {
-                    List<?> r = results.stream().toList();
-                    return new VagaResponse(
-                            vaga.id, vaga.nome, vaga.descricao, vaga.tituloEmail, vaga.assuntoEmail,
-                            vaga.dataInicio, vaga.dataFim, vaga.vagas, vaga.usuarioId,
-                            vaga.flAtivo, vaga.flExibirVaga, vaga.flEmail, vaga.dataEnvio,
-                            ((List<?>) r.get(0)).stream().map(x -> ((VagaPerfil) x).perfilId).toList(),
-                            ((List<?>) r.get(1)).stream().map(x -> ((VagaUnidade) x).unidadeId).toList(),
-                            ((List<?>) r.get(2)).stream().map(x -> ((VagaComponente) x).componenteId).toList(),
-                            ((List<?>) r.get(3)).stream().map(x -> ((VagaOferecimento) x).oferecimentoId).toList(),
-                            ((List<?>) r.get(4)).stream().map(x -> ((VagaGrupo) x).grupoId).toList(),
-                            ((List<?>) r.get(5)).stream().map(x -> ((VagaCurriculo) x).curriculoId).toList(),
-                            ((List<?>) r.get(6)).stream().map(x -> ((VagaEmpresa) x).empresaId).toList(),
-                            ((List<?>) r.get(7)).stream().map(x -> ((VagaUsuario) x).usuarioId).toList());
+        return perfis.chain((List<VagaPerfil> p) -> {
+            Uni<List<VagaUnidade>> unidades = VagaUnidade.find("vagaId", vaga.id).list();
+            return unidades.chain((List<VagaUnidade> u) -> {
+                Uni<List<VagaComponente>> componentes = VagaComponente.find("vagaId", vaga.id).list();
+                return componentes.chain((List<VagaComponente> c) -> {
+                    Uni<List<VagaOferecimento>> oferecimentos = VagaOferecimento.find("vagaId", vaga.id).list();
+                    return oferecimentos.chain((List<VagaOferecimento> o) -> {
+                        Uni<List<VagaGrupo>> grupos = VagaGrupo.find("vagaId", vaga.id).list();
+                        return grupos.chain((List<VagaGrupo> g) -> {
+                            Uni<List<VagaCurriculo>> curriculos = VagaCurriculo.find("vagaId", vaga.id).list();
+                            return curriculos.chain((List<VagaCurriculo> cr) -> {
+                                Uni<List<VagaEmpresa>> empresas = VagaEmpresa.find("vagaId", vaga.id).list();
+                                return empresas.chain((List<VagaEmpresa> em) -> {
+                                    Uni<List<VagaUsuario>> usuarios = VagaUsuario.find("vagaId", vaga.id).list();
+                                    return usuarios.map((List<VagaUsuario> us) -> buildResponse(
+                                            vaga, p, u, c, o, g, cr, em, us));
+                                });
+                            });
+                        });
+                    });
                 });
+            });
+        });
+    }
+
+    private VagaResponse buildResponse(Vaga vaga,
+                                       List<VagaPerfil> perfis, List<VagaUnidade> unidades,
+                                       List<VagaComponente> componentes, List<VagaOferecimento> oferecimentos,
+                                       List<VagaGrupo> grupos, List<VagaCurriculo> curriculos,
+                                       List<VagaEmpresa> empresas, List<VagaUsuario> usuarios) {
+        return new VagaResponse(
+                vaga.id, vaga.nome, vaga.descricao, vaga.tituloEmail, vaga.assuntoEmail,
+                vaga.dataInicio, vaga.dataFim, vaga.vagas, vaga.usuarioId,
+                vaga.flAtivo, vaga.flExibirVaga, vaga.flEmail, vaga.dataEnvio,
+                perfis.stream().map(x -> x.perfilId).toList(),
+                unidades.stream().map(x -> x.unidadeId).toList(),
+                componentes.stream().map(x -> x.componenteId).toList(),
+                oferecimentos.stream().map(x -> x.oferecimentoId).toList(),
+                grupos.stream().map(x -> x.grupoId).toList(),
+                curriculos.stream().map(x -> x.curriculoId).toList(),
+                empresas.stream().map(x -> x.empresaId).toList(),
+                usuarios.stream().map(x -> x.usuarioId).toList());
     }
 }

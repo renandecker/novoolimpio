@@ -32,6 +32,8 @@ public class OferecimentoComponenteCurricular extends PanacheEntity {
     public Date dataAlteracao;
     @Column(name = "tipo_replicacao")
     public int tipoReplicacao;
+    @Column(name = "tipo_planejamento")
+    public String tipoPlanejamento;  // era TipoPlanejamentoAula (enum) no legado; armazena o name()
     @Column(name = "qtde_dias_replicar")
     public int diasReplicar;
     @Column(name = "qtde_sequencia")

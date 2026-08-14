@@ -1,9 +1,12 @@
 # olimpio-pagamento-service
 
-Microsserviço de pagamentos (cartão à vista, cartão parcelado e PIX) para o ecossistema
+Microsserviço de pagamentos com **cartão** (à vista e parcelado) para o ecossistema
 Olímpio, construído no mesmo padrão do `olimpio-basico-service` (Quarkus 3.15 + Hibernate
 Reactive Panache + Postgres reativo + JWT + Kafka), integrando com a **Fiserv Commerce Hub /
 Payments Gateway (IPP)** a partir da collection Postman fornecida.
+
+> O fluxo **PIX**, que usava o Asaas como PSP, foi movido para o **asaas-service**
+> (rota `/api/asaas/pix`). Este serviço trata apenas cartão Fiserv.
 
 ---
 
@@ -12,58 +15,43 @@ Payments Gateway (IPP)** a partir da collection Postman fornecida.
 | Item | Descrição |
 |---|---|
 | Estrutura do projeto | Mesmo padrão do `basico.zip`: um pacote por domínio (`entity/repository/service/controller/dto`), classes de segurança JWT e mapeadores de exceção copiados de `shared/`. |
-| Integração Fiserv | Módulo `gateway/fiserv`: assinatura HMAC, DTOs de request e o serviço que chama `/payments` (à vista), `/payment-schedules` (parcelado) e `/payment-tokens` (cadastro de cartão). |
+| Integração Fiserv | Módulo `gateway/fiserv`: assinatura HMAC, DTOs de request e o serviço que chama `/payments` (à vista), `/payment-schedules` (parcelado), `/payment-tokens` (cadastro de cartão) e transações secundárias `/payments/{id}` (void/estorno). |
 | Cadastro de cartão | Módulo `cartaopessoa`: tokeniza o cartão na Fiserv e grava **apenas** bin, últimos 4 dígitos, CPF e o token — nunca o número completo nem o CVV. |
-| Cobrança de cartão | Módulo `parcelacartao`: efetua a cobrança (à vista ou parcelada) e vincula o resultado a `fin_parcela`. |
-| PIX | Módulo `pix`: reaproveita as tabelas legadas `fin_pix`/`fin_parcela_pix` já existentes no `V1__base.sql`. |
-| Orquestração | Módulo `pagamento`: um único endpoint que recebe a forma de pagamento e despacha para o módulo certo. |
-| Banco de dados | `V2__pagamento_fiserv.sql` (Flyway), aditivo ao `V1__base.sql` — cria as tabelas novas e uma única coluna de vínculo em `fin_parcela`. |
+| Cobrança de cartão | Módulo `parcelacartao`: efetua a cobrança (à vista ou parcelada), cancela (void), estorna (return) e vincula o resultado a `fin_parcela`. |
+| PIX | Movido para o `asaas-service` (rota `/api/asaas/pix`, antes `/api/pagamento/pix`). O pagamento-service agora trata somente cartão Fiserv. |
+| Webhook | `POST /api/pagamento/webhook/fiserv`: aplica confirmações assíncronas da Fiserv em `fin_parcela_cartao`. |
+| Kafka | Evento `olimpio.pagamento.confirmado` publicado quando um pagamento por **cartão** é confirmado. O fluxo PIX publica o mesmo evento a partir do asaas-service. |
+| Orquestração | Módulo `pagamento`: um único endpoint que recebe a forma de pagamento (cartão) e despacha para o módulo certo. |
+| Banco de dados | `V2__pagamento_fiserv.sql` (Flyway), aditivo ao `V1__base.sql`. No Docker a mesma migração é aplicada por `0021__pagamento_fiserv.sql` (o `0017__fiserv.sql` cobre apenas o `V17` do login-service). O `V3__ajuste_pix.sql` (PIX) foi movido para o asaas-service. |
 
 ---
 
-## 2. ⚠️ Sobre PIX na collection Fiserv fornecida
+## 2. ⚠️ PIX foi movido para o asaas-service
 
-Fiz uma busca completa em `fiserv_dev_postman_collection.json` (por "pix", "installment",
-"parcel") e **não existe nenhum endpoint de PIX nessa collection**. Ela é a API global de
-e-commerce da Fiserv (Commerce Hub / Payments Gateway/IPP) — PIX é um meio de pagamento
-instantâneo brasileiro e não faz parte dela.
+O PIX do pagamento-service (módulo `pix/`, incluindo o provider real `AsaasPixProviderClient`)
+foi **movido integralmente para o microsserviço `asaas`** (rota `/api/asaas/pix`, pacote
+`br.com.sol7.olimpio.asaas.pagamento_pix`). Os consumidores que chamavam `/api/pagamento/pix`
+devem chamar `/api/asaas/pix`.
 
-O que a collection tem, e que de fato mapeia para "à vista" e "parcelado", é:
+Motivo: a collection Fiserv fornecida (`fiserv_dev_postman_collection.json`) é a API global de
+e-commerce da Fiserv (Commerce Hub / Payments Gateway/IPP) e **não possui endpoint de PIX** —
+PIX é um meio de pagamento instantâneo brasileiro. O fluxo de PIX, que já usava o Asaas como PSP,
+passou a viver no microsserviço responsável pelo Asaas.
+
+O que este serviço (pagamento) faz hoje:
 
 - **À vista** → `POST /ipp/payments-gateway/v2/payments` com `requestType: PaymentCardSaleTransaction` (ou `PaymentTokenSaleTransaction` quando usa cartão já cadastrado).
 - **Parcelado** → `POST /ipp/payments-gateway/v2/payment-schedules` com `requestType: PaymentMethodPaymentSchedulesRequest` (`numberOfPayments` = quantidade de parcelas, `frequency` = periodicidade).
 - **Cadastro de cartão** → `POST /ipp/payments-gateway/v2/payment-tokens` (`PaymentCardPaymentTokenizationRequest`), que retorna um `paymentToken` reutilizável.
 
-Para não travar a entrega, implementei o **cartão (à vista e parcelado) chamando a Fiserv de
-verdade**, e o **PIX como um módulo funcional e persistente** (gera e consulta a cobrança,
-vincula a `fin_parcela`), mas com a geração real do QR Code/chave isolada atrás da interface
-`PixProviderClient` (`pix/provider/`). Hoje ela tem uma implementação `Stub` (gera um registro
-"PENDENTE" local).
+Para não travar a entrega, o cartão (à vista e parcelado) chama a Fiserv de verdade, e o PIX
+foi isolado atrás da interface `PixProviderClient` e movido para o asaas-service.
 
-**Revisão do schema legado (`V3__ajuste_pix.sql`):** como não existe um schema Fiserv de PIX
-para comparar, revisei `fin_pix`/`fin_parcela_pix` (`V1__base.sql`) contra o que uma cobrança
-PIX real precisa para funcionar de ponta a ponta e encontrei lacunas reais, corrigidas de forma
-aditiva:
-
-- `fin_parcela_pix` **não tinha `valor`** — não dava para saber quanto estava sendo cobrado.
-  Adicionei `valor`, `valor_pago`, `moeda`.
-- Só existia `id_asaas` (acopla a tabela a um PSP específico). Adicionei `provider_charge_id`
-  (genérico, funciona com qualquer `PixProviderClient`) e `end_to_end_id` (comprovante oficial
-  do Banco Central, para conciliação).
-- Só existia `data_vencimento`. Adicionei `data_criacao` e `data_pagamento`.
-- `fin_pix` (chave PIX da unidade/loja) não tinha `tipo_chave` (CPF/CNPJ/EMAIL/TELEFONE/ALEATORIA)
-  nem `fl_ativo`. Adicionei ambas.
-
-Todas as colunas foram propagadas para o código (`ParcelaPix`, `PixService`, `ParcelaPixResponse`
-e `PixProviderClient.PixChargeStatus`, que agora retorna `valorPago`/`endToEndId`). Para produção,
-falta apenas:
-
-1. Implementar `PixProviderClient` para o PSP real (ex.: Asaas — o schema já tem a coluna
-   `fin_parcela_pix.id_asaas` pronta para isso — ou uma futura API Fiserv Brasil).
-2. Trocar a implementação `@ApplicationScoped` (usar `@Alternative` + `@Priority`, ou remover o
-   Stub do classpath).
-
-Nenhuma mudança de schema ou de controller é necessária para isso.
+A migração `V3__ajuste_pix.sql` (revisão de `fin_pix`/`fin_parcela_pix`: `valor`,
+`valor_pago`, `moeda`, `provider_charge_id`, `end_to_end_id`, `data_criacao`,
+`data_pagamento`, `tipo_chave`, `fl_ativo`) foi **movida para o asaas-service**
+(`src/main/resources/db/migration/asaas/V3__ajuste_pix.sql`). No Docker ela continua sendo
+aplicada pelo restore (`0022__ajuste_pix.sql`).
 
 ---
 
@@ -79,8 +67,7 @@ pagamento-service/
     │   ├── application.properties
     │   └── db/migration/
     │       ├── V1__base.sql                 (fornecido por você, copiado para o Flyway rodar em ordem)
-    │       ├── V2__pagamento_fiserv.sql      (novo — ver seção 4)
-    │       └── V3__ajuste_pix.sql            (novo — completa valor/PSP genérico/E2E em fin_parcela_pix)
+    │       └── V2__pagamento_fiserv.sql      (novo — ver seção 4)
     └── java/br/com/sol7/olimpio/
         ├── shared/                          (copiado do basico: JWT, exceptions, PagedResponse)
         │   └── security/
@@ -89,10 +76,8 @@ pagamento-service/
             │   └── dto/
             ├── cartaopessoa/                (fin_cartao_pessoa — cadastro de cartão)
             ├── parcelacartao/               (fin_parcela_cartao — cobrança à vista/parcelado)
-            ├── pix/                         (fin_pix/fin_parcela_pix — cobrança PIX)
-            │   └── provider/                (ponto de extensão para o PSP real)
             ├── parcela/                     (leitura/vínculo de fin_parcela)
-            └── pagamento/                   (orquestração — endpoint único)
+            └── pagamento/                   (orquestração — endpoint único, somente cartão)
 ```
 
 ---
@@ -119,16 +104,20 @@ padrão** que as colunas já existentes `id_parcela_boleto` e `id_parcela_pix` u
 PIX. Assim, `fin_parcela` sabe se (e como) foi paga: boleto, PIX ou cartão (à vista/parcelado).
 
 PIX **não precisou de nenhuma tabela nova** — `fin_pix` e `fin_parcela_pix`, já existentes no
-`V1__base.sql`, foram reaproveitadas como estão.
+`V1__base.sql`, foram reaproveitadas e completadas de forma aditiva. O script que as ajusta
+(`V3__ajuste_pix.sql`) foi movido para o `asaas-service`
+(`src/main/resources/db/migration/asaas/V3__ajuste_pix.sql`).
 
 ### Como rodar
 
-O Flyway já está configurado para migrar automaticamente (`quarkus.flyway.migrate-at-start`,
-controlado por `FLYWAY_MIGRATE_AT_START` no `.env`). Se preferir rodar manualmente:
+O Flyway deste serviço está **desativado** (`quarkus.flyway.migrate-at-start=false`): as
+migrações de pagamento (o equivalente a `V21__pagamento_fiserv.sql` do
+login-service) são aplicadas pelo restore do Docker (`docker/postgres/0017__fiserv.sql` para o
+V17 do login e `0021__pagamento_fiserv.sql` = V21). Se precisar
+rodar manualmente:
 
 ```bash
 psql -h localhost -U postgres -d olimpio -f src/main/resources/db/migration/V2__pagamento_fiserv.sql
-psql -h localhost -U postgres -d olimpio -f src/main/resources/db/migration/V3__ajuste_pix.sql
 ```
 
 (O script usa `CREATE TABLE IF NOT EXISTS` e blocos `DO $$ ... IF NOT EXISTS` para constraints,
@@ -154,6 +143,12 @@ então pode ser reexecutado com segurança.)
    `Message-Signature` — o mesmo mecanismo usado pela collection Postman.
 4. Quando quiser ir para produção, troque `FISERV_BASE_URL` para
    `https://prod.emea.api.fiservapps.com` e use as credenciais de produção.
+
+### Configuração da API Asaas
+
+As credenciais do Asaas (`ASAAS_API_KEY`, `ASAAS_BASE_URL`) **não são mais necessárias neste
+serviço**: o fluxo PIX/Asaas foi movido para o `asaas-service`. Configure-as no microsserviço
+`asaas` (o `AsaasApiAuth` envia o token no header `access_token`).
 
 ---
 
@@ -204,6 +199,8 @@ curl -X POST http://localhost:8085/api/pagamento/cartao-pessoa \
 |---|---|---|
 | `POST` | `/api/pagamento/cartao` | Cobra uma parcela à vista ou parcelada |
 | `GET`  | `/api/pagamento/cartao/{id}` | Consulta uma transação de cartão |
+| `POST` | `/api/pagamento/cartao/{id}/cancelar` | Cancela (void) a transação na Fiserv e grava o status de reverso |
+| `POST` | `/api/pagamento/cartao/{id}/estornar` | Estorna (return) o valor informado na transação |
 
 ```bash
 # À vista, usando cartão já cadastrado
@@ -228,24 +225,53 @@ curl -X POST http://localhost:8085/api/pagamento/cartao \
 > No `PARCELADO`, `valor` é o valor de **cada** parcela (é assim que a Fiserv espera em
 > `payment-schedules`); `qtdParcelas` é o total de cobranças.
 
-### PIX — `/api/pagamento/pix`
+```bash
+# Cancela (void) a transação de cartão id 123
+curl -X POST http://localhost:8085/api/pagamento/cartao/123/cancelar \
+  -H "Authorization: Bearer $TOKEN"
 
-| Método | Rota | Descrição |
-|---|---|---|
-| `POST` | `/api/pagamento/pix` | Gera uma cobrança PIX para uma parcela |
-| `GET`  | `/api/pagamento/pix/{id}` | Consulta uma cobrança PIX |
-| `POST` | `/api/pagamento/pix/{id}/atualizar-status` | Atualiza a situação junto ao provider |
+# Estorna (return) R$ 100,00 da transação de cartão id 123
+curl -X POST http://localhost:8085/api/pagamento/cartao/123/estornar \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"valor": 100.00}'
+```
+
+### Webhook Fiserv — `POST /api/pagamento/webhook/fiserv`
+
+Endpoint **público** (isento de JWT) que recebe as notificações assíncronas da Fiserv e atualiza
+a `fin_parcela_cartao` correspondente (identificação por `ipgTransactionId`/
+`merchantTransactionId`/`orderId`, processamento idempotente):
+
+- `APPROVED`/status de sucesso → marca `fin_parcela_cartao` e `fin_parcela` como pagas e publica o
+  evento Kafka `olimpio.pagamento.confirmado`.
+- `REVERSED`/`DECLINED` → marca o reverso e limpa a `data_pagamento`.
 
 ```bash
-curl -X POST http://localhost:8085/api/pagamento/pix \
+curl -X POST http://localhost:8085/api/pagamento/webhook/fiserv \
+  -H "Content-Type: application/json" \
+  -d '{"transactionStatus": "APPROVED", "ipgTransactionId": "123456", "transactionAmount": 100.00}'
+```
+
+### PIX — movido para `/api/asaas/pix`
+
+O fluxo PIX não existe mais neste serviço. Foi movido para o **asaas-service**:
+
+| Método | Rota | Serviço |
+|---|---|---|
+| `POST` | `/api/asaas/pix` | asaas-service (gera cobrança PIX para uma parcela) |
+| `GET`  | `/api/asaas/pix/{id}` | asaas-service (consulta uma cobrança PIX) |
+| `POST` | `/api/asaas/pix/{id}/atualizar-status` | asaas-service (atualiza a situação junto ao provider) |
+
+```bash
+curl -X POST http://localhost:8094/api/asaas/pix \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
   -d '{"idParcela": 503, "idPessoa": 1, "valor": 150.00, "dataVencimento": "2026-08-20"}'
 ```
 
 ### Endpoint único — `/api/pagamento`
 
-Ponto de entrada único que recebe `formaPagamento` (`PIX`, `CARTAO_VISTA` ou
-`CARTAO_PARCELADO`) e despacha internamente para os módulos acima:
+Ponto de entrada único para **cartão** que recebe `formaPagamento` (`CARTAO_VISTA` ou
+`CARTAO_PARCELADO`) e despacha internamente para os módulos de cartão:
 
 ```bash
 curl -X POST http://localhost:8085/api/pagamento \
@@ -264,14 +290,18 @@ curl -X POST http://localhost:8085/api/pagamento \
   e nunca são gravados no banco — só bin, últimos 4 dígitos, CPF e o `paymentToken`.
 - **Assinatura HMAC** calculada sobre os bytes exatos enviados (o serviço serializa o corpo uma
   única vez e reusa a mesma string para assinar e enviar).
-- **JWT** compartilhado com o `basico-service` protege todas as rotas.
+- **JWT** compartilhado com o `basico-service` protege todas as rotas (exceto o webhook Fiserv,
+  que é público por natureza).
+- **Kafka**: a publicação de `olimpio.pagamento.confirmado` nunca derruba a transação — falha é
+  logada e o fluxo continua.
 - Tabelas novas seguem exatamente a convenção (`IF NOT EXISTS`, `DO $$` idempotente,
   nomenclatura `fin_*`) do `V1__base.sql`, para minimizar risco de conflito.
 
 ## 9. Não incluído neste MVP (próximos passos sugeridos)
 
-- Estorno/cancelamento (`PATCH /v2/payments/{id}`) e webhooks de confirmação assíncrona da Fiserv.
-- Retry/idempotência mais robusta em falhas de rede com a Fiserv.
-- Implementação real de `PixProviderClient` (hoje é um Stub — ver seção 2).
-- Publicação de evento Kafka `olimpio.pagamento.confirmado` (tópico já configurado em
-  `application.properties`, falta o `Emitter` nos services).
+- **Verificação de assinatura no webhook** da Fiserv (o endpoint atual é público; validar o HMAC
+  do corpo seria ideal em produção).
+- **Retry/idempotência** mais robusta em falhas de rede com a Fiserv (ex.: exponential
+  backoff + estado "PROCESSANDO" para reconciliar transações pendentes).
+- **Reconciliação**: job periódico para consultar na Fiserv transações que ficaram em status
+  intermediário e atualizar o banco. (No asaas-service, o equivalente vale para as cobranças PIX.)

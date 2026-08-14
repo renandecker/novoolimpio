@@ -1,7 +1,6 @@
 package br.com.sol7.olimpio.schedule.maintenance;
 import java.util.Date;
 
-import io.quarkus.reactive.datasource.ReactiveDataSource;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,7 +15,6 @@ import jakarta.inject.Inject;
 public class ComercialMaintenanceService {
 
     @Inject
-    @ReactiveDataSource("comercial-db")
     Pool comercialPool;
 
     // Migrado de SchedulingService.atualizarIdadeProspectos()

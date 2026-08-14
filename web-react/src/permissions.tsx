@@ -43,7 +43,7 @@ export function PermissionProvider({
         if (Object.prototype.hasOwnProperty.call(modulePermissions, key)) {
           return modulePermissions[key].includes(permission);
         }
-        if (hasModulePermissions) return permission === 'READ';
+        if (hasModulePermissions) return global.has(permission);
       }
       return global.has(permission);
     };

@@ -9,18 +9,15 @@ import br.com.sol7.olimpio.schedule.maintenance.EmpresaMaintenanceService;
 import br.com.sol7.olimpio.schedule.maintenance.FinanceiroMaintenanceService;
 import br.com.sol7.olimpio.schedule.maintenance.NapEmailMaintenanceService;
 import br.com.sol7.olimpio.schedule.maintenance.RelatoriosMaintenanceService;
-import io.smallrye.common.annotation.RunOnVirtualThread;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.reactive.messaging.annotations.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.jboss.logging.Logger;
 
 /**
- * Consome os triggers publicados pelo SchedulingJobs (topico olimpio.schedule.<dominio>).
+ * Executa as rotinas de manutencao chamadas diretamente pelo SchedulingJobs.
  *
- * Cada metodo roda em uma virtual thread (@Incoming + @Blocking + @RunOnVirtualThread) e executa a
+ * Cada metodo roda em uma virtual thread e executa a
  * rotina de manutencao do dominio chamando os maintenance services de forma "sincrona" via
  * await().indefinitely(). Uma falha num passo nao impede os demais (mesmo espirito do try/catch
  * do legado), e uma falha no processamento inteiro e logada (o ack do Kafka so acontece apos o
@@ -58,9 +55,6 @@ public class MaintenanceConsumer {
     @Inject
     EmpresaMaintenanceService empresa;
 
-    @Incoming("job-empresa")
-    @Blocking
-    @RunOnVirtualThread
     public void processarEmpresa(String trigger) {
         LOG.infof("MaintenanceConsumer - processando job-empresa: %s", trigger);
         try {
@@ -81,9 +75,6 @@ public class MaintenanceConsumer {
         }
     }
 
-    @Incoming("job-basico")
-    @Blocking
-    @RunOnVirtualThread
     public void processarBasico(String trigger) {
         LOG.infof("MaintenanceConsumer - processando job-basico: %s", trigger);
         try {
@@ -100,9 +91,6 @@ public class MaintenanceConsumer {
         }
     }
 
-    @Incoming("job-educacao")
-    @Blocking
-    @RunOnVirtualThread
     public void processarEducacao(String trigger) {
         LOG.infof("MaintenanceConsumer - processando job-educacao: %s", trigger);
         try {
@@ -118,9 +106,6 @@ public class MaintenanceConsumer {
         }
     }
 
-    @Incoming("job-financeiro")
-    @Blocking
-    @RunOnVirtualThread
     public void processarFinanceiro(String trigger) {
         LOG.infof("MaintenanceConsumer - processando job-financeiro: %s", trigger);
         try {
@@ -133,9 +118,6 @@ public class MaintenanceConsumer {
         }
     }
 
-    @Incoming("job-central")
-    @Blocking
-    @RunOnVirtualThread
     public void processarCentral(String trigger) {
         LOG.infof("MaintenanceConsumer - processando job-central: %s", trigger);
         try {
@@ -146,9 +128,6 @@ public class MaintenanceConsumer {
         }
     }
 
-    @Incoming("job-comercial")
-    @Blocking
-    @RunOnVirtualThread
     public void processarComercial(String trigger) {
         LOG.infof("MaintenanceConsumer - processando job-comercial: %s", trigger);
         try {
@@ -159,9 +138,6 @@ public class MaintenanceConsumer {
         }
     }
 
-    @Incoming("job-relatorios")
-    @Blocking
-    @RunOnVirtualThread
     public void processarRelatorios(String trigger) {
         LOG.infof("MaintenanceConsumer - processando job-relatorios: %s", trigger);
         try {
@@ -172,9 +148,6 @@ public class MaintenanceConsumer {
         }
     }
 
-    @Incoming("job-emails")
-    @Blocking
-    @RunOnVirtualThread
     public void processarEmails(String trigger) {
         LOG.infof("MaintenanceConsumer - processando job-emails: %s", trigger);
         try {
@@ -195,9 +168,6 @@ public class MaintenanceConsumer {
         }
     }
 
-    @Incoming("job-caixa")
-    @Blocking
-    @RunOnVirtualThread
     public void processarFechamentoCaixa(String trigger) {
         LOG.infof("MaintenanceConsumer - processando job-caixa (fluxo de caixa): %s", trigger);
         try {
@@ -212,9 +182,6 @@ public class MaintenanceConsumer {
         }
     }
 
-    @Incoming("job-avaliacoes")
-    @Blocking
-    @RunOnVirtualThread
     public void processarCorrigirAvaliacoes(String trigger) {
         LOG.infof("MaintenanceConsumer - processando job-avaliacoes: %s", trigger);
         try {

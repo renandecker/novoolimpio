@@ -28,9 +28,7 @@ public class CurriculoTrabalhoService {
     RefService refService;
 
     public Uni<List<CurriculoTrabalhoResponse>> list() {
-        return repository.listAll().onItem().transformToUni(items ->
-                Uni.combine().all().unis(items.stream().map(this::toResponse).toList())
-                        .combinedWith(results -> results.stream().map(r -> (CurriculoTrabalhoResponse) r).toList()));
+        return repository.listAll().onItem().transformToUni(items -> toResponses(items));
     }
 
     public Uni<PagedResponse<CurriculoTrabalhoResponse>> paged(int page, int size) {
@@ -40,11 +38,23 @@ public class CurriculoTrabalhoService {
             default -> 10;
         };
         return repository.findAll().page(p, s).list()
-                .onItem().transformToUni(items ->
-                        Uni.combine().all().unis(items.stream().map(this::toResponse).toList())
-                                .combinedWith(results -> results.stream().map(r -> (CurriculoTrabalhoResponse) r).toList())
-                                .chain(responses -> repository.count()
-                                        .map(count -> new PagedResponse<>(responses, count, p, s))));
+                .onItem().transformToUni(items -> toResponses(items)
+                        .chain(responses -> repository.count()
+                                .map(count -> new PagedResponse<>(responses, count, p, s))));
+    }
+
+    private Uni<List<CurriculoTrabalhoResponse>> toResponses(List<CurriculoTrabalho> items) {
+        if (items.isEmpty()) {
+            return Uni.createFrom().item(List.of());
+        }
+        return Uni.createFrom().item(new ArrayList<CurriculoTrabalhoResponse>())
+                .chain(acc -> {
+                    Uni<List<CurriculoTrabalhoResponse>> chain = Uni.createFrom().item(acc);
+                    for (CurriculoTrabalho item : items) {
+                        chain = chain.chain(list -> toResponse(item).map(list::add).replaceWith(list));
+                    }
+                    return chain;
+                });
     }
 
     public Uni<CurriculoTrabalhoResponse> find(Long id) {

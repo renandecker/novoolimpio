@@ -2,6 +2,12 @@ import { PermissionGate } from '../permissions';
 import { DataTable, type DataTableColumn } from '../DataTable';
 import { Wizard } from '../Wizard';
 
+const TIPO_PLANEJAMENTO_OPTIONS = [
+  { value: 'DISPONIBILIDADE_AULA', label: 'Disponibilidade aula' },
+  { value: 'DISPONIBILIDADE_SEQUENTE', label: 'Disponibilidade sequente' },
+  { value: 'DISPONIBILIDADE_LIVRE', label: 'Disponibilidade livre' },
+];
+
 const OFERECIMENTO_COLUMNS: DataTableColumn[] = [
   { key: 'unidadeId', label: 'Unidade' },
   { key: 'grupoId', label: 'Grupo' },
@@ -12,6 +18,7 @@ const OFERECIMENTO_COLUMNS: DataTableColumn[] = [
   { key: 'vagas', label: 'Vagas' },
   { key: 'inscritos', label: 'Inscritos' },
   { key: 'status', label: 'Status' },
+  { key: 'tipoPlanejamento', label: 'Tipo Planejamento', options: TIPO_PLANEJAMENTO_OPTIONS },
   { key: 'dataInicio', label: 'Início' },
   { key: 'dataFim', label: 'Fim' },
 ];

@@ -13,10 +13,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 /**
- * Endpoint unico para pagar uma parcela (fin_parcela), qualquer que seja a forma escolhida.
- * Para operacoes especificas de cada forma (consultar cobranca PIX, listar cartoes cadastrados,
- * etc.) use os controllers dedicados: /api/pagamento/pix, /api/pagamento/cartao,
- * /api/pagamento/cartao-pessoa.
+ * Endpoint unico para pagar uma parcela (fin_parcela) via cartao (a vista ou parcelado).
+ * Para operacoes especificas de cada forma use os controllers dedicados: /api/pagamento/cartao,
+ * /api/pagamento/cartao-pessoa. O fluxo PIX foi movido para o asaas-service (rota /api/asaas/pix).
  */
 @Path("/api/pagamento")
 @Produces(MediaType.APPLICATION_JSON)

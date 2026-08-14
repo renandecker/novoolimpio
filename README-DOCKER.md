@@ -1,6 +1,6 @@
 # Rodando o Olimpio com Docker
 
-Este projeto sobe com um unico comando: Postgres, os 10 microsservicos Quarkus (cada um na sua porta), um gateway Nginx e o app React.
+Este projeto sobe com um unico comando: Postgres, Kafka, os 16 microsservicos Quarkus (cada um na sua porta), um gateway Nginx e o app React.
 
 ## Pre-requisitos
 - [Docker](https://docs.docker.com/get-docker/) e Docker Compose (ja vem junto no Docker Desktop).
@@ -41,16 +41,23 @@ stop-all.bat -v          # para os containers e apaga os dados do banco
 |---|---|---|
 | `web-react` | **3000** | App React (http://localhost:3000) |
 | `gateway` | **8080** | Nginx roteando `/api/<modulo>/...` pro microsservico certo |
+| `postgres` | 5432 | Banco de dados (instancia unica com o banco `olimpio`) |
+| `kafka` | 9092 | Broker Kafka (triggers do schedule e eventos de pagamento) |
+| `aluno` | 8092 | Microsservico |
+| `asaas` | 8094 | Microsservico (integração Asaas) |
 | `basico` | 8081 | Microsservico |
 | `central` | 8083 | Microsservico |
 | `comercial` | 8084 | Microsservico |
+| `curriculo` | 8095 | Microsservico (dominio Empresa/Curriculo cur_*) |
 | `educacao` | 8085 | Microsservico |
 | `estoque` | 8086 | Microsservico |
 | `financeiro` | 8087 | Microsservico |
 | `login` | 8090 | Microsservico de autenticacao (login/bootstrap) |
+| `notificacoes` | 8082 | Microsservico |
+| `pagamento` | 8096 | Microsservico (cartao Fiserv + PIX, publica no Kafka) |
+| `professor` | 8091 | Microsservico |
 | `relatorios` | 8088 | Microsservico |
 | `schedule` | 8089 | Microsservico |
-| `postgres` | 5432 | Banco de dados (um schema/database por microsservico) |
 
 Cada microsservico tambem pode ser chamado **diretamente** na sua porta (ex.: `http://localhost:8081/api/basico/agenda`), sem passar pelo gateway — util para testar um servico isolado.
 
@@ -70,6 +77,8 @@ Todo controller dos microsservicos segue o padrao `@Path("/api/<modulo>/<feature
 /api/estoque/*     -> estoque:8086
 /api/financeiro/*  -> financeiro:8087
 /api/login/*       -> login:8090
+/api/notificacoes/* -> notificacoes:8082
+/api/pagamento/*   -> pagamento:8096
 /api/relatorios/*  -> relatorios:8088
 /api/schedule/*    -> schedule:8089
 ```

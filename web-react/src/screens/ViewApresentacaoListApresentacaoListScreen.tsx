@@ -1,1 +1,18 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewApresentacaoListApresentacaoListScreen(){return <PermissionGate permission="READ"><main><h1>List Apresentacao</h1><DataTable path="/api/view/apresentacao/listApresentacao"/></main></PermissionGate>}
+import { PermissionGate } from '../permissions';
+import { ModuleTabs } from '../ModuleTabs';
+
+export default function ViewApresentacaoListApresentacaoListScreen() {
+  return (
+    <PermissionGate permission="READ">
+      <main>
+        <h1>List Apresentacao</h1>
+        <ModuleTabs
+          tabs={[
+            { key: 'imagens', label: 'Imagens', path: '/api/view/apresentacao/listApresentacao' },
+            { key: 'videos', label: 'Vídeos', empty: 'Conteúdo de Vídeos.' },
+          ]}
+        />
+      </main>
+    </PermissionGate>
+  );
+}

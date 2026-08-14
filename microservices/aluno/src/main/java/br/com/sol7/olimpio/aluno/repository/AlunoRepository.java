@@ -27,7 +27,7 @@ public class AlunoRepository {
             LIMIT 1
             """;
         return nativeList(sql, username)
-                .map(rows -> rows.isEmpty() ? null : asLong(((Object[]) rows.get(0))[0]));
+                .map(rows -> rows.isEmpty() ? null : asLong(rows.get(0)));
     }
 
     public Uni<Object[]> perfilPorUsername(String username) {
@@ -154,7 +154,7 @@ public class AlunoRepository {
                    COALESCE((SELECT SUM(c.qtde_parcelas_nao_pagas) FROM edc_contrato c WHERE c.id_pessoa = ?1), 0) AS qtd_restantes,
                    COALESCE((SELECT SUM(c.valor_parcelas) FROM edc_contrato c WHERE c.id_pessoa = ?1), 0) AS valor_pendente
             """;
-        return nativeList(sql, pessoaId, pessoaId, pessoaId, pessoaId)
+        return nativeList(sql, pessoaId)
                 .map(rows -> rows.isEmpty() ? null : (Object[]) rows.get(0));
     }
 
@@ -226,7 +226,7 @@ public class AlunoRepository {
                    (p.id_venda IS NOT NULL) AS venda_produto,
                    (p.id_multa_livro IS NOT NULL) AS multa_livro
             FROM fin_parcela p
-            WHERE p.id_pessoa = ?1 AND """ + condicao + """
+            WHERE p.id_pessoa = ?1 AND """ + " " + condicao + " " + """
             ORDER BY p.data_vencimento ASC NULLS LAST, p.id ASC
             """;
         return nativeList(sql, params);

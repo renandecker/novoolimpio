@@ -6,6 +6,8 @@ import br.com.sol7.olimpio.pagamento.gateway.fiserv.FiservGatewayService;
 import br.com.sol7.olimpio.pagamento.parcela.entity.Parcela;
 import br.com.sol7.olimpio.pagamento.parcela.repository.ParcelaRepository;
 import br.com.sol7.olimpio.pagamento.parcelacartao.dto.PagamentoCartaoRequest;
+import br.com.sol7.olimpio.pagamento.pagamento.event.PagamentoConfirmadoEvent;
+import br.com.sol7.olimpio.pagamento.pagamento.event.PagamentoConfirmadoProducer;
 import br.com.sol7.olimpio.pagamento.parcelacartao.dto.ParcelaCartaoResponse;
 import br.com.sol7.olimpio.pagamento.parcelacartao.entity.ParcelaCartao;
 import br.com.sol7.olimpio.pagamento.parcelacartao.repository.ParcelaCartaoRepository;
@@ -35,6 +37,7 @@ public class ParcelaCartaoService {
     @Inject ParcelaRepository parcelaRepository;
     @Inject CartaoPessoaService cartaoPessoaService;
     @Inject FiservGatewayService fiserv;
+    @Inject PagamentoConfirmadoProducer pagamentoConfirmadoProducer;
 
     @WithTransaction
     public Uni<ParcelaCartaoResponse> pagar(PagamentoCartaoRequest r) {
@@ -89,8 +92,22 @@ public class ParcelaCartaoService {
             if (STATUS_APROVADO.contains(entity.status)) {
                 parcela.dataPagamento = LocalDateTime.now();
             }
-            return parcelaRepository.persist(parcela).map(v -> toResponse(entity));
+            return parcelaRepository.persist(parcela)
+                    .onItem().transformToUni(v -> {
+                        ParcelaCartaoResponse response = toResponse(entity);
+                        if (STATUS_APROVADO.contains(entity.status)) {
+                            return publicarConfirmado(parcela, entity).map(ignored -> response);
+                        }
+                        return Uni.createFrom().item(response);
+                    });
         });
+    }
+
+    private Uni<Void> publicarConfirmado(Parcela parcela, ParcelaCartao entity) {
+        return pagamentoConfirmadoProducer.publicar(new PagamentoConfirmadoEvent(
+                parcela.id, entity.id, parcela.idPessoa, parcela.formaPagamento, entity.status,
+                entity.valor, entity.ipgTransactionId != null ? entity.ipgTransactionId : entity.orderId,
+                entity.dataTransacao));
     }
 
     @WithSession
@@ -98,6 +115,57 @@ public class ParcelaCartaoService {
         return repository.findById(id)
                 .onItem().ifNull().failWith(() -> new NotFoundException("Transacao de cartao nao encontrada"))
                 .map(this::toResponse);
+    }
+
+    /** Cancela (void) uma transacao aprovada do mesmo dia junto a Fiserv. */
+    @WithTransaction
+    public Uni<ParcelaCartaoResponse> cancelar(Long id) {
+        return repository.findById(id)
+                .onItem().ifNull().failWith(() -> new NotFoundException("Transacao de cartao nao encontrada"))
+                .onItem().transformToUni(entity -> executarSecundaria(entity, true));
+    }
+
+    /** Estorna (return) uma transacao ja liquidada junto a Fiserv. */
+    @WithTransaction
+    public Uni<ParcelaCartaoResponse> estornar(Long id) {
+        return repository.findById(id)
+                .onItem().ifNull().failWith(() -> new NotFoundException("Transacao de cartao nao encontrada"))
+                .onItem().transformToUni(entity -> executarSecundaria(entity, false));
+    }
+
+    private Uni<ParcelaCartaoResponse> executarSecundaria(ParcelaCartao entity, boolean cancelar) {
+        String acao = cancelar ? "cancelar" : "estornar";
+        if (entity.ipgTransactionId == null) {
+            return Uni.createFrom().failure(new BadRequestException("Transacao sem ipgTransactionId - nao e possivel " + acao));
+        }
+        if (Set.of("VOIDED", "CANCELADO", "RETURNED", "ESTORNADO").contains(entity.status)) {
+            return Uni.createFrom().failure(new BadRequestException("Transacao ja " + acao + "da"));
+        }
+        Uni<JsonNode> secundaria = cancelar
+                ? fiserv.cancelarPagamento(entity.ipgTransactionId)
+                : fiserv.estornarPagamento(entity.ipgTransactionId, entity.valor.toPlainString());
+        return secundaria.onItem().transformToUni(json -> {
+            entity.status = statusSecundario(json);
+            entity.mensagemRetorno = json.path("processor").path("responseMessage")
+                    .asText(json.path("error").path("message").asText(null));
+            entity.dataCancelamento = LocalDateTime.now();
+            return repository.persist(entity).onItem().transformToUni(v ->
+                    parcelaRepository.find("idParcelaCartao", entity.id).firstResult()
+                            .onItem().transformToUni(parcela -> {
+                                if (parcela != null) {
+                                    parcela.dataPagamento = null;
+                                    return parcelaRepository.persist(parcela).map(x -> toResponse(entity));
+                                }
+                                return Uni.createFrom().item(toResponse(entity));
+                            }));
+        });
+    }
+
+    private String statusSecundario(JsonNode json) {
+        String s = json.path("transactionResult").asText(null);
+        if (s == null) s = json.path("transactionStatus").asText(null);
+        if (s == null) s = json.path("transactionState").asText(null);
+        return s == null ? "DESCONHECIDO" : s.toUpperCase();
     }
 
     private String status(JsonNode json) {

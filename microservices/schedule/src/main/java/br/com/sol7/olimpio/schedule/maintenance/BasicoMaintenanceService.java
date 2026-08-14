@@ -1,6 +1,5 @@
 package br.com.sol7.olimpio.schedule.maintenance;
 
-import io.quarkus.reactive.datasource.ReactiveDataSource;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -8,15 +7,13 @@ import jakarta.inject.Inject;
 
 /**
  * Rotinas do dominio "basico" migradas de SchedulingService.tudo() e dos services chamados por
- * ele (ContaService, ConfiguracaoEmailService, LogradouroService). Acessa o banco
- * "olimpio_basico" diretamente pelo datasource reativo "basico-db" - sem nenhuma chamada REST
- * para o microsservico basico.
+ * ele (ContaService, ConfiguracaoEmailService, LogradouroService). Usa diretamente o pool
+ * padrão do banco compartilhado, sem conexões específicas por microsserviço.
  */
 @ApplicationScoped
 public class BasicoMaintenanceService {
 
     @Inject
-    @ReactiveDataSource("basico-db")
     Pool pool;
 
     // Migrado de SchedulingService.tudo() - atualiza a situacao (inadimplente) das contas

@@ -1,5 +1,5 @@
 @echo off
-REM Sobe o Postgres, o broker Kafka, os 11 microsservicos (cada um na sua porta), o gateway e o app React.
+REM Sobe o Postgres, o broker Kafka, os 16 microsservicos (cada um na sua porta), o gateway e o app React.
 REM Uso:
 REM   start-all.bat          # builda (se preciso) e sobe tudo, acompanhando os logs
 REM   start-all.bat -d       # sobe tudo em background
@@ -71,7 +71,7 @@ if %errorlevel% equ 0 (
 )
 
 echo ============================================
-echo  Subindo Postgres, Kafka, 11 microsservicos, gateway e app React...
+echo  Subindo Postgres, Kafka, 16 microsservicos, gateway e app React...
 echo ============================================
 
 if "%1"=="-d" (
@@ -89,13 +89,19 @@ if "%1"=="-d" (
     echo   App React:  http://localhost:3000
     echo   Gateway:    http://localhost:8080/api/^<modulo^>/...
     echo   Kafka:      http://localhost:9092
+    echo   Postgres:   http://localhost:5432
+    echo   aluno:      http://localhost:8092
+    echo   asaas:      http://localhost:8094
     echo   basico:     http://localhost:8081
     echo   central:    http://localhost:8083
     echo   comercial:  http://localhost:8084
+    echo   curriculo:  http://localhost:8095
     echo   educacao:   http://localhost:8085
     echo   estoque:    http://localhost:8086
     echo   financeiro: http://localhost:8087
     echo   login:      http://localhost:8090
+    echo   notificacoes: http://localhost:8082
+    echo   pagamento:  http://localhost:8096
     echo   professor:  http://localhost:8091
     echo   relatorios: http://localhost:8088
     echo   schedule:   http://localhost:8089
@@ -115,6 +121,7 @@ if "%1"=="-d" (
     echo   App React: http://localhost:3000
     echo   Gateway:   http://localhost:8080
     echo   Login:     http://localhost:8090
+    echo   Pagamento: http://localhost:8096
     echo.
     echo Pressione Ctrl+C para parar todos os containers.
 )

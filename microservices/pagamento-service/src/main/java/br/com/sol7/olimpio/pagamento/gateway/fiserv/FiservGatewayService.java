@@ -4,6 +4,7 @@ import br.com.sol7.olimpio.pagamento.gateway.fiserv.dto.ExpiryDate;
 import br.com.sol7.olimpio.pagamento.gateway.fiserv.dto.PaymentCard;
 import br.com.sol7.olimpio.pagamento.gateway.fiserv.dto.SaleRequest;
 import br.com.sol7.olimpio.pagamento.gateway.fiserv.dto.ScheduleRequest;
+import br.com.sol7.olimpio.pagamento.gateway.fiserv.dto.SecondaryTransactionRequest;
 import br.com.sol7.olimpio.pagamento.gateway.fiserv.dto.TokenizationRequest;
 import br.com.sol7.olimpio.pagamento.gateway.fiserv.dto.TransactionAmount;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -90,6 +91,17 @@ public class FiservGatewayService {
                 headers.timestamp(), headers.messageSignature());
     }
 
+    /** Cancela (void) uma transacao primaria do mesmo dia pelo ipgTransactionId. */
+    public Uni<JsonNode> cancelarPagamento(String transactionId) {
+        return post(client::executarTransacaoSecundaria, transactionId, SecondaryTransactionRequest.voidTotal());
+    }
+
+    /** Estorna (return) uma transacao primaria ja liquidada pelo ipgTransactionId. */
+    public Uni<JsonNode> estornarPagamento(String transactionId, String valor) {
+        return post(client::executarTransacaoSecundaria, transactionId,
+                SecondaryTransactionRequest.returnValor(valor, properties.currency()));
+    }
+
     // -----------------------------------------------------------------------------------------
 
     @FunctionalInterface
@@ -97,11 +109,27 @@ public class FiservGatewayService {
         Uni<JsonNode> call(String apiKey, String clientRequestId, String timestamp, String signature, String body);
     }
 
+    @FunctionalInterface
+    private interface PostWithId {
+        Uni<JsonNode> call(String transactionId, String apiKey, String clientRequestId, String timestamp, String signature, String body);
+    }
+
     private Uni<JsonNode> post(Post call, Object requestDto) {
         try {
             String body = mapper.writeValueAsString(requestDto);
             var headers = signer.headersFor(body);
             return call.call(headers.apiKey(), headers.clientRequestId(), headers.timestamp(), headers.messageSignature(), body);
+        } catch (Exception exception) {
+            return Uni.createFrom().failure(new IllegalStateException("Falha ao montar requisicao Fiserv", exception));
+        }
+    }
+
+    private Uni<JsonNode> post(PostWithId call, String transactionId, Object requestDto) {
+        try {
+            String body = mapper.writeValueAsString(requestDto);
+            var headers = signer.headersFor(body);
+            return call.call(transactionId, headers.apiKey(), headers.clientRequestId(),
+                    headers.timestamp(), headers.messageSignature(), body);
         } catch (Exception exception) {
             return Uni.createFrom().failure(new IllegalStateException("Falha ao montar requisicao Fiserv", exception));
         }

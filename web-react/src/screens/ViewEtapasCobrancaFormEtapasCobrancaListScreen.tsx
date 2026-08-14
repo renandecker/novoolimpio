@@ -1,62 +1,24 @@
-import { useState } from 'react';
 import { PermissionGate } from '../permissions';
-import { DataTable } from '../DataTable';
-import { MasterDetail } from '../MasterDetail';
-import {
-  USUARIO_SOURCE,
-  USUARIO_COLUMNS,
-  USUARIO_SEARCH,
-  PERFIL_SOURCE,
-  PERFIL_COLUMNS,
-  PERFIL_SEARCH,
-  RESULTADO_COBRANCA_SOURCE,
-  RESULTADO_COBRANCA_COLUMNS,
-  RESULTADO_COBRANCA_SEARCH,
-} from '../masterDetailSources';
-import type { ApiItem } from '../types';
+import { ModuleTabs } from '../ModuleTabs';
+import { ETAPAS_SOURCE, ETAPAS_COLUMNS, ETAPAS_SEARCH, PERFIL_SOURCE, PERFIL_COLUMNS, PERFIL_SEARCH, UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH, USUARIO_SOURCE, USUARIO_COLUMNS, USUARIO_SEARCH } from '../masterDetailSources';
 
 export default function ViewEtapasCobrancaFormEtapasCobrancaListScreen() {
-  const [usuarios, setUsuarios] = useState<ApiItem[]>([]);
-  const [perfils, setPerfils] = useState<ApiItem[]>([]);
-  const [resultados, setResultados] = useState<ApiItem[]>([]);
-
   return (
     <PermissionGate permission="READ">
       <main>
         <h1>Form Etapas Cobranca</h1>
-        <div className="div_form">
-          <div className="form-title">Etapas Cobrança</div>
-          <div className="table_form">
-            <MasterDetail
-              label="Usuário"
-              source={USUARIO_SOURCE}
-              valueKey="id"
-              searchKeys={USUARIO_SEARCH}
-              columns={USUARIO_COLUMNS}
-              items={usuarios}
-              onChange={setUsuarios}
-            />
-            <MasterDetail
-              label="Perfil"
-              source={PERFIL_SOURCE}
-              valueKey="id"
-              searchKeys={PERFIL_SEARCH}
-              columns={PERFIL_COLUMNS}
-              items={perfils}
-              onChange={setPerfils}
-            />
-            <MasterDetail
-              label="Resultado Ligação"
-              source={RESULTADO_COBRANCA_SOURCE}
-              valueKey="id"
-              searchKeys={RESULTADO_COBRANCA_SEARCH}
-              columns={RESULTADO_COBRANCA_COLUMNS}
-              items={resultados}
-              onChange={setResultados}
-            />
-          </div>
-        </div>
-        <DataTable path="/api/view/etapasCobranca/formEtapasCobranca" />
+        <ModuleTabs
+          tabs={[
+            { key: 'geral', label: 'Geral', path: '/api/view/etapasCobranca/formEtapasCobranca' },
+            { key: 'resultado', label: 'Resultado', empty: 'Conteúdo de Resultado.' },
+            { key: 'usuario', label: 'Usuário', masterDetail: { label: 'Usuário', source: USUARIO_SOURCE, valueKey: 'id', searchKeys: USUARIO_SEARCH, columns: USUARIO_COLUMNS } },
+            { key: 'perfil', label: 'Perfil', masterDetail: { label: 'Perfil', source: PERFIL_SOURCE, valueKey: 'id', searchKeys: PERFIL_SEARCH, columns: PERFIL_COLUMNS } },
+            { key: 'contratante', label: 'Contratante', empty: 'Conteúdo de Contratante.' },
+            { key: 'aluno', label: 'Aluno', empty: 'Conteúdo de Aluno.' },
+            { key: 'unidade', label: 'Unidade', masterDetail: { label: 'Unidade', source: UNIDADE_SOURCE, valueKey: 'id', searchKeys: UNIDADE_SEARCH, columns: UNIDADE_COLUMNS } },
+            { key: 'etapas', label: 'Etapas', masterDetail: { label: 'Etapas', source: ETAPAS_SOURCE, valueKey: 'id', searchKeys: ETAPAS_SEARCH, columns: ETAPAS_COLUMNS } },
+          ]}
+        />
       </main>
     </PermissionGate>
   );

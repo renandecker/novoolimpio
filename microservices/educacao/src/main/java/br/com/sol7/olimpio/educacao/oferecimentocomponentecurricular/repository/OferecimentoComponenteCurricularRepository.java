@@ -475,16 +475,24 @@ import io.smallrye.mutiny.Uni;
     }
 
 
-    // Feriados nacionais (bas_feriado) no intervalo - o legado filtrava por unidade/tipo de curso
-    // (basico), aqui limitamos a fl_nacional = true.
-    public static final String SQL_BUSCAR_FERIADOS_NACIONAIS =
-            "SELECT dt_feriado FROM bas_feriado WHERE fl_nacional = true AND dt_feriado between ?1 and ?2";
+    // Feriados (bas_feriado) no intervalo - inclui nacionais e os da unidade e do tipo de curso
+    // do oferecimento (join tables bas_feriado_unidade / bas_feriado_tipo_curso), como o
+    // FeriadoRepository.buscarFeriadoUnidade do legado (basico).
+    public static final String SQL_BUSCAR_FERIADOS =
+            "SELECT DISTINCT f.dt_feriado FROM bas_feriado f " +
+            "LEFT JOIN bas_feriado_unidade fu ON fu.id_feriado = f.id " +
+            "LEFT JOIN bas_feriado_tipo_curso ft ON ft.id_feriado = f.id " +
+            "WHERE f.dt_feriado between ?1 and ?2 " +
+            "AND (f.fl_nacional = true OR (?3 IS NOT NULL AND fu.id_unidade = ?3)) " +
+            "AND (COALESCE(f.fl_tipo_curso, false) = false OR (?4 IS NOT NULL AND ft.id_tipo_curso = ?4))";
 
-    public Uni<java.util.List<java.util.Date>> buscarFeriadosNacionais(Date inicio, Date fim) {
+    public Uni<java.util.List<java.util.Date>> buscarFeriados(Date inicio, Date fim, Long unidadeId, Long tipoCursoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_FERIADOS_NACIONAIS)
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_FERIADOS)
                     .setParameter(1, inicio)
                     .setParameter(2, fim)
+                    .setParameter(3, unidadeId)
+                    .setParameter(4, tipoCursoId)
                     .getResultList())
                 .map(list -> list.stream().map(java.util.Date.class::cast).toList());
     }
@@ -502,6 +510,149 @@ import io.smallrye.mutiny.Uni;
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_DIAS_AULA_POR_GRUPO, DiaAula.class)
                     .setParameter(1, grupoId)
                     .getResultList());
+    }
+
+    // Dias de aula de um oferecimento especifico (join table edc_oferecimento_dias_aula) -
+    // migrado de DiaAulaService.buscaDiasAulaOferecimentoList (legado).
+    public static final String SQL_BUSCAR_DIAS_AULA_POR_OFERECIMENTO =
+            "SELECT DISTINCT da.* FROM edc_oferecimento_dias_aula oda " +
+            "JOIN edc_dia_aula da ON da.id = oda.id_dia_aula " +
+            "WHERE oda.id_oferecimento_componente_curricular = ?1 ORDER BY da.id";
+
+    public Uni<java.util.List<DiaAula>> buscarDiasAulaPorOferecimento(Long oferecimentoComponenteCurricularId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_DIAS_AULA_POR_OFERECIMENTO, DiaAula.class)
+                    .setParameter(1, oferecimentoComponenteCurricularId)
+                    .getResultList());
+    }
+
+    // Migrado de OferecimentoComponenteCurricularService.atualizaDataOferecimento (legado) -
+    // recalcula data_inicio/data_fim a partir das ocorrencias ativas e o status.
+    public static final String SQL_ATUALIZA_DATA_OFERECIMENTO_DATAS =
+            "UPDATE edc_oferecimento_componente_curricular o SET " +
+            " data_inicio = (select oco.data from edc_ocorrencia_componente_curricular oco " +
+            "   where oco.id_oferecimento_componente_curricular = o.id and oco.fl_ativo = true order by oco.data limit 1), " +
+            " data_fim = (select oco.data from edc_ocorrencia_componente_curricular oco " +
+            "   where oco.id_oferecimento_componente_curricular = o.id and oco.fl_ativo = true order by oco.data desc limit 1) " +
+            " where o.id = ?1";
+
+    public static final String SQL_ATUALIZA_DATA_OFERECIMENTO_STATUS =
+            "UPDATE edc_oferecimento_componente_curricular o SET " +
+            " status = (case when o.data_inicio > current_date and vagas <= inscritos then 'LOTADA' " +
+            "   when o.data_inicio > current_date and vagas > inscritos then 'LIBERADA' " +
+            "   when o.data_inicio < current_date and o.data_fim > current_date then 'EM_ANDAMENTO' " +
+            "   when o.data_fim < current_date then 'FINALIZADA' " +
+            "   when o.data_cancelamento is not null then 'CANCELADA' else 'LIBERADA' end) " +
+            " where o.id = ?1";
+
+    public Uni<Integer> atualizaDataOferecimento(Long oferecimentoComponenteCurricularId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_ATUALIZA_DATA_OFERECIMENTO_DATAS)
+                    .setParameter(1, oferecimentoComponenteCurricularId).executeUpdate())
+                .chain(() -> io.quarkus.hibernate.reactive.panache.Panache.getSession())
+                .chain(session -> session.createNativeQuery(SQL_ATUALIZA_DATA_OFERECIMENTO_STATUS)
+                    .setParameter(1, oferecimentoComponenteCurricularId).executeUpdate());
+    }
+
+    // Migrado de OferecimentoComponenteCurricularService.atulizarStatosInscritosOferecimento
+    // (legado) - recalcula inscritos (contratos ativos) e o status.
+    public static final String SQL_ATUALIZA_INSCRITOS_OFERECIMENTO =
+            "UPDATE edc_oferecimento_componente_curricular o SET " +
+            " inscritos = COALESCE((select count(distinct(con.id)) " +
+            "   from edc_matricula mat inner join edc_contrato con on (con.id = mat.id_contrato) " +
+            "   inner join edc_oferecimento_componente_curricular off on (off.id = mat.id_oferecimento_componente_curricular) " +
+            "   where con.ativo = true and mat.data_cancelamento is null and con.desistente = false and o.id = off.id), 0) " +
+            " where o.id = ?1";
+
+    public static final String SQL_ATUALIZA_STATUS_INSCRITOS_OFERECIMENTO =
+            "UPDATE edc_oferecimento_componente_curricular ofere SET status = " +
+            " (case when ofere.data_fim < current_date then 'FINALIZADA' " +
+            "   when ofere.id_professor is null then 'PENDENTE' " +
+            "   when ofere.inscritos >= ofere.vagas and ofere.data_inicio > current_date and ofere.data_fim > current_date then 'LOTADA' " +
+            "   when ofere.inscritos < ofere.vagas and ofere.data_inicio > current_date and ofere.data_fim > current_date then 'LIBERADA' " +
+            "   when ofere.data_fim < current_date then 'FINALIZADA' " +
+            "   when ofere.data_inicio <= current_date and ofere.data_fim >= current_date then 'EM_ANDAMENTO' end) " +
+            " where ofere.id = ?1";
+
+    public Uni<Integer> atualizaStatosInscritosOferecimento(Long oferecimentoComponenteCurricularId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_ATUALIZA_INSCRITOS_OFERECIMENTO)
+                    .setParameter(1, oferecimentoComponenteCurricularId).executeUpdate())
+                .chain(() -> io.quarkus.hibernate.reactive.panache.Panache.getSession())
+                .chain(session -> session.createNativeQuery(SQL_ATUALIZA_STATUS_INSCRITOS_OFERECIMENTO)
+                    .setParameter(1, oferecimentoComponenteCurricularId).executeUpdate());
+    }
+
+    // Migrado de OferecimentoComponenteCurricularService.verificarDisciplina (legado, L431-458) -
+    // rotina de manutencao executada junto da replicacao automatica.
+    public static final String[] SQL_VERIFICAR_DISCIPLINA = {
+            "UPDATE edc_oferecimento_componente_curricular o SET status = 'CANCELADA' " +
+                    "where (o.status = 'PENDENTE' or o.status = 'LIBERADA') and o.inscritos = 0 " +
+                    "and (select count(oco) from edc_ocorrencia_componente_curricular oco where oco.fl_ativo = true " +
+                    "and oco.data < current_date and oco.id_oferecimento_componente_curricular = o.id) > " +
+                    "(select c.qtd_aulas_tolerancia_matricula from edc_criterio c where c.id_curriculo = o.id_curso order by c.id desc limit 1)",
+            "UPDATE edc_oferecimento_componente_curricular o SET status = 'EM_ANDAMENTO' " +
+                    "where current_date between o.data_inicio and o.data_fim and o.status != 'CANCELADA'",
+            "UPDATE edc_oferecimento_componente_curricular o SET status = 'FINALIZADA' " +
+                    "where o.data_fim < current_date and o.status != 'CANCELADA'",
+            "UPDATE edc_ocorrencia_componente_curricular oco SET fl_ativo = false " +
+                    "from edc_ocorrencia_componente_curricular oco2 " +
+                    "inner join edc_oferecimento_componente_curricular oo on (oco2.id_oferecimento_componente_curricular = oo.id) " +
+                    "where oco2.id = oco.id and oo.status = 'CANCELADA' and oco2.fl_ativo = true",
+            "UPDATE edc_matricula mat SET status = 'FINALIZADA' " +
+                    "from edc_oferecimento_componente_curricular ofe " +
+                    "where mat.id_oferecimento_componente_curricular = ofe.id and mat.status = 'CURSANDO' " +
+                    "and (ofe.status = 'FINALIZADA' or ofe.status = 'CONCLUIDA')",
+    };
+
+    public Uni<Integer> verificarDisciplina() {
+        return executeAll(SQL_VERIFICAR_DISCIPLINA);
+    }
+
+    // Migrado de OferecimentoComponenteCurricularService.verificarchamadaAssinada (legado, L501-512)
+    // - parte SQL da rotina (a geracao de PDF/chamadas nao foi portada, vive no dominio chamadaassinada).
+    public static final String[] SQL_VERIFICAR_CHAMADA_ASSINADA = {
+            "update edc_oferecimento_componente_curricular set qtde_sequencia = 1 where qtde_sequencia = 0",
+    };
+
+    public Uni<Integer> verificarchamadaAssinada() {
+        return executeAll(SQL_VERIFICAR_CHAMADA_ASSINADA);
+    }
+
+    private Uni<Integer> executeAll(String[] sqls) {
+        Uni<Integer> chain = Uni.createFrom().item(0);
+        for (String sql : sqls) {
+            chain = chain.chain(() -> io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                    .flatMap(session -> session.createNativeQuery(sql).executeUpdate()));
+        }
+        return chain;
+    }
+
+    // SQL de selecao da replicacao automatica, configurado em bas_config (chave
+    // SQL_REPLICAR_OFERECIMENTOS) - mesmo mecanismo do legado (SchedulingService.replicarOferecimentoAuto).
+    public static final String SQL_BUSCAR_CONFIG_REPLICACAO =
+            "SELECT valor FROM bas_config WHERE chave = 'SQL_REPLICAR_OFERECIMENTOS' LIMIT 1";
+
+    public Uni<String> buscarSqlConfigReplicacao() {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_CONFIG_REPLICACAO).getResultList())
+                .map(list -> list.isEmpty() || list.get(0) == null ? null : String.valueOf(list.get(0)));
+    }
+
+    // Fallback para o SQL do Config (o mesmo do legado quando a chave nao existe no banco).
+    public static final String SQL_REPLICAR_OFERECIMENTOS_PADRAO =
+            "SELECT o.id FROM edc_oferecimento_componente_curricular o " +
+            "WHERE o.data_inicio <= (cast(current_date as date) + (o.qtde_dias_replicar)) " +
+            "AND o.status != 'CANCELADA' AND o.fl_replicar = true " +
+            "AND NOT EXISTS (SELECT faju.id FROM bas_feriado_ajuste faju " +
+            "  INNER JOIN bas_feriado fer ON (fer.id = faju.id_feriado) " +
+            "  WHERE faju.fl_ativo = true AND fer.dt_feriado between o.data_inicio and o.data_fim) " +
+            "ORDER BY o.data_inicio LIMIT 50";
+
+    public Uni<java.util.List<Long>> listarIdsParaReplicacao(String sql) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql).getResultList())
+                .map(list -> list.stream().map(r -> ((Number) r).longValue()).toList());
     }
 
 }

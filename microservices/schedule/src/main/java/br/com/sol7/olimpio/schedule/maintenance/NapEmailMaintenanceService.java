@@ -1,6 +1,5 @@
 package br.com.sol7.olimpio.schedule.maintenance;
 
-import io.quarkus.reactive.datasource.ReactiveDataSource;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;
 import io.vertx.mutiny.sqlclient.Row;
@@ -30,7 +29,6 @@ public class NapEmailMaintenanceService {
     private static final Logger LOG = Logger.getLogger(NapEmailMaintenanceService.class);
 
     @Inject
-    @ReactiveDataSource("educacao-db")
     Pool pool;
 
     private static final String SQL_LISTAR_CONFIGS =

@@ -74,5 +74,14 @@ public interface FiservPaymentClient {
             @HeaderParam("Message-Signature") String messageSignature,
             String requestBodyJson);
 
-    /** DELETE nao mapeado neste MVP - ver README para evolucao (cancelamento/estorno via PATCH em /payments/{id}). */
+    /** POST /ipp/payments-gateway/v2/payments/{transaction-id} - transacao secundaria (void/return) da transacao primaria. */
+    @POST
+    @Path("/ipp/payments-gateway/v2/payments/{transactionId}")
+    Uni<JsonNode> executarTransacaoSecundaria(
+            @PathParam("transactionId") String transactionId,
+            @HeaderParam("Api-Key") String apiKey,
+            @HeaderParam("Client-Request-Id") String clientRequestId,
+            @HeaderParam("Timestamp") String timestamp,
+            @HeaderParam("Message-Signature") String messageSignature,
+            String requestBodyJson);
 }

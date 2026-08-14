@@ -56,7 +56,7 @@ public class PermissaoController {
     private Uni<Map<String, Set<String>>> resolveByUsername(String username) {
         if (username == null || username.isBlank()) return Uni.createFrom().item(Map.of());
         return loginRepository.findByUsername(username.trim().toLowerCase())
-                .onItem().transformToUni(login -> modulePermissions.resolve(login == null ? null : login.id));
+                .onItem().transformToUni(login -> modulePermissions.resolve(login == null ? null : login.idUsuario));
     }
 
     private String normalizar(String value) {

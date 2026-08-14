@@ -4,6 +4,8 @@ import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 import java.util.Date;
 
@@ -24,9 +26,11 @@ public class Vaga extends PanacheEntity {
     public String assuntoEmail;
 
     @Column(name = "data_inicio")
+    @Temporal(TemporalType.DATE)
     public Date dataInicio;
 
     @Column(name = "data_fim")
+    @Temporal(TemporalType.DATE)
     public Date dataFim;
 
     @Column(name = "vagas")
@@ -45,5 +49,6 @@ public class Vaga extends PanacheEntity {
     public Boolean flEmail;
 
     @Column(name = "data_envio")
+    @Temporal(TemporalType.TIMESTAMP)
     public Date dataEnvio;
 }

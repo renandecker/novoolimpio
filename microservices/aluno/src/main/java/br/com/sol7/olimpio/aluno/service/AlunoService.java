@@ -15,6 +15,7 @@ import br.com.sol7.olimpio.aluno.dto.AlunoDtos.OcorrenciaPresencaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.ParcelaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.ResumoFinanceiroResponse;
 import br.com.sol7.olimpio.aluno.repository.AlunoRepository;
+import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -33,6 +34,7 @@ import static java.math.BigDecimal.ONE;
 import static java.math.BigDecimal.ZERO;
 
 @ApplicationScoped
+@WithTransaction
 public class AlunoService {
 
     @Inject AlunoRepository repository;

@@ -6,11 +6,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "auditoria")
+@Table(name = "bas_auditoria")
 public class Auditoria extends PanacheEntity {
 
     @Column(name = "username")
     public String username;
     @Column(name = "action")
     public int action;
+    @Column(name = "`timestamp`")
+    public long timestamp;
 }

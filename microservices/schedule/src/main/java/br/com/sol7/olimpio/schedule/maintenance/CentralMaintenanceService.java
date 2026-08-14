@@ -1,6 +1,5 @@
 package br.com.sol7.olimpio.schedule.maintenance;
 
-import io.quarkus.reactive.datasource.ReactiveDataSource;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;
 import io.vertx.mutiny.sqlclient.Row;
@@ -11,21 +10,16 @@ import jakarta.inject.Inject;
 import java.util.List;
 
 /**
- * Rotina do dominio "central" migrada de SchedulingService.verificarOperacionalVencidos().
- * Acessa "olimpio_central" pelo datasource reativo "central-db" e "olimpio_comercial" (dono de
- * com_pacote/com_acao_de_campanha) por um pool separado - sao bancos diferentes, entao a
- * verificacao de "pacote vencido" precisa ser feita em duas etapas (nao da pra fazer um JOIN
- * direto entre bancos diferentes). Nenhuma chamada REST envolvida, so acesso direto aos bancos.
+ * Rotina migrada de SchedulingService.verificarOperacionalVencidos(). Usa o pool do banco
+ * compartilhado; as etapas são mantidas separadas somente para preservar a regra de negócio.
  */
 @ApplicationScoped
 public class CentralMaintenanceService {
 
     @Inject
-    @ReactiveDataSource("central-db")
     Pool centralPool;
 
     @Inject
-    @ReactiveDataSource("comercial-db")
     Pool comercialPool;
 
     // Etapa 1 (banco comercial): ids de pacote cuja campanha ja venceu.

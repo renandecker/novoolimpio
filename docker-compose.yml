@@ -25,9 +25,9 @@
 #   8090  login
 #   8091  professor
 #   8092  aluno
-#   8093  aula
 #   8094  asaas
 #   8095  curriculo (dominio Empresa/Curriculo cur_*)
+#   8096  pagamento (cartao Fiserv; publica olimpio.pagamento.confirmado no Kafka)
 #   3000  web-react (app React)
 
 name: olimpio
@@ -70,43 +70,45 @@ services:
     environment:
       PGPASSWORD: postgres
     volumes:
-      - ./docker/postgres/olimpio.sql:/backup/olimpio.sql:ro
-      - ./docker/postgres/olimpio.sql:V1__base.sql:ro
-      - ./docker/postgres/olimpio.sql:V2__login.sql:ro
-      - ./docker/postgres/olimpio.sql:V3__temas.sql:ro
-      - ./docker/postgres/olimpio.sql:V4__seed_admin_login.sql:ro
-      - ./docker/postgres/olimpio.sql:V5__garantir_admin_login.sql:ro
-      - ./docker/postgres/olimpio.sql:V6__login_session.sql:ro
-      - ./docker/postgres/olimpio.sql:V7__menu_react_e_perfil_admin.sql:ro
-      - ./docker/postgres/olimpio.sql:V8__asaas_menu.sql:ro
-      - ./docker/postgres/olimpio.sql:V8__provisionar_usuarios_legados.sql:ro
-      - ./docker/postgres/olimpio.sql:V9__acesso_aluno.sql:ro
-      - ./docker/postgres/olimpio.sql:V10__remove_whatsapp_telegram.sql:ro
-      - ./docker/postgres/olimpio.sql:V11__menu_recriar_calendario_academico.sql:ro
-      - ./docker/postgres/olimpio.sql:V12__remove_pagina_inicial.sql:ro
-      - ./docker/postgres/olimpio.sql:V13__corrigir_modulo_genero.sql:ro
-      - ./docker/postgres/olimpio.sql:V14__temas_posicao_e_menu.sql:ro
-      - ./docker/postgres/olimpio.sql:V15__foto_base64_usuario.sql:ro
-      - ./docker/postgres/olimpio.sql:V15__menu_lote_nap_cobranca.sql:ro
-      - ./docker/postgres/olimpio.sql:V17__fiserv.sql:ro
-      - ./docker/postgres/olimpio.sql:V18__financeiro_aluno.sql:ro
+      # Monta a pasta postgres inteira dentro de /backup
+      - ./docker/postgres:/backup:ro 
     entrypoint: ["/bin/sh", "-e", "-c"]
     command:
       - |
         echo "[restore] Aguardando o Postgres aceitar conexoes..."
         until pg_isready -h postgres -U postgres; do sleep 1; done
-        echo "[restore] Restaurando olimpio.sql no banco 'olimpio'..."
+        echo "[restore] Restaurando 001_olimpio.sql no banco 'olimpio'..."
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -c "DROP DATABASE IF EXISTS olimpio WITH (FORCE);"
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -c "CREATE DATABASE olimpio;"
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/olimpio.sql
-        echo "[restore] Aplicando schema do dominio Empresa/Curriculo (cur_*)..."
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/curriculo.sql
-        echo "[restore] Aplicando migracoes do microsservico notificacoes..."
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/002_create_notificacoes.sql
-        echo "[restore] Aplicando migracoes do microsservico aula..."
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/003_create_aula.sql
-        echo "[restore] Aplicando migracao do schedule (corrigirAvaliacoes)..."
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/004_add_avaliacao_fl_ativo.sql
+        echo "[restore] Aplicando migracoes..."
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/002_create_bas_login.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/003__temas.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/004__admin_login.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/005__admin_acesso_total.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/006__login_session.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/007__menu_react_e_perfil_admin.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/008__provisionar_usuarios_legados.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/008_1__asaas_menu.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/009__acesso_aluno.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0010__remove_whatsapp_telegram.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0011__menu_recriar_calendario_academico.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0012__remove_pagina_inicial.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0013__corrigir_modulo_genero.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0014__temas_posicao_e_menu.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0015__foto_base64_usuario.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0015_1__menu_lote_nap_cobranca.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0015_2__auditoria_menu.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0017__fiserv.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0018__financeiro_aluno.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0019__admin_acesso_total.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0020__perfil_admin_acesso_total.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0021__pagamento_fiserv.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0022__ajuste_pix.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0023__schema_aula.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0024__avaliacao_fl_ativo.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0025__asaas_base.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0026__schema_curriculo.sql
         echo "[restore] Restore concluido."
 
   # Broker Kafka (KRaft). O schedule publica os triggers de rotina e o basico
@@ -163,11 +165,14 @@ services:
     environment:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "8082:8082"
     depends_on:
       restore:
         condition: service_completed_successfully
+      kafka:
+        condition: service_healthy
       login:
         condition: service_healthy
 
@@ -293,6 +298,7 @@ services:
     environment:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
+      PROFESSOR_AULA_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
     ports:
       - "8091:8091"
     depends_on:
@@ -328,23 +334,9 @@ services:
     environment:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
+      ALUNO_AULA_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
     ports:
       - "8092:8092"
-    depends_on:
-      restore:
-        condition: service_completed_successfully
-      login:
-        condition: service_healthy
-
-  aula:
-    build: ./microservices/aula
-    container_name: olimpio-aula
-    restart: unless-stopped
-    environment:
-      <<: *service-env
-      DATABASE_URL: postgresql://postgres:5432/olimpio
-    ports:
-      - "8093:8093"
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -358,6 +350,7 @@ services:
     environment:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
+      CURRICULO_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
     ports:
       - "8095:8095"
     depends_on:
@@ -374,38 +367,42 @@ services:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
       ASAAS_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
-      ASAAS_API_KEY:  $aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjE1MjVlNjliLTRhMDItNDkzZC1hMTI0LTcyYjgzNjVmMDNhNDo6JGFhY2hfYmM0OGJjMTQtZDk1OC00MDVmLWEyYmUtODQxN2U1YTY4MTFk
+      ASAAS_API_KEY: $$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjE1MjVlNjliLTRhMDItNDkzZC1hMTI0LTcyYjgzNjVmMDNhNDo6JGFhY2hfYmM0OGJjMTQtZDk1OC00MDVmLWEyYmUtODQxN2U1YTY4MTFk
       ASAAS_BASE_URL: ${ASAAS_BASE_URL:-https://api-sandbox.asaas.com}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "8094:8094"
     depends_on:
       restore:
         condition: service_completed_successfully
+      kafka:
+        condition: service_healthy
       login:
         condition: service_healthy
         
-  fiserv:
-    build: ./microservices/fiserv
-    container_name: olimpio-fiserv
+  pagamento:
+    build: ./microservices/pagamento-service
+    container_name: olimpio-pagamento
     restart: unless-stopped
     environment:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
-      ASAAS_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
-      FISERV_BASE_URL: https://cert.emea.api.fiservapps.com
-      FISERV_API_KEY: RGkq5yaacHoXmvqJGqdHxziacmhhhSbXZlLOnxGVYMvQyfTy
-      FISERV_API_SECRET: w58j8cHQ05Y8kRAeWGj8jVVUzGTo4dl8wJQOVO7GwA8hP31fKsuVy4Jd8xxMgUBV
-      FISERV_STORE_ID: 
-      FISERV_CURRENCY: BRL
-      FISERV_TIMEOUT_MS: 15000
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      ASAAS_API_KEY: ${ASAAS_API_KEY:-$$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjE1MjVlNjliLTRhMDItNDkzZC1hMTI0LTcyYjgzNjVmMDNhNDo6JGFhY2hfYmM0OGJjMTQtZDk1OC00MDVmLWEyYmUtODQxN2U1YTY4MTFk}
+      ASAAS_BASE_URL: ${ASAAS_BASE_URL:-https://api-sandbox.asaas.com}
     ports:
       - "8096:8096"
     depends_on:
       restore:
         condition: service_completed_successfully
+      kafka:
+        condition: service_healthy
       login:
         condition: service_healthy
         
+  # fiserv: removido temporariamente - microsservico nao criado (sem ./microservices/fiserv). Reativar quando o modulo existir.
+  #       O modulo Fiserv (cartao + PIX) agora vive em pagamento-service (porta 8096).
+  
   gateway:
     build: ./docker/gateway
     container_name: olimpio-gateway
@@ -415,8 +412,6 @@ services:
     depends_on:
       - aluno
       - asaas
-      - fiserv
-      - aula
       - basico
       - central
       - comercial
@@ -426,6 +421,7 @@ services:
       - financeiro
       - login
       - notificacoes
+      - pagamento
       - professor
       - relatorios
       - schedule

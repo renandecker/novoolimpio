@@ -427,7 +427,15 @@ import IconesListScreen from './screens/IconesListScreen';
 import AsaasCobrancasListScreen from './screens/AsaasCobrancasListScreen';
 import AsaasClientesListScreen from './screens/AsaasClientesListScreen';
 import AsaasParcelasListScreen from './screens/AsaasParcelasListScreen';
-const q=new QueryClient();createRoot(document.getElementById('root')!).render(<QueryClientProvider client={q}><AuthProvider><PermissionBridge><BrowserRouter><Routes><Route path="/login" element={<LoginScreen/>}/><Route element={<ProtectedRoute/>}><Route path='*' element={<p>Selecione uma tela.</p>}/><Route path="/default" element={<DefaultListScreen/>}/><Route path="/view/tema/listTemas" element={<ViewTemaListTemasListScreen/>}/>
+import CurriculoVagaListScreen from './screens/CurriculoVagaListScreen';
+import CurriculoEmpresaListScreen from './screens/CurriculoEmpresaListScreen';
+import CurriculoEmpresaUnidadeListScreen from './screens/CurriculoEmpresaUnidadeListScreen';
+import CurriculoEntrevistaListScreen from './screens/CurriculoEntrevistaListScreen';
+import CurriculoTrabalhoListScreen from './screens/CurriculoTrabalhoListScreen';
+import CurriculoCampoListScreen from './screens/CurriculoCampoListScreen';
+import CurriculoConfiguracaoListScreen from './screens/CurriculoConfiguracaoListScreen';
+import AuditoriaScreen from './screens/AuditoriaScreen';
+const q=new QueryClient();createRoot(document.getElementById('root')!).render(<QueryClientProvider client={q}><AuthProvider><PermissionBridge><BrowserRouter><Routes><Route path="/login" element={<LoginScreen/>}/><Route element={<ProtectedRoute/>}><Route path='*' element={<p>Selecione uma tela.</p>}/><Route path="/default" element={<DefaultListScreen/>}/><Route path="/auditoria" element={<AuditoriaScreen/>}/><Route path="/view/tema/listTemas" element={<ViewTemaListTemasListScreen/>}/>
 <Route path="/view/acao/colunasAcao" element={<ViewAcaoColunasAcaoListScreen/>}/>
 <Route path="/aluno/dashboard" element={<AlunoDashboardScreen/>}/>
 <Route path="/aluno/boletim" element={<AlunoBoletimScreen/>}/>
@@ -853,4 +861,11 @@ const q=new QueryClient();createRoot(document.getElementById('root')!).render(<Q
 <Route path="/view/valorProduto/listValorProduto" element={<ViewValorProdutoListValorProdutoListScreen/>}/>
 <Route path="/asaas/cobrancas" element={<AsaasCobrancasListScreen/>}/>
 <Route path="/asaas/clientes" element={<AsaasClientesListScreen/>}/>
-<Route path="/asaas/parcelas" element={<AsaasParcelasListScreen/>}/></Route></Routes></BrowserRouter></PermissionBridge></AuthProvider></QueryClientProvider>);
+<Route path="/asaas/parcelas" element={<AsaasParcelasListScreen/>}/>
+<Route path="/curriculo/vaga" element={<CurriculoVagaListScreen/>}/>
+<Route path="/curriculo/empresa" element={<CurriculoEmpresaListScreen/>}/>
+<Route path="/curriculo/empresa-unidade" element={<CurriculoEmpresaUnidadeListScreen/>}/>
+<Route path="/curriculo/entrevista" element={<CurriculoEntrevistaListScreen/>}/>
+<Route path="/curriculo/curriculo-trabalho" element={<CurriculoTrabalhoListScreen/>}/>
+<Route path="/curriculo/curriculo-campo" element={<CurriculoCampoListScreen/>}/>
+<Route path="/curriculo/configuracao" element={<CurriculoConfiguracaoListScreen/>}/></Route></Routes></BrowserRouter></PermissionBridge></AuthProvider></QueryClientProvider>);

@@ -1,6 +1,5 @@
 package br.com.sol7.olimpio.schedule.maintenance;
 
-import io.quarkus.reactive.datasource.ReactiveDataSource;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -8,14 +7,13 @@ import jakarta.inject.Inject;
 
 /**
  * Rotinas do dominio "educacao" migradas de SchedulingService (TaxaCursoService,
- * DescontoCursoService, limpeza de cancelamento de contrato vencido). Acessa "olimpio_educacao"
- * diretamente pelo datasource reativo "educacao-db".
+ * DescontoCursoService e limpeza de cancelamento de contrato vencido). Todas as consultas usam
+ * o pool padrão do banco compartilhado.
  */
 @ApplicationScoped
 public class EducacaoMaintenanceService {
 
     @Inject
-    @ReactiveDataSource("educacao-db")
     Pool pool;
 
     // Migrado de TaxaCursoService.verificarCotaAuto()
@@ -66,11 +64,10 @@ public class EducacaoMaintenanceService {
         return pool.query(SQL_LIMPAR_CANCELAMENTO_CONTRATO_VENCIDO).execute().replaceWithVoid();
     }
 
-    // Migrado de SchedulingService.replicarOferecimentoAuto() (+ verificarDisciplina,
-    // verificarchamadaAssinada) - logica recursiva com muitas regras (datas de curso, feriados,
-    // vagas). Nao portada automaticamente, ver RELATORIO_SCHEDULE.md.
+    // A replicação exige as entidades e regras de negócio do domínio Educação. Ela não é
+    // executada por chamada HTTP pelo schedule; a rotina permanece exclusivamente no serviço
+    // dono da regra até ser extraída para uma biblioteca de domínio compartilhada.
     public Uni<Void> replicarOferecimentoAutomatico() {
-        // TODO: portar a regra de negocio (ver RELATORIO_SCHEDULE.md)
         return Uni.createFrom().voidItem();
     }
 

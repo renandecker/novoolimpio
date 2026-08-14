@@ -4,6 +4,8 @@ import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 import java.util.Date;
 
@@ -33,8 +35,10 @@ public class Entrevista extends PanacheEntity {
     public Boolean flResposta;
 
     @Column(name = "data_final")
+    @Temporal(TemporalType.DATE)
     public Date dataFinal;
 
     @Column(name = "data_aceite_aluno")
+    @Temporal(TemporalType.TIMESTAMP)
     public Date dataAceiteAluno;
 }

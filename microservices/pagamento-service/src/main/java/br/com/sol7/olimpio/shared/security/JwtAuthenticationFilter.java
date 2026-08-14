@@ -18,6 +18,7 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
         String path = context.getUriInfo().getPath();
         if (path.startsWith("/")) path = path.substring(1);
         if (path.equals("api/login/authenticate") || path.equals("api/login/bootstrap")) return;
+        if (path.equals("api/pagamento/webhook/fiserv")) return;
         String authorization = context.getHeaderString("Authorization");
         if (authorization == null || !authorization.startsWith("Bearer ")) { reject(context, Response.Status.UNAUTHORIZED, "Token Bearer ausente"); return; }
         try {

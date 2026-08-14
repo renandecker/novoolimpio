@@ -217,7 +217,14 @@ import java.util.Date;
     @POST
     @Path("/replicar-oferecimento-automatico")
     public Uni<Void> replicarOferecimentoAutomatico() {
-        return service.replicarOferecimentoAutomatico();
+        return service.replicarOferecimentoAutomatico().replaceWithVoid();
+    }
+
+
+    @POST
+    @Path("/{id}/replicar")
+    public Uni<Integer> replicarOferecimento(@PathParam("id") Long id) {
+        return service.replicarOferecimento(id);
     }
 
 }

@@ -33,4 +33,18 @@ public class ParcelaCartaoController {
     public Uni<ParcelaCartaoResponse> buscar(@PathParam("id") Long id) {
         return service.buscar(id);
     }
+
+    /** Cancela (void) uma transacao aprovada do mesmo dia junto a Fiserv. */
+    @POST
+    @Path("/{id}/cancelar")
+    public Uni<ParcelaCartaoResponse> cancelar(@PathParam("id") Long id) {
+        return service.cancelar(id);
+    }
+
+    /** Estorna (return) uma transacao ja liquidada junto a Fiserv. */
+    @POST
+    @Path("/{id}/estornar")
+    public Uni<ParcelaCartaoResponse> estornar(@PathParam("id") Long id) {
+        return service.estornar(id);
+    }
 }

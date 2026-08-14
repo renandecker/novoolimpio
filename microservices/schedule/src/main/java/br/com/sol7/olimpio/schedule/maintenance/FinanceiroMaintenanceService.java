@@ -1,6 +1,5 @@
 package br.com.sol7.olimpio.schedule.maintenance;
 
-import io.quarkus.reactive.datasource.ReactiveDataSource;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;
 import io.vertx.mutiny.sqlclient.Row;
@@ -20,7 +19,6 @@ import java.util.List;
 public class FinanceiroMaintenanceService {
 
     @Inject
-    @ReactiveDataSource("financeiro-db")
     Pool pool;
 
     // Migrado de FormaPagamentoService.verificarCotaAuto()

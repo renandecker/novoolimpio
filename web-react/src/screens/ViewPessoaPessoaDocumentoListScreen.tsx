@@ -1,1 +1,18 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewPessoaPessoaDocumentoListScreen(){return <PermissionGate permission="READ"><main><h1>Pessoa Documento</h1><DataTable path="/api/view/pessoa/pessoaDocumento"/></main></PermissionGate>}
+import { PermissionGate } from '../permissions';
+import { ModuleTabs } from '../ModuleTabs';
+
+export default function ViewPessoaPessoaDocumentoListScreen() {
+  return (
+    <PermissionGate permission="READ">
+      <main>
+        <h1>Pessoa Documento</h1>
+        <ModuleTabs
+          tabs={[
+            { key: 'aluno', label: 'Aluno', path: '/api/view/pessoa/pessoaDocumento' },
+            { key: 'responsavel', label: 'Responsável', empty: 'Conteúdo de Responsável.' },
+          ]}
+        />
+      </main>
+    </PermissionGate>
+  );
+}
