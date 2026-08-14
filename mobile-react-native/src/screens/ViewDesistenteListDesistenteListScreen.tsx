@@ -1,13 +1,30 @@
-import React from 'react';
-import { ModuleTabs } from '../ModuleTabs';
+import React, { useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ModuleList } from '../ModuleListScreen';
+import { CancelamentoModal } from '../CancelamentoModal';
 
+// listDesistente.xhtml (olimpio.zip) shows a plain list of alunos desistentes; the row actions
+// "Reativar", "Reparcelamento" and "Cancelamento de Contrato" each open their own modal — the
+// "Cancelamento" wizard is not a page-level tab.
 export default function ViewDesistenteListDesistenteListScreen() {
+  const [cancelamentoAberto, setCancelamentoAberto] = useState(false);
+
   return (
-    <ModuleTabs
-      tabs={[
-        { key: 'indivname', label: 'Regra', path: '/api/educacao/desistente' },
-        { key: 'cancelamento', label: 'Cancelamento', path: '/api/educacao/matricula' },
-      ]}
-    />
+    <View style={styles.container}>
+      <View style={styles.actionsRow}>
+        <Pressable style={styles.dangerBtn} onPress={() => setCancelamentoAberto(true)}>
+          <Text style={styles.btnText}>Cancelamento de Contrato</Text>
+        </Pressable>
+      </View>
+      <ModuleList path="/api/educacao/desistente" title="Desistente" />
+      <CancelamentoModal visible={cancelamentoAberto} onClose={() => setCancelamentoAberto(false)} />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  actionsRow: { paddingVertical: 8, paddingHorizontal: 8 },
+  dangerBtn: { backgroundColor: '#c0392b', borderRadius: 6, paddingVertical: 8, paddingHorizontal: 12, alignSelf: 'flex-start' },
+  btnText: { color: '#fff', fontWeight: '600' },
+});

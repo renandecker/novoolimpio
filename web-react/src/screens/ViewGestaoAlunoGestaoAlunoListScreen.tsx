@@ -4,7 +4,7 @@ import { PermissionGate } from '../permissions';
 import { DataTable, PAGE_SIZES } from '../DataTable';
 import { useModulePaged } from '../useModulePaged';
 import { AutoComplete, type AutoCompleteOption } from '../AutoComplete';
-import { Wizard } from '../Wizard';
+import { CancelamentoModal } from '../CancelamentoModal';
 import type { ApiItem } from '../types';
 
 const CONTRACT_COLUMNS = [
@@ -19,15 +19,21 @@ const CONTRACT_COLUMNS = [
   { key: 'valor_parcelas', label: 'Valor' },
 ];
 
-const ACTION_STEPS = [
-  { key: 'situacao', label: 'Situação Financeira', empty: 'Situação financeira do aluno.' },
-  { key: 'pessoais', label: 'Dados Pessoais', empty: 'Dados pessoais do aluno.' },
-  { key: 'historicoNap', label: 'Histórico NAP', empty: 'Histórico de atendimentos no NAP.' },
-  { key: 'historicoCobranca', label: 'Histórico Cobrança', empty: 'Histórico de cobranças do aluno.' },
-  { key: 'notas', label: 'Notas', empty: 'Notas do aluno.' },
-  { key: 'presencas', label: 'Presenças', empty: 'Presenças do aluno.' },
-  { key: 'historicoAluno', label: 'Histórico aluno', empty: 'Histórico completo do aluno.' },
-];
+// Each of these corresponds to an independent <p:commandButton ... onsuccess="PF('xxx').show()"/>
+// in gestaoAluno.xhtml (olimpio.zip): every action opens its own modal dialog, they are NOT
+// sequential steps of a wizard.
+const ACTIONS = [
+  { key: 'situacao', label: '$ Situação Financeira', className: 'btnblue', empty: 'Situação financeira do aluno.' },
+  { key: 'pessoais', label: 'Dados Pessoais Aluno', className: 'btngreen', empty: 'Dados pessoais do aluno.' },
+  { key: 'contratante', label: 'Dados Pessoais Contratante', className: 'btnstop', empty: 'Dados pessoais do contratante.' },
+  { key: 'historicoNap', label: 'Histórico NAP', className: 'btnsky', empty: 'Histórico de atendimentos no NAP.' },
+  { key: 'historicoCobranca', label: 'Histórico Cobrança', className: 'btnpurple', empty: 'Histórico de cobranças do aluno.' },
+  { key: 'notas', label: 'Notas', className: 'btnblack', empty: 'Notas do aluno.' },
+  { key: 'presencas', label: 'Presenças', className: 'btnbrown', empty: 'Presenças do aluno.' },
+  { key: 'historicoAluno', label: 'Histórico aluno', className: 'btnpink', empty: 'Histórico completo do aluno.' },
+] as const;
+
+type ActionKey = (typeof ACTIONS)[number]['key'];
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -43,6 +49,7 @@ function ContractsTable({ searchedIds }: { searchedIds: number[] | null }) {
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(PAGE_SIZES[0]);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [cancelandoId, setCancelandoId] = useState<string | null>(null);
 
   const q = useModulePaged('/api/view/contrato/colunasContrato', page, size);
   const all = q.data?.content ?? [];
@@ -52,7 +59,7 @@ function ContractsTable({ searchedIds }: { searchedIds: number[] | null }) {
   const items = searchedIds
     ? all.filter((item) => searchedIds.includes(Number(item.id)))
     : all;
-  const colSpan = 2 + CONTRACT_COLUMNS.length;
+  const colSpan = 3 + CONTRACT_COLUMNS.length;
 
   return (
     <div className="data-table">
@@ -67,6 +74,7 @@ function ContractsTable({ searchedIds }: { searchedIds: number[] | null }) {
               {CONTRACT_COLUMNS.map((column) => (
                 <th key={column.key}>{column.label}</th>
               ))}
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -100,6 +108,16 @@ function ContractsTable({ searchedIds }: { searchedIds: number[] | null }) {
                     {CONTRACT_COLUMNS.map((column) => (
                       <td key={column.key}>{renderValue(item, column.key)}</td>
                     ))}
+                    <td>
+                      <button
+                        type="button"
+                        className="btn-action btn-danger"
+                        title="Cancelamento de Contrato"
+                        onClick={() => setCancelandoId(rowKey)}
+                      >
+                        Cancelamento
+                      </button>
+                    </td>
                   </tr>
                 );
                 if (!isOpen) return [row];
@@ -151,6 +169,7 @@ function ContractsTable({ searchedIds }: { searchedIds: number[] | null }) {
           </tfoot>
         </table>
       )}
+      {cancelandoId && <CancelamentoModal onClose={() => setCancelandoId(null)} />}
     </div>
   );
 }
@@ -160,6 +179,7 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
   const [searchedIds, setSearchedIds] = useState<number[] | null>(null);
   const [searching, setSearching] = useState(false);
   const [erro, setErro] = useState('');
+  const [openAction, setOpenAction] = useState<ActionKey | null>(null);
 
   const fetchAlunos = async (query: string): Promise<AutoCompleteOption[]> => {
     const { data } = await api.get<{ id: number; nome: string }[]>(
@@ -187,6 +207,8 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
       .finally(() => setSearching(false));
   };
 
+  const activeAction = ACTIONS.find((action) => action.key === openAction) ?? null;
+
   return (
     <PermissionGate permission="READ">
       <main>
@@ -194,52 +216,65 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
         <section className="div_form">
           <div className="form-title">Gestão do Aluno</div>
           <div className="table_form">
-            <Wizard
-              steps={[
-                {
-                  key: 'busca',
-                  label: 'Buscar Aluno',
-                  content: (
-                    <>
-                      <div className="form-grid">
-                        <label className="form-field">
-                          <span className="form-label">Aluno</span>
-                          <AutoComplete
-                            placeholder="Digite ao menos 3 caracteres..."
-                            value={aluno}
-                            onChange={selecionarAluno}
-                            fetchOptions={fetchAlunos}
-                          />
-                        </label>
-                      </div>
-                      {erro && <p className="form-erro">{erro}</p>}
-                      <div className="modal-actions">
-                        <button
-                          type="button"
-                          className="btn-form-save"
-                          onClick={() => aluno && selecionarAluno(aluno)}
-                          disabled={searching || !aluno}
-                        >
-                          {searching ? 'Buscando...' : 'Buscar/Atualizar'}
-                        </button>
-                        <button type="button" className="btn-form-back" onClick={() => selecionarAluno(null)}>
-                          Limpar campo
-                        </button>
-                      </div>
-                    </>
-                  ),
-                },
-                ...ACTION_STEPS.map((step, index) => ({
-                  key: step.key,
-                  label: step.label,
-                  nextLabel: index === ACTION_STEPS.length - 1 ? 'Finalizar' : undefined,
-                  content: <p className="master-detail-empty">{step.empty}</p>,
-                })),
-              ]}
-            />
+            <div className="form-grid">
+              <label className="form-field">
+                <span className="form-label">Aluno</span>
+                <AutoComplete
+                  placeholder="Digite ao menos 3 caracteres..."
+                  value={aluno}
+                  onChange={selecionarAluno}
+                  fetchOptions={fetchAlunos}
+                />
+              </label>
+            </div>
+            {erro && <p className="form-erro">{erro}</p>}
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="btn-form-save"
+                onClick={() => aluno && selecionarAluno(aluno)}
+                disabled={searching || !aluno}
+              >
+                {searching ? 'Buscando...' : 'Buscar/Atualizar'}
+              </button>
+              <button type="button" className="btn-form-back" onClick={() => selecionarAluno(null)}>
+                Limpar campo
+              </button>
+            </div>
+
+            {/* Ações do aluno: cada botão abre seu próprio modal (p:dialog), assim como em
+                gestaoAluno.xhtml — não são etapas de um wizard. */}
+            {aluno && (
+              <div className="modal-actions" style={{ flexWrap: 'wrap', marginTop: '1rem' }}>
+                {ACTIONS.map((action) => (
+                  <button
+                    key={action.key}
+                    type="button"
+                    className={action.className}
+                    onClick={() => setOpenAction(action.key)}
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </section>
         <ContractsTable searchedIds={searchedIds} />
+
+        {activeAction && (
+          <div className="modal-overlay" onClick={() => setOpenAction(null)}>
+            <div className="modal form-modal" onClick={(event) => event.stopPropagation()}>
+              <h2>{activeAction.label}</h2>
+              <p className="master-detail-empty">{activeAction.empty}</p>
+              <div className="modal-actions form-footer">
+                <button type="button" className="btn-form-back" onClick={() => setOpenAction(null)}>
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </PermissionGate>
   );

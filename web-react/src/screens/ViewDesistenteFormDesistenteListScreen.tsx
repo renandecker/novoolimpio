@@ -1,7 +1,8 @@
 import { PermissionGate } from '../permissions';
 import { DataTable } from '../DataTable';
-import { Wizard } from '../Wizard';
 
+// formDesistente.xhtml (olimpio.zip) is a plain single-panel form (po:cabecalho + po:formButtons),
+// it does not use p:wizard — so no wizard/steps should be added here.
 export default function ViewDesistenteFormDesistenteListScreen() {
   return (
     <PermissionGate permission="READ">
@@ -10,31 +11,7 @@ export default function ViewDesistenteFormDesistenteListScreen() {
         <div className="div_form">
           <div className="form-title">Desistente</div>
           <div className="table_form">
-            <Wizard
-              steps={[
-                {
-                  key: 'dados',
-                  label: 'Dados',
-                  content: (
-                    <>
-                      <p className="master-detail-empty">Informações do aluno que está desistindo.</p>
-                      <DataTable path="/api/view/desistente/formDesistente" />
-                    </>
-                  ),
-                },
-                {
-                  key: 'motivo',
-                  label: 'Motivo',
-                  content: <p className="master-detail-empty">Motivo da desistência.</p>,
-                },
-                {
-                  key: 'confirmacao',
-                  label: 'Confirmação',
-                  nextLabel: 'Finalizar',
-                  content: <p className="master-detail-empty">Confirme a desistência do aluno.</p>,
-                },
-              ]}
-            />
+            <DataTable path="/api/view/desistente/formDesistente" />
           </div>
         </div>
       </main>

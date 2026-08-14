@@ -1,6 +1,7 @@
 import { PermissionGate } from '../permissions';
 import { DataTable, type DataTableColumn } from '../DataTable';
 import { Tabs } from '../Tabs';
+import { Wizard } from '../Wizard';
 
 const CONSULTOR_COLUMNS: DataTableColumn[] = [
   { key: 'usuarioId', label: 'Usuário' },
@@ -59,14 +60,35 @@ export default function ViewConsultorConsultorListScreen() {
               content: <DataTable path="/api/educacao/contrato" columns={CONTRATO_COLUMNS} />,
             },
             {
+              // consultor.xhtml (menu==2) embeds the same <p:wizard id="wizardmatricula"> used in
+              // formMatricula.xhtml — so it is rendered here as a wizard, not a flat data table.
               key: 'tabMatricula',
               label: 'Matrícula',
-              content: <DataTable path="/api/educacao/matricula" columns={MATRICULA_COLUMNS} />,
+              content: (
+                <Wizard
+                  steps={[
+                    { key: 'tabMatricula', label: 'Matrícula', content: <DataTable path="/api/educacao/matricula" columns={MATRICULA_COLUMNS} /> },
+                    { key: 'tabMaterial', label: 'Material', content: <DataTable path="/api/estoque/venda-produto" columns={MATERIAL_COLUMNS} /> },
+                    { key: 'tabValores', label: 'Valores', nextLabel: 'Salvar', content: <DataTable path="/api/educacao/valor-curso" columns={VALORES_COLUMNS} /> },
+                  ]}
+                />
+              ),
             },
             {
+              // consultor.xhtml (menu==4) embeds <p:wizard id="wizardrematricula">, mirroring
+              // formRematricula.xhtml.
               key: 'tabRematricula',
               label: 'Rematrícula',
-              content: <DataTable path="/api/educacao/matricula" columns={MATRICULA_COLUMNS} />,
+              content: (
+                <Wizard
+                  steps={[
+                    { key: 'tabContrato', label: 'Contrato', content: <DataTable path="/api/educacao/contrato" columns={CONTRATO_COLUMNS} /> },
+                    { key: 'tabMatricula', label: 'Matrícula/Rematrícula', content: <DataTable path="/api/educacao/matricula" columns={MATRICULA_COLUMNS} /> },
+                    { key: 'tabMaterial', label: 'Material', content: <DataTable path="/api/estoque/venda-produto" columns={MATERIAL_COLUMNS} /> },
+                    { key: 'tabValores', label: 'Valores', nextLabel: 'Salvar', content: <DataTable path="/api/educacao/valor-curso" columns={VALORES_COLUMNS} /> },
+                  ]}
+                />
+              ),
             },
             {
               key: 'tabMaterial',

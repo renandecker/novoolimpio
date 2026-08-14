@@ -1,6 +1,6 @@
 import { PermissionGate } from '../permissions';
 import { DataTable, type DataTableColumn } from '../DataTable';
-import { Tabs } from '../Tabs';
+import { Wizard } from '../Wizard';
 
 const CONTRATO_COLUMNS: DataTableColumn[] = [
   { key: 'pessoaId', label: 'Pessoa' },
@@ -44,30 +44,36 @@ export default function ViewMatriculaFormRematriculaListScreen() {
     <PermissionGate permission="READ">
       <main>
         <h1>Form Rematricula</h1>
-        <Tabs
-          tabs={[
-            {
-              key: 'tabContrato',
-              label: 'Contrato',
-              content: <DataTable path="/api/educacao/contrato" columns={CONTRATO_COLUMNS} />,
-            },
-            {
-              key: 'tabMatricula',
-              label: 'Matrícula/Rematrícula',
-              content: <DataTable path="/api/educacao/matricula" columns={MATRICULA_COLUMNS} />,
-            },
-            {
-              key: 'tabMaterial',
-              label: 'Material',
-              content: <DataTable path="/api/estoque/venda-produto" columns={MATERIAL_COLUMNS} />,
-            },
-            {
-              key: 'tabValores',
-              label: 'Valores',
-              content: <DataTable path="/api/educacao/valor-curso" columns={VALORES_COLUMNS} />,
-            },
-          ]}
-        />
+        <div className="div_form">
+          <div className="form-title">Rematrícula</div>
+          <div className="table_form">
+            <Wizard
+              steps={[
+                {
+                  key: 'tabContrato',
+                  label: 'Contrato',
+                  content: <DataTable path="/api/educacao/contrato" columns={CONTRATO_COLUMNS} />,
+                },
+                {
+                  key: 'tabMatricula',
+                  label: 'Matrícula/Rematrícula',
+                  content: <DataTable path="/api/educacao/matricula" columns={MATRICULA_COLUMNS} />,
+                },
+                {
+                  key: 'tabMaterial',
+                  label: 'Material',
+                  content: <DataTable path="/api/estoque/venda-produto" columns={MATERIAL_COLUMNS} />,
+                },
+                {
+                  key: 'tabValores',
+                  label: 'Valores',
+                  nextLabel: 'Salvar',
+                  content: <DataTable path="/api/educacao/valor-curso" columns={VALORES_COLUMNS} />,
+                },
+              ]}
+            />
+          </div>
+        </div>
       </main>
     </PermissionGate>
   );

@@ -1,14 +1,14 @@
 import React from 'react';
-import { ModuleTabs } from '../ModuleTabs';
+import { ModuleWizard } from '../ModuleWizard';
 
 export default function ViewMatriculaFormRematriculaListScreen() {
   return (
-    <ModuleTabs
-      tabs={[
+    <ModuleWizard
+      steps={[
         { key: 'tabContrato', label: 'Contrato', path: '/api/educacao/contrato' },
         { key: 'tabMatricula', label: 'Matrícula/Rematrícula', path: '/api/educacao/matricula' },
         { key: 'tabMaterial', label: 'Material', path: '/api/estoque/venda-produto' },
-        { key: 'tabValores', label: 'Valores', path: '/api/educacao/valor-curso' },
+        { key: 'tabValores', label: 'Valores', path: '/api/educacao/valor-curso', nextLabel: 'Salvar' },
       ]}
     />
   );

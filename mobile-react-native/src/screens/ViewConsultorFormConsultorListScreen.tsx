@@ -1,12 +1,8 @@
 import React from 'react';
-import { ModuleWizard } from '../ModuleWizard';
+import { ModuleList } from '../ModuleListScreen';
+
+// formConsultor.xhtml (olimpio.zip) is a single panel form (usuário + agenda + turnos de
+// trabalho, all master-detail attributes) — it does not use p:wizard, so no wizard/steps here.
 export default function ViewConsultorFormConsultorListScreen() {
-  return (
-    <ModuleWizard
-      steps={[
-        { key: 'contato', label: 'Contato', empty: 'Nome, e-mail, telefone e situação do consultor.' },
-        { key: 'acoes', label: 'Ações', path: '/api/view/consultor/formConsultor', empty: 'Ações vinculadas ao consultor.', nextLabel: 'Salvar' },
-      ]}
-    />
-  );
+  return <ModuleList path="/api/view/consultor/formConsultor" title="Consultor" />;
 }

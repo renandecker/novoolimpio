@@ -1,6 +1,6 @@
 import { PermissionGate } from '../permissions';
 import { DataTable, type DataTableColumn } from '../DataTable';
-import { Tabs } from '../Tabs';
+import { Wizard } from '../Wizard';
 
 const COMPONENTE_COLUMNS: DataTableColumn[] = [
   { key: 'descricao', label: 'Descrição' },
@@ -40,35 +40,41 @@ export default function ViewComponenteCurricularFormComponenteCurricularListScre
     <PermissionGate permission="READ">
       <main>
         <h1>Form Componente Curricular</h1>
-        <Tabs
-          tabs={[
-            {
-              key: 'componenteCurricular',
-              label: 'Componente Curricular',
-              content: <DataTable path="/api/educacao/componente-curricular" columns={COMPONENTE_COLUMNS} />,
-            },
-            {
-              key: 'habilidadeCompetencia',
-              label: 'Habilidade e Competência',
-              content: <DataTable path="/api/educacao/componente-curricular" columns={HABILIDADE_COLUMNS} />,
-            },
-            {
-              key: 'baseTecnologica',
-              label: 'Base Tecnológica',
-              content: <DataTable path="/api/educacao/base-tecnologica" columns={BASE_TECNOLOGICA_COLUMNS} />,
-            },
-            {
-              key: 'cronograma',
-              label: 'Plano de Aula',
-              content: <DataTable path="/api/educacao/cronograma-componente-curricular" columns={CRONOGRAMA_COLUMNS} />,
-            },
-            {
-              key: 'referenciaBibliografica',
-              label: 'Referência Bibliográfica',
-              content: <DataTable path="/api/educacao/referencia-bibliografica" columns={REFERENCIA_COLUMNS} />,
-            },
-          ]}
-        />
+        <div className="div_form">
+          <div className="form-title">Componente Curricular</div>
+          <div className="table_form">
+            <Wizard
+              steps={[
+                {
+                  key: 'componenteCurricular',
+                  label: 'Componente Curricular',
+                  content: <DataTable path="/api/educacao/componente-curricular" columns={COMPONENTE_COLUMNS} />,
+                },
+                {
+                  key: 'habilidadeCompetencia',
+                  label: 'Habilidade e Competência',
+                  content: <DataTable path="/api/educacao/componente-curricular" columns={HABILIDADE_COLUMNS} />,
+                },
+                {
+                  key: 'baseTecnologica',
+                  label: 'Base Tecnológica',
+                  content: <DataTable path="/api/educacao/base-tecnologica" columns={BASE_TECNOLOGICA_COLUMNS} />,
+                },
+                {
+                  key: 'cronograma',
+                  label: 'Plano de Aula',
+                  content: <DataTable path="/api/educacao/cronograma-componente-curricular" columns={CRONOGRAMA_COLUMNS} />,
+                },
+                {
+                  key: 'referenciaBibliografica',
+                  label: 'Referência Bibliográfica',
+                  nextLabel: 'Salvar',
+                  content: <DataTable path="/api/educacao/referencia-bibliografica" columns={REFERENCIA_COLUMNS} />,
+                },
+              ]}
+            />
+          </div>
+        </div>
       </main>
     </PermissionGate>
   );

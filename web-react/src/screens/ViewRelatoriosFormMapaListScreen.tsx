@@ -1,6 +1,6 @@
 import { PermissionGate } from '../permissions';
 import { DataTable, type DataTableColumn } from '../DataTable';
-import { Tabs } from '../Tabs';
+import { Wizard } from '../Wizard';
 
 const DEFINICAO_COLUMNS: DataTableColumn[] = [
   { key: 'nome', label: 'Nome' },
@@ -20,22 +20,28 @@ export default function ViewRelatoriosFormMapaListScreen() {
     <PermissionGate permission="READ">
       <main>
         <h1>Form Mapa</h1>
-        <Tabs
-          tabs={[
-            {
-              key: 'definicao',
-              label: 'Definição',
-              content: <DataTable path="/api/relatorios/mapa" columns={DEFINICAO_COLUMNS} />,
-            },
-            { key: 'permissao', label: 'Permissão', content: <p className="master-detail-empty">Usuários, unidades e perfis com acesso ao mapa.</p> },
-            { key: 'regras', label: 'Regras', content: <p className="master-detail-empty">Regras de marcação do mapa.</p> },
-            {
-              key: 'filtros',
-              label: 'Filtros',
-              content: <DataTable path="/api/relatorios/filtros" columns={FILTROS_COLUMNS} />,
-            },
-          ]}
-        />
+        <div className="div_form">
+          <div className="form-title">Mapa</div>
+          <div className="table_form">
+            <Wizard
+              steps={[
+                {
+                  key: 'definicao',
+                  label: 'Definição',
+                  content: <DataTable path="/api/relatorios/mapa" columns={DEFINICAO_COLUMNS} />,
+                },
+                { key: 'permissao', label: 'Permissão', content: <p className="master-detail-empty">Usuários, unidades e perfis com acesso ao mapa.</p> },
+                { key: 'regras', label: 'Regras', content: <p className="master-detail-empty">Regras de marcação do mapa.</p> },
+                {
+                  key: 'filtros',
+                  label: 'Filtros',
+                  nextLabel: 'Salvar',
+                  content: <DataTable path="/api/relatorios/filtros" columns={FILTROS_COLUMNS} />,
+                },
+              ]}
+            />
+          </div>
+        </div>
       </main>
     </PermissionGate>
   );
