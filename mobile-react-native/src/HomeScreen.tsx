@@ -14,6 +14,7 @@ import { useAuth } from './auth';
 import { countNaoLidas, subscribeNotificacoesStream } from './notificacoes';
 import { moduleIcon } from './moduleIcons';
 import { ReportButton } from './ReportButton';
+import { FavoritosButton } from './FavoritosButton';
 import type { Modulo } from './types';
 
 export type ParamList = { home: undefined; [route: string]: undefined | object };
@@ -195,6 +196,7 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<ParamL
         </View>
         <View style={styles.headerActions}>
           <ReportButton navigateTo={navigateTo} />
+          <FavoritosButton navigateTo={navigateTo} />
           <Pressable
             style={styles.bellButton}
             onPress={() => navigateTo('view/notificacao/listNotificacao')}

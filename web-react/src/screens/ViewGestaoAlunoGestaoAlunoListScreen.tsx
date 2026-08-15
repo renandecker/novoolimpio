@@ -1,10 +1,21 @@
 import { useState } from 'react';
 import { api } from '../api';
-import { PermissionGate } from '../permissions';
+import { PermissionGate, usePermissions, useCurrentOutcome } from '../permissions';
 import { DataTable, PAGE_SIZES } from '../DataTable';
 import { useModulePaged } from '../useModulePaged';
 import { AutoComplete, type AutoCompleteOption } from '../AutoComplete';
 import { CancelamentoModal } from '../CancelamentoModal';
+import { RowMenu, type RowMenuItem } from '../RowMenu';
+import {
+  SituacaoFinanceiraModal,
+  DadosPessoaisModal,
+  ContratanteModal,
+  HistoricoNapModal,
+  HistoricoCobrancaModal,
+  NotasModal,
+  PresencasModal,
+  HistoricoAlunoModal,
+} from '../GestaoAlunoModais';
 import type { ApiItem } from '../types';
 
 const CONTRACT_COLUMNS = [
@@ -23,14 +34,14 @@ const CONTRACT_COLUMNS = [
 // in gestaoAluno.xhtml (olimpio.zip): every action opens its own modal dialog, they are NOT
 // sequential steps of a wizard.
 const ACTIONS = [
-  { key: 'situacao', label: '$ Situação Financeira', className: 'btnblue', empty: 'Situação financeira do aluno.' },
-  { key: 'pessoais', label: 'Dados Pessoais Aluno', className: 'btngreen', empty: 'Dados pessoais do aluno.' },
-  { key: 'contratante', label: 'Dados Pessoais Contratante', className: 'btnstop', empty: 'Dados pessoais do contratante.' },
-  { key: 'historicoNap', label: 'Histórico NAP', className: 'btnsky', empty: 'Histórico de atendimentos no NAP.' },
-  { key: 'historicoCobranca', label: 'Histórico Cobrança', className: 'btnpurple', empty: 'Histórico de cobranças do aluno.' },
-  { key: 'notas', label: 'Notas', className: 'btnblack', empty: 'Notas do aluno.' },
-  { key: 'presencas', label: 'Presenças', className: 'btnbrown', empty: 'Presenças do aluno.' },
-  { key: 'historicoAluno', label: 'Histórico aluno', className: 'btnpink', empty: 'Histórico completo do aluno.' },
+  { key: 'situacao', label: '$ Situação Financeira', className: 'btnblue' },
+  { key: 'pessoais', label: 'Dados Pessoais Aluno', className: 'btngreen' },
+  { key: 'contratante', label: 'Dados Pessoais Contratante', className: 'btnstop' },
+  { key: 'historicoNap', label: 'Histórico NAP', className: 'btnsky' },
+  { key: 'historicoCobranca', label: 'Histórico Cobrança', className: 'btnpurple' },
+  { key: 'notas', label: 'Notas', className: 'btnblack' },
+  { key: 'presencas', label: 'Presenças', className: 'btnbrown' },
+  { key: 'historicoAluno', label: 'Histórico aluno', className: 'btnpink' },
 ] as const;
 
 type ActionKey = (typeof ACTIONS)[number]['key'];
@@ -50,6 +61,19 @@ function ContractsTable({ searchedIds }: { searchedIds: number[] | null }) {
   const [size, setSize] = useState(PAGE_SIZES[0]);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [cancelandoId, setCancelandoId] = useState<string | null>(null);
+  const [placeholder, setPlaceholder] = useState<{ titulo: string; texto: string } | null>(null);
+
+  const { can } = usePermissions();
+  const outcome = useCurrentOutcome();
+  // Espelha gestaoAlunoController.acessoRelatorios/acessoNovo/acessoEditar/acessoRemover em
+  // gestaoAluno.xhtml: cada coluna de ações só aparece se o usuário tiver a permissão correspondente.
+  const acessoRelatorios = can('EXECUTE', outcome);
+  const acessoNovo = can('CREATE', outcome);
+  const acessoEditar = can('UPDATE', outcome);
+  const acessoRemover = can('DELETE', outcome);
+  const showActionsColumn = acessoRelatorios || acessoNovo || acessoEditar || acessoRemover;
+
+  const abrirPlaceholder = (titulo: string, texto: string) => setPlaceholder({ titulo, texto });
 
   const q = useModulePaged('/api/view/contrato/colunasContrato', page, size);
   const all = q.data?.content ?? [];
@@ -59,7 +83,7 @@ function ContractsTable({ searchedIds }: { searchedIds: number[] | null }) {
   const items = searchedIds
     ? all.filter((item) => searchedIds.includes(Number(item.id)))
     : all;
-  const colSpan = 3 + CONTRACT_COLUMNS.length;
+  const colSpan = 2 + CONTRACT_COLUMNS.length + (showActionsColumn ? 1 : 0);
 
   return (
     <div className="data-table">
@@ -74,7 +98,7 @@ function ContractsTable({ searchedIds }: { searchedIds: number[] | null }) {
               {CONTRACT_COLUMNS.map((column) => (
                 <th key={column.key}>{column.label}</th>
               ))}
-              <th>Ações</th>
+              {showActionsColumn && <th className="col-actions">Ações</th>}
             </tr>
           </thead>
           <tbody>
@@ -92,6 +116,41 @@ function ContractsTable({ searchedIds }: { searchedIds: number[] | null }) {
               items.flatMap((item) => {
                 const rowKey = String(item.id);
                 const isOpen = Boolean(expanded[rowKey]);
+                const ativo = asRecord(item).ativo !== false;
+
+                // Relatórios: <p:menuButton icon="ui-icon-document" styleClass="btnyellow"> em gestaoAluno.xhtml.
+                const relatoriosItems: RowMenuItem[] = [
+                  { key: 'contrato', label: 'Contrato', className: 'btnstop', onSelect: () => abrirPlaceholder('Contrato', 'Imprimir contrato do aluno.') },
+                  { key: 'promissoria', label: 'Promissória', className: 'btnsky', onSelect: () => abrirPlaceholder('Promissória', 'Imprimir promissória do contrato.') },
+                  { key: 'reparcelamentoImpr', label: 'Reparcelamento', className: 'btngreen', onSelect: () => abrirPlaceholder('Reparcelamento', 'Imprimir segunda via de reparcelamento.') },
+                  { key: 'precancelamentos', label: 'Pré cancelamentos', className: 'btnorange', onSelect: () => abrirPlaceholder('Pré cancelamentos', 'Pré cancelamentos criados no contrato.') },
+                  { key: 'trocaTurma', label: 'Troca Turma', className: 'btnblue', onSelect: () => abrirPlaceholder('Troca Turma', 'Gerar segunda via troca de turma.') },
+                  { key: 'cancelamentoImpr', label: 'Cancelamento', className: 'btnred', disabled: ativo, onSelect: () => abrirPlaceholder('Cancelamento', 'Imprimir segunda via documento de cancelamento.') },
+                  { key: 'historicoEscolar', label: 'Histórico Escolar', className: 'btngrey', onSelect: () => abrirPlaceholder('Histórico Escolar', 'Gerar histórico escolar do aluno.') },
+                  { key: 'boletim', label: 'Imprimir boletim', className: 'btnpink', onSelect: () => abrirPlaceholder('Boletim', 'Imprimir boletim do aluno.') },
+                  { key: 'certificado', label: 'Imprimir certificado', className: 'btnpurple', onSelect: () => abrirPlaceholder('Certificado', 'Imprimir certificado do aluno.') },
+                  { key: 'presencasContrato', label: 'Presenças', className: 'btnbrown', onSelect: () => abrirPlaceholder('Presenças', 'Ver presenças deste contrato.') },
+                  { key: 'notasContrato', label: 'Notas', className: 'btnblack', onSelect: () => abrirPlaceholder('Notas', 'Ver notas deste contrato.') },
+                ];
+
+                // Novo: <p:menuButton icon="ui-icon-circle-plus" styleClass="btnstop">.
+                const novoItems: RowMenuItem[] = [
+                  { key: 'trocaUnidade', label: 'Troca Unidade Responsável', className: 'btnstop', onSelect: () => abrirPlaceholder('Troca de Unidade', 'Troca de unidade responsável do contrato.') },
+                  { key: 'documento', label: 'Documento', className: 'btngreen', onSelect: () => abrirPlaceholder('Documento', 'Documentos do aluno/responsável.') },
+                ];
+
+                // Editar: <p:menuButton icon="ui-icon-pencil" styleClass="btngreen">.
+                const editarItems: RowMenuItem[] = [
+                  { key: 'trocaResponsavel', label: 'Troca Responsável', className: 'btnsky', onSelect: () => abrirPlaceholder('Troca de Responsável', 'Troca do responsável pelo contrato.') },
+                  { key: 'reparcelamento', label: 'Reparcelamento', className: 'btngreen', onSelect: () => abrirPlaceholder('Reparcelamento', 'Reparcelamento do contrato.') },
+                  { key: 'trocarDeTurma', label: 'Trocar de turma', className: 'btnblue', onSelect: () => abrirPlaceholder('Trocar de turma', 'Trocar o aluno de turma.') },
+                ];
+
+                // Remover: <p:menuButton icon="ui-icon-trash" styleClass="btnred">.
+                const removerItems: RowMenuItem[] = [
+                  { key: 'cancelamento', label: 'Cancelamento', className: 'btnred', disabled: !ativo, onSelect: () => setCancelandoId(rowKey) },
+                ];
+
                 const row = (
                   <tr key={`${rowKey}-row`}>
                     <td className="col-toggle">
@@ -108,16 +167,24 @@ function ContractsTable({ searchedIds }: { searchedIds: number[] | null }) {
                     {CONTRACT_COLUMNS.map((column) => (
                       <td key={column.key}>{renderValue(item, column.key)}</td>
                     ))}
-                    <td>
-                      <button
-                        type="button"
-                        className="btn-action btn-danger"
-                        title="Cancelamento de Contrato"
-                        onClick={() => setCancelandoId(rowKey)}
-                      >
-                        Cancelamento
-                      </button>
-                    </td>
+                    {showActionsColumn && (
+                      <td className="col-actions">
+                        <div className="row-actions-menu">
+                          {acessoRelatorios && (
+                            <RowMenu icon={<i className="fa fa-file-text-o" />} className="btnyellow" title="Relatórios" items={relatoriosItems} />
+                          )}
+                          {acessoNovo && (
+                            <RowMenu icon={<i className="fa fa-plus-circle" />} className="btnstop" title="Novo" items={novoItems} />
+                          )}
+                          {acessoEditar && (
+                            <RowMenu icon={<i className="fa fa-pencil" />} className="btngreen" title="Editar" items={editarItems} />
+                          )}
+                          {acessoRemover && (
+                            <RowMenu icon={<i className="fa fa-trash" />} className="btnred" title="Remover" items={removerItems} />
+                          )}
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 );
                 if (!isOpen) return [row];
@@ -170,6 +237,19 @@ function ContractsTable({ searchedIds }: { searchedIds: number[] | null }) {
         </table>
       )}
       {cancelandoId && <CancelamentoModal onClose={() => setCancelandoId(null)} />}
+      {placeholder && (
+        <div className="modal-overlay" onClick={() => setPlaceholder(null)}>
+          <div className="modal form-modal" onClick={(event) => event.stopPropagation()}>
+            <h2>{placeholder.titulo}</h2>
+            <p className="master-detail-empty">{placeholder.texto}</p>
+            <div className="modal-actions form-footer">
+              <button type="button" className="btn-form-back" onClick={() => setPlaceholder(null)}>
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -262,18 +342,33 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
         </section>
         <ContractsTable searchedIds={searchedIds} />
 
-        {activeAction && (
-          <div className="modal-overlay" onClick={() => setOpenAction(null)}>
-            <div className="modal form-modal" onClick={(event) => event.stopPropagation()}>
-              <h2>{activeAction.label}</h2>
-              <p className="master-detail-empty">{activeAction.empty}</p>
-              <div className="modal-actions form-footer">
-                <button type="button" className="btn-form-back" onClick={() => setOpenAction(null)}>
-                  Fechar
-                </button>
-              </div>
-            </div>
-          </div>
+        {activeAction && aluno && (
+          <>
+            {activeAction.key === 'situacao' && (
+              <SituacaoFinanceiraModal pessoaId={aluno.id} onClose={() => setOpenAction(null)} />
+            )}
+            {activeAction.key === 'pessoais' && (
+              <DadosPessoaisModal pessoaId={aluno.id} onClose={() => setOpenAction(null)} />
+            )}
+            {activeAction.key === 'contratante' && (
+              <ContratanteModal pessoaId={aluno.id} onClose={() => setOpenAction(null)} />
+            )}
+            {activeAction.key === 'historicoNap' && (
+              <HistoricoNapModal pessoaId={aluno.id} onClose={() => setOpenAction(null)} />
+            )}
+            {activeAction.key === 'historicoCobranca' && (
+              <HistoricoCobrancaModal pessoaId={aluno.id} onClose={() => setOpenAction(null)} />
+            )}
+            {activeAction.key === 'notas' && (
+              <NotasModal pessoaId={aluno.id} onClose={() => setOpenAction(null)} />
+            )}
+            {activeAction.key === 'presencas' && (
+              <PresencasModal pessoaId={aluno.id} onClose={() => setOpenAction(null)} />
+            )}
+            {activeAction.key === 'historicoAluno' && (
+              <HistoricoAlunoModal pessoaId={aluno.id} onClose={() => setOpenAction(null)} />
+            )}
+          </>
         )}
       </main>
     </PermissionGate>

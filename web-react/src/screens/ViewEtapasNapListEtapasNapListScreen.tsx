@@ -5,7 +5,7 @@ export default function ViewEtapasNapListEtapasNapListScreen() {
   return (
     <PermissionGate permission="READ">
       <main>
-        <h1>List Etapas Nap</h1>
+        <h1>Etapas Nap</h1>
         <ModuleTabs
           tabs={[
             { key: 'mensagem', label: 'Mensagem', path: '/api/view/etapasNap/listEtapasNap' },

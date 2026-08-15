@@ -24,6 +24,7 @@ export interface DataTableColumn {
   key: string;
   label: string;
   options?: DataTableColumnOption[];
+  render?: (item: ApiItem) => ReactNode;
 }
 
 export interface ComboSource {
@@ -40,6 +41,7 @@ interface DataTableProps {
   outcome?: string;
   combos?: Record<string, ComboSource>;
   colorColumns?: string[];
+  maxMainColumns?: number;
   preview?: (values: Record<string, unknown>) => ReactNode;
 }
 
@@ -118,11 +120,12 @@ function ColorCell({ value }: { value: unknown }) {
   );
 }
 
-const renderCell = (item: ApiItem, key: string, colorColumns: Set<string>): ReactNode => {
-  if (colorColumns.has(key)) return <ColorCell value={asRecord(item)[key]} />;
-  const className = legacyClassName(asRecord(item)[key]);
-  if (className) return <span className={className}>{renderValue(item, key)}</span>;
-  return renderValue(item, key);
+const renderCell = (item: ApiItem, column: DataTableColumn, colorColumns: Set<string>): ReactNode => {
+  if (column.render) return column.render(item);
+  if (colorColumns.has(column.key)) return <ColorCell value={asRecord(item)[column.key]} />;
+  const className = legacyClassName(asRecord(item)[column.key]);
+  if (className) return <span className={className}>{renderValue(item, column.key)}</span>;
+  return renderValue(item, column.key);
 };
 
 const descriptionSiblings = (item: ApiItem): Set<string> => {
@@ -165,7 +168,7 @@ type ModalState =
   | { mode: 'delete'; item: ApiItem }
   | null;
 
-export function DataTable({ path, columns, params, module = 'basico', outcome, combos, colorColumns, preview }: DataTableProps) {
+export function DataTable({ path, columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview }: DataTableProps) {
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(PAGE_SIZES[0]);
   const [modal, setModal] = useState<ModalState>(null);
@@ -190,8 +193,9 @@ export function DataTable({ path, columns, params, module = 'basico', outcome, c
         ? deriveColumns(items[0])
         : [];
 
-  const mainCols = cols.slice(0, MAX_MAIN_COLUMNS);
-  const subCols = cols.slice(MAX_MAIN_COLUMNS);
+  const mainLimit = maxMainColumns ?? MAX_MAIN_COLUMNS;
+  const mainCols = cols.slice(0, mainLimit);
+  const subCols = cols.slice(mainLimit);
   const expandable = subCols.length > 0;
 
   const canCreate = can('CREATE', screenOutcome);
@@ -355,10 +359,10 @@ export function DataTable({ path, columns, params, module = 'basico', outcome, c
                     )}
                     <td className="col-id">{item.id}</td>
                     {mainCols.map((column) => (
-                      <td key={column.key}>{renderCell(item, column.key, colorColumnSet)}</td>
+                      <td key={column.key}>{renderCell(item, column, colorColumnSet)}</td>
                     ))}
                     {!expandable && subCols.map((column) => (
-                      <td key={column.key}>{renderCell(item, column.key, colorColumnSet)}</td>
+                      <td key={column.key}>{renderCell(item, column, colorColumnSet)}</td>
                     ))}
                     {actionColumns.map((column) => (
                       <td key={column.key} className="col-actions">{column.render(item)}</td>
@@ -374,7 +378,7 @@ export function DataTable({ path, columns, params, module = 'basico', outcome, c
                         {subCols.map((column) => (
                           <div key={column.key} className="sub-column">
                             <span className="sub-column-label">{column.label}</span>
-                            <span className="sub-column-value">{renderCell(item, column.key, colorColumnSet)}</span>
+                            <span className="sub-column-value">{renderCell(item, column, colorColumnSet)}</span>
                           </div>
                         ))}
                       </div>

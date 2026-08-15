@@ -4,6 +4,7 @@ import br.com.sol7.olimpio.login.permissao.entity.Modulo;
 import br.com.sol7.olimpio.login.permissao.entity.Perfil;
 import br.com.sol7.olimpio.login.permissao.entity.PerfilModulo;
 import br.com.sol7.olimpio.login.permissao.entity.UsuarioPerfil;
+import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -29,6 +30,7 @@ public class ModulePermissionService {
      * módulos). Quando o usuário não possui perfis vinculados (ex.: admin
      * bootstrap), o mapa é vazio e a aplicação usa as permissões globais do bas_login.
      */
+    @CacheResult(cacheName = "login-menu-cache")
     public Uni<Map<String, Set<String>>> resolve(Long idUsuario) {
         if (idUsuario == null) return Uni.createFrom().item(Map.of());
         return UsuarioPerfil.<UsuarioPerfil>find("usuarioId", idUsuario).list()
@@ -54,6 +56,7 @@ public class ModulePermissionService {
      * depende do nome do login: qualquer usuário vinculado a um perfil de
      * hierarquia ADMIN deve receber as permissões globais do administrador.
      */
+    @CacheResult(cacheName = "login-menu-cache")
     public Uni<Boolean> isAdministrator(Long idUsuario) {
         if (idUsuario == null) return Uni.createFrom().item(false);
         return UsuarioPerfil.<UsuarioPerfil>find("usuarioId", idUsuario).list()

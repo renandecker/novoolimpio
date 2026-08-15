@@ -6,7 +6,7 @@ export default function ViewTurmaListTurmaFinalizandoListScreen() {
   return (
     <PermissionGate permission="READ">
       <main>
-        <h1>List Turma Finalizando</h1>
+        <h1>Turma Finalizando</h1>
         <ModuleTabs
           tabs={[
             { key: 'matriculas', label: 'Matrículas', path: '/api/view/turma/listTurmaFinalizando' },

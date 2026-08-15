@@ -2,6 +2,7 @@ package br.com.sol7.olimpio.aluno.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public final class AlunoDtos {
@@ -69,4 +70,32 @@ public final class AlunoDtos {
             List<ParcelaResponse> parcelasMatricula,
             List<ParcelaResponse> parcelasProdutos,
             List<ParcelaResponse> parcelasCanceladas) {}
+
+    public record PessoaDadosResponse(
+            Long id, String nome, String cpf, String rg, LocalDate dataNascimento,
+            String email, String telefone, String celular) {}
+
+    public record LigacaoNapResponse(
+            Long id, LocalDateTime dataInicial, String telefone, String observacao,
+            String resultado, LocalDate retornoAula) {}
+
+    public record EmailNapResponse(
+            Long id, LocalDateTime data, String email, String assunto, String mensagem) {}
+
+    public record HistoricoNapResponse(
+            List<LigacaoNapResponse> ligacoes, List<EmailNapResponse> emails) {}
+
+    public record LigacaoCobrancaResponse(
+            Long id, LocalDateTime dataInicial, String telefone, String observacao,
+            String resultado, Integer qtdeParcela, BigDecimal valor) {}
+
+    public record EmailCobrancaResponse(
+            Long id, LocalDateTime data, String email, String assunto, String mensagem,
+            Integer qtdeParcela, BigDecimal valor) {}
+
+    public record HistoricoCobrancaResponse(
+            List<LigacaoCobrancaResponse> ligacoes, List<EmailCobrancaResponse> emails) {}
+
+    public record HistoricoAlunoResponse(
+            Long id, LocalDateTime dataRegistro, String descricao, Long usuarioId, String usuarioNome) {}
 }

@@ -1,1 +1,1 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewFiltrosListFiltrosListScreen(){return <PermissionGate permission="READ"><main><h1>List Filtros</h1><DataTable path="/api/view/filtros/listFiltros"/></main></PermissionGate>}
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewFiltrosListFiltrosListScreen(){return <PermissionGate permission="READ"><main><h1>Filtros</h1><DataTable path="/api/view/filtros/listFiltros"/></main></PermissionGate>}

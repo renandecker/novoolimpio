@@ -5,7 +5,7 @@ export default function ViewApresentacaoListApresentacaoListScreen() {
   return (
     <PermissionGate permission="READ">
       <main>
-        <h1>List Apresentacao</h1>
+        <h1>Apresentacao</h1>
         <ModuleTabs
           tabs={[
             { key: 'imagens', label: 'Imagens', path: '/api/view/apresentacao/listApresentacao' },

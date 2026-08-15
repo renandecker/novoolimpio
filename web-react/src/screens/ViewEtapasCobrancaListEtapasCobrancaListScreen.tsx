@@ -5,7 +5,7 @@ export default function ViewEtapasCobrancaListEtapasCobrancaListScreen() {
   return (
     <PermissionGate permission="READ">
       <main>
-        <h1>List Etapas Cobranca</h1>
+        <h1>Etapas Cobranca</h1>
         <ModuleTabs
           tabs={[
             { key: 'mensagem', label: 'Mensagem', path: '/api/view/etapasCobranca/listEtapasCobranca' },

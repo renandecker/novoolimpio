@@ -11,7 +11,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
   return (
     <PermissionGate permission="READ">
       <main>
-        <h1>List Oferecimento Curso</h1>
+        <h1>Oferecimento Curso</h1>
         <DataTable path="/api/educacao/oferecimento-curso" columns={COLUMNS} />
       </main>
     </PermissionGate>

@@ -14,6 +14,8 @@ export default function PermissionBridge({ children }: { children: ReactNode }) 
     queryFn: async () => (await api.get<ModulePermissions>('/api/permissao/me')).data,
     enabled: Boolean(session),
     retry: false,
+    staleTime: 24 * 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
   });
   const modulePermissions = serverQuery.data ?? jwtModulePermissions;
   return (

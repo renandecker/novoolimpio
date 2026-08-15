@@ -6,7 +6,7 @@ export default function ViewConfiguracaoListConfiguracaoParcelaListScreen() {
   return (
     <PermissionGate permission="READ">
       <main>
-        <h1>List Configuracao Parcela</h1>
+        <h1>Configuracao Parcela</h1>
         <ModuleTabs
           tabs={[
             { key: 'regras', label: 'Regras', path: '/api/view/configuracao/listConfiguracaoParcela' },

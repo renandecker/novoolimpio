@@ -6,6 +6,8 @@ import br.com.sol7.olimpio.educacao.componentecurricular.ComponenteCurricularRep
 import br.com.sol7.olimpio.educacao.criterio.Criterio;
 import br.com.sol7.olimpio.educacao.criterio.CriterioRepository;
 import br.com.sol7.olimpio.educacao.criterio.CriterioService;
+import br.com.sol7.olimpio.educacao.curso.Curso;
+import br.com.sol7.olimpio.educacao.curso.CursoRepository;
 import br.com.sol7.olimpio.educacao.curriculo.Curriculo;
 import br.com.sol7.olimpio.educacao.curriculo.CurriculoRepository;
 import br.com.sol7.olimpio.educacao.diaaula.DiaAula;
@@ -24,6 +26,8 @@ import br.com.sol7.olimpio.educacao.tempoaula.TempoAula;
 import br.com.sol7.olimpio.educacao.tempoaula.TempoAulaRepository;
 import br.com.sol7.olimpio.educacao.turnoeducacao.TurnoEducacao;
 import br.com.sol7.olimpio.educacao.turnoeducacao.TurnoEducacaoRepository;
+import br.com.sol7.olimpio.educacao.unidade.Unidade;
+import br.com.sol7.olimpio.educacao.unidade.UnidadeRepository;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -56,6 +60,8 @@ public class OferecimentoComponenteCurricularService {
     @Inject SalaRepository salaRepository;
     @Inject GrupoRepository grupoRepository;
     @Inject CurriculoRepository curriculoRepository;
+    @Inject UnidadeRepository unidadeRepository;
+    @Inject CursoRepository cursoRepository;
     @Inject CriterioRepository criterioRepository;
     @Inject CriterioService criterioService;
     @Inject OcorrenciaComponenteCurricularRepository ocorrenciaRepository;
@@ -137,32 +143,58 @@ public class OferecimentoComponenteCurricularService {
 
     private OferecimentoComponenteCurricularResponse toResponse(OferecimentoComponenteCurricular e, Refs refs) {
         return new OferecimentoComponenteCurricularResponse(e.id, e.unidadeId, e.periodoId, e.grupoId, e.salaId, e.dataInicio, e.dataFim, e.dataAlteracao, e.tipoReplicacao, e.tipoPlanejamento, e.diasReplicar, e.qtdeSequencia, e.qtdeEspacoCaderno, e.curriculoId, e.professorId, e.componenteCurricularId, e.componenteCurricularReplicarId, e.vagas, e.inscritos, e.dataCancelamento, e.registraFrequencia, e.possuiAvaliacao, e.replicar, e.replicado, e.detalharReplicacao, e.salas, e.status, e.sequencia,
-                null, // unidade_descricao - cross-service (basico)
+                refs != null ? unidadeDescricao(refs.unidade(e.unidadeId)) : null,
                 refs != null && e.periodoId != null ? refs.periodo(e.periodoId).descricao : null,
                 refs != null && e.grupoId != null ? refs.grupo(e.grupoId).nome : null,
                 refs != null && e.salaId != null ? refs.sala(e.salaId).descricao : null,
-                refs != null && e.curriculoId != null ? refs.curriculo(e.curriculoId).descricao : null,
+                refs != null ? curriculoDescricao(refs.curriculo(e.curriculoId), refs.curso(e.curriculoId)) : null,
                 refs != null && e.componenteCurricularId != null ? refs.componente(e.componenteCurricularId).descricao : null,
                 null); // professor_descricao - cross-service (professor)
+    }
+
+    private String unidadeDescricao(Unidade u) {
+        if (u == null) return null;
+        return firstNonBlank(u.sucinto, u.nomeFantasia, u.razaoSocial);
+    }
+
+    private String curriculoDescricao(Curriculo c, Curso curso) {
+        if (c == null) return null;
+        return firstNonBlank(curso != null ? curso.nome : null, c.descricao, c.sucinto, c.sigla);
+    }
+
+    private static String firstNonBlank(String... values) {
+        for (String v : values) {
+            if (v != null && !v.isBlank()) return v;
+        }
+        return null;
     }
 
     // ----- resolucao de descricoes (refs locais, sem N+1) -----
 
     private record Refs(List<Periodo> periodos, List<Grupo> grupos, List<Sala> salas,
-                        List<Curriculo> curriculos, List<ComponenteCurricular> componentes) {
+                        List<Curriculo> curriculos, List<ComponenteCurricular> componentes,
+                        List<Unidade> unidades, List<Curso> cursos) {
         Periodo periodo(Long id) { if (id == null) return null; return periodos.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null); }
         Grupo grupo(Long id) { if (id == null) return null; return grupos.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null); }
         Sala sala(Long id) { if (id == null) return null; return salas.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null); }
         Curriculo curriculo(Long id) { if (id == null) return null; return curriculos.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null); }
         ComponenteCurricular componente(Long id) { if (id == null) return null; return componentes.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null); }
+        Unidade unidade(Long id) { if (id == null) return null; return unidades.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null); }
+        Curso curso(Long id) {
+            if (id == null) return null;
+            Curriculo c = curriculo(id);
+            if (c == null || c.cursoId == null) return null;
+            return cursos.stream().filter(x -> x.id.equals(c.cursoId)).findFirst().orElse(null);
+        }
     }
 
     private Uni<Refs> loadRefs() {
         return Uni.combine().all()
                 .unis(periodoRepository.listAll(), grupoRepository.listAll(), salaRepository.listAll(),
-                        curriculoRepository.listAll(), componenteCurricularRepository.listAll())
+                        curriculoRepository.listAll(), componenteCurricularRepository.listAll(),
+                        unidadeRepository.listAll(), cursoRepository.listAll())
                 .asTuple()
-                .map(t -> new Refs(t.getItem1(), t.getItem2(), t.getItem3(), t.getItem4(), t.getItem5()));
+                .map(t -> new Refs(t.getItem1(), t.getItem2(), t.getItem3(), t.getItem4(), t.getItem5(), t.getItem6(), t.getItem7()));
     }
 
     private Uni<List<OferecimentoComponenteCurricularResponse>> withRefs(Uni<List<OferecimentoComponenteCurricular>> items) {

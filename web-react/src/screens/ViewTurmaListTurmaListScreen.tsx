@@ -130,7 +130,7 @@ export default function ViewTurmaListTurmaListScreen() {
   return (
     <PermissionGate permission="READ">
       <main>
-        <h1>List Turma</h1>
+        <h1>Turma</h1>
 
         <div className="div_form">
           <div className="form-title">Filtros</div>

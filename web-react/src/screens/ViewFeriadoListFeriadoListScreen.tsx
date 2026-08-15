@@ -5,7 +5,7 @@ export default function ViewFeriadoListFeriadoListScreen() {
   return (
     <PermissionGate permission="READ">
       <main>
-        <h1>List Feriado</h1>
+        <h1>Feriado</h1>
         <ModuleTabs
           tabs={[
             { key: 'tabela', label: 'Tabela', path: '/api/view/feriado/listFeriado' },

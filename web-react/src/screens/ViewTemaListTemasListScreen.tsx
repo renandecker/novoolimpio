@@ -54,7 +54,7 @@ export default function ViewTemaListTemasListScreen() {
   return (
     <PermissionGate permission="READ">
       <main>
-        <h1>List Temas</h1>
+        <h1>Temas</h1>
         <DataTable
           path="/api/login/temas"
           module="login"

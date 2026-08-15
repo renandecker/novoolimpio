@@ -5,7 +5,7 @@ export default function ViewResultadoLigacaoNapListResultadoLigacaoNapListScreen
   return (
     <PermissionGate permission="READ">
       <main>
-        <h1>List Resultado Ligacao Nap</h1>
+        <h1>Resultado Ligacao Nap</h1>
         <ModuleTabs
           tabs={[
             { key: 'historicoDeLigacoes', label: 'Histórico de Ligações', path: '/api/view/resultadoLigacaoNap/listResultadoLigacaoNap' },

@@ -21,15 +21,37 @@ type Auth = {
 };
 
 const KEY = 'olimpio.session';
+const MENU_KEY = 'olimpio.menu';
+const MENU_TTL = 24 * 60 * 60 * 1000;
+type MenuCache = { at: number; modules: Modulo[] };
 const Context = createContext<Auth | undefined>(undefined);
 
+async function readMenuCache(): Promise<MenuCache | null> {
+  try {
+    const raw = await AsyncStorage.getItem(MENU_KEY);
+    return raw ? (JSON.parse(raw) as MenuCache) : null;
+  } catch {
+    return null;
+  }
+}
+
 const fetchModules = async (accessToken: string): Promise<Modulo[]> => {
+  const cached = await readMenuCache();
+  if (cached && Array.isArray(cached.modules) && Date.now() - cached.at < MENU_TTL) {
+    return cached.modules;
+  }
   try {
     const { data } = await api.get<Modulo[]>('/api/basico/modulo/menu', {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
-    return Array.isArray(data) ? data : [];
+    const modules = Array.isArray(data) ? data : [];
+    try {
+      await AsyncStorage.setItem(MENU_KEY, JSON.stringify({ at: Date.now(), modules }));
+    } catch {
+    }
+    return modules;
   } catch {
+    if (cached && Array.isArray(cached.modules)) return cached.modules;
     return [];
   }
 };

@@ -5,7 +5,7 @@ export default function ViewValorCursoListValorCursoListScreen() {
   return (
     <PermissionGate permission="READ">
       <main>
-        <h1>List Valor Curso</h1>
+        <h1>Valor Curso</h1>
         <ModuleTabs
           tabs={[
             { key: 'formaPagamento', label: 'Forma Pagamento', path: '/api/view/valorCurso/listValorCurso' },

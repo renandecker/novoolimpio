@@ -1,12 +1,16 @@
 package br.com.sol7.olimpio.educacao.oferecimentocurso;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.educacao.curso.Curso;
+import br.com.sol7.olimpio.educacao.curso.CursoRepository;
 import br.com.sol7.olimpio.educacao.curriculo.Curriculo;
 import br.com.sol7.olimpio.educacao.curriculo.CurriculoRepository;
 import br.com.sol7.olimpio.educacao.grupo.Grupo;
 import br.com.sol7.olimpio.educacao.grupo.GrupoRepository;
 import br.com.sol7.olimpio.educacao.oferecimentocomponentecurricular.OferecimentoComponenteCurricularResponse;
 import br.com.sol7.olimpio.educacao.oferecimentocomponentecurricular.OferecimentoComponenteCurricularService;
+import br.com.sol7.olimpio.educacao.unidade.Unidade;
+import br.com.sol7.olimpio.educacao.unidade.UnidadeRepository;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -21,6 +25,8 @@ public class OferecimentoCursoService {
 
     @Inject GrupoRepository grupoRepository;
     @Inject CurriculoRepository curriculoRepository;
+    @Inject UnidadeRepository unidadeRepository;
+    @Inject CursoRepository cursoRepository;
     @Inject OferecimentoComponenteCurricularService oferecimentoService;
 
     public Uni<List<OferecimentoCursoResponse>> list() {
@@ -122,15 +128,28 @@ public class OferecimentoCursoService {
 
     // ----- resolucao de descricoes (refs locais, sem N+1) -----
 
-    private record Refs(List<Curriculo> curriculos) {
+    private record Refs(List<Curriculo> curriculos, List<Unidade> unidades, List<Curso> cursos) {
         Curriculo curriculo(Long id) {
             if (id == null) return null;
             return curriculos.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null);
         }
+
+        Unidade unidade(Long id) {
+            if (id == null) return null;
+            return unidades.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null);
+        }
+
+        Curso curso(Long id) {
+            if (id == null) return null;
+            return cursos.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null);
+        }
     }
 
     private Uni<Refs> loadRefs() {
-        return curriculoRepository.listAll().map(Refs::new);
+        return Uni.combine().all()
+                .unis(curriculoRepository.listAll(), unidadeRepository.listAll(), cursoRepository.listAll())
+                .asTuple()
+                .map(t -> new Refs(t.getItem1(), t.getItem2(), t.getItem3()));
     }
 
     private Uni<List<OferecimentoCursoResponse>> withRefs(Uni<List<Grupo>> items) {
@@ -138,8 +157,30 @@ public class OferecimentoCursoService {
     }
 
     private OferecimentoCursoResponse toResponse(Grupo e, Refs refs) {
+        if (refs == null) {
+            return new OferecimentoCursoResponse(e.id, e.nome, e.unidadeId, e.curriculoId, null, null);
+        }
+        Curriculo curriculo = refs.curriculo(e.curriculoId);
+        Curso curso = refs.curso(curriculo != null ? curriculo.cursoId : null);
         return new OferecimentoCursoResponse(e.id, e.nome, e.unidadeId, e.curriculoId,
-                null, // unidade_descricao - cross-service (basico)
-                refs != null && e.curriculoId != null ? refs.curriculo(e.curriculoId).descricao : null);
+                unidadeDescricao(refs.unidade(e.unidadeId)),
+                curriculoDescricao(curriculo, curso));
+    }
+
+    private String unidadeDescricao(Unidade u) {
+        if (u == null) return null;
+        return firstNonBlank(u.sucinto, u.nomeFantasia, u.razaoSocial);
+    }
+
+    private String curriculoDescricao(Curriculo c, Curso curso) {
+        if (c == null) return null;
+        return firstNonBlank(curso != null ? curso.nome : null, c.descricao, c.sucinto, c.sigla);
+    }
+
+    private static String firstNonBlank(String... values) {
+        for (String v : values) {
+            if (v != null && !v.isBlank()) return v;
+        }
+        return null;
     }
 }

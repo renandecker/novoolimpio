@@ -5,7 +5,7 @@ export default function ViewMetaListMetaDinamicaListScreen() {
   return (
     <PermissionGate permission="READ">
       <main>
-        <h1>List Meta Dinamica</h1>
+        <h1>Meta Dinamica</h1>
         <ModuleTabs
           tabs={[
             { key: 'meta', label: 'Meta', path: '/api/view/meta/listMetaDinamica' },

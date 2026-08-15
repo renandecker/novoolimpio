@@ -8,6 +8,34 @@ type SessionCore = Pick<Session, 'accessToken' | 'expiresAt' | 'username' | 'per
 type Auth = { session: Session | null; signIn: (username: string, password: string, bootstrap?: boolean) => Promise<void>; signOut: () => Promise<void>; refreshSession: (next: SessionCore) => void };
 export type { Session };
 const KEY = 'olimpio.session';
+const MENU_KEY = 'olimpio.menu';
+const MENU_TTL = 24 * 60 * 60 * 1000;
+type MenuCache = { at: number; modules: Module[] };
+
+function readMenuCache(): MenuCache | null {
+  try {
+    const raw = localStorage.getItem(MENU_KEY);
+    return raw ? (JSON.parse(raw) as MenuCache) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchModules(accessToken: string): Promise<Module[]> {
+  const cached = readMenuCache();
+  if (cached && Date.now() - cached.at < MENU_TTL) return cached.modules;
+  try {
+    const { data } = await api.get<Module[]>('/api/basico/modulo/menu', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    localStorage.setItem(MENU_KEY, JSON.stringify({ at: Date.now(), modules: data }));
+    return data;
+  } catch {
+    if (cached) return cached.modules;
+    return [];
+  }
+}
+
 const AuthContext = createContext<Auth | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(() => {
@@ -24,14 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     async signIn(username, password, bootstrap = false) {
       const { data } = await api.post<Session>(`/api/login/${bootstrap ? 'bootstrap' : 'authenticate'}`, { username, password });
-      try {
-        const { data: menuData } = await api.get<Module[]>('/api/basico/modulo/menu', {
-          headers: { Authorization: `Bearer ${data.accessToken}` },
-        });
-        data.modules = menuData;
-      } catch {
-        data.modules = [];
-      }
+      data.modules = await fetchModules(data.accessToken);
       localStorage.setItem(KEY, JSON.stringify(data)); setSession(data);
     },
     async signOut() {

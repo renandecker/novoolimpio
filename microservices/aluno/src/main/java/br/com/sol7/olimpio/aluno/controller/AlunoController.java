@@ -5,7 +5,11 @@ import br.com.sol7.olimpio.aluno.dto.AlunoDtos.BoletimResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.DashboardResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.FinanceiroResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.FrequenciaResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.HistoricoAlunoResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.HistoricoCobrancaResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.HistoricoNapResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.MatriculaResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.PessoaDadosResponse;
 import br.com.sol7.olimpio.aluno.service.AlunoService;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
@@ -66,6 +70,57 @@ public class AlunoController {
     @Path("/financeiro")
     public Uni<FinanceiroResponse> financeiro(@Context ContainerRequestContext ctx) {
         return service.financeiro(username(ctx));
+    }
+
+    // Endpoints de gestão do aluno (administrativo): dados por pessoaId, usados pelas modais da
+    // tela "Gestão do Aluno" (espelham os dialogs de gestaoAluno.xhtml).
+
+    @GET
+    @Path("/gestao/{pessoaId}/perfil")
+    public Uni<PessoaDadosResponse> gestaoPerfil(@PathParam("pessoaId") Long pessoaId) {
+        return service.pessoaDados(pessoaId);
+    }
+
+    @GET
+    @Path("/gestao/{pessoaId}/contratantes")
+    public Uni<List<PessoaDadosResponse>> gestaoContratantes(@PathParam("pessoaId") Long pessoaId) {
+        return service.responsaveis(pessoaId);
+    }
+
+    @GET
+    @Path("/gestao/{pessoaId}/financeiro")
+    public Uni<FinanceiroResponse> gestaoFinanceiro(@PathParam("pessoaId") Long pessoaId) {
+        return service.financeiroPorPessoa(pessoaId);
+    }
+
+    @GET
+    @Path("/gestao/{pessoaId}/historico-nap")
+    public Uni<HistoricoNapResponse> gestaoHistoricoNap(@PathParam("pessoaId") Long pessoaId) {
+        return service.historicoNap(pessoaId);
+    }
+
+    @GET
+    @Path("/gestao/{pessoaId}/historico-cobranca")
+    public Uni<HistoricoCobrancaResponse> gestaoHistoricoCobranca(@PathParam("pessoaId") Long pessoaId) {
+        return service.historicoCobranca(pessoaId);
+    }
+
+    @GET
+    @Path("/gestao/{pessoaId}/boletim")
+    public Uni<List<BoletimResponse>> gestaoBoletim(@PathParam("pessoaId") Long pessoaId) {
+        return service.boletimCompletoPorPessoa(pessoaId);
+    }
+
+    @GET
+    @Path("/gestao/{pessoaId}/frequencias")
+    public Uni<List<FrequenciaResponse>> gestaoFrequencias(@PathParam("pessoaId") Long pessoaId) {
+        return service.frequenciasPorPessoa(pessoaId);
+    }
+
+    @GET
+    @Path("/gestao/{pessoaId}/historico-aluno")
+    public Uni<List<HistoricoAlunoResponse>> gestaoHistoricoAluno(@PathParam("pessoaId") Long pessoaId) {
+        return service.historicoAluno(pessoaId);
     }
 
     private String username(ContainerRequestContext ctx) {

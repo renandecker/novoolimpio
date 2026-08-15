@@ -1,1 +1,1 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewPerfilListPerfilListScreen(){return <PermissionGate permission="READ"><main><h1>List Perfil</h1><DataTable path="/api/view/perfil/listPerfil"/></main></PermissionGate>}
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewPerfilListPerfilListScreen(){return <PermissionGate permission="READ"><main><h1>Perfil</h1><DataTable path="/api/view/perfil/listPerfil"/></main></PermissionGate>}

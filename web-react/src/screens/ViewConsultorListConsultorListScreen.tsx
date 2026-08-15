@@ -6,7 +6,7 @@ export default function ViewConsultorListConsultorListScreen() {
   return (
     <PermissionGate permission="READ">
       <main>
-        <h1>List Consultor</h1>
+        <h1>Consultor</h1>
         <ModuleTabs
           tabs={[
             { key: 'item1', label: 'Item 1', path: '/api/view/consultor/listConsultor' },

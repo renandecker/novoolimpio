@@ -21,7 +21,7 @@ export default function ViewDesistenteListDesistenteListScreen() {
   return (
     <PermissionGate permission="READ">
       <main>
-        <h1>List Desistente</h1>
+        <h1>Desistente</h1>
         <div className="div_form">
           <div className="form-title">Desistente</div>
           <div className="modal-actions" style={{ marginBottom: '0.5rem' }}>

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useAuth } from './auth';
 import { NotificationBell } from './NotificationBell';
 import { ReportButton } from './ReportButton';
+import { FavoritosMenu } from './FavoritosMenu';
 import { UserMenu } from './UserMenu';
 import Sidebar from './Sidebar';
 import PageHeader from './PageHeader';
@@ -20,6 +21,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           <div className="app-header-right">
             <NotificationBell />
             <ReportButton />
+            <FavoritosMenu />
             <UserMenu />
           </div>
         </header>

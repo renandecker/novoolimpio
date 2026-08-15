@@ -1,1 +1,1 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewUnidadeListUnidadeListScreen(){return <PermissionGate permission="READ"><main><h1>List Unidade</h1><DataTable path="/api/view/unidade/listUnidade"/></main></PermissionGate>}
+import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewUnidadeListUnidadeListScreen(){return <PermissionGate permission="READ"><main><h1>Unidade</h1><DataTable path="/api/view/unidade/listUnidade"/></main></PermissionGate>}

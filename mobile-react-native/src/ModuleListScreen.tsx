@@ -85,7 +85,9 @@ export function ModuleList({
   const outcome = feature && resource ? `view/${feature}/${resource}` : '';
   const entityTitle = toTitle(resource.replace(/^(form|list|colunas)/i, '') || resource);
 
-  const screenTitle = title ?? (resource ? toTitle(resource) : toTitle(feature) || 'Lista');
+  // Espelha o pedido de remover o prefixo "List " dos títulos das telas: o nome do recurso
+  // (ex.: "listAcao") não deve aparecer como "List Acao" para o usuário.
+  const screenTitle = title ?? (resource ? entityTitle : toTitle(feature) || 'Lista');
 
   const canCreate = can(session, 'CREATE', outcome);
   const canUpdate = can(session, 'UPDATE', outcome);

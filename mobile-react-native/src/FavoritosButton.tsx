@@ -1,0 +1,78 @@
+import React, { useState } from 'react';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useQuery } from '@tanstack/react-query';
+import { listarFavoritos } from './favoritos';
+import { moduleIcon } from './moduleIcons';
+
+const normalizeOutcome = (value: string) => value.replace(/(\.xhtml)+$/i, '').replace(/^\/+|\/+$/g, '') || 'default';
+
+/**
+ * Ícone de estrela entre o botão de Relatórios e o menu do usuário, listando os atalhos
+ * favoritados pelo usuário — equivalente ao bloco <c:forEach var="favoritos"
+ * items="#{usuarioLogadoController.listFavoritos}"><po:panel .../></c:forEach> de header.xhtml
+ * (olimpio.zip). Não confundir com o ícone "Favoritos" do menu de usuário, que abre a tela de
+ * gerenciamento (listFavoritoUsuario) — aqui é a lista de atalhos em si.
+ */
+export function FavoritosButton({ navigateTo }: { navigateTo: (key: string) => void }) {
+  const [open, setOpen] = useState(false);
+
+  const list = useQuery({
+    queryKey: ['favoritos', 'usuarioLogado'],
+    queryFn: listarFavoritos,
+    enabled: open,
+  });
+
+  const items = list.data ?? [];
+
+  const handleItemPress = (outcome: string) => {
+    setOpen(false);
+    navigateTo(normalizeOutcome(outcome));
+  };
+
+  return (
+    <>
+      <Pressable style={styles.iconButton} onPress={() => setOpen(true)}>
+        <Text style={styles.icon}>⭐</Text>
+      </Pressable>
+
+      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+        <Pressable style={styles.overlay} onPress={() => setOpen(false)}>
+          <Pressable style={styles.dropdown} onPress={(e) => e.stopPropagation()}>
+            <View style={styles.dropdownHeader}>
+              <Text style={styles.dropdownTitle}>Favoritos</Text>
+              <Pressable onPress={() => { setOpen(false); navigateTo('view/favoritoUsuario/listFavoritoUsuario'); }}>
+                <Text style={styles.manageLink}>Gerenciar</Text>
+              </Pressable>
+            </View>
+            {list.isLoading && items.length === 0 ? (
+              <Text style={styles.empty}>Carregando...</Text>
+            ) : items.length === 0 ? (
+              <Text style={styles.empty}>Nenhum favorito cadastrado.</Text>
+            ) : (
+              items.map((item, index) => (
+                <Pressable key={`${item.outcome}-${index}`} style={styles.item} onPress={() => handleItemPress(item.outcome)}>
+                  <Text style={styles.itemIcon}>{moduleIcon(item.nome, item.icon)}</Text>
+                  <Text style={styles.itemNome}>{item.nome}</Text>
+                </Pressable>
+              ))
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  iconButton: { marginRight: 8, padding: 6 },
+  icon: { fontSize: 18 },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)', paddingTop: 70, paddingHorizontal: 16 },
+  dropdown: { backgroundColor: '#ffffff', borderRadius: 10, padding: 12, maxHeight: '70%' },
+  dropdownHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  dropdownTitle: { fontSize: 14, fontWeight: '700', color: '#2b2b2b' },
+  manageLink: { fontSize: 12, color: '#265a88' },
+  empty: { color: '#888', fontSize: 13, paddingVertical: 8 },
+  item: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, borderBottomWidth: 1, borderColor: '#f0f0f0' },
+  itemIcon: { fontSize: 18, width: 26, textAlign: 'center' },
+  itemNome: { fontSize: 14, color: '#2b2b2b' },
+});

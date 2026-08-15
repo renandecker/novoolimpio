@@ -232,6 +232,123 @@ public class AlunoRepository {
         return nativeList(sql, params);
     }
 
+    public Uni<Object[]> pessoaDadosPorPessoa(Long pessoaId) {
+        String sql = """
+            SELECT p.id,
+                   COALESCE(f.nome, '') AS nome,
+                   COALESCE(f.cpf, '') AS cpf,
+                   COALESCE(f.rg, '') AS rg,
+                   f.data_nascimento,
+                   COALESCE(p.email, '') AS email,
+                   COALESCE(p.telefone, '') AS telefone,
+                   COALESCE(p.celular, '') AS celular
+            FROM bas_pessoa p
+            LEFT JOIN bas_pessoa_fisica f ON f.id_pessoa = p.id
+            WHERE p.id = ?1
+            LIMIT 1
+            """;
+        return nativeList(sql, pessoaId)
+                .map(rows -> rows.isEmpty() ? null : (Object[]) rows.get(0));
+    }
+
+    public Uni<List<Object[]>> responsaveisPorPessoa(Long pessoaId) {
+        String sql = """
+            SELECT DISTINCT p.id,
+                   COALESCE(f.nome, '') AS nome,
+                   COALESCE(f.cpf, '') AS cpf,
+                   COALESCE(f.rg, '') AS rg,
+                   f.data_nascimento,
+                   COALESCE(p.email, '') AS email,
+                   COALESCE(p.telefone, '') AS telefone,
+                   COALESCE(p.celular, '') AS celular
+            FROM edc_contrato ct
+            JOIN bas_pessoa p ON p.id = ct.id_responsavel
+            LEFT JOIN bas_pessoa_fisica f ON f.id_pessoa = p.id
+            WHERE ct.id_pessoa = ?1
+            ORDER BY COALESCE(f.nome, '') ASC
+            """;
+        return nativeList(sql, pessoaId);
+    }
+
+    public Uni<List<Object[]>> historicoNapLigacaoPorPessoa(Long pessoaId) {
+        String sql = """
+            SELECT ln.id,
+                   ln.data_inicial,
+                   COALESCE(ln.telefone, '') AS telefone,
+                   COALESCE(ln.observacao, '') AS observacao,
+                   COALESCE(r.descricao, '') AS resultado,
+                   ln.retorno_aula
+            FROM edc_ligacao_nap ln
+            LEFT JOIN edc_resultado_ligacao_nap r ON r.id = ln.id_resultado_ligacao_nap
+            WHERE ln.id_contrato IN (SELECT id FROM edc_contrato WHERE id_pessoa = ?1)
+            ORDER BY ln.data_inicial DESC NULLS LAST, ln.id DESC
+            """;
+        return nativeList(sql, pessoaId);
+    }
+
+    public Uni<List<Object[]>> historicoNapEmailPorPessoa(Long pessoaId) {
+        String sql = """
+            SELECT en.id,
+                   en.data,
+                   COALESCE(en.email, '') AS email,
+                   COALESCE(en.assunto, '') AS assunto,
+                   COALESCE(en.mensagem, '') AS mensagem
+            FROM edc_email_nap en
+            WHERE en.id_contrato IN (SELECT id FROM edc_contrato WHERE id_pessoa = ?1)
+            ORDER BY en.data DESC NULLS LAST, en.id DESC
+            """;
+        return nativeList(sql, pessoaId);
+    }
+
+    public Uni<List<Object[]>> historicoCobrancaLigacaoPorPessoa(Long pessoaId) {
+        String sql = """
+            SELECT lc.id,
+                   lc.data_inicial,
+                   COALESCE(lc.telefone, '') AS telefone,
+                   COALESCE(lc.observacao, '') AS observacao,
+                   COALESCE(r.descricao, '') AS resultado,
+                   lc.qtde_parcela,
+                   lc.valor
+            FROM fin_ligacao_cobranca lc
+            LEFT JOIN fin_resultado_ligacao_cobranca r ON r.id = lc.id_resultado_cobranca
+            WHERE lc.id_contrato IN (SELECT id FROM edc_contrato WHERE id_pessoa = ?1)
+            ORDER BY lc.data_inicial DESC NULLS LAST, lc.id DESC
+            """;
+        return nativeList(sql, pessoaId);
+    }
+
+    public Uni<List<Object[]>> historicoCobrancaEmailPorPessoa(Long pessoaId) {
+        String sql = """
+            SELECT ec.id,
+                   ec.data,
+                   COALESCE(ec.email, '') AS email,
+                   COALESCE(ec.assunto, '') AS assunto,
+                   COALESCE(ec.mensagem, '') AS mensagem,
+                   ec.qtde_parcela,
+                   ec.valor
+            FROM fin_email_cobranca ec
+            WHERE ec.id_contrato IN (SELECT id FROM edc_contrato WHERE id_pessoa = ?1)
+            ORDER BY ec.data DESC NULLS LAST, ec.id DESC
+            """;
+        return nativeList(sql, pessoaId);
+    }
+
+    public Uni<List<Object[]>> historicoAlunoPorPessoa(Long pessoaId) {
+        String sql = """
+            SELECT ha.id,
+                   ha.data_registro,
+                   COALESCE(ha.descricao, '') AS descricao,
+                   COALESCE(ha.id_usuario, 0) AS id_usuario,
+                   COALESCE(l.username, '') AS usuario_nome
+            FROM edc_historico_aluno ha
+            LEFT JOIN bas_usuario u ON u.id = ha.id_usuario
+            LEFT JOIN bas_login l ON l.id_usuario = u.id
+            WHERE ha.id_aluno = ?1
+            ORDER BY ha.data_registro DESC NULLS LAST, ha.id DESC
+            """;
+        return nativeList(sql, pessoaId);
+    }
+
     private Long asLong(Object o) {
         if (o == null) return null;
         if (o instanceof Number n) return n.longValue();

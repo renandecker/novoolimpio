@@ -1491,3 +1491,107 @@
   text-shadow: none !important;
   margin-bottom: 2px;
 }
+
+/* ---- p:menuButton equivalent: colored trigger + dropdown of colored menu items ---- */
+.row-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.row-menu-trigger {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 3px;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.row-menu-trigger:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.row-menu-list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 50;
+  min-width: 200px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.row-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-radius: 3px;
+  padding: 6px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.row-menu-item:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.row-actions-menu {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* ---- Menu de Favoritos (header): equivalente ao po:panel listado em header.xhtml ---- */
+.favoritos-dropdown {
+  right: -30px;
+}
+
+.favoritos-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.favoritos-item:hover {
+  background-color: #f7f7f7;
+}
+
+.favoritos-item-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: #f0e9c9;
+  color: #8a7420;
+  font-size: 13px;
+}
+
+.favoritos-item-nome {
+  font-size: 13px;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -6,13 +6,21 @@ import br.com.sol7.olimpio.aluno.dto.AlunoDtos.BoletimResumoResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.BoletimResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.ContratoFinanceiroResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.DashboardResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.EmailCobrancaResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.EmailNapResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.FinanceiroResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.FrequenciaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.GrauNotaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.GrauResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.HistoricoAlunoResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.HistoricoCobrancaResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.HistoricoNapResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.LigacaoCobrancaResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.LigacaoNapResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.MatriculaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.OcorrenciaPresencaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.ParcelaResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.PessoaDadosResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.ResumoFinanceiroResponse;
 import br.com.sol7.olimpio.aluno.repository.AlunoRepository;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -103,11 +111,7 @@ public class AlunoService {
     public Uni<List<BoletimResponse>> boletimCompleto(String username) {
         return repository.pessoaIdPorUsername(username)
                 .onItem().ifNull().failWith(() -> new NotFoundException("Aluno não encontrado"))
-                .onItem().transformToUni(pessoaId -> repository.matriculasPorPessoa(pessoaId)
-                        .onItem().transformToUni(rows -> {
-                            List<MatriculaResponse> matriculas = rows.stream().map(this::toMatricula).toList();
-                            return sequencial(matriculas.stream().map(this::boletimDeMatricula).toList());
-                        }));
+                .onItem().transformToUni(this::boletimCompletoPorPessoa);
     }
 
     public Uni<FrequenciaResponse> frequencia(String username, Long matriculaId) {
@@ -144,24 +148,76 @@ public class AlunoService {
     public Uni<FinanceiroResponse> financeiro(String username) {
         return repository.pessoaIdPorUsername(username)
                 .onItem().ifNull().failWith(() -> new NotFoundException("Aluno não encontrado"))
-                .onItem().transformToUni(pessoaId -> {
-                    LocalDate hoje = LocalDate.now();
-                    LocalDate inicioMes = hoje.withDayOfMonth(1);
-                    LocalDate fimMes = hoje.withDayOfMonth(hoje.lengthOfMonth());
-                    return Uni.combine().all().unis(
-                            repository.resumoFinanceiroPorPessoa(pessoaId),
-                            repository.contratosPorPessoa(pessoaId),
-                            repository.parcelasMesPorPessoa(pessoaId, inicioMes, fimMes, hoje),
-                            repository.parcelasMatriculaPorPessoa(pessoaId),
-                            repository.parcelasProdutosPorPessoa(pessoaId),
-                            repository.parcelasCanceladasPorPessoa(pessoaId))
-                            .combinedWith(r -> new FinanceiroResponse(
-                                    toResumo(r.get(0)),
-                                    ((List<?>) r.get(1)).stream().map(row -> toContratoFinanceiro((Object[]) row)).toList(),
-                                    ((List<?>) r.get(2)).stream().map(row -> toParcela((Object[]) row)).toList(),
-                                    ((List<?>) r.get(3)).stream().map(row -> toParcela((Object[]) row)).toList(),
-                                    ((List<?>) r.get(4)).stream().map(row -> toParcela((Object[]) row)).toList(),
-                                    ((List<?>) r.get(5)).stream().map(row -> toParcela((Object[]) row)).toList()));
+                .onItem().transformToUni(this::financeiroPorPessoa);
+    }
+
+    public Uni<FinanceiroResponse> financeiroPorPessoa(Long pessoaId) {
+        LocalDate hoje = LocalDate.now();
+        LocalDate inicioMes = hoje.withDayOfMonth(1);
+        LocalDate fimMes = hoje.withDayOfMonth(hoje.lengthOfMonth());
+        return Uni.combine().all().unis(
+                repository.resumoFinanceiroPorPessoa(pessoaId),
+                repository.contratosPorPessoa(pessoaId),
+                repository.parcelasMesPorPessoa(pessoaId, inicioMes, fimMes, hoje),
+                repository.parcelasMatriculaPorPessoa(pessoaId),
+                repository.parcelasProdutosPorPessoa(pessoaId),
+                repository.parcelasCanceladasPorPessoa(pessoaId))
+                .combinedWith(r -> new FinanceiroResponse(
+                        toResumo(r.get(0)),
+                        ((List<?>) r.get(1)).stream().map(row -> toContratoFinanceiro((Object[]) row)).toList(),
+                        ((List<?>) r.get(2)).stream().map(row -> toParcela((Object[]) row)).toList(),
+                        ((List<?>) r.get(3)).stream().map(row -> toParcela((Object[]) row)).toList(),
+                        ((List<?>) r.get(4)).stream().map(row -> toParcela((Object[]) row)).toList(),
+                        ((List<?>) r.get(5)).stream().map(row -> toParcela((Object[]) row)).toList()));
+    }
+
+    public Uni<PessoaDadosResponse> pessoaDados(Long pessoaId) {
+        return repository.pessoaDadosPorPessoa(pessoaId)
+                .onItem().ifNull().failWith(() -> new NotFoundException("Pessoa não encontrada"))
+                .map(this::toPessoaDados);
+    }
+
+    public Uni<List<PessoaDadosResponse>> responsaveis(Long pessoaId) {
+        return repository.responsaveisPorPessoa(pessoaId)
+                .map(rows -> rows.stream().map(this::toPessoaDados).toList());
+    }
+
+    public Uni<HistoricoNapResponse> historicoNap(Long pessoaId) {
+        return Uni.combine().all().unis(
+                repository.historicoNapLigacaoPorPessoa(pessoaId),
+                repository.historicoNapEmailPorPessoa(pessoaId))
+                .combinedWith(r -> new HistoricoNapResponse(
+                        ((List<?>) r.get(0)).stream().map(row -> toLigacaoNap((Object[]) row)).toList(),
+                        ((List<?>) r.get(1)).stream().map(row -> toEmailNap((Object[]) row)).toList()));
+    }
+
+    public Uni<HistoricoCobrancaResponse> historicoCobranca(Long pessoaId) {
+        return Uni.combine().all().unis(
+                repository.historicoCobrancaLigacaoPorPessoa(pessoaId),
+                repository.historicoCobrancaEmailPorPessoa(pessoaId))
+                .combinedWith(r -> new HistoricoCobrancaResponse(
+                        ((List<?>) r.get(0)).stream().map(row -> toLigacaoCobranca((Object[]) row)).toList(),
+                        ((List<?>) r.get(1)).stream().map(row -> toEmailCobranca((Object[]) row)).toList()));
+    }
+
+    public Uni<List<HistoricoAlunoResponse>> historicoAluno(Long pessoaId) {
+        return repository.historicoAlunoPorPessoa(pessoaId)
+                .map(rows -> rows.stream().map(this::toHistoricoAluno).toList());
+    }
+
+    public Uni<List<BoletimResponse>> boletimCompletoPorPessoa(Long pessoaId) {
+        return repository.matriculasPorPessoa(pessoaId)
+                .onItem().transformToUni(rows -> {
+                    List<MatriculaResponse> matriculas = rows.stream().map(this::toMatricula).toList();
+                    return sequencial(matriculas.stream().map(this::boletimDeMatricula).toList());
+                });
+    }
+
+    public Uni<List<FrequenciaResponse>> frequenciasPorPessoa(Long pessoaId) {
+        return repository.matriculasPorPessoa(pessoaId)
+                .onItem().transformToUni(rows -> {
+                    List<MatriculaResponse> matriculas = rows.stream().map(this::toMatricula).toList();
+                    return sequencial(matriculas.stream().map(this::frequenciaDeMatricula).toList());
                 });
     }
 
@@ -327,6 +383,36 @@ public class AlunoService {
                 asString(row[4]), asLocalDate(row[5]), asString(row[6]), asString(row[7]), asString(row[8]), asString(row[9]));
     }
 
+    private PessoaDadosResponse toPessoaDados(Object[] r) {
+        return new PessoaDadosResponse(asLong(r[0]), asString(r[1]), asString(r[2]), asString(r[3]),
+                asLocalDate(r[4]), asString(r[5]), asString(r[6]), asString(r[7]));
+    }
+
+    private LigacaoNapResponse toLigacaoNap(Object[] r) {
+        return new LigacaoNapResponse(asLong(r[0]), asLocalDateTime(r[1]), asString(r[2]),
+                asString(r[3]), asString(r[4]), asLocalDate(r[5]));
+    }
+
+    private EmailNapResponse toEmailNap(Object[] r) {
+        return new EmailNapResponse(asLong(r[0]), asLocalDateTime(r[1]), asString(r[2]),
+                asString(r[3]), asString(r[4]));
+    }
+
+    private LigacaoCobrancaResponse toLigacaoCobranca(Object[] r) {
+        return new LigacaoCobrancaResponse(asLong(r[0]), asLocalDateTime(r[1]), asString(r[2]),
+                asString(r[3]), asString(r[4]), asInt(r[5]), asBigDecimal(r[6]));
+    }
+
+    private EmailCobrancaResponse toEmailCobranca(Object[] r) {
+        return new EmailCobrancaResponse(asLong(r[0]), asLocalDateTime(r[1]), asString(r[2]),
+                asString(r[3]), asString(r[4]), asInt(r[5]), asBigDecimal(r[6]));
+    }
+
+    private HistoricoAlunoResponse toHistoricoAluno(Object[] r) {
+        return new HistoricoAlunoResponse(asLong(r[0]), asLocalDateTime(r[1]), asString(r[2]),
+                asLong(r[3]), asString(r[4]));
+    }
+
     private MatriculaResponse toMatricula(Object[] row) {
         return new MatriculaResponse(asLong(row[0]), asString(row[1]), asString(row[2]), asString(row[3]),
                 asInt(row[4]), asString(row[5]), asInt(row[6]), asString(row[7]), asLocalDate(row[8]),
@@ -378,5 +464,22 @@ public class AlunoService {
             }
         }
         return LocalDate.parse(s);
+    }
+
+    private LocalDateTime asLocalDateTime(Object o) {
+        if (o == null) return null;
+        if (o instanceof LocalDateTime d) return d;
+        if (o instanceof LocalDate d) return d.atStartOfDay();
+        if (o instanceof java.sql.Timestamp d) return d.toLocalDateTime();
+        if (o instanceof java.util.Date d) return d.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime();
+        String s = o.toString();
+        if (s.length() >= 16) {
+            try {
+                return LocalDateTime.parse(s.substring(0, 16).replace(' ', 'T'));
+            } catch (RuntimeException ignored) {
+                // fall through
+            }
+        }
+        return LocalDateTime.parse(s);
     }
 }
