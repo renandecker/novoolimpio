@@ -389,8 +389,6 @@ services:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      ASAAS_API_KEY: ${ASAAS_API_KEY:-$$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjE1MjVlNjliLTRhMDItNDkzZC1hMTI0LTcyYjgzNjVmMDNhNDo6JGFhY2hfYmM0OGJjMTQtZDk1OC00MDVmLWEyYmUtODQxN2U1YTY4MTFk}
-      ASAAS_BASE_URL: ${ASAAS_BASE_URL:-https://api-sandbox.asaas.com}
     ports:
       - "8096:8096"
     depends_on:
@@ -402,7 +400,7 @@ services:
         condition: service_healthy
         
   # fiserv: removido temporariamente - microsservico nao criado (sem ./microservices/fiserv). Reativar quando o modulo existir.
-  #       O modulo Fiserv (cartao + PIX) agora vive em pagamento-service (porta 8096).
+  #       O modulo Fiserv (cartao) vive em pagamento-service (porta 8096); o fluxo PIX (Asaas) vive em asaas-service (porta 8094).
   
   gateway:
     build: ./docker/gateway
