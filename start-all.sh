@@ -59,6 +59,33 @@ if $DC ps -q > /dev/null 2>&1; then
 fi
 
 echo "============================================"
+echo " Verificando compilacao dos microsservicos..."
+echo "============================================"
+
+MICROSERVICES="aluno asaas basico central comercial curriculo educacao estoque financeiro fiserv login notificacoes professor relatorios schedule"
+COMPILE_ERRORS=0
+for svc in $MICROSERVICES; do
+    if [ -d "microservices/$svc" ] && [ -f "microservices/$svc/pom.xml" ]; then
+        if ! mvn -B -q -f "microservices/$svc/pom.xml" compile -DskipTests 2> "$LOGFILE"; then
+            echo "  [ERRO] $svc - compilacao falhou. Detalhes em error.log"
+            COMPILE_ERRORS=1
+        else
+            echo "  [OK] $svc"
+        fi
+    fi
+done
+
+if [ "$COMPILE_ERRORS" -ne 0 ]; then
+    echo ""
+    echo "[ERRO] Nem todos os microsservicos compilaram com sucesso."
+    echo "  Corrija os erros de compilacao antes de subir os containers."
+    echo "  Detalhes em error.log"
+    exit 1
+fi
+
+echo "Todos os microsservicos compilaram com sucesso."
+
+echo "============================================"
 echo " Subindo Postgres, Kafka, 16 microsservicos, gateway e app React..."
 echo "============================================"
 

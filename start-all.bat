@@ -71,6 +71,33 @@ if %errorlevel% equ 0 (
 )
 
 echo ============================================
+echo  Verificando compilacao dos microsservicos...
+echo ============================================
+
+set "COMPILE_ERRORS=0"
+for %%s in (aluno asaas basico central comercial curriculo educacao estoque financeiro fiserv login notificacoes professor relatorios schedule) do (
+    if exist "microservices\%%s\pom.xml" (
+        mvn -B -q -f "microservices\%%s\pom.xml" compile -DskipTests >nul 2> "%LOGFILE%"
+        if !errorlevel! neq 0 (
+            echo   [ERRO] %%s - compilacao falhou. Detalhes em error.log
+            set "COMPILE_ERRORS=1"
+        ) else (
+            echo   [OK] %%s
+        )
+    )
+)
+
+if "!COMPILE_ERRORS!" neq "0" (
+    echo.
+    echo [ERRO] Nem todos os microsservicos compilaram com sucesso.
+    echo   Corrija os erros de compilacao antes de subir os containers.
+    echo   Detalhes em error.log
+    exit /b 1
+)
+
+echo Todos os microsservicos compilaram com sucesso.
+
+echo ============================================
 echo  Subindo Postgres, Kafka, 16 microsservicos, gateway e app React...
 echo ============================================
 

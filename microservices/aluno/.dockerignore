@@ -1,3 +1,4 @@
-target
-.git
+target/
+.mvn/
+*.class
 *.log
