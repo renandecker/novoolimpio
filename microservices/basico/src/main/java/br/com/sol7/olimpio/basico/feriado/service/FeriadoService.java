@@ -11,6 +11,7 @@ import java.util.Date;
 import br.com.sol7.olimpio.basico.feriado.dto.FeriadoRequest;
 import br.com.sol7.olimpio.basico.feriado.dto.FeriadoResponse;
 import br.com.sol7.olimpio.basico.feriado.entity.Feriado;
+import br.com.sol7.olimpio.basico.feriado.producer.FeriadoKafkaProducer;
 import br.com.sol7.olimpio.basico.feriado.repository.FeriadoRepository;
 
 @ApplicationScoped
@@ -18,7 +19,7 @@ import br.com.sol7.olimpio.basico.feriado.repository.FeriadoRepository;
 public class FeriadoService {
 
     @Inject FeriadoRepository repository;
-    @Inject FeriadoAjusteService feriadoAjusteService;
+    @Inject FeriadoKafkaProducer kafkaProducer;
 
     public Uni<List<FeriadoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -65,63 +66,25 @@ public class FeriadoService {
     }
 
 
-    // Migrado de FeriadoController.atualizarOferecimento (src/main/java/br/com/sol7/olimpio/control/controllers/basico/FeriadoController.java:350, camada controller)
-    // Logica original (adaptar):
-    // public String atualizarOferecimento() {
-    //         try {
-    //             temoferecimento = true;
-    //             manteroferecimento = false;
-    //             ajustar = false;
-    //             naoajustar = false;
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.SAVE, "global.sucess", "validation", "Ajustados oferecimentos com sucesso");
-    //             return saveOrUpdate(saving);
-    //         } catch (Exception e) {
-    //             e.printStackTrace();
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.INFO, "global.error", "validation", "Ocorreu um erro ao ajustar oferecimentos");
-    //         }
-    // // ... (truncado, ver fonte original)
+    // Migrado de FeriadoController.atualizarOferecimento - agora envia trigger via Kafka
+    // para o schedule executar a regra (FeriadoAjusteMaintenanceService)
     public Uni<String> atualizarOferecimento() {
-        return feriadoAjusteService.executarAjusteGeral();
+        return kafkaProducer.enviarTrigger("verificaFeriadosParaajustar")
+                .replaceWith("Trigger de ajuste geral enviado para o schedule");
     }
 
 
-    // Migrado de FeriadoController.atualizarOferecimentoNaoAjustado (src/main/java/br/com/sol7/olimpio/control/controllers/basico/FeriadoController.java:365, camada controller)
-    // Logica original (adaptar):
-    // public String atualizarOferecimentoNaoAjustado() {
-    //         try {
-    //             temoferecimento = true;
-    //             manteroferecimento = false;
-    //             ajustar = false;
-    //             naoajustar = true;
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.SAVE, "global.sucess", "validation", "Criado ajuste ocorrencias não ajusteveis com sucesso");
-    //             return saveOrUpdate(saving);
-    //         } catch (Exception e) {
-    //             e.printStackTrace();
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.INFO, "global.error", "validation", "Ocorreu um erro ao criar ajuste ocorrencias não ajusteveis");
-    //         }
-    // // ... (truncado, ver fonte original)
+    // Migrado de FeriadoController.atualizarOferecimentoNaoAjustado - agora envia trigger via Kafka
     public Uni<String> atualizarOferecimentoNaoAjustado() {
-        return feriadoAjusteService.executarAjusteNaoSelecionados();
+        return kafkaProducer.enviarTrigger("executarAjusteNaoSelecionados")
+                .replaceWith("Trigger de ajuste nao selecionados enviado para o schedule");
     }
 
 
-    // Migrado de FeriadoController.atualizarOferecimentoAjustados (src/main/java/br/com/sol7/olimpio/control/controllers/basico/FeriadoController.java:381, camada controller)
-    // Logica original (adaptar):
-    // public String atualizarOferecimentoAjustados() {
-    //         try {
-    //             temoferecimento = true;
-    //             manteroferecimento = false;
-    //             ajustar = true;
-    //             naoajustar = false;
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.SAVE, "global.sucess", "validation", "Criado ajuste ocorrencias ajusteveis com sucesso");
-    //             return saveOrUpdate(saving);
-    //         } catch (Exception e) {
-    //             e.printStackTrace();
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.INFO, "global.error", "validation", "Ocorreu um erro ao criar ajuste ocorrencias ajusteveis");
-    //         }
-    // // ... (truncado, ver fonte original)
+    // Migrado de FeriadoController.atualizarOferecimentoAjustados - agora envia trigger via Kafka
     public Uni<String> atualizarOferecimentoAjustados() {
-        return feriadoAjusteService.executarAjusteSelecionados();
+        return kafkaProducer.enviarTrigger("executarAjusteSelecionados")
+                .replaceWith("Trigger de ajuste selecionados enviado para o schedule");
     }
 
 

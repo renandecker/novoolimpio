@@ -219,11 +219,14 @@ services:
     environment:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "8085:8085"
     depends_on:
       restore:
         condition: service_completed_successfully
+      kafka:
+        condition: service_healthy
       login:
         condition: service_healthy
 
@@ -287,6 +290,7 @@ services:
       RELATORIOS_DATABASE_URL: postgresql://postgres:5432/olimpio
       EMPRESA_DATABASE_URL: postgresql://postgres:5432/olimpio
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      RELATORIOS_TABELAS_PATH: /tmp/olimpio/tabelas
     ports:
       - "8089:8089"
     depends_on:

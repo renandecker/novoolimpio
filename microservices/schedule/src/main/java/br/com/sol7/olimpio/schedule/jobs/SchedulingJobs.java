@@ -2,31 +2,27 @@ package br.com.sol7.olimpio.schedule.jobs;
 
 import io.quarkus.scheduler.Scheduled;
 import io.smallrye.common.annotation.RunOnVirtualThread;
-import io.smallrye.reactive.messaging.MutinyEmitter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.jboss.logging.Logger;
 
 /**
  * Portado de br.com.sol7.olimpio.service.services.SchedulingService (legado).
  *
  * Cada rotina do legado virou um metodo separado (@Scheduled + @RunOnVirtualThread) e chama
- * diretamente os objetos de manutencao que usam a conexao compartilhada com o banco. O evento
- * job-feriado continua sendo consumido pelo microsservico basico, dono da regra de ajuste de
- * feriados/oferecimentos.
+ * diretamente os objetos de manutencao que usam a conexao compartilhada com o banco.
  *
  * As rotinas de manutencao rodam a partir da 1h da manha (America/Sao_Paulo); o fechamento de
  * caixa e a correcao de avaliacoes permanecem as 23h.
+ *
+ * A regra de ajuste de feriados (verificaFeriadosParaajustar) foi migrada do basico para o
+ * schedule: agora o cron e o trigger manual executam a regra diretamente aqui via
+ * FeriadoAjusteMaintenanceService.
  */
 @ApplicationScoped
 public class SchedulingJobs {
 
     private static final Logger LOG = Logger.getLogger(SchedulingJobs.class);
-
-    @Inject
-    @Channel("job-feriado-out")
-    MutinyEmitter<String> jobFeriado;
 
     @Inject
     MaintenanceConsumer maintenance;
@@ -119,9 +115,9 @@ public class SchedulingJobs {
         maintenance.processarEmails("scheduled");
     }
 
-    // Migrado de SchedulingService.tudo() - verificaFeriadosParaajustar (basico.FeriadoAjuste).
-    // O schedule apenas dispara; quem executa a regra de ajuste de feriados/oferecimentos e o
-    // microsservico basico (FeriadoAjusteConsumer -> FeriadoAjusteService).
+    // Migrado de SchedulingService.tudo() - verificaFeriadosParaajustar.
+    // A regra agora e executada diretamente no schedule (FeriadoAjusteMaintenanceService),
+    // que foi migrada do basico. O cron e o trigger manual via Kafka executam aqui.
     @Scheduled(cron = "{scheduler.tudo.cron:0 0 1 * * ?}", timeZone = "America/Sao_Paulo")
     @RunOnVirtualThread
     public void rotinaFeriado() {
@@ -129,8 +125,7 @@ public class SchedulingJobs {
             LOG.info("SchedulingJobs.rotinaFeriado() - desabilitado via scheduler.jobs.enabled=false, pulando.");
             return;
         }
-        LOG.info("SchedulingJobs.rotinaFeriado() - publicando trigger Kafka para o ajuste de feriados (consumido pelo basico)");
-        send(jobFeriado, "job-feriado", "verificaFeriadosParaajustar");
+        maintenance.processarFeriado("scheduled");
     }
 
     // Migrado de SchedulingService.fechamentoCaixaAbertos() - 23h (fluxo de caixa)
@@ -157,14 +152,5 @@ public class SchedulingJobs {
 
     private boolean jobsEnabled() {
         return !"false".equalsIgnoreCase(System.getenv().getOrDefault("SCHEDULER_JOBS_ENABLED", "true"));
-    }
-
-    /** Publica o trigger no Kafka aguardando o ack. Falha nao derruba o agendamento: e logada. */
-    private void send(MutinyEmitter<String> emitter, String canal, String payload) {
-        emitter.send(payload)
-                .subscribe().with(
-                        v -> LOG.infof("SchedulingJobs - trigger '%s' publicado com sucesso", canal),
-                        e -> LOG.errorf(e, "SchedulingJobs - falha ao publicar trigger '%s' no Kafka", canal)
-                );
     }
 }

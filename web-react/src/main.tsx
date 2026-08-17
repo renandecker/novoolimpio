@@ -325,6 +325,7 @@ import ViewRelatoriosViewGraficoPizzaListScreen from './screens/ViewRelatoriosVi
 import ViewRelatoriosViewMapaListScreen from './screens/ViewRelatoriosViewMapaListScreen';
 import ViewRelatoriosViewOrganogramaListScreen from './screens/ViewRelatoriosViewOrganogramaListScreen';
 import ViewRelatoriosViewTabelaListScreen from './screens/ViewRelatoriosViewTabelaListScreen';
+import ReportViewScreen from './screens/ReportViewScreen';
 import ViewResultadoColunasResultadoListScreen from './screens/ViewResultadoColunasResultadoListScreen';
 import ViewResultadoFormResultadoListScreen from './screens/ViewResultadoFormResultadoListScreen';
 import ViewResultadoListResultadoListScreen from './screens/ViewResultadoListResultadoListScreen';
@@ -772,6 +773,7 @@ const q=new QueryClient();createRoot(document.getElementById('root')!).render(<Q
 <Route path="/view/relatorios/viewMapa" element={<ViewRelatoriosViewMapaListScreen/>}/>
 <Route path="/view/relatorios/viewOrganograma" element={<ViewRelatoriosViewOrganogramaListScreen/>}/>
 <Route path="/view/relatorios/viewTabela" element={<ViewRelatoriosViewTabelaListScreen/>}/>
+<Route path="/relatorios/:tipo/:id" element={<ReportViewScreen/>}/>
 <Route path="/view/resultado/colunasResultado" element={<ViewResultadoColunasResultadoListScreen/>}/>
 <Route path="/view/resultado/formResultado" element={<ViewResultadoFormResultadoListScreen/>}/>
 <Route path="/view/resultado/listResultado" element={<ViewResultadoListResultadoListScreen/>}/>

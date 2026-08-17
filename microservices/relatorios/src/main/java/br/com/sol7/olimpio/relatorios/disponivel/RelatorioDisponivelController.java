@@ -6,7 +6,12 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.core.MediaType;
+import br.com.sol7.olimpio.relatorios.tabela.TabelaService;
+import br.com.sol7.olimpio.relatorios.grafico.GraficoService;
+import br.com.sol7.olimpio.relatorios.mapa.MapaService;
 
 import java.util.List;
 
@@ -15,9 +20,34 @@ import java.util.List;
 public class RelatorioDisponivelController {
 
     @Inject RelatorioDisponivelService service;
+    @Inject TabelaService tabelaService;
+    @Inject GraficoService graficoService;
+    @Inject MapaService mapaService;
 
     @GET
     public Uni<List<RelatorioDisponivelResponse>> listar(@HeaderParam("X-Authenticated-Username") String username) {
         return service.listarDisponiveis(username);
+    }
+
+    @GET
+    @Path("/{tipo}/{id}")
+    public Uni<RelatorioAbertoResponse> abrir(
+            @PathParam("tipo") String tipo,
+            @PathParam("id") Long id,
+            @HeaderParam("X-Authenticated-Username") String username) {
+        String tipoNormalizado = tipo == null ? "" : tipo.toUpperCase();
+        return service.podeAcessar(username, tipoNormalizado, id)
+                .onItem().transformToUni(permitido -> {
+                    if (!permitido) return Uni.createFrom().failure(new ForbiddenException("Relatório não disponível para este usuário"));
+                    return switch (tipoNormalizado) {
+                        case "TABELA" -> tabelaService.find(id)
+                                .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r));
+                        case "GRAFICO" -> graficoService.find(id)
+                                .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r));
+                        case "MAPA" -> mapaService.find(id)
+                                .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r));
+                        default -> Uni.createFrom().failure(new ForbiddenException("Tipo de relatório inválido"));
+                    };
+                });
     }
 }

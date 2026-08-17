@@ -88,6 +88,33 @@ public class RelatorioDisponivelService {
                 });
     }
 
+    /**
+     * Confere a mesma regra usada pelo menu antes de abrir o relatório. Isso evita
+     * que um usuário contorne o filtro do botão acessando uma URL com outro id.
+     */
+    public Uni<Boolean> podeAcessar(String username, String tipo, Long relatorioId) {
+        if (username == null || username.isBlank() || relatorioId == null) {
+            return Uni.createFrom().item(false);
+        }
+        String sql = switch (tipo == null ? "" : tipo.toUpperCase()) {
+            case "TABELA" -> SQL_TABELA;
+            case "GRAFICO" -> SQL_GRAFICO;
+            case "MAPA" -> SQL_MAPA;
+            default -> null;
+        };
+        if (sql == null) return Uni.createFrom().item(false);
+
+        return Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_USUARIO)
+                        .setParameter(1, username)
+                        .getSingleResultOrNull())
+                .onItem().transformToUni(usuarioId -> {
+                    if (usuarioId == null) return Uni.createFrom().item(false);
+                    return consultar(sql, ((Number) usuarioId).longValue(), tipo.toUpperCase())
+                            .map(relatorios -> relatorios.stream().anyMatch(relatorio -> relatorio.id().equals(relatorioId)));
+                });
+    }
+
     private Uni<List<RelatorioDisponivelResponse>> consultar(String sql, Long usuarioId, String tipo) {
         return Panache.getSession()
                 .chain(session -> session.createNativeQuery(sql)

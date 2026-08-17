@@ -6,6 +6,7 @@ import br.com.sol7.olimpio.schedule.maintenance.CobrancaEmailMaintenanceService;
 import br.com.sol7.olimpio.schedule.maintenance.ComercialMaintenanceService;
 import br.com.sol7.olimpio.schedule.maintenance.EducacaoMaintenanceService;
 import br.com.sol7.olimpio.schedule.maintenance.EmpresaMaintenanceService;
+import br.com.sol7.olimpio.schedule.maintenance.FeriadoAjusteMaintenanceService;
 import br.com.sol7.olimpio.schedule.maintenance.FinanceiroMaintenanceService;
 import br.com.sol7.olimpio.schedule.maintenance.NapEmailMaintenanceService;
 import br.com.sol7.olimpio.schedule.maintenance.RelatoriosMaintenanceService;
@@ -54,6 +55,9 @@ public class MaintenanceConsumer {
 
     @Inject
     EmpresaMaintenanceService empresa;
+
+    @Inject
+    FeriadoAjusteMaintenanceService feriadoAjuste;
 
     public void processarEmpresa(String trigger) {
         LOG.infof("MaintenanceConsumer - processando job-empresa: %s", trigger);
@@ -179,6 +183,19 @@ public class MaintenanceConsumer {
             LOG.info("MaintenanceConsumer - job-caixa concluido");
         } catch (Exception e) {
             LOG.error("MaintenanceConsumer - falha inesperada no job-caixa", e);
+        }
+    }
+
+    public void processarFeriado(String trigger) {
+        LOG.infof("MaintenanceConsumer - processando ajuste de feriados: %s", trigger);
+        try {
+            step("verificaFeriadosParaajustar", feriadoAjuste.verificaFeriadosParaajustar().map(r -> {
+                LOG.info("MaintenanceConsumer - verificaFeriadosParaajustar concluido");
+                return r;
+            })).await().indefinitely();
+            LOG.info("MaintenanceConsumer - ajuste de feriados concluido");
+        } catch (Exception e) {
+            LOG.error("MaintenanceConsumer - falha inesperada no ajuste de feriados", e);
         }
     }
 

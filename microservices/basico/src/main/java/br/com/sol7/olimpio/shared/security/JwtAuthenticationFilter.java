@@ -25,6 +25,7 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
             String required = requiredPermission(context, path);
             if (!claims.permissions().contains(required)) { reject(context, Response.Status.FORBIDDEN, "Permissão insuficiente: " + required); return; }
             context.getHeaders().putSingle("X-Authenticated-Permissions", String.join(",", claims.permissions()));
+            context.getHeaders().putSingle("X-Authenticated-Username", claims.subject());
             context.setProperty("modulePermissions", claims.modulePermissions());
             context.setProperty("authenticatedUser", claims.subject());
         } catch (IllegalArgumentException exception) { reject(context, Response.Status.UNAUTHORIZED, "Token inválido ou expirado"); }
