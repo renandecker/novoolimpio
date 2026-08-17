@@ -8,6 +8,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -25,8 +27,10 @@ public class OferecimentoComponenteCurricular extends PanacheEntity {
     @Column(name = "id_sala")
     public Long salaId;  // referencia a Sala (id, cross-service)
     @Column(name = "data_inicio")
+    @Temporal(TemporalType.DATE)
     public Date dataInicio;
     @Column(name = "data_fim")
+    @Temporal(TemporalType.DATE)
     public Date dataFim;
     @Column(name = "data_alteracao")
     public Date dataAlteracao;
@@ -53,6 +57,7 @@ public class OferecimentoComponenteCurricular extends PanacheEntity {
     @Column(name = "inscritos")
     public Integer inscritos;
     @Column(name = "data_cancelamento")
+    @Temporal(TemporalType.DATE)
     public Date dataCancelamento;
     @Column(name = "fl_registra_frequencia")
     public Boolean registraFrequencia;

@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 /**
  * Evento publicado no topico olimpio.pagamento.confirmado quando um pagamento e confirmado.
- * Fluxo PIX movido do pagamento-service para o asaas-service. O formato e JSON serializado
+ * Fluxo PIX movido do fiserv para o asaas-service. O formato e JSON serializado
  * (StringSerializer).
  *
  * @param idParcela      id da fin_parcela vinculada ao pagamento

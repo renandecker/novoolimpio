@@ -11,6 +11,10 @@ import br.com.sol7.olimpio.educacao.tempoaula.TempoAula;
 import br.com.sol7.olimpio.educacao.tempoaula.TempoAulaRepository;
 import br.com.sol7.olimpio.educacao.turnoeducacao.TurnoEducacao;
 import br.com.sol7.olimpio.educacao.turnoeducacao.TurnoEducacaoRepository;
+import br.com.sol7.olimpio.educacao.professor.Professor;
+import br.com.sol7.olimpio.educacao.professor.ProfessorRepository;
+import br.com.sol7.olimpio.educacao.basico.PessoaFisica;
+import br.com.sol7.olimpio.educacao.basico.PessoaFisicaRepository;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -33,6 +37,8 @@ public class OcorrenciaComponenteCurricularService {
     @Inject TempoAulaRepository tempoAulaRepository;
     @Inject OferecimentoComponenteCurricularRepository oferecimentoRepository;
     @Inject ComponenteCurricularRepository componenteCurricularRepository;
+    @Inject ProfessorRepository professorRepository;
+    @Inject PessoaFisicaRepository pessoaFisicaRepository;
 
     public Uni<List<OcorrenciaComponenteCurricularResponse>> list() {
         return withRefs(repository.listAll());
@@ -80,7 +86,8 @@ public class OcorrenciaComponenteCurricularService {
 
     private record Refs(List<Sala> salas, List<DiaAula> diaAulas,
                         List<OferecimentoComponenteCurricular> oferecimentos,
-                        List<ComponenteCurricular> componentes) {
+                        List<ComponenteCurricular> componentes,
+                        List<Professor> professores, List<PessoaFisica> pessoasFisicas) {
         String salaDescricao(Long id) {
             if (id == null) return null;
             return salas.stream().filter(x -> x.id.equals(id)).map(x -> x.descricao).findFirst().orElse(null);
@@ -102,6 +109,13 @@ public class OcorrenciaComponenteCurricularService {
                             : null)
                     .orElse(null);
         }
+        String professorNome(Long professorId) {
+            if (professorId == null) return null;
+            Professor p = professores.stream().filter(x -> x.id.equals(professorId)).findFirst().orElse(null);
+            if (p == null) return null;
+            PessoaFisica pf = pessoasFisicas.stream().filter(x -> x.id.equals(p.pessoaId)).findFirst().orElse(null);
+            return pf != null ? pf.nome : null;
+        }
     }
 
     private void hydrate(DiaAula d, List<TurnoEducacao> turnos, List<TempoAula> tempos) {
@@ -114,15 +128,18 @@ public class OcorrenciaComponenteCurricularService {
     }
 
     private Uni<Refs> loadRefs() {
-        return Uni.combine().all()
-                .unis(salaRepository.listAll(), diaAulaRepository.listAll(),
-                        turnoEducacaoRepository.listAll(), tempoAulaRepository.listAll(),
-                        oferecimentoRepository.listAll(), componenteCurricularRepository.listAll())
-                .asTuple()
-                .map(t -> {
-                    for (DiaAula d : t.getItem2()) hydrate(d, t.getItem3(), t.getItem4());
-                    return new Refs(t.getItem1(), t.getItem2(), t.getItem5(), t.getItem6());
-                });
+        return salaRepository.listAll()
+                .onItem().transformToUni(salas -> diaAulaRepository.listAll()
+                        .onItem().transformToUni(dias -> turnoEducacaoRepository.listAll()
+                                .onItem().transformToUni(turnos -> tempoAulaRepository.listAll()
+                                        .onItem().transformToUni(tempos -> oferecimentoRepository.listAll()
+                                                .onItem().transformToUni(oferecimentos -> componenteCurricularRepository.listAll()
+                                                        .onItem().transformToUni(componentes -> professorRepository.listAll()
+                                                                .onItem().transformToUni(professores -> pessoaFisicaRepository.listAll()
+                                                                        .map(pessoasFisicas -> {
+                                                                            for (DiaAula d : dias) hydrate(d, turnos, tempos);
+                                                                            return new Refs(salas, dias, oferecimentos, componentes, professores, pessoasFisicas);
+                                                                        }))))))));
     }
 
     private Uni<List<OcorrenciaComponenteCurricularResponse>> withRefs(Uni<List<OcorrenciaComponenteCurricular>> items) {
@@ -131,7 +148,7 @@ public class OcorrenciaComponenteCurricularService {
 
     private OcorrenciaComponenteCurricularResponse toResponse(OcorrenciaComponenteCurricular e, Refs refs) {
         return new OcorrenciaComponenteCurricularResponse(e.id, e.professorId, e.salaId, e.ativo, e.oferecimentoComponenteCurricularId, e.data, e.diaAulaId, e.aulaCoringa, e.aulaPresencial,
-                null, // professor_descricao - cross-service (professor)
+                refs != null ? refs.professorNome(e.professorId) : null,
                 refs != null ? refs.salaDescricao(e.salaId) : null,
                 refs != null ? refs.diaAulaDescricao(e.diaAulaId) : null,
                 refs != null ? refs.oferecimentoDescricao(e.oferecimentoComponenteCurricularId) : null);

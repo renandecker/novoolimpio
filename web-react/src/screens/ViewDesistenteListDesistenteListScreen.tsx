@@ -1,20 +1,27 @@
 import { useState } from 'react';
 import { PermissionGate } from '../permissions';
 import { DataTable, type DataTableColumn } from '../DataTable';
+import type { ApiItem } from '../types';
 import { CancelamentoModal } from '../CancelamentoModal';
 
+const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+
+const formatDate = (value: unknown): string => {
+  if (value === null || value === undefined) return '';
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value));
+  if (!match) return String(value);
+  return `${match[3]}/${match[2]}/${match[1]}`;
+};
+
 const DESISTENTE_COLUMNS: DataTableColumn[] = [
-  { key: 'descricao', label: 'Descrição' },
-  { key: 'contratoId', label: 'Contrato' },
-  { key: 'motivoId', label: 'Motivo' },
-  { key: 'pessoaFuncionarioId', label: 'Funcionário' },
-  { key: 'dataCriacao', label: 'Data Criação' },
-  { key: 'ativo', label: 'Ativo' },
+  { key: 'id', label: 'Id' },
+  { key: 'data_criacao', label: 'Data Desistente', render: (item) => formatDate(asRecord(item).data_criacao) },
+  { key: 'id_contrato', label: 'Contrato' },
+  { key: 'pessoa_aluno_descricao', label: 'Nome Aluno' },
+  { key: 'pessoa_notificou_descricao', label: 'Nome Funcionário' },
+  { key: 'motivo_descricao', label: 'Motivo' },
 ];
 
-// listDesistente.xhtml (olimpio.zip) shows a plain list of alunos desistentes; the row actions
-// "Reativar", "Reparcelamento" and "Cancelamento de Contrato" each open their own modal — the
-// "Cancelamento" wizard is not a page-level tab.
 export default function ViewDesistenteListDesistenteListScreen() {
   const [cancelamentoAberto, setCancelamentoAberto] = useState(false);
 
@@ -29,7 +36,7 @@ export default function ViewDesistenteListDesistenteListScreen() {
               Cancelamento de Contrato
             </button>
           </div>
-          <DataTable path="/api/educacao/desistente" columns={DESISTENTE_COLUMNS} />
+          <DataTable path="/api/view/desistente/listDesistente" columns={DESISTENTE_COLUMNS} />
         </div>
         {cancelamentoAberto && <CancelamentoModal onClose={() => setCancelamentoAberto(false)} />}
       </main>

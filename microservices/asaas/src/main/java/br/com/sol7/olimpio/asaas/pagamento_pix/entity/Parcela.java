@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 /**
  * Mapeamento parcial de fin_parcela (tabela legada, criada em V1__base.sql). O fluxo PIX
- * (movido do pagamento-service para o asaas-service) so precisa ler/atualizar os campos
+ * (movido do fiserv para o asaas-service) so precisa ler/atualizar os campos
  * relacionados a forma de pagamento - as demais colunas sao de responsabilidade de outros
  * microsservicos.
  */

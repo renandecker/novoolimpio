@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 
 /**
  * Cobranca PIX de uma parcela - tabela legada (fin_parcela_pix), vinculada a
- * fin_parcela.id_parcela_pix. Fluxo movido do pagamento-service para o asaas-service.
+ * fin_parcela.id_parcela_pix. Fluxo movido do fiserv para o asaas-service.
  *
  * As colunas valor/valorPago/providerChargeId/endToEndId/dataCriacao/dataPagamento foram
  * adicionadas em V3__ajuste_pix.sql (aplicado pelo restore do Docker como 0022__ajuste_pix.sql)

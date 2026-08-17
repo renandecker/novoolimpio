@@ -27,7 +27,7 @@
 #   8092  aluno
 #   8094  asaas
 #   8095  curriculo (dominio Empresa/Curriculo cur_*)
-#   8096  pagamento (cartao Fiserv; publica olimpio.pagamento.confirmado no Kafka)
+#   8096  fiserv (cartao Fiserv; publica olimpio.pagamento.confirmado no Kafka)
 #   3000  web-react (app React)
 
 name: olimpio
@@ -386,9 +386,9 @@ services:
       login:
         condition: service_healthy
         
-  pagamento:
-    build: ./microservices/pagamento-service
-    container_name: olimpio-pagamento
+  fiserv:
+    build: ./microservices/fiserv
+    container_name: olimpio-fiserv
     restart: unless-stopped
     environment:
       <<: *service-env
@@ -404,8 +404,7 @@ services:
       login:
         condition: service_healthy
         
-  # fiserv: removido temporariamente - microsservico nao criado (sem ./microservices/fiserv). Reativar quando o modulo existir.
-  #       O modulo Fiserv (cartao) vive em pagamento-service (porta 8096); o fluxo PIX (Asaas) vive em asaas-service (porta 8094).
+  # O modulo Fiserv (cartao) vive em fiserv (porta 8096); o fluxo PIX (Asaas) vive em asaas-service (porta 8094).
   
   gateway:
     build: ./docker/gateway
@@ -425,7 +424,7 @@ services:
       - financeiro
       - login
       - notificacoes
-      - pagamento
+      - fiserv
       - professor
       - relatorios
       - schedule

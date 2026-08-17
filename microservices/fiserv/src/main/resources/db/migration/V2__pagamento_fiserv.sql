@@ -1,7 +1,7 @@
 --
 -- V2__pagamento_fiserv.sql
 --
--- Objetivo: dar suporte ao microsservico olimpio-pagamento-service, que integra com a
+-- Objetivo: dar suporte ao microsservico olimpio-fiserv, que integra com a
 -- Fiserv Commerce Hub / Payments Gateway (IPP) para pagamentos com cartao (a vista e
 -- parcelado) e ao fluxo de PIX ja existente no schema legado (fin_pix / fin_parcela_pix).
 --

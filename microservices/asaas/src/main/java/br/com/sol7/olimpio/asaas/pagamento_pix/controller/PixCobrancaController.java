@@ -16,7 +16,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 /**
- * Cobrancas PIX de parcelas (fluxo movido do pagamento-service, rota antiga
+ * Cobrancas PIX de parcelas (fluxo movido do fiserv, rota antiga
  * /api/pagamento/pix). Gera a cobranca no Asaas (PixProviderClient), persiste em
  * fin_parcela_pix e vincula fin_parcela.id_parcela_pix.
  */

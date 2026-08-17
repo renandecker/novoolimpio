@@ -54,7 +54,7 @@ stop-all.bat -v          # para os containers e apaga os dados do banco
 | `financeiro` | 8087 | Microsservico |
 | `login` | 8090 | Microsservico de autenticacao (login/bootstrap) |
 | `notificacoes` | 8082 | Microsservico |
-| `pagamento` | 8096 | Microsservico (cartao Fiserv + PIX, publica no Kafka) |
+| `fiserv` | 8096 | Microsservico (cartao Fiserv + PIX, publica no Kafka) |
 | `professor` | 8091 | Microsservico |
 | `relatorios` | 8088 | Microsservico |
 | `schedule` | 8089 | Microsservico |
@@ -78,7 +78,7 @@ Todo controller dos microsservicos segue o padrao `@Path("/api/<modulo>/<feature
 /api/financeiro/*  -> financeiro:8087
 /api/login/*       -> login:8090
 /api/notificacoes/* -> notificacoes:8082
-/api/pagamento/*   -> pagamento:8096
+/api/pagamento/*   -> fiserv:8096
 /api/relatorios/*  -> relatorios:8088
 /api/schedule/*    -> schedule:8089
 ```

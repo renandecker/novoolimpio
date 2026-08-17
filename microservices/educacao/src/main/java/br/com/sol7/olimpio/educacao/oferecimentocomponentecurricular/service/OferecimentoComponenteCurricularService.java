@@ -28,6 +28,10 @@ import br.com.sol7.olimpio.educacao.turnoeducacao.TurnoEducacao;
 import br.com.sol7.olimpio.educacao.turnoeducacao.TurnoEducacaoRepository;
 import br.com.sol7.olimpio.educacao.unidade.Unidade;
 import br.com.sol7.olimpio.educacao.unidade.UnidadeRepository;
+import br.com.sol7.olimpio.educacao.professor.Professor;
+import br.com.sol7.olimpio.educacao.professor.ProfessorRepository;
+import br.com.sol7.olimpio.educacao.basico.PessoaFisica;
+import br.com.sol7.olimpio.educacao.basico.PessoaFisicaRepository;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -65,6 +69,8 @@ public class OferecimentoComponenteCurricularService {
     @Inject CriterioRepository criterioRepository;
     @Inject CriterioService criterioService;
     @Inject OcorrenciaComponenteCurricularRepository ocorrenciaRepository;
+    @Inject ProfessorRepository professorRepository;
+    @Inject PessoaFisicaRepository pessoaFisicaRepository;
 
     // Migrado de SchedulingService.replicarOferecimentoAuto() (legado, L279-326): rotina automatica
     // de replicacao de oferecimentos. Roda verificarDisciplina (status de disciplinas), seleciona os
@@ -149,7 +155,7 @@ public class OferecimentoComponenteCurricularService {
                 refs != null && e.salaId != null ? refs.sala(e.salaId).descricao : null,
                 refs != null ? curriculoDescricao(refs.curriculo(e.curriculoId), refs.curso(e.curriculoId)) : null,
                 refs != null && e.componenteCurricularId != null ? refs.componente(e.componenteCurricularId).descricao : null,
-                null); // professor_descricao - cross-service (professor)
+                refs != null ? refs.professorNome(e.professorId) : null);
     }
 
     private String unidadeDescricao(Unidade u) {
@@ -173,7 +179,8 @@ public class OferecimentoComponenteCurricularService {
 
     private record Refs(List<Periodo> periodos, List<Grupo> grupos, List<Sala> salas,
                         List<Curriculo> curriculos, List<ComponenteCurricular> componentes,
-                        List<Unidade> unidades, List<Curso> cursos) {
+                        List<Unidade> unidades, List<Curso> cursos,
+                        List<Professor> professores, List<PessoaFisica> pessoasFisicas) {
         Periodo periodo(Long id) { if (id == null) return null; return periodos.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null); }
         Grupo grupo(Long id) { if (id == null) return null; return grupos.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null); }
         Sala sala(Long id) { if (id == null) return null; return salas.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null); }
@@ -186,15 +193,26 @@ public class OferecimentoComponenteCurricularService {
             if (c == null || c.cursoId == null) return null;
             return cursos.stream().filter(x -> x.id.equals(c.cursoId)).findFirst().orElse(null);
         }
+        String professorNome(Long professorId) {
+            if (professorId == null) return null;
+            Professor p = professores.stream().filter(x -> x.id.equals(professorId)).findFirst().orElse(null);
+            if (p == null) return null;
+            PessoaFisica pf = pessoasFisicas.stream().filter(x -> x.id.equals(p.pessoaId)).findFirst().orElse(null);
+            return pf != null ? pf.nome : null;
+        }
     }
 
     private Uni<Refs> loadRefs() {
-        return Uni.combine().all()
-                .unis(periodoRepository.listAll(), grupoRepository.listAll(), salaRepository.listAll(),
-                        curriculoRepository.listAll(), componenteCurricularRepository.listAll(),
-                        unidadeRepository.listAll(), cursoRepository.listAll())
-                .asTuple()
-                .map(t -> new Refs(t.getItem1(), t.getItem2(), t.getItem3(), t.getItem4(), t.getItem5(), t.getItem6(), t.getItem7()));
+        return periodoRepository.listAll()
+                .onItem().transformToUni(periodos -> grupoRepository.listAll()
+                        .onItem().transformToUni(grupos -> salaRepository.listAll()
+                                .onItem().transformToUni(salas -> curriculoRepository.listAll()
+                                        .onItem().transformToUni(curriculos -> componenteCurricularRepository.listAll()
+                                                .onItem().transformToUni(componentes -> unidadeRepository.listAll()
+                                                        .onItem().transformToUni(unidades -> cursoRepository.listAll()
+                                                                .onItem().transformToUni(cursos -> professorRepository.listAll()
+                                                                        .onItem().transformToUni(professores -> pessoaFisicaRepository.listAll()
+                                                                                .map(pessoasFisicas -> new Refs(periodos, grupos, salas, curriculos, componentes, unidades, cursos, professores, pessoasFisicas))))))))));
     }
 
     private Uni<List<OferecimentoComponenteCurricularResponse>> withRefs(Uni<List<OferecimentoComponenteCurricular>> items) {

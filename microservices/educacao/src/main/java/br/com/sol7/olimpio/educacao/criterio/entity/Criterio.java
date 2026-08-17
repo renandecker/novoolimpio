@@ -4,6 +4,8 @@ import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import java.util.Date;
 
 @Entity
@@ -23,8 +25,10 @@ public class Criterio extends PanacheEntity {
     @Column(name = "qtd_aulas_tolerancia_matricula")
     public int qtdAulasToleraciaMatricula;
     @Column(name = "data_inicio")
+    @Temporal(TemporalType.DATE)
     public Date dataInicio;
     @Column(name = "data_fim")
+    @Temporal(TemporalType.DATE)
     public Date dataFim;
     @Column(name = "tipo_matricula")
     public String tipoMatricula;  // era TipoMatricula (enum/embeddable) no legado

@@ -56,7 +56,7 @@ public class ModulePermissionService {
      * depende do nome do login: qualquer usuário vinculado a um perfil de
      * hierarquia ADMIN deve receber as permissões globais do administrador.
      */
-    @CacheResult(cacheName = "login-menu-cache")
+    @CacheResult(cacheName = "login-admin-cache")
     public Uni<Boolean> isAdministrator(Long idUsuario) {
         if (idUsuario == null) return Uni.createFrom().item(false);
         return UsuarioPerfil.<UsuarioPerfil>find("usuarioId", idUsuario).list()

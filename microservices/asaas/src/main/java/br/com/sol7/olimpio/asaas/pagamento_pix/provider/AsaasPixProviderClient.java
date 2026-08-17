@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Implementacao real de {@link PixProviderClient} usando o Asaas (mesmo PSP do asaas-service).
- * Fluxo movido do pagamento-service para o asaas-service. Como NAO esta marcada com @DefaultBean,
+ * Fluxo movido do fiserv para o asaas-service. Como NAO esta marcada com @DefaultBean,
  * o Quarkus a injeta no lugar do StubPixProviderClient automaticamente.
  *
  * Fluxo de criacao: garante um cliente Asaas (busca por CPF/CNPJ ou cria), cria a cobranca

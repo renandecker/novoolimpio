@@ -88,7 +88,7 @@ if [ "$1" == "-d" ]; then
     echo "  financeiro: http://localhost:8087"
     echo "  login:      http://localhost:8090"
     echo "  notificacoes: http://localhost:8082"
-    echo "  pagamento:  http://localhost:8096"
+    echo "  fiserv:     http://localhost:8096"
     echo "  professor:  http://localhost:8091"
     echo "  relatorios: http://localhost:8088"
     echo "  schedule:   http://localhost:8089"

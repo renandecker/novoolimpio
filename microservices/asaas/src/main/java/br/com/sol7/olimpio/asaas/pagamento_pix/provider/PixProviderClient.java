@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 /**
  * Ponto de extensao para a geracao real de cobrancas PIX junto a um PSP (ex.: Asaas).
- * Fluxo movido do pagamento-service para o asaas-service.
+ * Fluxo movido do fiserv para o asaas-service.
  *
  * A implementacao default (StubPixProviderClient, marcada com @DefaultBean) e automaticamente
  * substituida quando existe outra implementacao ativa do contrato (ex.: AsaasPixProviderClient).

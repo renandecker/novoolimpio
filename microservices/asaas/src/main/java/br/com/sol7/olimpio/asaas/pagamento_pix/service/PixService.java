@@ -21,7 +21,7 @@ import java.util.Set;
 /**
  * Gera e consulta cobrancas PIX, reaproveitando fin_parcela_pix (tabela legada) e vinculando o
  * resultado a fin_parcela.id_parcela_pix. A geracao efetiva do QR Code/chave e delegada a
- * PixProviderClient. Fluxo movido do pagamento-service para o asaas-service.
+ * PixProviderClient. Fluxo movido do fiserv para o asaas-service.
  */
 @ApplicationScoped
 public class PixService {

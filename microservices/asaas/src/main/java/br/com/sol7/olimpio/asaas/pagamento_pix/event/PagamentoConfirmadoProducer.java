@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Publica eventos de pagamento confirmado no Kafka (topico olimpio.pagamento.confirmado,
  * configurado em application.properties - canal "pagamento-confirmado"). Fluxo PIX movido do
- * pagamento-service para o asaas-service. JSON serializado com StringSerializer e falha de
+ * fiserv para o asaas-service. JSON serializado com StringSerializer e falha de
  * publicacao apenas logada (nao derruba a transacao).
  */
 @ApplicationScoped

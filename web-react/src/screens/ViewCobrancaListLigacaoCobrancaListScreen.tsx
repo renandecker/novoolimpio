@@ -3,17 +3,26 @@ import { api } from '../api';
 import { PermissionGate } from '../permissions';
 import { DataTable, type DataTableColumn } from '../DataTable';
 import { Tabs } from '../Tabs';
+import type { ApiItem } from '../types';
 
 interface EtapaCobranca {
   id: number;
   descricao: string;
 }
 
+const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+
+const formatDate = (value: unknown): string => {
+  if (value === null || value === undefined) return '';
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value));
+  if (!match) return String(value);
+  return `${match[3]}/${match[2]}/${match[1]}`;
+};
+
 const COBRANCA_COLUMNS: DataTableColumn[] = [
-  { key: 'id', label: 'Id' },
   { key: 'usuarioId', label: 'Usuário ligou' },
-  { key: 'dataInicial', label: 'Data inicial' },
-  { key: 'dataFinal', label: 'Data final' },
+  { key: 'dataInicial', label: 'Data inicial', render: (item) => formatDate(asRecord(item).dataInicial) },
+  { key: 'dataFinal', label: 'Data final', render: (item) => formatDate(asRecord(item).dataFinal) },
   { key: 'compromissoId', label: 'Compromisso' },
   { key: 'resultadoCobrancaId', label: 'Resultado ligação' },
   { key: 'telefone', label: 'Telefone' },
@@ -45,6 +54,7 @@ export default function ViewCobrancaListLigacaoCobrancaListScreen() {
                   path="/api/financeiro/ligacao-cobranca"
                   params={{ etapasCobrancaId: etapa.id }}
                   columns={COBRANCA_COLUMNS}
+                  maxMainColumns={COBRANCA_COLUMNS.length}
                 />
               ),
             }))}

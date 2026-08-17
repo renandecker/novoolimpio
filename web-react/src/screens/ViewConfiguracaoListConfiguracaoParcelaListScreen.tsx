@@ -1,6 +1,12 @@
 import { PermissionGate } from '../permissions';
 import { ModuleTabs } from '../ModuleTabs';
+import type { DataTableColumn } from '../DataTable';
 import { CAMPO_SOURCE, CAMPO_COLUMNS, CAMPO_SEARCH, PERFIL_SOURCE, PERFIL_COLUMNS, PERFIL_SEARCH, UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH } from '../masterDetailSources';
+
+const CONFIGURACAO_PARCELA_COLUMNS: DataTableColumn[] = [
+  { key: 'id', label: 'Id' },
+  { key: 'unidade_descricao', label: 'Unidade' },
+];
 
 export default function ViewConfiguracaoListConfiguracaoParcelaListScreen() {
   return (
@@ -9,7 +15,7 @@ export default function ViewConfiguracaoListConfiguracaoParcelaListScreen() {
         <h1>Configuracao Parcela</h1>
         <ModuleTabs
           tabs={[
-            { key: 'regras', label: 'Regras', path: '/api/view/configuracao/listConfiguracaoParcela' },
+            { key: 'regras', label: 'Regras', path: '/api/view/configuracao/listConfiguracaoParcela', columns: CONFIGURACAO_PARCELA_COLUMNS, maxMainColumns: CONFIGURACAO_PARCELA_COLUMNS.length },
             { key: 'variaveis', label: 'Variáveis', empty: 'Conteúdo de Variáveis.' },
             { key: 'geral', label: 'Geral', empty: 'Conteúdo de Geral.' },
             { key: 'camposValor', label: 'Campos valor', masterDetail: { label: 'Campos valor', source: CAMPO_SOURCE, valueKey: 'id', searchKeys: CAMPO_SEARCH, columns: CAMPO_COLUMNS } },

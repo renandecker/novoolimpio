@@ -1,4 +1,4 @@
-# olimpio-pagamento-service
+# olimpio-fiserv
 
 Microsserviço de pagamentos com **cartão** (à vista e parcelado) para o ecossistema
 Olímpio, construído no mesmo padrão do `olimpio-basico-service` (Quarkus 3.15 + Hibernate
@@ -18,7 +18,7 @@ Payments Gateway (IPP)** a partir da collection Postman fornecida.
 | Integração Fiserv | Módulo `gateway/fiserv`: assinatura HMAC, DTOs de request e o serviço que chama `/payments` (à vista), `/payment-schedules` (parcelado), `/payment-tokens` (cadastro de cartão) e transações secundárias `/payments/{id}` (void/estorno). |
 | Cadastro de cartão | Módulo `cartaopessoa`: tokeniza o cartão na Fiserv e grava **apenas** bin, últimos 4 dígitos, CPF e o token — nunca o número completo nem o CVV. |
 | Cobrança de cartão | Módulo `parcelacartao`: efetua a cobrança (à vista ou parcelada), cancela (void), estorna (return) e vincula o resultado a `fin_parcela`. |
-| PIX | Movido para o `asaas-service` (rota `/api/asaas/pix`, antes `/api/pagamento/pix`). O pagamento-service agora trata somente cartão Fiserv. |
+| PIX | Movido para o `asaas-service` (rota `/api/asaas/pix`, antes `/api/pagamento/pix`). O fiserv agora trata somente cartão Fiserv. |
 | Webhook | `POST /api/pagamento/webhook/fiserv`: aplica confirmações assíncronas da Fiserv em `fin_parcela_cartao`. |
 | Kafka | Evento `olimpio.pagamento.confirmado` publicado quando um pagamento por **cartão** é confirmado. O fluxo PIX publica o mesmo evento a partir do asaas-service. |
 | Orquestração | Módulo `pagamento`: um único endpoint que recebe a forma de pagamento (cartão) e despacha para o módulo certo. |
@@ -28,7 +28,7 @@ Payments Gateway (IPP)** a partir da collection Postman fornecida.
 
 ## 2. ⚠️ PIX foi movido para o asaas-service
 
-O PIX do pagamento-service (módulo `pix/`, incluindo o provider real `AsaasPixProviderClient`)
+O PIX do fiserv (módulo `pix/`, incluindo o provider real `AsaasPixProviderClient`)
 foi **movido integralmente para o microsserviço `asaas`** (rota `/api/asaas/pix`, pacote
 `br.com.sol7.olimpio.asaas.pagamento_pix`). Os consumidores que chamavam `/api/pagamento/pix`
 devem chamar `/api/asaas/pix`.
@@ -38,7 +38,7 @@ e-commerce da Fiserv (Commerce Hub / Payments Gateway/IPP) e **não possui endpo
 PIX é um meio de pagamento instantâneo brasileiro. O fluxo de PIX, que já usava o Asaas como PSP,
 passou a viver no microsserviço responsável pelo Asaas.
 
-O que este serviço (pagamento) faz hoje:
+O que este serviço (fiserv) faz hoje:
 
 - **À vista** → `POST /ipp/payments-gateway/v2/payments` com `requestType: PaymentCardSaleTransaction` (ou `PaymentTokenSaleTransaction` quando usa cartão já cadastrado).
 - **Parcelado** → `POST /ipp/payments-gateway/v2/payment-schedules` com `requestType: PaymentMethodPaymentSchedulesRequest` (`numberOfPayments` = quantidade de parcelas, `frequency` = periodicidade).
@@ -58,7 +58,7 @@ aplicada pelo restore (`0022__ajuste_pix.sql`).
 ## 3. Estrutura do projeto
 
 ```
-pagamento-service/
+fiserv/
 ├── pom.xml
 ├── .env.example
 ├── README.md

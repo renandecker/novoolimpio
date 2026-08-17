@@ -146,10 +146,10 @@ public class OferecimentoCursoService {
     }
 
     private Uni<Refs> loadRefs() {
-        return Uni.combine().all()
-                .unis(curriculoRepository.listAll(), unidadeRepository.listAll(), cursoRepository.listAll())
-                .asTuple()
-                .map(t -> new Refs(t.getItem1(), t.getItem2(), t.getItem3()));
+        return curriculoRepository.listAll()
+                .onItem().transformToUni(curriculos -> unidadeRepository.listAll()
+                        .onItem().transformToUni(unidades -> cursoRepository.listAll()
+                                .map(cursos -> new Refs(curriculos, unidades, cursos))));
     }
 
     private Uni<List<OferecimentoCursoResponse>> withRefs(Uni<List<Grupo>> items) {

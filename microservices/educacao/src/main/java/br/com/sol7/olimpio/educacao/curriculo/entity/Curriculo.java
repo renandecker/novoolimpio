@@ -4,6 +4,8 @@ import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import java.util.Date;
 
 @Entity
@@ -51,6 +53,7 @@ public class Curriculo extends PanacheEntity {
     @Column(name = "idade_maxima")
     public Integer idadeMaxima;
     @Column(name = "data_cancelamento")
+    @Temporal(TemporalType.DATE)
     public Date dataCancelamento;
     @Column(name = "template_contrato")
     public String templateContrato;

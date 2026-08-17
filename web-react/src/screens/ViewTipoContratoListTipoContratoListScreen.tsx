@@ -1,1 +1,20 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewTipoContratoListTipoContratoListScreen(){return <PermissionGate permission="READ"><main><h1>Tipo Contrato</h1><DataTable path="/api/view/tipoContrato/listTipoContrato"/></main></PermissionGate>}
+import { PermissionGate } from '../permissions';
+import { DataTable, type DataTableColumn } from '../DataTable';
+import type { ApiItem } from '../types';
+
+const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+
+const COLUMNS: DataTableColumn[] = [
+  { key: 'descricao', label: 'Descrição' },
+];
+
+export default function ViewTipoContratoListTipoContratoListScreen() {
+  return (
+    <PermissionGate permission="READ">
+      <main>
+        <h1>Tipo Contrato</h1>
+        <DataTable path="/api/view/tipoContrato/listTipoContrato" columns={COLUMNS} maxMainColumns={COLUMNS.length} />
+      </main>
+    </PermissionGate>
+  );
+}

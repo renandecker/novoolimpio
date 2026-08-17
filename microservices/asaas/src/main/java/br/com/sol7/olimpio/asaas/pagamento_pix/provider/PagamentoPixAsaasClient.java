@@ -16,7 +16,7 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 /**
  * Cliente REST reativo para os endpoints Asaas usados pela geracao/consulta de cobrancas PIX
- * (AsaasPixProviderClient). Fluxo movido do pagamento-service para o asaas-service. Corpo/consulta
+ * (AsaasPixProviderClient). Fluxo movido do fiserv para o asaas-service. Corpo/consulta
  * trafegam como JSON generico (JsonNode) e o header de autenticacao (access_token) e injetado via
  * @ClientHeaderParam (ver AsaasAuth).
  */

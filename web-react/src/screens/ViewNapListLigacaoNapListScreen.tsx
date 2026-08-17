@@ -43,6 +43,7 @@ export default function ViewNapListLigacaoNapListScreen() {
                   path="/api/educacao/ligacao-nap"
                   params={{ etapasNapId: etapa.id }}
                   columns={NAP_COLUMNS}
+                  maxMainColumns={NAP_COLUMNS.length}
                 />
               ),
             }))}
