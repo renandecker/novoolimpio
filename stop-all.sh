@@ -18,7 +18,8 @@ fi
 
 if [ "$1" == "-v" ]; then
     echo "Parando tudo, apagando as imagens e os dados do banco..."
-    if $DC down --rmi all -v 2> "$LOGFILE"; then
+    if $DC down --rmi all -v --remove-orphans 2> "$LOGFILE"; then
+        docker network rm olimpio_default 2> /dev/null || true
         echo "[SUCESSO] Containers removidos, imagens apagadas e dados do banco apagados."
     else
         echo "[ERRO] Falha ao parar os containers. Detalhes em error.log:"
@@ -27,7 +28,8 @@ if [ "$1" == "-v" ]; then
     fi
 else
     echo "Parando tudo e apagando as imagens (dados do banco preservados)..."
-    if $DC down --rmi all 2> "$LOGFILE"; then
+    if $DC down --rmi all --remove-orphans 2> "$LOGFILE"; then
+        docker network rm olimpio_default 2> /dev/null || true
         echo "[SUCESSO] Containers removidos e imagens apagadas. Dados do banco preservados."
     else
         echo "[ERRO] Falha ao parar os containers. Detalhes em error.log:"

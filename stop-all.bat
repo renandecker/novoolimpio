@@ -26,9 +26,11 @@ if %errorlevel% equ 0 (
 
 if "%1"=="-v" (
     echo Parando tudo, apagando as imagens e os dados do banco...
-    %DC% down --rmi all -v 2> "%LOGFILE%"
-    if %errorlevel% equ 0 (
-        echo [SUCESSO] Containers removidos, imagens apagadas e dados do banco apagados.
+    %DC% down --rmi all -v --remove-orphans 2> "%LOGFILE%"
+    set "DOWN_RESULT=!errorlevel!"
+    docker network rm olimpio_default >nul 2>&1
+    if "!DOWN_RESULT!" equ "0" (
+        echo [SUCESSO] Containers removidos, imagens e dados do banco apagados.
     ) else (
         echo [ERRO] Falha ao parar os containers. Detalhes em error.log:
         type "%LOGFILE%"
@@ -36,8 +38,10 @@ if "%1"=="-v" (
     )
 ) else (
     echo Parando tudo e apagando as imagens (dados do banco preservados)...
-    %DC% down --rmi all 2> "%LOGFILE%"
-    if %errorlevel% equ 0 (
+    %DC% down --rmi all --remove-orphans 2> "%LOGFILE%"
+    set "DOWN_RESULT=!errorlevel!"
+    docker network rm olimpio_default >nul 2>&1
+    if "!DOWN_RESULT!" equ "0" (
         echo [SUCESSO] Containers removidos e imagens apagadas. Dados do banco preservados.
     ) else (
         echo [ERRO] Falha ao parar os containers. Detalhes em error.log:

@@ -48,12 +48,13 @@ if $DC ps -q > /dev/null 2>&1; then
     RUNNING=$($DC ps -q 2> /dev/null | wc -l)
     if [ "$RUNNING" -gt 0 ]; then
         echo " Encontrados containers em execucao. Derrubando antes de subir novamente..."
-        if ! $DC down 2> "$LOGFILE"; then
+        if ! $DC down --remove-orphans 2> "$LOGFILE"; then
             echo ""
             echo "[ERRO] Falha ao derrubar os containers existentes. Detalhes em error.log:"
             cat "$LOGFILE"
             exit 1
         fi
+        docker network rm olimpio_default 2> /dev/null || true
         echo " Containers existentes derrubados. Dados do banco preservados."
     fi
 fi
@@ -64,9 +65,16 @@ echo "============================================"
 
 MICROSERVICES="aluno asaas basico central comercial curriculo educacao estoque financeiro fiserv login notificacoes professor relatorios schedule"
 COMPILE_ERRORS=0
+> "$LOGFILE"
 for svc in $MICROSERVICES; do
     if [ -d "microservices/$svc" ] && [ -f "microservices/$svc/pom.xml" ]; then
-        if ! mvn -B -q -f "microservices/$svc/pom.xml" compile -DskipTests 2> "$LOGFILE"; then
+        MVN_OUT=$(mvn -B -f "microservices/$svc/pom.xml" compile -DskipTests 2>&1)
+        if [ $? -ne 0 ]; then
+            echo "" >> "$LOGFILE"
+            echo "========================================" >> "$LOGFILE"
+            echo " ERRO: $svc" >> "$LOGFILE"
+            echo "========================================" >> "$LOGFILE"
+            echo "$MVN_OUT" >> "$LOGFILE"
             echo "  [ERRO] $svc - compilacao falhou. Detalhes em error.log"
             COMPILE_ERRORS=1
         else
