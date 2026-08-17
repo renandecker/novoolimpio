@@ -21,7 +21,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 @ApplicationScoped
 public class RelatoriosMaintenanceService {
 
-    private static final Logger LOG = Logger.getLogger(ReloriosMaintenanceService.class);
+    private static final Logger LOG = Logger.getLogger(RelatoriosMaintenanceService.class);
 
     @Inject
     Pool pool;
