@@ -162,21 +162,22 @@ public class EducacaoMaintenanceService {
                 .replaceWithVoid();
     }
 
-    private Uni<List<long[]>> buscarOcorrencias(long oId, String tipo) {
+    private Uni<List<LocalDateTime[]>> buscarOcorrencias(long oId, String tipo) {
         return pool.preparedQuery(SQL_OCORRENCIAS)
                 .execute(Tuple.tuple().addLong(oId).addString(tipo))
                 .onItem().transform(rows -> {
-                    List<long[]> result = new ArrayList<>();
+                    List<LocalDateTime[]> result = new ArrayList<>();
                     for (Row r : rows) {
                         LocalDateTime data = r.getLocalDateTime("data");
-                        long ts = data != null ? java.sql.Timestamp.valueOf(data).getTime() : 0;
-                        result.add(new long[]{r.getLong("id"), ts});
+                        if (data != null) {
+                            result.add(new LocalDateTime[]{data});
+                        }
                     }
                     return result;
                 });
     }
 
-    private Uni<Void> gerarChamadasParaOferecimento(long oId, int qtdeSequencia, List<long[]> ocorrencias, boolean coringa) {
+    private Uni<Void> gerarChamadasParaOferecimento(long oId, int qtdeSequencia, List<LocalDateTime[]> ocorrencias, boolean coringa) {
         int size = ocorrencias.size();
         int dividido = (size + qtdeSequencia - 1) / qtdeSequencia;
 
@@ -186,8 +187,8 @@ public class EducacaoMaintenanceService {
             int inicioIdx = Math.min(qtdeSequencia * limite, size - 1);
             int fimIdx = Math.min(qtdeSequencia * (limite + 1), size) - 1;
 
-            LocalDateTime inicio = java.sql.Timestamp.valueOf(ocorrencias.get(inicioIdx)[1]).toLocalDateTime();
-            LocalDateTime fim = java.sql.Timestamp.valueOf(ocorrencias.get(Math.min(fimIdx, size - 1))[1]).toLocalDateTime();
+            LocalDateTime inicio = ocorrencias.get(inicioIdx)[0];
+            LocalDateTime fim = ocorrencias.get(Math.min(fimIdx, size - 1))[0];
 
             chain = chain.chain(() -> {
                 return pool.preparedQuery(SQL_EXISTE_PENDENTE)
@@ -235,8 +236,6 @@ public class EducacaoMaintenanceService {
     private static final String SQL_AVALIACOES_PARA_CORRIGIR =
             "SELECT id FROM edc_avaliacao WHERE data_final < current_date AND data_final IS NOT NULL";
 
-    // Corrige as respostas do aluno: compara id_avaliacao_resposta do aluno
-    // com id_avaliacao_resposta da pergunta (resposta correta).
     private static final String SQL_CORRIGIR_RESPOSTAS =
             "UPDATE edc_avaliacao_aluno aa " +
             "SET nota_acerto = CASE " +
