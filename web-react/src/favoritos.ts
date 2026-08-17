@@ -10,4 +10,4 @@ export type FavoritoDisponivel = {
 };
 
 export const listarFavoritos = async (): Promise<FavoritoDisponivel[]> =>
-  (await api.get<FavoritoDisponivel[]>('/api/basico/usuario-logado/favoritos')).data;
+  (await api.get<FavoritoDisponivel[]>('/api/basico/usuarioLogado/favoritos')).data;

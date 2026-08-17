@@ -6,13 +6,5 @@ export type RelatorioDisponivel = {
   tipo: 'TABELA' | 'GRAFICO' | 'MAPA';
 };
 
-export type RelatorioAberto = RelatorioDisponivel & {
-  configuracao: Record<string, unknown>;
-  dados?: { colunas: string[]; linhas: Array<Record<string, unknown>> } | null;
-};
-
 export const listarRelatoriosDisponiveis = async (): Promise<RelatorioDisponivel[]> =>
   (await api.get('/api/relatorios/relatorio/disponiveis')).data;
-
-export const abrirRelatorio = async (tipo: RelatorioDisponivel['tipo'], id: number): Promise<RelatorioAberto> =>
-  (await api.get(`/api/relatorios/relatorio/disponiveis/${tipo}/${id}`)).data;

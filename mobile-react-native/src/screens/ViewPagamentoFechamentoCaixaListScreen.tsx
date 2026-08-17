@@ -1,5 +1,394 @@
-import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
-export default function ViewPagamentoFechamentoCaixaListScreen() {
-  return <ModuleList path="/api/view/pagamento/fechamentoCaixa" />;
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { api } from '../api';
+import { Wizard } from '../Wizard';
+import type { WizardStep } from '../Wizard';
+
+// Tela real de Fechamento de Caixa (equivalente mobile de view/pagamento/fechamentoCaixa.xhtml
+// + includes, olimpio.zip / acesoalunoprofessor.zip), consumindo os endpoints REST reais do
+// módulo caixa de financeiro.zip.
+
+type Caixa = {
+  id: number; data: string; dataFechamento: string | null; usuarioId: number; fundoCaixa: number;
+  impressoraId: number | null; unidadeId: number; idCaixaUnidade: number; documento: string | null;
+};
+
+type TipoPagamento = 'DINHEIRO' | 'CHEQUE' | 'CARTAO' | 'BOLETO' | 'PIX' | 'TRANFERENCIA' | 'DEPOSITO';
+const TIPOS_PAGAMENTO: { value: TipoPagamento; label: string }[] = [
+  { value: 'DINHEIRO', label: 'Dinheiro' }, { value: 'CHEQUE', label: 'Cheque' }, { value: 'CARTAO', label: 'Cartão' },
+  { value: 'BOLETO', label: 'Boleto' }, { value: 'PIX', label: 'Pix' }, { value: 'TRANFERENCIA', label: 'Transf.' },
+  { value: 'DEPOSITO', label: 'Depósito' },
+];
+
+type FormaPagamentoLinha = { tipoPagamento: TipoPagamento; valor: string; documento: string };
+
+type FechamentoCaixaTotais = {
+  totalFundoCaixa: number; totalDinheiro: number; totalCheque: number; totalCartao: number;
+  totalBoleto: number; totalTransferencia: number; totalDeposito: number; totalSangria: number;
+  totalDinheiroCaixa: number; totalDesconto: number; totalJurosMulta: number;
+};
+
+const money = (v: number | undefined | null) => (v ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+function Field({ label, value, onChangeText, keyboardType }: { label: string; value: string; onChangeText: (v: string) => void; keyboardType?: 'numeric' | 'default' }) {
+  return (
+    <View style={styles.field}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      <TextInput style={styles.input} value={value} onChangeText={onChangeText} keyboardType={keyboardType} />
+    </View>
+  );
 }
+
+function ChipSelect<T extends string>({ options, value, onChange }: { options: { value: T; label: string }[]; value: T; onChange: (v: T) => void }) {
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }}>
+      {options.map((o) => (
+        <Pressable key={o.value} onPress={() => onChange(o.value)} style={[styles.chip, value === o.value && styles.chipActive]}>
+          <Text style={[styles.chipText, value === o.value && styles.chipTextActive]}>{o.label}</Text>
+        </Pressable>
+      ))}
+    </ScrollView>
+  );
+}
+
+export default function ViewPagamentoFechamentoCaixaListScreen() {
+  const [usuarioId, setUsuarioId] = useState('');
+  const [unidadeId, setUnidadeId] = useState('');
+  const [caixa, setCaixa] = useState<Caixa | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState('');
+  const [mensagem, setMensagem] = useState('');
+
+  // Passo 1
+  const [fundoCaixa, setFundoCaixa] = useState('');
+  const [impressoraId, setImpressoraId] = useState('');
+
+  useEffect(() => {
+    if (!usuarioId || !unidadeId) return;
+    (async () => {
+      try {
+        const { data: caixaId } = await api.get<number | null>('/api/financeiro/caixa/buscar-abertura-caixa-com-usuario-unidade', { params: { usuarioId, unidadeId } });
+        if (caixaId) {
+          const { data } = await api.get<Caixa>(`/api/financeiro/caixa/${caixaId}`);
+          setCaixa(data);
+        }
+        const { data: sugerido } = await api.get<number | null>('/api/financeiro/caixa/fundo-caixa-sugerido', { params: { usuarioId, unidadeId } });
+        if (sugerido != null) setFundoCaixa(String(sugerido));
+      } catch {
+        // sem caixa aberto ainda
+      }
+    })();
+  }, [usuarioId, unidadeId]);
+
+  async function abrirNovoCaixa() {
+    setErro(''); setLoading(true);
+    try {
+      const { data } = await api.post<Caixa>('/api/financeiro/caixa/abrir-novo-caixa', {
+        data: new Date().toISOString(), usuarioId: Number(usuarioId), unidadeId: Number(unidadeId),
+        fundoCaixa: Number(fundoCaixa || 0), impressoraId: impressoraId ? Number(impressoraId) : null,
+      });
+      setCaixa(data);
+      setMensagem('Caixa aberto com sucesso!');
+    } catch (e: any) {
+      setErro(e?.response?.data?.message ?? 'Ocorreu um erro ao abrir o caixa!');
+    } finally { setLoading(false); }
+  }
+
+  async function reabrirCaixa() {
+    if (!caixa) return;
+    setLoading(true); setErro('');
+    try {
+      const { data } = await api.post<Caixa>(`/api/financeiro/caixa/${caixa.id}/abrir`);
+      setCaixa(data);
+      setMensagem('Caixa aberto com sucesso!');
+    } catch { setErro('Ocorreu um erro ao abrir o caixa!'); } finally { setLoading(false); }
+  }
+
+  // Passo 2 - sub-abas
+  const [movSubTab, setMovSubTab] = useState<'parcela' | 'extra' | 'sangria'>('parcela');
+
+  const [parcelaId, setParcelaId] = useState('');
+  const [valorParcela, setValorParcela] = useState('');
+  const [dataVencimento, setDataVencimento] = useState(''); // yyyy-MM-dd
+  const [parcelaSequencia, setParcelaSequencia] = useState('1');
+  const [percentualDesconto, setPercentualDesconto] = useState('0');
+  const [percentualMulta, setPercentualMulta] = useState('2');
+  const [percentualJuros, setPercentualJuros] = useState('1');
+  const [diasTolerancia, setDiasTolerancia] = useState('0');
+  const [calculo, setCalculo] = useState<{ desconto: number; multa: number; juros: number; valorCobrado: number } | null>(null);
+  const [formasPagamento, setFormasPagamento] = useState<FormaPagamentoLinha[]>([{ tipoPagamento: 'DINHEIRO', valor: '', documento: '' }]);
+  const valorRecebido = formasPagamento.reduce((acc, f) => acc + (Number(f.valor) || 0), 0);
+  const troco = calculo ? Math.max(0, valorRecebido - calculo.valorCobrado) : 0;
+
+  async function calcularValores() {
+    setErro('');
+    try {
+      const { data } = await api.post('/api/financeiro/caixa/calcular-valores-parcela', {
+        valor: Number(valorParcela || 0), dataVencimento: dataVencimento || null, parcelaSequencia: Number(parcelaSequencia || 0),
+        percentualDesconto: Number(percentualDesconto || 0), percentualMulta: Number(percentualMulta || 0),
+        percentualJuros: Number(percentualJuros || 0), diasToleranciaMulta: Number(diasTolerancia || 0),
+        feriadoNoDiaAnteriorVencimento: false,
+      });
+      setCalculo(data);
+    } catch { setErro('Não foi possível calcular os valores da parcela.'); }
+  }
+
+  async function registrarPagamento() {
+    if (!caixa || !calculo) return;
+    setErro(''); setLoading(true);
+    try {
+      await api.post('/api/financeiro/caixa/registrar-pagamento-parcela', {
+        caixaId: caixa.id, parcelaId: Number(parcelaId), usuarioId: Number(usuarioId),
+        valorCobrado: calculo.valorCobrado, desconto: calculo.desconto, multaJuros: calculo.multa + calculo.juros,
+        movimentacoes: formasPagamento.filter((f) => Number(f.valor) > 0).map((f) => ({ tipoPagamento: f.tipoPagamento, valor: Number(f.valor), documento: f.documento || null })),
+      });
+      setMensagem('Pagamento registrado com sucesso!');
+      setParcelaId(''); setValorParcela(''); setDataVencimento(''); setCalculo(null);
+      setFormasPagamento([{ tipoPagamento: 'DINHEIRO', valor: '', documento: '' }]);
+    } catch (e: any) {
+      setErro(e?.response?.data?.message ?? 'Ocorreu um erro ao registrar esta movimentação!');
+    } finally { setLoading(false); }
+  }
+
+  const [historico, setHistorico] = useState('');
+  const [valorExtra, setValorExtra] = useState('');
+  const [movimentoId, setMovimentoId] = useState('');
+  const [tipoPagamentoExtra, setTipoPagamentoExtra] = useState<TipoPagamento>('DINHEIRO');
+
+  async function registrarMovimentacaoExtra() {
+    if (!caixa) return;
+    setErro(''); setLoading(true);
+    try {
+      await api.post('/api/financeiro/movimentacao-financeira/movimentacao-extra', {
+        historico, valor: Number(valorExtra || 0), movimentoId: Number(movimentoId),
+        tipoPagamento: tipoPagamentoExtra, caixaId: caixa.id, usuarioId: Number(usuarioId), valorTroco: 0,
+      });
+      setMensagem('Movimentação registrada com sucesso!');
+      setHistorico(''); setValorExtra(''); setMovimentoId('');
+    } catch (e: any) {
+      setErro(e?.response?.data?.message ?? 'Ocorreu um erro ao registrar esta movimentação!');
+    } finally { setLoading(false); }
+  }
+
+  const [valorSangria, setValorSangria] = useState('');
+  async function registrarSangria() {
+    if (!caixa) return;
+    setErro(''); setLoading(true);
+    try {
+      await api.post(`/api/financeiro/caixa/${caixa.id}/sangria`, { valor: Number(valorSangria || 0) });
+      setMensagem('Sangria registrada com sucesso!');
+      setValorSangria('');
+      await carregarTotais();
+    } catch (e: any) {
+      setErro(e?.response?.data?.message ?? 'Dinheiro em caixa insuficiente!');
+    } finally { setLoading(false); }
+  }
+
+  // Passo 3
+  const [totais, setTotais] = useState<FechamentoCaixaTotais | null>(null);
+  async function carregarTotais() {
+    if (!caixa) return;
+    setLoading(true); setErro('');
+    try {
+      const { data } = await api.get<FechamentoCaixaTotais>(`/api/financeiro/caixa/${caixa.id}/totais-fechamento`);
+      setTotais(data);
+    } catch { setErro('Não foi possível carregar os totais do caixa.'); } finally { setLoading(false); }
+  }
+  async function fecharCaixa() {
+    if (!caixa) return;
+    setErro(''); setLoading(true);
+    try {
+      const { data } = await api.post<Caixa>(`/api/financeiro/caixa/${caixa.id}/fechar`);
+      setCaixa(data);
+      setMensagem('Caixa fechado com sucesso!');
+    } catch { setErro('Ocorreu um erro ao fechar o caixa!'); } finally { setLoading(false); }
+  }
+
+  const passo1 = (
+    <ScrollView>
+      <Field label="Usuário ID" value={usuarioId} onChangeText={setUsuarioId} keyboardType="numeric" />
+      <Field label="Unidade ID" value={unidadeId} onChangeText={setUnidadeId} keyboardType="numeric" />
+      {caixa ? (
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Caixa #{caixa.idCaixaUnidade}</Text>
+          <Text>Aberto em: {new Date(caixa.data).toLocaleString('pt-BR')}</Text>
+          <Text>Status: {caixa.dataFechamento ? 'Fechado' : 'Aberto'}</Text>
+          <Text>Fundo de caixa: {money(caixa.fundoCaixa)}</Text>
+          {caixa.dataFechamento && (
+            <Pressable style={styles.primaryButton} onPress={reabrirCaixa} disabled={loading}>
+              <Text style={styles.primaryButtonText}>Abrir caixa novamente</Text>
+            </Pressable>
+          )}
+        </View>
+      ) : (
+        <View>
+          <Text style={styles.hint}>Nenhum caixa aberto hoje. Configure a impressora e o fundo de caixa.</Text>
+          <Field label="Impressora ID" value={impressoraId} onChangeText={setImpressoraId} keyboardType="numeric" />
+          <Field label="Fundo de Caixa" value={fundoCaixa} onChangeText={setFundoCaixa} keyboardType="numeric" />
+          <Pressable style={styles.primaryButton} onPress={abrirNovoCaixa} disabled={loading || !usuarioId || !unidadeId}>
+            <Text style={styles.primaryButtonText}>Abrir Caixa</Text>
+          </Pressable>
+        </View>
+      )}
+    </ScrollView>
+  );
+
+  const passo2 = (
+    <ScrollView>
+      <View style={styles.subTabsRow}>
+        {(['parcela', 'extra', 'sangria'] as const).map((k) => (
+          <Pressable key={k} onPress={() => setMovSubTab(k)} style={[styles.chip, movSubTab === k && styles.chipActive]}>
+            <Text style={[styles.chipText, movSubTab === k && styles.chipTextActive]}>
+              {k === 'parcela' ? 'Pagamento de Parcela' : k === 'extra' ? 'Movimentação Extra' : 'Sangria'}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {movSubTab === 'parcela' && (
+        <View>
+          <Field label="Nº da Parcela" value={parcelaId} onChangeText={setParcelaId} keyboardType="numeric" />
+          <Field label="Valor" value={valorParcela} onChangeText={setValorParcela} keyboardType="numeric" />
+          <Field label="Vencimento (AAAA-MM-DD)" value={dataVencimento} onChangeText={setDataVencimento} />
+          <Field label="Nº Parcela (0 = entrada)" value={parcelaSequencia} onChangeText={setParcelaSequencia} keyboardType="numeric" />
+          <Field label="% Desconto" value={percentualDesconto} onChangeText={setPercentualDesconto} keyboardType="numeric" />
+          <Field label="% Multa" value={percentualMulta} onChangeText={setPercentualMulta} keyboardType="numeric" />
+          <Field label="% Juros a.m." value={percentualJuros} onChangeText={setPercentualJuros} keyboardType="numeric" />
+          <Field label="Dias tolerância" value={diasTolerancia} onChangeText={setDiasTolerancia} keyboardType="numeric" />
+          <Pressable style={styles.secondaryButton} onPress={calcularValores}>
+            <Text style={styles.secondaryButtonText}>Calcular valores</Text>
+          </Pressable>
+
+          {calculo && (
+            <View style={styles.card}>
+              <Text>Desconto: {money(calculo.desconto)}</Text>
+              <Text>Multa + Juros: {money(calculo.multa + calculo.juros)}</Text>
+              <Text style={styles.bold}>Valor Cobrado: {money(calculo.valorCobrado)}</Text>
+            </View>
+          )}
+
+          <Text style={styles.sectionTitle}>Formas de pagamento</Text>
+          {formasPagamento.map((f, idx) => (
+            <View key={idx} style={styles.card}>
+              <ChipSelect options={TIPOS_PAGAMENTO} value={f.tipoPagamento} onChange={(v) => setFormasPagamento((list) => list.map((x, i) => (i === idx ? { ...x, tipoPagamento: v } : x)))} />
+              <Field label="Valor" value={f.valor} onChangeText={(v) => setFormasPagamento((list) => list.map((x, i) => (i === idx ? { ...x, valor: v } : x)))} keyboardType="numeric" />
+              {f.tipoPagamento !== 'DINHEIRO' && (
+                <Field label="Documento / nº" value={f.documento} onChangeText={(v) => setFormasPagamento((list) => list.map((x, i) => (i === idx ? { ...x, documento: v } : x)))} />
+              )}
+              {formasPagamento.length > 1 && (
+                <Pressable onPress={() => setFormasPagamento((list) => list.filter((_, i) => i !== idx))}>
+                  <Text style={styles.removeText}>Remover</Text>
+                </Pressable>
+              )}
+            </View>
+          ))}
+          <Pressable style={styles.secondaryButton} onPress={() => setFormasPagamento((list) => [...list, { tipoPagamento: 'DINHEIRO', valor: '', documento: '' }])}>
+            <Text style={styles.secondaryButtonText}>+ Adicionar forma de pagamento</Text>
+          </Pressable>
+
+          <Text style={styles.bold}>Valor recebido: {money(valorRecebido)}{calculo && troco > 0 ? ` — Troco: ${money(troco)}` : ''}</Text>
+
+          <Pressable
+            style={[styles.primaryButton, (!calculo || valorRecebido < (calculo?.valorCobrado ?? Infinity)) && styles.buttonDisabled]}
+            disabled={loading || !calculo || valorRecebido < (calculo?.valorCobrado ?? Infinity)}
+            onPress={registrarPagamento}
+          >
+            <Text style={styles.primaryButtonText}>Confirmar Pagamento</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {movSubTab === 'extra' && (
+        <View>
+          <Field label="Descrição" value={historico} onChangeText={setHistorico} />
+          <Field label="Valor" value={valorExtra} onChangeText={setValorExtra} keyboardType="numeric" />
+          <Field label="Movimento ID" value={movimentoId} onChangeText={setMovimentoId} keyboardType="numeric" />
+          <Text style={styles.fieldLabel}>Forma de pagamento</Text>
+          <ChipSelect options={TIPOS_PAGAMENTO} value={tipoPagamentoExtra} onChange={setTipoPagamentoExtra} />
+          <Pressable style={styles.primaryButton} onPress={registrarMovimentacaoExtra} disabled={loading}>
+            <Text style={styles.primaryButtonText}>Registrar Movimentação</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {movSubTab === 'sangria' && (
+        <View>
+          <Field label="Valor da sangria" value={valorSangria} onChangeText={setValorSangria} keyboardType="numeric" />
+          <Pressable style={styles.primaryButton} onPress={registrarSangria} disabled={loading}>
+            <Text style={styles.primaryButtonText}>Registrar Sangria</Text>
+          </Pressable>
+        </View>
+      )}
+    </ScrollView>
+  );
+
+  const passo3 = (
+    <ScrollView>
+      {caixa && <Text style={styles.sectionTitle}>Totais do Caixa #{caixa.idCaixaUnidade}</Text>}
+      {!totais && <Pressable style={styles.secondaryButton} onPress={carregarTotais}><Text style={styles.secondaryButtonText}>Carregar totais</Text></Pressable>}
+      {loading && <ActivityIndicator />}
+      {totais && (
+        <View style={styles.card}>
+          <Text>Fundo de Caixa: {money(totais.totalFundoCaixa)}</Text>
+          <Text>Dinheiro: {money(totais.totalDinheiro)}</Text>
+          <Text>Cheque: {money(totais.totalCheque)}</Text>
+          <Text>Cartão: {money(totais.totalCartao)}</Text>
+          <Text>Boleto: {money(totais.totalBoleto)}</Text>
+          <Text>Transferência: {money(totais.totalTransferencia)}</Text>
+          <Text>Depósito: {money(totais.totalDeposito)}</Text>
+          <Text>Sangria: {money(totais.totalSangria)}</Text>
+          <Text>Desconto concedido: {money(totais.totalDesconto)}</Text>
+          <Text>Multa/Juros recebidos: {money(totais.totalJurosMulta)}</Text>
+          <Text style={styles.bold}>Total Dinheiro em Caixa: {money(totais.totalDinheiroCaixa)}</Text>
+          <Pressable style={styles.secondaryButton} onPress={carregarTotais}><Text style={styles.secondaryButtonText}>Atualizar totais</Text></Pressable>
+        </View>
+      )}
+      {caixa && !caixa.dataFechamento && (
+        <Pressable style={styles.primaryButton} onPress={fecharCaixa} disabled={loading}>
+          <Text style={styles.primaryButtonText}>Fechar Caixa</Text>
+        </Pressable>
+      )}
+    </ScrollView>
+  );
+
+  const steps: WizardStep[] = [
+    { key: 'configuracao', label: 'Configurações impressora', content: passo1, nextDisabled: !caixa },
+    { key: 'movimentacao', label: 'Movimentação Financeira', content: passo2, nextDisabled: !caixa },
+    { key: 'fechamento', label: 'Fechamento Caixa', content: passo3 },
+  ];
+
+  return (
+    <View style={styles.page}>
+      <Text style={styles.title}>Fechamento Caixa</Text>
+      {!!erro && <Text style={styles.error}>{erro}</Text>}
+      {!!mensagem && <Text style={styles.success}>{mensagem}</Text>}
+      <Wizard steps={steps} completeLabel="Concluir" onComplete={carregarTotais} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  page: { flex: 1, padding: 12, backgroundColor: '#ffffff' },
+  title: { fontSize: 18, fontWeight: '700', marginBottom: 8 },
+  field: { marginBottom: 10 },
+  fieldLabel: { fontSize: 12, color: '#555', marginBottom: 4 },
+  input: { borderWidth: 1, borderColor: '#d3d3d3', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 8, fontSize: 14 },
+  card: { borderWidth: 1, borderColor: '#e0e0e0', borderRadius: 8, padding: 12, marginBottom: 10, backgroundColor: '#fafafa' },
+  cardTitle: { fontSize: 15, fontWeight: '700', marginBottom: 4 },
+  hint: { color: '#555', marginBottom: 10 },
+  sectionTitle: { fontSize: 14, fontWeight: '700', marginTop: 6, marginBottom: 6 },
+  bold: { fontWeight: '700', marginVertical: 6 },
+  error: { color: '#b00020', marginBottom: 6 },
+  success: { color: '#2e7d32', marginBottom: 6 },
+  removeText: { color: '#b00020', marginTop: 4 },
+  subTabsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 },
+  chip: { borderWidth: 1, borderColor: '#d3d3d3', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6, marginRight: 6 },
+  chipActive: { backgroundColor: '#2a5a88', borderColor: '#265a88' },
+  chipText: { fontSize: 12, color: '#333' },
+  chipTextActive: { color: '#ffffff', fontWeight: '700' },
+  primaryButton: { backgroundColor: '#2a5a88', borderRadius: 6, paddingVertical: 12, alignItems: 'center', marginTop: 10 },
+  primaryButtonText: { color: '#ffffff', fontWeight: '700' },
+  secondaryButton: { borderWidth: 1, borderColor: '#2a5a88', borderRadius: 6, paddingVertical: 10, alignItems: 'center', marginTop: 6, marginBottom: 6 },
+  secondaryButtonText: { color: '#2a5a88', fontWeight: '700' },
+  buttonDisabled: { opacity: 0.5 },
+});
