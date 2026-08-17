@@ -8,6 +8,7 @@ export type RelatorioDisponivel = {
 
 export type RelatorioAberto = RelatorioDisponivel & {
   configuracao: Record<string, unknown>;
+  dados?: { colunas: string[]; linhas: Array<Record<string, unknown>> } | null;
 };
 
 export const listarRelatoriosDisponiveis = async (): Promise<RelatorioDisponivel[]> =>

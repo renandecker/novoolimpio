@@ -54,7 +54,7 @@ stop-all.bat -v          # para os containers e apaga os dados do banco
 | `financeiro` | 8087 | Microsservico |
 | `login` | 8090 | Microsservico de autenticacao (login/bootstrap) |
 | `notificacoes` | 8082 | Microsservico |
-| `fiserv` | 8096 | Microsservico (cartao Fiserv + PIX, publica no Kafka) |
+| `fiserv` | 8097 | Microsservico (cartao Fiserv + PIX, publica no Kafka) |
 | `professor` | 8091 | Microsservico |
 | `relatorios` | 8088 | Microsservico |
 | `schedule` | 8089 | Microsservico |

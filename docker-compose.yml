@@ -27,7 +27,7 @@
 #   8092  aluno
 #   8094  asaas
 #   8095  curriculo (dominio Empresa/Curriculo cur_*)
-#   8096  fiserv (cartao Fiserv; publica olimpio.pagamento.confirmado no Kafka)
+#   8097  fiserv (cartao Fiserv; publica olimpio.pagamento.confirmado no Kafka)
 #   3000  web-react (app React)
 
 name: olimpio
@@ -399,7 +399,7 @@ services:
       DATABASE_URL: postgresql://postgres:5432/olimpio
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
-      - "8096:8096"
+      - "8097:8096"
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -408,7 +408,7 @@ services:
       login:
         condition: service_healthy
         
-  # O modulo Fiserv (cartao) vive em fiserv (porta 8096); o fluxo PIX (Asaas) vive em asaas-service (porta 8094).
+  # O modulo Fiserv (cartao) vive em fiserv (porta 8097); o fluxo PIX (Asaas) vive em asaas-service (porta 8094).
   
   gateway:
     build: ./docker/gateway

@@ -41,11 +41,12 @@ public class RelatorioDisponivelController {
                     if (!permitido) return Uni.createFrom().failure(new ForbiddenException("Relatório não disponível para este usuário"));
                     return switch (tipoNormalizado) {
                         case "TABELA" -> tabelaService.find(id)
-                                .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r));
+                                .chain(r -> tabelaService.executar(id)
+                                        .map(dados -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, dados)));
                         case "GRAFICO" -> graficoService.find(id)
-                                .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r));
+                                .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, null));
                         case "MAPA" -> mapaService.find(id)
-                                .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r));
+                                .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, null));
                         default -> Uni.createFrom().failure(new ForbiddenException("Tipo de relatório inválido"));
                     };
                 });

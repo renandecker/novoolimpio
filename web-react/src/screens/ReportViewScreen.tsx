@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api';
 import { abrirRelatorio, type RelatorioDisponivel } from '../relatorios';
@@ -37,9 +37,10 @@ function isReportType(value: string | undefined): value is ReportType {
 export default function ReportViewScreen() {
   const { tipo, id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const { can } = usePermissions();
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(() => searchParams.get('edit') === '1');
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const reportType = isReportType(tipo) ? tipo.toUpperCase() as ReportType : undefined;
   const reportId = Number(id);
@@ -97,6 +98,16 @@ export default function ReportViewScreen() {
       ) : (
         <section className="report-view-content">
           <h2>Relatório</h2>
+          {data.tipo === 'TABELA' && data.dados && (
+            <div className="report-result">
+              {data.dados.colunas.length === 0 ? <p>Este relatório ainda não possui colunas configuradas.</p> : (
+                <table>
+                  <thead><tr>{data.dados.colunas.map((column) => <th key={column}>{column}</th>)}</tr></thead>
+                  <tbody>{data.dados.linhas.length === 0 ? <tr><td colSpan={data.dados.colunas.length}>Nenhum registro encontrado.</td></tr> : data.dados.linhas.map((row, index) => <tr key={index}>{data.dados!.colunas.map((column) => <td key={column}>{valueFor(row[column])}</td>)}</tr>)}</tbody>
+                </table>
+              )}
+            </div>
+          )}
           <dl className="report-details">
             {Object.entries(data.configuracao)
               .filter(([key]) => key !== 'id' && !key.startsWith('todos'))
