@@ -139,17 +139,22 @@ echo Use "stop-all.bat" para parar.
 goto :eof
 
 :start_fg
-%DC% up --build 2> "%LOGFILE%"
+echo.
+echo Iniciando servicos com logs em tempo real...
+echo Pressione Ctrl+C para parar.
+echo.
+
+%DC% up --build
 if %errorlevel% neq 0 (
-    echo [ERRO] Falha ao subir containers. Detalhes em error.log
+    echo.
+    echo [ERRO] Falha ao subir containers.
     exit /b 1
 )
+
 echo.
 echo [SUCESSO] Todos os containers estao rodando.
 echo   App React: http://localhost:3000
 echo   Gateway:   http://localhost:8080
 echo   Login:     http://localhost:8090
-echo.
-echo Pressione Ctrl+C para parar.
 
 endlocal

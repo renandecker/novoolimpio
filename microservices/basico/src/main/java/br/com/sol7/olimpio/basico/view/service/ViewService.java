@@ -49,7 +49,8 @@ public class ViewService {
             Map.entry("categoriaEstoque/listCategoria", "bas_categoria"),
             Map.entry("genero/listGenero", "bas_genero"),
             Map.entry("marca/listMarca", "est_marca"),
-            Map.entry("mensagemMeta/listMensagemMeta", "cen_mensagem_meta"));
+            Map.entry("mensagemMeta/listMensagemMeta", "cen_mensagem_meta"),
+            Map.entry("chamadaAssinada/listChamadaAssinada", "edc_chamada_assinada_impressa"));
 
     public Uni<PagedResponse<Map<String, Object>>> paged(String feature, String resource, int page, int size) {
         int p = Math.max(0, page);
