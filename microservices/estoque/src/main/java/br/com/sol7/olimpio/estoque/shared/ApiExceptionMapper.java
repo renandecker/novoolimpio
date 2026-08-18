@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.estoque.shared;
+package br.com.sol7.olimpio.shared;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
@@ -10,4 +10,5 @@ public class ApiExceptionMapper implements ExceptionMapper<RuntimeException> {
     }
     public record ErrorResponse(String code, String message) {}
 }
+
 

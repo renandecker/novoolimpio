@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.estoque.shared;
+package br.com.sol7.olimpio.shared;
 import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -16,4 +16,5 @@ public class ForbiddenExceptionMapper implements ExceptionMapper<ForbiddenExcept
                 .build();
     }
 }
+
 

@@ -1,7 +1,7 @@
 package br.com.sol7.olimpio.estoque.shared.action;
 
-import br.com.sol7.olimpio.estoque.shared.security.Permission;
-import br.com.sol7.olimpio.estoque.shared.security.PermissionGuard;
+import br.com.sol7.olimpio.shared.security.Permission;
+import br.com.sol7.olimpio.shared.security.PermissionGuard;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -43,4 +43,5 @@ public abstract class GenericActionController {
         return value instanceof Map ? (Map<String, Set<String>>) value : null;
     }
 }
+
 

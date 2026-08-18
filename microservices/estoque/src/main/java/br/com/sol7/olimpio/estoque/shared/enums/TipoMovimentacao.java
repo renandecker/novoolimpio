@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.estoque.shared.enums;
+package br.com.sol7.olimpio.shared.enums;
 
 public enum TipoMovimentacao {
     ENTRADA,
@@ -7,4 +7,5 @@ public enum TipoMovimentacao {
     AJUSTE,
     DEVOLUCAO
 }
+
 
