@@ -1,5 +1,5 @@
 package br.com.sol7.olimpio.educacao.ligacaonap;
-import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -76,3 +76,4 @@ public class LigacaoNapService {
         return new LigacaoNapResponse(e.id, e.usuarioId, e.dataInicial, e.dataFinal, e.resultadoLigacaoNapId, e.telefone, e.observacao, e.compromissoId, e.etapasNapId, e.retornoAula, e.ativo, e.qtdeAulaFeita, e.qtdeAulaPresente, e.qtdeAulaMeiaPresente, e.qtdeFalta, e.mediaNota, e.notaTotal, e.notaExecutadas, e.notaObtida, e.qtdeAula, e.contratoId, e.cadernoRetornoId, e.qtdeAulaAtrasado);
     }
 }
+

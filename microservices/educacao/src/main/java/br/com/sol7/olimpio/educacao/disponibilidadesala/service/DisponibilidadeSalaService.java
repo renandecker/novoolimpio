@@ -1,8 +1,8 @@
 package br.com.sol7.olimpio.educacao.disponibilidadesala;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
-import br.com.sol7.olimpio.shared.PagedResponse;
-import br.com.sol7.olimpio.shared.DisponibilidadeScheduleEventResponse;
+import br.com.sol7.olimpio.educacao.shared.PagedResponse;
+import br.com.sol7.olimpio.educacao.shared.DisponibilidadeScheduleEventResponse;
 import io.smallrye.mutiny.Uni; import jakarta.enterprise.context.ApplicationScoped; import jakarta.inject.Inject; import jakarta.ws.rs.NotFoundException; import org.hibernate.reactive.mutiny.Mutiny;
 
 import java.time.LocalDate;

@@ -1,7 +1,7 @@
 package br.com.sol7.olimpio.educacao.auditoria;
 
 import br.com.sol7.olimpio.educacao.auditoria.dto.AuditoriaResponse;
-import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -27,3 +27,4 @@ public class AuditoriaController {
         return service.paged(entidade, page == null ? 0 : page, size == null ? 10 : size);
     }
 }
+

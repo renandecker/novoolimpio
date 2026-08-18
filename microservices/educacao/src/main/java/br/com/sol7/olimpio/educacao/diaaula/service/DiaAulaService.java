@@ -1,7 +1,7 @@
 package br.com.sol7.olimpio.educacao.diaaula;
 
-import br.com.sol7.olimpio.shared.PagedResponse;
-import br.com.sol7.olimpio.shared.RefOption;
+import br.com.sol7.olimpio.educacao.shared.PagedResponse;
+import br.com.sol7.olimpio.educacao.shared.RefOption;
 import br.com.sol7.olimpio.educacao.tempoaula.TempoAula;
 import br.com.sol7.olimpio.educacao.tempoaula.TempoAulaRepository;
 import br.com.sol7.olimpio.educacao.turnoeducacao.TurnoEducacao;

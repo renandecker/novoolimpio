@@ -2,7 +2,7 @@ package br.com.sol7.olimpio.educacao.tipomatrizcurricular;
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
-import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -64,3 +64,4 @@ public class TipoMatrizCurricularService {
         return new TipoMatrizCurricularResponse(e.id, e.descricao);
     }
 }
+

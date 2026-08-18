@@ -1,5 +1,5 @@
 package br.com.sol7.olimpio.educacao.ligacaonap;
-import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 import io.smallrye.mutiny.Uni; import jakarta.inject.Inject; import jakarta.validation.Valid; import jakarta.ws.rs.*; import jakarta.ws.rs.core.*; import java.util.List;
 @Path("/api/educacao/ligacao-nap") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON) public class LigacaoNapController { @Inject LigacaoNapService service; @GET public Uni<List<LigacaoNapResponse>> list(){return service.list();}     @GET
     @Path("/paged")
@@ -22,3 +22,4 @@ import io.smallrye.mutiny.Uni; import jakarta.inject.Inject; import jakarta.vali
     }
 
 }
+

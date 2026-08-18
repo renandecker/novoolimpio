@@ -1,6 +1,6 @@
 package br.com.sol7.olimpio.educacao.mensagemnap;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
-import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -58,3 +58,4 @@ public class MensagemNapService {
         return new MensagemNapResponse(e.id, e.descricao, e.assunto, e.mensagem, e.flagEmail);
     }
 }
+

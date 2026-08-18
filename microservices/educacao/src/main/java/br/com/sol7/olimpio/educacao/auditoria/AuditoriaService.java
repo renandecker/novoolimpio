@@ -2,7 +2,7 @@ package br.com.sol7.olimpio.educacao.auditoria;
 
 import br.com.sol7.olimpio.educacao.auditoria.dto.AuditoriaCampo;
 import br.com.sol7.olimpio.educacao.auditoria.dto.AuditoriaResponse;
-import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -79,3 +79,4 @@ public class AuditoriaService {
         return valor instanceof Date data ? data : null;
     }
 }
+

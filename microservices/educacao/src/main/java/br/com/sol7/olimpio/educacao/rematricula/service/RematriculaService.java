@@ -1,6 +1,6 @@
 package br.com.sol7.olimpio.educacao.rematricula;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
-import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 import io.smallrye.mutiny.Uni; import jakarta.enterprise.context.ApplicationScoped; import jakarta.inject.Inject; import jakarta.ws.rs.NotFoundException; import java.util.List;
 import io.smallrye.mutiny.Uni;
 @ApplicationScoped @WithTransaction public class RematriculaService { @Inject RematriculaRepository repository; public Uni<List<RematriculaResponse>> list(){return repository.listAll().map(items->items.stream().map(this::toResponse).toList());}

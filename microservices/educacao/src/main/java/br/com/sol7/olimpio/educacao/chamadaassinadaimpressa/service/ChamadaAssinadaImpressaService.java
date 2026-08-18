@@ -1,6 +1,6 @@
 package br.com.sol7.olimpio.educacao.chamadaassinadaimpressa;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
-import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -318,3 +318,4 @@ public class ChamadaAssinadaImpressaService {
     }
 
 }
+

@@ -1,6 +1,6 @@
 package br.com.sol7.olimpio.educacao.shared.controller;
 
-import br.com.sol7.olimpio.shared.kafka.EducacaoKafkaProducer;
+import br.com.sol7.olimpio.educacao.shared.kafka.EducacaoKafkaProducer;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.POST;

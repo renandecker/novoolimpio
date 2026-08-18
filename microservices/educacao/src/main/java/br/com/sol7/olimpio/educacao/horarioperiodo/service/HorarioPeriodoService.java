@@ -1,6 +1,6 @@
 package br.com.sol7.olimpio.educacao.horarioperiodo;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
-import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -58,3 +58,4 @@ public class HorarioPeriodoService {
         return new HorarioPeriodoResponse(e.id, e.descricao, e.periodoId, e.turnoEducacaoId, e.dataInicio, e.dataFim, e.horaInicio, e.horaFim, e.minutosAulaDiario, e.minutosAula);
     }
 }
+

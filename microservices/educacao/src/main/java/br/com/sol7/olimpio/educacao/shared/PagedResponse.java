@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.shared;
+package br.com.sol7.olimpio.educacao.shared;
 
 import java.util.List;
 

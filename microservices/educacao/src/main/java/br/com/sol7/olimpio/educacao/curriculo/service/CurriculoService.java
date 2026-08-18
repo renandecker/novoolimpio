@@ -1,6 +1,6 @@
 package br.com.sol7.olimpio.educacao.curriculo;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
-import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -253,3 +253,4 @@ public class CurriculoService {
     }
 
 }
+

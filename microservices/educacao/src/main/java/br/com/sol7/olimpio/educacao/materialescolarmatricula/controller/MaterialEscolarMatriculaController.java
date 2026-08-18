@@ -1,6 +1,6 @@
 package br.com.sol7.olimpio.educacao.materialescolarmatricula;
 
-import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -31,3 +31,4 @@ public class MaterialEscolarMatriculaController {
     @PUT @Path("/{id}") public Uni<MaterialEscolarMatriculaResponse> update(@PathParam("id") Long id, @Valid MaterialEscolarMatriculaRequest r) { return service.update(id, r); }
     @DELETE @Path("/{id}") public Uni<Void> delete(@PathParam("id") Long id) { return service.delete(id); }
 }
+

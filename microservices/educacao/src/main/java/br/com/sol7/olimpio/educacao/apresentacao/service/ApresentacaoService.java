@@ -1,6 +1,6 @@
 package br.com.sol7.olimpio.educacao.apresentacao;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
-import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -58,3 +58,4 @@ public class ApresentacaoService {
         return new ApresentacaoResponse(e.id, e.ordem, e.local);
     }
 }
+
