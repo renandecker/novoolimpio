@@ -11,4 +11,4 @@ export type FavoritoDisponivel = {
 };
 
 export const listarFavoritos = async (page = 0, size = 10, busca?: string): Promise<PagedResponse<FavoritoDisponivel>> =>
-  (await api.get<PagedResponse<FavoritoDisponivel>>('/api/basico/usuarioLogado/favoritos', { params: { page, size, ...(busca ? { busca } : {}) } })).data;
+  (await api.get<PagedResponse<FavoritoDisponivel>>('/api/basico/usuario-logado/favoritos', { params: { page, size, ...(busca ? { busca } : {}) } })).data;

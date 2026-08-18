@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from './api';
+import { PAGE_SIZES } from './DataTable';
 
 export interface PessoaDados {
   id: number;
@@ -305,6 +306,86 @@ function TabelaDados({ colunas, linhas, vazio }: { colunas: TabelaColuna[]; linh
   );
 }
 
+interface TabelaDadosPaginadaProps {
+  colunas: TabelaColuna[];
+  linhas: Record<string, unknown>[];
+  vazio: string;
+  pageSize?: number;
+}
+
+function TabelaDadosPaginada({ colunas, linhas, vazio, pageSize = 10 }: TabelaDadosPaginadaProps) {
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(pageSize);
+
+  const totalPages = Math.max(1, Math.ceil(linhas.length / size));
+  const start = page * size;
+  const end = start + size;
+  const paginaLinhas = linhas.slice(start, end);
+
+  return (
+    <table className="lote-table">
+      <thead>
+        <tr>
+          {colunas.map((coluna) => (
+            <th key={coluna.key}>{coluna.label}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {paginaLinhas.length === 0 ? (
+          <tr>
+            <td colSpan={colunas.length}>{vazio}</td>
+          </tr>
+        ) : (
+          paginaLinhas.map((linha) => (
+            <tr key={String(linha.id)}>
+              {colunas.map((coluna) => (
+                <td key={coluna.key}>
+                  {coluna.render ? coluna.render(linha) : String(linha[coluna.key] ?? '')}
+                </td>
+              ))}
+            </tr>
+          ))
+        )}
+      </tbody>
+      {totalPages > 1 && (
+        <tfoot>
+          <tr>
+            <td colSpan={colunas.length} className="data-table-paginator">
+              <button onClick={() => setPage((current) => Math.max(0, current - 1))} disabled={page === 0}>
+                Anterior
+              </button>
+              <span>
+                Página {page + 1} de {totalPages}
+              </span>
+              <button onClick={() => setPage((current) => Math.min(totalPages - 1, current + 1))} disabled={page >= totalPages - 1}>
+                Próxima
+              </button>
+              <label>
+                Registros por página
+                <select
+                  value={size}
+                  onChange={(event) => {
+                    setSize(Number(event.target.value));
+                    setPage(0);
+                  }}
+                >
+                  {PAGE_SIZES.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <span>Total: {linhas.length}</span>
+            </td>
+          </tr>
+        </tfoot>
+      )}
+    </table>
+  );
+}
+
 function DadosPessoa({ dados }: { dados: PessoaDados }) {
   const campos: [string, ReactNode][] = [
     ['Nome', dados.nome],
@@ -409,7 +490,7 @@ export function SituacaoFinanceiraModal({ pessoaId, onClose }: GestaoModalProps)
                   </label>
                 </div>
                 <h3>Contratos</h3>
-                <TabelaDados
+                <TabelaDadosPaginada
                   vazio="Nenhum contrato encontrado."
                   colunas={[
                     { key: 'id', label: 'Contrato' },
@@ -430,7 +511,7 @@ export function SituacaoFinanceiraModal({ pessoaId, onClose }: GestaoModalProps)
             key: 'parcelasMes',
             label: 'Parcelas do Mês e Vencidas',
             content: (
-              <TabelaDados
+              <TabelaDadosPaginada
                 vazio="Nenhuma parcela para o mês corrente."
                 colunas={PARCELA_COLUNAS}
                 linhas={parcelasMes as unknown as Record<string, unknown>[]}
@@ -441,7 +522,7 @@ export function SituacaoFinanceiraModal({ pessoaId, onClose }: GestaoModalProps)
             key: 'verTodos',
             label: 'Ver Todos',
             content: (
-              <TabelaDados
+              <TabelaDadosPaginada
                 vazio="Nenhuma parcela encontrada."
                 colunas={PARCELA_COLUNAS}
                 linhas={todasParcelas as unknown as Record<string, unknown>[]}
@@ -452,7 +533,7 @@ export function SituacaoFinanceiraModal({ pessoaId, onClose }: GestaoModalProps)
             key: 'matricula',
             label: 'Matrícula',
             content: (
-              <TabelaDados
+              <TabelaDadosPaginada
                 vazio="Nenhuma parcela de matrícula encontrada."
                 colunas={PARCELA_MATRICULA_COLUNAS}
                 linhas={parcelasMatricula as unknown as Record<string, unknown>[]}
@@ -463,7 +544,7 @@ export function SituacaoFinanceiraModal({ pessoaId, onClose }: GestaoModalProps)
             key: 'produtos',
             label: 'Produtos',
             content: (
-              <TabelaDados
+              <TabelaDadosPaginada
                 vazio="Nenhuma parcela de produto encontrada."
                 colunas={PRODUTO_COLUNAS}
                 linhas={parcelasProdutos as unknown as Record<string, unknown>[]}
@@ -474,7 +555,7 @@ export function SituacaoFinanceiraModal({ pessoaId, onClose }: GestaoModalProps)
             key: 'canceladas',
             label: 'Canceladas',
             content: (
-              <TabelaDados
+              <TabelaDadosPaginada
                 vazio="Nenhuma parcela cancelada."
                 colunas={CANCELADA_COLUNAS}
                 linhas={parcelasCanceladas as unknown as Record<string, unknown>[]}
@@ -555,12 +636,12 @@ export function HistoricoNapModal({ pessoaId, onClose }: GestaoModalProps) {
           {
             key: 'ligacao',
             label: 'Ligação',
-            content: <TabelaDados vazio="Nenhuma ligação encontrada." colunas={NAP_COLUNAS} linhas={q.data.ligacoes as unknown as Record<string, unknown>[]} />,
+            content: <TabelaDadosPaginada vazio="Nenhuma ligação encontrada." colunas={NAP_COLUNAS} linhas={q.data.ligacoes as unknown as Record<string, unknown>[]} />,
           },
           {
             key: 'email',
             label: 'E-mail',
-            content: <TabelaDados vazio="Nenhum e-mail encontrado." colunas={NAP_EMAIL_COLUNAS} linhas={q.data.emails as unknown as Record<string, unknown>[]} />,
+            content: <TabelaDadosPaginada vazio="Nenhum e-mail encontrado." colunas={NAP_EMAIL_COLUNAS} linhas={q.data.emails as unknown as Record<string, unknown>[]} />,
           },
         ]}
       />
@@ -602,12 +683,12 @@ export function HistoricoCobrancaModal({ pessoaId, onClose }: GestaoModalProps) 
           {
             key: 'ligacao',
             label: 'Ligação',
-            content: <TabelaDados vazio="Nenhuma ligação encontrada." colunas={COBRANCA_COLUNAS} linhas={q.data.ligacoes as unknown as Record<string, unknown>[]} />,
+            content: <TabelaDadosPaginada vazio="Nenhuma ligação encontrada." colunas={COBRANCA_COLUNAS} linhas={q.data.ligacoes as unknown as Record<string, unknown>[]} />,
           },
           {
             key: 'email',
             label: 'E-mail',
-            content: <TabelaDados vazio="Nenhum e-mail encontrado." colunas={COBRANCA_EMAIL_COLUNAS} linhas={q.data.emails as unknown as Record<string, unknown>[]} />,
+            content: <TabelaDadosPaginada vazio="Nenhum e-mail encontrado." colunas={COBRANCA_EMAIL_COLUNAS} linhas={q.data.emails as unknown as Record<string, unknown>[]} />,
           },
         ]}
       />
@@ -755,7 +836,7 @@ export function PresencasModal({ pessoaId, onClose }: GestaoModalProps) {
                       <input className="form-input" value={frequencia.ausentes} readOnly />
                     </label>
                   </div>
-                  <TabelaDados
+                  <TabelaDadosPaginada
                     vazio="Nenhuma ocorrência de presença."
                     colunas={[
                       { key: 'data', label: 'Data', render: (linha) => fmtData(linha.data as string | null) },
@@ -789,7 +870,7 @@ export function HistoricoAlunoModal({ pessoaId, onClose }: GestaoModalProps) {
   const registros = q.data ?? [];
   return (
     <ModalFrame titulo="Histórico aluno" onClose={onClose}>
-      <TabelaDados
+      <TabelaDadosPaginada
         vazio="Nenhum registro no histórico do aluno."
         colunas={[
           { key: 'id', label: 'Id' },

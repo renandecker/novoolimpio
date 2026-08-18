@@ -285,9 +285,10 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
     api
       .get<number[]>('/api/educacao/contrato/buscar-contratos-pessoa', { params: { pessoaId: option.id } })
       .then((response) => setSearchedIds(response.data ?? []))
-      .catch(() => {
+      .catch((error) => {
         setSearchedIds([]);
-        setErro('Erro ao buscar os contratos do aluno.');
+        const msg = error?.response?.data?.error ?? error?.message ?? 'Erro ao buscar os contratos do aluno.';
+        setErro(msg);
       })
       .finally(() => setSearching(false));
   };
