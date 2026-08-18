@@ -1,5 +1,6 @@
 package br.com.sol7.olimpio.relatorios.disponivel;
 
+import br.com.sol7.olimpio.shared.PagedResponse;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
@@ -85,6 +86,49 @@ public class RelatorioDisponivelService {
                                         Comparator.nullsLast(String::compareTo)));
                                 return todos;
                             }));
+                });
+    }
+
+    public Uni<PagedResponse<RelatorioDisponivelResponse>> listarDisponiveisPaged(String username, int page, int size, String busca) {
+        if (username == null || username.isBlank()) {
+            return Uni.createFrom().item(new PagedResponse<>(List.of(), 0, page, size));
+        }
+        int p = Math.max(0, page);
+        int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
+        String filtro = (busca == null || busca.isBlank()) ? null : busca.trim().toLowerCase();
+        return Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_USUARIO)
+                        .setParameter(1, username)
+                        .getSingleResultOrNull())
+                .onItem().transformToUni(usuarioId -> {
+                    if (usuarioId == null) {
+                        return Uni.createFrom().item(new PagedResponse<>(List.of(), 0, p, s));
+                    }
+                    Long id = ((Number) usuarioId).longValue();
+                    return consultar(SQL_TABELA, id, "TABELA")
+                            .chain(tabelas -> consultar(SQL_GRAFICO, id, "GRAFICO").map(graficos -> {
+                                List<RelatorioDisponivelResponse> todos = new ArrayList<>(tabelas);
+                                todos.addAll(graficos);
+                                return todos;
+                            }))
+                            .chain(todos -> consultar(SQL_MAPA, id, "MAPA").map(mapas -> {
+                                todos.addAll(mapas);
+                                todos.sort(Comparator.comparing(RelatorioDisponivelResponse::nome,
+                                        Comparator.nullsLast(String::compareTo)));
+                                return todos;
+                            }))
+                            .map(todos -> {
+                                List<RelatorioDisponivelResponse> filtrados = filtro == null
+                                        ? todos
+                                        : todos.stream()
+                                                .filter(r -> r.nome() != null && r.nome().toLowerCase().contains(filtro))
+                                                .toList();
+                                long total = filtrados.size();
+                                int from = Math.min(p * s, filtrados.size());
+                                int to = Math.min(from + s, filtrados.size());
+                                List<RelatorioDisponivelResponse> pageContent = filtrados.subList(from, to);
+                                return new PagedResponse<>(pageContent, total, p, s);
+                            });
                 });
     }
 

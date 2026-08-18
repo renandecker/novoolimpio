@@ -5,7 +5,6 @@ import type { ApiItem } from '../types';
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
 const COLUMNS: DataTableColumn[] = [
-  { key: 'qtde_carta', label: 'Cartas Enviadas' },
   { key: 'qtde_email', label: 'Emails Enviados' },
   { key: 'qtde_ligacao', label: 'Ligações Realizadas' },
   { key: 'valor', label: 'Valor' },

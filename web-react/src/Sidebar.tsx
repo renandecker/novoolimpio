@@ -25,7 +25,7 @@ const ICON_RULES: Array<[RegExp, string]> = [
   [/favorito/, '⭐'],
   [/senha/, '🔑'],
   [/impressora|digitalizacao|imprimir/, '🖨️'],
-  [/mensagem|comunicacao|^modelocarta$/, '✉️'],
+  [/mensagem|comunicacao/, '✉️'],
   [/^ligacao$/, '🎧'],
   [/^resultado.*ligacao/, '📊'],
   [/telefone/, '📞'],
@@ -93,6 +93,7 @@ function menuIcon(rotulo: string, icone?: string): string {
 export default function Sidebar() {
   const { session } = useAuth();
   const modulos = (session?.modules ?? []) as Modulo[];
+  const defaultPath = session?.defaultOutcome || '/default';
   const [portalOpen, setPortalOpen] = useState(true);
   const [search, setSearch] = useState('');
 
@@ -113,7 +114,7 @@ export default function Sidebar() {
 
   const flatItems = useMemo(() => {
     const items: { label: string; parent: string | null; path: string; icon: string; keywords: string }[] = [
-      { label: 'Início', parent: null, path: '/default', icon: '🏠', keywords: 'inicio paginainicial' },
+      { label: 'Início', parent: null, path: defaultPath, icon: '🏠', keywords: 'inicio paginainicial' },
     ];
     if (modulos.length === 0) {
       items.push(
@@ -135,7 +136,7 @@ export default function Sidebar() {
     };
     for (const m of topModulos) walk(m, null);
     return items;
-  }, [modulos, childrenByParent, topModulos]);
+  }, [modulos, childrenByParent, topModulos, defaultPath]);
 
   const query = search.trim().toLowerCase();
   const searchResults = useMemo(() => {
@@ -190,7 +191,7 @@ export default function Sidebar() {
           )
         ) : (
           <>
-            <Link className="sidebar-item" to="/default">
+            <Link className="sidebar-item" to={defaultPath}>
               <span className="sidebar-icon">🏠</span>
               <span className="sidebar-label">Início</span>
             </Link>

@@ -41,11 +41,26 @@ public class AlunoRepository {
                    COALESCE(p.email, '') AS email,
                    COALESCE(p.telefone, '') AS telefone,
                    COALESCE(p.celular, '') AS celular,
-                   COALESCE(u.foto_base64, '') AS foto
+                   COALESCE(u.foto_base64, '') AS foto,
+                   COALESCE(f.nome_pai, '') AS nome_pai,
+                   COALESCE(f.nome_mae, '') AS nome_mae,
+                   COALESCE(f.nome_referencia, '') AS nome_referencia,
+                   COALESCE(f.telefone_referencia, '') AS telefone_referencia,
+                   COALESCE(f.facebook, '') AS facebook,
+                   COALESCE(f.twitter, '') AS twitter,
+                   COALESCE(f.telefone_comercial, '') AS telefone_comercial,
+                   COALESCE(gen.descricao, '') AS genero,
+                   COALESCE(et.descricao, '') AS etnia,
+                   COALESCE(es.descricao, '') AS escolaridade,
+                   COALESCE(ec.descricao, '') AS estado_civil
             FROM bas_login l
             JOIN bas_usuario u ON u.id = l.id_usuario
             JOIN bas_pessoa p ON p.id = u.id_pessoa
             LEFT JOIN bas_pessoa_fisica f ON f.id_pessoa = p.id
+            LEFT JOIN bas_genero gen ON gen.id = f.id_genero
+            LEFT JOIN bas_etnia et ON et.id = f.id_etnia
+            LEFT JOIN bas_escolaridade es ON es.id = f.id_escolaridade
+            LEFT JOIN bas_estado_civil ec ON ec.id = f.id_estado_civil
             WHERE lower(l.username) = lower(?1)
             LIMIT 1
             """;

@@ -1,5 +1,7 @@
 package br.com.sol7.olimpio.estoque.pendenciavendaproduto;
 
+import br.com.sol7.olimpio.estoque.produto.ProdutoRepository;
+import br.com.sol7.olimpio.estoque.vendaproduto.VendaProdutoRepository;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
@@ -14,9 +16,14 @@ import java.util.List;
 public class PendenciaVendaProdutoService {
 
     @Inject PendenciaVendaProdutoRepository repository;
+    @Inject ProdutoRepository produtoRepository;
+    @Inject VendaProdutoRepository vendaProdutoRepository;
 
     public Uni<List<PendenciaVendaProdutoResponse>> list() {
-        return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
+        return repository.listAll().chain(items -> {
+            var responses = items.stream().map(this::toResponse).toList();
+            return enrichResponses(responses);
+        });
     }
 
     public Uni<PagedResponse<PendenciaVendaProdutoResponse>> paged(int page, int size) {
@@ -24,26 +31,29 @@ public class PendenciaVendaProdutoService {
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
         return repository.findAll(io.quarkus.panache.common.Sort.by("id").descending()).page(io.quarkus.panache.common.Page.of(p, s)).list()
                 .onItem().transformToUni(items -> repository.count()
-                        .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
+                        .map(count -> {
+                            var responses = items.stream().map(this::toResponse).toList();
+                            return new PagedResponse<>(responses, count, p, s);
+                        }));
     }
 
     public Uni<PendenciaVendaProdutoResponse> find(Long id) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("PendenciaVendaProduto not found"))
-                .map(this::toResponse);
+                .chain(e -> enrichSingleResponse(toResponse(e)));
     }
 
     public Uni<PendenciaVendaProdutoResponse> create(PendenciaVendaProdutoRequest r) {
         var e = new PendenciaVendaProduto();
         apply(e, r);
-        return repository.persist(e).replaceWith(() -> toResponse(e));
+        return repository.persist(e).chain(() -> enrichSingleResponse(toResponse(e)));
     }
 
     public Uni<PendenciaVendaProdutoResponse> update(Long id, PendenciaVendaProdutoRequest r) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("PendenciaVendaProduto not found"))
                 .invoke(e -> apply(e, r))
-                .map(this::toResponse);
+                .chain(e -> enrichSingleResponse(toResponse(e)));
     }
 
     public Uni<Void> delete(Long id) {
@@ -52,7 +62,6 @@ public class PendenciaVendaProdutoService {
                         : Uni.createFrom().failure(new NotFoundException("PendenciaVendaProduto not found")));
     }
 
-    // Migrado de EstoqueProdutoController.salvaPendenciaEntregue (legado): marca a data de entrega da pendencia
     public Uni<PendenciaVendaProdutoResponse> salvaPendenciaEntregue(Long id) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("PendenciaVendaProduto not found"))
@@ -60,16 +69,21 @@ public class PendenciaVendaProdutoService {
                     e.dataEntrega = new Date();
                     repository.persist(e);
                 })
-                .map(this::toResponse);
+                .chain(e -> enrichSingleResponse(toResponse(e)));
     }
 
-    // Migrado de PendenciaVendaProdutoService.buscaPendencias (legado)
     public Uni<List<PendenciaVendaProdutoResponse>> buscaPendencias(Long unidadeId) {
-        return repository.buscaPendencias(unidadeId).map(items -> items.stream().map(this::toResponse).toList());
+        return repository.buscaPendencias(unidadeId).chain(items -> {
+            var responses = items.stream().map(this::toResponse).toList();
+            return enrichResponses(responses);
+        });
     }
 
     public Uni<List<PendenciaVendaProdutoResponse>> listarPorUnidade(Long unidadeId) {
-        return repository.listarPorUnidade(unidadeId).map(items -> items.stream().map(this::toResponse).toList());
+        return repository.listarPorUnidade(unidadeId).chain(items -> {
+            var responses = items.stream().map(this::toResponse).toList();
+            return enrichResponses(responses);
+        });
     }
 
     private void apply(PendenciaVendaProduto e, PendenciaVendaProdutoRequest r) {
@@ -81,5 +95,33 @@ public class PendenciaVendaProdutoService {
 
     private PendenciaVendaProdutoResponse toResponse(PendenciaVendaProduto e) {
         return new PendenciaVendaProdutoResponse(e.id, e.quantidade, e.vendaProdutoId, e.produtoId, e.dataEntrega);
+    }
+
+    private Uni<PendenciaVendaProdutoResponse> enrichSingleResponse(PendenciaVendaProdutoResponse r) {
+        Uni<String> produtoNome = r.produtoId() != null
+            ? produtoRepository.findById(r.produtoId()).map(p -> p != null ? p.nome : null)
+            : Uni.createFrom().item((String) null);
+        Uni<String> produtoImagem = r.produtoId() != null
+            ? produtoRepository.findById(r.produtoId()).map(p -> p != null ? p.imagem : null)
+            : Uni.createFrom().item((String) null);
+
+        Uni<java.util.Date> vendaDataCompra = r.vendaProdutoId() != null
+            ? vendaProdutoRepository.findById(r.vendaProdutoId()).map(v -> v != null ? v.dataCompra : null)
+            : Uni.createFrom().item((java.util.Date) null);
+        Uni<java.math.BigDecimal> vendaValor = r.vendaProdutoId() != null
+            ? vendaProdutoRepository.findById(r.vendaProdutoId()).map(v -> v != null ? v.valor : null)
+            : Uni.createFrom().item((java.math.BigDecimal) null);
+
+        return Uni.combine().all().unis(produtoNome, produtoImagem, vendaDataCompra, vendaValor)
+                .asTuple()
+                .map(t -> new PendenciaVendaProdutoResponse(
+                    r.id(), r.quantidade(), r.vendaProdutoId(), r.produtoId(), r.dataEntrega(),
+                    t.getItem1(), t.getItem2(), null, t.getItem3(), t.getItem4()
+                ));
+    }
+
+    private Uni<List<PendenciaVendaProdutoResponse>> enrichResponses(List<PendenciaVendaProdutoResponse> responses) {
+        List<Uni<PendenciaVendaProdutoResponse>> unis = responses.stream().map(this::enrichSingleResponse).toList();
+        return Uni.join().all(unis).andFailFast();
     }
 }

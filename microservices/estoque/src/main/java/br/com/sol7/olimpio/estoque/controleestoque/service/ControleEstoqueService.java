@@ -1,6 +1,7 @@
 package br.com.sol7.olimpio.estoque.controleestoque;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.estoque.produto.ProdutoRepository;
 import java.util.Date;
 
 import io.smallrye.mutiny.Uni;
@@ -8,15 +9,25 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
 @WithTransaction
 public class ControleEstoqueService {
 
     @Inject ControleEstoqueRepository repository;
+    @Inject ProdutoRepository produtoRepository;
+
+    private final Map<Long, String> unidadeCache = new ConcurrentHashMap<>();
+    private final Map<Long, String> usuarioCache = new ConcurrentHashMap<>();
 
     public Uni<List<ControleEstoqueResponse>> list() {
-        return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
+        return repository.listAll().chain(items -> enrichResponses(items.stream().map(this::toResponse).toList()));
+    }
+
+    public Uni<List<ControleEstoqueResponse>> listByUnidade(Long unidadeId) {
+        return repository.find("unidadeId = ?1", unidadeId).list().chain(items -> enrichResponses(items.stream().map(this::toResponse).toList()));
     }
 
     public Uni<PagedResponse<ControleEstoqueResponse>> paged(int page, int size) {
@@ -24,27 +35,30 @@ public class ControleEstoqueService {
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
         return repository.findAll(io.quarkus.panache.common.Sort.by("id").descending()).page(io.quarkus.panache.common.Page.of(p, s)).list()
                 .onItem().transformToUni(items -> repository.count()
-                        .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
+                        .map(count -> {
+                            var responses = items.stream().map(this::toResponse).toList();
+                            return new PagedResponse<>(responses, count, p, s);
+                        }));
     }
 
 
     public Uni<ControleEstoqueResponse> find(Long id) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("ControleEstoque not found"))
-                .map(this::toResponse);
+                .chain(e -> enrichSingleResponse(toResponse(e)));
     }
 
     public Uni<ControleEstoqueResponse> create(ControleEstoqueRequest r) {
         var e = new ControleEstoque();
         apply(e, r);
-        return repository.persist(e).replaceWith(() -> toResponse(e));
+        return repository.persist(e).chain(() -> enrichSingleResponse(toResponse(e)));
     }
 
     public Uni<ControleEstoqueResponse> update(Long id, ControleEstoqueRequest r) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("ControleEstoque not found"))
                 .invoke(e -> apply(e, r))
-                .map(this::toResponse);
+                .chain(e -> enrichSingleResponse(toResponse(e)));
     }
 
     public Uni<Void> delete(Long id) {
@@ -68,6 +82,26 @@ public class ControleEstoqueService {
 
     private ControleEstoqueResponse toResponse(ControleEstoque e) {
         return new ControleEstoqueResponse(e.id, e.valor, e.quantidade, e.qtdeSolicitado, e.qtdeDefeito, e.qtdeFalta, e.qtdeNaoEncontrado, e.qtdeReservado, e.qtdeAprovadoNaoEntregue, e.produtoId, e.unidadeId);
+    }
+
+    private Uni<ControleEstoqueResponse> enrichSingleResponse(ControleEstoqueResponse r) {
+        if (r.produtoId() == null) return Uni.createFrom().item(r);
+        return produtoRepository.findById(r.produtoId())
+                .map(produto -> {
+                    if (produto == null) return r;
+                    return new ControleEstoqueResponse(
+                        r.id(), r.valor(), r.quantidade(), r.qtdeSolicitado(), r.qtdeDefeito(),
+                        r.qtdeFalta(), r.qtdeNaoEncontrado(), r.qtdeReservado(), r.qtdeAprovadoNaoEntregue(),
+                        r.produtoId(), r.unidadeId(),
+                        produto.nome, produto.imagem, produto.valor, produto.quantidade,
+                        null, null, null
+                    );
+                });
+    }
+
+    private Uni<List<ControleEstoqueResponse>> enrichResponses(List<ControleEstoqueResponse> responses) {
+        List<Uni<ControleEstoqueResponse>> unis = responses.stream().map(this::enrichSingleResponse).toList();
+        return Uni.join().all(unis).andFailFast();
     }
 
 

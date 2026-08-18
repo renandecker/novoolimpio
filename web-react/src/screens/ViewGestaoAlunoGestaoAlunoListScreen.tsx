@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../api';
 import { PermissionGate, usePermissions, useCurrentOutcome } from '../permissions';
 import { DataTable, PAGE_SIZES } from '../DataTable';
@@ -60,6 +60,11 @@ function ContractsTable({ searchedIds }: { searchedIds: number[] | null }) {
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(PAGE_SIZES[0]);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    setPage(0);
+    setExpanded({});
+  }, [searchedIds]);
   const [cancelandoId, setCancelandoId] = useState<string | null>(null);
   const [placeholder, setPlaceholder] = useState<{ titulo: string; texto: string } | null>(null);
 

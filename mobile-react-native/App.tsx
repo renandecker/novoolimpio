@@ -211,8 +211,6 @@ import ViewMetaFormMetaListScreen from './src/screens/ViewMetaFormMetaListScreen
 import ViewMetaIndicadorMetaDinamicaListScreen from './src/screens/ViewMetaIndicadorMetaDinamicaListScreen';
 import ViewMetaListMetaListScreen from './src/screens/ViewMetaListMetaListScreen';
 import ViewMetaListMetaDinamicaListScreen from './src/screens/ViewMetaListMetaDinamicaListScreen';
-import ViewModeloCartaFormModeloCartaListScreen from './src/screens/ViewModeloCartaFormModeloCartaListScreen';
-import ViewModeloCartaListModeloCartaListScreen from './src/screens/ViewModeloCartaListModeloCartaListScreen';
 import ViewModuloColunasModuloListScreen from './src/screens/ViewModuloColunasModuloListScreen';
 import ViewModuloFormModuloListScreen from './src/screens/ViewModuloFormModuloListScreen';
 import ViewModuloListModuloListScreen from './src/screens/ViewModuloListModuloListScreen';
@@ -642,8 +640,6 @@ const Stack=createNativeStackNavigator<ParamList>();const q=new QueryClient();fu
 <Stack.Screen name='view/meta/indicadorMetaDinamica' component={ViewMetaIndicadorMetaDinamicaListScreen}/>
 <Stack.Screen name='view/meta/listMeta' component={ViewMetaListMetaListScreen}/>
 <Stack.Screen name='view/meta/listMetaDinamica' component={ViewMetaListMetaDinamicaListScreen}/>
-<Stack.Screen name='view/modeloCarta/formModeloCarta' component={ViewModeloCartaFormModeloCartaListScreen}/>
-<Stack.Screen name='view/modeloCarta/listModeloCarta' component={ViewModeloCartaListModeloCartaListScreen}/>
 <Stack.Screen name='view/modulo/colunasModulo' component={ViewModuloColunasModuloListScreen}/>
 <Stack.Screen name='view/modulo/formModulo' component={ViewModuloFormModuloListScreen}/>
 <Stack.Screen name='view/modulo/listModulo' component={ViewModuloListModuloListScreen}/>

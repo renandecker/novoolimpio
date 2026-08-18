@@ -103,6 +103,54 @@ public class ModulePermissionService {
         return mapa;
     }
 
+    /**
+     * Resolve a tela inicial (outcome) do perfil de maior hierarquia do usuário.
+     * Regra: ADMIN > ESTRATEGICO > OPERACIONAL. Em caso de empate (mesma hierarquia),
+     * escolhe o primeiro perfil em ordem alfabética de descricao.
+     * Retorna null se não houver perfil com id_modulo definido.
+     */
+    @CacheResult(cacheName = "login-default-cache")
+    public Uni<String> resolveDefaultOutcome(Long idUsuario) {
+        if (idUsuario == null) return Uni.createFrom().item(null);
+        return UsuarioPerfil.<UsuarioPerfil>find("usuarioId", idUsuario).list()
+                .onItem().transformToUni(vinculos -> {
+                    if (vinculos == null || vinculos.isEmpty()) return Uni.createFrom().item(null);
+                    List<Long> perfilIds = vinculos.stream().map(v -> v.perfilId).distinct().toList();
+                    return Perfil.<Perfil>find("id in ?1", perfilIds).list()
+                            .onItem().transformToUni(perfis -> {
+                                if (perfis == null || perfis.isEmpty()) return Uni.createFrom().item(null);
+                                // Filtra apenas perfis com idModulo definido
+                                var comModulo = perfis.stream()
+                                        .filter(p -> p.idModulo != null)
+                                        .toList();
+                                if (comModulo.isEmpty()) return Uni.createFrom().item(null);
+                                // Ordena por hierarquia (maior primeiro) e depois por descricao (A-Z)
+                                var melhorPerfil = comModulo.stream()
+                                        .sorted(java.util.Comparator
+                                                .comparingInt((Perfil p) -> hierarquiaOrdinal(p.hierarquia)).reversed()
+                                                .thenComparing(p -> p.descricao != null ? p.descricao : "", java.lang.String.CASE_INSENSITIVE_ORDER))
+                                        .findFirst()
+                                        .orElse(null);
+                                if (melhorPerfil == null) return Uni.createFrom().item(null);
+                                return Modulo.<Modulo>find("id", melhorPerfil.idModulo).firstResult()
+                                        .map(modulo -> {
+                                            if (modulo == null || modulo.outcome == null || modulo.outcome.isBlank()) return null;
+                                            return normalizar(modulo.outcome);
+                                        });
+                            });
+                });
+    }
+
+    private int hierarquiaOrdinal(String hierarquia) {
+        if (hierarquia == null) return 0;
+        return switch (hierarquia.trim().toUpperCase(java.util.Locale.ROOT)) {
+            case "ADMIN" -> 3;
+            case "ESTRATEGICO" -> 2;
+            case "OPERACIONAL" -> 1;
+            default -> 0;
+        };
+    }
+
     private String normalizar(String outcome) {
         String valor = outcome.trim();
         if (valor.toLowerCase(java.util.Locale.ROOT).endsWith(".xhtml")) valor = valor.substring(0, valor.length() - ".xhtml".length());

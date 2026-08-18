@@ -1,5 +1,6 @@
-package br.com.sol7.olimpio.estoque.produtounidade;
+package br.com.sol7.olimpio.estoque.produtounidade.controller;
 
+import br.com.sol7.olimpio.estoque.produtounidade.ProdutoUnidadeService;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -11,7 +12,8 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ProdutoUnidadeController {
 
-    @Inject ProdutoUnidadeService service;
+    @Inject
+    ProdutoUnidadeService service;
 
     @GET
     @Path("/produto/{produtoId}")

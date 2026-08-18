@@ -1,5 +1,6 @@
-package br.com.sol7.olimpio.estoque.solicitacaoestoque;
+package br.com.sol7.olimpio.estoque.solicitacaoestoque.repository;
 
+import br.com.sol7.olimpio.estoque.solicitacaoestoque.SolicitacaoEstoque;
 import br.com.sol7.olimpio.shared.enums.Motivo;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Uni;

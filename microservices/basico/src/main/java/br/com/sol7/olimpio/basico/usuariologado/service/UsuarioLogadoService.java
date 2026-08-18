@@ -69,6 +69,36 @@ public class UsuarioLogadoService {
                         .toList());
     }
 
+    public Uni<PagedResponse<FavoritoDisponivelResponse>> listarFavoritosPaged(String username, int page, int size, String busca) {
+        if (username == null || username.isBlank()) return Uni.createFrom().item(new PagedResponse<>(List.of(), 0, page, size));
+        int p = Math.max(0, page);
+        int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
+        String filtro = (busca == null || busca.isBlank()) ? null : busca.trim().toLowerCase();
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_FAVORITOS_DO_USUARIO)
+                        .setParameter(1, username)
+                        .getResultList())
+                .map(linhas -> {
+                    List<FavoritoDisponivelResponse> todos = linhas.stream()
+                            .map(linha -> (Object[]) linha)
+                            .map(linha -> new FavoritoDisponivelResponse(
+                                    linha[0] == null ? "" : linha[0].toString(),
+                                    linha[1] == null ? "" : linha[1].toString(),
+                                    linha[2] == null ? "" : linha[2].toString()))
+                            .toList();
+                    List<FavoritoDisponivelResponse> filtrados = filtro == null
+                            ? todos
+                            : todos.stream()
+                                    .filter(f -> f.nome() != null && f.nome().toLowerCase().contains(filtro))
+                                    .toList();
+                    long total = filtrados.size();
+                    int from = Math.min(p * s, filtrados.size());
+                    int to = Math.min(from + s, filtrados.size());
+                    List<FavoritoDisponivelResponse> pageContent = filtrados.subList(from, to);
+                    return new PagedResponse<>(pageContent, total, p, s);
+                });
+    }
+
     public Uni<PagedResponse<UsuarioLogadoResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;

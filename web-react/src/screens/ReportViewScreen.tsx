@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api';
-import { abrirRelatorio, type RelatorioDisponivel } from '../relatorios';
+import { abrirRelatorio, type RelatorioAberto } from '../relatorios';
 import { usePermissions } from '../permissions';
 
 const reportTypes = ['TABELA', 'GRAFICO', 'MAPA'] as const;
@@ -24,9 +24,20 @@ const labelFor = (key: string) => key
   .replace(/([a-z])([A-Z])/g, '$1 $2')
   .replace(/^./, (letter) => letter.toUpperCase());
 
-const valueFor = (value: unknown) => {
+const isObject = (v: unknown): v is Record<string, unknown> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);
+
+const valueFor = (value: unknown): string => {
   if (value === null || value === undefined || value === '') return '—';
   if (typeof value === 'boolean') return value ? 'Sim' : 'Não';
+  if (value instanceof Date) return value.toLocaleDateString('pt-BR');
+  if (Array.isArray(value)) return `${value.length} item(s)`;
+  if (isObject(value)) {
+    if ('nome' in value && typeof value.nome === 'string') return value.nome;
+    if ('id' in value && typeof value.id === 'number') return `#${value.id}`;
+    const keys = Object.keys(value);
+    return keys.length > 0 ? keys.join(', ') : '—';
+  }
   return String(value);
 };
 
@@ -46,11 +57,37 @@ export default function ReportViewScreen() {
   const reportId = Number(id);
   const managementOutcome = reportType ? `view/relatorios/${routeFor[reportType]}` : '';
 
+  const [page, setPage] = useState(0);
+  const [dataPage, setDataPage] = useState<{ colunas: string[]; linhas: Record<string, unknown>[]; totalElements: number; totalPages: number } | null>(null);
+  const [fetchLimit, setFetchLimit] = useState(10);
+
   const report = useQuery({
     queryKey: ['relatorio-aberto', reportType, reportId],
     queryFn: () => abrirRelatorio(reportType!, reportId),
     enabled: Boolean(reportType && Number.isInteger(reportId) && reportId > 0),
   });
+
+  useEffect(() => {
+    setPage(0);
+    setDataPage(null);
+    setFetchLimit(10);
+  }, [reportType, reportId]);
+
+  useEffect(() => {
+    const dados = report.data?.dados;
+    if (!dados || report.data?.tipo !== 'TABELA') {
+      setDataPage(null);
+      return;
+    }
+    const allRows = dados.linhas;
+    const totalElements = allRows.length;
+    const totalPages = Math.max(1, Math.ceil(totalElements / fetchLimit));
+    const safePage = Math.min(page, totalPages - 1);
+    const start = safePage * fetchLimit;
+    const linhas = allRows.slice(start, start + fetchLimit);
+    setDataPage({ colunas: dados.colunas, linhas, totalElements, totalPages });
+    if (page !== safePage) setPage(safePage);
+  }, [report.data, page, fetchLimit]);
 
   const remove = useMutation({
     mutationFn: () => api.delete(`/api/relatorios/${resourceFor[reportType!]}/${reportId}`),
@@ -98,19 +135,40 @@ export default function ReportViewScreen() {
       ) : (
         <section className="report-view-content">
           <h2>Relatório</h2>
-          {data.tipo === 'TABELA' && data.dados && (
+          {data.tipo === 'TABELA' && dataPage && (
             <div className="report-result">
-              {data.dados.colunas.length === 0 ? <p>Este relatório ainda não possui colunas configuradas.</p> : (
-                <table>
-                  <thead><tr>{data.dados.colunas.map((column) => <th key={column}>{column}</th>)}</tr></thead>
-                  <tbody>{data.dados.linhas.length === 0 ? <tr><td colSpan={data.dados.colunas.length}>Nenhum registro encontrado.</td></tr> : data.dados.linhas.map((row, index) => <tr key={index}>{data.dados!.colunas.map((column) => <td key={column}>{valueFor(row[column])}</td>)}</tr>)}</tbody>
-                </table>
+              {dataPage.colunas.length === 0 ? <p>Este relatório ainda não possui colunas configuradas.</p> : (
+                <>
+                  <table>
+                    <thead><tr>{dataPage.colunas.map((column) => <th key={column}>{column}</th>)}</tr></thead>
+                    <tbody>{dataPage.linhas.length === 0 ? <tr><td colSpan={dataPage.colunas.length}>Nenhum registro encontrado.</td></tr> : dataPage.linhas.map((row, index) => <tr key={index}>{dataPage.colunas.map((column) => <td key={column}>{valueFor(row[column])}</td>)}</tr>)}</tbody>
+                  </table>
+                  {dataPage.totalElements > fetchLimit && (
+                    <div className="data-table-paginator" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
+                      <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}>Anterior</button>
+                      <span>Página {page + 1} de {dataPage.totalPages}</span>
+                      <button onClick={() => setPage((p) => Math.min(dataPage.totalPages - 1, p + 1))} disabled={page >= dataPage.totalPages - 1}>Próxima</button>
+                      <label>
+                        Registros por página
+                        <select value={fetchLimit} onChange={(e) => { setFetchLimit(Number(e.target.value)); setPage(0); }}>
+                          {[10, 20, 50, 100].map((s) => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </label>
+                      <span>Total: {dataPage.totalElements}</span>
+                    </div>
+                  )}
+                </>
               )}
+            </div>
+          )}
+          {data.tipo === 'TABELA' && !dataPage && (
+            <div className="report-result">
+              <p>Nenhum registro encontrado.</p>
             </div>
           )}
           <dl className="report-details">
             {Object.entries(data.configuracao)
-              .filter(([key]) => key !== 'id' && !key.startsWith('todos'))
+              .filter(([key]) => key !== 'id' && !key.startsWith('todos') && !Array.isArray(data.configuracao[key]) && !isObject(data.configuracao[key]))
               .map(([key, value]) => <div key={key}><dt>{labelFor(key)}</dt><dd>{valueFor(value)}</dd></div>)}
           </dl>
         </section>
@@ -120,7 +178,7 @@ export default function ReportViewScreen() {
         <div className="modal-overlay" onClick={() => setConfirmingDelete(false)}>
           <div className="modal" onClick={(event) => event.stopPropagation()}>
             <h3>Excluir relatório</h3>
-            <p>Deseja excluir “{data.nome}”?</p>
+            <p>Deseja excluir "{data.nome}"?</p>
             {remove.isError && <p>Não foi possível excluir o relatório.</p>}
             <div className="modal-actions">
               <button className="btnblue" onClick={() => setConfirmingDelete(false)}>Cancelar</button>
@@ -134,7 +192,15 @@ export default function ReportViewScreen() {
 }
 
 function ReportEditor({ type, id, initial, onClose, onSaved }: { type: ReportType; id: number; initial: Record<string, unknown>; onClose: () => void; onSaved: () => void }) {
-  const [values, setValues] = useState(initial);
+  const [values, setValues] = useState(() => {
+    const filtered: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(initial)) {
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) continue;
+      if (Array.isArray(value)) continue;
+      filtered[key] = value;
+    }
+    return filtered;
+  });
   const save = useMutation({
     mutationFn: () => api.put(`/api/relatorios/${resourceFor[type]}/${id}`, values),
     onSuccess: onSaved,

@@ -327,6 +327,47 @@ function DadosPessoa({ dados }: { dados: PessoaDados }) {
   );
 }
 
+const PARCELA_COLUNAS: TabelaColuna[] = [
+  { key: 'id', label: 'Parcela' },
+  { key: 'contratoId', label: 'Contrato' },
+  { key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null) },
+  { key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null) },
+  { key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null) },
+  { key: 'situacao', label: 'Situação' },
+];
+
+const PARCELA_MATRICULA_COLUNAS: TabelaColuna[] = [
+  { key: 'id', label: 'Parcela' },
+  { key: 'contratoId', label: 'Contrato' },
+  { key: 'parcela', label: 'Nº' },
+  { key: 'descricao', label: 'Descrição' },
+  { key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null) },
+  { key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null) },
+  { key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null) },
+  { key: 'valorPago', label: 'Valor pago', render: (linha) => fmtMoeda(linha.valorPago as number | null) },
+  { key: 'situacao', label: 'Situação' },
+];
+
+const PRODUTO_COLUNAS: TabelaColuna[] = [
+  { key: 'id', label: 'Parcela' },
+  { key: 'contratoId', label: 'Contrato' },
+  { key: 'descricao', label: 'Descrição' },
+  { key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null) },
+  { key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null) },
+  { key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null) },
+  { key: 'valorPago', label: 'Valor pago', render: (linha) => fmtMoeda(linha.valorPago as number | null) },
+  { key: 'situacao', label: 'Situação' },
+];
+
+const CANCELADA_COLUNAS: TabelaColuna[] = [
+  { key: 'id', label: 'Parcela' },
+  { key: 'contratoId', label: 'Contrato' },
+  { key: 'descricao', label: 'Descrição' },
+  { key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null) },
+  { key: 'dataCancelamento', label: 'Cancelamento', render: (linha) => fmtData(linha.dataCancelamento as string | null) },
+  { key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null) },
+];
+
 export function SituacaoFinanceiraModal({ pessoaId, onClose }: GestaoModalProps) {
   const q = useQuery({
     queryKey: ['gestao-aluno', 'financeiro', pessoaId],
@@ -334,91 +375,113 @@ export function SituacaoFinanceiraModal({ pessoaId, onClose }: GestaoModalProps)
   });
   if (q.isLoading) return <ModalFrame titulo="Situação Financeira" onClose={onClose}><Carregando /></ModalFrame>;
   if (q.isError || !q.data) return <ModalFrame titulo="Situação Financeira" onClose={onClose}><Erro mensagem={apiError(q.error)} /></ModalFrame>;
-  const { resumo, contratos, parcelasMes, parcelasMatricula, parcelasCanceladas } = q.data;
+  const { resumo, contratos, parcelasMes, parcelasMatricula, parcelasProdutos, parcelasCanceladas } = q.data;
+  const todasParcelas = [...parcelasMes, ...parcelasMatricula, ...parcelasProdutos, ...parcelasCanceladas];
   return (
     <ModalFrame titulo="Situação Financeira" onClose={onClose}>
-      <div className="form-grid">
-        <label className="form-field">
-          <span className="form-label">Situação</span>
-          <input className="form-input" value={resumo.situacao} readOnly />
-        </label>
-        <label className="form-field">
-          <span className="form-label">Maior dia em atraso</span>
-          <input className="form-input" value={resumo.diasAtraso > 0 ? `${resumo.diasAtraso} (dias)` : 'Em dia'} readOnly />
-        </label>
-        <label className="form-field">
-          <span className="form-label">Qtd parcelas em atraso</span>
-          <input className="form-input" value={resumo.qtdParcelasAtrasadas} readOnly />
-        </label>
-        <label className="form-field">
-          <span className="form-label">Qtd parcelas restantes</span>
-          <input className="form-input" value={resumo.qtdParcelasRestantes} readOnly />
-        </label>
-        <label className="form-field">
-          <span className="form-label">Valor pendente</span>
-          <input className="form-input" value={fmtMoeda(resumo.valorPendente)} readOnly />
-        </label>
-      </div>
-
-      <h3>Contratos</h3>
-      <TabelaDados
-        vazio="Nenhum contrato encontrado."
-        colunas={[
-          { key: 'id', label: 'Contrato' },
-          { key: 'curso', label: 'Curso' },
-          { key: 'unidade', label: 'Unidade' },
-          { key: 'unidadeResponsavel', label: 'Unidade Responsável' },
-          { key: 'status', label: 'Status' },
-          { key: 'qtdeReparcelamento', label: 'Reparcelamentos' },
-          { key: 'proxima', label: 'Próxima parcela', render: (linha) => `${linha.proximaParcelaSequencia ?? '—'} · ${fmtData(linha.proximaParcelaData as string | null)} · ${fmtMoeda(linha.proximaParcelaValor as number | null)}` },
-          { key: 'ultima', label: 'Última parcela', render: (linha) => `${linha.ultimaParcelaSequencia ?? '—'} · ${fmtData(linha.ultimaParcelaData as string | null)} · ${fmtMoeda(linha.ultimaParcelaValor as number | null)}` },
+      <Tabs
+        tabs={[
+          {
+            key: 'financeiro',
+            label: 'Financeiro',
+            content: (
+              <>
+                <div className="form-grid">
+                  <label className="form-field">
+                    <span className="form-label">Situação</span>
+                    <input className="form-input" value={resumo.situacao} readOnly />
+                  </label>
+                  <label className="form-field">
+                    <span className="form-label">Maior dia em atraso</span>
+                    <input className="form-input" value={resumo.diasAtraso > 0 ? `${resumo.diasAtraso} (dias)` : 'Em dia'} readOnly />
+                  </label>
+                  <label className="form-field">
+                    <span className="form-label">Qtd parcelas em atraso</span>
+                    <input className="form-input" value={resumo.qtdParcelasAtrasadas} readOnly />
+                  </label>
+                  <label className="form-field">
+                    <span className="form-label">Qtd parcelas restantes</span>
+                    <input className="form-input" value={resumo.qtdParcelasRestantes} readOnly />
+                  </label>
+                  <label className="form-field">
+                    <span className="form-label">Valor pendente</span>
+                    <input className="form-input" value={fmtMoeda(resumo.valorPendente)} readOnly />
+                  </label>
+                </div>
+                <h3>Contratos</h3>
+                <TabelaDados
+                  vazio="Nenhum contrato encontrado."
+                  colunas={[
+                    { key: 'id', label: 'Contrato' },
+                    { key: 'curso', label: 'Curso' },
+                    { key: 'unidade', label: 'Unidade' },
+                    { key: 'unidadeResponsavel', label: 'Unidade Responsável' },
+                    { key: 'status', label: 'Status' },
+                    { key: 'qtdeReparcelamento', label: 'Reparcelamentos' },
+                    { key: 'proxima', label: 'Próxima parcela', render: (linha) => `${linha.proximaParcelaSequencia ?? '—'} · ${fmtData(linha.proximaParcelaData as string | null)} · ${fmtMoeda(linha.proximaParcelaValor as number | null)}` },
+                    { key: 'ultima', label: 'Última parcela', render: (linha) => `${linha.ultimaParcelaSequencia ?? '—'} · ${fmtData(linha.ultimaParcelaData as string | null)} · ${fmtMoeda(linha.ultimaParcelaValor as number | null)}` },
+                  ]}
+                  linhas={contratos as unknown as Record<string, unknown>[]}
+                />
+              </>
+            ),
+          },
+          {
+            key: 'parcelasMes',
+            label: 'Parcelas do Mês e Vencidas',
+            content: (
+              <TabelaDados
+                vazio="Nenhuma parcela para o mês corrente."
+                colunas={PARCELA_COLUNAS}
+                linhas={parcelasMes as unknown as Record<string, unknown>[]}
+              />
+            ),
+          },
+          {
+            key: 'verTodos',
+            label: 'Ver Todos',
+            content: (
+              <TabelaDados
+                vazio="Nenhuma parcela encontrada."
+                colunas={PARCELA_COLUNAS}
+                linhas={todasParcelas as unknown as Record<string, unknown>[]}
+              />
+            ),
+          },
+          {
+            key: 'matricula',
+            label: 'Matrícula',
+            content: (
+              <TabelaDados
+                vazio="Nenhuma parcela de matrícula encontrada."
+                colunas={PARCELA_MATRICULA_COLUNAS}
+                linhas={parcelasMatricula as unknown as Record<string, unknown>[]}
+              />
+            ),
+          },
+          {
+            key: 'produtos',
+            label: 'Produtos',
+            content: (
+              <TabelaDados
+                vazio="Nenhuma parcela de produto encontrada."
+                colunas={PRODUTO_COLUNAS}
+                linhas={parcelasProdutos as unknown as Record<string, unknown>[]}
+              />
+            ),
+          },
+          {
+            key: 'canceladas',
+            label: 'Canceladas',
+            content: (
+              <TabelaDados
+                vazio="Nenhuma parcela cancelada."
+                colunas={CANCELADA_COLUNAS}
+                linhas={parcelasCanceladas as unknown as Record<string, unknown>[]}
+              />
+            ),
+          },
         ]}
-        linhas={contratos as unknown as Record<string, unknown>[]}
-      />
-
-      <h3>Parcelas deste mês</h3>
-      <TabelaDados
-        vazio="Nenhuma parcela para o mês corrente."
-        colunas={[
-          { key: 'id', label: 'Parcela' },
-          { key: 'contratoId', label: 'Contrato' },
-          { key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null) },
-          { key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null) },
-          { key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null) },
-          { key: 'situacao', label: 'Situação' },
-        ]}
-        linhas={parcelasMes as unknown as Record<string, unknown>[]}
-      />
-
-      <h3>Parcelas de matrícula</h3>
-      <TabelaDados
-        vazio="Nenhuma parcela de matrícula encontrada."
-        colunas={[
-          { key: 'id', label: 'Parcela' },
-          { key: 'contratoId', label: 'Contrato' },
-          { key: 'parcela', label: 'Nº' },
-          { key: 'descricao', label: 'Descrição' },
-          { key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null) },
-          { key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null) },
-          { key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null) },
-          { key: 'valorPago', label: 'Valor pago', render: (linha) => fmtMoeda(linha.valorPago as number | null) },
-          { key: 'situacao', label: 'Situação' },
-        ]}
-        linhas={parcelasMatricula as unknown as Record<string, unknown>[]}
-      />
-
-      <h3>Parcelas canceladas</h3>
-      <TabelaDados
-        vazio="Nenhuma parcela cancelada."
-        colunas={[
-          { key: 'id', label: 'Parcela' },
-          { key: 'contratoId', label: 'Contrato' },
-          { key: 'descricao', label: 'Descrição' },
-          { key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null) },
-          { key: 'dataCancelamento', label: 'Cancelamento', render: (linha) => fmtData(linha.dataCancelamento as string | null) },
-          { key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null) },
-        ]}
-        linhas={parcelasCanceladas as unknown as Record<string, unknown>[]}
       />
     </ModalFrame>
   );
@@ -656,49 +719,62 @@ export function PresencasModal({ pessoaId, onClose }: GestaoModalProps) {
   const frequencias = q.data ?? [];
   return (
     <ModalFrame titulo="Presenças" onClose={onClose}>
-      {frequencias.length === 0 ? (
-        <p className="master-detail-empty">Nenhuma matrícula encontrada.</p>
-      ) : (
-        frequencias.map((frequencia) => (
-          <div key={frequencia.matricula.id} className="master-detail" style={{ marginBottom: '1rem' }}>
-            <div className="form-grid">
-              <label className="form-field">
-                <span className="form-label">Curso</span>
-                <input className="form-input" value={frequencia.matricula.curso} readOnly />
-              </label>
-              <label className="form-field">
-                <span className="form-label">Componente</span>
-                <input className="form-input" value={frequencia.matricula.componente} readOnly />
-              </label>
-              <label className="form-field">
-                <span className="form-label">Turma</span>
-                <input className="form-input" value={frequencia.matricula.turma ?? '—'} readOnly />
-              </label>
-              <label className="form-field">
-                <span className="form-label">Frequência</span>
-                <input className="form-input" value={frequencia.frequenciaPerc == null ? '—' : `${frequencia.frequenciaPerc}%`} readOnly />
-              </label>
-              <label className="form-field">
-                <span className="form-label">Presentes</span>
-                <input className="form-input" value={frequencia.presentes} readOnly />
-              </label>
-              <label className="form-field">
-                <span className="form-label">Ausentes</span>
-                <input className="form-input" value={frequencia.ausentes} readOnly />
-              </label>
-            </div>
-            <TabelaDados
-              vazio="Nenhuma ocorrência de presença."
-              colunas={[
-                { key: 'data', label: 'Data', render: (linha) => fmtData(linha.data as string | null) },
-                { key: 'presenca', label: 'Presença', render: (linha) => PRESENCA_COR[String(linha.presenca ?? '')] ?? String(linha.presenca ?? '') },
-                { key: 'componente', label: 'Componente' },
-              ]}
-              linhas={frequencia.ocorrencias as unknown as Record<string, unknown>[]}
-            />
-          </div>
-        ))
-      )}
+      <Tabs
+        tabs={[
+          {
+            key: 'matricula',
+            label: 'Matrícula',
+            content: frequencias.length === 0 ? (
+              <p className="master-detail-empty">Nenhuma matrícula encontrada.</p>
+            ) : (
+              frequencias.map((frequencia) => (
+                <div key={frequencia.matricula.id} className="master-detail" style={{ marginBottom: '1rem' }}>
+                  <div className="form-grid">
+                    <label className="form-field">
+                      <span className="form-label">Curso</span>
+                      <input className="form-input" value={frequencia.matricula.curso} readOnly />
+                    </label>
+                    <label className="form-field">
+                      <span className="form-label">Componente</span>
+                      <input className="form-input" value={frequencia.matricula.componente} readOnly />
+                    </label>
+                    <label className="form-field">
+                      <span className="form-label">Turma</span>
+                      <input className="form-input" value={frequencia.matricula.turma ?? '—'} readOnly />
+                    </label>
+                    <label className="form-field">
+                      <span className="form-label">Frequência</span>
+                      <input className="form-input" value={frequencia.frequenciaPerc == null ? '—' : `${frequencia.frequenciaPerc}%`} readOnly />
+                    </label>
+                    <label className="form-field">
+                      <span className="form-label">Presentes</span>
+                      <input className="form-input" value={frequencia.presentes} readOnly />
+                    </label>
+                    <label className="form-field">
+                      <span className="form-label">Ausentes</span>
+                      <input className="form-input" value={frequencia.ausentes} readOnly />
+                    </label>
+                  </div>
+                  <TabelaDados
+                    vazio="Nenhuma ocorrência de presença."
+                    colunas={[
+                      { key: 'data', label: 'Data', render: (linha) => fmtData(linha.data as string | null) },
+                      { key: 'presenca', label: 'Presença', render: (linha) => PRESENCA_COR[String(linha.presenca ?? '')] ?? String(linha.presenca ?? '') },
+                      { key: 'componente', label: 'Componente' },
+                    ]}
+                    linhas={frequencia.ocorrencias as unknown as Record<string, unknown>[]}
+                  />
+                </div>
+              ))
+            ),
+          },
+          {
+            key: 'trocaTurma',
+            label: 'Troca Turma',
+            content: <p className="master-detail-empty">Nenhuma troca de turma registrada.</p>,
+          },
+        ]}
+      />
     </ModalFrame>
   );
 }

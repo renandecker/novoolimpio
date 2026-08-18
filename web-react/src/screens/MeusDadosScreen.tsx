@@ -16,6 +16,17 @@ type MeusDados = {
   telefone: string;
   celular: string;
   foto: string;
+  nomePai: string;
+  nomeMae: string;
+  nomeReferencia: string;
+  telefoneReferencia: string;
+  facebook: string;
+  twitter: string;
+  telefoneComercial: string;
+  genero: string;
+  etnia: string;
+  escolaridade: string;
+  estadoCivil: string;
 };
 
 export default function MeusDadosScreen() {
@@ -31,6 +42,17 @@ export default function MeusDadosScreen() {
     telefone: '',
     celular: '',
     foto: session?.foto || '',
+    nomePai: '',
+    nomeMae: '',
+    nomeReferencia: '',
+    telefoneReferencia: '',
+    facebook: '',
+    twitter: '',
+    telefoneComercial: '',
+    genero: '',
+    etnia: '',
+    escolaridade: '',
+    estadoCivil: '',
   });
   const [foto, setFoto] = useState(session?.foto || '');
   const [busy, setBusy] = useState(true);
@@ -55,6 +77,17 @@ export default function MeusDadosScreen() {
           telefone: perfil.telefone || '',
           celular: perfil.celular || '',
           foto: perfil.foto || prev.foto,
+          nomePai: perfil.nomePai || '',
+          nomeMae: perfil.nomeMae || '',
+          nomeReferencia: perfil.nomeReferencia || '',
+          telefoneReferencia: perfil.telefoneReferencia || '',
+          facebook: perfil.facebook || '',
+          twitter: perfil.twitter || '',
+          telefoneComercial: perfil.telefoneComercial || '',
+          genero: perfil.genero || '',
+          etnia: perfil.etnia || '',
+          escolaridade: perfil.escolaridade || '',
+          estadoCivil: perfil.estadoCivil || '',
         }));
         if (perfil.foto) setFoto(perfil.foto);
       })
@@ -136,6 +169,22 @@ export default function MeusDadosScreen() {
               <dd>{formatarData(dados.dataNascimento)}</dd>
             </div>
             <div className="meus-dados-item">
+              <dt>Gênero</dt>
+              <dd>{dados.genero || 'Não informado'}</dd>
+            </div>
+            <div className="meus-dados-item">
+              <dt>Etnia</dt>
+              <dd>{dados.etnia || 'Não informado'}</dd>
+            </div>
+            <div className="meus-dados-item">
+              <dt>Estado civil</dt>
+              <dd>{dados.estadoCivil || 'Não informado'}</dd>
+            </div>
+            <div className="meus-dados-item">
+              <dt>Escolaridade</dt>
+              <dd>{dados.escolaridade || 'Não informado'}</dd>
+            </div>
+            <div className="meus-dados-item">
               <dt>E-mail</dt>
               <dd>{dados.email || 'Não informado'}</dd>
             </div>
@@ -147,6 +196,38 @@ export default function MeusDadosScreen() {
               <dt>Celular</dt>
               <dd>{dados.celular || 'Não informado'}</dd>
             </div>
+            <div className="meus-dados-item">
+              <dt>Telefone comercial</dt>
+              <dd>{dados.telefoneComercial || 'Não informado'}</dd>
+            </div>
+            <div className="meus-dados-item">
+              <dt>Nome do pai</dt>
+              <dd>{dados.nomePai || 'Não informado'}</dd>
+            </div>
+            <div className="meus-dados-item">
+              <dt>Nome da mãe</dt>
+              <dd>{dados.nomeMae || 'Não informado'}</dd>
+            </div>
+            <div className="meus-dados-item">
+              <dt>Contato de referência</dt>
+              <dd>{dados.nomeReferencia || 'Não informado'}</dd>
+            </div>
+            <div className="meus-dados-item">
+              <dt>Telefone do contato</dt>
+              <dd>{dados.telefoneReferencia || 'Não informado'}</dd>
+            </div>
+            {dados.facebook && (
+              <div className="meus-dados-item">
+                <dt>Facebook</dt>
+                <dd>{dados.facebook}</dd>
+              </div>
+            )}
+            {dados.twitter && (
+              <div className="meus-dados-item">
+                <dt>Twitter</dt>
+                <dd>{dados.twitter}</dd>
+              </div>
+            )}
           </dl>
 
           <div className="meus-dados-foto-editar">

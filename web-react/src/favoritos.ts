@@ -1,4 +1,5 @@
 import { api } from './api';
+import type { PagedResponse } from './types';
 
 // Espelha br.com.sol7.olimpio.control.controllers.basico.UsuarioLogadoController#listFavoritos:
 // combina FavoritoUsuario (favoritos do próprio usuário) + FavoritoPerfil (favoritos do perfil),
@@ -9,5 +10,5 @@ export type FavoritoDisponivel = {
   outcome: string;
 };
 
-export const listarFavoritos = async (): Promise<FavoritoDisponivel[]> =>
-  (await api.get<FavoritoDisponivel[]>('/api/basico/usuarioLogado/favoritos')).data;
+export const listarFavoritos = async (page = 0, size = 10, busca?: string): Promise<PagedResponse<FavoritoDisponivel>> =>
+  (await api.get<PagedResponse<FavoritoDisponivel>>('/api/basico/usuarioLogado/favoritos', { params: { page, size, ...(busca ? { busca } : {}) } })).data;

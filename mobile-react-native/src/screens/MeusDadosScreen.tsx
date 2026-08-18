@@ -14,6 +14,17 @@ type MeusDados = {
   telefone: string;
   celular: string;
   foto: string;
+  nomePai: string;
+  nomeMae: string;
+  nomeReferencia: string;
+  telefoneReferencia: string;
+  facebook: string;
+  twitter: string;
+  telefoneComercial: string;
+  genero: string;
+  etnia: string;
+  escolaridade: string;
+  estadoCivil: string;
 };
 
 export default function MeusDadosScreen() {
@@ -29,6 +40,17 @@ export default function MeusDadosScreen() {
     telefone: '',
     celular: '',
     foto: '',
+    nomePai: '',
+    nomeMae: '',
+    nomeReferencia: '',
+    telefoneReferencia: '',
+    facebook: '',
+    twitter: '',
+    telefoneComercial: '',
+    genero: '',
+    etnia: '',
+    escolaridade: '',
+    estadoCivil: '',
   });
   const [busy, setBusy] = useState(true);
 
@@ -49,6 +71,17 @@ export default function MeusDadosScreen() {
           telefone: perfil.telefone || '',
           celular: perfil.celular || '',
           foto: perfil.foto || prev.foto,
+          nomePai: perfil.nomePai || '',
+          nomeMae: perfil.nomeMae || '',
+          nomeReferencia: perfil.nomeReferencia || '',
+          telefoneReferencia: perfil.telefoneReferencia || '',
+          facebook: perfil.facebook || '',
+          twitter: perfil.twitter || '',
+          telefoneComercial: perfil.telefoneComercial || '',
+          genero: perfil.genero || '',
+          etnia: perfil.etnia || '',
+          escolaridade: perfil.escolaridade || '',
+          estadoCivil: perfil.estadoCivil || '',
         }));
       })
       .catch(() => {
@@ -78,9 +111,20 @@ export default function MeusDadosScreen() {
     ['CPF', dados.cpf || 'Não informado'],
     ['RG', dados.rg || 'Não informado'],
     ['Data de nascimento', formatarData(dados.dataNascimento)],
+    ['Gênero', dados.genero || 'Não informado'],
+    ['Etnia', dados.etnia || 'Não informado'],
+    ['Estado civil', dados.estadoCivil || 'Não informado'],
+    ['Escolaridade', dados.escolaridade || 'Não informado'],
     ['E-mail', dados.email || 'Não informado'],
     ['Telefone', dados.telefone || 'Não informado'],
     ['Celular', dados.celular || 'Não informado'],
+    ['Telefone comercial', dados.telefoneComercial || 'Não informado'],
+    ['Nome do pai', dados.nomePai || 'Não informado'],
+    ['Nome da mãe', dados.nomeMae || 'Não informado'],
+    ['Contato de referência', dados.nomeReferencia || 'Não informado'],
+    ['Telefone do contato', dados.telefoneReferencia || 'Não informado'],
+    ...(dados.facebook ? [['Facebook', dados.facebook] as [string, string]] : []),
+    ...(dados.twitter ? [['Twitter', dados.twitter] as [string, string]] : []),
   ];
 
   return (

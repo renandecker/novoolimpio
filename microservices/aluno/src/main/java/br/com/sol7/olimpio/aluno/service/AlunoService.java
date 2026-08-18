@@ -380,7 +380,10 @@ public class AlunoService {
 
     private AlunoPerfilResponse toPerfil(Object[] row) {
         return new AlunoPerfilResponse(asString(row[0]), asString(row[1]), asString(row[2]), asString(row[3]),
-                asString(row[4]), asLocalDate(row[5]), asString(row[6]), asString(row[7]), asString(row[8]), asString(row[9]));
+                asString(row[4]), asLocalDate(row[5]), asString(row[6]), asString(row[7]), asString(row[8]), asString(row[9]),
+                asString(row[10]), asString(row[11]), asString(row[12]), asString(row[13]),
+                asString(row[14]), asString(row[15]), asString(row[16]),
+                asString(row[17]), asString(row[18]), asString(row[19]), asString(row[20]));
     }
 
     private PessoaDadosResponse toPessoaDados(Object[] r) {

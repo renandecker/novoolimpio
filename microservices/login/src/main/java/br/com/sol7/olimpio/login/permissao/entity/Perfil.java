@@ -12,6 +12,10 @@ public class Perfil extends PanacheEntityBase {
     @Id
     @Column(name = "id")
     public Long id;
+    @Column(name = "descricao")
+    public String descricao;
     @Column(name = "hierarquia")
     public String hierarquia;
+    @Column(name = "id_modulo")
+    public Long idModulo;
 }

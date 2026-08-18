@@ -6,6 +6,7 @@ import br.com.sol7.olimpio.estoque.controleepedidos.ControlePedidosService;
 import br.com.sol7.olimpio.estoque.movimentacaoestoque.MovimentacaoEstoqueRequest;
 import br.com.sol7.olimpio.estoque.movimentacaoestoque.MovimentacaoEstoqueService;
 import br.com.sol7.olimpio.estoque.pendenciavendaproduto.PendenciaVendaProdutoService;
+import br.com.sol7.olimpio.estoque.produto.ProdutoRepository;
 import br.com.sol7.olimpio.estoque.solicitacaoestoque.SolicitacaoEstoqueRequest;
 import br.com.sol7.olimpio.estoque.solicitacaoestoque.SolicitacaoEstoqueService;
 import br.com.sol7.olimpio.shared.enums.Motivo;
@@ -25,13 +26,33 @@ public class EstoqueProdutoService {
     @Inject SolicitacaoEstoqueService solicitacaoEstoqueService;
     @Inject ControlePedidosService controlePedidosService;
     @Inject PendenciaVendaProdutoService pendenciaVendaProdutoService;
+    @Inject ProdutoRepository produtoRepository;
 
     // Migrado de EstoqueProdutoController.populaItens (legado) - controle de estoque da unidade
     public Uni<List<ControleEstoqueResponse>> listarControlePorUnidade(Long unidadeId) {
         return controleEstoqueRepository.buscarItenUnidade(unidadeId)
-                .map(items -> items.stream().map(ce -> new ControleEstoqueResponse(
+                .chain(items -> {
+                    var responses = items.stream().map(ce -> new ControleEstoqueResponse(
                         ce.id, ce.valor, ce.quantidade, ce.qtdeSolicitado, ce.qtdeDefeito, ce.qtdeFalta,
-                        ce.qtdeNaoEncontrado, ce.qtdeReservado, ce.qtdeAprovadoNaoEntregue, ce.produtoId, ce.unidadeId)).toList());
+                        ce.qtdeNaoEncontrado, ce.qtdeReservado, ce.qtdeAprovadoNaoEntregue, ce.produtoId, ce.unidadeId)).toList();
+                List<Uni<ControleEstoqueResponse>> unis = responses.stream().map(this::enrichControleResponse).toList();
+                return Uni.join().all(unis);
+                });
+    }
+
+    private Uni<ControleEstoqueResponse> enrichControleResponse(ControleEstoqueResponse r) {
+        if (r.produtoId() == null) return Uni.createFrom().item(r);
+        return produtoRepository.findById(r.produtoId())
+                .map(produto -> {
+                    if (produto == null) return r;
+                    return new ControleEstoqueResponse(
+                        r.id(), r.valor(), r.quantidade(), r.qtdeSolicitado(), r.qtdeDefeito(),
+                        r.qtdeFalta(), r.qtdeNaoEncontrado(), r.qtdeReservado(), r.qtdeAprovadoNaoEntregue(),
+                        r.produtoId(), r.unidadeId(),
+                        produto.nome, produto.imagem, produto.valor, produto.quantidade,
+                        null, null, null
+                    );
+                });
     }
 
     // Migrado de EstoqueProdutoController.salvaEntrada (legado): registra movimentacao ENTRADA e soma no ControleEstoque

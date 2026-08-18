@@ -214,8 +214,6 @@ import ViewMetaFormMetaListScreen from './screens/ViewMetaFormMetaListScreen';
 import ViewMetaIndicadorMetaDinamicaListScreen from './screens/ViewMetaIndicadorMetaDinamicaListScreen';
 import ViewMetaListMetaListScreen from './screens/ViewMetaListMetaListScreen';
 import ViewMetaListMetaDinamicaListScreen from './screens/ViewMetaListMetaDinamicaListScreen';
-import ViewModeloCartaFormModeloCartaListScreen from './screens/ViewModeloCartaFormModeloCartaListScreen';
-import ViewModeloCartaListModeloCartaListScreen from './screens/ViewModeloCartaListModeloCartaListScreen';
 import ViewModuloColunasModuloListScreen from './screens/ViewModuloColunasModuloListScreen';
 import ViewModuloFormModuloListScreen from './screens/ViewModuloFormModuloListScreen';
 import ViewModuloListModuloListScreen from './screens/ViewModuloListModuloListScreen';
@@ -661,8 +659,6 @@ const q=new QueryClient();createRoot(document.getElementById('root')!).render(<Q
 <Route path="/view/meta/indicadorMetaDinamica" element={<ViewMetaIndicadorMetaDinamicaListScreen/>}/>
 <Route path="/view/meta/listMeta" element={<ViewMetaListMetaListScreen/>}/>
 <Route path="/view/meta/listMetaDinamica" element={<ViewMetaListMetaDinamicaListScreen/>}/>
-<Route path="/view/modeloCarta/formModeloCarta" element={<ViewModeloCartaFormModeloCartaListScreen/>}/>
-<Route path="/view/modeloCarta/listModeloCarta" element={<ViewModeloCartaListModeloCartaListScreen/>}/>
 <Route path="/view/modulo/colunasModulo" element={<ViewModuloColunasModuloListScreen/>}/>
 <Route path="/view/modulo/formModulo" element={<ViewModuloFormModuloListScreen/>}/>
 <Route path="/view/modulo/listModulo" element={<ViewModuloListModuloListScreen/>}/>

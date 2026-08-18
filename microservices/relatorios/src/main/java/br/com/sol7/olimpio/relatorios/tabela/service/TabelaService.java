@@ -75,15 +75,21 @@ public class TabelaService {
     private static final String SQL_COLUNAS = "SELECT tc.ordem, d.nome_visualizacao, d.tipo_info_dimensao, dc.coluna, m.nome_visualizacao, m.tipo_info_medida, mc.coluna FROM rel_tabela_colunas tc LEFT JOIN rel_dimensao d ON d.id = tc.id_dimensao LEFT JOIN rel_coluna dc ON dc.id = d.id_coluna LEFT JOIN rel_medida m ON m.id = tc.id_medida LEFT JOIN rel_coluna mc ON mc.id = m.id_coluna WHERE tc.id_tabela = ?1 ORDER BY tc.ordem, tc.id";
     private static final String SQL_ESTRUTURA = "SELECT e.tabela, e.condicao FROM rel_tabela t INNER JOIN rel_estrutura e ON e.id = t.id_estrutura WHERE t.id = ?1";
 
-    /** Executa a consulta montada pela estrutura e pelas colunas configuradas, como no RelatorioTabelaLazyModel legado. */
-    public Uni<TabelaExecutadaResponse> executar(Long tabelaId) {
+    /** Executa a consulta montada pela estrutura e pelas colunas configuradas, com paginação via LIMIT/OFFSET do PostgreSQL. */
+    public Uni<TabelaExecutadaResponse> executar(Long tabelaId, int page, int size) {
+        int p = Math.max(0, page);
+        int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
         return Panache.getSession().chain(session -> session.createNativeQuery(SQL_ESTRUTURA).setParameter(1, tabelaId).getSingleResultOrNull())
                 .onItem().ifNull().failWith(() -> new NotFoundException("Estrutura da tabela não encontrada"))
                 .onItem().transformToUni(estrutura -> Panache.getSession().chain(session -> session.createNativeQuery(SQL_COLUNAS).setParameter(1, tabelaId).getResultList())
-                        .onItem().transformToUni(colunas -> executarSql((Object[]) estrutura, colunas)));
+                        .onItem().transformToUni(colunas -> executarSql((Object[]) estrutura, colunas, p, s)));
     }
 
-    private Uni<TabelaExecutadaResponse> executarSql(Object[] estrutura, List<?> configuracoes) {
+    public Uni<TabelaExecutadaResponse> executar(Long tabelaId) {
+        return executar(tabelaId, 0, 500);
+    }
+
+    private Uni<TabelaExecutadaResponse> executarSql(Object[] estrutura, List<?> configuracoes, int page, int size) {
         if (configuracoes.isEmpty()) return Uni.createFrom().item(new TabelaExecutadaResponse(List.of(), List.of()));
         String origem = texto(estrutura[0]);
         String condicao = texto(estrutura[1]);
@@ -106,9 +112,25 @@ public class TabelaService {
         StringBuilder sql = new StringBuilder("SELECT ").append(String.join(", ", expressoes)).append(' ').append(origem);
         if (!condicao.isBlank()) sql.append(' ').append(condicao);
         if (possuiAgregacao && !grupos.isEmpty()) sql.append(" GROUP BY ").append(String.join(", ", grupos));
-        sql.append(" LIMIT 500");
-        return Panache.getSession().chain(session -> session.createNativeQuery(sql.toString()).getResultList())
-                .map(resultado -> new TabelaExecutadaResponse(cabecalhos, converterLinhas(resultado, cabecalhos)));
+
+        String mainSql = sql.toString();
+        String whereClause = condicao.isBlank() ? "" : condicao;
+        String countSql = "SELECT count(*) FROM (SELECT 1 " + origem + whereClause + ") _cnt";
+
+        int offset = page * size;
+        String paginatedSql = mainSql + " LIMIT " + size + " OFFSET " + offset;
+
+        Uni<Long> countUni = Panache.getSession()
+                .chain(session -> session.createNativeQuery(countSql).getSingleResultOrNull())
+                .map(result -> result == null ? 0L : ((Number) result).longValue());
+
+        Uni<List<Object>> dataUni = Panache.getSession()
+                .chain(session -> session.createNativeQuery(paginatedSql).getResultList());
+
+        return countUni.chain(totalCount -> dataUni.map(resultado -> {
+            int totalPages = (int) Math.ceil((double) totalCount / Math.max(1, size));
+            return new TabelaExecutadaResponse(cabecalhos, converterLinhas(resultado, cabecalhos), totalCount, page, size, totalPages);
+        }));
     }
 
     private List<Map<String, Object>> converterLinhas(List<?> resultado, List<String> cabecalhos) {

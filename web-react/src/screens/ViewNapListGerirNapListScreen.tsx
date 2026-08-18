@@ -3,7 +3,6 @@ import { DataTable, type DataTableColumn } from '../DataTable';
 
 const COLUMNS: DataTableColumn[] = [
   { key: 'etapas_nap_descricao', label: 'Etapa NAP' },
-  { key: 'qtde_carta', label: 'Cartas Enviadas' },
   { key: 'qtde_email', label: 'Emails Enviados' },
   { key: 'qtde_ligacao', label: 'Ligações Realizadas' },
 ];

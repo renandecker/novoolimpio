@@ -17,7 +17,7 @@ export default function LoginScreen() {
   const [busy, setBusy] = useState(false);
 
   if (session) {
-    return <Navigate to={(location.state as { from?: string } | null)?.from || '/default'} replace />;
+    return <Navigate to={(location.state as { from?: string } | null)?.from || session.defaultOutcome || '/default'} replace />;
   }
 
   async function submit(event: FormEvent) {

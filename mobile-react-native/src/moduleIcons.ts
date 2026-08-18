@@ -12,7 +12,7 @@ const ICON_RULES: Array<[RegExp, string]> = [
   [/favorito/, '⭐'],
   [/senha/, '🔑'],
   [/impressora|digitalizacao|imprimir/, '🖨️'],
-  [/mensagem|comunicacao|^modelocarta$/, '✉️'],
+  [/mensagem|comunicacao/, '✉️'],
   [/^ligacao$/, '🎧'],
   [/^resultado.*ligacao/, '📊'],
   [/telefone/, '📞'],

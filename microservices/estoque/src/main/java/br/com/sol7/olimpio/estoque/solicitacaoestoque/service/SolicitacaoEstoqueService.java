@@ -1,5 +1,7 @@
 package br.com.sol7.olimpio.estoque.solicitacaoestoque;
 
+import br.com.sol7.olimpio.estoque.solicitacaoestoque.repository.SolicitacaoEstoqueRepository;
+import br.com.sol7.olimpio.estoque.produto.ProdutoRepository;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.enums.Motivo;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -15,9 +17,20 @@ import java.util.List;
 public class SolicitacaoEstoqueService {
 
     @Inject SolicitacaoEstoqueRepository repository;
+    @Inject ProdutoRepository produtoRepository;
 
     public Uni<List<SolicitacaoEstoqueResponse>> list() {
-        return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
+        return repository.listAll().chain(items -> {
+            var responses = items.stream().map(this::toResponse).toList();
+            return enrichResponses(responses);
+        });
+    }
+
+    public Uni<List<SolicitacaoEstoqueResponse>> listByUnidade(Long unidadeId) {
+        return repository.find("unidadeId = ?1", unidadeId).list().chain(items -> {
+            var responses = items.stream().map(this::toResponse).toList();
+            return enrichResponses(responses);
+        });
     }
 
     public Uni<PagedResponse<SolicitacaoEstoqueResponse>> paged(int page, int size) {
@@ -25,19 +38,22 @@ public class SolicitacaoEstoqueService {
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
         return repository.findAll(io.quarkus.panache.common.Sort.by("id").descending()).page(io.quarkus.panache.common.Page.of(p, s)).list()
                 .onItem().transformToUni(items -> repository.count()
-                        .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
+                        .map(count -> {
+                            var responses = items.stream().map(this::toResponse).toList();
+                            return new PagedResponse<>(responses, count, p, s);
+                        }));
     }
 
     public Uni<SolicitacaoEstoqueResponse> find(Long id) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("SolicitacaoEstoque not found"))
-                .map(this::toResponse);
+                .chain(e -> enrichSingleResponse(toResponse(e)));
     }
 
     public Uni<SolicitacaoEstoqueResponse> create(SolicitacaoEstoqueRequest r) {
         var e = new SolicitacaoEstoque();
         apply(e, r);
-        return repository.persist(e).replaceWith(() -> toResponse(e));
+        return repository.persist(e).chain(() -> enrichSingleResponse(toResponse(e)));
     }
 
     // Migrado de EstoqueProdutoController.solicitarItem/salvaSolicitacao (legado):
@@ -52,14 +68,14 @@ public class SolicitacaoEstoqueService {
         if (e.motivo == null) {
             e.motivo = Motivo.SOLICITADO;
         }
-        return repository.persist(e).replaceWith(() -> toResponse(e));
+        return repository.persist(e).chain(() -> enrichSingleResponse(toResponse(e)));
     }
 
     public Uni<SolicitacaoEstoqueResponse> update(Long id, SolicitacaoEstoqueRequest r) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("SolicitacaoEstoque not found"))
                 .invoke(e -> apply(e, r))
-                .map(this::toResponse);
+                .chain(e -> enrichSingleResponse(toResponse(e)));
     }
 
     public Uni<Void> delete(Long id) {
@@ -92,5 +108,24 @@ public class SolicitacaoEstoqueService {
 
     private SolicitacaoEstoqueResponse toResponse(SolicitacaoEstoque e) {
         return new SolicitacaoEstoqueResponse(e.id, e.valor, e.quantidade, e.vendaProdutoId, e.usuarioId, e.produtoId, e.unidadeId, e.dataSolicitacao, e.ativo, e.motivo, e.idMotivo);
+    }
+
+    private Uni<SolicitacaoEstoqueResponse> enrichSingleResponse(SolicitacaoEstoqueResponse r) {
+        if (r.produtoId() == null) return Uni.createFrom().item(r);
+        return produtoRepository.findById(r.produtoId())
+                .map(produto -> {
+                    if (produto == null) return r;
+                    return new SolicitacaoEstoqueResponse(
+                        r.id(), r.valor(), r.quantidade(), r.vendaProdutoId(), r.usuarioId(),
+                        r.produtoId(), r.unidadeId(), r.dataSolicitacao(), r.ativo(), r.motivo(), r.idMotivo(),
+                        produto.nome, produto.imagem, produto.valor, produto.quantidade,
+                        null, null, null
+                    );
+                });
+    }
+
+    private Uni<List<SolicitacaoEstoqueResponse>> enrichResponses(List<SolicitacaoEstoqueResponse> responses) {
+        List<Uni<SolicitacaoEstoqueResponse>> unis = responses.stream().map(this::enrichSingleResponse).toList();
+        return Uni.join().all(unis).andFailFast();
     }
 }

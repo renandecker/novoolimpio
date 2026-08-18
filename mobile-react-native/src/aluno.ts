@@ -11,6 +11,17 @@ export type AlunoPerfil = {
   telefone: string;
   celular: string;
   foto: string;
+  nomePai: string;
+  nomeMae: string;
+  nomeReferencia: string;
+  telefoneReferencia: string;
+  facebook: string;
+  twitter: string;
+  telefoneComercial: string;
+  genero: string;
+  etnia: string;
+  escolaridade: string;
+  estadoCivil: string;
 };
 
 export type Matricula = {

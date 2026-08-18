@@ -3,8 +3,8 @@ import { api } from './api';
 import type { ModulePermissions } from './types';
 
 type Module = { id: number; antecessorId: number | null; rotulo: string; descricao: string; icone: string; ajuda: string; outcome: string; ordem: number };
-type Session = { accessToken: string; expiresAt: number; username: string; permissions: string[]; modules: Module[]; modulePermissions?: ModulePermissions; nome?: string; email?: string; cpf?: string; foto?: string };
-type SessionCore = Pick<Session, 'accessToken' | 'expiresAt' | 'username' | 'permissions'> & { modulePermissions?: ModulePermissions; nome?: string; email?: string; cpf?: string; foto?: string };
+type Session = { accessToken: string; expiresAt: number; username: string; permissions: string[]; modules: Module[]; modulePermissions?: ModulePermissions; nome?: string; email?: string; cpf?: string; foto?: string; defaultOutcome?: string };
+type SessionCore = Pick<Session, 'accessToken' | 'expiresAt' | 'username' | 'permissions'> & { modulePermissions?: ModulePermissions; nome?: string; email?: string; cpf?: string; foto?: string; defaultOutcome?: string };
 type Auth = { session: Session | null; signIn: (username: string, password: string, bootstrap?: boolean) => Promise<void>; signOut: () => Promise<void>; refreshSession: (next: SessionCore) => void };
 export type { Session };
 const KEY = 'olimpio.session';

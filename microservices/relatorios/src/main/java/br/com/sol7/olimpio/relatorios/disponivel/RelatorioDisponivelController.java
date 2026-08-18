@@ -1,5 +1,6 @@
 package br.com.sol7.olimpio.relatorios.disponivel;
 
+import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -7,6 +8,7 @@ import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.core.MediaType;
 import br.com.sol7.olimpio.relatorios.tabela.TabelaService;
@@ -25,8 +27,12 @@ public class RelatorioDisponivelController {
     @Inject MapaService mapaService;
 
     @GET
-    public Uni<List<RelatorioDisponivelResponse>> listar(@HeaderParam("X-Authenticated-Username") String username) {
-        return service.listarDisponiveis(username);
+    public Uni<PagedResponse<RelatorioDisponivelResponse>> listar(
+            @HeaderParam("X-Authenticated-Username") String username,
+            @QueryParam("page") Integer page,
+            @QueryParam("size") Integer size,
+            @QueryParam("busca") String busca) {
+        return service.listarDisponiveisPaged(username, page == null ? 0 : page, size == null ? 10 : size, busca);
     }
 
     @GET

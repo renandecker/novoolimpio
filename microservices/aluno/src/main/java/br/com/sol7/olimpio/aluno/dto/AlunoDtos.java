@@ -9,7 +9,10 @@ public final class AlunoDtos {
 
     public record AlunoPerfilResponse(
             String username, String nome, String nomeSocial, String cpf, String rg,
-            LocalDate dataNascimento, String email, String telefone, String celular, String foto) {}
+            LocalDate dataNascimento, String email, String telefone, String celular, String foto,
+            String nomePai, String nomeMae, String nomeReferencia, String telefoneReferencia,
+            String facebook, String twitter, String telefoneComercial,
+            String genero, String etnia, String escolaridade, String estadoCivil) {}
 
     public record MatriculaResponse(
             Long id, String curso, String componente, String unidade, Integer turma, String periodo, Integer ano,

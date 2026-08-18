@@ -24,13 +24,9 @@ const renderValor = (key: string) => (item: ApiItem) => `R$ ${Number(asRecord(it
 const COLUMNS: DataTableColumn[] = [
   { key: 'id', label: 'Id' },
   { key: 'valor_email', label: 'Valor Email', render: renderValor('valor_email') },
-  { key: 'tipo_email', label: 'Tipo Serviço SMS', render: renderTipo('tipo_email') },
-  { key: 'valor_carta', label: 'Valor Carta', render: renderValor('valor_carta') },
-  { key: 'tipo_carta', label: 'Tipo Serviço SMS', render: renderTipo('tipo_carta') },
+  { key: 'tipo_email', label: 'Tipo Serviço Email', render: renderTipo('tipo_email') },
   { key: 'valor_ligacao', label: 'Valor Ligação', render: renderValor('valor_ligacao') },
   { key: 'tipo_ligacao', label: 'Tipo Serviço Ligação', render: renderTipo('tipo_ligacao') },
-  { key: 'valor_sms', label: 'Valor SMS', render: renderValor('valor_sms') },
-  { key: 'tipo_sms', label: 'Tipo Serviço SMS', render: renderTipo('tipo_sms') },
   { key: 'data_alteracao', label: 'Data', render: (item) => formatDate(asRecord(item).data_alteracao) },
 ];
 
