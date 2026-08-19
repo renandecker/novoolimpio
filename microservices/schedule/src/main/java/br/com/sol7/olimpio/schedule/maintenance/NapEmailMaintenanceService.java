@@ -17,9 +17,7 @@ import java.util.List;
  *
  * Para cada configuracao ativa em edc_nap_email_envio monta o SQL da NAP (from + joins +
  * caseCor da situacao) e registra um registro em edc_nap_email para cada contrato que atende
- * as regras. O envio efetivo via SMTP/Gmail/SendGrid (RotinaEnvioEmailController no legado)
- * nao foi portado: aqui fica registrado o envio pendente + log; a entrega real deve ficar no
- * microsservico de dominio (educacao), no mesmo espirito das notas de fechamentoCaixaAbertos.
+ * as regras. Nao foi portado o envio efetivo: aqui fica registrado o envio pendente + log.
  *
  * Acessa o banco pelo datasource reativo "educacao-db" (SQL nativo, sem REST).
  */

@@ -11,8 +11,25 @@ const formatDate = (value: unknown): string => {
   return `${match[3]}/${match[2]}/${match[1]}`;
 };
 
+// Helper to get offered component curricular description
+const getOferecimentoDesc = (item: ApiItem): string => {
+  const record = asRecord(item);
+  const oferta = record.oferecimentoComponenteCurricular;
+  if (!oferta) return '';
+  // Try various field names for the description
+  if (oferta.descricao) return String(oferta.descricao);
+  if (oferta.nome) return String(oferta.nome);
+  if (oferta.sucinto) return String(oferta.sucinto);
+  if (oferta.grupo && grupo.nome) return String(grupo.nome);
+  return '';
+};
+
 const COLUMNS: DataTableColumn[] = [
-  { key: 'id_oferecimento_componente_curricular', label: 'Turma' },
+  {
+    key: 'id_oferecimento_componente_curricular',
+    label: 'Turma',
+    render: (item) => getOferecimentoDesc(item) || '#' + (item.id || '')
+  },
   { key: 'sequencia', label: 'Sequência' },
   { key: 'inicio', label: 'Início', render: (item) => formatDate(asRecord(item).inicio) },
   { key: 'fim', label: 'Fim', render: (item) => formatDate(asRecord(item).fim) },
@@ -25,7 +42,15 @@ const COLUMNS: DataTableColumn[] = [
   {
     key: 'aula_coringa',
     label: 'Aula Coringa',
-    render: (item) => (asRecord(item).aula_coringa ? 'Sim' : 'Não'),
+    render: (item) => {
+      const pendente = asRecord(item).pendente;
+      // Use the offered component curricular's course info
+      const oferta = asRecord(item).oferecimentoComponenteCurricular;
+      if (oferta && oferta.componenteCurricular && oferta.componenteCurricular.curso) {
+        return 'Sim';
+      }
+      return pendente ? 'Sim' : 'Não';
+    },
   },
 ];
 

@@ -1,6 +1,7 @@
 import { PermissionGate } from '../permissions';
 import { DataTable, type DataTableColumn } from '../DataTable';
-import { Wizard } from '../Wizard';
+import { Wizard, useWizardData } from '../Wizard';
+import { useApi } from '../api';
 
 const CONTRATO_COLUMNS: DataTableColumn[] = [
   { key: 'pessoaId', label: 'Pessoa' },
@@ -39,7 +40,73 @@ const VALORES_COLUMNS: DataTableColumn[] = [
   { key: 'cobraRematricula', label: 'Cobra Rematrícula' },
 ];
 
+interface RematriculaData {
+  entity: {
+    contratoId?: number;
+    unidadeId?: number;
+    testemunha1Id?: number;
+    testemunha2Id?: number;
+    responsavelId?: number;
+  };
+  ofertasSelecionadas: any[];
+  materialEscolar: any[];
+  valores: {
+    formaPagamentoId?: number;
+    dataPrimeiraParcela?: string;
+    dataParcela?: string;
+    parcelas?: any[];
+    taxas?: any[];
+    bonificacao?: number;
+  };
+}
+
 export default function ViewMatriculaFormRematriculaListScreen() {
+  const { data, updateFields } = useWizardData<RematriculaData>({
+    entity: {},
+    ofertasSelecionadas: [],
+    materialEscolar: [],
+    valores: {},
+  });
+
+  const { post: saveRematricula } = useApi('/api/educacao/rematricula');
+
+  const validateStep1 = async (currentData: RematriculaData) => {
+    if (!currentData.entity.contratoId) return 'Selecione o contrato';
+    if (!currentData.entity.unidadeId) return 'Selecione a unidade';
+    if (!currentData.entity.testemunha1Id) return 'Informe a primeira testemunha';
+    if (!currentData.entity.testemunha2Id) return 'Informe a segunda testemunha';
+    return true;
+  };
+
+  const validateStep2 = async (currentData: RematriculaData) => {
+    if (!currentData.ofertasSelecionadas || currentData.ofertasSelecionadas.length === 0) {
+      return 'Selecione pelo menos um oferecimento para a rematrícula';
+    }
+    return true;
+  };
+
+  const validateStep4 = async (currentData: RematriculaData) => {
+    if (!currentData.valores.formaPagamentoId) return 'Selecione a forma de pagamento';
+    if (!currentData.valores.dataPrimeiraParcela) return 'Defina a data da primeira parcela';
+    if (!currentData.valores.parcelas || currentData.valores.parcelas.length === 0) return 'Configure as parcelas';
+    return true;
+  };
+
+  const handleComplete = async (formData: RematriculaData) => {
+    try {
+      await saveRematricula({
+        ...formData.entity,
+        ofertasSelecionadas: formData.ofertasSelecionadas,
+        materialEscolar: formData.materialEscolar,
+        valores: formData.valores,
+      });
+      alert('Rematrícula realizada com sucesso!');
+    } catch (error) {
+      console.error('Erro ao salvar:', error);
+      alert('Erro ao realizar rematrícula');
+    }
+  };
+
   return (
     <PermissionGate permission="READ">
       <main>
@@ -48,16 +115,20 @@ export default function ViewMatriculaFormRematriculaListScreen() {
           <div className="form-title">Rematrícula</div>
           <div className="table_form">
             <Wizard
+              initialData={data}
+              onDataChange={updateFields}
               steps={[
                 {
                   key: 'tabContrato',
                   label: 'Contrato',
                   content: <DataTable path="/api/educacao/contrato" columns={CONTRATO_COLUMNS} />,
+                  validate: validateStep1,
                 },
                 {
                   key: 'tabMatricula',
                   label: 'Matrícula/Rematrícula',
                   content: <DataTable path="/api/educacao/matricula" columns={MATRICULA_COLUMNS} />,
+                  validate: validateStep2,
                 },
                 {
                   key: 'tabMaterial',
@@ -69,8 +140,10 @@ export default function ViewMatriculaFormRematriculaListScreen() {
                   label: 'Valores',
                   nextLabel: 'Salvar',
                   content: <DataTable path="/api/educacao/valor-curso" columns={VALORES_COLUMNS} />,
+                  validate: validateStep4,
                 },
               ]}
+              onComplete={handleComplete}
             />
           </div>
         </div>

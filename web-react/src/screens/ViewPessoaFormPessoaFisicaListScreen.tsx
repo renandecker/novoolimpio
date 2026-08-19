@@ -4,7 +4,6 @@ import { Tabs } from '../Tabs';
 import type { TabItem } from '../Tabs';
 import { MasterDetail } from '../MasterDetail';
 import type { ApiItem } from '../types';
-import { api } from '../api';
 import { UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH } from '../masterDetailSources';
 
 export default function ViewPessoaFormPessoaFisicaListScreen() {

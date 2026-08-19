@@ -3,6 +3,7 @@ import { api } from '../api';
 import { useAuth } from '../auth';
 import { PermissionGate } from '../permissions';
 import '../Wizard.css';
+import { useQuery } from '@tanstack/react-query';
 
 // ==== Tipos espelhando os DTOs REST de financeiro.zip (módulo caixa) ====
 type Caixa = {
@@ -42,6 +43,53 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
   // módulo básico exponha esses campos no token/sessão.
   const [usuarioId, setUsuarioId] = useState<string>('');
   const [unidadeId, setUnidadeId] = useState<string>('');
+  const [impressoraId, setImpressoraId] = useState<number | null>(null);
+
+  // Combo search for Usuario
+  const [usuarioOptions, setUsuarioOptions] = useState<Array<{ id: number; nome: string }>>([]);
+  const [loadingUsuario, setLoadingUsuario] = useState(false);
+  useQuery({
+    queryKey: ['combo-usuario'],
+    queryFn: async () => {
+      setLoadingUsuario(true);
+      try {
+        const { data } = await api.get('/api/view/usuario/listUsuario');
+        setUsuarioOptions(data.map((u: any) => ({ id: u.id, nome: u.nome })));
+      } catch { setUsuarioOptions([]); }
+      finally { setLoadingUsuario(false); }
+    },
+    enabled: false,
+  });
+  // Combo search for Unidade
+  const [unidadeOptions, setUnidadeOptions] = useState<Array<{ id: number; nome: string }>>([]);
+  const [loadingUnidade, setLoadingUnidade] = useState(false);
+  useQuery({
+    queryKey: ['combo-unidade'],
+    queryFn: async () => {
+      setLoadingUnidade(true);
+      try {
+        const { data } = await api.get('/api/view/unidade/listUnidade');
+        setUnidadeOptions(data.map((u: any) => ({ id: u.id, nome: u.sucinto })));
+      } catch { setUnidadeOptions([]); }
+      finally { setLoadingUnidade(false); }
+    },
+    enabled: false,
+  });
+  // Combo search for Impressora
+  const [impressoraOptions, setImpressoraOptions] = useState<Array<{ id: number; nome: string }>>([]);
+  const [loadingImpressora, setLoadingImpressora] = useState(false);
+  useQuery({
+    queryKey: ['combo-impressora'],
+    queryFn: async () => {
+      setLoadingImpressora(true);
+      try {
+        const { data } = await api.get('/api/view/impressora/listImpressora');
+        setImpressoraOptions(data.map((i: any) => ({ id: i.id, nome: i.sicrito })));
+       } catch { setImpressoraOptions([]); }
+      finally { setLoadingImpressora(false); }
+    },
+    enabled: false,
+  });
 
   const [step, setStep] = useState<number>(0);
   const [caixa, setCaixa] = useState<Caixa | null>(null);
@@ -51,7 +99,6 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
 
   // ---- Passo 1: Configurações impressora / abertura de caixa ----
   const [fundoCaixa, setFundoCaixa] = useState('');
-  const [impressoraId, setImpressoraId] = useState('');
 
   useEffect(() => {
     if (!usuarioId || !unidadeId) return;
@@ -261,8 +308,26 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
               <section>
                 <p>Informe o usuário e a unidade para localizar (ou abrir) o caixa do dia.</p>
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
-                  <label>Usuário ID <input value={usuarioId} onChange={(e) => setUsuarioId(e.target.value)} /></label>
-                  <label>Unidade ID <input value={unidadeId} onChange={(e) => setUnidadeId(e.target.value)} /></label>
+                  <label>Usuário <select
+                    value={usuarioId}
+                    onChange={(e) => setUsuarioId(e.target.value)}
+                    disabled={loadingUsuario}
+                  >
+                    <option value="">-- Selecione --</option>
+                    {loadingUsuario ? <option>Carregando...</option> : usuarioOptions.map((u) => (
+                      <option key={u.id} value={u.id}>{u.nome}</option>
+                    ))}
+                  </select></label>
+                  <label>Unidade <select
+                    value={unidadeId}
+                    onChange={(e) => setUnidadeId(e.target.value)}
+                    disabled={loadingUnidade}
+                  >
+                    <option value="">-- Selecione --</option>
+                    {loadingUnidade ? <option>Carregando...</option> : unidadeOptions.map((u) => (
+                      <option key={u.id} value={u.id}>{u.nome}</option>
+                    ))}
+                  </select></label>
                 </div>
 
                 {caixa ? (
@@ -280,7 +345,16 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                   <div>
                     <p>Nenhum caixa aberto hoje para este usuário/unidade. Configure a impressora e o fundo de caixa para abrir um novo caixa.</p>
                     <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                      <label>Impressora ID <input value={impressoraId} onChange={(e) => setImpressoraId(e.target.value)} /></label>
+                      <label>Impressora <select
+                        value={impressoraId !== null ? String(impressoraId) : ''}
+                        onChange={(e) => setImpressoraId(e.target.value ? Number(e.target.value) : null)}
+                        disabled={loadingImpressora}
+                      >
+                        <option value="">-- Selecione --</option>
+                        {loadingImpressora ? <option>Carregando...</option> : impressoraOptions.map((imp) => (
+                          <option key={imp.id} value={imp.id}>{imp.nome}</option>
+                        ))}
+                      </select></label>
                       <label>Fundo de Caixa <input value={fundoCaixa} onChange={(e) => setFundoCaixa(e.target.value)} /></label>
                     </div>
                     <button className="wizard-btn-next" onClick={abrirNovoCaixa} disabled={loading || !usuarioId || !unidadeId}>
@@ -340,7 +414,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                     ))}
                     <button onClick={addFormaPagamento}>+ Adicionar forma de pagamento</button>
 
-                    <p>Valor recebido: <strong>{money(valorRecebido)}</strong>{calculo && troco > 0 && <> — Troco: <strong>{money(troco)}</strong></>}</p>
+                    <p>Valor recebido: <strong>{money(valorRecebido)}</strong>{calculo && troco > 0 && ` — Troco: ${money(troco)}`}</p>
 
                     <button
                       className="wizard-btn-next"

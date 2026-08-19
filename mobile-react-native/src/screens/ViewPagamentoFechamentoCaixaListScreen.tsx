@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View, TouchableOpacity, Text as RNText } from 'react-native';
 import { api } from '../api';
 import { Wizard } from '../Wizard';
 import type { WizardStep } from '../Wizard';
+import { useQuery } from '@tanstack/react-query';
 
 // Tela real de Fechamento de Caixa (equivalente mobile de view/pagamento/fechamentoCaixa.xhtml
 // + includes, olimpio.zip / acesoalunoprofessor.zip), consumindo os endpoints REST reais do
@@ -59,7 +60,50 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
   const [erro, setErro] = useState('');
   const [mensagem, setMensagem] = useState('');
 
-  // Passo 1
+  // Combo search states
+  const [usuarioOptions, setUsuarioOptions] = useState<Array<{ id: number; nome: string }>>([]);
+  const [loadingUsuario, setLoadingUsuario] = useState(false);
+  useQuery({
+    queryKey: ['combo-usuario'],
+    queryFn: async () => {
+      setLoadingUsuario(true);
+      try {
+        const { data } = await api.get('/api/view/usuario/listUsuario');
+        setUsuarioOptions(data.map((u: any) => ({ id: u.id, nome: u.nome })));
+      } catch { setUsuarioOptions([]); }
+      finally { setLoadingUsuario(false); }
+    },
+    enabled: false,
+  });
+  const [unidadeOptions, setUnidadeOptions] = useState<Array<{ id: number; nome: string }>>([]);
+  const [loadingUnidade, setLoadingUnidade] = useState(false);
+  useQuery({
+    queryKey: ['combo-unidade'],
+    queryFn: async () => {
+      setLoadingUnidade(true);
+      try {
+        const { data } = await api.get('/api/view/unidade/listUnidade');
+        setUnidadeOptions(data.map((u: any) => ({ id: u.id, nome: u.sucinto })));
+      } catch { setUnidadeOptions([]); }
+      finally { setLoadingUnidade(false); }
+    },
+    enabled: false,
+  });
+  const [impressoraOptions, setImpressoraOptions] = useState<Array<{ id: number; nome: string }>>([]);
+  const [loadingImpressora, setLoadingImpressora] = useState(false);
+  useQuery({
+    queryKey: ['combo-impressora'],
+    queryFn: async () => {
+      setLoadingImpressora(true);
+      try {
+        const { data } = await api.get('/api/view/impressora/listImpressora');
+        setImpressoraOptions(data.map((i: any) => ({ id: i.id, nome: i.sucinto })));
+      } catch { setImpressoraOptions([]); }
+      finally { setLoadingImpressora(false); }
+    },
+    enabled: false,
+  });
+
   const [fundoCaixa, setFundoCaixa] = useState('');
   const [impressoraId, setImpressoraId] = useState('');
 
@@ -206,8 +250,34 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
 
   const passo1 = (
     <ScrollView>
-      <Field label="Usuário ID" value={usuarioId} onChangeText={setUsuarioId} keyboardType="numeric" />
-      <Field label="Unidade ID" value={unidadeId} onChangeText={setUnidadeId} keyboardType="numeric" />
+      <View style={styles.fieldRow}>
+        <RNText style={styles.fieldLabel}>Usuário</RNText>
+        <TouchableOpacity
+          style={[
+            styles.input, 
+            loadingUsuario && styles.inputDisabled,
+            usuarioId && styles.inputFilled
+          ]}
+          onPress={loadingUsuario ? undefined : () => {/* open combo */}}
+        >
+          <RNText style={styles.inputText}>{usuarioId || '-- Selecione --'}</RNText>
+          {loadingUsuario && <ActivityIndicator size="small" />}
+        </TouchableOpacity>
+      </View>
+      <View style={styles.fieldRow}>
+        <RNText style={styles.fieldLabel}>Unidade</RNText>
+        <TouchableOpacity
+          style={[
+            styles.input, 
+            loadingUnidade && styles.inputDisabled,
+            unidadeId && styles.inputFilled
+          ]}
+          onPress={loadingUnidade ? undefined : () => {/* open combo */}}
+        >
+          <RNText style={styles.inputText}>{unidadeId || '-- Selecione --'}</RNText>
+          {loadingUnidade && <ActivityIndicator size="small" />}
+        </TouchableOpacity>
+      </View>
       {caixa ? (
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Caixa #{caixa.idCaixaUnidade}</Text>
@@ -216,17 +286,33 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
           <Text>Fundo de caixa: {money(caixa.fundoCaixa)}</Text>
           {caixa.dataFechamento && (
             <Pressable style={styles.primaryButton} onPress={reabrirCaixa} disabled={loading}>
-              <Text style={styles.primaryButtonText}>Abrir caixa novamente</Text>
+              <RNText style={styles.primaryButtonText}>Abrir caixa novamente</RNText>
             </Pressable>
           )}
         </View>
       ) : (
         <View>
-          <Text style={styles.hint}>Nenhum caixa aberto hoje. Configure a impressora e o fundo de caixa.</Text>
-          <Field label="Impressora ID" value={impressoraId} onChangeText={setImpressoraId} keyboardType="numeric" />
-          <Field label="Fundo de Caixa" value={fundoCaixa} onChangeText={setFundoCaixa} keyboardType="numeric" />
+          <RNText style={styles.hint}>Nenhum caixa aberto hoje. Configure a impressora e o fundo de caixa.</RNText>
+          <View style={styles.fieldRow}>
+            <RNText style={styles.fieldLabel}>Impressora</RNText>
+            <TouchableOpacity
+              style={[
+                styles.input, 
+                loadingImpressora && styles.inputDisabled,
+                impressoraId && styles.inputFilled
+              ]}
+              onPress={loadingImpressora ? undefined : () => {/* open combo */}
+            >
+              <RNText style={styles.inputText}>{impressoraId || '-- Selecione --'}</RNText>
+              {loadingImpressora && <ActivityIndicator size="small" />}
+            </TouchableOpacity>
+          </View>
+          <View style={styles.fieldRow}>
+            <RNText style={styles.fieldLabel}>Fundo de Caixa</RNText>
+            <TextInput style={styles.input} value={fundoCaixa} onChangeText={setFundoCaixa} keyboardType="numeric" />
+          </View>
           <Pressable style={styles.primaryButton} onPress={abrirNovoCaixa} disabled={loading || !usuarioId || !unidadeId}>
-            <Text style={styles.primaryButtonText}>Abrir Caixa</Text>
+            <RNText style={styles.primaryButtonText}>Abrir Caixa</RNText>
           </Pressable>
         </View>
       )}
@@ -391,4 +477,9 @@ const styles = StyleSheet.create({
   secondaryButton: { borderWidth: 1, borderColor: '#2a5a88', borderRadius: 6, paddingVertical: 10, alignItems: 'center', marginTop: 6, marginBottom: 6 },
   secondaryButtonText: { color: '#2a5a88', fontWeight: '700' },
   buttonDisabled: { opacity: 0.5 },
+  fieldRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+  input: { width: '100%', borderWidth: 1, borderColor: '#d3d3d3', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 8, fontSize: 14 },
+  inputDisabled: { opacity: 0.5 },
+  inputFilled: { backgroundColor: '#f0f0f0' },
+  inputText: { fontSize: 14, color: '#333' },
 });

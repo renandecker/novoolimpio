@@ -1,6 +1,7 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { api } from '../api';
 import { PermissionGate } from '../permissions';
+import { useAuth } from '../auth';
 import { Tabs } from '../Tabs';
 import { AutoComplete, type AutoCompleteOption } from '../AutoComplete';
 import { legacyClassName } from '../DataTable';
@@ -170,6 +171,9 @@ export default function ViewGestaoProfessorGestaoProfessorListScreen() {
 }
 
 function GestaoTab() {
+  const { session } = useAuth();
+  const isAdmin = session?.username === 'admin' || (session?.permissions ?? []).includes('ADMIN');
+
   const [professor, setProfessor] = useState<AutoCompleteOption | null>(null);
   const [turmas, setTurmas] = useState<Turma[]>([]);
   const [carregandoTurmas, setCarregandoTurmas] = useState(false);
@@ -214,21 +218,17 @@ function GestaoTab() {
     return (data ?? []).map((item) => ({ id: item.id, label: item.nome || `#${item.id}` }));
   };
 
-  async function buscarTurmas(id: number) {
-    if (!id) {
-      notificar('erro', 'Selecione um professor.');
-      return;
-    }
+  async function buscarTurmas(professorId: number | null) {
     setErro('');
     setCarregandoTurmas(true);
     setPainel(null);
     try {
-      const { data } = await api.get<Turma[]>('/api/professor/gestao-professor/turmas', { params: { professorId: id } });
+      const { data } = await api.get<Turma[]>(professorId === null ? '/api/professor/gestao-professor/turmas' : '/api/professor/gestao-professor/turmas', { params: professorId !== null ? { professorId } : undefined });
       setTurmas(data);
       if (data.length === 0) {
-        notificar('erro', 'Nenhuma turma encontrada para este professor.');
+        notificar(isAdmin ? 'sucesso' : 'erro', isAdmin ? 'Todas as turmas listadas.' : 'Nenhuma turma encontrada para este professor.');
       } else {
-        notificar('sucesso', `${data.length} turma(s) encontrada(s).`);
+        notificar(isAdmin ? 'sucesso' : 'sucesso', isAdmin ? `${data.length} turma(s) encontrada(s).` : `${data.length} turma(s) encontrada(s).`);
       }
     } catch (e) {
       setErro('Erro ao carregar as turmas.');
@@ -507,8 +507,16 @@ function GestaoTab() {
         />
         <button
           className="gp-btn gp-btn-procurar"
-          onClick={() => professor && buscarTurmas(professor.id)}
-          disabled={carregandoTurmas || !professor}
+          onClick={() => {
+            if (isAdmin) {
+              buscarTurmas(null);
+            } else if (professor) {
+              buscarTurmas(professor.id);
+            } else {
+              notificar('erro', 'Selecione um professor.');
+            }
+          }}
+          disabled={carregandoTurmas || (!isAdmin && !professor)}
         >
           {carregandoTurmas ? 'Buscando...' : 'Buscar'}
         </button>

@@ -136,10 +136,12 @@ public class GestaoProfessorService {
         });
     }
 
-    public Uni<List<TurmaDto>> listarTurmas(Long professorId) {
-        return nativeQuery(SQL_TURMAS, professorId)
-                .map(rows -> rows.stream().map(this::mapTurma).toList());
-    }
+public Uni<List<TurmaDto>> listarTurmas(Long professorId) {
+        if (professorId == null) {
+            return nativeQuery(SQL_TURMA.replace("INNER JOIN edc_professor p ON p.id = off.id_professor ", "LEFT JOIN edc_professor p ON p.id = off.id_professor ")).map(rows -> rows.stream().map(this::mapTurma).toList());
+        }
+        return nativeQuery(SQL_TURMAS, professorId).map(rows -> rows.stream().map(this::mapTurma).toList());
+      }
 
     public Uni<CadernoDto> buscarCaderno(Long turmaId) {
         return nativeQuery(SQL_TURMA + " WHERE off.id = ?1", turmaId).chain(rows -> {

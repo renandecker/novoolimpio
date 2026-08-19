@@ -17,9 +17,7 @@ import java.util.List;
  *
  * Para cada configuracao ativa em fin_cobranca_email_envio monta o SQL da cobranca (from +
  * joins + caseCor da situacao) e registra um registro em fin_cobranca_email para cada contrato
- * que atende as regras. O envio efetivo via SMTP/Gmail/SendGrid (RotinaEnvioEmailController no
- * legado) nao foi portado: aqui fica registrado o envio pendente + log; a entrega real deve
- * ficar no microsservico de dominio (financeiro).
+ * que atende as regras. Nao foi portado o envio efetivo: aqui fica registrado o envio pendente + log.
  *
  * Acessa o banco pelo datasource reativo "financeiro-db" (SQL nativo, sem REST).
  */
