@@ -65,7 +65,9 @@ interface CurriculoData {
 }
 
 export default function ViewCurriculoFormCurriculoListScreen() {
-  const { data, updateFields, updateField } = useWizardData<CurriculoData>({
+  const [matriz, setMatriz] = useState<ApiItem[]>([]);
+  const [unidades, setUnidades] = useState<ApiItem[]>([]);
+  const { data, updateFields } = useWizardData<CurriculoData>({
     entity: {},
     matrizCurricular: [],
     requisitos: [],
@@ -161,8 +163,8 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                       valueKey="id"
                       searchKeys={COMPONENTE_SEARCH}
                       columns={COMPONENTE_COLUMNS}
-                      items={data.matrizCurricular}
-                      onChange={updateField('matrizCurricular')}
+                      items={matriz}
+                      onChange={setMatriz}
                     />
                   ),
                   validate: validateStep3,
@@ -182,8 +184,8 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                       valueKey="id"
                       searchKeys={UNIDADE_SEARCH}
                       columns={UNIDADE_COLUMNS}
-                      items={data.unidades}
-                      onChange={updateField('unidades')}
+                      items={unidades}
+                      onChange={setUnidades}
                     />
                   ),
                   validate: validateStep5,

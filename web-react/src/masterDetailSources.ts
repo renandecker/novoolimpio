@@ -128,3 +128,27 @@ export const TURNO_TRABALHO_COLUMNS: MasterDetailColumn[] = [
   { key: 'diaSemana', label: 'Dia Semana' },
 ];
 export const TURNO_TRABALHO_SEARCH = ['descricao'];
+
+export const TIPO_SALA_SOURCE = '/api/view/tipoSala/listTipoSala';
+export const TIPO_SALA_COLUMNS: MasterDetailColumn[] = [
+  { key: 'id', label: 'Id' },
+  { key: 'descricao', label: 'Descrição' },
+];
+export const TIPO_SALA_SEARCH = ['descricao'];
+
+export const BASE_TECNOLOGICA_SOURCE = '/api/view/baseTecnologica/listBaseTecnologica';
+export const BASE_TECNOLOGICA_COLUMNS: MasterDetailColumn[] = [
+  { key: 'id', label: 'Id' },
+  { key: 'nome', label: 'Nome' },
+  { key: 'descricao', label: 'Descrição' },
+];
+export const BASE_TECNOLOGICA_SEARCH = ['nome', 'descricao'];
+
+export const REFERENCIA_BIBLIOGRAFICA_SOURCE = '/api/view/referenciaBibliografica/listReferenciaBibliografica';
+export const REFERENCIA_BIBLIOGRAFICA_COLUMNS: MasterDetailColumn[] = [
+  { key: 'id', label: 'Id' },
+  { key: 'autor', label: 'Autor' },
+  { key: 'titulo', label: 'Título' },
+  { key: 'volume', label: 'Volume' },
+];
+export const REFERENCIA_BIBLIOGRAFICA_SEARCH = ['autor', 'titulo'];

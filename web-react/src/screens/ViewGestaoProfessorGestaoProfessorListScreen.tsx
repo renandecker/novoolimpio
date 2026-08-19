@@ -172,7 +172,7 @@ export default function ViewGestaoProfessorGestaoProfessorListScreen() {
 
 function GestaoTab() {
   const { session } = useAuth();
-  const isAdmin = session?.username === 'admin' || (session?.permissions ?? []).includes('ADMIN');
+  const isAdmin = session?.hierarquia === 'ADMIN';
 
   const [professor, setProfessor] = useState<AutoCompleteOption | null>(null);
   const [turmas, setTurmas] = useState<Turma[]>([]);

@@ -31,7 +31,8 @@ public class LoginRepository implements PanacheRepository<Login> {
                 SELECT COALESCE(u.foto_base64, ''),
                        COALESCE(p.email, ''),
                        COALESCE(f.nome, ''),
-                       COALESCE(f.cpf, '')
+                       COALESCE(f.cpf, ''),
+                       COALESCE(u.hierarquia, '')
                 FROM bas_login l
                 LEFT JOIN bas_usuario u ON u.id = l.id_usuario
                 LEFT JOIN bas_pessoa p ON p.id = u.id_pessoa
