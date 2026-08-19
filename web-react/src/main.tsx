@@ -252,7 +252,7 @@ import ViewPagamentoCaixaentradaListScreen from './screens/ViewPagamentoCaixaent
 import ViewPagamentoCaixasaidaListScreen from './screens/ViewPagamentoCaixasaidaListScreen';
 import ViewPagamentoCodigoVerificadorListScreen from './screens/ViewPagamentoCodigoVerificadorListScreen';
 import ViewPagamentoEfetuarPagamentoListScreen from './screens/ViewPagamentoEfetuarPagamentoListScreen';
-import ViewPagamentoFechamentoCaixaListScreen from './screens/ViewPagamentoFechamentoCaixaListScreen';
+import ViewPagamentoFechamentoCaixaWizardScreen from './screens/ViewPagamentoFechamentoCaixaWizardScreen';
 import ViewPagamentoMovimentocaixaListScreen from './screens/ViewPagamentoMovimentocaixaListScreen';
 import ViewPagamentoProdutoListScreen from './screens/ViewPagamentoProdutoListScreen';
 import ViewPaisFormPaisListScreen from './screens/ViewPaisFormPaisListScreen';
@@ -697,7 +697,7 @@ const q=new QueryClient();createRoot(document.getElementById('root')!).render(<Q
 <Route path="/view/pagamento/caixasaida" element={<ViewPagamentoCaixasaidaListScreen/>}/>
 <Route path="/view/pagamento/codigoVerificador" element={<ViewPagamentoCodigoVerificadorListScreen/>}/>
 <Route path="/view/pagamento/efetuarPagamento" element={<ViewPagamentoEfetuarPagamentoListScreen/>}/>
-<Route path="/view/pagamento/fechamentoCaixa" element={<ViewPagamentoFechamentoCaixaListScreen/>}/>
+<Route path="/view/pagamento/fechamentoCaixa" element={<ViewPagamentoFechamentoCaixaWizardScreen/>}/>
 <Route path="/view/pagamento/movimentocaixa" element={<ViewPagamentoMovimentocaixaListScreen/>}/>
 <Route path="/view/pagamento/produto" element={<ViewPagamentoProdutoListScreen/>}/>
 <Route path="/view/pais/formPais" element={<ViewPaisFormPaisListScreen/>}/>

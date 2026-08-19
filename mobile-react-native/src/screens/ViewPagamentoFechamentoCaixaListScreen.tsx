@@ -1,13 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View, TouchableOpacity, Text as RNText } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Text as RNText } from 'react-native';
 import { api } from '../api';
 import { Wizard } from '../Wizard';
 import type { WizardStep } from '../Wizard';
 import { useQuery } from '@tanstack/react-query';
-
-// Tela real de Fechamento de Caixa (equivalente mobile de view/pagamento/fechamentoCaixa.xhtml
-// + includes, olimpio.zip / acesoalunoprofessor.zip), consumindo os endpoints REST reais do
-// módulo caixa de financeiro.zip.
 
 type Caixa = {
   id: number; data: string; dataFechamento: string | null; usuarioId: number; fundoCaixa: number;
@@ -60,7 +56,6 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
   const [erro, setErro] = useState('');
   const [mensagem, setMensagem] = useState('');
 
-  // Combo search states
   const [usuarioOptions, setUsuarioOptions] = useState<Array<{ id: number; nome: string }>>([]);
   const [loadingUsuario, setLoadingUsuario] = useState(false);
   useQuery({
@@ -148,12 +143,11 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
     } catch { setErro('Ocorreu um erro ao abrir o caixa!'); } finally { setLoading(false); }
   }
 
-  // Passo 2 - sub-abas
   const [movSubTab, setMovSubTab] = useState<'parcela' | 'extra' | 'sangria'>('parcela');
 
   const [parcelaId, setParcelaId] = useState('');
   const [valorParcela, setValorParcela] = useState('');
-  const [dataVencimento, setDataVencimento] = useState(''); // yyyy-MM-dd
+  const [dataVencimento, setDataVencimento] = useState('');
   const [parcelaSequencia, setParcelaSequencia] = useState('1');
   const [percentualDesconto, setPercentualDesconto] = useState('0');
   const [percentualMulta, setPercentualMulta] = useState('2');
@@ -228,7 +222,6 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
     } finally { setLoading(false); }
   }
 
-  // Passo 3
   const [totais, setTotais] = useState<FechamentoCaixaTotais | null>(null);
   async function carregarTotais() {
     if (!caixa) return;
@@ -258,7 +251,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
             loadingUsuario && styles.inputDisabled,
             usuarioId && styles.inputFilled
           ]}
-          onPress={loadingUsuario ? undefined : () => {/* open combo */}}
+          onPress={loadingUsuario ? undefined : () => { /* open combo */ }}
         >
           <RNText style={styles.inputText}>{usuarioId || '-- Selecione --'}</RNText>
           {loadingUsuario && <ActivityIndicator size="small" />}
@@ -272,7 +265,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
             loadingUnidade && styles.inputDisabled,
             unidadeId && styles.inputFilled
           ]}
-          onPress={loadingUnidade ? undefined : () => {/* open combo */}}
+          onPress={loadingUnidade ? undefined : () => { /* open combo */ }}
         >
           <RNText style={styles.inputText}>{unidadeId || '-- Selecione --'}</RNText>
           {loadingUnidade && <ActivityIndicator size="small" />}
@@ -301,7 +294,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                 loadingImpressora && styles.inputDisabled,
                 impressoraId && styles.inputFilled
               ]}
-              onPress={loadingImpressora ? undefined : () => {/* open combo */}
+              onPress={loadingImpressora ? undefined : () => { /* open combo */ }}
             >
               <RNText style={styles.inputText}>{impressoraId || '-- Selecione --'}</RNText>
               {loadingImpressora && <ActivityIndicator size="small" />}
@@ -478,7 +471,7 @@ const styles = StyleSheet.create({
   secondaryButtonText: { color: '#2a5a88', fontWeight: '700' },
   buttonDisabled: { opacity: 0.5 },
   fieldRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  input: { width: '100%', borderWidth: 1, borderColor: '#d3d3d3', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 8, fontSize: 14 },
+  inputField: { width: '100%', borderWidth: 1, borderColor: '#d3d3d3', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 8, fontSize: 14 },
   inputDisabled: { opacity: 0.5 },
   inputFilled: { backgroundColor: '#f0f0f0' },
   inputText: { fontSize: 14, color: '#333' },

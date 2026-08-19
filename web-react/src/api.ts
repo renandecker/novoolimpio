@@ -5,6 +5,21 @@ export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080'
 });
 
+api.interceptors.request.use((config) => {
+  const session = localStorage.getItem('olimpio.session');
+  if (session) {
+    try {
+      const { accessToken } = JSON.parse(session);
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
+    } catch {
+      // ignore parse errors
+    }
+  }
+  return config;
+});
+
 export function useApi<T = any>(path: string) {
   const get = useCallback(async (params?: Record<string, any>) => {
     const response = await api.get<T>(path, { params });
