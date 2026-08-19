@@ -1087,7 +1087,7 @@ public Uni<Long> buscarCriterios(Long oferecimentoComponenteCurricularId) {
     }
 
     public Uni<List<Long>> listagemOferecimentoPorUnidadeCalendario(Long unidades, Date inicio, Date fim) {
-        return repository.listagemOferecimentoPorUnidadeCalendario(unidades, inicio, fim).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.listagemOferecimentoPorUnidadeCalendarioIds(unidades, inicio, fim);
     }
 
     public Uni<List<Long>> consultaListarOferecimentos(Long unidades) {
@@ -1103,11 +1103,11 @@ public Uni<Long> buscarCriterios(Long oferecimentoComponenteCurricularId) {
     }
 
     public Uni<List<String>> listarGruposDisponiveisComUnidadesRematricula(Long curriculoId, List<Long> unidades, Long pessoaId) {
-        return repository.listarGruposDisponiveisComUnidadesRematricula(curriculoId, unidades, pessoaId);
+        return repository.listarGruposDisponiveisComUnidadesRematriculaStr(curriculoId, unidades, pessoaId);
     }
 
     public Uni<List<String>> listarGruposDisponiveisComUnidades(Long curriculoId, List<Long> unidades) {
-        return repository.listarGruposDisponiveisComUnidades(curriculoId, unidades);
+        return repository.listarGruposDisponiveisComUnidadesStr(curriculoId, unidades);
     }
 
     public Uni<Void> ajutarOferecimento(Long oferecimentoComponenteCurricularId, Long diaAulaId) {

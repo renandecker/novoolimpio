@@ -60,19 +60,19 @@ public class NAPService {
     }
 
     public Uni<List<Long>> listaLigacaoNapComEtapa(Long contratoId, Long etapasNAPId) {
-        return repository.listaLigacaoNapComEtapa(contratoId, etapasNAPId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.listaLigacaoNapComEtapa(contratoId, etapasNAPId).map(list -> list.stream().map(nap -> nap.id).toList());
     }
 
     public Uni<List<Long>> listaNapComEtapa(Long etapasNAPId) {
-        return repository.listaNapComEtapa(etapasNAPId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.listaNapComEtapa(etapasNAPId).map(list -> list.stream().map(nap -> nap.id).toList());
     }
 
     public Uni<List<Long>> listaNapSemEtapa() {
-        return repository.listaNapSemEtapa().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.listaNapSemEtapa().map(list -> list.stream().map(nap -> nap.id).toList());
     }
 
     public Uni<Long> buscaObjeto(Integer id) {
-        return repository.buscaObjeto(id).map(e -> e == null ? null : e.id);
+        return repository.buscaObjeto(id).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
     public Uni<Void> atualizaNapsContrato(Long contratoId) {
