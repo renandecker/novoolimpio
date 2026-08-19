@@ -1,9 +1,22 @@
 package br.com.sol7.olimpio.relatorios.filtros;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
-import io.smallrye.mutiny.Uni; import jakarta.enterprise.context.ApplicationScoped; import jakarta.inject.Inject; import jakarta.ws.rs.NotFoundException; import java.util.List;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped @WithTransaction public class FiltrosService { @Inject FiltrosRepository repository; public Uni<List<FiltrosResponse>> list(){return repository.listAll().map(items->items.stream().map(this::toResponse).toList());}
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
+import java.util.List;
+
+@ApplicationScoped
+@WithTransaction
+public class FiltrosService {
+
+    @Inject FiltrosRepository repository;
+
+    public Uni<List<FiltrosResponse>> list() {
+        return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
+    }
 
     public Uni<PagedResponse<FiltrosResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
@@ -12,7 +25,119 @@ import io.smallrye.mutiny.Uni;
                 .onItem().transformToUni(items -> repository.count()
                         .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
- public Uni<FiltrosResponse> find(Long id){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("Filtros not found")).map(this::toResponse);} public Uni<FiltrosResponse> create(FiltrosRequest r){var e=new Filtros();apply(e,r);return repository.persist(e).replaceWith(()->toResponse(e));} public Uni<FiltrosResponse> update(Long id,FiltrosRequest r){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("Filtros not found")).invoke(e->apply(e,r)).map(this::toResponse);} public Uni<Void> delete(Long id){return repository.deleteById(id).onItem().transformToUni(deleted->deleted?Uni.createFrom().voidItem():Uni.createFrom().failure(new NotFoundException("Filtros not found")));} private void apply(Filtros e,FiltrosRequest r){e.nome=r.nome();e.dadosJson=r.dadosJson();} private FiltrosResponse toResponse(Filtros e){return new FiltrosResponse(e.id,e.nome,e.dadosJson);} 
+
+    public Uni<FiltrosResponse> find(Long id) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Filtros not found")).map(this::toResponse);
+    }
+
+    public Uni<FiltrosResponse> create(FiltrosRequest r) {
+        var e = new Filtros();
+        apply(e, r);
+        return repository.persist(e).replaceWith(() -> toResponse(e));
+    }
+
+    public Uni<FiltrosResponse> update(Long id, FiltrosRequest r) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Filtros not found"))
+                .invoke(e -> apply(e, r)).map(this::toResponse);
+    }
+
+    public Uni<Void> delete(Long id) {
+        return repository.deleteById(id).onItem()
+                .transformToUni(deleted -> deleted ? Uni.createFrom().voidItem() : Uni.createFrom().failure(new NotFoundException("Filtros not found")));
+    }
+
+    private void apply(Filtros e, FiltrosRequest r) {
+        e.nome = r.nome();
+        e.dadosJson = r.dadosJson();
+    }
+
+    private FiltrosResponse toResponse(Filtros e) {
+        return new FiltrosResponse(e.id, e.nome, e.dadosJson);
+    }
+
+    public Uni<List<Long>> criarFiltros(List<Integer> ids) {
+        return repository.criarFiltros(ids).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> criarFiltrosTabela(Long tabelaId, Long estruturaId, Long usuarioId, List<Long> perfils, List<Long> unidades, String hierarquia) {
+        return repository.criarFiltrosTabela(tabelaId, estruturaId, usuarioId, perfils, unidades, hierarquia)
+                .map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> criarFiltrosGrafico(Long graficoId, Long estruturaId, Long usuarioId, List<Long> perfils, List<Long> unidades, String hierarquia) {
+        return repository.criarFiltrosGrafico(graficoId, estruturaId, usuarioId, perfils, unidades, hierarquia)
+                .map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> criarFiltrosMapa(Long mapaId, Long estruturaId, Long usuarioId, List<Long> perfils, List<Long> unidades, String hierarquia) {
+        return repository.criarFiltrosMapa(mapaId, estruturaId, usuarioId, perfils, unidades, hierarquia)
+                .map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> criarFiltrosOrganograma(Long organogramaId, Long estruturaId, Long usuarioId, List<Long> perfils, List<Long> unidades, String hierarquia) {
+        return repository.criarFiltrosOrganograma(organogramaId, estruturaId, usuarioId, perfils, unidades, hierarquia)
+                .map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> buscarFiltrosTabelaDesmarcado(Long tabelaId) {
+        return repository.buscarFiltrosTabelaDesmarcado(tabelaId).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> buscarFiltrosGraficoDesmarcado(Long graficoId) {
+        return repository.buscarFiltrosGraficoDesmarcado(graficoId).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> buscarFiltrosMapaDesmarcado(Long mapaId) {
+        return repository.buscarFiltrosMapaDesmarcado(mapaId).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> buscarFiltrosOrganogramaDesmarcado(Long organogramaId) {
+        return repository.buscarFiltrosOrganogramaDesmarcado(organogramaId).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> buscarFiltrosTabelas() {
+        return repository.buscarFiltrosTabelas().map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> buscarFiltrosTabela(Long tabelaId) {
+        return repository.buscarFiltrosTabela(tabelaId).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> buscarFiltrosGrafico(Long graficoId) {
+        return repository.buscarFiltrosGrafico(graficoId).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> buscarFiltrosMapa(Long mapaId) {
+        return repository.buscarFiltrosMapa(mapaId).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> buscarFiltrosOrganograma(Long organogramaId) {
+        return repository.buscarFiltrosOrganograma(organogramaId).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> buscarFiltrosTabelaComFiltros(Long filtroRelatorioId) {
+        return repository.buscarFiltrosTabelaComFiltros(filtroRelatorioId).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> buscarFiltrosGraficoComFiltros(Long filtroRelatorioId) {
+        return repository.buscarFiltrosGraficoComFiltros(filtroRelatorioId).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> buscarFiltrosMapaComFiltros(Long filtroRelatorioId) {
+        return repository.buscarFiltrosMapaComFiltros(filtroRelatorioId).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> buscarFiltrosUnidadeComFiltros(Long filtroRelatorioId) {
+        return repository.buscarFiltrosUnidadeComFiltros(filtroRelatorioId).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> buscarFiltrosPerfilComFiltros(Long filtroRelatorioId) {
+        return repository.buscarFiltrosPerfilComFiltros(filtroRelatorioId).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> buscarFiltrosUsuarioComFiltros(Long filtroRelatorioId) {
+        return repository.buscarFiltrosUsuarioComFiltros(filtroRelatorioId).map(list -> list.stream().map(x -> x.id).toList());
+    } 
 
     // Migrado de FiltrosController.autoCompleteDimensao (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/FiltrosController.java:106, camada controller)
     // Logica original (adaptar):

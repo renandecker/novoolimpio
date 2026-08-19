@@ -1032,10 +1032,100 @@ public class OferecimentoComponenteCurricularService {
     //                 }
     //             }
     // // ... (truncado, ver fonte original)
-    public Uni<Long> buscarCriterios(Long oferecimentoComponenteCurricularId) {
+public Uni<Long> buscarCriterios(Long oferecimentoComponenteCurricularId) {
         return repository.findById(oferecimentoComponenteCurricularId)
                 .onItem().ifNull().continueWith(() -> null)
                 .flatMap(of -> of == null ? Uni.createFrom().nullItem() : carregarCriterio(of).map(c -> c == null ? null : c.id));
+    }
+
+    public Uni<Void> atulizarStatosInscritosOferecimentoTrocaTurma(Long contratoId) {
+        return repository.atulizarStatosInscritosOferecimentoTrocaTurma(contratoId).replaceWithVoid();
+    }
+
+    public Uni<Void> atulizarStatosInscritosOferecimentoGrupo(Long grupoId) {
+        return repository.atulizarStatosInscritosOferecimentoGrupo(grupoId).replaceWithVoid();
+    }
+
+    public Uni<Void> atulizarSalasOferecimentoComGrupo(Long grupoId) {
+        return repository.atulizarSalasOferecimentoComGrupo(grupoId).replaceWithVoid();
+    }
+
+    public Uni<Void> atulizarSalasOferecimentoComOferecimento(Long oferecimentoComponenteCurricularId) {
+        return repository.atulizarSalasOferecimentoComOferecimento(oferecimentoComponenteCurricularId).replaceWithVoid();
+    }
+
+    public Uni<Void> atulizarVagasOferecimento(Long oferecimentoComponenteCurricularId, Integer vagas) {
+        return repository.atulizarVagasOferecimento(oferecimentoComponenteCurricularId, vagas).replaceWithVoid();
+    }
+
+    public Uni<Void> atulizarStatosInscritosOferecimento(Long oferecimentoComponenteCurricularId) {
+        return repository.atulizarStatosInscritosOferecimento(oferecimentoComponenteCurricularId).replaceWithVoid();
+    }
+
+    public Uni<Void> atulizarStatosInscritosOferecimentoCurso(Long curriculoId) {
+        return repository.atulizarStatosInscritosOferecimentoCurso(curriculoId).replaceWithVoid();
+    }
+
+    public Uni<List<Long>> listarOferecimentosPendentes(List<Long> unidades) {
+        return repository.listarOferecimentosPendentes(unidades).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> listarOferecimentosDisponiveis(List<Long> componentes, List<Long> unidades, Long pessoaId) {
+        return repository.listarOferecimentosDisponiveis(componentes, unidades, pessoaId).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> listarOferecimentosDisponiveisComGrupo(List<Long> componentes, List<Long> unidades, Long pessoaId, String grupo) {
+        return repository.listarOferecimentosDisponiveisComGrupo(componentes, unidades, pessoaId, grupo).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> listarOferecimentosRematriculaDisponiveisComGrupo(List<Long> componentes, List<Long> unidades, Long pessoaId, String grupo) {
+        return repository.listarOferecimentosRematriculaDisponiveisComGrupo(componentes, unidades, pessoaId, grupo).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> listarOferecimentosDisponiveisComGrupoUnidade(List<Long> componentes, Integer codUnidade, Long pessoaId, String grupo) {
+        return repository.listarOferecimentosDisponiveisComGrupoUnidade(componentes, codUnidade, pessoaId, grupo).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> listagemOferecimentoPorUnidadeCalendario(Long unidades, Date inicio, Date fim) {
+        return repository.listagemOferecimentoPorUnidadeCalendario(unidades, inicio, fim).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Long>> consultaListarOferecimentos(Long unidades) {
+        return repository.consultaListarOferecimentos(unidades).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<Void> atualizaDataOferecimento(Long oferecimentoComponenteCurricularId) {
+        return repository.atualizaDataOferecimento(oferecimentoComponenteCurricularId).replaceWithVoid();
+    }
+
+    public Uni<Void> atualizaDataOferecimentoGrupo(Long grupoId) {
+        return repository.atualizaDataOferecimentoGrupo(grupoId).replaceWithVoid();
+    }
+
+    public Uni<List<String>> listarGruposDisponiveisComUnidadesRematricula(Long curriculoId, List<Long> unidades, Long pessoaId) {
+        return repository.listarGruposDisponiveisComUnidadesRematricula(curriculoId, unidades, pessoaId);
+    }
+
+    public Uni<List<String>> listarGruposDisponiveisComUnidades(Long curriculoId, List<Long> unidades) {
+        return repository.listarGruposDisponiveisComUnidades(curriculoId, unidades);
+    }
+
+    public Uni<Void> ajutarOferecimento(Long oferecimentoComponenteCurricularId, Long diaAulaId) {
+        return repository.ajutarOferecimento(oferecimentoComponenteCurricularId, diaAulaId).replaceWithVoid();
+    }
+
+    public Uni<Long> saveOrUpdate(Long id, Date dataAlteracao) {
+        return repository.findById(id)
+                .onItem().ifNull().failWith(() -> new NotFoundException("OferecimentoComponenteCurricular not found"))
+                .flatMap(of -> {
+                    of.dataAlteracao = dataAlteracao;
+                    return repository.persist(of).replaceWith(of.id);
+                });
+    }
+
+    public Uni<List<Long>> listProfessoresDisponiveisComponente(Long componenteCurricularId, Long unidadeId) {
+        return professorRepository.buscarListaProfessoresParaTurma(componenteCurricularId, unidadeId)
+                .map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }
