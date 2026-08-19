@@ -76,11 +76,11 @@ export default function ViewCobrancaListLoteListScreen() {
 const styles = StyleSheet.create({
   page: { flex: 1, padding: 16 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 22, fontWeight: 'bold', color: '#2b2b2b', marginBottom: 12 },
+  title: { fontSize: 22, fontWeight: 'bold', color: '#1d2025', marginBottom: 12 },
   errorText: { color: '#a61b29', fontSize: 14, marginBottom: 8 },
   actions: { flexDirection: 'row', gap: 8, paddingVertical: 16 },
-  actionButton: { borderRadius: 4, paddingHorizontal: 16, paddingVertical: 8 },
-  emailButton: { backgroundColor: '#2a5a88' },
-  ligacaoButton: { backgroundColor: '#faa523' },
-  actionButtonText: { color: '#ffffff', fontSize: 14, fontWeight: '700' },
+  actionButton: { borderRadius: 8, paddingHorizontal: 20, paddingVertical: 10 },
+  emailButton: { backgroundColor: '#2a5a88', shadowColor: '#2a5a88', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
+  ligacaoButton: { backgroundColor: '#c2aa3c', shadowColor: '#c2aa3c', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
+  actionButtonText: { color: '#ffffff', fontSize: 14, fontWeight: '600' },
 });

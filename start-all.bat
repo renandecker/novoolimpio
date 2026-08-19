@@ -80,11 +80,11 @@ if "!COMPILE_ERRORS!" neq "0" (
 echo Todos os microsservicos compilaram com sucesso.
 
 echo ============================================
-echo  Subindo containers...
+echo  Subindo containers com acompanhamento em tempo real...
 echo ============================================
 
-if "%1"=="-d" goto start_bg
-goto start_fg
+if "%1"=="-d" goto start_bg_with_progress
+goto start_fg_with_progress
 
 :do_compile
 set SVC=%~1
@@ -104,16 +104,76 @@ if !errorlevel! neq 0 (
 )
 goto :eof
 
-:start_bg
+:start_bg_with_progress
+echo.
+echo Iniciando containers em background com monitoramento de saude...
+echo.
+
 %DC% up --build -d 2> "%LOGFILE%"
 if %errorlevel% neq 0 (
     echo [ERRO] Falha ao subir containers. Detalhes em error.log
     exit /b 1
 )
+
 echo.
-echo [SUCESSO] Todos os containers subiram em background.
+echo Containers iniciados. Aguardando servicos ficarem saudaveis...
 echo.
-echo Enderecos:
+
+set SERVICES=login:8090 basico:8081 notificacoes:8082 central:8083 comercial:8084 educacao:8085 estoque:8086 financeiro:8087 relatorios:8088 schedule:8089 professor:8091 aluno:8092 asaas:8094 curriculo:8095 fiserv:8096 gateway:8080 web-react:3000
+set TOTAL=0
+for %%s in (%SERVICES%) do set /a TOTAL+=1
+
+set CHECKED=0
+set HEALTHY=0
+set MAX_WAIT=180
+set WAITED=0
+
+:wait_loop
+set CHECKED=0
+set HEALTHY=0
+for %%s in (%SERVICES%) do (
+    for /f "tokens=1,2 delims=:" %%a in ("%%s") do (
+        call :check_health %%a %%b
+    )
+)
+
+if !HEALTHY! equ !TOTAL! (
+    echo.
+    echo ============================================
+    echo  [SUCESSO] Todos os %TOTAL% servicos estao saudaveis!
+    echo ============================================
+    goto show_endpoints
+)
+
+if !WAITED! geq !MAX_WAIT! (
+    echo.
+    echo ============================================
+    echo  [AVISO] Tempo maximo atingido (%MAX_WAIT% seg).
+    echo  Alguns servicos podem ainda estar iniciando.
+    echo ============================================
+    goto show_endpoints
+)
+
+set /a WAITED+=5
+echo [AGUARDANDO] %HEALTHY!/%TOTAL! servicos saudaveis... (%WAITED!s/%MAX_WAIT!s)
+timeout /t 5 /nobreak >nul
+goto wait_loop
+
+:check_health
+set SVC_NAME=%1
+set SVC_PORT=%2
+curl -sf http://localhost:%SVC_PORT%/q/health >nul 2>&1
+if !errorlevel! equ 0 (
+    set /a CHECKED+=1
+    set /a HEALTHY+=1
+) else (
+    set /a CHECKED+=1
+)
+goto :eof
+
+:show_endpoints
+echo.
+echo Enderecos disponiveis:
 echo   App React:    http://localhost:3000
 echo   Gateway:      http://localhost:8080
 echo   Kafka:        http://localhost:9092
@@ -138,11 +198,14 @@ echo Use "%DC% logs -f [servico]" para acompanhar logs.
 echo Use "stop-all.bat" para parar.
 goto :eof
 
-:start_fg
+:start_fg_with_progress
 echo.
 echo Iniciando servicos com logs em tempo real...
 echo Pressione Ctrl+C para parar.
 echo.
+
+echo Iniciando monitoramento de saude em janela separada...
+start "Health Monitor" cmd /k "%~dp0\health-monitor.bat"
 
 %DC% up --build
 if %errorlevel% neq 0 (

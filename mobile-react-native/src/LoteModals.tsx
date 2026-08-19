@@ -188,9 +188,14 @@ export function LoteEmailModal({ basePath, etapaKey, etapaId, etapaLabel, situac
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalBox}>
-          <Text style={styles.modalTitle}>E-mail em lote · {etapaLabel}</Text>
+      <Pressable style={styles.modalOverlay} onPress={onClose}>
+        <Pressable style={styles.modalBox} onPress={(e) => e.stopPropagation()}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>E-mail em lote · {etapaLabel}</Text>
+            <Pressable style={styles.closeBtn} onPress={onClose} accessibilityLabel="Fechar">
+              <Text style={styles.closeBtnText}>✕</Text>
+            </Pressable>
+          </View>
           <ScrollView style={styles.modalScroll}>
             <Text style={styles.fieldLabel}>Modelo de e-mail</Text>
             {modelosQuery.isLoading ? (
@@ -263,7 +268,7 @@ export function LoteEmailModal({ basePath, etapaKey, etapaId, etapaLabel, situac
               </Text>
             ) : (
               <Pressable
-                style={[styles.primaryButton, (selected.length === 0 || !mensagemId || enviarMutation.isPending) && styles.buttonDisabled]}
+                style={[styles.primaryButton, (selected.length === 0 || !mensagemId || enviarMutation.isPending) && styles.primaryButtonDisabled]}
                 disabled={selected.length === 0 || !mensagemId || enviarMutation.isPending}
                 onPress={() => enviarMutation.mutate()}
               >
@@ -275,11 +280,11 @@ export function LoteEmailModal({ basePath, etapaKey, etapaId, etapaLabel, situac
           </ScrollView>
           <View style={styles.modalActions}>
             <Pressable style={[styles.modalButton, styles.cancelButton]} onPress={onClose}>
-              <Text style={styles.modalButtonText}>{enviado ? 'Concluir' : 'Cancelar'}</Text>
+              <Text style={styles.cancelButtonText}>{enviado ? 'Concluir' : 'Cancelar'}</Text>
             </Pressable>
           </View>
-        </View>
-      </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }
@@ -330,9 +335,14 @@ export function LoteLigacaoModal({ basePath, etapaKey, etapaId, etapaLabel, situ
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalBox}>
-          <Text style={styles.modalTitle}>Ligação em lote · {etapaLabel}</Text>
+      <Pressable style={styles.modalOverlay} onPress={onClose}>
+        <Pressable style={styles.modalBox} onPress={(e) => e.stopPropagation()}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Ligação em lote · {etapaLabel}</Text>
+            <Pressable style={styles.closeBtn} onPress={onClose} accessibilityLabel="Fechar">
+              <Text style={styles.closeBtnText}>✕</Text>
+            </Pressable>
+          </View>
           <ScrollView style={styles.modalScroll}>
             {resultado ? (
               <Text style={styles.notice}>{resultado.processados} ligação(ões) iniciada(s).</Text>
@@ -379,7 +389,7 @@ export function LoteLigacaoModal({ basePath, etapaKey, etapaId, etapaLabel, situ
                 {error ? <Text style={styles.errorText}>Falha: {error}</Text> : null}
 
                 <Pressable
-                  style={[styles.primaryButton, (selected.length === 0 || iniciarMutation.isPending) && styles.buttonDisabled]}
+                  style={[styles.primaryButton, (selected.length === 0 || iniciarMutation.isPending) && styles.primaryButtonDisabled]}
                   disabled={selected.length === 0 || iniciarMutation.isPending}
                   onPress={() => iniciarMutation.mutate()}
                 >
@@ -392,50 +402,98 @@ export function LoteLigacaoModal({ basePath, etapaKey, etapaId, etapaLabel, situ
           </ScrollView>
           <View style={styles.modalActions}>
             <Pressable style={[styles.modalButton, styles.cancelButton]} onPress={onClose}>
-              <Text style={styles.modalButtonText}>{resultado ? 'Concluir' : 'Cancelar'}</Text>
+              <Text style={styles.cancelButtonText}>{resultado ? 'Concluir' : 'Cancelar'}</Text>
             </Pressable>
           </View>
-        </View>
-      </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', padding: 16 },
-  modalBox: { backgroundColor: '#ffffff', borderRadius: 10, padding: 16, maxHeight: '92%' },
-  modalTitle: { fontSize: 18, fontWeight: '700', color: '#2b2b2b', marginBottom: 10 },
-  modalScroll: { flexGrow: 0 },
-  modalActions: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 12 },
-  modalButton: { borderRadius: 4, paddingHorizontal: 16, paddingVertical: 8, marginLeft: 8 },
-  cancelButton: { backgroundColor: '#e0e0e0' },
-  modalButtonText: { color: '#ffffff', fontSize: 15, fontWeight: '700' },
-  fieldLabel: { fontSize: 13, fontWeight: '700', color: '#616161', marginBottom: 3, marginTop: 10 },
-  fieldInput: { borderWidth: 1, borderColor: '#c9c9c9', borderRadius: 4, padding: 8, fontSize: 15, color: '#2b2b2b', backgroundColor: '#ffffff' },
-  picker: { borderWidth: 1, borderColor: '#c9c9c9', borderRadius: 4, padding: 8, backgroundColor: '#ffffff' },
-  pickerText: { fontSize: 15, color: '#2b2b2b' },
-  optionsBox: { backgroundColor: '#ffffff', borderRadius: 10, padding: 8, marginHorizontal: 40 },
-  option: { paddingVertical: 10, paddingHorizontal: 12 },
-  optionSelected: { backgroundColor: '#eef1f5' },
-  optionText: { fontSize: 15, color: '#2b2b2b' },
-  optionTextActive: { color: '#2a5a88', fontWeight: '700' },
-  preview: { borderWidth: 1, borderColor: '#e0e0e0', borderRadius: 4, padding: 8, marginTop: 10, backgroundColor: '#fafafa' },
-  previewTitle: { fontSize: 14, fontWeight: '700', color: '#2b2b2b', marginBottom: 4 },
-  previewBody: { fontSize: 13, color: '#555' },
-  selectionBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 8 },
-  rowButton: { backgroundColor: '#eef1f5', borderRadius: 4, paddingHorizontal: 10, paddingVertical: 6 },
-  rowButtonText: { color: '#2a5a88', fontSize: 13, fontWeight: '600' },
+  modalOverlay: { 
+    flex: 1, 
+    backgroundColor: 'rgba(29, 32, 37, 0.55)', 
+    justifyContent: 'center', 
+    padding: 16 
+  },
+  modalBox: { 
+    backgroundColor: '#ffffff', 
+    borderRadius: 16, 
+    maxHeight: '92%',
+    shadowColor: '#1d2025',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(194, 170, 60, 0.15)',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#2f333b',
+    borderBottomWidth: 3,
+    borderBottomColor: '#c2aa3c',
+  },
+  modalTitle: { 
+    fontSize: 17, 
+    fontWeight: '600', 
+    color: '#ffffff',
+    letterSpacing: 0.3,
+  },
+  closeBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeBtnText: { 
+    color: '#e8d27a', 
+    fontSize: 18,
+    fontWeight: '500',
+  },
+  modalScroll: { flexGrow: 0, paddingHorizontal: 20, paddingVertical: 16 },
+  modalActions: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#f0f0f0' },
+  modalButton: { borderRadius: 8, paddingHorizontal: 20, paddingVertical: 10, marginLeft: 10 },
+  cancelButton: { backgroundColor: '#f5f5f5', borderWidth: 1, borderColor: '#e0e0e0' },
+  cancelButtonText: { color: '#4a4a4a', fontSize: 15, fontWeight: '600' },
+  modalButtonText: { color: '#ffffff', fontSize: 15, fontWeight: '600' },
+  primaryButton: { backgroundColor: '#2a5a88', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: 16, shadowColor: '#2a5a88', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
+  primaryButtonText: { color: '#ffffff', fontSize: 15, fontWeight: '600' },
+  primaryButtonDisabled: { opacity: 0.5, shadowOpacity: 0 },
+  fieldLabel: { fontSize: 13, fontWeight: '600', color: '#4a4a4a', marginBottom: 4, marginTop: 14 },
+  fieldInput: { borderWidth: 1, borderColor: '#d3d3d3', borderRadius: 8, padding: 12, fontSize: 15, color: '#1d2025', backgroundColor: '#ffffff' },
+  fieldInputFocused: { borderColor: '#337ab7', borderWidth: 2 },
+  picker: { borderWidth: 1, borderColor: '#d3d3d3', borderRadius: 8, padding: 12, backgroundColor: '#ffffff' },
+  pickerText: { fontSize: 15, color: '#1d2025' },
+  optionsBox: { backgroundColor: '#ffffff', borderRadius: 12, padding: 8, marginHorizontal: 24, shadowColor: '#1d2025', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 6 },
+  option: { paddingVertical: 12, paddingHorizontal: 14, borderRadius: 6 },
+  optionSelected: { backgroundColor: 'rgba(51, 122, 183, 0.08)' },
+  optionText: { fontSize: 15, color: '#1d2025' },
+  optionTextActive: { color: '#265a88', fontWeight: '600' },
+  preview: { borderWidth: 1, borderColor: '#e8e8e8', borderRadius: 8, padding: 12, marginTop: 10, backgroundColor: '#fafafa' },
+  previewTitle: { fontSize: 14, fontWeight: '600', color: '#1d2025', marginBottom: 6 },
+  previewBody: { fontSize: 13, color: '#555', lineHeight: 20 },
+  selectionBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 10 },
+  rowButton: { backgroundColor: 'rgba(51, 122, 183, 0.08)', borderRadius: 6, paddingHorizontal: 12, paddingVertical: 8 },
+  rowButtonText: { color: '#265a88', fontSize: 13, fontWeight: '600' },
   countText: { fontSize: 13, color: '#666' },
-  row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderColor: '#eee' },
-  checkbox: { fontSize: 18, marginRight: 10, color: '#999' },
-  checkboxChecked: { color: '#2a5a88' },
+  row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderColor: '#f0f0f0' },
+  checkbox: { fontSize: 20, marginRight: 12, color: '#bbb' },
+  checkboxChecked: { color: '#265a88' },
   rowMain: { flex: 1 },
-  rowText: { fontSize: 15, color: '#2b2b2b' },
+  rowText: { fontSize: 15, color: '#1d2025' },
   rowDetail: { fontSize: 12, color: '#888', marginTop: 2 },
-  empty: { textAlign: 'center', color: '#888', marginTop: 12 },
-  notice: { backgroundColor: '#e8f4e8', borderWidth: 1, borderColor: '#a3d3a3', borderRadius: 4, padding: 8, marginVertical: 8, color: '#2e7d32', fontSize: 14 },
+  empty: { textAlign: 'center', color: '#888', marginTop: 16, fontSize: 14 },
+  notice: { backgroundColor: '#e8f4e8', borderWidth: 1, borderColor: '#a3d3a3', borderRadius: 8, padding: 10, marginVertical: 10, color: '#2e7d32', fontSize: 14 },
   errorText: { color: '#a61b29', fontSize: 13, marginTop: 8 },
-  primaryButton: { backgroundColor: '#2a5a88', borderRadius: 4, paddingVertical: 12, alignItems: 'center', marginTop: 12 },
-  primaryButtonText: { color: '#ffffff', fontSize: 15, fontWeight: '700' },
   buttonDisabled: { opacity: 0.5 },
 });

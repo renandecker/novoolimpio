@@ -323,6 +323,16 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
               >
                 {searching ? 'Buscando...' : 'Buscar/Atualizar'}
               </button>
+              <button
+                type="button"
+                className="btn-form-save"
+                onClick={() => aluno && selecionarAluno(aluno)}
+                disabled={searching || !aluno}
+                title="Buscar/Atualizar"
+                style={{ padding: '0.5rem', minWidth: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <i className="fa fa-search" style={{ fontSize: '1.2rem' }} />
+              </button>
               <button type="button" className="btn-form-back" onClick={() => selecionarAluno(null)}>
                 Limpar campo
               </button>

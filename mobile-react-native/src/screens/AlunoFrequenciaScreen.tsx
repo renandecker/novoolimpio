@@ -127,7 +127,13 @@ export default function AlunoFrequenciaScreen() {
 
       <Modal visible={pickerOpen} transparent animationType="fade" onRequestClose={() => setPickerOpen(false)}>
         <Pressable style={styles.modalOverlay} onPress={() => setPickerOpen(false)}>
-          <View style={styles.modalBox}>
+          <Pressable style={styles.modalBox} onPress={(e) => e.stopPropagation()}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Selecionar Matrícula</Text>
+              <Pressable style={styles.closeBtn} onPress={() => setPickerOpen(false)} accessibilityLabel="Fechar">
+                <Text style={styles.closeBtnText}>✕</Text>
+              </Pressable>
+            </View>
             {matriculas.map((m) => (
               <Pressable
                 key={m.id}
@@ -142,7 +148,7 @@ export default function AlunoFrequenciaScreen() {
                 </Text>
               </Pressable>
             ))}
-          </View>
+          </Pressable>
         </Pressable>
       </Modal>
     </ScrollView>
@@ -152,31 +158,72 @@ export default function AlunoFrequenciaScreen() {
 const styles = StyleSheet.create({
   page: { flex: 1, padding: 16 },
   content: { paddingBottom: 24 },
-  title: { fontSize: 22, fontWeight: 'bold', color: '#2b2b2b', marginBottom: 12 },
+  title: { fontSize: 22, fontWeight: 'bold', color: '#1d2025', marginBottom: 12 },
   errorText: { color: '#a61b29', fontSize: 14 },
   empty: { color: '#888', fontSize: 13, marginTop: 4 },
   spinner: { marginVertical: 12 },
-  select: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f4f7fa', borderRadius: 6, padding: 10, marginBottom: 12 },
+  select: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f4f7fa', borderRadius: 8, padding: 12, marginBottom: 12 },
   selectLabel: { fontSize: 13, color: '#555', marginRight: 6 },
-  selectValue: { fontSize: 14, color: '#2a5a88', fontWeight: '700' },
-  section: { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#e5e5e5', borderRadius: 8, padding: 14 },
+  selectValue: { fontSize: 14, color: '#265a88', fontWeight: '600' },
+  section: { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#e5e5e5', borderRadius: 10, padding: 16 },
   itemHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 },
   itemHeaderText: { flex: 1, marginRight: 8 },
-  itemTitle: { fontSize: 16, fontWeight: '700', color: '#2b2b2b' },
+  itemTitle: { fontSize: 16, fontWeight: '600', color: '#1d2025' },
   itemMeta: { fontSize: 12, color: '#888', marginTop: 2 },
-  headerPercent: { fontSize: 12, fontWeight: '700', color: '#2a5a88' },
+  headerPercent: { fontSize: 12, fontWeight: '600', color: '#265a88' },
   countersGrid: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 12 },
   counter: { fontSize: 12, color: '#444', width: '50%', marginBottom: 6 },
-  bold: { fontWeight: '700', color: '#2b2b2b' },
-  table: { borderWidth: 1, borderColor: '#e5e5e5', borderRadius: 6, overflow: 'hidden' },
+  bold: { fontWeight: '600', color: '#1d2025' },
+  table: { borderWidth: 1, borderColor: '#e5e5e5', borderRadius: 8, overflow: 'hidden' },
   tableRow: { flexDirection: 'row', borderBottomWidth: 1, borderColor: '#eee' },
   tableHeader: { backgroundColor: '#f4f7fa' },
-  tableHeaderText: { fontWeight: '700', color: '#555' },
-  tableCell: { flex: 1, fontSize: 12, color: '#333', padding: 8, textAlign: 'center' },
+  tableHeaderText: { fontWeight: '600', color: '#555' },
+  tableCell: { flex: 1, fontSize: 12, color: '#333', padding: 10, textAlign: 'center' },
   tableCellWide: { flex: 2, textAlign: 'left' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', padding: 20 },
-  modalBox: { backgroundColor: '#ffffff', borderRadius: 10, padding: 8 },
-  modalOption: { paddingVertical: 10, paddingHorizontal: 12 },
-  modalOptionText: { fontSize: 15, color: '#2b2b2b' },
-  modalOptionTextActive: { color: '#2a5a88', fontWeight: '700' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(29, 32, 37, 0.55)', justifyContent: 'center', padding: 16 },
+  modalBox: { 
+    backgroundColor: '#ffffff', 
+    borderRadius: 16, 
+    maxHeight: '85%',
+    shadowColor: '#1d2025',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(194, 170, 60, 0.15)',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#2f333b',
+    borderBottomWidth: 3,
+    borderBottomColor: '#c2aa3c',
+  },
+  modalTitle: { 
+    fontSize: 17, 
+    fontWeight: '600', 
+    color: '#ffffff',
+    letterSpacing: 0.3,
+  },
+  closeBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeBtnText: { 
+    color: '#e8d27a', 
+    fontSize: 18,
+    fontWeight: '500',
+  },
+  modalOption: { paddingVertical: 12, paddingHorizontal: 16, borderBottomWidth: 1, borderColor: '#f0f0f0' },
+  modalOptionText: { fontSize: 15, color: '#1d2025' },
+  modalOptionTextActive: { color: '#265a88', fontWeight: '600' },
 });

@@ -22,9 +22,14 @@ function EmptyText({ children }: { children: string }) {
 function FinalizarTurmaModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <View style={styles.modal}>
-          <Text style={styles.title}>Finalizando Turma</Text>
+      <Pressable style={styles.overlay} onPress={onClose}>
+        <Pressable style={styles.modal} onPress={(e) => e.stopPropagation()}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Finalizando Turma</Text>
+            <Pressable style={styles.closeBtn} onPress={onClose} accessibilityLabel="Fechar">
+              <Text style={styles.closeBtnText}>✕</Text>
+            </Pressable>
+          </View>
           <Tabs
             tabs={[
               { key: 'matriculas', label: 'Matrículas', content: <ModuleList path="/api/educacao/matricula" /> },
@@ -32,11 +37,8 @@ function FinalizarTurmaModal({ visible, onClose }: { visible: boolean; onClose: 
               { key: 'presencas', label: 'Presenças', content: <EmptyText>Presenças da turma.</EmptyText> },
             ]}
           />
-          <Pressable style={styles.closeBtn} onPress={onClose}>
-            <Text style={styles.closeBtnText}>Fechar</Text>
-          </Pressable>
-        </View>
-      </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }
@@ -45,9 +47,14 @@ function FinalizarTurmaModal({ visible, onClose }: { visible: boolean; onClose: 
 function ProrrogarTurmaModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <View style={styles.modal}>
-          <Text style={styles.title}>Prorrogando Turma</Text>
+      <Pressable style={styles.overlay} onPress={onClose}>
+        <Pressable style={styles.modal} onPress={(e) => e.stopPropagation()}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Prorrogando Turma</Text>
+            <Pressable style={styles.closeBtn} onPress={onClose} accessibilityLabel="Fechar">
+              <Text style={styles.closeBtnText}>✕</Text>
+            </Pressable>
+          </View>
           <Wizard
             completeLabel="Concluir"
             onComplete={onClose}
@@ -57,8 +64,8 @@ function ProrrogarTurmaModal({ visible, onClose }: { visible: boolean; onClose: 
               { key: 'selecioneProfessor', label: 'Professor', nextLabel: 'Salvar', content: <ModuleList path="/api/professor/professor" /> },
             ]}
           />
-        </View>
-      </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }
@@ -67,9 +74,14 @@ function ProrrogarTurmaModal({ visible, onClose }: { visible: boolean; onClose: 
 function TrocarTurmaModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <View style={styles.modal}>
-          <Text style={styles.title}>Trocar aluno da turma</Text>
+      <Pressable style={styles.overlay} onPress={onClose}>
+        <Pressable style={styles.modal} onPress={(e) => e.stopPropagation()}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Trocar aluno da turma</Text>
+            <Pressable style={styles.closeBtn} onPress={onClose} accessibilityLabel="Fechar">
+              <Text style={styles.closeBtnText}>✕</Text>
+            </Pressable>
+          </View>
           <Wizard
             completeLabel="Concluir"
             onComplete={onClose}
@@ -78,8 +90,8 @@ function TrocarTurmaModal({ visible, onClose }: { visible: boolean; onClose: () 
               { key: 'novaTurma', label: 'Selecionando nova Turma', nextLabel: 'Finalizar', content: <EmptyText>Seleção de nova turma.</EmptyText> },
             ]}
           />
-        </View>
-      </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }
@@ -140,13 +152,51 @@ export default function ViewTurmaListTurmaListScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   actionsRow: { flexDirection: 'row', flexWrap: 'wrap', paddingVertical: 8, paddingHorizontal: 8 },
-  actionBtn: { backgroundColor: '#2e7dd7', borderRadius: 6, paddingVertical: 8, paddingHorizontal: 12, marginRight: 8, marginBottom: 8 },
-  actionBtnText: { color: '#fff', fontWeight: '600' },
+  actionBtn: { backgroundColor: '#2a5a88', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 14, marginRight: 8, marginBottom: 8, shadowColor: '#2a5a88', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
+  actionBtnText: { color: '#fff', fontWeight: '600', fontSize: 14 },
   filters: { padding: 8 },
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', padding: 16 },
-  modal: { backgroundColor: '#fff', borderRadius: 8, padding: 16, maxHeight: '90%' },
-  title: { fontSize: 18, fontWeight: '600', marginBottom: 8 },
-  empty: { color: '#888', fontStyle: 'italic' },
-  closeBtn: { alignSelf: 'flex-end', marginTop: 12, paddingVertical: 8, paddingHorizontal: 16 },
-  closeBtnText: { color: '#c0392b', fontWeight: '600' },
+  overlay: { flex: 1, backgroundColor: 'rgba(29, 32, 37, 0.55)', justifyContent: 'center', padding: 16 },
+  modal: { 
+    backgroundColor: '#ffffff', 
+    borderRadius: 16, 
+    maxHeight: '90%',
+    shadowColor: '#1d2025',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(194, 170, 60, 0.15)',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#2f333b',
+    borderBottomWidth: 3,
+    borderBottomColor: '#c2aa3c',
+  },
+  title: { 
+    fontSize: 17, 
+    fontWeight: '600', 
+    color: '#ffffff',
+    letterSpacing: 0.3,
+  },
+  empty: { color: '#888', fontStyle: 'italic', fontSize: 14 },
+  closeBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeBtnText: { 
+    color: '#e8d27a', 
+    fontSize: 18,
+    fontWeight: '500',
+  },
 });

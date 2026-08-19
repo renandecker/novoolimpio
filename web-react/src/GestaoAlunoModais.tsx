@@ -414,7 +414,15 @@ const PARCELA_COLUNAS: TabelaColuna[] = [
   { key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null) },
   { key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null) },
   { key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null) },
-  { key: 'situacao', label: 'Situação' },
+  { key: 'situacao', label: 'Situação', render: (linha) => {
+      const situacao = String(linha.situacao ?? '');
+      const situacaoCor = String(linha.situacaoCor ?? '');
+      const dataPagamento = linha.dataPagamento as string | null;
+      if (dataPagamento) {
+        return <span style={{ color: '#0000FF', cursor: 'pointer' }}>Pago</span>;
+      }
+      return situacaoCor ? <span style={{ color: situacaoCor, fontWeight: 'bold' }}>{situacao}</span> : situacao;
+    } },
 ];
 
 const PARCELA_MATRICULA_COLUNAS: TabelaColuna[] = [
@@ -426,7 +434,15 @@ const PARCELA_MATRICULA_COLUNAS: TabelaColuna[] = [
   { key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null) },
   { key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null) },
   { key: 'valorPago', label: 'Valor pago', render: (linha) => fmtMoeda(linha.valorPago as number | null) },
-  { key: 'situacao', label: 'Situação' },
+  { key: 'situacao', label: 'Situação', render: (linha) => {
+      const situacao = String(linha.situacao ?? '');
+      const situacaoCor = String(linha.situacaoCor ?? '');
+      const dataPagamento = linha.dataPagamento as string | null;
+      if (dataPagamento) {
+        return <span style={{ color: '#0000FF', cursor: 'pointer' }}>Pago</span>;
+      }
+      return situacaoCor ? <span style={{ color: situacaoCor, fontWeight: 'bold' }}>{situacao}</span> : situacao;
+    } },
 ];
 
 const PRODUTO_COLUNAS: TabelaColuna[] = [
@@ -437,7 +453,15 @@ const PRODUTO_COLUNAS: TabelaColuna[] = [
   { key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null) },
   { key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null) },
   { key: 'valorPago', label: 'Valor pago', render: (linha) => fmtMoeda(linha.valorPago as number | null) },
-  { key: 'situacao', label: 'Situação' },
+  { key: 'situacao', label: 'Situação', render: (linha) => {
+      const situacao = String(linha.situacao ?? '');
+      const situacaoCor = String(linha.situacaoCor ?? '');
+      const dataPagamento = linha.dataPagamento as string | null;
+      if (dataPagamento) {
+        return <span style={{ color: '#0000FF', cursor: 'pointer' }}>Pago</span>;
+      }
+      return situacaoCor ? <span style={{ color: situacaoCor, fontWeight: 'bold' }}>{situacao}</span> : situacao;
+    } },
 ];
 
 const CANCELADA_COLUNAS: TabelaColuna[] = [

@@ -244,7 +244,7 @@ export function ModuleList({
 
       <Modal visible={sizePickerOpen} transparent animationType="fade" onRequestClose={() => setSizePickerOpen(false)}>
         <Pressable style={styles.modalOverlay} onPress={() => setSizePickerOpen(false)}>
-          <View style={styles.sizeOptionsBox}>
+          <Pressable style={styles.sizeOptionsBox} onPress={(e) => e.stopPropagation()}>
             {PAGE_SIZES.map((option) => (
               <Pressable
                 key={option}
@@ -260,19 +260,23 @@ export function ModuleList({
                 </Text>
               </Pressable>
             ))}
-          </View>
+          </Pressable>
         </Pressable>
       </Modal>
 
       <Modal visible={modal !== null} transparent animationType="fade" onRequestClose={() => setModal(null)}>
-        <RecordModal
-          title={modal?.mode === 'edit' ? `Editar ${entityTitle} #${modal.item.id}` : `Novo ${entityTitle}`}
-          fields={fields}
-          initial={modal?.mode === 'edit' ? asRecord(modal.item) : {}}
-          submitLabel="Salvar"
-          onCancel={() => setModal(null)}
-          onSubmit={(values) => (modal?.mode === 'edit' ? saveEdit(modal.item, values) : saveCreate(values))}
-        />
+        <Pressable style={styles.modalOverlay} onPress={() => setModal(null)}>
+          <Pressable style={styles.modalBox} onPress={(e) => e.stopPropagation()}>
+            <RecordModal
+              title={modal?.mode === 'edit' ? `Editar ${entityTitle} #${modal.item.id}` : `Novo ${entityTitle}`}
+              fields={fields}
+              initial={modal?.mode === 'edit' ? asRecord(modal.item) : {}}
+              submitLabel="Salvar"
+              onCancel={() => setModal(null)}
+              onSubmit={(values) => (modal?.mode === 'edit' ? saveEdit(modal.item, values) : saveCreate(values))}
+            />
+          </Pressable>
+        </Pressable>
       </Modal>
     </View>
   );
@@ -303,33 +307,36 @@ function RecordModal({
   });
 
   return (
-    <View style={styles.modalOverlay}>
-      <View style={styles.modalBox}>
+    <View style={styles.recordModalContainer}>
+      <View style={styles.modalHeader}>
         <Text style={styles.modalTitle}>{title}</Text>
-        <ScrollView style={styles.modalScroll}>
-          {fields.length === 0 ? (
-            <Text style={styles.modalEmpty}>Nenhum campo disponível para edição.</Text>
-          ) : (
-            fields.map((field) => (
-              <View key={field} style={styles.field}>
-                <Text style={styles.fieldLabel}>{toTitle(field)}</Text>
-                <TextInput
-                  style={styles.fieldInput}
-                  value={values[field] ?? ''}
-                  onChangeText={(text) => setValues((prev) => ({ ...prev, [field]: text }))}
-                />
-              </View>
-            ))
-          )}
-        </ScrollView>
-        <View style={styles.modalActions}>
-          <Pressable style={[styles.modalButton, styles.cancelButton]} onPress={onCancel}>
-            <Text style={styles.modalButtonText}>Cancelar</Text>
-          </Pressable>
-          <Pressable style={[styles.modalButton, styles.saveButton]} onPress={() => onSubmit(values)}>
-            <Text style={styles.modalButtonText}>{submitLabel}</Text>
-          </Pressable>
-        </View>
+        <Pressable style={styles.closeBtn} onPress={onCancel} accessibilityLabel="Fechar">
+          <Text style={styles.closeBtnText}>✕</Text>
+        </Pressable>
+      </View>
+      <ScrollView style={styles.modalScroll}>
+        {fields.length === 0 ? (
+          <Text style={styles.modalEmpty}>Nenhum campo disponível para edição.</Text>
+        ) : (
+          fields.map((field) => (
+            <View key={field} style={styles.field}>
+              <Text style={styles.fieldLabel}>{toTitle(field)}</Text>
+              <TextInput
+                style={styles.fieldInput}
+                value={values[field] ?? ''}
+                onChangeText={(text) => setValues((prev) => ({ ...prev, [field]: text }))}
+              />
+            </View>
+          ))
+        )}
+      </ScrollView>
+      <View style={styles.modalActions}>
+        <Pressable style={[styles.modalButton, styles.cancelButton]} onPress={onCancel}>
+          <Text style={styles.cancelButtonText}>Cancelar</Text>
+        </Pressable>
+        <Pressable style={[styles.modalButton, styles.saveButton]} onPress={() => onSubmit(values)}>
+          <Text style={styles.modalButtonText}>{submitLabel}</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -339,43 +346,100 @@ const styles = StyleSheet.create({
   page: { flex: 1, padding: 16 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  title: { fontSize: 22, fontWeight: 'bold', color: '#2b2b2b' },
-  primaryButton: { backgroundColor: '#2a5a88', borderRadius: 4, paddingHorizontal: 16, paddingVertical: 8 },
-  primaryButtonText: { color: '#ffffff', fontSize: 16, fontWeight: '700' },
-  notice: { backgroundColor: '#fff8e1', borderWidth: 1, borderColor: '#f0e0a0', borderRadius: 4, padding: 8, marginBottom: 8, color: '#7a5c00' },
-  empty: { textAlign: 'center', color: '#888', marginTop: 24 },
-  row: { paddingVertical: 10, borderBottomWidth: 1, borderColor: '#ddd' },
+  title: { fontSize: 22, fontWeight: 'bold', color: '#1d2025' },
+  primaryButton: { backgroundColor: '#2a5a88', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10, shadowColor: '#2a5a88', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
+  primaryButtonText: { color: '#ffffff', fontSize: 15, fontWeight: '600' },
+  notice: { backgroundColor: '#fff8e1', borderWidth: 1, borderColor: '#f0e0a0', borderRadius: 8, padding: 10, marginBottom: 8, color: '#7a5c00' },
+  empty: { textAlign: 'center', color: '#888', marginTop: 24, fontSize: 14 },
+  row: { paddingVertical: 12, borderBottomWidth: 1, borderColor: '#f0f0f0' },
   rowMain: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  rowText: { fontSize: 16, color: '#2b2b2b', flexShrink: 1, marginRight: 8 },
+  rowText: { fontSize: 16, color: '#1d2025', flexShrink: 1, marginRight: 8 },
   rowId: { fontSize: 12, color: '#999' },
   rowActions: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 6 },
-  rowButton: { backgroundColor: '#eef1f5', borderRadius: 4, paddingHorizontal: 10, paddingVertical: 5, marginRight: 6, marginTop: 4 },
-  dangerButton: { backgroundColor: '#fdecea' },
-  rowButtonText: { color: '#2a5a88', fontSize: 13, fontWeight: '600' },
-  errorText: { color: '#a61b29', fontSize: 15, fontWeight: '700' },
+  rowButton: { backgroundColor: 'rgba(51, 122, 183, 0.08)', borderRadius: 6, paddingHorizontal: 12, paddingVertical: 6, marginRight: 6, marginTop: 4 },
+  dangerButton: { backgroundColor: '#fff0f0' },
+  rowButtonText: { color: '#265a88', fontSize: 13, fontWeight: '600' },
+  errorText: { color: '#a61b29', fontSize: 15, fontWeight: '600', textAlign: 'center' },
   errorDetail: { color: '#888', fontSize: 13, marginTop: 6, textAlign: 'center' },
-  paginator: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderColor: '#eee' },
-  pageButton: { backgroundColor: '#eef1f5', borderRadius: 4, paddingHorizontal: 12, paddingVertical: 8 },
+  paginator: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderColor: '#f0f0f0' },
+  pageButton: { backgroundColor: 'rgba(51, 122, 183, 0.08)', borderRadius: 6, paddingHorizontal: 14, paddingVertical: 8 },
   pageButtonDisabled: { opacity: 0.4 },
-  pageButtonText: { color: '#2a5a88', fontSize: 13, fontWeight: '700' },
+  pageButtonText: { color: '#265a88', fontSize: 13, fontWeight: '600' },
   pageInfo: { fontSize: 12, color: '#666', flexShrink: 1, textAlign: 'center', marginHorizontal: 6 },
   sizeSelector: { alignSelf: 'flex-end', marginTop: 8 },
-  sizeSelectorText: { color: '#2a5a88', fontSize: 13, fontWeight: '600' },
-  sizeOptionsBox: { backgroundColor: '#ffffff', borderRadius: 10, padding: 8, marginHorizontal: 40 },
-  sizeOption: { paddingVertical: 10, paddingHorizontal: 12 },
-  sizeOptionText: { fontSize: 15, color: '#2b2b2b' },
-  sizeOptionTextActive: { color: '#2a5a88', fontWeight: '700' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', padding: 20 },
-  modalBox: { backgroundColor: '#ffffff', borderRadius: 10, padding: 16, maxHeight: '85%' },
-  modalTitle: { fontSize: 18, fontWeight: '700', color: '#2b2b2b', marginBottom: 10 },
-  modalScroll: { flexGrow: 0 },
-  modalEmpty: { color: '#888', marginBottom: 12 },
-  field: { marginBottom: 10 },
-  fieldLabel: { fontSize: 13, fontWeight: '700', color: '#616161', marginBottom: 3 },
-  fieldInput: { borderWidth: 1, borderColor: '#c9c9c9', borderRadius: 4, padding: 8, fontSize: 15, color: '#2b2b2b', backgroundColor: '#ffffff' },
-  modalActions: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 12 },
-  modalButton: { borderRadius: 4, paddingHorizontal: 16, paddingVertical: 8, marginLeft: 8 },
-  cancelButton: { backgroundColor: '#e0e0e0' },
-  saveButton: { backgroundColor: '#2a5a88' },
-  modalButtonText: { color: '#ffffff', fontSize: 15, fontWeight: '700' },
+  sizeSelectorText: { color: '#265a88', fontSize: 13, fontWeight: '600' },
+  sizeOptionsBox: { 
+    backgroundColor: '#ffffff', 
+    borderRadius: 12, 
+    padding: 8, 
+    marginHorizontal: 40,
+    shadowColor: '#1d2025',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  sizeOption: { paddingVertical: 12, paddingHorizontal: 14, borderRadius: 6 },
+  sizeOptionText: { fontSize: 15, color: '#1d2025' },
+  sizeOptionTextActive: { color: '#265a88', fontWeight: '600' },
+  modalOverlay: { 
+    flex: 1, 
+    backgroundColor: 'rgba(29, 32, 37, 0.55)', 
+    justifyContent: 'center', 
+    padding: 16 
+  },
+  modalBox: { 
+    backgroundColor: '#ffffff', 
+    borderRadius: 16, 
+    maxHeight: '85%',
+    shadowColor: '#1d2025',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(194, 170, 60, 0.15)',
+  },
+  recordModalContainer: { flex: 1, backgroundColor: '#ffffff', borderRadius: 16 },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#2f333b',
+    borderBottomWidth: 3,
+    borderBottomColor: '#c2aa3c',
+  },
+  modalTitle: { 
+    fontSize: 17, 
+    fontWeight: '600', 
+    color: '#ffffff',
+    letterSpacing: 0.3,
+  },
+  closeBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeBtnText: { 
+    color: '#e8d27a', 
+    fontSize: 18,
+    fontWeight: '500',
+  },
+  modalScroll: { flexGrow: 0, paddingHorizontal: 20, paddingVertical: 16 },
+  modalEmpty: { color: '#888', marginBottom: 12, fontSize: 14, textAlign: 'center' },
+  field: { marginBottom: 14 },
+  fieldLabel: { fontSize: 13, fontWeight: '600', color: '#4a4a4a', marginBottom: 4 },
+  fieldInput: { borderWidth: 1, borderColor: '#d3d3d3', borderRadius: 8, padding: 12, fontSize: 15, color: '#1d2025', backgroundColor: '#ffffff' },
+  modalActions: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#f0f0f0', paddingHorizontal: 16, paddingBottom: 16 },
+  modalButton: { borderRadius: 8, paddingHorizontal: 20, paddingVertical: 10, marginLeft: 10 },
+  cancelButton: { backgroundColor: '#f5f5f5', borderWidth: 1, borderColor: '#e0e0e0' },
+  cancelButtonText: { color: '#4a4a4a', fontSize: 15, fontWeight: '600' },
+  saveButton: { backgroundColor: '#2a5a88', shadowColor: '#2a5a88', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
+  modalButtonText: { color: '#ffffff', fontSize: 15, fontWeight: '600' },
 });

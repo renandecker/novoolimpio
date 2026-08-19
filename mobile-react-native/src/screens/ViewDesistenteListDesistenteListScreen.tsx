@@ -25,6 +25,6 @@ export default function ViewDesistenteListDesistenteListScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   actionsRow: { paddingVertical: 8, paddingHorizontal: 8 },
-  dangerBtn: { backgroundColor: '#c0392b', borderRadius: 6, paddingVertical: 8, paddingHorizontal: 12, alignSelf: 'flex-start' },
-  btnText: { color: '#fff', fontWeight: '600' },
+  dangerBtn: { backgroundColor: '#b93f2a', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 14, alignSelf: 'flex-start', shadowColor: '#b93f2a', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
+  btnText: { color: '#fff', fontWeight: '600', fontSize: 14 },
 });
