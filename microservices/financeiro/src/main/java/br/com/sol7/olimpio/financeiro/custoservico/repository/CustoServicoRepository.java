@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.financeiro.custoservico;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class CustoServicoRepository implements PanacheRepository<CustoServico> {
+
+@ApplicationScoped
+public class CustoServicoRepository implements PanacheRepository<CustoServico> {
 
     // Migrado de CustoServicoRepository.buscarCustoServicoComUnidade (legado) - HQL original:
     // select c from CustoServico c left join fetch c.unidades where c = ?1
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<CustoServico>> buscarCustoServicoComUnidade(Long custoServicoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CUSTO_SERVICO_COM_UNIDADE, CustoServico.class)
-                    .setParameter(1, custoServicoId)
-                    .getResultList());
+                        .setParameter(1, custoServicoId)
+                        .getResultList());
     }
 
 
@@ -25,8 +30,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<CustoServico>> buscarCustoServicoPorUnidade(Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CUSTO_SERVICO_POR_UNIDADE, CustoServico.class)
-                    .setParameter(1, unidadeId)
-                    .getResultList());
+                        .setParameter(1, unidadeId)
+                        .getResultList());
     }
 
 }

@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.mensagem;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class MensagemService {
 
-    @Inject MensagemRepository repository;
+    @Inject
+    MensagemRepository repository;
 
     public Uni<List<MensagemResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,12 @@ public class MensagemService {
                         : Uni.createFrom().failure(new NotFoundException("Mensagem not found")));
     }
 
-    private void apply(Mensagem e, MensagemRequest r) { e.descricao = r.descricao(); e.assunto = r.assunto(); e.mensagem = r.mensagem(); e.flagEmail = r.flagEmail(); }
+    private void apply(Mensagem e, MensagemRequest r) {
+        e.descricao = r.descricao();
+        e.assunto = r.assunto();
+        e.mensagem = r.mensagem();
+        e.flagEmail = r.flagEmail();
+    }
 
     private MensagemResponse toResponse(Mensagem e) {
         return new MensagemResponse(e.id, e.descricao, e.assunto, e.mensagem, e.flagEmail);

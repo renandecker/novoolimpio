@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.financeiro.configuracaoparcela;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class ConfiguracaoParcelaRepository implements PanacheRepository<ConfiguracaoParcela> {
+
+@ApplicationScoped
+public class ConfiguracaoParcelaRepository implements PanacheRepository<ConfiguracaoParcela> {
 
     // Migrado de ConfiguracaoParcelaRepository.buscarConf (legado) - HQL original:
     // Select c from ConfiguracaoParcela c where c.unidade = ?1 order by c.id desc
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ConfiguracaoParcela>> buscarConf(Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CONF, ConfiguracaoParcela.class)
-                    .setParameter(1, unidadeId)
-                    .getResultList());
+                        .setParameter(1, unidadeId)
+                        .getResultList());
     }
 
 
@@ -25,8 +30,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ConfiguracaoParcela>> buscarConfComUnidades(List<Long> unidadeIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CONF_COM_UNIDADES, ConfiguracaoParcela.class)
-                    .setParameter(1, unidadeIds)
-                    .getResultList());
+                        .setParameter(1, unidadeIds)
+                        .getResultList());
     }
 
 
@@ -38,8 +43,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ConfiguracaoParcela>> buscarConfComUnidadesNotCancelamento(List<Long> unidadeIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CONF_COM_UNIDADES_NOT_CANCELAMENTO, ConfiguracaoParcela.class)
-                    .setParameter(1, unidadeIds)
-                    .getResultList());
+                        .setParameter(1, unidadeIds)
+                        .getResultList());
     }
 
 }

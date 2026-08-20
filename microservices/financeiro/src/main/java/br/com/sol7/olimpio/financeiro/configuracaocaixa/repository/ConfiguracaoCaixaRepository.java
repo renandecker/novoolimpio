@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.financeiro.configuracaocaixa;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class ConfiguracaoCaixaRepository implements PanacheRepository<ConfiguracaoCaixa> {
+
+@ApplicationScoped
+public class ConfiguracaoCaixaRepository implements PanacheRepository<ConfiguracaoCaixa> {
 
     // Migrado de ConfiguracaoCaixaRepository.buscarConfiguracaoComUnidadeUsuario (legado) - HQL original:
     // Select c from ConfiguracaoCaixa c where c.usuario =?1 and c.unidade =?2 order by c.id desc
@@ -12,9 +17,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ConfiguracaoCaixa>> buscarConfiguracaoComUnidadeUsuario(Long usuarioId, Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CONFIGURACAO_COM_UNIDADE_USUARIO, ConfiguracaoCaixa.class)
-                    .setParameter(1, usuarioId)
-                    .setParameter(2, unidadeId)
-                    .getResultList());
+                        .setParameter(1, usuarioId)
+                        .setParameter(2, unidadeId)
+                        .getResultList());
     }
 
 
@@ -26,8 +31,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ConfiguracaoCaixa>> buscarConfiguracaoComUsuario(Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CONFIGURACAO_COM_USUARIO, ConfiguracaoCaixa.class)
-                    .setParameter(1, usuarioId)
-                    .getResultList());
+                        .setParameter(1, usuarioId)
+                        .getResultList());
     }
 
 
@@ -39,8 +44,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ConfiguracaoCaixa>> buscarConfiguracaoCaixaUnico(Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CONFIGURACAO_CAIXA_UNICO, ConfiguracaoCaixa.class)
-                    .setParameter(1, usuarioId)
-                    .getResultList());
+                        .setParameter(1, usuarioId)
+                        .getResultList());
     }
 
 
@@ -52,10 +57,10 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ConfiguracaoCaixa>> buscarConfiguracaoComUnidadeUsuarioId(Long usuarioId, Long unidadeId, Long configuracaoCaixaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CONFIGURACAO_COM_UNIDADE_USUARIO_ID, ConfiguracaoCaixa.class)
-                    .setParameter(1, usuarioId)
-                    .setParameter(2, unidadeId)
-                    .setParameter(3, configuracaoCaixaId)
-                    .getResultList());
+                        .setParameter(1, usuarioId)
+                        .setParameter(2, unidadeId)
+                        .setParameter(3, configuracaoCaixaId)
+                        .getResultList());
     }
 
 }

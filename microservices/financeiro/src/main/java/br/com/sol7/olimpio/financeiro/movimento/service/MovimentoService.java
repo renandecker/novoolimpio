@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.movimento;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class MovimentoService {
 
-    @Inject MovimentoRepository repository;
+    @Inject
+    MovimentoRepository repository;
 
     public Uni<List<MovimentoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,12 @@ public class MovimentoService {
                         : Uni.createFrom().failure(new NotFoundException("Movimento not found")));
     }
 
-    private void apply(Movimento e, MovimentoRequest r) { e.descricao = r.descricao(); e.descricaocompleta = r.descricaocompleta(); e.movimentoId = r.movimentoId(); e.tipoMovimentoId = r.tipoMovimentoId(); }
+    private void apply(Movimento e, MovimentoRequest r) {
+        e.descricao = r.descricao();
+        e.descricaocompleta = r.descricaocompleta();
+        e.movimentoId = r.movimentoId();
+        e.tipoMovimentoId = r.tipoMovimentoId();
+    }
 
     private MovimentoResponse toResponse(Movimento e) {
         return new MovimentoResponse(e.id, e.descricao, e.descricaocompleta, e.movimentoId, e.tipoMovimentoId);

@@ -1,23 +1,29 @@
 package br.com.sol7.olimpio.financeiro.caixa;
+
 import java.util.Date;
 import java.math.BigDecimal;
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import br.com.sol7.olimpio.financeiro.caixa.entity.Caixa;
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class CaixaRepository implements PanacheRepository<Caixa> {
+
+@ApplicationScoped
+public class CaixaRepository implements PanacheRepository<Caixa> {
 
     // Migrado de SchedulingService.fechamentoCaixaAbertos() (legado) - soma de entradas/saidas
     // (por tipo de movimento) e sangrias de um caixa, e fechamento propriamente dito.
     public static final String SQL_SOMAR_ENTRADAS =
             "SELECT COALESCE(SUM(m.valor), 0) FROM fin_movimentacao m " +
-            "JOIN fin_movimento mv ON mv.id = m.id_movimento " +
-            "JOIN fin_tipo_movimento tm ON tm.id = mv.id_tipo_movimento " +
-            "WHERE m.id_caixa = ?1 AND tm.id = 1";
+                    "JOIN fin_movimento mv ON mv.id = m.id_movimento " +
+                    "JOIN fin_tipo_movimento tm ON tm.id = mv.id_tipo_movimento " +
+                    "WHERE m.id_caixa = ?1 AND tm.id = 1";
     public static final String SQL_SOMAR_SAIDAS =
             "SELECT COALESCE(SUM(m.valor), 0) FROM fin_movimentacao m " +
-            "JOIN fin_movimento mv ON mv.id = m.id_movimento " +
-            "JOIN fin_tipo_movimento tm ON tm.id = mv.id_tipo_movimento " +
-            "WHERE m.id_caixa = ?1 AND tm.id = 2";
+                    "JOIN fin_movimento mv ON mv.id = m.id_movimento " +
+                    "JOIN fin_tipo_movimento tm ON tm.id = mv.id_tipo_movimento " +
+                    "WHERE m.id_caixa = ?1 AND tm.id = 2";
     public static final String SQL_SOMAR_SANGRIA =
             "SELECT COALESCE(SUM(valor), 0) FROM fin_sangria WHERE id_caixa = ?1";
     public static final String SQL_FECHAR_CAIXA =
@@ -26,8 +32,8 @@ import io.smallrye.mutiny.Uni;
     private Uni<java.math.BigDecimal> somarNativo(String sql, Long caixaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(sql)
-                    .setParameter(1, caixaId)
-                    .getSingleResult())
+                        .setParameter(1, caixaId)
+                        .getSingleResult())
                 .map(v -> new java.math.BigDecimal(v.toString()));
     }
 
@@ -49,6 +55,16 @@ import io.smallrye.mutiny.Uni;
                 .replaceWithVoid();
     }
 
+    // Migrado de CaixaController.abrirCaixa - remove data_fechamento
+    public static final String SQL_ABRIR_CAIXA =
+            "UPDATE fin_caixa SET data_fechamento = null WHERE id = ?1";
+
+    public Uni<Void> abrirCaixaNativo(Long caixaId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_ABRIR_CAIXA).setParameter(1, caixaId).executeUpdate())
+                .replaceWithVoid();
+    }
+
     // Migrado de CaixaRepository.buscarAberturaCaixa (legado) - HQL original:
     // select c from Caixa c where c.usuario = ?1 AND date(c.data) = current_date  order by c.id
     public static final String SQL_BUSCAR_ABERTURA_CAIXA =
@@ -57,8 +73,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Caixa>> buscarAberturaCaixa(Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_ABERTURA_CAIXA, Caixa.class)
-                    .setParameter(1, usuarioId)
-                    .getResultList());
+                        .setParameter(1, usuarioId)
+                        .getResultList());
     }
 
 
@@ -70,9 +86,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Caixa>> buscarAberturaCaixaComUsuarioUnidade(Long usuarioId, Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_ABERTURA_CAIXA_COM_USUARIO_UNIDADE, Caixa.class)
-                    .setParameter(1, usuarioId)
-                    .setParameter(2, unidadeId)
-                    .getResultList());
+                        .setParameter(1, usuarioId)
+                        .setParameter(2, unidadeId)
+                        .getResultList());
     }
 
 
@@ -85,7 +101,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CAIXAS_ABERTOS, Caixa.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -97,8 +113,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> countCaixaUnidade(Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_COUNT_CAIXA_UNIDADE)
-                    .setParameter(1, unidadeId)
-                    .getResultList());
+                        .setParameter(1, unidadeId)
+                        .getResultList());
     }
 
 }

@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.configuracaocaixa;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ConfiguracaoCaixaService {
 
-    @Inject ConfiguracaoCaixaRepository repository;
+    @Inject
+    ConfiguracaoCaixaRepository repository;
 
     public Uni<List<ConfiguracaoCaixaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,18 @@ public class ConfiguracaoCaixaService {
                         : Uni.createFrom().failure(new NotFoundException("ConfiguracaoCaixa not found")));
     }
 
-    private void apply(ConfiguracaoCaixa e, ConfiguracaoCaixaRequest r) { e.unidadeId = r.unidadeId(); e.fundoCaixa = r.fundoCaixa(); e.dias = r.dias(); e.email = r.email(); e.impressao = r.impressao(); e.pagPropriaUnid = r.pagPropriaUnid(); e.usuarioId = r.usuarioId(); e.responsavelId = r.responsavelId(); e.templateCaixa = r.templateCaixa(); e.tipoModeloCaixa = r.tipoModeloCaixa(); }
+    private void apply(ConfiguracaoCaixa e, ConfiguracaoCaixaRequest r) {
+        e.unidadeId = r.unidadeId();
+        e.fundoCaixa = r.fundoCaixa();
+        e.dias = r.dias();
+        e.email = r.email();
+        e.impressao = r.impressao();
+        e.pagPropriaUnid = r.pagPropriaUnid();
+        e.usuarioId = r.usuarioId();
+        e.responsavelId = r.responsavelId();
+        e.templateCaixa = r.templateCaixa();
+        e.tipoModeloCaixa = r.tipoModeloCaixa();
+    }
 
     private ConfiguracaoCaixaResponse toResponse(ConfiguracaoCaixa e) {
         return new ConfiguracaoCaixaResponse(e.id, e.unidadeId, e.fundoCaixa, e.dias, e.email, e.impressao, e.pagPropriaUnid, e.usuarioId, e.responsavelId, e.templateCaixa, e.tipoModeloCaixa);
@@ -83,7 +97,7 @@ public class ConfiguracaoCaixaService {
     //         return getConfiguracaoCaixaRepository().buscarConfiguracaoComUnidadeUsuario(usuario, unidade);
     //     }
     public Uni<Long> buscarConfiguracaoComUnidadeUsuario(Long usuarioId, Long unidadeId) {
-                return repository.find("usuarioId =?1 and unidadeId =?2 order by id desc", usuarioId, unidadeId).firstResult().map(x -> x == null ? null : x.id);
+        return repository.find("usuarioId =?1 and unidadeId =?2 order by id desc", usuarioId, unidadeId).firstResult().map(x -> x == null ? null : x.id);
     }
 
 
@@ -94,7 +108,7 @@ public class ConfiguracaoCaixaService {
     //         return getConfiguracaoCaixaRepository().buscarConfiguracaoComUsuario(usuario);
     //     }
     public Uni<List<Long>> buscarConfiguracaoComUsuario(Long usuarioId) {
-                return repository.find("usuarioId =?1 order by unidade.sucinto", usuarioId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("usuarioId =?1 order by unidade.sucinto", usuarioId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -105,7 +119,7 @@ public class ConfiguracaoCaixaService {
     //         return getConfiguracaoCaixaRepository().buscarConfiguracaoCaixaUnico(usuario);
     //     }
     public Uni<List<Long>> buscarConfiguracaoCaixaUnico(Long usuarioId) {
-                return repository.find("usuarioId =?1 and pagPropriaUnid = true order by unidade.sucinto", usuarioId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("usuarioId =?1 and pagPropriaUnid = true order by unidade.sucinto", usuarioId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -116,7 +130,7 @@ public class ConfiguracaoCaixaService {
     //         return getConfiguracaoCaixaRepository().buscarConfiguracaoComUnidadeUsuarioId(usuario, unidade, configuracaoCaixa);
     //     }
     public Uni<Long> buscarConfiguracaoComUnidadeUsuarioId(Long usuarioId, Long unidadeId, Long configuracaoCaixaId) {
-                return repository.find("usuarioId =?1 and unidadeId =?2 and c <> ?3 order by id desc", usuarioId, unidadeId, configuracaoCaixaId).firstResult().map(x -> x == null ? null : x.id);
+        return repository.find("usuarioId =?1 and unidadeId =?2 and c <> ?3 order by id desc", usuarioId, unidadeId, configuracaoCaixaId).firstResult().map(x -> x == null ? null : x.id);
     }
 
 }

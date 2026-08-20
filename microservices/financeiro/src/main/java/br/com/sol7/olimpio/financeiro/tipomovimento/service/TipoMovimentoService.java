@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.tipomovimento;
+
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -8,13 +9,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class TipoMovimentoService {
 
-    @Inject TipoMovimentoRepository repository;
+    @Inject
+    TipoMovimentoRepository repository;
 
     @CacheResult(cacheName = "tipo-movimento-cache")
     public Uni<List<TipoMovimentoResponse>> list() {
@@ -58,7 +61,9 @@ public class TipoMovimentoService {
                         : Uni.createFrom().failure(new NotFoundException("TipoMovimento not found")));
     }
 
-    private void apply(TipoMovimento e, TipoMovimentoRequest r) { e.descricao = r.descricao(); }
+    private void apply(TipoMovimento e, TipoMovimentoRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private TipoMovimentoResponse toResponse(TipoMovimento e) {
         return new TipoMovimentoResponse(e.id, e.descricao);

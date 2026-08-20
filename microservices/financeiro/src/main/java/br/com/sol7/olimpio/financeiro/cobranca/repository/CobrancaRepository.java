@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.financeiro.cobranca;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class CobrancaRepository implements PanacheRepository<Cobranca> {
+
+@ApplicationScoped
+public class CobrancaRepository implements PanacheRepository<Cobranca> {
 
     // Migrado de CobrancaRepository.listaLigacaoCobrancaComEtapaAtivos (legado) - HQL original:
     // select l from Cobranca l where l.etapasCobranca = ?1
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Cobranca>> listaLigacaoCobrancaComEtapaAtivos(Long etapasCobrancaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTA_LIGACAO_COBRANCA_COM_ETAPA_ATIVOS, Cobranca.class)
-                    .setParameter(1, etapasCobrancaId)
-                    .getResultList());
+                        .setParameter(1, etapasCobrancaId)
+                        .getResultList());
     }
 
 
@@ -26,7 +31,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTA_LIGACAO_SEM_ETAPA_ATIVOS, Cobranca.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -38,8 +43,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Cobranca>> buscaObjeto(Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCA_OBJETO, Cobranca.class)
-                    .setParameter(1, id)
-                    .getResultList());
+                        .setParameter(1, id)
+                        .getResultList());
     }
 
 }

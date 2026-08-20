@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.valorproduto;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ValorProdutoService {
 
-    @Inject ValorProdutoRepository repository;
+    @Inject
+    ValorProdutoRepository repository;
 
     public Uni<List<ValorProdutoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,14 @@ public class ValorProdutoService {
                         : Uni.createFrom().failure(new NotFoundException("ValorProduto not found")));
     }
 
-    private void apply(ValorProduto e, ValorProdutoRequest r) { e.vezes = r.vezes(); e.juros = r.juros(); e.desconto = r.desconto(); e.multa = r.multa(); e.diasSpc = r.diasSpc(); e.diasToleranciaMulta = r.diasToleranciaMulta(); }
+    private void apply(ValorProduto e, ValorProdutoRequest r) {
+        e.vezes = r.vezes();
+        e.juros = r.juros();
+        e.desconto = r.desconto();
+        e.multa = r.multa();
+        e.diasSpc = r.diasSpc();
+        e.diasToleranciaMulta = r.diasToleranciaMulta();
+    }
 
     private ValorProdutoResponse toResponse(ValorProduto e) {
         return new ValorProdutoResponse(e.id, e.vezes, e.juros, e.desconto, e.multa, e.diasSpc, e.diasToleranciaMulta);
@@ -67,7 +77,7 @@ public class ValorProdutoService {
     //         return getValorProdutoRepository().buscarExistenciaEmVenda(valorProduto);
     //     }
     public Uni<List<Long>> buscarExistenciaEmVenda(Long valorProdutoId) {
-                return repository.buscarExistenciaEmVenda(valorProdutoId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarExistenciaEmVenda(valorProdutoId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

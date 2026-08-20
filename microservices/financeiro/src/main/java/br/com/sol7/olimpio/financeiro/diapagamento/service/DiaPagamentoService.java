@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.diapagamento;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class DiaPagamentoService {
 
-    @Inject DiaPagamentoRepository repository;
+    @Inject
+    DiaPagamentoRepository repository;
 
     public Uni<List<DiaPagamentoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,9 @@ public class DiaPagamentoService {
                         : Uni.createFrom().failure(new NotFoundException("DiaPagamento not found")));
     }
 
-    private void apply(DiaPagamento e, DiaPagamentoRequest r) { e.dia = r.dia(); }
+    private void apply(DiaPagamento e, DiaPagamentoRequest r) {
+        e.dia = r.dia();
+    }
 
     private DiaPagamentoResponse toResponse(DiaPagamento e) {
         return new DiaPagamentoResponse(e.id, e.dia);

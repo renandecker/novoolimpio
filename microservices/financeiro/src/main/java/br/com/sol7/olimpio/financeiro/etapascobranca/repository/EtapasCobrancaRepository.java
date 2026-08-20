@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.financeiro.etapascobranca;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class EtapasCobrancaRepository implements PanacheRepository<EtapasCobranca> {
+
+@ApplicationScoped
+public class EtapasCobrancaRepository implements PanacheRepository<EtapasCobranca> {
 
     // Migrado de EtapasCobrancaRepository.listarEtapasOrdemComUsuario (legado) - HQL original:
     // select distinct e from EtapasCobranca e left join e.usuarios u left join e.perfils p  where ((u = ?1 and e.usuario = false) or  e.usuario = true) or ((p in (?2) and e.perfil = false) or  e.perfil = true) order by e.ordem
@@ -12,9 +17,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<EtapasCobranca>> listarEtapasOrdemComUsuario(Long usuarioId, List<Long> perfilsIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_ETAPAS_ORDEM_COM_USUARIO, EtapasCobranca.class)
-                    .setParameter(1, usuarioId)
-                    .setParameter(2, perfilsIds)
-                    .getResultList());
+                        .setParameter(1, usuarioId)
+                        .setParameter(2, perfilsIds)
+                        .getResultList());
     }
 
 
@@ -26,8 +31,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<EtapasCobranca>> listarEtapasTrocaOrdemComUsuario(Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_ETAPAS_TROCA_ORDEM_COM_USUARIO, EtapasCobranca.class)
-                    .setParameter(1, usuarioId)
-                    .getResultList());
+                        .setParameter(1, usuarioId)
+                        .getResultList());
     }
 
 
@@ -41,8 +46,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> listarUsuariosDaEtapa(Long etapasCobrancaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_USUARIOS_DA_ETAPA)
-                    .setParameter(1, etapasCobrancaId)
-                    .getResultList());
+                        .setParameter(1, etapasCobrancaId)
+                        .getResultList());
     }
 
 
@@ -56,8 +61,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> listarPerfilDaEtapa(Long etapasNAPId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_PERFIL_DA_ETAPA)
-                    .setParameter(1, etapasNAPId)
-                    .getResultList());
+                        .setParameter(1, etapasNAPId)
+                        .getResultList());
     }
 
 
@@ -69,8 +74,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<EtapasCobranca>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, EtapasCobranca.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -83,7 +88,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_ETAPAS_ORDEM, EtapasCobranca.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 }

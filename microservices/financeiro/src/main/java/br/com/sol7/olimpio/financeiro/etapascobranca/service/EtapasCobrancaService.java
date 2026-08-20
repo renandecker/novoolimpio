@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.etapascobranca;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class EtapasCobrancaService {
 
-    @Inject EtapasCobrancaRepository repository;
+    @Inject
+    EtapasCobrancaRepository repository;
 
     public Uni<List<EtapasCobrancaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,18 @@ public class EtapasCobrancaService {
                         : Uni.createFrom().failure(new NotFoundException("EtapasCobranca not found")));
     }
 
-    private void apply(EtapasCobranca e, EtapasCobrancaRequest r) { e.descricao = r.descricao(); e.ordem = r.ordem(); e.customizado = r.customizado(); e.tipoModeloDocumento = r.tipoModeloDocumento(); e.campoCustomizado = r.campoCustomizado(); e.localDocumento = r.localDocumento(); e.nomeDocumento = r.nomeDocumento(); e.campoDetalhes = r.campoDetalhes(); e.usuario = r.usuario(); e.perfil = r.perfil(); }
+    private void apply(EtapasCobranca e, EtapasCobrancaRequest r) {
+        e.descricao = r.descricao();
+        e.ordem = r.ordem();
+        e.customizado = r.customizado();
+        e.tipoModeloDocumento = r.tipoModeloDocumento();
+        e.campoCustomizado = r.campoCustomizado();
+        e.localDocumento = r.localDocumento();
+        e.nomeDocumento = r.nomeDocumento();
+        e.campoDetalhes = r.campoDetalhes();
+        e.usuario = r.usuario();
+        e.perfil = r.perfil();
+    }
 
     private EtapasCobrancaResponse toResponse(EtapasCobranca e) {
         return new EtapasCobrancaResponse(e.id, e.descricao, e.ordem, e.customizado, e.tipoModeloDocumento, e.campoCustomizado, e.localDocumento, e.nomeDocumento, e.campoDetalhes, e.usuario, e.perfil);

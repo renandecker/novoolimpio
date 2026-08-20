@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.financeiro.movimento;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class MovimentoRepository implements PanacheRepository<Movimento> {
+
+@ApplicationScoped
+public class MovimentoRepository implements PanacheRepository<Movimento> {
 
     // Migrado de MovimentoRepository.autoComplete (legado) - HQL original:
     // select u from Movimento u where (lower(u.descricaocompleta) like '%' || ?1 || '%' or str(u.id) = ?1)  order by u.descricaocompleta
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Movimento>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Movimento.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -25,9 +30,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Movimento>> autoCompleteComTipo(String query, Long tipoMovimentoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_TIPO, Movimento.class)
-                    .setParameter(1, query)
-                    .setParameter(2, tipoMovimentoId)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, tipoMovimentoId)
+                        .getResultList());
     }
 
 }

@@ -1,3 +1,8 @@
 package br.com.sol7.olimpio.financeiro.gerircobranca;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
-@ApplicationScoped public class GerirCobrancaRepository implements PanacheRepository<GerirCobranca> {}
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
+public class GerirCobrancaRepository implements PanacheRepository<GerirCobranca> {
+}

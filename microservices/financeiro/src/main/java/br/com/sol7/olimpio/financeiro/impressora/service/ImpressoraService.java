@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.impressora;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ImpressoraService {
 
-    @Inject ImpressoraRepository repository;
+    @Inject
+    ImpressoraRepository repository;
 
     public Uni<List<ImpressoraResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,14 @@ public class ImpressoraService {
                         : Uni.createFrom().failure(new NotFoundException("Impressora not found")));
     }
 
-    private void apply(Impressora e, ImpressoraRequest r) { e.unidadeId = r.unidadeId(); e.porta = r.porta(); e.modelo = r.modelo(); e.manual = r.manual(); e.tamanho = r.tamanho(); e.dataAlteracao = r.dataAlteracao(); }
+    private void apply(Impressora e, ImpressoraRequest r) {
+        e.unidadeId = r.unidadeId();
+        e.porta = r.porta();
+        e.modelo = r.modelo();
+        e.manual = r.manual();
+        e.tamanho = r.tamanho();
+        e.dataAlteracao = r.dataAlteracao();
+    }
 
     private ImpressoraResponse toResponse(Impressora e) {
         return new ImpressoraResponse(e.id, e.unidadeId, e.porta, e.modelo, e.manual, e.tamanho, e.dataAlteracao);
@@ -86,4 +96,12 @@ public class ImpressoraService {
         return repository.verificarImpressorasComUnidade(unidadeId, id).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
+    // Migrado de ImpressoraController.imprimeComprovante (legado)
+    // Imprime comprovante de pagamento - no microserviço retorna apenas sucesso
+    // A impressão real é feita no frontend via impressora térmica/USB
+    public Uni<Void> imprimirComprovante(Object comprovantePagamento) {
+        // TODO: Implementar integração com serviço de impressão se necessário
+        // No legado: impressoraController.imprimeComprovante(comprovantePagamento)
+        return Uni.createFrom().voidItem();
+    }
 }

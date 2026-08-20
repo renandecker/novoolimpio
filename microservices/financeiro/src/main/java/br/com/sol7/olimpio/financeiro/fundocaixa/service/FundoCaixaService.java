@@ -1,10 +1,54 @@
 package br.com.sol7.olimpio.financeiro.fundocaixa;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
-import java.util.Date;
-import io.smallrye.mutiny.Uni; import jakarta.enterprise.context.ApplicationScoped; import jakarta.inject.Inject; import jakarta.ws.rs.NotFoundException; import java.util.List;
+import br.com.sol7.olimpio.financeiro.movimentacaofinanceira.service.MovimentacaoFinanceiraService;
+import br.com.sol7.olimpio.financeiro.movimentacaofinanceira.dto.MovimentacaoFinanceiraResponse;
+import br.com.sol7.olimpio.financeiro.movimentacaofinanceira.entity.TipoPagamento;
+import br.com.sol7.olimpio.financeiro.sangria.service.SangriaService;
+import br.com.sol7.olimpio.financeiro.sangria.dto.SangriaResponse;
+import br.com.sol7.olimpio.financeiro.caixa.CaixaService;
+import br.com.sol7.olimpio.financeiro.caixa.CaixaResponse;
+import br.com.sol7.olimpio.financeiro.caixa.CaixaService.CaixaTotais;
+import br.com.sol7.olimpio.financeiro.configuracaocaixa.ConfiguracaoCaixaService;
+import br.com.sol7.olimpio.financeiro.configuracaocaixa.ConfiguracaoCaixaResponse;
+import br.com.sol7.olimpio.financeiro.impressora.ImpressoraService;
+import br.com.sol7.olimpio.financeiro.sangria.dto.SangriaRequest;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped @WithTransaction public class FundoCaixaService { @Inject FundoCaixaRepository repository; public Uni<List<FundoCaixaResponse>> list(){return repository.listAll().map(items->items.stream().map(this::toResponse).toList());}
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Date;
+import java.util.List;
+
+@ApplicationScoped
+@WithTransaction
+public class FundoCaixaService {
+
+    @Inject
+    FundoCaixaRepository repository;
+
+    @Inject
+    MovimentacaoFinanceiraService movimentacaoFinanceiraService;
+
+    @Inject
+    SangriaService sangriaService;
+
+    @Inject
+    CaixaService caixaService;
+
+    @Inject
+    ConfiguracaoCaixaService configuracaoCaixaService;
+
+    @Inject
+    ImpressoraService impressoraService;
+
+    public Uni<List<FundoCaixaResponse>> list() {
+        return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
+    }
 
     public Uni<PagedResponse<FundoCaixaResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
@@ -13,114 +57,254 @@ import io.smallrye.mutiny.Uni;
                 .onItem().transformToUni(items -> repository.count()
                         .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
- public Uni<FundoCaixaResponse> find(Long id){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("FundoCaixa not found")).map(this::toResponse);} public Uni<FundoCaixaResponse> create(FundoCaixaRequest r){var e=new FundoCaixa();apply(e,r);return repository.persist(e).replaceWith(()->toResponse(e));} public Uni<FundoCaixaResponse> update(Long id,FundoCaixaRequest r){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("FundoCaixa not found")).invoke(e->apply(e,r)).map(this::toResponse);} public Uni<Void> delete(Long id){return repository.deleteById(id).onItem().transformToUni(deleted->deleted?Uni.createFrom().voidItem():Uni.createFrom().failure(new NotFoundException("FundoCaixa not found")));} private void apply(FundoCaixa e,FundoCaixaRequest r){e.nome=r.nome();e.dadosJson=r.dadosJson();} private FundoCaixaResponse toResponse(FundoCaixa e){return new FundoCaixaResponse(e.id,e.nome,e.dadosJson);} 
 
-    // Migrado de FundoCaixaController.verificarSenhaResponsavel (src/main/java/br/com/sol7/olimpio/control/controllers/financeiro/FundoCaixaController.java:160, camada controller)
-    // Logica original (adaptar):
-    // private boolean verificarSenhaResponsavel() {
-    //         try {
-    //             if (configuracaoCaixa == null) {
-    //                 MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.INFO, "global.warning", "validation", "Necess\u00E1rio configurar o caixa para esse usu\u00E1rio");
-    //                 return false;
-    //             }
-    // 
-    //             if (!ObjectUtil.nullOrEmpty(usuarioService.findByLoginAndSenha(configuracaoCaixa.getResponsavel().getLogin(), senha))) {
-    //                 return true;
-    //             } else {
-    //                 MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.INFO, "global.warning", "validation", "Senha inválida, digite sua senha do autorizador " + configuracaoCaixa.getRespons ...
-    // // ... (truncado, ver fonte original)
-    // Obs: depende do microservico basico (usuarioService) e de estado de UI (configuracaoCaixa/senha do controller JSF)
+    public Uni<FundoCaixaResponse> find(Long id) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("FundoCaixa not found")).map(this::toResponse);
+    }
+
+    public Uni<FundoCaixaResponse> create(FundoCaixaRequest r) {
+        var e = new FundoCaixa();
+        apply(e, r);
+        return repository.persist(e).replaceWith(() -> toResponse(e));
+    }
+
+    public Uni<FundoCaixaResponse> update(Long id, FundoCaixaRequest r) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("FundoCaixa not found")).invoke(e -> apply(e, r)).map(this::toResponse);
+    }
+
+    public Uni<Void> delete(Long id) {
+        return repository.deleteById(id).onItem().transformToUni(deleted -> deleted ? Uni.createFrom().voidItem() : Uni.createFrom().failure(new NotFoundException("FundoCaixa not found")));
+    }
+
+    private void apply(FundoCaixa e, FundoCaixaRequest r) {
+        e.nome = r.nome();
+        e.dadosJson = r.dadosJson();
+    }
+
+    private FundoCaixaResponse toResponse(FundoCaixa e) {
+        return new FundoCaixaResponse(e.id, e.nome, e.dadosJson);
+    }
+
+    // Migrado de FundoCaixaController.verificarSenhaResponsavel
+    public Uni<Boolean> verificarSenhaResponsavel(Long configuracaoCaixaId, String senha) {
+        if (configuracaoCaixaId == null) {
+            return Uni.createFrom().item(false);
+        }
+        return configuracaoCaixaService.find(configuracaoCaixaId)
+                .onItem().transformToUni(config -> {
+                    if (config.responsavelId() == null) {
+                        return Uni.createFrom().item(false);
+                    }
+                    // TODO: Chamar microserviço básico para verificar senha
+                    // return usuarioService.verificarSenha(config.responsavelId(), senha);
+                    return Uni.createFrom().item(false);
+                });
+    }
+
+    // Versão sem parâmetros para compatibilidade com controller
     public Uni<Boolean> verificarSenhaResponsavel() {
         return Uni.createFrom().item(false);
     }
 
-
-    // Migrado de FundoCaixaController.buscarMovimentacoes (src/main/java/br/com/sol7/olimpio/control/controllers/financeiro/FundoCaixaController.java:426, camada controller)
-    // Observacao: parametro event: era ToggleEvent no legado
-    // Logica original (adaptar):
-    // public void buscarMovimentacoes(ToggleEvent event) {
-    //         if (event.getVisibility() == Visibility.VISIBLE) {
-    //             Caixa caixa = (Caixa) event.getData();
-    //             this.caixa = caixa;
-    //             detalhesCaixa = movimentacaoFinanceiraService.buscarMovimentacaoCaixaEntrada(caixa);
-    //             List<Sangria> listSangria = sangriaService.buscarSangriaCaixa(caixa);
-    // 
-    //             for (Sangria s : listSangria) {
-    //                 MovimentacaoFinanceira mov = new MovimentacaoFinanceira();
-    //                 mov.setDataMovimento(s.getData());
-    //                 mov.setValor(s.getValor());
-    //                 mov.setHistorico("Sangria");
-    // // ... (truncado, ver fonte original)
-    // Obs: depende de MovimentacaoFinanceiraService/SangriaService (entidades nao portadas neste microservico) e de estado de UI (ToggleEvent)
-    public Uni<Void> buscarMovimentacoes(String event) {
-        return Uni.createFrom().voidItem();
+    // Migrado de FundoCaixaController.fecharCaixa
+    public Uni<CaixaResponse> fecharCaixa(Long caixaId, Long configuracaoCaixaId, String senha) {
+        return verificarSenhaResponsavel(configuracaoCaixaId, senha)
+                .chain(valido -> {
+                    if (!valido) {
+                        return Uni.createFrom().failure(new IllegalArgumentException("Senha do responsável inválida"));
+                    }
+                    return caixaService.fecharCaixa(caixaId);
+                });
     }
 
+    // Migrado de FundoCaixaController.abrirCaixa
+    public Uni<CaixaResponse> abrirCaixa(Long caixaId, Long configuracaoCaixaId, String senha) {
+        return verificarSenhaResponsavel(configuracaoCaixaId, senha)
+                .chain(valido -> {
+                    if (!valido) {
+                        return Uni.createFrom().failure(new IllegalArgumentException("Senha do responsável inválida"));
+                    }
+                    return caixaService.abrirCaixa(caixaId);
+                });
+    }
 
-    // Migrado de FundoCaixaController.imprimirSegundaVia (src/main/java/br/com/sol7/olimpio/control/controllers/financeiro/FundoCaixaController.java:476, camada controller)
-    // Logica original (adaptar):
-    // private void imprimirSegundaVia() {
-    //         imprimirComprovantePagamento(movimentacaoFinanceira);
-    //         ControleImpressao controleImpressao = new ControleImpressao();
-    //         controleImpressao.setData(new Date());
-    //         controleImpressao.setMovimentacaoFinanceira(movimentacaoFinanceira);
-    //         controleImpressao.setUsuario(usuarioLogadoController.getUsuario());
-    //         controleImpressaoService.save(controleImpressao);
-    //         // controleImpressaoService.fechamentoCaixaAbertos(caixa, movimentacaoFinanceira, configuracaoCaixa);
-    //         if (!caixa.getImpressora().isManual()) {
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.SAVE, "global.sucess", "validation", "Segund ...
-    // // ... (truncado, ver fonte original)
-    // Obs: metodo de UI (impressao) que depende de ControleImpressaoService (nao portado neste microservico)
+    // Migrado de FundoCaixaController.registrarSangriaSegundaVia
+    public Uni<SangriaResponse> registrarSangria(Long caixaId, BigDecimal valor) {
+        var request = new SangriaRequest(caixaId, new Date(), valor);
+        return sangriaService.create(request);
+    }
+
+    // Migrado de FundoCaixaController.relatorioMov
+    public Uni<CaixaMovimentacaoResumo> gerarRelatorioMovimentacao(Long caixaId) {
+        return caixaService.find(caixaId)
+                .chain(caixa -> movimentacaoFinanceiraService.buscarPorCaixa(caixaId)
+                        .chain(movs -> sangriaService.buscarPorCaixa(caixaId)
+                                .chain(sangrias -> caixaService.calcularTotaisCaixa(caixaId)
+                                        .map(totais -> {
+                                            float totalCartao = 0;
+                                            float totalDinheiro = 0;
+                                            float totalCheque = 0;
+                                            float totalBoleto = 0;
+                                            float totalTransferencia = 0;
+                                            float totalDeposito = 0;
+                                            float totalSangria = 0;
+                                            float troco = 0;
+
+                                            for (MovimentacaoFinanceiraResponse mov : movs) {
+                                                // Simplificado: trata todas como entradas (buscarPorCaixa retorna todas)
+                                                switch (mov.tipoPagamento()) {
+                                                    case CARTAO -> totalCartao += mov.valor().floatValue()
+                                                        ;
+                                                    case DINHEIRO -> totalDinheiro += mov.valor().floatValue()
+                                                        ;
+                                                    case CHEQUE -> totalCheque += mov.valor().floatValue()
+                                                        ;
+                                                    case BOLETO -> totalBoleto += mov.valor().floatValue()
+                                                        ;
+                                                    case TRANFERENCIA -> totalTransferencia += mov.valor().floatValue()
+                                                        ;
+                                                    case DEPOSITO -> totalDeposito += mov.valor().floatValue()
+                                                        ;
+                                                }
+                                                troco += mov.valorTroco().floatValue();
+                                            }
+
+                                            for (SangriaResponse s : sangrias) {
+                                                totalSangria += s.valor().floatValue();
+                                            }
+
+                                            totalDinheiro -= troco;
+                                            float fundoCaixa = caixa.fundoCaixa().floatValue();
+                                            float totalDinheiroCaixa = ((totalDinheiro + fundoCaixa) - troco) - totalSangria;
+
+                                            return new CaixaMovimentacaoResumo(
+                                                    caixa.id(),
+                                                    caixa.unidadeId(),
+                                                    caixa.fundoCaixa(),
+                                                    BigDecimal.valueOf(totalCartao).setScale(2, RoundingMode.HALF_DOWN),
+                                                    BigDecimal.valueOf(totalDinheiro).setScale(2, RoundingMode.HALF_DOWN),
+                                                    BigDecimal.valueOf(totalCheque).setScale(2, RoundingMode.HALF_DOWN),
+                                                    BigDecimal.valueOf(totalBoleto).setScale(2, RoundingMode.HALF_DOWN),
+                                                    BigDecimal.valueOf(totalTransferencia).setScale(2, RoundingMode.HALF_DOWN),
+                                                    BigDecimal.valueOf(totalDeposito).setScale(2, RoundingMode.HALF_DOWN),
+                                                    BigDecimal.valueOf(totalSangria).setScale(2, RoundingMode.HALF_DOWN),
+                                                    BigDecimal.valueOf(totalDinheiroCaixa).setScale(2, RoundingMode.HALF_DOWN),
+                                                    BigDecimal.valueOf(troco).setScale(2, RoundingMode.HALF_DOWN),
+                                                    movs,
+                                                    sangrias
+                                            );
+                                        }))));
+    }
+
+    // Migrado de FundoCaixaController.buscarMovimentacoes
+    public Uni<List<MovimentacaoFinanceiraResponse>> buscarMovimentacoes(Long caixaId) {
+        return movimentacaoFinanceiraService.buscarMovimentacaoCaixaEntrada(caixaId)
+                .chain(entradas -> sangriaService.buscarPorCaixa(caixaId)
+                        .map(sangrias -> {
+                            List<MovimentacaoFinanceiraResponse> sangriasComoMov = sangrias.stream().map(s ->
+                                    new MovimentacaoFinanceiraResponse(
+                                            s.id(), s.data(), "Sangria", null, s.valor(), null,
+                                            null, null, BigDecimal.ZERO, s.caixaId(), 3L, null, null,
+                                            TipoPagamento.DINHEIRO, null, null, BigDecimal.ZERO, BigDecimal.ZERO
+                                    )
+                            ).toList();
+
+                            entradas.addAll(sangriasComoMov);
+                            return entradas;
+                        }));
+    }
+
+    // Migrado de FundoCaixaController.imprimirSegundaVia
+    public Uni<Void> imprimirSegundaVia(Long movimentacaoFinanceiraId, Long usuarioId) {
+        return movimentacaoFinanceiraService.find(movimentacaoFinanceiraId)
+                .chain(mov -> {
+                    ComprovantePagamento comprovante = gerarComprovantePagamento(mov);
+                    return impressoraService.imprimirComprovante(comprovante)
+                            .chain(v -> {
+                                // TODO: Registrar controle de impressão quando serviço existir
+                                return Uni.createFrom().voidItem();
+                            });
+                });
+    }
+
+    // Versão sem parâmetros para compatibilidade com controller
     public Uni<Void> imprimirSegundaVia() {
         return Uni.createFrom().voidItem();
     }
 
-
-    // Migrado de FundoCaixaController.buscarCaixa (src/main/java/br/com/sol7/olimpio/control/controllers/financeiro/FundoCaixaController.java:491, camada controller)
-    // Observacao: parametro movimentacaoFinanceiratempId: era MovimentacaoFinanceira (referencia por id)
-    // Logica original (adaptar):
-    // public void buscarCaixa(MovimentacaoFinanceira movimentacaoFinanceiratemp) {
-    //         movimentacaoFinanceira = movimentacaoFinanceiratemp;
-    //         this.caixa = movimentacaoFinanceira.getCaixa();
-    //         configuracaoCaixa = configuracaoCaixaService.buscarConfiguracaoComUnidadeUsuario(caixa.getUsuario(), caixa.getUnidade());
-    //         //  imprimirSegundaVia();
-    //     }
-    // Obs: depende de MovimentacaoFinanceira (nao portado neste microservico) e de estado de UI
-    public Uni<Void> buscarCaixa(Long movimentacaoFinanceiratempId) {
-        return Uni.createFrom().voidItem();
+    // Migrado de FundoCaixaController.buscarCaixa
+    public Uni<CaixaComConfiguracao> buscarCaixaPorMovimentacao(Long movimentacaoFinanceiraId) {
+        return movimentacaoFinanceiraService.find(movimentacaoFinanceiraId)
+                .chain(mov -> caixaService.find(mov.caixaId())
+                        .chain(caixa -> configuracaoCaixaService.buscarConfiguracaoComUnidadeUsuario(caixa.usuarioId(), caixa.unidadeId())
+                                .chain(configId -> configuracaoCaixaService.find(configId))
+                                .map(config -> new CaixaComConfiguracao(caixa, config))));
     }
 
+    // Migrado de FundoCaixaController.verificarCotaImpressao
+    public Uni<Boolean> verificarCotaImpressao(Long movimentacaoFinanceiraId, Long usuarioId) {
+        return movimentacaoFinanceiraService.find(movimentacaoFinanceiraId)
+                .chain(mov -> {
+                    if (mov.caixaId() == null) {
+                        return Uni.createFrom().item(false);
+                    }
+                    // TODO: Implementar controle de impressão quando serviço existir
+                    return Uni.createFrom().item(false);
+                });
+    }
 
-    // Migrado de FundoCaixaController.verificarCotaImpressao (src/main/java/br/com/sol7/olimpio/control/controllers/financeiro/FundoCaixaController.java:498, camada controller)
-    // Observacao: parametro movimentacaoFinanceiraId: era MovimentacaoFinanceira (referencia por id)
-    // Logica original (adaptar):
-    // public boolean verificarCotaImpressao(MovimentacaoFinanceira movimentacaoFinanceira) {
-    //         if (movimentacaoFinanceira.getCaixa() != null) {
-    //             Integer listaControle = Math.toIntExact(controleImpressaoService.verificarControle(movimentacaoFinanceira.getCaixa(), movimentacaoFinanceira));
-    //             if (ObjectUtil.nullOrEmpty(listaControle)) {
-    //                 listaControle = 0;
-    //             }
-    //             configuracaoCaixa = configuracaoCaixaService.buscarConfiguracaoComUnidadeUsuario(usuarioLogadoController.getUsuario(), movimentacaoFinanceira.getCaixa().getUnidade());
-    //             if (configuracaoCaixa != null) {
-    //                 this.caixa = movimentacaoFinanceira.getCaixa();
-    //       ...
-    // // ... (truncado, ver fonte original)
-    // Obs: depende de ControleImpressaoService/ConfiguracaoCaixaService e de estado de UI (usuario logado)
+    // Versão compatível com controller (apenas movimentacaoFinanceiraId)
     public Uni<Boolean> verificarCotaImpressao(Long movimentacaoFinanceiraId) {
-        return Uni.createFrom().item(false);
+        return verificarCotaImpressao(movimentacaoFinanceiraId, null);
     }
 
+    // Migrado de FundoCaixaController.imprimirComprovantePagamento
+    private ComprovantePagamento gerarComprovantePagamento(MovimentacaoFinanceiraResponse mov) {
+        String valorStr = mov.valor().setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",");
+        String descontoStr = mov.desconto().setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",");
+        String multaJurosStr = mov.multaJuros().setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",");
+        String lancamentoStr = mov.parcelaId() != null ? mov.parcelaId().toString() : mov.id().toString();
+        String emissaoStr = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date());
 
-    // Migrado de FundoCaixaController.imprimirComprovantePagamento (src/main/java/br/com/sol7/olimpio/control/controllers/financeiro/FundoCaixaController.java:523, camada controller)
-    // Observacao: parametro movimentacaoFinanceiraId: era MovimentacaoFinanceira (referencia por id)
-    // Logica original (adaptar):
-    // private void imprimirComprovantePagamento(MovimentacaoFinanceira movimentacaoFinanceira) {
-    //         ComprovantePagamento comprovantePagamento = atributosCompovante(movimentacaoFinanceira);
-    //         impressoraController.imprimeComprovante(comprovantePagamento);
-    //     }
-    // Obs: metodo de UI (impressao via ImpressoraController) e depende de MovimentacaoFinanceira (nao portado neste microservico)
-    public Uni<Void> imprimirComprovantePagamento(Long movimentacaoFinanceiraId) {
-        return Uni.createFrom().voidItem();
+        return new ComprovantePagamento(
+                null, null, null, null, null,
+                descontoStr, multaJurosStr, multaJurosStr, lancamentoStr, null,
+                emissaoStr, valorStr, valorStr, null, null,
+                null, null, null, null, null, null
+        );
     }
 
+    // Records para respostas
+    public record CaixaMovimentacaoResumo(
+            Long caixaId,
+            Long unidadeId,
+            BigDecimal fundoCaixa,
+            BigDecimal totalCartao,
+            BigDecimal totalDinheiro,
+            BigDecimal totalCheque,
+            BigDecimal totalBoleto,
+            BigDecimal totalTransferencia,
+            BigDecimal totalDeposito,
+            BigDecimal totalSangria,
+            BigDecimal totalDinheiroCaixa,
+            BigDecimal troco,
+            List<MovimentacaoFinanceiraResponse> movimentacoes,
+            List<SangriaResponse> sangrias
+    ) {
+    }
+
+    public record CaixaComConfiguracao(CaixaResponse caixa, ConfiguracaoCaixaResponse configuracao) {
+    }
+
+    public record ComprovantePagamento(
+            String aluno, String atendente, String codigo, String contrato, String curso,
+            String desconto, String multa, String juros, String lancamento, String pagamento,
+            String emissao, String total, String valor, String vencimento, String unidade,
+            String enderecoTelefone, String turma, String responsavel, String parcela,
+            String formasPagamento, String caixa
+    ) {
+        public ComprovantePagamento() {
+            this(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        }
+    }
 }

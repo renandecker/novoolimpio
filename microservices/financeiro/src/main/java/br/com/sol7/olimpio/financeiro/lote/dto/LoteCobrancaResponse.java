@@ -7,13 +7,18 @@ public final class LoteCobrancaResponse {
     private LoteCobrancaResponse() {
     }
 
-    public record ModeloEmail(Long id, String descricao, String assunto, String mensagem) {}
+    public record ModeloEmail(Long id, String descricao, String assunto, String mensagem) {
+    }
 
-    public record Aluno(Long contratoId, String aluno, String contratante, String email) {}
+    public record Aluno(Long contratoId, String aluno, String contratante, String email) {
+    }
 
-    public record Resumo(Integer processados, Integer semEmail, String assunto) {}
+    public record Resumo(Integer processados, Integer semEmail, String assunto) {
+    }
 
-    public record ResultadoLigacao(Integer processados) {}
+    public record ResultadoLigacao(Integer processados) {
+    }
 
-    public record ResumoAlunos(List<Aluno> alunos, Integer total) {}
+    public record ResumoAlunos(List<Aluno> alunos, Integer total) {
+    }
 }

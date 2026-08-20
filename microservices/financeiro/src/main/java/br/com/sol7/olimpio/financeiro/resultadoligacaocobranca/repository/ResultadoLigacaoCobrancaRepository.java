@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.financeiro.resultadoligacaocobranca;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class ResultadoLigacaoCobrancaRepository implements PanacheRepository<ResultadoLigacaoCobranca> {
+
+@ApplicationScoped
+public class ResultadoLigacaoCobrancaRepository implements PanacheRepository<ResultadoLigacaoCobranca> {
 
     // Migrado de ResultadoLigacaoCobrancaRepository.buscarResultadoLigacaoCobrancaComEtapas (legado) - HQL original:
     // select r from ResultadoLigacaoCobranca r left join fetch r.etapasCobrancas  where r = ?1
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ResultadoLigacaoCobranca>> buscarResultadoLigacaoCobrancaComEtapas(Long resultadoLigacaoCobrancaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_RESULTADO_LIGACAO_COBRANCA_COM_ETAPAS, ResultadoLigacaoCobranca.class)
-                    .setParameter(1, resultadoLigacaoCobrancaId)
-                    .getResultList());
+                        .setParameter(1, resultadoLigacaoCobrancaId)
+                        .getResultList());
     }
 
 
@@ -25,8 +30,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ResultadoLigacaoCobranca>> listarResultadoLigacaoCobrancaLimite(Long etapasCobrancaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_RESULTADO_LIGACAO_COBRANCA_LIMITE, ResultadoLigacaoCobranca.class)
-                    .setParameter(1, etapasCobrancaId)
-                    .getResultList());
+                        .setParameter(1, etapasCobrancaId)
+                        .getResultList());
     }
 
 
@@ -38,9 +43,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ResultadoLigacaoCobranca>> autoCompleteComEtapa(String query, Long etapasCobrancaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_ETAPA, ResultadoLigacaoCobranca.class)
-                    .setParameter(1, query)
-                    .setParameter(2, etapasCobrancaId)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, etapasCobrancaId)
+                        .getResultList());
     }
 
 
@@ -52,8 +57,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ResultadoLigacaoCobranca>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, ResultadoLigacaoCobranca.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 }

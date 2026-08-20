@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.campanhanegociacao;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class CampanhaNegociacaoService {
 
-    @Inject CampanhaNegociacaoRepository repository;
+    @Inject
+    CampanhaNegociacaoRepository repository;
 
     public Uni<List<CampanhaNegociacaoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,19 @@ public class CampanhaNegociacaoService {
                         : Uni.createFrom().failure(new NotFoundException("CampanhaNegociacao not found")));
     }
 
-    private void apply(CampanhaNegociacao e, CampanhaNegociacaoRequest r) { e.descricao = r.descricao(); e.diaPagamentoAntecipado = r.diaPagamentoAntecipado(); e.diasParaVencer = r.diasParaVencer(); e.dia = r.dia(); e.mes = r.mes(); e.parcela = r.parcela(); e.ano = r.ano(); e.valor = r.valor(); e.percentual = r.percentual(); e.ativo = r.ativo(); e.dataFim = r.dataFim(); }
+    private void apply(CampanhaNegociacao e, CampanhaNegociacaoRequest r) {
+        e.descricao = r.descricao();
+        e.diaPagamentoAntecipado = r.diaPagamentoAntecipado();
+        e.diasParaVencer = r.diasParaVencer();
+        e.dia = r.dia();
+        e.mes = r.mes();
+        e.parcela = r.parcela();
+        e.ano = r.ano();
+        e.valor = r.valor();
+        e.percentual = r.percentual();
+        e.ativo = r.ativo();
+        e.dataFim = r.dataFim();
+    }
 
     private CampanhaNegociacaoResponse toResponse(CampanhaNegociacao e) {
         return new CampanhaNegociacaoResponse(e.id, e.descricao, e.diaPagamentoAntecipado, e.diasParaVencer, e.dia, e.mes, e.parcela, e.ano, e.valor, e.percentual, e.ativo, e.dataFim);

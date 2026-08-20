@@ -1,9 +1,10 @@
-package br.com.sol7.olimpio.financeiro.caixa;
+package br.com.sol7.olimpio.financeiro.caixa.entity;
 
 import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 import java.util.Date;
 

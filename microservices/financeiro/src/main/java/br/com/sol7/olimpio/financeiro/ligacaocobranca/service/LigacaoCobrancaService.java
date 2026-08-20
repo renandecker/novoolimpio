@@ -1,17 +1,21 @@
 package br.com.sol7.olimpio.financeiro.ligacaocobranca;
+
 import br.com.sol7.olimpio.shared.PagedResponse;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
+import java.util.Date;
 import java.util.List;
 
 @ApplicationScoped
 @io.quarkus.hibernate.reactive.panache.common.WithTransaction
 public class LigacaoCobrancaService {
 
-    @Inject LigacaoCobrancaRepository repository;
+    @Inject
+    LigacaoCobrancaRepository repository;
 
     public Uni<List<LigacaoCobrancaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -69,10 +73,33 @@ public class LigacaoCobrancaService {
     }
 
     private void apply(LigacaoCobranca e, LigacaoCobrancaRequest r) {
-        e.usuarioId = r.usuarioId(); e.contratoId = r.contratoId(); e.dataInicial = r.dataInicial(); e.dataFinal = r.dataFinal(); e.resultadoCobrancaId = r.resultadoCobrancaId(); e.telefone = r.telefone(); e.observacao = r.observacao(); e.compromissoId = r.compromissoId(); e.ativo = r.ativo(); e.etapasCobrancaId = r.etapasCobrancaId(); e.qtdeParcela = r.qtdeParcela(); e.valor = r.valor();
+        e.usuarioId = r.usuarioId();
+        e.contratoId = r.contratoId();
+        e.dataInicial = r.dataInicial();
+        e.dataFinal = r.dataFinal();
+        e.resultadoCobrancaId = r.resultadoCobrancaId();
+        e.telefone = r.telefone();
+        e.observacao = r.observacao();
+        e.compromissoId = r.compromissoId();
+        e.ativo = r.ativo();
+        e.etapasCobrancaId = r.etapasCobrancaId();
+        e.qtdeParcela = r.qtdeParcela();
+        e.valor = r.valor();
     }
 
     private LigacaoCobrancaResponse toResponse(LigacaoCobranca e) {
         return new LigacaoCobrancaResponse(e.id, e.usuarioId, e.contratoId, e.dataInicial, e.dataFinal, e.resultadoCobrancaId, e.telefone, e.observacao, e.compromissoId, e.ativo, e.etapasCobrancaId, e.qtdeParcela, e.valor);
+    }
+
+    // Migrado de LigacaoCobrancaService.cobradasPessoas (legado)
+    // Retorna IDs de pessoas/contratos que foram cobradas em uma data
+    public Uni<List<Long>> buscarPessoasCobradas(Long unidadeId, Date data) {
+        return repository.buscarPessoasCobradas(unidadeId, data);
+    }
+
+    // Migrado de LigacaoCobrancaService.quantidadeLigacoesRealizadasPessoa (legado)
+    // Conta ligações realizadas para uma pessoa em uma data
+    public Uni<Long> contarLigacoesRealizadasPessoa(Long unidadeId, Date data, Long pessoaId) {
+        return repository.contarLigacoesRealizadasPessoa(unidadeId, data, pessoaId);
     }
 }

@@ -1,8 +1,23 @@
 package br.com.sol7.olimpio.financeiro.codigoverificador;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
-import io.smallrye.mutiny.Uni; import jakarta.enterprise.context.ApplicationScoped; import jakarta.inject.Inject; import jakarta.ws.rs.NotFoundException; import java.util.List;
-@ApplicationScoped @WithTransaction public class CodigoVerificadorService { @Inject CodigoVerificadorRepository repository; public Uni<List<CodigoVerificadorResponse>> list(){return repository.listAll().map(items->items.stream().map(this::toResponse).toList());}
+import io.smallrye.mutiny.Uni;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
+
+import java.util.List;
+
+@ApplicationScoped
+@WithTransaction
+public class CodigoVerificadorService {
+    @Inject
+    CodigoVerificadorRepository repository;
+
+    public Uni<List<CodigoVerificadorResponse>> list() {
+        return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
+    }
 
     public Uni<PagedResponse<CodigoVerificadorResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
@@ -11,4 +26,31 @@ import io.smallrye.mutiny.Uni; import jakarta.enterprise.context.ApplicationScop
                 .onItem().transformToUni(items -> repository.count()
                         .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
- public Uni<CodigoVerificadorResponse> find(Long id){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("CodigoVerificador not found")).map(this::toResponse);} public Uni<CodigoVerificadorResponse> create(CodigoVerificadorRequest r){var e=new CodigoVerificador();apply(e,r);return repository.persist(e).replaceWith(()->toResponse(e));} public Uni<CodigoVerificadorResponse> update(Long id,CodigoVerificadorRequest r){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("CodigoVerificador not found")).invoke(e->apply(e,r)).map(this::toResponse);} public Uni<Void> delete(Long id){return repository.deleteById(id).onItem().transformToUni(deleted->deleted?Uni.createFrom().voidItem():Uni.createFrom().failure(new NotFoundException("CodigoVerificador not found")));} private void apply(CodigoVerificador e,CodigoVerificadorRequest r){e.nome=r.nome();e.dadosJson=r.dadosJson();} private CodigoVerificadorResponse toResponse(CodigoVerificador e){return new CodigoVerificadorResponse(e.id,e.nome,e.dadosJson);} }
+
+    public Uni<CodigoVerificadorResponse> find(Long id) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("CodigoVerificador not found")).map(this::toResponse);
+    }
+
+    public Uni<CodigoVerificadorResponse> create(CodigoVerificadorRequest r) {
+        var e = new CodigoVerificador();
+        apply(e, r);
+        return repository.persist(e).replaceWith(() -> toResponse(e));
+    }
+
+    public Uni<CodigoVerificadorResponse> update(Long id, CodigoVerificadorRequest r) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("CodigoVerificador not found")).invoke(e -> apply(e, r)).map(this::toResponse);
+    }
+
+    public Uni<Void> delete(Long id) {
+        return repository.deleteById(id).onItem().transformToUni(deleted -> deleted ? Uni.createFrom().voidItem() : Uni.createFrom().failure(new NotFoundException("CodigoVerificador not found")));
+    }
+
+    private void apply(CodigoVerificador e, CodigoVerificadorRequest r) {
+        e.nome = r.nome();
+        e.dadosJson = r.dadosJson();
+    }
+
+    private CodigoVerificadorResponse toResponse(CodigoVerificador e) {
+        return new CodigoVerificadorResponse(e.id, e.nome, e.dadosJson);
+    }
+}

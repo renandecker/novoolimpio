@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.resultadoligacaocobranca;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ResultadoLigacaoCobrancaService {
 
-    @Inject ResultadoLigacaoCobrancaRepository repository;
+    @Inject
+    ResultadoLigacaoCobrancaRepository repository;
 
     public Uni<List<ResultadoLigacaoCobrancaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,12 @@ public class ResultadoLigacaoCobrancaService {
                         : Uni.createFrom().failure(new NotFoundException("ResultadoLigacaoCobranca not found")));
     }
 
-    private void apply(ResultadoLigacaoCobranca e, ResultadoLigacaoCobrancaRequest r) { e.descricao = r.descricao(); e.tela = r.tela(); e.ordem = r.ordem(); e.diasRetorno = r.diasRetorno(); }
+    private void apply(ResultadoLigacaoCobranca e, ResultadoLigacaoCobrancaRequest r) {
+        e.descricao = r.descricao();
+        e.tela = r.tela();
+        e.ordem = r.ordem();
+        e.diasRetorno = r.diasRetorno();
+    }
 
     private ResultadoLigacaoCobrancaResponse toResponse(ResultadoLigacaoCobranca e) {
         return new ResultadoLigacaoCobrancaResponse(e.id, e.descricao, e.tela, e.ordem, e.diasRetorno);
@@ -94,7 +102,7 @@ public class ResultadoLigacaoCobrancaService {
     //         return getResultadoLigacaoCobrancaRepository().buscarResultadoLigacaoCobrancaComEtapas(resultadoLigacaoCobranca);
     //     }
     public Uni<Long> buscarResultadoLigacaoCobrancaComEtapas(Long resultadoLigacaoCobrancaId) {
-                return repository.buscarResultadoLigacaoCobrancaComEtapas(resultadoLigacaoCobrancaId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarResultadoLigacaoCobrancaComEtapas(resultadoLigacaoCobrancaId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -106,7 +114,7 @@ public class ResultadoLigacaoCobrancaService {
     //         return getResultadoLigacaoCobrancaRepository().autoCompleteComEtapa(query.toLowerCase().trim(), etapasCobranca, new PageRequest(0, 20)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteComEtapa2(String query, Long etapasCobrancaId) {
-                return repository.autoCompleteComEtapa(query.toLowerCase().trim(), etapasCobrancaId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoCompleteComEtapa(query.toLowerCase().trim(), etapasCobrancaId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

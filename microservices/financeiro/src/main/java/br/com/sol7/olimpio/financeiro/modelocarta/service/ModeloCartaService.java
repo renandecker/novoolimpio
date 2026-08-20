@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.modelocarta;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ModeloCartaService {
 
-    @Inject ModeloCartaRepository repository;
+    @Inject
+    ModeloCartaRepository repository;
 
     public Uni<List<ModeloCartaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,10 @@ public class ModeloCartaService {
                         : Uni.createFrom().failure(new NotFoundException("ModeloCarta not found")));
     }
 
-    private void apply(ModeloCarta e, ModeloCartaRequest r) { e.descricao = r.descricao(); e.localDocumento = r.localDocumento(); }
+    private void apply(ModeloCarta e, ModeloCartaRequest r) {
+        e.descricao = r.descricao();
+        e.localDocumento = r.localDocumento();
+    }
 
     private ModeloCartaResponse toResponse(ModeloCarta e) {
         return new ModeloCartaResponse(e.id, e.descricao, e.localDocumento);

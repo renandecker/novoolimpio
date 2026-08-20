@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.configuracaoparcela;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ConfiguracaoParcelaService {
 
-    @Inject ConfiguracaoParcelaRepository repository;
+    @Inject
+    ConfiguracaoParcelaRepository repository;
 
     public Uni<List<ConfiguracaoParcelaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,40 @@ public class ConfiguracaoParcelaService {
                         : Uni.createFrom().failure(new NotFoundException("ConfiguracaoParcela not found")));
     }
 
-    private void apply(ConfiguracaoParcela e, ConfiguracaoParcelaRequest r) { e.unidadeId = r.unidadeId(); e.diasValidadePreCancelamento = r.diasValidadePreCancelamento(); e.vezesPreCancelamento = r.vezesPreCancelamento(); e.jurosReparcela = r.jurosReparcela(); e.multaReparcela = r.multaReparcela(); e.descontoReparcela = r.descontoReparcela(); e.percDescJurMul = r.percDescJurMul(); e.percDescValor = r.percDescValor(); e.percValorMinReparcela = r.percValorMinReparcela(); e.qtdeParcCancelamento = r.qtdeParcCancelamento(); e.prazoParcEntrada = r.prazoParcEntrada(); e.prazoParcSegunda = r.prazoParcSegunda(); e.prazoReparcEntrada = r.prazoReparcEntrada(); e.prazoReparcSegunda = r.prazoReparcSegunda(); e.qtdeReaprcelamento = r.qtdeReaprcelamento(); e.qtdePacelas = r.qtdePacelas(); e.qtdeReparcValorManual = r.qtdeReparcValorManual(); e.percParcelaValor = r.percParcelaValor(); e.percParcelaAlterar = r.percParcelaAlterar(); e.perfilEditarParcelasId = r.perfilEditarParcelasId(); e.perfilDescParcelasId = r.perfilDescParcelasId(); e.templateReparcelamento = r.templateReparcelamento(); e.templateCancelamento = r.templateCancelamento(); e.templateCancelamentoPrevisao = r.templateCancelamentoPrevisao(); e.templateCancelamentoCurso = r.templateCancelamentoCurso(); e.percMultaCancelamento = r.percMultaCancelamento(); e.qtdeDiasCancelamentoParcela = r.qtdeDiasCancelamentoParcela(); e.percMinimoCancelamento = r.percMinimoCancelamento(); e.tipoModeloCancelamentoCurso = r.tipoModeloCancelamentoCurso(); e.tipoModeloCancelamento = r.tipoModeloCancelamento(); e.tipoModeloCancelamentoPrecisao = r.tipoModeloCancelamentoPrecisao(); e.tipoModeloCancelamentoReparcelamento = r.tipoModeloCancelamentoReparcelamento(); }
+    private void apply(ConfiguracaoParcela e, ConfiguracaoParcelaRequest r) {
+        e.unidadeId = r.unidadeId();
+        e.diasValidadePreCancelamento = r.diasValidadePreCancelamento();
+        e.vezesPreCancelamento = r.vezesPreCancelamento();
+        e.jurosReparcela = r.jurosReparcela();
+        e.multaReparcela = r.multaReparcela();
+        e.descontoReparcela = r.descontoReparcela();
+        e.percDescJurMul = r.percDescJurMul();
+        e.percDescValor = r.percDescValor();
+        e.percValorMinReparcela = r.percValorMinReparcela();
+        e.qtdeParcCancelamento = r.qtdeParcCancelamento();
+        e.prazoParcEntrada = r.prazoParcEntrada();
+        e.prazoParcSegunda = r.prazoParcSegunda();
+        e.prazoReparcEntrada = r.prazoReparcEntrada();
+        e.prazoReparcSegunda = r.prazoReparcSegunda();
+        e.qtdeReaprcelamento = r.qtdeReaprcelamento();
+        e.qtdePacelas = r.qtdePacelas();
+        e.qtdeReparcValorManual = r.qtdeReparcValorManual();
+        e.percParcelaValor = r.percParcelaValor();
+        e.percParcelaAlterar = r.percParcelaAlterar();
+        e.perfilEditarParcelasId = r.perfilEditarParcelasId();
+        e.perfilDescParcelasId = r.perfilDescParcelasId();
+        e.templateReparcelamento = r.templateReparcelamento();
+        e.templateCancelamento = r.templateCancelamento();
+        e.templateCancelamentoPrevisao = r.templateCancelamentoPrevisao();
+        e.templateCancelamentoCurso = r.templateCancelamentoCurso();
+        e.percMultaCancelamento = r.percMultaCancelamento();
+        e.qtdeDiasCancelamentoParcela = r.qtdeDiasCancelamentoParcela();
+        e.percMinimoCancelamento = r.percMinimoCancelamento();
+        e.tipoModeloCancelamentoCurso = r.tipoModeloCancelamentoCurso();
+        e.tipoModeloCancelamento = r.tipoModeloCancelamento();
+        e.tipoModeloCancelamentoPrecisao = r.tipoModeloCancelamentoPrecisao();
+        e.tipoModeloCancelamentoReparcelamento = r.tipoModeloCancelamentoReparcelamento();
+    }
 
     private ConfiguracaoParcelaResponse toResponse(ConfiguracaoParcela e) {
         return new ConfiguracaoParcelaResponse(e.id, e.unidadeId, e.diasValidadePreCancelamento, e.vezesPreCancelamento, e.jurosReparcela, e.multaReparcela, e.descontoReparcela, e.percDescJurMul, e.percDescValor, e.percValorMinReparcela, e.qtdeParcCancelamento, e.prazoParcEntrada, e.prazoParcSegunda, e.prazoReparcEntrada, e.prazoReparcSegunda, e.qtdeReaprcelamento, e.qtdePacelas, e.qtdeReparcValorManual, e.percParcelaValor, e.percParcelaAlterar, e.perfilEditarParcelasId, e.perfilDescParcelasId, e.templateReparcelamento, e.templateCancelamento, e.templateCancelamentoPrevisao, e.templateCancelamentoCurso, e.percMultaCancelamento, e.qtdeDiasCancelamentoParcela, e.percMinimoCancelamento, e.tipoModeloCancelamentoCurso, e.tipoModeloCancelamento, e.tipoModeloCancelamentoPrecisao, e.tipoModeloCancelamentoReparcelamento);
@@ -79,7 +115,7 @@ public class ConfiguracaoParcelaService {
     //         return getConfiguracaoParcelaRepository().buscarConf(unidade);
     //     }
     public Uni<Long> buscarConf(Long unidadeId) {
-                return repository.find("unidadeId = ?1 order by id desc", unidadeId).firstResult().map(x -> x == null ? null : x.id);
+        return repository.find("unidadeId = ?1 order by id desc", unidadeId).firstResult().map(x -> x == null ? null : x.id);
     }
 
 
@@ -90,7 +126,7 @@ public class ConfiguracaoParcelaService {
     //         return getConfiguracaoParcelaRepository().buscarConf(unidade, id);
     //     }
     public Uni<Long> buscarConf2(Long unidadeId, Integer id) {
-                return repository.find("unidadeId = ?1 order by id desc", unidadeId, id).firstResult().map(x -> x == null ? null : x.id);
+        return repository.find("unidadeId = ?1 order by id desc", unidadeId, id).firstResult().map(x -> x == null ? null : x.id);
     }
 
 
@@ -100,7 +136,7 @@ public class ConfiguracaoParcelaService {
     //         return getConfiguracaoParcelaRepository().buscarConfComUnidades(unidade);
     //     }
     public Uni<List<Long>> buscarConfComUnidades(List<Long> unidade) {
-                return repository.find("unidadeId in (?1) order by id desc", unidade).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("unidadeId in (?1) order by id desc", unidade).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -111,7 +147,7 @@ public class ConfiguracaoParcelaService {
     //         return getConfiguracaoParcelaRepository().buscarConfComUnidadesNotCancelamento(unidade);
     //     }
     public Uni<List<Long>> buscarConfComUnidadesNotCancelamento(List<Long> unidade) {
-                return repository.buscarConfComUnidadesNotCancelamento(unidade).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarConfComUnidadesNotCancelamento(unidade).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.mensagemcobranca;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class MensagemCobrancaService {
 
-    @Inject MensagemCobrancaRepository repository;
+    @Inject
+    MensagemCobrancaRepository repository;
 
     public Uni<List<MensagemCobrancaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,12 @@ public class MensagemCobrancaService {
                         : Uni.createFrom().failure(new NotFoundException("MensagemCobranca not found")));
     }
 
-    private void apply(MensagemCobranca e, MensagemCobrancaRequest r) { e.descricao = r.descricao(); e.assunto = r.assunto(); e.mensagem = r.mensagem(); e.flagEmail = r.flagEmail(); }
+    private void apply(MensagemCobranca e, MensagemCobrancaRequest r) {
+        e.descricao = r.descricao();
+        e.assunto = r.assunto();
+        e.mensagem = r.mensagem();
+        e.flagEmail = r.flagEmail();
+    }
 
     private MensagemCobrancaResponse toResponse(MensagemCobranca e) {
         return new MensagemCobrancaResponse(e.id, e.descricao, e.assunto, e.mensagem, e.flagEmail);

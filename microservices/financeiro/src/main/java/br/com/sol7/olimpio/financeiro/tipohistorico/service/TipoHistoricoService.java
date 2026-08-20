@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.tipohistorico;
+
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -8,13 +9,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class TipoHistoricoService {
 
-    @Inject TipoHistoricoRepository repository;
+    @Inject
+    TipoHistoricoRepository repository;
 
     @CacheResult(cacheName = "tipo-historico-cache")
     public Uni<List<TipoHistoricoResponse>> list() {
@@ -58,7 +61,9 @@ public class TipoHistoricoService {
                         : Uni.createFrom().failure(new NotFoundException("TipoHistorico not found")));
     }
 
-    private void apply(TipoHistorico e, TipoHistoricoRequest r) { e.descricao = r.descricao(); }
+    private void apply(TipoHistorico e, TipoHistoricoRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private TipoHistoricoResponse toResponse(TipoHistorico e) {
         return new TipoHistoricoResponse(e.id, e.descricao);

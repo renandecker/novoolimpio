@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.bandeira;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class BandeiraService {
 
-    @Inject BandeiraRepository repository;
+    @Inject
+    BandeiraRepository repository;
 
     public Uni<List<BandeiraResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,10 @@ public class BandeiraService {
                         : Uni.createFrom().failure(new NotFoundException("Bandeira not found")));
     }
 
-    private void apply(Bandeira e, BandeiraRequest r) { e.descricao = r.descricao(); e.quantidadeParcelas = r.quantidadeParcelas(); }
+    private void apply(Bandeira e, BandeiraRequest r) {
+        e.descricao = r.descricao();
+        e.quantidadeParcelas = r.quantidadeParcelas();
+    }
 
     private BandeiraResponse toResponse(Bandeira e) {
         return new BandeiraResponse(e.id, e.descricao, e.quantidadeParcelas);

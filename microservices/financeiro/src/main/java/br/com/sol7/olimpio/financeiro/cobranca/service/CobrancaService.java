@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.cobranca;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class CobrancaService {
 
-    @Inject CobrancaRepository repository;
+    @Inject
+    CobrancaRepository repository;
 
     // Obs: depende do microservico educacao/central (Contrato, Parcela, Config e TaskExecutor) - logica de particionamento em threads nao portada automaticamente, ver RELATORIO_SCHEDULE.md
     public Uni<Void> atualizarCobrancasAutomatico() {
@@ -57,7 +60,21 @@ public class CobrancaService {
                         : Uni.createFrom().failure(new NotFoundException("Cobranca not found")));
     }
 
-    private void apply(Cobranca e, CobrancaRequest r) { e.contratoId = r.contratoId(); e.etapasCobrancaId = r.etapasCobrancaId(); e.devendoDesde = r.devendoDesde(); e.dataUltimaCarta = r.dataUltimaCarta(); e.dataUltimoRetorno = r.dataUltimoRetorno(); e.dataUltimaSms = r.dataUltimaSms(); e.dataUltimaLigacao = r.dataUltimaLigacao(); e.dataUltimoEmail = r.dataUltimoEmail(); e.ligacaoCobrancaId = r.ligacaoCobrancaId(); e.qtdLigacoes = r.qtdLigacoes(); e.qtdEmails = r.qtdEmails(); e.qtdCartas = r.qtdCartas(); e.qtdSms = r.qtdSms(); }
+    private void apply(Cobranca e, CobrancaRequest r) {
+        e.contratoId = r.contratoId();
+        e.etapasCobrancaId = r.etapasCobrancaId();
+        e.devendoDesde = r.devendoDesde();
+        e.dataUltimaCarta = r.dataUltimaCarta();
+        e.dataUltimoRetorno = r.dataUltimoRetorno();
+        e.dataUltimaSms = r.dataUltimaSms();
+        e.dataUltimaLigacao = r.dataUltimaLigacao();
+        e.dataUltimoEmail = r.dataUltimoEmail();
+        e.ligacaoCobrancaId = r.ligacaoCobrancaId();
+        e.qtdLigacoes = r.qtdLigacoes();
+        e.qtdEmails = r.qtdEmails();
+        e.qtdCartas = r.qtdCartas();
+        e.qtdSms = r.qtdSms();
+    }
 
     private CobrancaResponse toResponse(Cobranca e) {
         return new CobrancaResponse(e.id, e.contratoId, e.etapasCobrancaId, e.devendoDesde, e.dataUltimaCarta, e.dataUltimoRetorno, e.dataUltimaSms, e.dataUltimaLigacao, e.dataUltimoEmail, e.ligacaoCobrancaId, e.qtdLigacoes, e.qtdEmails, e.qtdCartas, e.qtdSms);

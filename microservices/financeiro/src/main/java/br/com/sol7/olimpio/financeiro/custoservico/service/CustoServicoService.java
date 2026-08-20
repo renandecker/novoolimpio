@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.custoservico;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,16 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
+import java.util.Date;
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class CustoServicoService {
 
-    @Inject CustoServicoRepository repository;
+    @Inject
+    CustoServicoRepository repository;
 
     public Uni<List<CustoServicoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -36,6 +40,7 @@ public class CustoServicoService {
     public Uni<CustoServicoResponse> create(CustoServicoRequest r) {
         var e = new CustoServico();
         apply(e, r);
+        e.dataAlteracao = new Date();
         return repository.persist(e).replaceWith(() -> toResponse(e));
     }
 
@@ -52,7 +57,17 @@ public class CustoServicoService {
                         : Uni.createFrom().failure(new NotFoundException("CustoServico not found")));
     }
 
-    private void apply(CustoServico e, CustoServicoRequest r) { e.valorEmail = r.valorEmail(); e.valorSms = r.valorSms(); e.valorLigacao = r.valorLigacao(); e.valorCarta = r.valorCarta(); e.dataAlteracao = r.dataAlteracao(); e.tipoSms = r.tipoSms(); e.tipoLigacao = r.tipoLigacao(); e.tipoCarta = r.tipoCarta(); e.tipoEmail = r.tipoEmail(); }
+    private void apply(CustoServico e, CustoServicoRequest r) {
+        e.valorEmail = r.valorEmail();
+        e.valorSms = r.valorSms();
+        e.valorLigacao = r.valorLigacao();
+        e.valorCarta = r.valorCarta();
+        e.dataAlteracao = r.dataAlteracao();
+        e.tipoSms = r.tipoSms();
+        e.tipoLigacao = r.tipoLigacao();
+        e.tipoCarta = r.tipoCarta();
+        e.tipoEmail = r.tipoEmail();
+    }
 
     private CustoServicoResponse toResponse(CustoServico e) {
         return new CustoServicoResponse(e.id, e.valorEmail, e.valorSms, e.valorLigacao, e.valorCarta, e.dataAlteracao, e.tipoSms, e.tipoLigacao, e.tipoCarta, e.tipoEmail);
@@ -85,7 +100,7 @@ public class CustoServicoService {
     //         return getCustoServicoRepository().buscarCustoServicoComUnidade(custoServico);
     //     }
     public Uni<Long> buscarCustoServicoComUnidade(Long custoServicoId) {
-                return repository.buscarCustoServicoComUnidade(custoServicoId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarCustoServicoComUnidade(custoServicoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 

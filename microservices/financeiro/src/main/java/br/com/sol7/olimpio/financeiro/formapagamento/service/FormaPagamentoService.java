@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.financeiro.formapagamento;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class FormaPagamentoService {
 
-    @Inject FormaPagamentoRepository repository;
+    @Inject
+    FormaPagamentoRepository repository;
 
     public Uni<List<FormaPagamentoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,32 @@ public class FormaPagamentoService {
                         : Uni.createFrom().failure(new NotFoundException("FormaPagamento not found")));
     }
 
-    private void apply(FormaPagamento e, FormaPagamentoRequest r) { e.vezes = r.vezes(); e.juros = r.juros(); e.desconto = r.desconto(); e.ajusteParcelaAluno = r.ajusteParcelaAluno(); e.ajusteParcela = r.ajusteParcela(); e.operacao = r.operacao(); e.tipoRegra = r.tipoRegra(); e.tipoRegraValor = r.tipoRegraValor(); e.periodicidade = r.periodicidade(); e.perfilId = r.perfilId(); e.regra = r.regra(); e.ativo = r.ativo(); e.usado = r.usado(); e.ajuste = r.ajuste(); e.cota = r.cota(); e.tipoPessoa = r.tipoPessoa(); e.valorRegra = r.valorRegra(); e.percentualMinimo = r.percentualMinimo(); e.percentualMaximo = r.percentualMaximo(); e.percentualMinimoAluno = r.percentualMinimoAluno(); e.percentualMaximoAluno = r.percentualMaximoAluno(); e.valorCota = r.valorCota(); e.valorCotaControle = r.valorCotaControle(); e.dateCotaControle = r.dateCotaControle(); }
+    private void apply(FormaPagamento e, FormaPagamentoRequest r) {
+        e.vezes = r.vezes();
+        e.juros = r.juros();
+        e.desconto = r.desconto();
+        e.ajusteParcelaAluno = r.ajusteParcelaAluno();
+        e.ajusteParcela = r.ajusteParcela();
+        e.operacao = r.operacao();
+        e.tipoRegra = r.tipoRegra();
+        e.tipoRegraValor = r.tipoRegraValor();
+        e.periodicidade = r.periodicidade();
+        e.perfilId = r.perfilId();
+        e.regra = r.regra();
+        e.ativo = r.ativo();
+        e.usado = r.usado();
+        e.ajuste = r.ajuste();
+        e.cota = r.cota();
+        e.tipoPessoa = r.tipoPessoa();
+        e.valorRegra = r.valorRegra();
+        e.percentualMinimo = r.percentualMinimo();
+        e.percentualMaximo = r.percentualMaximo();
+        e.percentualMinimoAluno = r.percentualMinimoAluno();
+        e.percentualMaximoAluno = r.percentualMaximoAluno();
+        e.valorCota = r.valorCota();
+        e.valorCotaControle = r.valorCotaControle();
+        e.dateCotaControle = r.dateCotaControle();
+    }
 
     private FormaPagamentoResponse toResponse(FormaPagamento e) {
         return new FormaPagamentoResponse(e.id, e.vezes, e.juros, e.desconto, e.ajusteParcelaAluno, e.ajusteParcela, e.operacao, e.tipoRegra, e.tipoRegraValor, e.periodicidade, e.perfilId, e.regra, e.ativo, e.usado, e.ajuste, e.cota, e.tipoPessoa, e.valorRegra, e.percentualMinimo, e.percentualMaximo, e.percentualMinimoAluno, e.percentualMaximoAluno, e.valorCota, e.valorCotaControle, e.dateCotaControle);
@@ -75,7 +103,7 @@ public class FormaPagamentoService {
     //         return this.getFormaPagamentoRepository().autoComplete(query);
     //     }
     public Uni<List<Long>> autoComplete2(Integer query) {
-                return repository.find("(vezes) = ?1", query).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("(vezes) = ?1", query).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
