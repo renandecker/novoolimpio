@@ -50,7 +50,7 @@ export function ModuleTabs({tabs, initial}: { tabs: ModuleTabItem[]; initial?: s
         ) : tab.path ? (
             <DataTable path={tab.path} params={tab.params} columns={tab.columns} maxMainColumns={tab.maxMainColumns}/>
         ) : (
-            <p className="master-detail-empty">{tab.empty ? ? 'Sem conteúdo nesta aba.'}</p>
+            <p className="master-detail-empty">{tab.empty ?? 'Sem conteúdo nesta aba.'}</p>
         ),
     }));
 

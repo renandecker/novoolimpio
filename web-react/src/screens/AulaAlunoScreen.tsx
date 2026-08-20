@@ -18,7 +18,7 @@ export default function AulaAlunoScreen() {
             .then(([a, anexos, assistida]) => {
                 if (!active) return;
                 setAula(a);
-                setAnexos(anexos ? ? []);
+                setAnexos(anexos ?? []);
                 setJaAssistida(assistida);
             })
             .catch((e: any) => {

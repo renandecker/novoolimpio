@@ -20,7 +20,7 @@ const VALOR_CURSO_COLUMNS: DataTableColumn[] = [
         label: 'Valor Curso',
         render: (item) => {
             const record = asRecord(item);
-            return record.valor_hora ? '' : String(record.valor ? ? '');
+            return record.valor_hora ? '' : String(record.valor ?? '');
         },
     },
     {
@@ -33,7 +33,7 @@ const VALOR_CURSO_COLUMNS: DataTableColumn[] = [
         label: 'Valor Hora',
         render: (item) => {
             const record = asRecord(item);
-            return record.valor_hora ? String(record.valor ? ? '') : '';
+            return record.valor_hora ? String(record.valor ?? '') : '';
         },
     },
     {key: 'dias_spc', label: 'Dias Atraso'},

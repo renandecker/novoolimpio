@@ -94,18 +94,18 @@ function ContractsTable({searchedIds}: { searchedIds: number[] | null }) {
 
     // Espelha gestaoAlunoController.acessoRelatorios/acessoNovo/acessoEditar/acessoRemover em
     // gestaoAluno.xhtml: cada coluna de ações só aparece se o usuário tiver a permissão correspondente.
-    const acessoRelatorios = can('EXECUTE', outcome) || (perfilModuloPermissions?.relatorio ? ? false);
-    const acessoNovo = can('CREATE', outcome) || (perfilModuloPermissions?.novo ? ? false);
-    const acessoEditar = can('UPDATE', outcome) || (perfilModuloPermissions?.editar ? ? false);
-    const acessoRemover = can('DELETE', outcome) || (perfilModuloPermissions?.remover ? ? false);
+    const acessoRelatorios = can('EXECUTE', outcome) || (perfilModuloPermissions?.relatorio ?? false);
+    const acessoNovo = can('CREATE', outcome) || (perfilModuloPermissions?.novo ?? false);
+    const acessoEditar = can('UPDATE', outcome) || (perfilModuloPermissions?.editar ?? false);
+    const acessoRemover = can('DELETE', outcome) || (perfilModuloPermissions?.remover ?? false);
     const showActionsColumn = acessoRelatorios || acessoNovo || acessoEditar || acessoRemover;
 
     const abrirPlaceholder = (titulo: string, texto: string) => setPlaceholder({titulo, texto});
 
     const q = useModulePaged('/api/view/contrato/colunasContrato', page, size);
-    const all = q.data?.content ? ? [];
-    const totalElements = q.data?.totalElements ? ? 0;
-    const totalPages = Math.max(1, q.data?.totalPages ? ? 0);
+    const all = q.data?.content ?? [];
+    const totalElements = q.data?.totalElements ?? 0;
+    const totalPages = Math.max(1, q.data?.totalPages ?? 0);
 
     const items = searchedIds
         ? all.filter((item) => searchedIds.includes(Number(item.id)))
@@ -386,7 +386,7 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
             '/api/educacao/contrato/auto-complete-aluno',
             {params: {query}},
         );
-        return (data ? ? []).map((item) => ({id: item.id, label: item.nome || `#${item.id}`}));
+        return (data ?? []).map((item) => ({id: item.id, label: item.nome || `#${item.id}`}));
     };
 
     const selecionarAluno = (option: AutoCompleteOption | null) => {
@@ -399,16 +399,16 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
         setSearching(true);
         api
             .get<number[]>('/api/educacao/contrato/buscar-contratos-pessoa', {params: {pessoaId: option.id}})
-            .then((response) => setSearchedIds(response.data ? ? []))
+            .then((response) => setSearchedIds(response.data ?? []))
             .catch((error) => {
                 setSearchedIds([]);
-                const msg = error?.response?.data?.error ? ? error?.message ? ? 'Erro ao buscar os contratos do aluno.';
+                const msg = error?.response?.data?.error ?? error?.message ?? 'Erro ao buscar os contratos do aluno.';
                 setErro(msg);
             })
             .finally(() => setSearching(false));
     };
 
-    const activeAction = ACTIONS.find((action) => action.key === openAction) ? ? null;
+    const activeAction = ACTIONS.find((action) => action.key === openAction) ?? null;
 
     return (
         <PermissionGate permission="READ">

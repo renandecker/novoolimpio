@@ -13,7 +13,7 @@ const COLUMNS: DataTableColumn[] = [
             if (value === 1) return 'Diária';
             if (value === 2) return 'Semanal';
             if (value === 3) return 'Mensal';
-            return String(value ? ? '');
+            return String(value ?? '');
         },
     },
 ];

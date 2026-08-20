@@ -37,7 +37,7 @@ export default function ViewDisponibilidadeProfessorListDisponibilidadeProfessor
         enabled: !!professorId,
     });
 
-    const opcoes = opcoesQuery.data ? ? [];
+    const opcoes = opcoesQuery.data ?? [];
 
     return (
         <PermissionGate permission="READ">
@@ -65,7 +65,7 @@ export default function ViewDisponibilidadeProfessorListDisponibilidadeProfessor
                 <ScheduleWeekView
                     startDate={weekStart}
                     onWeekChange={setWeekStart}
-                    events={eventosQuery.data ? ? []}
+                    events={eventosQuery.data ?? []}
                     loading={!!professorId && eventosQuery.isLoading}
                     error={eventosQuery.isError ? 'Erro ao carregar a agenda.' : null}
                     legend={LEGENDA}

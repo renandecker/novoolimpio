@@ -34,9 +34,9 @@ export default function ViewNotificacaoListNotificacaoListScreen() {
         },
     });
 
-    const items = query.data?.content ? ? [];
-    const totalElements = query.data?.totalElements ? ? 0;
-    const totalPages = Math.max(1, query.data?.totalPages ? ? 0);
+    const items = query.data?.content ?? [];
+    const totalElements = query.data?.totalElements ?? 0;
+    const totalPages = Math.max(1, query.data?.totalPages ?? 0);
 
     return (
         <PermissionGate permission="READ">

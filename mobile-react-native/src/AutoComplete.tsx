@@ -37,7 +37,7 @@ export function AutoComplete({
                                  disabled = false,
                                  style,
                              }: AutoCompleteProps) {
-    const [text, setText] = useState(value?.label ? ? '');
+    const [text, setText] = useState(value?.label ?? '');
     const [options, setOptions] = useState<AutoCompleteOption[]>([]);
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -47,7 +47,7 @@ export function AutoComplete({
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
-        setText(value?.label ? ? '');
+        setText(value?.label ?? '');
     }, [value]);
 
     useEffect(() => {

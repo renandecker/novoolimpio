@@ -14,7 +14,7 @@ export default function AlunoAulasScreen() {
             .chamadas()
             .then(data => {
                 if (!active) return;
-                setAulas(data ? ? []);
+                setAulas(data ?? []);
             })
             .catch((e: any) => {
                 if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar as chamadas.');

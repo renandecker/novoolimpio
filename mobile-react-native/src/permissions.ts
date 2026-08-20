@@ -11,8 +11,8 @@ export const can = (
     permission: Permission,
     outcome?: string,
 ): boolean => {
-    const permissions = session?.permissions ? ? ['READ'];
-    const modulePermissions: ModulePermissions = session?.modulePermissions ? ? {};
+    const permissions = session?.permissions ?? ['READ'];
+    const modulePermissions: ModulePermissions = session?.modulePermissions ?? {};
     const global = new Set<string>(permissions);
     const hasModulePermissions = Object.keys(modulePermissions).length > 0;
     if (outcome !== undefined && outcome !== '') {

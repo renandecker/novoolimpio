@@ -37,7 +37,7 @@ export default function ViewPessoaListDisponibilidadePessoaListScreen() {
         enabled: !!pessoaId,
     });
 
-    const opcoes = opcoesQuery.data ? ? [];
+    const opcoes = opcoesQuery.data ?? [];
 
     return (
         <PermissionGate permission="READ">
@@ -61,7 +61,7 @@ export default function ViewPessoaListDisponibilidadePessoaListScreen() {
                 <ScheduleWeekView
                     startDate={weekStart}
                     onWeekChange={setWeekStart}
-                    events={eventosQuery.data ? ? []}
+                    events={eventosQuery.data ?? []}
                     loading={!!pessoaId && eventosQuery.isLoading}
                     error={eventosQuery.isError ? 'Erro ao carregar a agenda.' : null}
                     legend={LEGENDA}

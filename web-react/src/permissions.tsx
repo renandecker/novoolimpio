@@ -65,5 +65,5 @@ export function PermissionGate({
 }) {
     const {can} = usePermissions();
     const current = useCurrentOutcome();
-    return can(permission, module ? ? current) ? <>{children}</> : null;
+    return can(permission, module ?? current) ? <>{children}</> : null;
 }

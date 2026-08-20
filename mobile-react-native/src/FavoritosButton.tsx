@@ -23,7 +23,7 @@ export function FavoritosButton({navigateTo}: { navigateTo: (key: string) => voi
         enabled: open,
     });
 
-    const items = list.data ? ? [];
+    const items = list.data ?? [];
 
     const handleItemPress = (outcome: string) => {
         setOpen(false);

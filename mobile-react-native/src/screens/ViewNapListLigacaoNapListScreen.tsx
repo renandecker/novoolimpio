@@ -15,7 +15,7 @@ export default function ViewNapListLigacaoNapListScreen() {
         queryKey: ['etapas-nap'],
         queryFn: async () => (await api.get<EtapaNap[]>('/api/educacao/etapas-nap')).data,
     });
-    const etapas = etapasQuery.data ? ? [];
+    const etapas = etapasQuery.data ?? [];
 
     if (etapasQuery.isLoading && etapas.length === 0) {
         return (

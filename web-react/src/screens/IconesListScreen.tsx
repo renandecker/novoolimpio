@@ -17,7 +17,7 @@ export default function IconesListScreen() {
             if (versao !== 'todas' && icone.versao !== versao) return false;
             if (!query) return true;
             const tokens = query.split(/\s+/);
-            const haystack = `${icone.classe} ${icone.icon} ${icone.search ? ? ''}`.toLowerCase();
+            const haystack = `${icone.classe} ${icone.icon} ${icone.search ?? ''}`.toLowerCase();
             return tokens.every((token) => haystack.includes(token));
         });
     }, [search, versao]);
@@ -77,7 +77,7 @@ export default function IconesListScreen() {
 
                         <div className="icones-grid">
                             {filtered.map((icone) => {
-                                const escopo = escopoPorClasse(icone.classe) ? ? '';
+                                const escopo = escopoPorClasse(icone.classe) ?? '';
                                 return (
                                     <button
                                         key={`${icone.versao}-${icone.classe}`}

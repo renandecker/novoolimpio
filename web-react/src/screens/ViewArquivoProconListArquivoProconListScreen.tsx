@@ -20,7 +20,7 @@ const COLUMNS: DataTableColumn[] = [
         label: 'Prospectos Deletados',
         render: (item) => {
             const value = asRecord(item).prospectos_deletados_pacote;
-            return value === -1 ? 'carregando e atualizando' : String(value ? ? '');
+            return value === -1 ? 'carregando e atualizando' : String(value ?? '');
         },
     },
 ];

@@ -23,7 +23,7 @@ type ActionKey = (typeof ACTIONS)[number]['key'];
 export default function ViewGestaoAlunoGestaoAlunoListScreen() {
     const [openAction, setOpenAction] = useState<ActionKey | null>(null);
     const [cancelamentoAberto, setCancelamentoAberto] = useState(false);
-    const activeAction = ACTIONS.find((action) => action.key === openAction) ? ? null;
+    const activeAction = ACTIONS.find((action) => action.key === openAction) ?? null;
 
     return (
         <View style={styles.container}>

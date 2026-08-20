@@ -11,7 +11,7 @@ const renderTela = (item: ApiItem) => {
     if (value === 1 || value === '1') return 'Agendar';
     if (value === 2 || value === '2') return 'Retorno';
     if (value === 3 || value === '3') return 'Curso';
-    return String(value ? ? '');
+    return String(value ?? '');
 };
 
 const COLUMNS: DataTableColumn[] = [

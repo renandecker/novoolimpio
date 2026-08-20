@@ -14,7 +14,7 @@ export default function AulaAulaScreen() {
         aulaApi
             .aulasDaOcorrencia(Number(ocorrenciaId))
             .then(data => {
-                if (active) setAulas(data ? ? []);
+                if (active) setAulas(data ?? []);
             })
             .catch((e: any) => {
                 if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar as aulas.');

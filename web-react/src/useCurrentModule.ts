@@ -20,12 +20,12 @@ export const useCurrentModule = () => {
     const outcome = useCurrentOutcome();
 
     return useMemo(() => {
-        const modulos = (session?.modules ? ? []) as Module[];
+        const modulos = (session?.modules ?? []) as Module[];
         const byId = new Map<number, Module>();
         for (const m of modulos) byId.set(m.id, m);
 
         const target =
-            modulos.find((m) => normalize(m.outcome) === normalize(outcome)) ? ? null;
+            modulos.find((m) => normalize(m.outcome) === normalize(outcome)) ?? null;
 
         const ancestors: Module[] = [];
         let current = target;

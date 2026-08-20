@@ -24,11 +24,11 @@ export function ReportButton({navigateTo}: { navigateTo: (key: string) => void }
         enabled: open,
     });
 
-    const items = list.data ? ? [];
+    const items = list.data ?? [];
 
     const handleItemPress = (item: RelatorioDisponivel) => {
         setOpen(false);
-        navigateTo(TIPO_ROTA[item.tipo] ? ? 'view/relatorios/listTabela');
+        navigateTo(TIPO_ROTA[item.tipo] ?? 'view/relatorios/listTabela');
     };
 
     return (
@@ -49,7 +49,7 @@ export function ReportButton({navigateTo}: { navigateTo: (key: string) => void }
                             items.map((item) => (
                                 <Pressable key={`${item.tipo}-${item.id}`} style={styles.item}
                                            onPress={() => handleItemPress(item)}>
-                                    <Text style={styles.itemTipo}>{TIPO_LABEL[item.tipo] ? ? item.tipo}</Text>
+                                    <Text style={styles.itemTipo}>{TIPO_LABEL[item.tipo] ?? item.tipo}</Text>
                                     <Text style={styles.itemNome}>{item.nome}</Text>
                                 </Pressable>
                             ))

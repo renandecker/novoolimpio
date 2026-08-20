@@ -63,8 +63,8 @@ export default function ViewDisponibilidadeSalaListDisponibilidadeSalaListScreen
         enabled: !!unidadeId,
     });
 
-    const unidades = (unidadesQuery.data ? ? []).filter((u) => u.fl_ativo !== false);
-    const salas = (salasQuery.data ? ? []).filter((s) => s.unidadeId === Number(unidadeId));
+    const unidades = (unidadesQuery.data ?? []).filter((u) => u.fl_ativo !== false);
+    const salas = (salasQuery.data ?? []).filter((s) => s.unidadeId === Number(unidadeId));
 
     function labelSala(s: Sala): string {
         if (s.numero != null) return `Sala ${s.numero}`;
@@ -119,7 +119,7 @@ export default function ViewDisponibilidadeSalaListDisponibilidadeSalaListScreen
                 <ScheduleWeekView
                     startDate={weekStart}
                     onWeekChange={setWeekStart}
-                    events={eventosQuery.data ? ? []}
+                    events={eventosQuery.data ?? []}
                     loading={!!unidadeId && eventosQuery.isLoading}
                     error={eventosQuery.isError ? 'Erro ao carregar a agenda.' : null}
                     legend={salaId ? LEGENDA_SALA : LEGENDA_TODAS}

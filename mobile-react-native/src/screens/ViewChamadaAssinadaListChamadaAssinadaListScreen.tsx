@@ -39,7 +39,7 @@ export default function ViewChamadaAssinadaListChamadaAssinadaListScreen() {
                 const {data} = await api.get<ApiItem[]>('/api/view/chamadaAssinada/listChamadaAssinada');
                 setItems(data);
             } catch (e: any) {
-                setError(e?.response?.data?.message ? ? 'Erro ao carregar chamadas assinadas');
+                setError(e?.response?.data?.message ?? 'Erro ao carregar chamadas assinadas');
             } finally {
                 setLoading(false);
             }

@@ -27,7 +27,7 @@ type FechamentoCaixaTotais = {
 };
 
 const money = (v: number | undefined | null) =>
-    (v ? ? 0).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+    (v ?? 0).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
 
 const STEPS = [
     {key: 'configuracao', label: 'Configurações impressora'},
@@ -146,7 +146,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
             setMensagem('Caixa aberto com sucesso!');
             setStep(1);
         } catch (e: any) {
-            setErro(e?.response?.data?.message ? ? 'Ocorreu um erro ao abrir o caixa!');
+            setErro(e?.response?.data?.message ?? 'Ocorreu um erro ao abrir o caixa!');
         } finally {
             setLoading(false);
         }
@@ -247,7 +247,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
             setCalculo(null);
             setFormasPagamento([{tipoPagamento: 'DINHEIRO', valor: '', documento: ''}]);
         } catch (e: any) {
-            setErro(e?.response?.data?.message ? ? 'Ocorreu um erro ao registrar esta movimentação!');
+            setErro(e?.response?.data?.message ?? 'Ocorreu um erro ao registrar esta movimentação!');
         } finally {
             setLoading(false);
         }
@@ -273,7 +273,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
             setValorExtra('');
             setMovimentoId('');
         } catch (e: any) {
-            setErro(e?.response?.data?.message ? ? 'Ocorreu um erro ao registrar esta movimentação!');
+            setErro(e?.response?.data?.message ?? 'Ocorreu um erro ao registrar esta movimentação!');
         } finally {
             setLoading(false);
         }
@@ -292,7 +292,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
             setValorSangria('');
             await carregarTotais();
         } catch (e: any) {
-            setErro(e?.response?.data?.message ? ? 'Dinheiro em caixa insuficiente!');
+            setErro(e?.response?.data?.message ?? 'Dinheiro em caixa insuficiente!');
         } finally {
             setLoading(false);
         }
@@ -529,7 +529,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                                         <button
                                             className="wizard-btn-next"
                                             onClick={registrarPagamento}
-                                            disabled={loading || !calculo || valorRecebido < (calculo?.valorCobrado ? ? Infinity)}
+                                            disabled={loading || !calculo || valorRecebido < (calculo?.valorCobrado ?? Infinity)}
                                         >
                                             Confirmar Pagamento
                                         </button>

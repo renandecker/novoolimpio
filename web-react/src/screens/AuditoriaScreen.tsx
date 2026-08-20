@@ -36,9 +36,9 @@ function AuditTable({entidade, titulo}: { entidade: string; titulo: string }) {
         queryFn: () => auditoriaApi.listar(entidade, page, size),
     });
 
-    const items = query.data?.content ? ? [];
-    const totalElements = query.data?.totalElements ? ? 0;
-    const totalPages = Math.max(1, query.data?.totalPages ? ? 0);
+    const items = query.data?.content ?? [];
+    const totalElements = query.data?.totalElements ?? 0;
+    const totalPages = Math.max(1, query.data?.totalPages ?? 0);
 
     const toggle = (item: AuditoriaItem) =>
         setExpanded((prev) => ({...prev, [`${item.id}-${item.rev}`]: !prev[`${item.id}-${item.rev}`]}));
@@ -87,8 +87,8 @@ function AuditTable({entidade, titulo}: { entidade: string; titulo: string }) {
                                     <td className="col-id">{item.id}</td>
                                     <td>{item.rev}</td>
                                     <td>{formatData(item.data)}</td>
-                                    <td>{item.usuario ? ? '-'}</td>
-                                    <td>{item.acao ? ? '-'}</td>
+                                    <td>{item.usuario ?? '-'}</td>
+                                    <td>{item.acao ?? '-'}</td>
                                 </tr>
                             );
                             if (!isOpen) return [row];

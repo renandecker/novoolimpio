@@ -16,10 +16,10 @@ const TIPOS = ['Por Contato', 'Por Minuto', 'Por Dia', 'Por Semana', 'Por Mês',
 const renderTipo = (key: string) => (item: ApiItem) => {
     const value = asRecord(item)[key];
     const index = Number(value);
-    return Number.isInteger(index) && index >= 0 && index < TIPOS.length ? TIPOS[index] : String(value ? ? '');
+    return Number.isInteger(index) && index >= 0 && index < TIPOS.length ? TIPOS[index] : String(value ?? '');
 };
 
-const renderValor = (key: string) => (item: ApiItem) => `R$ ${Number(asRecord(item)[key] ? ? 0).toFixed(2)}`;
+const renderValor = (key: string) => (item: ApiItem) => `R$ ${Number(asRecord(item)[key] ?? 0).toFixed(2)}`;
 
 const COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'Id'},

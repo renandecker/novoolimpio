@@ -86,7 +86,7 @@ const ICON_RULES: Array<[RegExp, string]> = [
 ];
 
 function menuIcon(rotulo: string, icone?: string): string {
-    const stored = (icone ? ? '').trim();
+    const stored = (icone ?? '').trim();
     if (stored && !stored.startsWith('ui-icon') && !stored.startsWith('fa ')) return stored;
     const name = normalizeName(rotulo);
     for (const [rule, emoji] of ICON_RULES) if (rule.test(name)) return emoji;
@@ -95,7 +95,7 @@ function menuIcon(rotulo: string, icone?: string): string {
 
 export default function Sidebar() {
     const {session} = useAuth();
-    const modulos = (session?.modules ? ? []) as Modulo[];
+    const modulos = (session?.modules ?? []) as Modulo[];
     const defaultPath = session?.defaultOutcome || '/default';
     const [portalOpen, setPortalOpen] = useState(true);
     const [search, setSearch] = useState('');
@@ -104,7 +104,7 @@ export default function Sidebar() {
         const map = new Map<number, Modulo[]>();
         for (const m of modulos) {
             if (m.antecessorId != null) {
-                const list = map.get(m.antecessorId) ? ? [];
+                const list = map.get(m.antecessorId) ?? [];
                 list.push(m);
                 map.set(m.antecessorId, list);
             }
@@ -159,7 +159,7 @@ export default function Sidebar() {
                 icon: menuIcon(modulo.rotulo, modulo.icone),
                 keywords: `${modulo.rotulo} ${modulo.descricao} ${modulo.outcome}`,
             });
-            for (const child of childrenByParent.get(modulo.id) ? ? []) walk(child, modulo.rotulo);
+            for (const child of childrenByParent.get(modulo.id) ?? []) walk(child, modulo.rotulo);
         };
         for (const m of topModulos) walk(m, null);
         return items;
@@ -170,7 +170,7 @@ export default function Sidebar() {
         if (!query) return null;
         const tokens = query.split(/\s+/);
         return flatItems.filter(item => {
-            const haystack = `${item.label} ${item.parent ? ? ''} ${item.keywords}`.toLowerCase();
+            const haystack = `${item.label} ${item.parent ?? ''} ${item.keywords}`.toLowerCase();
             return tokens.every(t => haystack.includes(t));
         });
     }, [query, flatItems]);
@@ -264,7 +264,7 @@ export default function Sidebar() {
 function SidebarItem({modulo, childrenByParent, depth}: { modulo: Modulo; childrenByParent: Map<number, Modulo[]>; depth: number }) {
     const location = useLocation();
     const [open, setOpen] = useState(false);
-    const children = childrenByParent.get(modulo.id) ? ? [];
+    const children = childrenByParent.get(modulo.id) ?? [];
     const isGroup = children.length > 0;
     const isSub = depth > 0;
     const outcome = normalizeOutcome(modulo.outcome);

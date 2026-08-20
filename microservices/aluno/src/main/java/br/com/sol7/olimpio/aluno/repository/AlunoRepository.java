@@ -20,19 +20,19 @@ public class AlunoRepository {
     }
 
     public Uni<Long> pessoaIdPorUsername(String username) {
-        String sql = "" "
+        String sql = """
         SELECT u.id_pessoa
         FROM bas_login l
         JOIN bas_usuario u ON u.id = l.id_usuario
         WHERE lower (l.username) = lower( ? 1)
         LIMIT 1
-        "" ";
+        """;
         return nativeList(sql, username)
                 .map(rows -> rows.isEmpty() ? null : asLong(rows.get(0)));
     }
 
     public Uni<Object[]> perfilPorUsername(String username) {
-        String sql = "" "
+        String sql = """
         SELECT l.username,
                 COALESCE(f.nome, '') AS nome,
         COALESCE(f.nome_social, '') AS nome_social,
@@ -64,13 +64,13 @@ public class AlunoRepository {
         LEFT JOIN bas_estado_civil ec ON ec.id = f.id_estado_civil
         WHERE lower (l.username) = lower( ? 1)
         LIMIT 1
-        "" ";
+        """;
         return nativeList(sql, username)
                 .map(rows -> rows.isEmpty() ? null : (Object[]) rows.get(0));
     }
 
     public Uni<List<Object[]>> matriculasPorPessoa(Long pessoaId) {
-        String sql = "" "
+        String sql = """
         SELECT m.id,
                 COALESCE(c.nome, '') AS curso,
         COALESCE(cc.descricao, '') AS componente,
@@ -100,12 +100,12 @@ public class AlunoRepository {
         LEFT JOIN bas_pessoa_fisica f ON f.id_pessoa = pprof.id
         WHERE ct.id_pessoa = ?1 AND m.data_cancelamento IS NULL
         ORDER BY per.ano DESC NULLS LAST, m.data DESC NULLS LAST
-        "" ";
+        """;
         return nativeList(sql, pessoaId);
     }
 
     public Uni<List<Object[]>> notasGrauPorMatricula(Long matriculaId) {
-        String sql = "" "
+        String sql = """
         SELECT COALESCE (g.id, 0)AS grau_id,
         COALESCE(g.descricao, '') AS grau_descricao,
         ncm.id AS ncm_id,
@@ -123,12 +123,12 @@ public class AlunoRepository {
         LEFT JOIN edc_grau g ON g.id = gn.id_grau
         WHERE ncm.id_matricula = ?1
         ORDER BY COALESCE(g.id, 0), COALESCE(gn.numero_nota, 0), ncm.id
-        "" ";
+        """;
         return nativeList(sql, matriculaId);
     }
 
     public Uni<List<Object[]>> avaliacoesPorMatricula(Long matriculaId) {
-        String sql = "" "
+        String sql = """
         SELECT ncm.id AS ncm_id,
                 n.ordem,
                 n.nota,
@@ -138,12 +138,12 @@ public class AlunoRepository {
         LEFT JOIN edc_grau_conceito gc ON gc.id = n.id_conceito_notas
         WHERE ncm.id_matricula = ?1
         ORDER BY ncm.id, COALESCE(n.ordem, 0), n.id
-        "" ";
+        """;
         return nativeList(sql, matriculaId);
     }
 
     public Uni<List<Object[]>> presencasPorMatricula(Long matriculaId) {
-        String sql = "" "
+        String sql = """
         SELECT occ.id AS ocorrencia_id,
                 occ.data,
                 COALESCE(cad.presenca, '') AS presenca,
@@ -154,12 +154,12 @@ public class AlunoRepository {
         LEFT JOIN edc_componente_curricular cc ON cc.id = of.id_componente_curricular
         WHERE cad.id_matricula = ?1
         ORDER BY occ.data NULLS LAST, occ.id
-        "" ";
+        """;
         return nativeList(sql, matriculaId);
     }
 
     public Uni<Object[]> resumoFinanceiroPorPessoa(Long pessoaId) {
-        String sql = "" "
+        String sql = """
         SELECT COALESCE ((SELECT current_date - p.data_vencimento
         FROM fin_parcela p
         WHERE p.data_pagamento IS NULL AND p.data_cancelamento IS NULL
@@ -169,13 +169,13 @@ public class AlunoRepository {
         COALESCE((SELECT SUM(c.qtde_parcelas_atrasadas)FROM edc_contrato c WHERE c.id_pessoa = ? 1),0)AS qtd_atrasadas,
         COALESCE((SELECT SUM(c.qtde_parcelas_nao_pagas)FROM edc_contrato c WHERE c.id_pessoa = ? 1),0)AS qtd_restantes,
         COALESCE((SELECT SUM(c.valor_parcelas)FROM edc_contrato c WHERE c.id_pessoa = ? 1),0)AS valor_pendente
-        "" ";
+        """;
         return nativeList(sql, pessoaId)
                 .map(rows -> rows.isEmpty() ? null : (Object[]) rows.get(0));
     }
 
     public Uni<List<Object[]>> contratosPorPessoa(Long pessoaId) {
-        String sql = "" "
+        String sql = """
         SELECT ct.id,
                 COALESCE(c.nome, '') AS curso,
         COALESCE(un.sucinto, '') AS unidade,
@@ -199,7 +199,7 @@ public class AlunoRepository {
         LEFT JOIN fin_parcela ul ON ul.id = ct.id_ultima_parcela
         WHERE ct.id_pessoa = ?1
         ORDER BY ct.id
-        "" ";
+        """;
         return nativeList(sql, pessoaId);
     }
 
@@ -221,35 +221,33 @@ public class AlunoRepository {
         return parcelasPorPessoa("p.data_cancelamento IS NOT NULL", pessoaId);
     }
 
-    private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params) {
-        String sql = "" "
-        SELECT p.id,
-                p.id_contrato,
-                p.parcela,
-                p.parcela_sequencia,
-                COALESCE(p.multa, 0),
-                COALESCE(p.juros, 0),
-                COALESCE(p.desconto, 0),
-                p.data_vencimento,
-                p.data_pagamento,
-                p.data_cancelamento,
-                p.valor,
-                p.valor_pago,
-                COALESCE(p.forma_pagamento, ''),
-                p.fl_reparcela,
-                p.fl_cancelamento,
-                p.fl_original,
-                (p.id_venda IS NOT NULL)AS venda_produto,
-        (p.id_multa_livro IS NOT NULL)AS multa_livro
-        FROM fin_parcela p
-        WHERE p.id_pessoa = ?1 AND "" " + " " + condicao + " " + " ""
-        ORDER BY p.data_vencimento ASC NULLS LAST, p.id ASC
-        "" ";
+private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params) {
+        String sql = "SELECT p.id," +
+            "p.id_contrato," +
+            "p.parcela," +
+            "p.parcela_sequencia," +
+            "COALESCE(p.multa, 0), " +
+            "COALESCE(p.juros, 0), " +
+            "COALESCE(p.desconto, 0), " +
+            "p.data_vencimento, " +
+            "p.data_pagamento, " +
+            "p.data_cancelamento, " +
+            "p.valor, " +
+            "p.valor_pago, " +
+            "COALESCE(p.forma_pagamento, ''), " +
+            "p.fl_reparcela, " +
+            "p.fl_cancelamento, " +
+            "p.fl_original, " +
+            "(p.id_venda IS NOT NULL)AS venda_produto, " +
+            "(p.id_multa_livro IS NOT NULL)AS multa_livro " +
+            "FROM fin_parcela p " +
+            "WHERE p.id_pessoa = ?1 AND " + condicao + " " +
+            "ORDER BY p.data_vencimento ASC NULLS LAST, p.id ASC";
         return nativeList(sql, params);
     }
 
     public Uni<Object[]> pessoaDadosPorPessoa(Long pessoaId) {
-        String sql = "" "
+        String sql = """
         SELECT p.id,
                 COALESCE(f.nome, '') AS nome,
         COALESCE(f.cpf, '') AS cpf,
@@ -262,13 +260,13 @@ public class AlunoRepository {
         LEFT JOIN bas_pessoa_fisica f ON f.id_pessoa = p.id
         WHERE p.id = ?1
         LIMIT 1
-        "" ";
+        """;
         return nativeList(sql, pessoaId)
                 .map(rows -> rows.isEmpty() ? null : (Object[]) rows.get(0));
     }
 
     public Uni<List<Object[]>> responsaveisPorPessoa(Long pessoaId) {
-        String sql = "" "
+        String sql = """
         SELECT DISTINCT p.id,
                 COALESCE(f.nome, '') AS nome,
         COALESCE(f.cpf, '') AS cpf,
@@ -282,12 +280,12 @@ public class AlunoRepository {
         LEFT JOIN bas_pessoa_fisica f ON f.id_pessoa = p.id
         WHERE ct.id_pessoa = ?1
         ORDER BY COALESCE(f.nome, '') ASC
-        "" ";
+        """;
         return nativeList(sql, pessoaId);
     }
 
     public Uni<List<Object[]>> historicoNapLigacaoPorPessoa(Long pessoaId) {
-        String sql = "" "
+        String sql = """
         SELECT ln.id,
                 ln.data_inicial,
                 COALESCE(ln.telefone, '') AS telefone,
@@ -298,12 +296,12 @@ public class AlunoRepository {
         LEFT JOIN edc_resultado_ligacao_nap r ON r.id = ln.id_resultado_ligacao_nap
         WHERE ln.id_contrato IN (SELECT id FROM edc_contrato WHERE id_pessoa = ?1)
         ORDER BY ln.data_inicial DESC NULLS LAST, ln.id DESC
-        "" ";
+        """;
         return nativeList(sql, pessoaId);
     }
 
     public Uni<List<Object[]>> historicoNapEmailPorPessoa(Long pessoaId) {
-        String sql = "" "
+        String sql = """
         SELECT en.id,
                 en.data,
                 COALESCE(en.email, '') AS email,
@@ -312,12 +310,12 @@ public class AlunoRepository {
         FROM edc_email_nap en
         WHERE en.id_contrato IN (SELECT id FROM edc_contrato WHERE id_pessoa = ?1)
         ORDER BY en.data DESC NULLS LAST, en.id DESC
-        "" ";
+        """;
         return nativeList(sql, pessoaId);
     }
 
     public Uni<List<Object[]>> historicoCobrancaLigacaoPorPessoa(Long pessoaId) {
-        String sql = "" "
+        String sql = """
         SELECT lc.id,
                 lc.data_inicial,
                 COALESCE(lc.telefone, '') AS telefone,
@@ -329,12 +327,12 @@ public class AlunoRepository {
         LEFT JOIN fin_resultado_ligacao_cobranca r ON r.id = lc.id_resultado_cobranca
         WHERE lc.id_contrato IN (SELECT id FROM edc_contrato WHERE id_pessoa = ?1)
         ORDER BY lc.data_inicial DESC NULLS LAST, lc.id DESC
-        "" ";
+        """;
         return nativeList(sql, pessoaId);
     }
 
     public Uni<List<Object[]>> historicoCobrancaEmailPorPessoa(Long pessoaId) {
-        String sql = "" "
+        String sql = """
         SELECT ec.id,
                 ec.data,
                 COALESCE(ec.email, '') AS email,
@@ -345,12 +343,12 @@ public class AlunoRepository {
         FROM fin_email_cobranca ec
         WHERE ec.id_contrato IN (SELECT id FROM edc_contrato WHERE id_pessoa = ?1)
         ORDER BY ec.data DESC NULLS LAST, ec.id DESC
-        "" ";
+        """;
         return nativeList(sql, pessoaId);
     }
 
     public Uni<List<Object[]>> historicoAlunoPorPessoa(Long pessoaId) {
-        String sql = "" "
+        String sql = """
         SELECT ha.id,
                 ha.data_registro,
                 COALESCE(ha.descricao, '') AS descricao,
@@ -361,7 +359,7 @@ public class AlunoRepository {
         LEFT JOIN bas_login l ON l.id_usuario = u.id
         WHERE ha.id_aluno = ?1
         ORDER BY ha.data_registro DESC NULLS LAST, ha.id DESC
-        "" ";
+        """;
         return nativeList(sql, pessoaId);
     }
 

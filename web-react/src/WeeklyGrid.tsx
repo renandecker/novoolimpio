@@ -112,7 +112,7 @@ export function WeeklyGrid({events, startDate, minTime, maxTime, dayLabels, onEv
                 <div className="wg-corner wg-corner-titulo">Hora</div>
                 {days.map((d, i) => (
                     <div key={`h${i}`} className={`wg-header-day${toIsoDate(d) === todayIso ? ' wg-header-hoje' : ''}`}>
-                        <span className="wg-dia-nome">{dayLabels?.[i] ? ? DIA_NOME[(d.getDay() + 6) % 7]}</span>
+                        <span className="wg-dia-nome">{dayLabels?.[i] ?? DIA_NOME[(d.getDay() + 6) % 7]}</span>
                         <span className="wg-dia-data">{fmtDataLong(d)}</span>
                     </div>
                 ))}
@@ -125,7 +125,7 @@ export function WeeklyGrid({events, startDate, minTime, maxTime, dayLabels, onEv
                             .map((e, j) => (
                                 <div
                                     key={j}
-                                    className={`wg-all-day-event ${e.styleClass ? ? ''}`}
+                                    className={`wg-all-day-event ${e.styleClass ?? ''}`}
                                     title={e.title}
                                     onClick={() => onEventClick?.(e)}
                                 >
@@ -170,7 +170,7 @@ export function WeeklyGrid({events, startDate, minTime, maxTime, dayLabels, onEv
                                 return (
                                     <div
                                         key={j}
-                                        className={`wg-event ${e.styleClass ? ? ''}`}
+                                        className={`wg-event ${e.styleClass ?? ''}`}
                                         style={{top, height}}
                                         title={e.title}
                                         onClick={() => onEventClick?.(e)}

@@ -20,11 +20,11 @@ function ParcelasTabela({parcelas, titulo}: { parcelas: Parcela[]; titulo: strin
                 </thead>
                 <tbody>
                 {parcelas.map(p => (
-                    <tr key={`${p.contratoId ? ? ''}-${p.id ? ? p.parcelaSequencia ? ? ''}`}>
+                    <tr key={`${p.contratoId ?? ''}-${p.id ?? p.parcelaSequencia ?? ''}`}>
                         <td>
                             <span style={{color: p.descricaoCor, fontWeight: 'bold'}}>{p.descricao}</span>
                         </td>
-                        <td>{p.parcelaSequencia ? ? p.parcela ? ? '-'}</td>
+                        <td>{p.parcelaSequencia ?? p.parcela ?? '-'}</td>
                         <td>{formatarData(p.dataVencimento)}</td>
                         <td>{formatarMoeda(p.valor)}</td>
                         <td>{formatarMoeda(p.valorPago)}</td>
@@ -91,11 +91,11 @@ export default function AlunoFinanceiroScreen() {
             </span>
                     </div>
                     <div className="aluno-portal-card">
-                        <span className="aluno-portal-card-valor">{resumo.qtdParcelasAtrasadas ? ? 0}</span>
+                        <span className="aluno-portal-card-valor">{resumo.qtdParcelasAtrasadas ?? 0}</span>
                         <span className="aluno-portal-card-rotulo">Parcelas atrasadas</span>
                     </div>
                     <div className="aluno-portal-card">
-                        <span className="aluno-portal-card-valor">{resumo.qtdParcelasRestantes ? ? 0}</span>
+                        <span className="aluno-portal-card-valor">{resumo.qtdParcelasRestantes ?? 0}</span>
                         <span className="aluno-portal-card-rotulo">Parcelas restantes</span>
                     </div>
                     <div className="aluno-portal-card">
@@ -105,7 +105,7 @@ export default function AlunoFinanceiroScreen() {
                 </div>
             )}
 
-            {(financeiro?.contratos?.length ? ? 0) > 0 && (
+            {(financeiro?.contratos?.length ?? 0) > 0 && (
                 <section className="aluno-portal-item">
                     <h2>Contratos</h2>
                     <table className="aluno-portal-tabela">
@@ -123,13 +123,13 @@ export default function AlunoFinanceiroScreen() {
                         </thead>
                         <tbody>
                         {financeiro!.contratos.map((c: ContratoFinanceiro) => (
-                            <tr key={c.id ? ? 0}>
+                            <tr key={c.id ?? 0}>
                                 <td>{c.id}</td>
                                 <td>{c.curso}</td>
                                 <td>{c.unidade}</td>
                                 <td>{c.unidadeResponsavel}</td>
                                 <td>{c.status}</td>
-                                <td>{c.qtdeReparcelamento ? ? 0}</td>
+                                <td>{c.qtdeReparcelamento ?? 0}</td>
                                 <td>
                                     {c.proximaParcelaSequencia != null
                                         ? `${c.proximaParcelaSequencia}ª · ${formatarData(c.proximaParcelaData)} · ${formatarMoeda(c.proximaParcelaValor)}`

@@ -26,7 +26,7 @@ export default function AlunoBoletimScreen() {
         alunoApi
             .boletim()
             .then((data) => {
-                if (active) setBoletins(data ? ? []);
+                if (active) setBoletins(data ?? []);
             })
             .catch((e: any) => {
                 if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar o boletim.');
@@ -81,9 +81,9 @@ export default function AlunoBoletimScreen() {
                             </Text>
                         </View>
                         <View
-                            style={[styles.statusBadge, {backgroundColor: (STATUS_COLOR[b.status] ? ? '#666') + '22'}]}>
-                            <Text style={[styles.statusText, {color: STATUS_COLOR[b.status] ? ? '#666'}]}>
-                                {STATUS_ROTULO[b.status] ? ? b.status}
+                            style={[styles.statusBadge, {backgroundColor: (STATUS_COLOR[b.status] ?? '#666') + '22'}]}>
+                            <Text style={[styles.statusText, {color: STATUS_COLOR[b.status] ?? '#666'}]}>
+                                {STATUS_ROTULO[b.status] ?? b.status}
                             </Text>
                         </View>
                     </View>

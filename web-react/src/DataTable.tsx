@@ -108,7 +108,7 @@ const readableOn = (hex: string): string => {
 };
 
 function ColorCell({value}: { value: unknown }) {
-    if (!isHexColor(value)) return <span>{String(value ? ? '')}</span>;
+    if (!isHexColor(value)) return <span>{String(value ?? '')}</span>;
     const color = value.trim();
     return (
         <span
@@ -176,15 +176,15 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
     const [executing, setExecuting] = useState<Action | null>(null);
     const [notice, setNotice] = useState<string>('');
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-    const colorColumnSet = new Set(colorColumns ? ? []);
+    const colorColumnSet = new Set(colorColumns ?? []);
     const {can} = usePermissions();
     const routeOutcome = useCurrentOutcome();
-    const screenOutcome = outcome ? ? routeOutcome;
+    const screenOutcome = outcome ?? routeOutcome;
 
     const q = useModulePaged(path, page, size, params);
-    const items = q.data?.content ? ? [];
-    const totalElements = q.data?.totalElements ? ? 0;
-    const totalPages = Math.max(1, q.data?.totalPages ? ? 0);
+    const items = q.data?.content ?? [];
+    const totalElements = q.data?.totalElements ?? 0;
+    const totalPages = Math.max(1, q.data?.totalPages ?? 0);
 
     // Fetch perfil module permissions from bas_perfil_modulo
     const [perfilModuloPermissions, setPerfilModuloPermissions] = useState<PerfilModuloPermissions | null>(null);
@@ -205,13 +205,13 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
         carregarPermissoes();
     }, [path]);
 
-    const canCreate = can('CREATE', screenOutcome) || (perfilModuloPermissions?.novo ? ? false);
-    const canUpdate = can('UPDATE', screenOutcome) || (perfilModuloPermissions?.editar ? ? false);
-    const canDelete = can('DELETE', screenOutcome) || (perfilModuloPermissions?.remover ? ? false);
-    const canRelatorio = can('EXECUTE', screenOutcome) || (perfilModuloPermissions?.relatorio ? ? false);
+    const canCreate = can('CREATE', screenOutcome) || (perfilModuloPermissions?.novo ?? false);
+    const canUpdate = can('UPDATE', screenOutcome) || (perfilModuloPermissions?.editar ?? false);
+    const canDelete = can('DELETE', screenOutcome) || (perfilModuloPermissions?.remover ?? false);
+    const canRelatorio = can('EXECUTE', screenOutcome) || (perfilModuloPermissions?.relatorio ?? false);
 
-    const feature = path.split('/').filter(Boolean)[2] ? ? '';
-    const resource = path.split('/').filter(Boolean)[3] ? ? '';
+    const feature = path.split('/').filter(Boolean)[2] ?? '';
+    const resource = path.split('/').filter(Boolean)[3] ?? '';
     const entityTitle = toTitle(resource.replace(/^(form|list|colunas)/i, '') || resource);
 
 
@@ -324,15 +324,15 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
 
     const apiErrorMessage = (error: unknown) =>
         (error as { response?: { data?: { error?: string } } })?.response?.data?.error
-            ? ? (error as Error)?.message
-            ? ? 'erro desconhecido';
+            ?? (error as Error)?.message
+            ?? 'erro desconhecido';
 
     const closeModal = () => setModal(null);
 
     const exportarDados = (item: ApiItem) => {
         // Exportar dados da tabela para JSON/visualização
-        const {content} = q.data ? ? {};
-        const dados = content?.map((i: ApiItem) => ({id: i.id, nome: i.nome})) ? ? [];
+        const {content} = q.data ?? {};
+        const dados = content?.map((i: ApiItem) => ({id: i.id, nome: i.nome})) ?? [];
         const blob = new Blob([JSON.stringify(dados, null, 2)], {type: 'application/json'});
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -362,7 +362,7 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
 
     const saveEdit = (item: ApiItem, values: Record<string, unknown>) => {
         q.update.mutate(
-            {id: item.id, body: {nome: item.nome ? ? 'Registro', ...values} as unknown as ApiItem},
+            {id: item.id, body: {nome: item.nome ?? 'Registro', ...values} as unknown as ApiItem},
             {onError: (error) => setNotice(`Erro ao salvar: ${apiErrorMessage(error)}`)},
         );
         closeModal();
@@ -587,7 +587,7 @@ function RecordModal({
                 copy[field.key] = value === 'true';
                 continue;
             }
-            copy[field.key] = typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value ? ? '');
+            copy[field.key] = typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value ?? '');
         }
         return copy;
     });
@@ -598,7 +598,7 @@ function RecordModal({
         queryFn: async () => (await api.get<RefsByColumn>(`${path}/refs`)).data,
         enabled: hasFk,
     });
-    const refs: RefsByColumn = refsQuery.data ? ? {};
+    const refs: RefsByColumn = refsQuery.data ?? {};
 
     const handleComboChange = (fieldKey: string, raw: string) => {
         setValues((prev) => ({...prev, [fieldKey]: raw === '' ? null : Number(raw)}));
@@ -644,7 +644,7 @@ function RecordModal({
                                             ) : options ? (
                                                 <select
                                                     className="form-input form-select"
-                                                    value={String(values[field.key] ? ? '')}
+                                                    value={String(values[field.key] ?? '')}
                                                     onChange={(event) => setValues((prev) => ({
                                                         ...prev,
                                                         [field.key]: event.target.value
@@ -664,13 +664,13 @@ function RecordModal({
                                             ) : isFk && refOptions ? (
                                                 <select
                                                     className="form-input form-select"
-                                                    value={String(values[field.key] ? ? '')}
+                                                    value={String(values[field.key] ?? '')}
                                                     onChange={(event) => handleComboChange(field.key, event.target.value)}
                                                 >
                                                     <option value="">-- Selecione --</option>
                                                     {refOptions.map((option) => (
                                                         <option key={option.id} value={option.id}>
-                                                            {option.label ? ? `#${option.id}`}
+                                                            {option.label ?? `#${option.id}`}
                                                         </option>
                                                     ))}
                                                 </select>
@@ -684,7 +684,7 @@ function RecordModal({
                                                 />
                                             ) : isFile ? (
                                                 <Base64FileUpload
-                                                    value={String(values[field.key] ? ? '')}
+                                                    value={String(values[field.key] ?? '')}
                                                     onChange={(value) => setValues((prev) => ({
                                                         ...prev,
                                                         [field.key]: value
@@ -693,7 +693,7 @@ function RecordModal({
                                             ) : (
                                                 <input
                                                     className="form-input"
-                                                    value={String(values[field.key] ? ? '')}
+                                                    value={String(values[field.key] ?? '')}
                                                     onChange={(event) => setValues((prev) => ({
                                                         ...prev,
                                                         [field.key]: event.target.value
@@ -731,8 +731,8 @@ function ComboSelect({
     value: unknown;
     onChange: (raw: string) => void;
 }) {
-    const valueKey = source.valueKey ? ? 'id';
-    const labelKey = source.labelKey ? ? 'titulo';
+    const valueKey = source.valueKey ?? 'id';
+    const labelKey = source.labelKey ?? 'titulo';
     const optionsQuery = useQuery({
         queryKey: ['combo', source.path],
         queryFn: async () => (await api.get<ApiItem[]>(source.path)).data,
@@ -746,18 +746,18 @@ function ComboSelect({
         );
     }
 
-    const options = optionsQuery.data ? ? [];
+    const options = optionsQuery.data ?? [];
     return (
         <select
             className="form-input form-select"
-            value={String(value ? ? '')}
+            value={String(value ?? '')}
             onChange={(event) => onChange(event.target.value)}
         >
             <option value="">-- Selecione --</option>
             {options.map((option) => {
                 const record = asRecord(option);
-                const optionValue = String(record[valueKey] ? ? '');
-                const label = record[labelKey] ? ? `#${record.id}`;
+                const optionValue = String(record[valueKey] ?? '');
+                const label = record[labelKey] ?? `#${record.id}`;
                 return (
                     <option key={optionValue} value={optionValue}>
                         {String(label)}

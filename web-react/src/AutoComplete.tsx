@@ -27,7 +27,7 @@ export function AutoComplete({
                                  minChars = 3,
                                  disabled = false,
                              }: AutoCompleteProps) {
-    const [text, setText] = useState(value?.label ? ? '');
+    const [text, setText] = useState(value?.label ?? '');
     const [options, setOptions] = useState<AutoCompleteOption[]>([]);
     const [open, setOpen] = useState(false);
     const [highlighted, setHighlighted] = useState(-1);
@@ -37,7 +37,7 @@ export function AutoComplete({
     const timerRef = useRef<number | null>(null);
 
     useEffect(() => {
-        setText(value?.label ? ? '');
+        setText(value?.label ?? '');
     }, [value]);
 
     useEffect(() => {

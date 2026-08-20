@@ -14,7 +14,7 @@ export default function AulaOcorrenciaScreen() {
         aulaApi
             .ocorrencias(Number(oferecimentoId))
             .then(data => {
-                if (active) setOcorrencias(data ? ? []);
+                if (active) setOcorrencias(data ?? []);
             })
             .catch((e: any) => {
                 if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar as ocorrências.');

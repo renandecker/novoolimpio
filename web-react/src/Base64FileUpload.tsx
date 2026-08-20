@@ -28,7 +28,7 @@ export function Base64FileUpload({
             return;
         }
         const reader = new FileReader();
-        reader.onload = () => onChange(String(reader.result ? ? ''));
+        reader.onload = () => onChange(String(reader.result ?? ''));
         reader.onerror = () => onError?.('Falha ao ler o arquivo.');
         reader.readAsDataURL(file);
     };
@@ -36,7 +36,7 @@ export function Base64FileUpload({
     return (
         <div className="base64-upload">
             {value ? (
-                <img className="base64-upload-preview" src={value} alt={label ? ? 'Arquivo anexado'}/>
+                <img className="base64-upload-preview" src={value} alt={label ?? 'Arquivo anexado'}/>
             ) : (
                 <div className="base64-upload-empty">Nenhum arquivo selecionado</div>
             )}

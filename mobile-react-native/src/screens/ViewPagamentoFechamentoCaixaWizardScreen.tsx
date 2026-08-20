@@ -75,7 +75,7 @@ type ParcelaCalculo = {
 };
 
 const money = (v: number | undefined | null) =>
-    (v ? ? 0).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+    (v ?? 0).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
 
 interface FechamentoCaixaData {
     // Step 1 - Configuração
@@ -146,7 +146,7 @@ function fetchAutoComplete(path: string, valueKey: string, labelKey: string) {
         const {data} = await api.get<any[]>(path, {params: {q: query, limit: 20}});
         return data.map((item) => ({
             id: Number(item[valueKey]),
-            label: String(item[labelKey] ? ? `#${item[valueKey]}`),
+            label: String(item[labelKey] ?? `#${item[valueKey]}`),
         }));
     };
 }
@@ -239,7 +239,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
             if (!d.parcelaId) return 'Informe o número da parcela ou busque por aluno';
             if (!d.calculo) return 'Calcule os valores antes de confirmar';
             const totalFormas = d.formasPagamento.reduce((acc, f) => acc + (Number(f.valor) || 0), 0);
-            if (totalFormas < (d.calculo.valorCobrado ? ? 0)) return 'Valor recebido deve ser >= valor cobrado';
+            if (totalFormas < (d.calculo.valorCobrado ?? 0)) return 'Valor recebido deve ser >= valor cobrado';
         } else if (d.movSubTab === 'extra') {
             if (!d.historico) return 'Informe a descrição/histórico';
             if (!d.valorExtra || Number(d.valorExtra) <= 0) return 'Informe o valor (> 0)';
@@ -272,7 +272,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
             setFields({caixaAberto: true, caixaId: newCaixa.id});
             setMensagem('Caixa aberto com sucesso!');
         } catch (e: any) {
-            setErro(e?.response?.data?.message ? ? 'Erro ao abrir o caixa!');
+            setErro(e?.response?.data?.message ?? 'Erro ao abrir o caixa!');
         } finally {
             setLoading(false);
         }
@@ -353,7 +353,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                 formasPagamento: [{tipoPagamento: 'DINHEIRO', valor: '', documento: ''}]
             });
         } catch (e: any) {
-            setErro(e?.response?.data?.message ? ? 'Erro ao registrar pagamento!');
+            setErro(e?.response?.data?.message ?? 'Erro ao registrar pagamento!');
         } finally {
             setLoading(false);
         }
@@ -376,7 +376,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
             setMensagem('Movimentação registrada com sucesso!');
             setFields({historico: '', valorExtra: '', movimentoId: ''});
         } catch (e: any) {
-            setErro(e?.response?.data?.message ? ? 'Erro ao registrar movimentação!');
+            setErro(e?.response?.data?.message ?? 'Erro ao registrar movimentação!');
         } finally {
             setLoading(false);
         }
@@ -392,7 +392,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
             setField('valorSangria', '');
             await carregarTotais();
         } catch (e: any) {
-            setErro(e?.response?.data?.message ? ? 'Dinheiro em caixa insuficiente!');
+            setErro(e?.response?.data?.message ?? 'Dinheiro em caixa insuficiente!');
         } finally {
             setLoading(false);
         }
@@ -633,7 +633,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                         label: f.tipoPagamento
                                     } : null}
                                     onChange={(opt) => {
-                                        const tp = TIPOS_PAGAMENTO[opt?.id ? ? 0];
+                                        const tp = TIPOS_PAGAMENTO[opt?.id ?? 0];
                                         if (tp) updateFormaPagamento(idx, {tipoPagamento: tp.value});
                                     }}
                                     fetchOptions={async () => TIPOS_PAGAMENTO.map((t, i) => ({id: i, label: t.label}))}
@@ -856,8 +856,8 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                     </View>
 
                     <Pressable
-                        style={[styles.primaryButton, (!state.calculo || valorRecebido < (state.calculo?.valorCobrado ? ? Infinity)) && styles.buttonDisabled]}
-                        disabled={loading || !state.calculo || valorRecebido < (state.calculo?.valorCobrado ? ? Infinity)}
+                        style={[styles.primaryButton, (!state.calculo || valorRecebido < (state.calculo?.valorCobrado ?? Infinity)) && styles.buttonDisabled]}
+                        disabled={loading || !state.calculo || valorRecebido < (state.calculo?.valorCobrado ?? Infinity)}
                         onPress={registrarPagamento}
                     >
                         <Text style={styles.primaryButtonText}>Confirmar Pagamento</Text>
@@ -900,7 +900,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                 label: state.tipoPagamentoExtra
                             } : null}
                             onChange={(opt) => {
-                                const tp = TIPOS_PAGAMENTO[opt?.id ? ? 0];
+                                const tp = TIPOS_PAGAMENTO[opt?.id ?? 0];
                                 if (tp) setField('tipoPagamentoExtra', tp.value);
                             }}
                             fetchOptions={async () => TIPOS_PAGAMENTO.map((t, i) => ({id: i, label: t.label}))}

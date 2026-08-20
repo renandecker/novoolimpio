@@ -156,7 +156,7 @@ export function Wizard({
                     onPress={goNext}
                 >
                     <Text style={styles.nextButtonText}>
-                        {isValidating ? 'Validando...' : last ? current?.nextLabel ? ? completeLabel : current?.nextLabel ? ? 'Próximo'}
+                        {isValidating ? 'Validando...' : last ? current?.nextLabel ?? completeLabel : current?.nextLabel ?? 'Próximo'}
                     </Text>
                 </Pressable>
             </View>

@@ -43,7 +43,7 @@ export default function ViewOferecimentoComponenteCurricularDisponibilidadeOfere
         enabled: !!unidadeId,
     });
 
-    const unidades = (unidadesQuery.data ? ? []).filter((u) => u.fl_ativo !== false);
+    const unidades = (unidadesQuery.data ?? []).filter((u) => u.fl_ativo !== false);
 
     return (
         <PermissionGate permission="READ">
@@ -71,7 +71,7 @@ export default function ViewOferecimentoComponenteCurricularDisponibilidadeOfere
                 <ScheduleWeekView
                     startDate={weekStart}
                     onWeekChange={setWeekStart}
-                    events={eventosQuery.data ? ? []}
+                    events={eventosQuery.data ?? []}
                     loading={!!unidadeId && eventosQuery.isLoading}
                     error={eventosQuery.isError ? 'Erro ao carregar a agenda.' : null}
                     legend={LEGENDA}

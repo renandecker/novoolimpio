@@ -24,8 +24,8 @@ public class MailService {
 
     public Uni<Void> sendTemporaryPassword(String to, String username, String temporaryPassword) {
         String subject = "Olímpio - Redefinição de senha";
-        String body = "" "
-        Olá % s,
+String body = """
+        Olá %s,
 
                 Recebemos uma solicitação para redefinir a sua senha de acesso ao sistema Olímpio.
 
@@ -36,9 +36,9 @@ public class MailService {
 
                 Se você não solicitou essa alteração, ignore este e -mail.
 
-                Atenciosamente,
+        Atenciosamente,
                 Equipe Olímpio
-        "" ".formatted(username, temporaryPassword);
+        """.formatted(username, temporaryPassword);
         return emailConfigRepository.findConfiguracaoEmailPadrao()
                 .onItem().transformToUni(config -> {
                     if (config == null || config.host == null || config.host.isBlank()) {

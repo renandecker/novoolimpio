@@ -53,7 +53,7 @@ export function ReportButton() {
 
     useEffect(() => {
         if (page === 0) {
-            setAllItems(list.data?.content ? ? []);
+            setAllItems(list.data?.content ?? []);
         } else if (list.data?.content) {
             setAllItems((prev) => [...prev, ...list.data!.content]);
         }
@@ -95,7 +95,7 @@ export function ReportButton() {
         setOpen(!open);
     };
 
-    const totalElements = list.data?.totalElements ? ? 0;
+    const totalElements = list.data?.totalElements ?? 0;
     const hasMore = allItems.length < totalElements;
 
     const handleLoadMore = () => {
@@ -104,7 +104,7 @@ export function ReportButton() {
 
     const handleItemClick = (item: RelatorioDisponivel) => {
         setOpen(false);
-        navigate(tipoRota[item.tipo] ? ? '/view/relatorios/listTabela');
+        navigate(tipoRota[item.tipo] ?? '/view/relatorios/listTabela');
     };
 
     return (

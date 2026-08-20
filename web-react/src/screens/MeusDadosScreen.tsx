@@ -109,7 +109,7 @@ export default function MeusDadosScreen() {
         setError('');
         try {
             const {data} = await api.put<{ foto: string }>('/api/basico/usuario/foto-base64', {foto});
-            const fotoFinal = data.foto ? ? foto;
+            const fotoFinal = data.foto ?? foto;
             setFoto(fotoFinal);
             setDados((prev) => ({...prev, foto: fotoFinal}));
             refreshSession({

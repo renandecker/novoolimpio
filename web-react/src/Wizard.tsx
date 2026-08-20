@@ -153,7 +153,7 @@ export function Wizard({
                     onClick={goNext}
                     disabled={current?.nextDisabled || isValidating}
                 >
-                    {isValidating ? 'Validando...' : last ? current?.nextLabel ? ? completeLabel : current?.nextLabel ? ? 'Próximo'}
+                    {isValidating ? 'Validando...' : last ? current?.nextLabel ?? completeLabel : current?.nextLabel ?? 'Próximo'}
                 </button>
             </div>
         </div>

@@ -107,7 +107,7 @@ function ProdutosEstoqueCentralTab({unidadeId}: { unidadeId: string }) {
         enabled: !!unidadeId,
     });
 
-    const itens = data ? ? [];
+    const itens = data ?? [];
 
     if (!unidadeId) return <p className="disp-aviso">Selecione uma unidade para visualizar o estoque central.</p>;
     if (isLoading) return <p>Carregando...</p>;
@@ -138,7 +138,7 @@ function ProdutosEstoqueCentralTab({unidadeId}: { unidadeId: string }) {
                             )}
                             <div className="estoque-card-info">
                                 <span>Categoria: {item.produtoCategoriaDescricao || '-'}</span>
-                                <span>Valor: {formatCurrency(item.produtoValor ? ? item.valor)}</span>
+                                <span>Valor: {formatCurrency(item.produtoValor ?? item.valor)}</span>
                                 <span>Quantidade Estoque: {item.quantidade}</span>
                             </div>
                         </div>
@@ -159,7 +159,7 @@ function SolicitacoesTab({unidadeId}: { unidadeId: string }) {
         queryFn: async () => (await api.get<SolicitacaoRow[]>('/api/estoque/solicitacao-estoque')).data,
     });
 
-    const itens = (data ? ? []).filter(item => !unidadeId || String(item.unidadeId) === unidadeId);
+    const itens = (data ?? []).filter(item => !unidadeId || String(item.unidadeId) === unidadeId);
 
     if (!unidadeId) return <p className="disp-aviso">Selecione uma unidade para visualizar as solicitações.</p>;
     if (isLoading) return <p>Carregando...</p>;
@@ -217,7 +217,7 @@ function PedidosTab({unidadeId}: { unidadeId: string }) {
         queryFn: async () => (await api.get<ControlePedidosRow[]>('/api/estoque/controle-pedidos')).data,
     });
 
-    const itens = (data ? ? []).filter(item => !unidadeId || String(item.unidadeId) === unidadeId);
+    const itens = (data ?? []).filter(item => !unidadeId || String(item.unidadeId) === unidadeId);
 
     if (!unidadeId) return <p className="disp-aviso">Selecione uma unidade para visualizar os pedidos.</p>;
     if (isLoading) return <p>Carregando...</p>;
@@ -275,7 +275,7 @@ function EntregasTab({unidadeId}: { unidadeId: string }) {
         enabled: !!unidadeId,
     });
 
-    const itens = (data ? ? []);
+    const itens = (data ?? []);
 
     if (!unidadeId) return <p className="disp-aviso">Selecione uma unidade para visualizar as entregas.</p>;
     if (isLoading) return <p>Carregando...</p>;
@@ -320,7 +320,7 @@ function ProdutosUnidadeTab({unidadeId}: { unidadeId: string }) {
         enabled: !!unidadeId,
     });
 
-    const itens = data ? ? [];
+    const itens = data ?? [];
 
     if (!unidadeId) return <p className="disp-aviso">Selecione uma unidade para visualizar os produtos.</p>;
     if (isLoading) return <p>Carregando...</p>;
@@ -384,7 +384,7 @@ export default function ViewEstoqueControleestoqueListScreen() {
         queryFn: async () => (await api.get<UnidadeRow[]>('/api/view/unidade/listUnidade')).data,
     });
 
-    const unidades = (unidadesQuery.data ? ? []).filter((u) => u.fl_ativo !== false);
+    const unidades = (unidadesQuery.data ?? []).filter((u) => u.fl_ativo !== false);
 
     const tabs: TabItem[] = [
         {

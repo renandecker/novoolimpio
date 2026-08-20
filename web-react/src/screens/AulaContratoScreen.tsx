@@ -13,7 +13,7 @@ export default function AulaContratoScreen() {
         aulaApi
             .contratos()
             .then(data => {
-                if (active) setContratos(data ? ? []);
+                if (active) setContratos(data ?? []);
             })
             .catch((e: any) => {
                 if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar os cursos.');

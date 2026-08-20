@@ -37,7 +37,7 @@ export const subscribeNotificacoesStream = (onMessage: (notification: Notificaca
     const parseChunk = (chunk: string) => {
         buffer += chunk;
         const events = buffer.split('\n\n');
-        buffer = events.pop() ? ? '';
+        buffer = events.pop() ?? '';
         for (const event of events) {
             const line = event.split('\n').find((l) => l.trimStart().startsWith('data:'));
             if (!line) continue;

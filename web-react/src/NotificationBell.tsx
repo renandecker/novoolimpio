@@ -82,8 +82,8 @@ export function NotificationBell() {
         };
     }, [open]);
 
-    const unread = count.data ? ? 0;
-    const items = list.data?.content ? ? [];
+    const unread = count.data ?? 0;
+    const items = list.data?.content ?? [];
 
     const handleItemClick = (notification: Notificacao) => {
         if (!notification.lida) markRead.mutate(notification.id);

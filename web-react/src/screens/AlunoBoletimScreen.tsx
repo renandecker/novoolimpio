@@ -20,7 +20,7 @@ export default function AlunoBoletimScreen() {
         alunoApi
             .boletim()
             .then(data => {
-                if (active) setBoletins(data ? ? []);
+                if (active) setBoletins(data ?? []);
             })
             .catch((e: any) => {
                 if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar o boletim.');
@@ -28,18 +28,15 @@ export default function AlunoBoletimScreen() {
             .finally(() => {
                 if (active) setBusy(false);
             });
-        return () => {
-            active = false;
-        };
     }, []);
 
     if (busy) return <main><h1>Notas</h1><p className="aluno-portal-msg">Carregando...</p></main>;
     if (error) return <main><h1>Notas</h1>
         <div className="aluno-portal-error" role="alert">{error}</div>
     </main>;
-    if (boletins.length === 0) return <main><h1>Notas</h1><p className="aluno-portal-msg">Nenhuma nota encontrada.</p>;
+    if (boletins.length === 0) return <main><h1>Notas</h1><p className="aluno-portal-msg">Nenhuma nota encontrada.</p></main>;
 
-        return (
+    return (
         <main className="aluno-portal">
             <h1>Notas</h1>
             {boletins.map(b => (
@@ -53,8 +50,8 @@ export default function AlunoBoletimScreen() {
                         </div>
                         <span
                             className={`aluno-portal-status aluno-portal-status-${String(b.status).toLowerCase().replace(/\s+/g, '-')}`}>
-              {STATUS_ROTULO[b.status] ? ? b.status}
-            </span>
+                {STATUS_ROTULO[b.status] ?? b.status}
+                        </span>
                     </div>
 
                     {b.graus.map(grau => (
@@ -91,14 +88,9 @@ export default function AlunoBoletimScreen() {
                             )}
                         </div>
                     ))}
-
-                    <div className="aluno-portal-item-dados">
-                        <span><strong>Média final:</strong> {formatarNota(b.media)}</span>
-                        <span><strong>Frequência:</strong> {formatarPercentual(b.frequenciaPerc)}</span>
-                    </div>
                 </section>
             ))}
             <p className="aluno-portal-msg aluno-portal-data">Emitido em {new Date().toISOString()}</p>
         </main>
-        );
-        }
+    );
+}

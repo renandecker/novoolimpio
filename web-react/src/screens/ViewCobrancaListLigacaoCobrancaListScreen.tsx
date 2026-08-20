@@ -36,7 +36,7 @@ export default function ViewCobrancaListLigacaoCobrancaListScreen() {
         queryKey: ['etapas-cobranca'],
         queryFn: async () => (await api.get<EtapaCobranca[]>('/api/financeiro/etapas-cobranca')).data,
     });
-    const etapas = etapasQuery.data ? ? [];
+    const etapas = etapasQuery.data ?? [];
 
     return (
         <PermissionGate permission="READ">

@@ -143,7 +143,7 @@ function InfoTurma({turma}: { turma: Turma }) {
       </span>
             <span className="gp-info-item">
         <b>Status:</b> <span
-                className={`gp-status ${legacyClassName(turma.status) ? ? ''}`.trim()}>{turma.status}</span>
+                className={`gp-status ${legacyClassName(turma.status) ?? ''}`.trim()}>{turma.status}</span>
       </span>
             <span className="gp-info-item">
         <b>Professor:</b> {turma.professor}
@@ -216,7 +216,7 @@ function GestaoTab() {
             '/api/professor/professor/auto-complete-professor',
             {params: {query}},
         );
-        return (data ? ? []).map((item) => ({id: item.id, label: item.nome || `#${item.id}`}));
+        return (data ?? []).map((item) => ({id: item.id, label: item.nome || `#${item.id}`}));
     };
 
     async function buscarTurmas(professorId: number | null) {
@@ -310,7 +310,7 @@ function GestaoTab() {
 
     function editarAula(aula: AulaItem) {
         setAulaForm({id: aula.id, nome: aula.nome, descricao: aula.descricao, anexos: []});
-        const anexos = anexosDaAula[aula.id] ? ? [];
+        const anexos = anexosDaAula[aula.id] ?? [];
         if (anexos.length > 0) {
             setAulaForm({
                 id: aula.id,
@@ -561,7 +561,7 @@ function GestaoTab() {
                                 <td>{t.componenteCurricular}</td>
                                 <td>
                                     <span
-                                        className={`gp-status ${legacyClassName(t.status) ? ? ''}`.trim()}>{t.status}</span>
+                                        className={`gp-status ${legacyClassName(t.status) ?? ''}`.trim()}>{t.status}</span>
                                 </td>
                                 <td className="gp-acoes">
                                     {(t.status === 'EM_ANDAMENTO' || t.status === 'FINALIZADA') && (
@@ -723,17 +723,17 @@ function GestaoTab() {
                         <div className="gp-media">
                             <div>
                                 <b>Média aprovação sem exame: </b>
-                                <span>{notas.mediaSemExame ? ? '-'}</span>
+                                <span>{notas.mediaSemExame ?? '-'}</span>
                             </div>
                             {notas.recuperacao && (
                                 <div>
                                     <b>Média aprovação com exame: </b>
-                                    <span>{notas.mediaFinal ? ? '-'}</span>
+                                    <span>{notas.mediaFinal ?? '-'}</span>
                                 </div>
                             )}
                             <div>
                                 <b>Nota máxima: </b>
-                                <span>{notas.notaMaxima ? ? '-'}</span>
+                                <span>{notas.notaMaxima ?? '-'}</span>
                             </div>
                         </div>
                     </div>
@@ -775,8 +775,8 @@ function GestaoTab() {
                                                             type="number"
                                                             min={0}
                                                             step="0.1"
-                                                            max={notas.notaMaxima ? ? undefined}
-                                                            value={ava.nota ? ? ''}
+                                                            max={notas.notaMaxima ?? undefined}
+                                                            value={ava.nota ?? ''}
                                                             onChange={(e) =>
                                                                 atualizarNotaAvaliacao(ava.id, 'nota', e.target.value === '' ? null : Number(e.target.value))
                                                             }
@@ -789,8 +789,8 @@ function GestaoTab() {
                                                                 type="number"
                                                                 min={0}
                                                                 step="0.1"
-                                                                max={notas.notaMaxima ? ? undefined}
-                                                                value={n.valor ? ? ''}
+                                                                max={notas.notaMaxima ?? undefined}
+                                                                value={n.valor ?? ''}
                                                                 onChange={(e) =>
                                                                     atualizarNotaValor(ava.id, n.id, e.target.value === '' ? null : Number(e.target.value))
                                                                 }
@@ -806,7 +806,7 @@ function GestaoTab() {
                                             return (
                                                 <td key={g.id} className="gp-col-data">
                                                     <select
-                                                        value={ava.notaConceitoId ? ? ''}
+                                                        value={ava.notaConceitoId ?? ''}
                                                         onChange={(e) =>
                                                             atualizarNotaAvaliacao(ava.id, 'notaConceitoId', e.target.value === '' ? null : Number(e.target.value))
                                                         }
@@ -883,7 +883,7 @@ function GestaoTab() {
                         <div className="gp-control-group gp-control-group-stretch">
                             <span className="gp-control-label">Ocorrência:</span>
                             <select
-                                value={ocorrenciaAulaSel ? ? ''}
+                                value={ocorrenciaAulaSel ?? ''}
                                 onChange={(e) => e.target.value && selecionarOcorrenciaAula(Number(e.target.value))}
                             >
                                 <option value="">Selecione a ocorrência...</option>
@@ -1027,12 +1027,12 @@ function GestaoTab() {
                                             <td>{aula.nome}</td>
                                             <td>{aula.descricao}</td>
                                             <td>
-                                                {(anexosDaAula[aula.id] ? ? []).map((anexo) => (
+                                                {(anexosDaAula[aula.id] ?? []).map((anexo) => (
                                                     <span key={anexo.id} className="gp-anexo-chip">
                               {anexo.tipo}: {anexo.nome}
                             </span>
                                                 ))}
-                                                {(anexosDaAula[aula.id] ? ? []).length === 0 &&
+                                                {(anexosDaAula[aula.id] ?? []).length === 0 &&
                                                 <span className="gp-vazio">—</span>}
                                             </td>
                                             <td className="gp-acoes">

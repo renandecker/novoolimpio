@@ -70,7 +70,7 @@ function ProdutosEstoqueTab({unidadeId}: { unidadeId: string }) {
         enabled: !!unidadeId,
     });
 
-    const itens = data ? ? [];
+    const itens = data ?? [];
 
     if (!unidadeId) return <p className="disp-aviso">Selecione uma unidade para visualizar o estoque.</p>;
     if (isLoading) return <p>Carregando...</p>;
@@ -98,7 +98,7 @@ function ProdutosEstoqueTab({unidadeId}: { unidadeId: string }) {
                                      className="estoque-card-img"/>
                             )}
                             <div className="estoque-card-info">
-                                <span>Valor: {formatCurrency(item.produtoValor ? ? item.valor)}</span>
+                                <span>Valor: {formatCurrency(item.produtoValor ?? item.valor)}</span>
                                 <span>Qtde Produto: {item.quantidade}</span>
                                 <span>Categoria: {item.produtoCategoriaDescricao || '-'}</span>
                                 <div className="estoque-card-status">
@@ -134,7 +134,7 @@ function PendenciaVendaTab({unidadeId}: { unidadeId: string }) {
         enabled: !!unidadeId,
     });
 
-    const itens = data ? ? [];
+    const itens = data ?? [];
 
     if (!unidadeId) return <p className="disp-aviso">Selecione uma unidade para visualizar as pendências.</p>;
     if (isLoading) return <p>Carregando...</p>;
@@ -195,7 +195,7 @@ export default function ViewEstoqueEstoqueprodutoListScreen() {
         queryFn: async () => (await api.get<UnidadeRow[]>('/api/view/unidade/listUnidade')).data,
     });
 
-    const unidades = (unidadesQuery.data ? ? []).filter((u) => u.fl_ativo !== false);
+    const unidades = (unidadesQuery.data ?? []).filter((u) => u.fl_ativo !== false);
 
     const tabs: TabItem[] = [
         {key: 'produtosEstoque', label: 'Produtos Estoque', content: <ProdutosEstoqueTab unidadeId={unidadeId}/>},

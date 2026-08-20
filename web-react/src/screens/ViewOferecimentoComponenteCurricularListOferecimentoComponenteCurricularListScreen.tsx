@@ -24,7 +24,7 @@ const OFERECIMENTO_COLUMNS: DataTableColumn[] = [
         label: 'Inscritos / Vagas',
         render: (item) => {
             const record = asRecord(item);
-            return `${record.inscritos ? ? 0} / ${record.vagas ? ? 0}`;
+            return `${record.inscritos ?? 0} / ${record.vagas ?? 0}`;
         },
     },
     {key: 'id_professor', label: 'Professor'},

@@ -14,7 +14,7 @@ export default function AlunoAvaliacoesScreen() {
             .avaliacoes()
             .then(data => {
                 if (!active) return;
-                setAvaliacoes(data ? ? []);
+                setAvaliacoes(data ?? []);
             })
             .catch((e: any) => {
                 if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar as avaliações.');

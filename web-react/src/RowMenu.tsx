@@ -49,7 +49,7 @@ export function RowMenu({icon, className, title, items}: RowMenuProps) {
                         <button
                             key={item.key}
                             type="button"
-                            className={`row-menu-item ${item.className ? ? ''}`}
+                            className={`row-menu-item ${item.className ?? ''}`}
                             disabled={item.disabled}
                             onClick={() => {
                                 setOpen(false);

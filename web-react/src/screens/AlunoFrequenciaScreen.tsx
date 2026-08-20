@@ -27,7 +27,7 @@ export default function AlunoFrequenciaScreen() {
             .matriculas()
             .then(data => {
                 if (!active) return;
-                setMatriculas(data ? ? []);
+                setMatriculas(data ?? []);
                 if (data && data.length > 0) setSelecionada(data[0].id);
             })
             .catch((e: any) => {
@@ -79,7 +79,7 @@ export default function AlunoFrequenciaScreen() {
             {matriculas.length > 1 && (
                 <label className="aluno-portal-select">
                     <span>Matrícula:</span>
-                    <select value={selecionada ? ? ''} onChange={e => setSelecionada(Number(e.target.value))}>
+                    <select value={selecionada ?? ''} onChange={e => setSelecionada(Number(e.target.value))}>
                         {matriculas.map(m => (
                             <option key={m.id} value={m.id}>
                                 {m.componente || m.curso}

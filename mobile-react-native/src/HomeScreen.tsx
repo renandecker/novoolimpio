@@ -67,7 +67,7 @@ export default function HomeScreen({navigation}: NativeStackScreenProps<ParamLis
     }, [ready, listarFavoritos]);
 
     const routeNames = navigation.getState().routeNames;
-    const modulePermissions = session?.modulePermissions ? ? {};
+    const modulePermissions = session?.modulePermissions ?? {};
     const allowedKeys = Object.keys(modulePermissions).length ? new Set(Object.keys(modulePermissions)) : null;
 
     const navigateTo = useCallback(
@@ -112,7 +112,7 @@ export default function HomeScreen({navigation}: NativeStackScreenProps<ParamLis
         if (!query) return null;
         const tokens = query.split(/\s+/);
         return flatItems.filter((item) => {
-            const haystack = `${item.label} ${item.parent ? ? ''} ${item.keywords}`.toLowerCase();
+            const haystack = `${item.label} ${item.parent ?? ''} ${item.keywords}`.toLowerCase();
             return tokens.every((t) => haystack.includes(t));
         });
     }, [query, flatItems]);

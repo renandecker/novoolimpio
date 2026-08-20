@@ -14,7 +14,7 @@ export default function AulaOferecimentoScreen() {
         aulaApi
             .oferecimentos(Number(contratoId))
             .then(data => {
-                if (active) setOferecimentos(data ? ? []);
+                if (active) setOferecimentos(data ?? []);
             })
             .catch((e: any) => {
                 if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar os módulos.');

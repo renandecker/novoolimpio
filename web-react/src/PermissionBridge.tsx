@@ -7,8 +7,8 @@ import type {ModulePermissions} from './types';
 
 export default function PermissionBridge({children}: { children: ReactNode }) {
     const {session} = useAuth();
-    const permissions = session?.permissions ? ? ['READ'];
-    const jwtModulePermissions = (session?.modulePermissions ? ? {}) as ModulePermissions;
+    const permissions = session?.permissions ?? ['READ'];
+    const jwtModulePermissions = (session?.modulePermissions ?? {}) as ModulePermissions;
     const serverQuery = useQuery({
         queryKey: ['permissao-me', session?.username],
         queryFn: async () => (await api.get<ModulePermissions>('/api/permissao/me')).data,
@@ -17,7 +17,7 @@ export default function PermissionBridge({children}: { children: ReactNode }) {
         staleTime: 24 * 60 * 60 * 1000,
         gcTime: 24 * 60 * 60 * 1000,
     });
-    const modulePermissions = serverQuery.data ? ? jwtModulePermissions;
+    const modulePermissions = serverQuery.data ?? jwtModulePermissions;
     return (
         <PermissionProvider permissions={permissions} modulePermissions={modulePermissions}>
             {children}

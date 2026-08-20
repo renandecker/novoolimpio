@@ -49,7 +49,7 @@ export function FavoritosMenu() {
 
     useEffect(() => {
         if (page === 0) {
-            setAllItems(list.data?.content ? ? []);
+            setAllItems(list.data?.content ?? []);
         } else if (list.data?.content) {
             setAllItems((prev) => [...prev, ...list.data!.content]);
         }
@@ -91,7 +91,7 @@ export function FavoritosMenu() {
         setOpen(!open);
     };
 
-    const totalElements = list.data?.totalElements ? ? 0;
+    const totalElements = list.data?.totalElements ?? 0;
     const hasMore = allItems.length < totalElements;
 
     const handleLoadMore = () => {

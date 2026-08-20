@@ -54,7 +54,7 @@ function FieldsStep({fields}: { fields: ModuleWizardField[] }) {
                     <Text style={styles.formLabel}>{field.label}</Text>
                     <TextInput
                         style={styles.formInput}
-                        placeholder={field.placeholder ? ? field.label}
+                        placeholder={field.placeholder ?? field.label}
                         secureTextEntry={field.secure}
                     />
                 </View>
@@ -76,13 +76,13 @@ export function ModuleWizard({steps, completeLabel}: { steps: ModuleWizardStep[]
             <ModuleList path={step.path}/>
         ) : (
             <View style={styles.emptyBox}>
-                <Text style={styles.empty}>{step.empty ? ? 'Sem conteúdo nesta etapa.'}</Text>
+                <Text style={styles.empty}>{step.empty ?? 'Sem conteúdo nesta etapa.'}</Text>
             </View>
         ),
         nextLabel: index === steps.length - 1 ? undefined : step.nextLabel,
     }));
 
-    return <Wizard steps={wizardSteps} completeLabel={lastStep?.nextLabel ? ? completeLabel}/>;
+    return <Wizard steps={wizardSteps} completeLabel={lastStep?.nextLabel ?? completeLabel}/>;
 }
 
 const styles = StyleSheet.create({

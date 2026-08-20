@@ -66,7 +66,7 @@ type ParcelaCalculo = {
 };
 
 const money = (v: number | undefined | null) =>
-    (v ? ? 0).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+    (v ?? 0).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
 
 function toOptions(arr: Array<{ id: number; nome: string }>): AutoCompleteOption[] {
     return arr.map((a) => ({id: a.id, label: a.nome}));
@@ -80,7 +80,7 @@ function fetchAutoComplete(path: string, valueKey: string, labelKey: string) {
         });
         return data.map((item) => ({
             id: Number(item[valueKey]),
-            label: String(item[labelKey] ? ? `#${item[valueKey]}`),
+            label: String(item[labelKey] ?? `#${item[valueKey]}`),
         }));
     };
 }
@@ -219,7 +219,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
             if (!d.parcelaId) return 'Informe o número da parcela ou busque por aluno';
             if (!d.calculo) return 'Calcule os valores antes de confirmar';
             const totalFormas = d.formasPagamento.reduce((acc, f) => acc + (Number(f.valor) || 0), 0);
-            if (totalFormas < (d.calculo.valorCobrado ? ? 0)) return 'Valor recebido deve ser >= valor cobrado';
+            if (totalFormas < (d.calculo.valorCobrado ?? 0)) return 'Valor recebido deve ser >= valor cobrado';
         } else if (d.movSubTab === 'extra') {
             if (!d.historico) return 'Informe a descrição/histórico';
             if (!d.valorExtra || Number(d.valorExtra) <= 0) return 'Informe o valor (> 0)';
@@ -252,7 +252,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
             updateFields({caixaAberto: true, caixaId: newCaixa.id});
             setMensagem('Caixa aberto com sucesso!');
         } catch (e: any) {
-            setErro(e?.response?.data?.message ? ? 'Erro ao abrir o caixa!');
+            setErro(e?.response?.data?.message ?? 'Erro ao abrir o caixa!');
         } finally {
             setLoading(false);
         }
@@ -339,7 +339,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                 formasPagamento: [{tipoPagamento: 'DINHEIRO', valor: '', documento: ''}]
             });
         } catch (e: any) {
-            setErro(e?.response?.data?.message ? ? 'Erro ao registrar pagamento!');
+            setErro(e?.response?.data?.message ?? 'Erro ao registrar pagamento!');
         } finally {
             setLoading(false);
         }
@@ -362,7 +362,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
             setMensagem('Movimentação registrada com sucesso!');
             updateFields({historico: '', valorExtra: '', movimentoId: ''});
         } catch (e: any) {
-            setErro(e?.response?.data?.message ? ? 'Erro ao registrar movimentação!');
+            setErro(e?.response?.data?.message ?? 'Erro ao registrar movimentação!');
         } finally {
             setLoading(false);
         }
@@ -378,7 +378,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
             updateField('valorSangria', '');
             await carregarTotais();
         } catch (e: any) {
-            setErro(e?.response?.data?.message ? ? 'Dinheiro em caixa insuficiente!');
+            setErro(e?.response?.data?.message ?? 'Dinheiro em caixa insuficiente!');
         } finally {
             setLoading(false);
         }
@@ -851,7 +851,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                             <button
                                                 className="btn-primary"
                                                 onClick={registrarPagamento}
-                                                disabled={loading || !data.calculo || valorRecebido < (data.calculo?.valorCobrado ? ? Infinity)}
+                                                disabled={loading || !data.calculo || valorRecebido < (data.calculo?.valorCobrado ?? Infinity)}
                                             >
                                                 Confirmar Pagamento
                                             </button>

@@ -17,7 +17,7 @@ export default function ViewCobrancaListLoteListScreen() {
         queryKey: ['etapas-cobranca'],
         queryFn: async () => (await api.get<EtapaCobranca[]>('/api/financeiro/etapas-cobranca')).data,
     });
-    const etapas = etapasQuery.data ? ? [];
+    const etapas = etapasQuery.data ?? [];
     const [emailEtapa, setEmailEtapa] = useState<EtapaCobranca | null>(null);
     const [ligacaoEtapa, setLigacaoEtapa] = useState<EtapaCobranca | null>(null);
 

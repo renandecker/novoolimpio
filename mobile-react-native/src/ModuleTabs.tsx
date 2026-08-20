@@ -48,7 +48,7 @@ export function ModuleTabs({tabs, initial}: { tabs: ModuleTabItem[]; initial?: s
             <ModuleList path={tab.path}/>
         ) : (
             <View style={styles.emptyBox}>
-                <Text style={styles.empty}>{tab.empty ? ? 'Sem conteúdo nesta aba.'}</Text>
+                <Text style={styles.empty}>{tab.empty ?? 'Sem conteúdo nesta aba.'}</Text>
             </View>
         ),
     }));

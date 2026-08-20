@@ -14,9 +14,9 @@ interface TabsProps<T extends string = string> {
 }
 
 export function Tabs<T extends string = string>({tabs, initial}: TabsProps<T>) {
-    const [active, setActive] = useState<T>(initial ? ? tabs[0]?.key);
+    const [active, setActive] = useState<T>(initial ?? tabs[0]?.key);
 
-    const current = tabs.find((tab) => tab.key === active) ? ? tabs[0];
+    const current = tabs.find((tab) => tab.key === active) ?? tabs[0];
 
     return (
         <View style={styles.container}>

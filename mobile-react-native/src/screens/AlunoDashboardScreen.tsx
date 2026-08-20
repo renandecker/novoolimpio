@@ -30,7 +30,7 @@ export default function AlunoDashboardScreen({navigation}: NativeStackScreenProp
             .then(([perfil, dashboard]) => {
                 if (!active) return;
                 setNome(perfil.nome || perfil.username || '');
-                setBoletins(dashboard.boletins ? ? []);
+                setBoletins(dashboard.boletins ?? []);
             })
             .catch((e: any) => {
                 if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar o painel do aluno.');
@@ -95,9 +95,9 @@ export default function AlunoDashboardScreen({navigation}: NativeStackScreenProp
                             </Text>
                         </View>
                         <View
-                            style={[styles.statusBadge, {backgroundColor: (STATUS_COLOR[b.status] ? ? '#666') + '22'}]}>
-                            <Text style={[styles.statusText, {color: STATUS_COLOR[b.status] ? ? '#666'}]}>
-                                {STATUS_ROTULO[b.status] ? ? b.status}
+                            style={[styles.statusBadge, {backgroundColor: (STATUS_COLOR[b.status] ?? '#666') + '22'}]}>
+                            <Text style={[styles.statusText, {color: STATUS_COLOR[b.status] ?? '#666'}]}>
+                                {STATUS_ROTULO[b.status] ?? b.status}
                             </Text>
                         </View>
                     </View>

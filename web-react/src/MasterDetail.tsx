@@ -105,7 +105,7 @@ export function MasterDetail({
         const existing = new Set(items.map((item) => String(asRecord(item)[valueKey])));
         return all.filter((item) => {
             if (existing.has(String(asRecord(item)[valueKey]))) return false;
-            return keys.some((key) => String(asRecord(item)[key] ? ? '').toLowerCase().includes(term));
+            return keys.some((key) => String(asRecord(item)[key] ?? '').toLowerCase().includes(term));
         });
     }, [query, all, items, searchKeys, detailCols, valueKey]);
 

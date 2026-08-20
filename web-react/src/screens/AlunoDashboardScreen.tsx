@@ -23,8 +23,8 @@ export default function AlunoDashboardScreen() {
             .then(([perfil, dashboard, chamadasData]) => {
                 if (!active) return;
                 setNome(perfil.nome || perfil.username || '');
-                setBoletins(dashboard.boletins ? ? []);
-                setChamadas(chamadasData ? ? []);
+                setBoletins(dashboard.boletins ?? []);
+                setChamadas(chamadasData ?? []);
             })
             .catch((e: any) => {
                 if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar o painel do aluno.');
@@ -74,7 +74,7 @@ export default function AlunoDashboardScreen() {
                             </div>
                             <span
                                 className={`aluno-portal-status aluno-portal-status-${String(b.status).toLowerCase().replace(/\s+/g, '-')}`}>
-                {STATUS_ROTULO[b.status] ? ? b.status}
+                {STATUS_ROTULO[b.status] ?? b.status}
               </span>
                         </div>
                         <div className="aluno-portal-item-dados">

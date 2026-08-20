@@ -17,7 +17,7 @@ export default function ViewNapListLoteListScreen() {
         queryKey: ['etapas-nap'],
         queryFn: async () => (await api.get<EtapaNap[]>('/api/educacao/etapas-nap')).data,
     });
-    const etapas = etapasQuery.data ? ? [];
+    const etapas = etapasQuery.data ?? [];
     const [emailEtapa, setEmailEtapa] = useState<EtapaNap | null>(null);
     const [ligacaoEtapa, setLigacaoEtapa] = useState<EtapaNap | null>(null);
 

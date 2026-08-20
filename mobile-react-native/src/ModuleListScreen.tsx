@@ -42,7 +42,7 @@ const primaryLabel = (item: ApiItem) => {
         }
     }
     for (const key of Object.keys(record)) {
-        if (key !== 'id' && key !== 'dadosJson') return String(record[key] ? ? '');
+        if (key !== 'id' && key !== 'dadosJson') return String(record[key] ?? '');
     }
     return `#${item.id}`;
 };
@@ -54,8 +54,8 @@ const editableFields = (item: ApiItem | null) => {
 
 const apiErrorMessage = (error: unknown) =>
     (error as { response?: { data?: { error?: string } } })?.response?.data?.error
-        ? ? (error as Error)?.message
-        ? ? 'erro desconhecido';
+        ?? (error as Error)?.message
+        ?? 'erro desconhecido';
 
 type ModalState =
     | { mode: 'create' }
@@ -80,14 +80,14 @@ export function ModuleList({
     const [runningAction, setRunningAction] = useState<string | null>(null);
 
     const segments = path.split('/').filter(Boolean);
-    const feature = segments[2] ? ? '';
-    const resource = segments[3] ? ? '';
+    const feature = segments[2] ?? '';
+    const resource = segments[3] ?? '';
     const outcome = feature && resource ? `view/${feature}/${resource}` : '';
     const entityTitle = toTitle(resource.replace(/^(form|list|colunas)/i, '') || resource);
 
     // Espelha o pedido de remover o prefixo "List " dos títulos das telas: o nome do recurso
     // (ex.: "listAcao") não deve aparecer como "List Acao" para o usuário.
-    const screenTitle = title ? ? (resource ? entityTitle : toTitle(feature) || 'Lista');
+    const screenTitle = title ?? (resource ? entityTitle : toTitle(feature) || 'Lista');
 
     const canCreate = can(session, 'CREATE', outcome);
     const canUpdate = can(session, 'UPDATE', outcome);
@@ -95,9 +95,9 @@ export function ModuleList({
     const canExecute = can(session, 'EXECUTE', outcome);
 
     const q = useModulePaged(path, page, size, params);
-    const items = q.data?.content ? ? [];
-    const totalElements = q.data?.totalElements ? ? 0;
-    const totalPages = Math.max(1, q.data?.totalPages ? ? 0);
+    const items = q.data?.content ?? [];
+    const totalElements = q.data?.totalElements ?? 0;
+    const totalPages = Math.max(1, q.data?.totalPages ?? 0);
 
 
     const runAction = (action: string, item: ApiItem) => {
@@ -113,7 +113,7 @@ export function ModuleList({
     };
 
     const fields = useMemo(
-        () => (modal?.mode === 'edit' ? editableFields(modal.item) : editableFields(items[0] ? ? null)),
+        () => (modal?.mode === 'edit' ? editableFields(modal.item) : editableFields(items[0] ?? null)),
         [modal, items],
     );
 
@@ -127,7 +127,7 @@ export function ModuleList({
     const saveEdit = (item: ApiItem, values: Record<string, unknown>) => {
         q.update.mutate({
             id: item.id,
-            body: {nome: asRecord(item).nome ? ? primaryLabel(item), ...values} as unknown as ApiItem
+            body: {nome: asRecord(item).nome ?? primaryLabel(item), ...values} as unknown as ApiItem
         }, {
             onError: (error) => setNotice(`Erro ao salvar: ${apiErrorMessage(error)}`),
         });
@@ -293,7 +293,7 @@ function RecordModal({
         const copy: Record<string, string> = {};
         for (const field of fields) {
             const value = initial[field];
-            copy[field] = typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value ? ? '');
+            copy[field] = typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value ?? '');
         }
         return copy;
     });
@@ -315,7 +315,7 @@ function RecordModal({
                             <Text style={styles.fieldLabel}>{toTitle(field)}</Text>
                             <TextInput
                                 style={styles.fieldInput}
-                                value={values[field] ? ? ''}
+                                value={values[field] ?? ''}
                                 onChangeText={(text) => setValues((prev) => ({...prev, [field]: text}))}
                             />
                         </View>

@@ -35,7 +35,7 @@ type FechamentoCaixaTotais = {
     totalDinheiroCaixa: number; totalDesconto: number; totalJurosMulta: number;
 };
 
-const money = (v: number | undefined | null) => (v ? ? 0).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+const money = (v: number | undefined | null) => (v ?? 0).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
 
 function Field({label, value, onChangeText, keyboardType}: { label: string; value: string; onChangeText: (v: string) => void; keyboardType?: 'numeric' | 'default' }) {
     return (
@@ -163,7 +163,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
             setCaixa(data);
             setMensagem('Caixa aberto com sucesso!');
         } catch (e: any) {
-            setErro(e?.response?.data?.message ? ? 'Ocorreu um erro ao abrir o caixa!');
+            setErro(e?.response?.data?.message ?? 'Ocorreu um erro ao abrir o caixa!');
         } finally {
             setLoading(false);
         }
@@ -247,7 +247,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
             setCalculo(null);
             setFormasPagamento([{tipoPagamento: 'DINHEIRO', valor: '', documento: ''}]);
         } catch (e: any) {
-            setErro(e?.response?.data?.message ? ? 'Ocorreu um erro ao registrar esta movimentação!');
+            setErro(e?.response?.data?.message ?? 'Ocorreu um erro ao registrar esta movimentação!');
         } finally {
             setLoading(false);
         }
@@ -272,7 +272,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
             setValorExtra('');
             setMovimentoId('');
         } catch (e: any) {
-            setErro(e?.response?.data?.message ? ? 'Ocorreu um erro ao registrar esta movimentação!');
+            setErro(e?.response?.data?.message ?? 'Ocorreu um erro ao registrar esta movimentação!');
         } finally {
             setLoading(false);
         }
@@ -290,7 +290,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
             setValorSangria('');
             await carregarTotais();
         } catch (e: any) {
-            setErro(e?.response?.data?.message ? ? 'Dinheiro em caixa insuficiente!');
+            setErro(e?.response?.data?.message ?? 'Dinheiro em caixa insuficiente!');
         } finally {
             setLoading(false);
         }
@@ -483,8 +483,8 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                         recebido: {money(valorRecebido)}{calculo && troco > 0 ? ` — Troco: ${money(troco)}` : ''}</Text>
 
                     <Pressable
-                        style={[styles.primaryButton, (!calculo || valorRecebido < (calculo?.valorCobrado ? ? Infinity)) && styles.buttonDisabled]}
-                        disabled={loading || !calculo || valorRecebido < (calculo?.valorCobrado ? ? Infinity)}
+                        style={[styles.primaryButton, (!calculo || valorRecebido < (calculo?.valorCobrado ?? Infinity)) && styles.buttonDisabled]}
+                        disabled={loading || !calculo || valorRecebido < (calculo?.valorCobrado ?? Infinity)}
                         onPress={registrarPagamento}
                     >
                         <Text style={styles.primaryButtonText}>Confirmar Pagamento</Text>

@@ -67,8 +67,8 @@ interface LoteApiProps {
 
 const apiError = (error: unknown) =>
     (error as { response?: { data?: { error?: string } } })?.response?.data?.error
-        ? ? (error as Error)?.message
-        ? ? 'erro desconhecido';
+        ?? (error as Error)?.message
+        ?? 'erro desconhecido';
 
 function SituacaoPicker({
                             situacoes,
@@ -85,7 +85,7 @@ function SituacaoPicker({
         <View>
             <Text style={styles.fieldLabel}>Situação</Text>
             <Pressable style={styles.picker} onPress={() => setOpen(true)}>
-                <Text style={styles.pickerText}>{current?.label ? ? 'Selecione'}</Text>
+                <Text style={styles.pickerText}>{current?.label ?? 'Selecione'}</Text>
             </Pressable>
             <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
                 <Pressable style={styles.modalOverlay} onPress={() => setOpen(false)}>
@@ -135,7 +135,7 @@ function AlunoRow({
 }
 
 export function LoteEmailModal({basePath, etapaKey, etapaId, etapaLabel, situacoes, onClose}: LoteApiProps) {
-    const [situacao, setSituacao] = useState(situacoes[0]?.value ? ? '');
+    const [situacao, setSituacao] = useState(situacoes[0]?.value ?? '');
     const [q, setQ] = useState('');
     const [mensagemId, setMensagemId] = useState<number | null>(null);
     const [selected, setSelected] = useState<number[]>([]);
@@ -146,8 +146,8 @@ export function LoteEmailModal({basePath, etapaKey, etapaId, etapaLabel, situaco
         queryKey: [basePath, 'modelos-email'],
         queryFn: async () => (await api.get<ModeloEmail[]>(`${basePath}/modelos-email`)).data,
     });
-    const modelos = modelosQuery.data ? ? [];
-    const modelo = modelos.find((m) => m.id === mensagemId) ? ? null;
+    const modelos = modelosQuery.data ?? [];
+    const modelo = modelos.find((m) => m.id === mensagemId) ?? null;
 
     const alunosQuery = useQuery({
         queryKey: [basePath, 'alunos', etapaKey, etapaId, situacao, q],
@@ -158,7 +158,7 @@ export function LoteEmailModal({basePath, etapaKey, etapaId, etapaLabel, situaco
                 })
             ).data,
     });
-    const alunos = alunosQuery.data?.alunos ? ? [];
+    const alunos = alunosQuery.data?.alunos ?? [];
 
     const toggle = (contratoId: number) =>
         setSelected((prev) =>
@@ -294,7 +294,7 @@ export function LoteEmailModal({basePath, etapaKey, etapaId, etapaLabel, situaco
 }
 
 export function LoteLigacaoModal({basePath, etapaKey, etapaId, etapaLabel, situacoes, onClose}: LoteApiProps) {
-    const [situacao, setSituacao] = useState(situacoes[0]?.value ? ? '');
+    const [situacao, setSituacao] = useState(situacoes[0]?.value ?? '');
     const [q, setQ] = useState('');
     const [selected, setSelected] = useState<number[]>([]);
     const [resultado, setResultado] = useState<{ processados: number } | null>(null);
@@ -309,7 +309,7 @@ export function LoteLigacaoModal({basePath, etapaKey, etapaId, etapaLabel, situa
                 })
             ).data,
     });
-    const alunos = alunosQuery.data?.alunos ? ? [];
+    const alunos = alunosQuery.data?.alunos ?? [];
 
     const iniciarMutation = useMutation({
         mutationFn: async () =>

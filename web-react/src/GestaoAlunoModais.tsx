@@ -221,8 +221,8 @@ const fmtMoeda = (value?: number | null) =>
 
 const apiError = (error: unknown) =>
     (error as { response?: { data?: { error?: string } } })?.response?.data?.error
-        ? ? (error as Error)?.message
-        ? ? 'erro desconhecido';
+        ?? (error as Error)?.message
+        ?? 'erro desconhecido';
 
 function ModalFrame({titulo, onClose, children}: { titulo: string; onClose: () => void; children: ReactNode }) {
     return (
@@ -249,7 +249,7 @@ function Erro({mensagem}: { mensagem: string }) {
 }
 
 function Tabs({tabs}: { tabs: { key: string; label: string; content: ReactNode }[] }) {
-    const [active, setActive] = useState(tabs[0]?.key ? ? '');
+    const [active, setActive] = useState(tabs[0]?.key ?? '');
     return (
         <div>
             <div className="tabs">
@@ -264,7 +264,7 @@ function Tabs({tabs}: { tabs: { key: string; label: string; content: ReactNode }
                     </button>
                 ))}
             </div>
-            <div className="tab-content">{tabs.find((tab) => tab.key === active)?.content ? ? null}</div>
+            <div className="tab-content">{tabs.find((tab) => tab.key === active)?.content ?? null}</div>
         </div>
     );
 }
@@ -295,7 +295,7 @@ function TabelaDados({colunas, linhas, vazio}: { colunas: TabelaColuna[]; linhas
                     <tr key={String(linha.id)}>
                         {colunas.map((coluna) => (
                             <td key={coluna.key}>
-                                {coluna.render ? coluna.render(linha) : String(linha[coluna.key] ? ? '')}
+                                {coluna.render ? coluna.render(linha) : String(linha[coluna.key] ?? '')}
                             </td>
                         ))}
                     </tr>
@@ -341,7 +341,7 @@ function TabelaDadosPaginada({colunas, linhas, vazio, pageSize = 10}: TabelaDado
                     <tr key={String(linha.id)}>
                         {colunas.map((coluna) => (
                             <td key={coluna.key}>
-                                {coluna.render ? coluna.render(linha) : String(linha[coluna.key] ? ? '')}
+                                {coluna.render ? coluna.render(linha) : String(linha[coluna.key] ?? '')}
                             </td>
                         ))}
                     </tr>
@@ -402,7 +402,7 @@ function DadosPessoa({dados}: { dados: PessoaDados }) {
             {campos.map(([rotulo, valor]) => (
                 <label key={rotulo} className="form-field">
                     <span className="form-label">{rotulo}</span>
-                    <input className="form-input" value={String(valor ? ? '')} readOnly/>
+                    <input className="form-input" value={String(valor ?? '')} readOnly/>
                 </label>
             ))}
         </div>
@@ -417,8 +417,8 @@ const PARCELA_COLUNAS: TabelaColuna[] = [
     {key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null)},
     {
         key: 'situacao', label: 'Situação', render: (linha) => {
-            const situacao = String(linha.situacao ? ? '');
-            const situacaoCor = String(linha.situacaoCor ? ? '');
+            const situacao = String(linha.situacao ?? '');
+            const situacaoCor = String(linha.situacaoCor ?? '');
             const dataPagamento = linha.dataPagamento as string | null;
             if (dataPagamento) {
                 return <span style={{color: '#0000FF', cursor: 'pointer'}}>Pago</span>;
@@ -439,8 +439,8 @@ const PARCELA_MATRICULA_COLUNAS: TabelaColuna[] = [
     {key: 'valorPago', label: 'Valor pago', render: (linha) => fmtMoeda(linha.valorPago as number | null)},
     {
         key: 'situacao', label: 'Situação', render: (linha) => {
-            const situacao = String(linha.situacao ? ? '');
-            const situacaoCor = String(linha.situacaoCor ? ? '');
+            const situacao = String(linha.situacao ?? '');
+            const situacaoCor = String(linha.situacaoCor ?? '');
             const dataPagamento = linha.dataPagamento as string | null;
             if (dataPagamento) {
                 return <span style={{color: '#0000FF', cursor: 'pointer'}}>Pago</span>;
@@ -460,8 +460,8 @@ const PRODUTO_COLUNAS: TabelaColuna[] = [
     {key: 'valorPago', label: 'Valor pago', render: (linha) => fmtMoeda(linha.valorPago as number | null)},
     {
         key: 'situacao', label: 'Situação', render: (linha) => {
-            const situacao = String(linha.situacao ? ? '');
-            const situacaoCor = String(linha.situacaoCor ? ? '');
+            const situacao = String(linha.situacao ?? '');
+            const situacaoCor = String(linha.situacaoCor ?? '');
             const dataPagamento = linha.dataPagamento as string | null;
             if (dataPagamento) {
                 return <span style={{color: '#0000FF', cursor: 'pointer'}}>Pago</span>;
@@ -540,12 +540,12 @@ export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
                                         {
                                             key: 'proxima',
                                             label: 'Próxima parcela',
-                                            render: (linha) => `${linha.proximaParcelaSequencia ? ? '—'} · ${fmtData(linha.proximaParcelaData as string | null)} · ${fmtMoeda(linha.proximaParcelaValor as number | null)}`
+                                            render: (linha) => `${linha.proximaParcelaSequencia ?? '—'} · ${fmtData(linha.proximaParcelaData as string | null)} · ${fmtMoeda(linha.proximaParcelaValor as number | null)}`
                                         },
                                         {
                                             key: 'ultima',
                                             label: 'Última parcela',
-                                            render: (linha) => `${linha.ultimaParcelaSequencia ? ? '—'} · ${fmtData(linha.ultimaParcelaData as string | null)} · ${fmtMoeda(linha.ultimaParcelaValor as number | null)}`
+                                            render: (linha) => `${linha.ultimaParcelaSequencia ?? '—'} · ${fmtData(linha.ultimaParcelaData as string | null)} · ${fmtMoeda(linha.ultimaParcelaValor as number | null)}`
                                         },
                                     ]}
                                     linhas={contratos as unknown as Record<string, unknown>[]}
@@ -638,7 +638,7 @@ export function ContratanteModal({pessoaId, onClose}: GestaoModalProps) {
                                         onClose={onClose}><Carregando/></ModalFrame>;
     if (q.isError) return <ModalFrame titulo="Dados Pessoais Contratante" onClose={onClose}><Erro
         mensagem={apiError(q.error)}/></ModalFrame>;
-    const contratantes = q.data ? ? [];
+    const contratantes = q.data ?? [];
     return (
         <ModalFrame titulo="Dados Pessoais Contratante" onClose={onClose}>
             {contratantes.length === 0 ? (
@@ -774,8 +774,8 @@ function GrausDeNotas({boletim}: { boletim: Boletim }) {
                             grau.notas.map((nota) => (
                                 <tr key={nota.id}>
                                     <td>{nota.nome}</td>
-                                    <td>{nota.peso ? ? '—'}</td>
-                                    <td>{nota.nota ? ? '—'}</td>
+                                    <td>{nota.peso ?? '—'}</td>
+                                    <td>{nota.nota ?? '—'}</td>
                                 </tr>
                             ))
                         )}
@@ -795,7 +795,7 @@ export function NotasModal({pessoaId, onClose}: GestaoModalProps) {
     if (q.isLoading) return <ModalFrame titulo="Notas" onClose={onClose}><Carregando/></ModalFrame>;
     if (q.isError) return <ModalFrame titulo="Notas" onClose={onClose}><Erro
         mensagem={apiError(q.error)}/></ModalFrame>;
-    const boletins = q.data ? ? [];
+    const boletins = q.data ?? [];
     return (
         <ModalFrame titulo="Notas" onClose={onClose}>
             {boletins.length === 0 ? (
@@ -814,11 +814,11 @@ export function NotasModal({pessoaId, onClose}: GestaoModalProps) {
                             </label>
                             <label className="form-field">
                                 <span className="form-label">Turma</span>
-                                <input className="form-input" value={boletim.matricula.turma ? ? '—'} readOnly/>
+                                <input className="form-input" value={boletim.matricula.turma ?? '—'} readOnly/>
                             </label>
                             <label className="form-field">
                                 <span className="form-label">Média</span>
-                                <input className="form-input" value={boletim.media ? ? '—'} readOnly/>
+                                <input className="form-input" value={boletim.media ?? '—'} readOnly/>
                             </label>
                             <label className="form-field">
                                 <span className="form-label">Situação</span>
@@ -854,7 +854,7 @@ export function PresencasModal({pessoaId, onClose}: GestaoModalProps) {
     if (q.isLoading) return <ModalFrame titulo="Presenças" onClose={onClose}><Carregando/></ModalFrame>;
     if (q.isError) return <ModalFrame titulo="Presenças" onClose={onClose}><Erro
         mensagem={apiError(q.error)}/></ModalFrame>;
-    const frequencias = q.data ? ? [];
+    const frequencias = q.data ?? [];
     return (
         <ModalFrame titulo="Presenças" onClose={onClose}>
             <Tabs
@@ -880,7 +880,7 @@ export function PresencasModal({pessoaId, onClose}: GestaoModalProps) {
                                         </label>
                                         <label className="form-field">
                                             <span className="form-label">Turma</span>
-                                            <input className="form-input" value={frequencia.matricula.turma ? ? '—'}
+                                            <input className="form-input" value={frequencia.matricula.turma ?? '—'}
                                                    readOnly/>
                                         </label>
                                         <label className="form-field">
@@ -909,7 +909,7 @@ export function PresencasModal({pessoaId, onClose}: GestaoModalProps) {
                                             {
                                                 key: 'presenca',
                                                 label: 'Presença',
-                                                render: (linha) => PRESENCA_COR[String(linha.presenca ? ? '')] ? ? String(linha.presenca ? ? '')
+                                                render: (linha) => PRESENCA_COR[String(linha.presenca ?? '')] ?? String(linha.presenca ?? '')
                                             },
                                             {key: 'componente', label: 'Componente'},
                                         ]}
@@ -938,7 +938,7 @@ export function HistoricoAlunoModal({pessoaId, onClose}: GestaoModalProps) {
     if (q.isLoading) return <ModalFrame titulo="Histórico aluno" onClose={onClose}><Carregando/></ModalFrame>;
     if (q.isError) return <ModalFrame titulo="Histórico aluno" onClose={onClose}><Erro
         mensagem={apiError(q.error)}/></ModalFrame>;
-    const registros = q.data ? ? [];
+    const registros = q.data ?? [];
     return (
         <ModalFrame titulo="Histórico aluno" onClose={onClose}>
             <TabelaDadosPaginada

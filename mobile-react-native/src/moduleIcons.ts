@@ -70,7 +70,7 @@ const ICON_RULES: Array<[RegExp, string]> = [
 ];
 
 export function moduleIcon(rotulo: string, icone?: string): string {
-    const stored = (icone ? ? '').trim();
+    const stored = (icone ?? '').trim();
     if (stored && !stored.startsWith('ui-icon') && !stored.startsWith('fa ')) return stored;
     const name = normalizeName(rotulo);
     for (const [rule, emoji] of ICON_RULES) if (rule.test(name)) return emoji;
