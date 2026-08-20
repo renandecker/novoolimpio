@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { ApiItem } from './types';
 import { api } from './api';
 import { useModulePaged } from './useModulePaged';
-import { listActions, executeAction, type Action } from './actions';
+import { executeAction, type Action } from './actions';
 import { usePermissions, useCurrentOutcome } from './permissions';
 import { BooleanField } from './BooleanField';
 import { Base64FileUpload } from './Base64FileUpload';
+import { PerfilModuloPermissions } from './useModulePaged';
 
 export const PAGE_SIZES = [10, 20, 50, 100];
 
@@ -176,7 +177,6 @@ export function DataTable({ path, columns, params, module = 'basico', outcome, c
   const [notice, setNotice] = useState<string>('');
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const colorColumnSet = new Set(colorColumns ?? []);
-
   const { can } = usePermissions();
   const routeOutcome = useCurrentOutcome();
   const screenOutcome = outcome ?? routeOutcome;
@@ -186,33 +186,35 @@ export function DataTable({ path, columns, params, module = 'basico', outcome, c
   const totalElements = q.data?.totalElements ?? 0;
   const totalPages = Math.max(1, q.data?.totalPages ?? 0);
 
-  const cols: DataTableColumn[] =
-    columns && columns.length > 0
-      ? columns
-      : items.length > 0
-        ? deriveColumns(items[0])
-        : [];
+  // Fetch perfil module permissions from bas_perfil_modulo
+  const [perfilModuloPermissions, setPerfilModuloPermissions] = useState<PerfilModuloPermissions | null>(null);
+  const [perfilModuloLoading, setPerfilModuloLoading] = useState(false);
 
-  const mainLimit = maxMainColumns ?? MAX_MAIN_COLUMNS;
-  const mainCols = cols.slice(0, mainLimit);
-  const subCols = cols.slice(mainLimit);
-  const expandable = subCols.length > 0;
+  useEffect(() => {
+    const carregarPermissoes = async () => {
+      setPerfilModuloLoading(true);
+      try {
+        const response = await api.get<PerfilModuloPermissions>(`/api/perfil-modulo/permissoes?caminho=${path}`);
+        setPerfilModuloPermissions(response.data);
+      } catch (error) {
+        console.error('Erro ao carregar permissões do perfil-modulo:', error);
+      } finally {
+        setPerfilModuloLoading(false);
+      }
+    };
+    carregarPermissoes();
+  }, [path]);
 
-  const canCreate = can('CREATE', screenOutcome);
-  const canUpdate = can('UPDATE', screenOutcome);
-  const canDelete = can('DELETE', screenOutcome);
-  const canExecute = can('EXECUTE', screenOutcome);
+  const canCreate = can('CREATE', screenOutcome) || (perfilModuloPermissions?.novo ?? false);
+  const canUpdate = can('UPDATE', screenOutcome) || (perfilModuloPermissions?.editar ?? false);
+  const canDelete = can('DELETE', screenOutcome) || (perfilModuloPermissions?.remover ?? false);
+  const canRelatorio = can('EXECUTE', screenOutcome) || (perfilModuloPermissions?.relatorio ?? false);
 
   const feature = path.split('/').filter(Boolean)[2] ?? '';
   const resource = path.split('/').filter(Boolean)[3] ?? '';
   const entityTitle = toTitle(resource.replace(/^(form|list|colunas)/i, '') || resource);
 
-  const catalogQuery = useQuery({
-    queryKey: ['actions-catalog', module],
-    queryFn: async () => (await listActions(module)).data,
-    enabled: canExecute,
-  });
-  const customActions = (catalogQuery.data ?? {})[feature] ?? [];
+  
 
   const runAction = (action: Action, item: ApiItem) => {
     setExecuting(action);
@@ -227,6 +229,21 @@ export function DataTable({ path, columns, params, module = 'basico', outcome, c
   };
 
   const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem) => ReactNode }> = [];
+  if (canCreate) {
+    actionColumns.push({
+      key: 'novo',
+      label: 'Novo',
+      render: (item) => (
+        <button
+          className="btn-action btnstop"
+          title="Novo"
+          onClick={() => setModal({ mode: 'create' })}
+        >
+          +
+        </button>
+      ),
+    });
+  }
   if (canUpdate) {
     actionColumns.push({
       key: 'editar',
@@ -242,23 +259,54 @@ export function DataTable({ path, columns, params, module = 'basico', outcome, c
       ),
     });
   }
-  customActions.forEach((action) => {
+  if (canDelete) {
     actionColumns.push({
-      key: `acao:${action}`,
-      label: toTitle(action),
+      key: 'excluir',
+      label: 'Excluir',
       render: (item) => (
         <button
-          className="btn-action btnsky"
-          title={toTitle(action)}
-          disabled={executing === action}
-          onClick={() => runAction(action, item)}
+          className="btn-action btn-danger"
+          title="Excluir"
+          onClick={() => setModal({ mode: 'delete', item })}
         >
-          {executing === action ? '…' : '⚡'}
+          ✕
         </button>
       ),
     });
-  });
-  if (canDelete) {
+  }
+  if (canRelatorio) {
+    actionColumns.push({
+      key: 'exportar',
+      label: 'Exportar',
+      render: (item) => (
+        <div className="row-actions-export">
+          <button
+            className="btn-action btn-yellow"
+            title="Exportar"
+            onClick={() => exportarDados(item)}
+          >
+            <i className="fa fa-download" /> Exportar
+          </button>
+          <button
+            className="btn-action btn-yellow"
+            title="Exportar PDF"
+            onClick={() => exportarPDF(item)}
+          >
+            <i className="fa fa-file-pdf-o" /> PDF
+          </button>
+          <button
+            className="btn-action btn-yellow"
+            title="Exportar Excel"
+            onClick={() => exportarExcel(item)}
+          >
+            <i className="fa fa-file-excel-o" /> Excel
+          </button>
+        </div>
+      ),
+    });
+  }
+
+if (canDelete) {
     actionColumns.push({
       key: 'excluir',
       label: 'Excluir',
@@ -281,6 +329,29 @@ export function DataTable({ path, columns, params, module = 'basico', outcome, c
     ?? 'erro desconhecido';
 
   const closeModal = () => setModal(null);
+
+  const exportarDados = (item: ApiItem) => {
+    // Exportar dados da tabela para JSON/visualização
+    const { content } = q.data ?? {};
+    const dados = content?.map((i: ApiItem) => ({ id: i.id, nome: i.nome })) ?? [];
+    const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${entityTitle}-${item.id}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportarPDF = (item: ApiItem) => {
+    // Exportar para PDF - abre tela de relatório ou gera PDF
+    window.open(`/api/relatorios/relatorio/disponiveis/TABELA/${item.id}`, '_blank');
+  };
+
+  const exportarExcel = (item: ApiItem) => {
+    // Exportar para Excel - baixa arquivo Excel
+    window.open(`/api/relatorios/relatorio/disponiveis/GRAFICO/${item.id}`, '_blank');
+  };
 
   const saveCreate = (values: Record<string, unknown>) => {
     q.create.mutate(

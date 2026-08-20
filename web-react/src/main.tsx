@@ -439,6 +439,8 @@ const q=new QueryClient();createRoot(document.getElementById('root')!).render(<Q
 <Route path="/aluno/boletim" element={<AlunoBoletimScreen/>}/>
 <Route path="/aluno/frequencia" element={<AlunoFrequenciaScreen/>}/>
 <Route path="/aluno/financeiro" element={<AlunoFinanceiroScreen/>}/>
+<Route path="/aluno/aulas" element={<AlunoAulasScreen/>}/>
+<Route path="/aluno/avaliacoes" element={<AlunoAvaliacoesScreen/>}/>
 <Route path="/aluno/aula" element={<AulaContratoScreen/>}/>
 <Route path="/aluno/aula/oferecimentos/:contratoId" element={<AulaOferecimentoScreen/>}/>
 <Route path="/aluno/aula/ocorrencias/:oferecimentoId" element={<AulaOcorrenciaScreen/>}/>

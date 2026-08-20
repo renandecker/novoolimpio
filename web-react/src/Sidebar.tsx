@@ -205,8 +205,10 @@ export default function Sidebar() {
                 {portalOpen && (
                   <div className="sidebar-submenu">
                     <Link className="sidebar-item sidebar-subitem" to="/aluno/dashboard"><span className="sidebar-icon">📊</span><span className="sidebar-label">Dashboard</span></Link>
-                    <Link className="sidebar-item sidebar-subitem" to="/aluno/boletim"><span className="sidebar-icon">📄</span><span className="sidebar-label">Boletim</span></Link>
+                    <Link className="sidebar-item sidebar-subitem" to="/aluno/boletim"><span className="sidebar-icon">📄</span><span className="sidebar-label">Notas</span></Link>
                     <Link className="sidebar-item sidebar-subitem" to="/aluno/frequencia"><span className="sidebar-icon">📅</span><span className="sidebar-label">Frequência</span></Link>
+                    <Link className="sidebar-item sidebar-subitem" to="/aluno/aulas"><span className="sidebar-icon">📚</span><span className="sidebar-label">Registro de Aulas</span></Link>
+                    <Link className="sidebar-item sidebar-subitem" to="/aluno/avaliacoes"><span className="sidebar-icon">📝</span><span className="sidebar-label">Avaliações</span></Link>
                   </div>
                 )}
               </div>

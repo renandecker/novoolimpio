@@ -13,9 +13,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './auth';
 import { countNaoLidas, subscribeNotificacoesStream } from './notificacoes';
 import { moduleIcon } from './moduleIcons';
+import { can } from './permissions';
 import { ReportButton } from './ReportButton';
 import { FavoritosButton } from './FavoritosButton';
 import type { Modulo } from './types';
+import type { FavoritoDisponivel } from './favoritos';
 
 export type ParamList = { home: undefined; [route: string]: undefined | object };
 
@@ -24,10 +26,10 @@ type FlatItem = { key: string; label: string; parent: string | null; icon: strin
 const normalizeOutcome = (value: string) => value.replace(/(\.xhtml)+$/i, '').replace(/^\/+|\/+$/g, '') || 'default';
 
 export default function HomeScreen({ navigation }: NativeStackScreenProps<ParamList, 'home'>) {
-  const { session, ready, signOut, refreshModules } = useAuth();
+  const { session, ready, signOut } = useAuth();
   const queryClient = useQueryClient();
-  const modulos: Modulo[] = useMemo(() => session?.modules ?? [], [session]);
-  const loading = !ready || session?.modules === undefined;
+  const [favoritos, setFavoritos] = useState<FavoritoDisponivel[]>([]);
+  const loading = !ready;
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
   const [openGroups, setOpenGroups] = useState<Record<number, boolean>>({});
@@ -52,98 +54,21 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<ParamL
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await refreshModules();
+      await listarFavoritos();
     } finally {
       setRefreshing(false);
     }
-  }, [refreshModules]);
+  }, [listarFavoritos]);
 
   useEffect(() => {
-    // Sessões salvas antes desta atualização não têm "modules" em cache ainda.
-    if (ready && session && session.modules === undefined) {
-      refreshModules();
+    if (ready) {
+      listarFavoritos();
     }
-  }, [ready, session, refreshModules]);
+  }, [ready, listarFavoritos]);
 
   const routeNames = navigation.getState().routeNames;
   const modulePermissions = session?.modulePermissions ?? {};
   const allowedKeys = Object.keys(modulePermissions).length ? new Set(Object.keys(modulePermissions)) : null;
-
-  const isLeafAllowed = useCallback(
-    (modulo: Modulo) => {
-      const key = normalizeOutcome(modulo.outcome || '');
-      if (!key.startsWith('view/') || !routeNames.includes(key)) return false;
-      if (allowedKeys && !allowedKeys.has(key)) return false;
-      return true;
-    },
-    [routeNames, allowedKeys],
-  );
-
-  const childrenByParent = useMemo(() => {
-    const map = new Map<number, Modulo[]>();
-    for (const m of modulos) {
-      if (m.antecessorId != null) {
-        const list = map.get(m.antecessorId) ?? [];
-        list.push(m);
-        map.set(m.antecessorId, list);
-      }
-    }
-    for (const list of map.values()) list.sort((a, b) => a.ordem - b.ordem);
-    return map;
-  }, [modulos]);
-
-  const topModulos = useMemo(
-    () => modulos.filter((m) => m.antecessorId == null).sort((a, b) => a.ordem - b.ordem),
-    [modulos],
-  );
-
-  const hasVisibleDescendant = useCallback(
-    (modulo: Modulo): boolean => {
-      const children = childrenByParent.get(modulo.id) ?? [];
-      if (children.length === 0) return isLeafAllowed(modulo);
-      return children.some((child) => hasVisibleDescendant(child));
-    },
-    [childrenByParent, isLeafAllowed],
-  );
-
-  const flatItems = useMemo(() => {
-    const items: FlatItem[] = [];
-    if (modulos.length === 0) {
-      items.push(
-        { key: 'aluno/dashboard', label: 'Dashboard', parent: 'Portal do Aluno', icon: '📊', keywords: 'portal aluno dashboard' },
-        { key: 'aluno/boletim', label: 'Boletim', parent: 'Portal do Aluno', icon: '📄', keywords: 'portal aluno boletim notas' },
-        { key: 'aluno/frequencia', label: 'Frequência', parent: 'Portal do Aluno', icon: '📅', keywords: 'portal aluno frequencia' },
-      );
-    }
-    const walk = (modulo: Modulo, parent: string | null) => {
-      const children = childrenByParent.get(modulo.id) ?? [];
-      if (children.length === 0) {
-        if (isLeafAllowed(modulo)) {
-          items.push({
-            key: normalizeOutcome(modulo.outcome),
-            label: modulo.rotulo,
-            parent,
-            icon: moduleIcon(modulo.rotulo, modulo.icone),
-            keywords: `${modulo.rotulo} ${modulo.descricao ?? ''} ${modulo.outcome}`,
-          });
-        }
-      } else {
-        for (const child of children) walk(child, modulo.rotulo);
-      }
-    };
-    for (const m of topModulos) walk(m, null);
-    return items;
-  }, [modulos, topModulos, childrenByParent, isLeafAllowed]);
-
-  const query = search.trim().toLowerCase();
-  const searchResults = useMemo(() => {
-    if (!query) return null;
-    const tokens = query.split(/\s+/);
-    return flatItems.filter((item) => {
-      const haystack = `${item.label} ${item.parent ?? ''} ${item.keywords}`.toLowerCase();
-      return tokens.every((t) => haystack.includes(t));
-    });
-  }, [query, flatItems]);
 
   const navigateTo = useCallback(
     (key: string) => {
@@ -154,38 +79,37 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<ParamL
 
   const toggleGroup = (id: number) => setOpenGroups((prev) => ({ ...prev, [id]: !prev[id] }));
 
-  const renderModulo = (modulo: Modulo, depth: number) => {
-    const children = childrenByParent.get(modulo.id) ?? [];
-    const isGroup = children.length > 0;
-    if (!hasVisibleDescendant(modulo)) return null;
-
-    if (!isGroup) {
-      return (
-        <Pressable
-          key={modulo.id}
-          style={[styles.menuItem, depth > 0 && styles.menuSubItem]}
-          onPress={() => navigateTo(normalizeOutcome(modulo.outcome))}
-        >
-          {depth === 0 && <Text style={styles.menuIcon}>{moduleIcon(modulo.rotulo, modulo.icone)}</Text>}
-          <Text style={styles.menuText}>{modulo.rotulo}</Text>
-        </Pressable>
+  const flatItems = useMemo(() => {
+    const items: FlatItem[] = [];
+    if (favoritos.length === 0) {
+      items.push(
+        { key: 'view/favoritoUsuario/listFavoritoUsuario', label: 'Meus Favoritos', parent: null, icon: '⭐', keywords: 'favoritos usuario' },
       );
     }
+    favoritos.forEach((item) => {
+      const key = normalizeOutcome(item.outcome);
+      if (!key.startsWith('view/') || !routeNames.includes(key)) return;
+      if (allowedKeys && !allowedKeys.has(key)) return;
+      items.push({
+        key,
+        label: item.nome,
+        parent: null,
+        icon: item.icon,
+        keywords: `${item.nome} ${item.outcome}`,
+      });
+    });
+    return items;
+  }, [favoritos, routeNames, allowedKeys]);
 
-    const open = openGroups[modulo.id] ?? false;
-    return (
-      <View key={modulo.id}>
-        <Pressable style={[styles.menuItem, depth > 0 && styles.menuSubItem]} onPress={() => toggleGroup(modulo.id)}>
-          {depth === 0 && <Text style={styles.menuIcon}>{moduleIcon(modulo.rotulo, modulo.icone)}</Text>}
-          <Text style={styles.menuText}>{modulo.rotulo}</Text>
-          <Text style={styles.menuArrow}>{open ? '▾' : '▸'}</Text>
-        </Pressable>
-        {open && <View style={styles.submenu}>{children.map((child) => renderModulo(child, depth + 1))}</View>}
-      </View>
-    );
-  };
-
-  const unread = bellCount.data ?? 0;
+  const query = search.trim().toLowerCase();
+  const searchResults = useMemo(() => {
+    if (!query) return null;
+    const tokens = query.split(/\s+/);
+    return flatItems.filter((item) => {
+      const haystack = `${item.label} ${item.parent ?? ''} ${item.keywords}`.toLowerCase();
+      return tokens.every((t) => haystack.includes(t));
+    });
+  }, [query, flatItems]);
 
   return (
     <View style={styles.page}>
@@ -248,34 +172,18 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<ParamL
             )}
           />
         )
-      ) : modulos.length === 0 ? (
-        <View>
-          <Pressable style={styles.menuItem} onPress={() => setPortalOpen((prev) => !prev)}>
-            <Text style={styles.menuIcon}>🎓</Text>
-            <Text style={styles.menuText}>Portal do Aluno</Text>
-            <Text style={styles.menuArrow}>{portalOpen ? '▾' : '▸'}</Text>
-          </Pressable>
-          {portalOpen && (
-            <View style={styles.submenu}>
-              <Pressable style={[styles.menuItem, styles.menuSubItem]} onPress={() => navigateTo('aluno/dashboard')}>
-                <Text style={styles.menuText}>Dashboard</Text>
-              </Pressable>
-              <Pressable style={[styles.menuItem, styles.menuSubItem]} onPress={() => navigateTo('aluno/boletim')}>
-                <Text style={styles.menuText}>Boletim</Text>
-              </Pressable>
-              <Pressable style={[styles.menuItem, styles.menuSubItem]} onPress={() => navigateTo('aluno/frequencia')}>
-                <Text style={styles.menuText}>Frequência</Text>
-              </Pressable>
-            </View>
-          )}
-        </View>
       ) : (
         <FlatList
-          data={topModulos}
-          keyExtractor={(item) => String(item.id)}
+          data={favoritos}
+          keyExtractor={(item) => item.outcome}
           refreshing={refreshing}
           onRefresh={handleRefresh}
-          renderItem={({ item }) => renderModulo(item, 0)}
+          renderItem={({ item }) => (
+            <Pressable style={styles.menuItem} onPress={() => navigateTo(normalizeOutcome(item.outcome))}>
+              <Text style={styles.menuIcon}>{moduleIcon(item.nome, item.icon)}</Text>
+              <Text style={styles.menuText}>{item.nome}</Text>
+            </Pressable>
+          )}
         />
       )}
     </View>
@@ -335,9 +243,4 @@ const styles = StyleSheet.create({
     borderColor: '#eee',
     borderRadius: 4,
   },
-  menuSubItem: { paddingLeft: 32, paddingVertical: 11 },
-  menuIcon: { fontSize: 16, marginRight: 10 },
-  menuText: { fontSize: 16, color: '#2a5a88', fontWeight: '600', flex: 1 },
-  menuArrow: { fontSize: 18, color: '#999' },
-  submenu: {},
 });

@@ -1,6 +1,13 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from './api';
-import type { ApiItem, ApiRequest, PagedResponse } from './types';
+import type { ApiItem, ApiRequest, PagedResponse, ModulePermissions } from './types';
+
+export interface PerfilModuloPermissions {
+  novo: boolean;
+  editar: boolean;
+  remover: boolean;
+  relatorio: boolean;
+}
 
 export const useModulePaged = (path: string, page: number, size: number, params?: Record<string, unknown>) => {
   const queryClient = useQueryClient();

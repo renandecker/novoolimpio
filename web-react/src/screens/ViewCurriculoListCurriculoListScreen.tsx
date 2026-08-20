@@ -13,10 +13,10 @@ const formatDate = (value: unknown): string => {
 
 const COLUMNS: DataTableColumn[] = [
   { key: 'id', label: 'Id' },
-  { key: 'curso_descricao', label: 'Curso' },
+  { key: 'curso', label: 'Curso' },
   { key: 'sucinto', label: 'Sucinto' },
-  { key: 'tipo_curso_descricao', label: 'Tipo Curso' },
-  { key: 'data_cancelamento', label: 'Data Cancelamento', render: (item) => formatDate(asRecord(item).data_cancelamento) },
+  { key: 'tipoCurso', label: 'Tipo Curso' },
+  { key: 'dataCancelamento', label: 'Data Cancelamento', render: (item) => formatDate(asRecord(item).dataCancelamento) },
 ];
 
 export default function ViewCurriculoListCurriculoListScreen() {
@@ -24,7 +24,7 @@ export default function ViewCurriculoListCurriculoListScreen() {
     <PermissionGate permission="READ">
       <main>
         <h1>Curriculo</h1>
-        <DataTable path="/api/view/curriculo/listCurriculo" columns={COLUMNS} maxMainColumns={COLUMNS.length} />
+        <DataTable path="/api/educacao/curriculo" columns={COLUMNS} maxMainColumns={COLUMNS.length} />
       </main>
     </PermissionGate>
   );

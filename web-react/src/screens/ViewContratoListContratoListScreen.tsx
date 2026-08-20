@@ -32,10 +32,10 @@ const renderStatus = (item: ApiItem) => {
 };
 
 const COLUMNS: DataTableColumn[] = [
-  { key: 'pessoa_descricao', label: 'Aluno' },
-  { key: 'curso_descricao', label: 'Curso' },
-  { key: 'unidade_descricao', label: 'Unidade' },
-  { key: 'unidade_resposavel_descricao', label: 'Unidade Responsável' },
+  { key: 'pessoa', label: 'Aluno' },
+  { key: 'curso', label: 'Curso' },
+  { key: 'unidade', label: 'Unidade' },
+  { key: 'unidadeResponsavel', label: 'Unidade Responsável' },
   { key: 'status', label: 'Status', render: renderStatus },
   { key: 'data', label: 'Data', render: (item) => formatDate(asRecord(item).data) },
 ];
@@ -45,7 +45,7 @@ export default function ViewContratoListContratoListScreen() {
     <PermissionGate permission="READ">
       <main>
         <h1>Contrato</h1>
-        <DataTable path="/api/view/contrato/listContrato" columns={COLUMNS} maxMainColumns={COLUMNS.length} />
+        <DataTable path="/api/educacao/contrato" columns={COLUMNS} maxMainColumns={COLUMNS.length} />
       </main>
     </PermissionGate>
   );

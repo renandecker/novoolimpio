@@ -2,6 +2,18 @@ import { useEffect, useState } from 'react';
 import { alunoApi, Frequencia, formatarData, formatarPercentual, Matricula } from '../aluno';
 import '../AlunoPortal.css';
 
+const STATUS_ROTULO: Record<string, string> = {
+  PRESENTE: 'Presente',
+  'MEIA PRESENCE': 'Meia presença',
+  AUSENTE: 'Ausente',
+  ATESTADO: 'Atestado',
+  ATRASADO: 'Atrasado',
+  'SEM MARCACAO': 'Sem marcação',
+  CANCELADO: 'Cancelado',
+  PRORROGADO: 'Prorrogado',
+  DESISTENTE: 'Desistente',
+};
+
 export default function AlunoFrequenciaScreen() {
   const [matriculas, setMatriculas] = useState<Matricula[]>([]);
   const [selecionada, setSelecionada] = useState<number | null>(null);
@@ -118,7 +130,11 @@ export default function AlunoFrequenciaScreen() {
                   {frequencia.ocorrencias.map((o, i) => (
                     <tr key={i}>
                       <td>{formatarData(o.data)}</td>
-                      <td>{o.presencaDescricao || o.presenca}</td>
+                      <td>
+                        <span className="aluno-portal-status" style={{ color: '#1e7e45' }}>
+                          {o.presencaDescricao || o.presenca}
+                        </span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

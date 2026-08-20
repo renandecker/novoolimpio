@@ -113,6 +113,8 @@ export const alunoApi = {
   boletimDetalhe: (matriculaId: number) => api.get<Boletim>(`/api/aluno/boletim/${matriculaId}`).then(r => r.data),
   frequencia: (matriculaId: number) => api.get<Frequencia>(`/api/aluno/frequencia/${matriculaId}`).then(r => r.data),
   financeiro: () => api.get<Financeiro>('/api/aluno/financeiro').then(r => r.data),
+  chamadas: () => api.get<AulaAluno[]>('/api/aluno/chamadas').then(r => r.data),
+  avaliacoes: () => api.get<AvaliacaoAluno[]>('/api/aluno/avaliacoes').then(r => r.data),
 };
 
 export type ResumoFinanceiro = {
@@ -193,3 +195,36 @@ export function formatarData(valor: string | null | undefined): string {
   if (!ano || !mes || !dia) return valor;
   return `${dia}/${mes}/${ano}`;
 }
+
+export type AulaAluno = {
+  id: number;
+  nome: string;
+  descricao: string;
+  componente: string;
+  turma: string;
+  dataAssistida?: string;
+};
+
+export type AvaliacaoPergunta = {
+  id: number;
+  nome: string;
+  descricao: string;
+};
+
+export type AvaliacaoResposta = {
+  id: number;
+  id_avaliacao_pergunta: number;
+  resposta: string;
+  nota: number | null;
+  conceito: string | null;
+};
+
+export type AvaliacaoAluno = {
+  id: number;
+  id_avaliacao: number;
+  id_avaliacao_pergunta: number;
+  descricao_pergunta: string;
+  resposta?: string;
+  nota?: number;
+  conceito?: string;
+};

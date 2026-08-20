@@ -17,6 +17,7 @@ import {
   HistoricoAlunoModal,
 } from '../GestaoAlunoModais';
 import type { ApiItem } from '../types';
+import { PerfilModuloPermissions } from '../useModulePaged';
 
 const CONTRACT_COLUMNS = [
   { key: 'id', label: 'Contrato' },
@@ -70,12 +71,32 @@ function ContractsTable({ searchedIds }: { searchedIds: number[] | null }) {
 
   const { can } = usePermissions();
   const outcome = useCurrentOutcome();
+
+  // Busca permissões do bas_perfil_modulo para esta tela/outcome
+  const [perfilModuloPermissions, setPerfilModuloPermissions] = useState<PerfilModuloPermissions | null>(null);
+  const [perfilModuloLoading, setPerfilModuloLoading] = useState(false);
+
+  useEffect(() => {
+    const carregarPermissoes = async () => {
+      setPerfilModuloLoading(true);
+      try {
+        const response = await api.get<PerfilModuloPermissions>(`/api/perfil-modulo/permissoes?caminho=${outcome}`);
+        setPerfilModuloPermissions(response.data);
+      } catch (error) {
+        console.error('Erro ao carregar permissões do perfil-modulo:', error);
+      } finally {
+        setPerfilModuloLoading(false);
+      }
+    };
+    carregarPermissoes();
+  }, [outcome]);
+
   // Espelha gestaoAlunoController.acessoRelatorios/acessoNovo/acessoEditar/acessoRemover em
   // gestaoAluno.xhtml: cada coluna de ações só aparece se o usuário tiver a permissão correspondente.
-  const acessoRelatorios = can('EXECUTE', outcome);
-  const acessoNovo = can('CREATE', outcome);
-  const acessoEditar = can('UPDATE', outcome);
-  const acessoRemover = can('DELETE', outcome);
+  const acessoRelatorios = can('EXECUTE', outcome) || (perfilModuloPermissions?.relatorio ?? false);
+  const acessoNovo = can('CREATE', outcome) || (perfilModuloPermissions?.novo ?? false);
+  const acessoEditar = can('UPDATE', outcome) || (perfilModuloPermissions?.editar ?? false);
+  const acessoRemover = can('DELETE', outcome) || (perfilModuloPermissions?.remover ?? false);
   const showActionsColumn = acessoRelatorios || acessoNovo || acessoEditar || acessoRemover;
 
   const abrirPlaceholder = (titulo: string, texto: string) => setPlaceholder({ titulo, texto });

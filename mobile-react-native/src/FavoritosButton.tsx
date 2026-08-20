@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View, TouchableWithoutFeedback } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { listarFavoritos } from './favoritos';
 import { moduleIcon } from './moduleIcons';
+import { api } from './api';
 
 const normalizeOutcome = (value: string) => value.replace(/(\.xhtml)+$/i, '').replace(/^\/+|\/+$/g, '') || 'default';
 
@@ -29,6 +30,18 @@ export function FavoritosButton({ navigateTo }: { navigateTo: (key: string) => v
     navigateTo(normalizeOutcome(outcome));
   };
 
+  const handleRemoveFavorite = async (outcome: string) => {
+    setOpen(false);
+    try {
+      await api.delete(`/api/basico/favorito-usuario`, {
+        params: { outcome },
+      });
+      await listarFavoritos();
+    } catch (error) {
+      console.error('Erro ao remover favorito:', error);
+    }
+  };
+
   return (
     <>
       <Pressable style={styles.iconButton} onPress={() => setOpen(true)}>
@@ -50,10 +63,18 @@ export function FavoritosButton({ navigateTo }: { navigateTo: (key: string) => v
               <Text style={styles.empty}>Nenhum favorito cadastrado.</Text>
             ) : (
               items.map((item, index) => (
-                <Pressable key={`${item.outcome}-${index}`} style={styles.item} onPress={() => handleItemPress(item.outcome)}>
-                  <Text style={styles.itemIcon}>{moduleIcon(item.nome, item.icon)}</Text>
-                  <Text style={styles.itemNome}>{item.nome}</Text>
-                </Pressable>
+                <TouchableWithoutFeedback key={`${item.outcome}-${index}`} style={styles.item} onPress={() => handleItemPress(item.outcome)}>
+                  <View style={styles.itemContent}>
+                    <Text style={styles.itemIcon}>{moduleIcon(item.nome, item.icon)}</Text>
+                    <Text style={styles.itemNome}>{item.nome}</Text>
+                  </View>
+                  <Pressable style={styles.removeButton} onPress={(e) => {
+                    e.stopPropagation();
+                    handleRemoveFavorite(item.outcome);
+                  }}>
+                    <Text style={styles.removeIcon}>✕</Text>
+                  </Pressable>
+                </TouchableWithoutFeedback>
               ))
             )}
           </Pressable>
@@ -87,4 +108,7 @@ const styles = StyleSheet.create({
   item: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12, borderBottomWidth: 1, borderColor: '#f0f0f0' },
   itemIcon: { fontSize: 18, width: 26, textAlign: 'center' },
   itemNome: { fontSize: 14, color: '#1d2025' },
+  itemContent: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  removeButton: { position: 'absolute', right: 8, top: 8 },
+  removeIcon: { fontSize: 12, color: '#e74c3c' },
 });

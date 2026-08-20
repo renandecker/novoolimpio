@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { PAGE_SIZES, useModulePaged } from './useModulePaged';
-import { listActions, executeAction } from './actions';
+import { executeAction } from './actions';
 import { can } from './permissions';
 import { useAuth } from './auth';
 import type { ApiItem } from './types';
@@ -99,12 +99,7 @@ export function ModuleList({
   const totalElements = q.data?.totalElements ?? 0;
   const totalPages = Math.max(1, q.data?.totalPages ?? 0);
 
-  const catalogQuery = useQuery({
-    queryKey: ['actions-catalog', 'basico'],
-    queryFn: async () => (await listActions('basico')).data,
-    enabled: canExecute,
-  });
-  const customActions = useMemo(() => (catalogQuery.data ?? {})[feature] ?? [], [catalogQuery.data, feature]);
+  
 
   const runAction = (action: string, item: ApiItem) => {
     setRunningAction(action);
@@ -190,16 +185,6 @@ export function ModuleList({
                     <Text style={styles.rowButtonText}>Editar</Text>
                   </Pressable>
                 )}
-                {customActions.map((action) => (
-                  <Pressable
-                    key={action}
-                    style={styles.rowButton}
-                    disabled={runningAction === action}
-                    onPress={() => runAction(action, item)}
-                  >
-                    <Text style={styles.rowButtonText}>{runningAction === action ? '…' : toTitle(action)}</Text>
-                  </Pressable>
-                ))}
                 {canDelete && (
                   <Pressable
                     style={[styles.rowButton, styles.dangerButton]}

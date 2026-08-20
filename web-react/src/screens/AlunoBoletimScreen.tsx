@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { alunoApi, Boletim, formatarData, formatarNota, formatarPercentual } from '../aluno';
+import { Link } from 'react-router-dom';
+import { alunoApi, Boletim, Grau, formatarNota, formatarPercentual } from '../aluno';
 import '../AlunoPortal.css';
 
 const STATUS_ROTULO: Record<string, string> = {
@@ -32,15 +33,15 @@ export default function AlunoBoletimScreen() {
     };
   }, []);
 
-  if (busy) return <main><h1>Boletim</h1><p className="aluno-portal-msg">Carregando...</p></main>;
-  if (error) return <main><h1>Boletim</h1><div className="aluno-portal-error" role="alert">{error}</div></main>;
-  if (boletins.length === 0) return <main><h1>Boletim</h1><p className="aluno-portal-msg">Nenhum boletim encontrado.</p></main>;
+  if (busy) return <main><h1>Notas</h1><p className="aluno-portal-msg">Carregando...</p></main>;
+  if (error) return <main><h1>Notas</h1><div className="aluno-portal-error" role="alert">{error}</div></main>;
+  if (boletins.length === 0) return <main><h1>Notas</h1><p className="aluno-portal-msg">Nenhuma nota encontrada.</p>;
 
   return (
     <main className="aluno-portal">
-      <h1>Boletim</h1>
+      <h1>Notas</h1>
       {boletins.map(b => (
-        <section className="aluno-portal-boletim" key={b.matricula.id}>
+        <section className="aluno-portal-item" key={b.matricula.id}>
           <div className="aluno-portal-item-cabecalho">
             <div>
               <h2>{b.matricula.componente || b.matricula.curso || 'Disciplina'}</h2>
@@ -93,7 +94,7 @@ export default function AlunoBoletimScreen() {
           </div>
         </section>
       ))}
-      <p className="aluno-portal-msg aluno-portal-data">Emitido em {formatarData(new Date().toISOString())}</p>
+      <p className="aluno-portal-msg aluno-portal-data">Emitido em {new Date().toISOString()}</p>
     </main>
   );
 }

@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, FlatList, ScrollView, StyleSheet, Text, View, TouchableWithoutFeedback, useNavigation } from 'react-native';
 import { useAuth } from '../auth';
-import { alunoApi, formatarData } from '../aluno';
+import { useQuery } from '@tanstack/react-query';
+import { listarFavoritos } from '../favoritos';
+import { moduleIcon } from '../moduleIcons';
+import { api } from '../api';
+import { useRoute } from '@react-navigation/native';
 
 type MeusDados = {
   username: string;
@@ -27,32 +31,25 @@ type MeusDados = {
   estadoCivil: string;
 };
 
-export default function MeusDadosScreen() {
+export default function MeusDadosScreen({ navigation }: { navigation: any }) {
   const { session } = useAuth();
-  const [dados, setDados] = useState<MeusDados>({
-    username: session?.username || '',
-    nome: '',
-    nomeSocial: '',
-    cpf: '',
-    rg: '',
-    dataNascimento: '',
-    email: '',
-    telefone: '',
-    celular: '',
-    foto: '',
-    nomePai: '',
-    nomeMae: '',
-    nomeReferencia: '',
-    telefoneReferencia: '',
-    facebook: '',
-    twitter: '',
-    telefoneComercial: '',
-    genero: '',
-    etnia: '',
-    escolaridade: '',
-    estadoCivil: '',
-  });
+  const { navigate } = useNavigation();
+  const { params } = useRoute();
+  const [dados, setDados] = useState<MeusDados>({});
+  const [favoritos, setFavoritos] = useState([]);
   const [busy, setBusy] = useState(true);
+
+  const favoritosQuery = useQuery({
+    queryKey: ['favoritos', 'usuarioLogado'],
+    queryFn: listarFavoritos,
+    enabled: false,
+  });
+
+  useEffect(() => {
+    if (favoritosQuery.data) {
+      setFavoritos(favoritosQuery.data);
+    }
+  }, [favoritosQuery.data]);
 
   useEffect(() => {
     let active = true;
@@ -64,7 +61,7 @@ export default function MeusDadosScreen() {
           username: perfil.username || prev.username,
           nome: perfil.nome || prev.nome,
           nomeSocial: perfil.nomeSocial || '',
-          cpf: perfil.cpf || prev.cpf,
+          cpf: perfil.cpf || '',
           rg: perfil.rg || '',
           dataNascimento: perfil.dataNascimento || '',
           email: perfil.email || prev.email,
@@ -127,9 +124,40 @@ export default function MeusDadosScreen() {
     ...(dados.twitter ? [['Twitter', dados.twitter] as [string, string]] : []),
   ];
 
+  const navigateTo = (key: string) => {
+    navigate(key as never);
+  };
+
   return (
     <ScrollView style={styles.page} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Meus dados</Text>
+
+      <View style={styles.favoritesSection}>
+        <Text style={styles.favoritesTitle}>Favoritos</Text>
+        {favoritos.length === 0 ? (
+          <Text style={styles.favoritesEmpty}>Nenhum favorito cadastrado.</Text>
+        ) : (
+          <FlatList
+            data={favoritos}
+            keyExtractor={(item) => item.outcome}
+            renderItem={({ item }) => (
+              <TouchableWithoutFeedback style={styles.favoriteItem} onPress={() => navigateTo(normalizeOutcome(item.outcome))}>
+                <View style={styles.favoriteItemContent}>
+                  <Text style={styles.favoriteItemIcon}>{moduleIcon(item.nome, item.icon)}</Text>
+                  <Text style={styles.favoriteItemNome}>{item.nome}</Text>
+                  <Pressable style={styles.favoriteRemove} onPress={(e) => {
+                    e.stopPropagation();
+                    api.delete('/api/basico/favorito-usuario', { params: { outcome: item.outcome } });
+                    favoritosQuery.refetch();
+                  }}>
+                    <Text style={styles.favoriteRemoveIcon}>✕</Text>
+                  </Pressable>
+                </View>
+              </TouchableWithoutFeedback>
+            )}
+          />
+        )}
+      </View>
 
       <View style={styles.card}>
         <View style={styles.photoWrap}>
@@ -174,4 +202,19 @@ const styles = StyleSheet.create({
   item: { borderBottomWidth: 1, borderColor: '#eee', paddingVertical: 10 },
   itemLabel: { fontSize: 12, color: '#888', textTransform: 'uppercase' },
   itemValue: { fontSize: 15, color: '#2b2b2b', marginTop: 2 },
+  favoritesSection: {
+    marginBottom: 20,
+  },
+  favoritesTitle: { fontSize: 18, fontWeight: '600', color: '#2a5a88', marginBottom: 8 },
+  favoritesEmpty: { color: '#888', fontSize: 14, marginBottom: 8 },
+  favoriteItem: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, borderBottomWidth: 1, borderColor: '#f0f0f0' },
+  favoriteItemIcon: { fontSize: 18, width: 26, textAlign: 'center' },
+  favoriteItemNome: { fontSize: 14, color: '#1d2025', flex: 1 },
+  favoriteRemove: {
+    paddingLeft: 16,
+    color: '#e74c3c',
+    fontSize: 12,
+  },
+  favoriteRemoveIcon: { fontSize: 12, color: '#e74c3c' },
+  favoriteItemContent: { flexDirection: 'row', alignItems: 'center', gap: 10 },
 });

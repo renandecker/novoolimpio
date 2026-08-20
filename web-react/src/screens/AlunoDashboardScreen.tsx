@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { alunoApi, BoletimResumo, formatarNota, formatarPercentual } from '../aluno';
+import { alunoApi, AulaAluno, BoletimResumo, formatarNota, formatarPercentual } from '../aluno';
 import '../AlunoPortal.css';
 
 const STATUS_ROTULO: Record<string, string> = {
@@ -13,16 +13,18 @@ const STATUS_ROTULO: Record<string, string> = {
 export default function AlunoDashboardScreen() {
   const [nome, setNome] = useState('');
   const [boletins, setBoletins] = useState<BoletimResumo[]>([]);
+  const [chamadas, setChamadas] = useState<AulaAluno[]>([]);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(true);
 
   useEffect(() => {
     let active = true;
-    Promise.all([alunoApi.perfil(), alunoApi.dashboard()])
-      .then(([perfil, dashboard]) => {
+    Promise.all([alunoApi.perfil(), alunoApi.dashboard(), alunoApi.chamadas()])
+      .then(([perfil, dashboard, chamadasData]) => {
         if (!active) return;
         setNome(perfil.nome || perfil.username || '');
         setBoletins(dashboard.boletins ?? []);
+        setChamadas(chamadasData ?? []);
       })
       .catch((e: any) => {
         if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar o painel do aluno.');
@@ -79,10 +81,28 @@ export default function AlunoDashboardScreen() {
             <div className="aluno-portal-item-acoes">
               <Link to="/aluno/boletim">Ver boletim</Link>
               <Link to="/aluno/frequencia">Ver frequência</Link>
+              <Link to="/aluno/aulas">Ver aulas</Link>
+              <Link to="/aluno/avaliacoes">Ver avaliações</Link>
             </div>
           </section>
         ))}
       </div>
+
+      {chamadas.length > 0 && (
+        <div className="aluno-portal-chamadas">
+          <h2>Minhas Chamadas</h2>
+          <p className="aluno-portal-msg">Total de aulas registradas: {chamadas.length}</p>
+          <ul>
+            {chamadas.map(c => (
+              <li key={c.id}>
+                <strong>{c.nome}</strong> - {c.descricao || ''}
+                {c.componente && <span>({c.componente})</span>}
+                {c.turma && <span>Turma: {c.turma}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </main>
   );
 }
