@@ -21,10 +21,36 @@ import jakarta.ws.rs.core.MediaType;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class LoginController {
-    @Inject LoginService service;
-    @POST @Path("/authenticate") public Uni<LoginResponse> authenticate(@Valid LoginRequest request) { return service.authenticate(request); }
-    @POST @Path("/bootstrap") public Uni<LoginResponse> bootstrap(@Valid BootstrapRequest request) { return service.bootstrap(request); }
-    @POST @Path("/forgot-password") public Uni<MessageResponse> forgotPassword(@Valid ForgotPasswordRequest request) { return service.forgotPassword(request); }
-    @POST @Path("/change-password") public Uni<LoginResponse> changePassword(@HeaderParam("Authorization") String authorization, @Valid ChangePasswordRequest request) { return service.changePassword(authorization, request); }
-    @POST @Path("/logout") public Uni<Void> logout(@HeaderParam("Authorization") String authorization) { return service.logout(authorization); }
+    @Inject
+    LoginService service;
+
+    @POST
+    @Path("/authenticate")
+    public Uni<LoginResponse> authenticate(@Valid LoginRequest request) {
+        return service.authenticate(request);
+    }
+
+    @POST
+    @Path("/bootstrap")
+    public Uni<LoginResponse> bootstrap(@Valid BootstrapRequest request) {
+        return service.bootstrap(request);
+    }
+
+    @POST
+    @Path("/forgot-password")
+    public Uni<MessageResponse> forgotPassword(@Valid ForgotPasswordRequest request) {
+        return service.forgotPassword(request);
+    }
+
+    @POST
+    @Path("/change-password")
+    public Uni<LoginResponse> changePassword(@HeaderParam("Authorization") String authorization, @Valid ChangePasswordRequest request) {
+        return service.changePassword(authorization, request);
+    }
+
+    @POST
+    @Path("/logout")
+    public Uni<Void> logout(@HeaderParam("Authorization") String authorization) {
+        return service.logout(authorization);
+    }
 }

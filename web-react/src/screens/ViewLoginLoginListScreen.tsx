@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewLoginLoginListScreen(){return <PermissionGate permission="READ"><main><h1>Login</h1><DataTable path="/api/view/login/login"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewLoginLoginListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Login</h1><DataTable path="/api/view/login/login"/></main>
+    </PermissionGate>
+}

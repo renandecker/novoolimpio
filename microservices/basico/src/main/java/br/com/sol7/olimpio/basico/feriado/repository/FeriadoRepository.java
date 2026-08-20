@@ -1,10 +1,15 @@
 package br.com.sol7.olimpio.basico.feriado.repository;
+
 import java.util.Date;
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 import br.com.sol7.olimpio.basico.feriado.entity.Feriado;
-@ApplicationScoped public class FeriadoRepository implements PanacheRepository<Feriado> {
+
+@ApplicationScoped
+public class FeriadoRepository implements PanacheRepository<Feriado> {
 
     // Migrado de FeriadoRepository.buscarFeriadoUnidade (legado) - HQL original:
     // Select f from Feriado f left join f.unidade u left join f.tipoCurso t where  ((u IN (?1)) or f.nacional = true )  and f.dataFeriado = ?2 and (t IN (?3) or f.todosCursos = true)
@@ -14,10 +19,10 @@ import br.com.sol7.olimpio.basico.feriado.entity.Feriado;
     public Uni<java.util.List<Feriado>> buscarFeriadoUnidade(Long unidadeId, Date data, Long tipoCursoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_FERIADO_UNIDADE, Feriado.class)
-                    .setParameter(1, unidadeId)
-                    .setParameter(2, data)
-                    .setParameter(3, tipoCursoId)
-                    .getResultList());
+                        .setParameter(1, unidadeId)
+                        .setParameter(2, data)
+                        .setParameter(3, tipoCursoId)
+                        .getResultList());
     }
 
 
@@ -29,9 +34,9 @@ import br.com.sol7.olimpio.basico.feriado.entity.Feriado;
     public Uni<java.util.List<Feriado>> buscarFeriadoDaUnidadetipoCurso(Date inicio, Date fim) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_FERIADO_DA_UNIDADETIPO_CURSO, Feriado.class)
-                    .setParameter(1, inicio)
-                    .setParameter(2, fim)
-                    .getResultList());
+                        .setParameter(1, inicio)
+                        .setParameter(2, fim)
+                        .getResultList());
     }
 
 
@@ -43,10 +48,10 @@ import br.com.sol7.olimpio.basico.feriado.entity.Feriado;
     public Uni<java.util.List<Feriado>> buscarFeriadoDaUnidade(Long unidadeId, Date inicio, Date fim) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_FERIADO_DA_UNIDADE, Feriado.class)
-                    .setParameter(1, unidadeId)
-                    .setParameter(2, inicio)
-                    .setParameter(3, fim)
-                    .getResultList());
+                        .setParameter(1, unidadeId)
+                        .setParameter(2, inicio)
+                        .setParameter(3, fim)
+                        .getResultList());
     }
 
 
@@ -58,10 +63,10 @@ import br.com.sol7.olimpio.basico.feriado.entity.Feriado;
     public Uni<java.util.List<Feriado>> buscarFeriadoDaUnidadeList(List<Long> unidadeIds, Date inicio, Date fim) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_FERIADO_DA_UNIDADE_LIST, Feriado.class)
-                    .setParameter(1, unidadeIds)
-                    .setParameter(2, inicio)
-                    .setParameter(3, fim)
-                    .getResultList());
+                        .setParameter(1, unidadeIds)
+                        .setParameter(2, inicio)
+                        .setParameter(3, fim)
+                        .getResultList());
     }
 
 
@@ -74,7 +79,7 @@ import br.com.sol7.olimpio.basico.feriado.entity.Feriado;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_FERIADO_FIXO, Feriado.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -86,8 +91,8 @@ import br.com.sol7.olimpio.basico.feriado.entity.Feriado;
     public Uni<java.util.List<Feriado>> verificarFeriadoExistente(Date data) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_VERIFICAR_FERIADO_EXISTENTE, Feriado.class)
-                    .setParameter(1, data)
-                    .getResultList());
+                        .setParameter(1, data)
+                        .getResultList());
     }
 
 
@@ -99,8 +104,8 @@ import br.com.sol7.olimpio.basico.feriado.entity.Feriado;
     public Uni<java.util.List<Feriado>> buscarFeriadoComUnidades(Long entityId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_FERIADO_COM_UNIDADES, Feriado.class)
-                    .setParameter(1, entityId)
-                    .getResultList());
+                        .setParameter(1, entityId)
+                        .getResultList());
     }
 
 
@@ -112,8 +117,8 @@ import br.com.sol7.olimpio.basico.feriado.entity.Feriado;
     public Uni<java.util.List<Feriado>> buscarFeriadoComTipoCurso(Long entityId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_FERIADO_COM_TIPO_CURSO, Feriado.class)
-                    .setParameter(1, entityId)
-                    .getResultList());
+                        .setParameter(1, entityId)
+                        .getResultList());
     }
 
 
@@ -125,9 +130,9 @@ import br.com.sol7.olimpio.basico.feriado.entity.Feriado;
     public Uni<java.util.List<Feriado>> buscarFeriadosComUnidadeData(Long unidadeId, Date inicio) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_FERIADOS_COM_UNIDADE_DATA, Feriado.class)
-                    .setParameter(1, unidadeId)
-                    .setParameter(2, inicio)
-                    .getResultList());
+                        .setParameter(1, unidadeId)
+                        .setParameter(2, inicio)
+                        .getResultList());
     }
 
 }

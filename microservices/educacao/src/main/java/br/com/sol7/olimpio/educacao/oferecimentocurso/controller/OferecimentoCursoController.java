@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
+
 import java.util.List;
 
 @Path("/api/educacao/oferecimento-curso")
@@ -14,10 +15,13 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class OferecimentoCursoController {
 
-    @Inject OferecimentoCursoService service;
+    @Inject
+    OferecimentoCursoService service;
 
     @GET
-    public Uni<List<OferecimentoCursoResponse>> list() { return service.list(); }
+    public Uni<List<OferecimentoCursoResponse>> list() {
+        return service.list();
+    }
 
     @GET
     @Path("/paged")
@@ -27,7 +31,9 @@ public class OferecimentoCursoController {
 
     @GET
     @Path("/{id}")
-    public Uni<OferecimentoCursoResponse> find(@PathParam("id") Long id) { return service.find(id); }
+    public Uni<OferecimentoCursoResponse> find(@PathParam("id") Long id) {
+        return service.find(id);
+    }
 
     @POST
     public Uni<Response> create(@Valid OferecimentoCursoRequest r) {
@@ -42,12 +48,16 @@ public class OferecimentoCursoController {
 
     @DELETE
     @Path("/{id}")
-    public Uni<Void> delete(@PathParam("id") Long id) { return service.delete(id); }
+    public Uni<Void> delete(@PathParam("id") Long id) {
+        return service.delete(id);
+    }
 
     // Grupo + turmas (detalhe do "Oferecimento Curso").
     @GET
     @Path("/detalhe")
-    public Uni<OferecimentoCursoDetalheResponse> detalhe(@QueryParam("id") Long id) { return service.detalhe(id); }
+    public Uni<OferecimentoCursoDetalheResponse> detalhe(@QueryParam("id") Long id) {
+        return service.detalhe(id);
+    }
 
     // Turmas (OferecimentoComponenteCurricular) de um grupo - migrado de GrupoRepository.listarOferecimentos.
     @GET

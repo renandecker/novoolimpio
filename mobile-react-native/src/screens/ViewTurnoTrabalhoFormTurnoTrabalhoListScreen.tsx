@@ -1,5 +1,6 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import {ModuleList} from '../ModuleListScreen';
+
 export default function ViewTurnoTrabalhoFormTurnoTrabalhoListScreen() {
-  return <ModuleList path="/api/view/turnoTrabalho/formTurnoTrabalho" />;
+    return <ModuleList path="/api/view/turnoTrabalho/formTurnoTrabalho"/>;
 }

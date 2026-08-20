@@ -6,8 +6,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * Implementacao real de {@link PixProviderClient} usando o Asaas (mesmo PSP do asaas-service).
  * Fluxo movido do fiserv para o asaas-service. Como NAO esta marcada com @DefaultBean,
  * o Quarkus a injeta no lugar do StubPixProviderClient automaticamente.
- *
+ * <p>
  * Fluxo de criacao: garante um cliente Asaas (busca por CPF/CNPJ ou cria), cria a cobranca
  * PIX (POST /v3/payments, billingType=PIX) e obtem o payload EMV do QR Code
  * (GET /v3/payments/{id}/pixQrCode). A consulta de status usa GET /v3/payments/{id}.
@@ -108,10 +110,10 @@ public class AsaasPixProviderClient implements PixProviderClient {
             return "PENDENTE";
         }
         return switch (status.toUpperCase()) {
-            case "RECEIVED", "CONFIRMED" -> "PAGO";
-            case "REFUNDED" -> "ESTORNADO";
-            case "OVERDUE" -> "VENCIDO";
-            default -> "PENDENTE";
-        };
+            case "RECEIVED","CONFIRMED" ->"PAGO";
+            case "REFUNDED" ->"ESTORNADO";
+            case "OVERDUE" ->"VENCIDO";
+            default ->"PENDENTE";
+        } ;
     }
 }

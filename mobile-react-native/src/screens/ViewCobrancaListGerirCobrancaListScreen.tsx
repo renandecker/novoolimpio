@@ -1,5 +1,6 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import {ModuleList} from '../ModuleListScreen';
+
 export default function ViewCobrancaListGerirCobrancaListScreen() {
-  return <ModuleList path="/api/view/cobranca/listGerirCobranca" />;
+    return <ModuleList path="/api/view/cobranca/listGerirCobranca"/>;
 }

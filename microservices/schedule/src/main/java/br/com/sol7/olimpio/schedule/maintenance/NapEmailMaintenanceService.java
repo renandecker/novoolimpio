@@ -14,11 +14,11 @@ import java.util.List;
 /**
  * Portado de NAPEmailService.rotinaEmailNap() do legado
  * (br.com.sol7.olimpio.service.services.educacao.NAPEmailService).
- *
+ * <p>
  * Para cada configuracao ativa em edc_nap_email_envio monta o SQL da NAP (from + joins +
  * caseCor da situacao) e registra um registro em edc_nap_email para cada contrato que atende
  * as regras. Nao foi portado o envio efetivo: aqui fica registrado o envio pendente + log.
- *
+ * <p>
  * Acessa o banco pelo datasource reativo "educacao-db" (SQL nativo, sem REST).
  */
 @ApplicationScoped
@@ -70,9 +70,11 @@ public class NapEmailMaintenanceService {
                     " left join edc_ocorrencia_componente_curricular ocorrencia on (caderno.id_ocorrencia_componente_curricular = ocorrencia.id) ";
 
     public record NapEmailConfig(Long id, Integer tipo, String situacao, Long idEtapa,
-                                 boolean customizado, String campoCustomizado) {}
+                                 boolean customizado, String campoCustomizado) {
+    }
 
-    public record RotinaEmailNapResumo(int configuracoes, int destinatarios) {}
+    public record RotinaEmailNapResumo(int configuracoes, int destinatarios) {
+    }
 
     public Uni<RotinaEmailNapResumo> rotinaEmailNap() {
         return pool.query(SQL_LISTAR_CONFIGS).execute()

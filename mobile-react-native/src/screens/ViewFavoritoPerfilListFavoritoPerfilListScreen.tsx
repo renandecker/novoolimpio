@@ -1,5 +1,6 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import {ModuleList} from '../ModuleListScreen';
+
 export default function ViewFavoritoPerfilListFavoritoPerfilListScreen() {
-  return <ModuleList path="/api/view/favoritoPerfil/listFavoritoPerfil" />;
+    return <ModuleList path="/api/view/favoritoPerfil/listFavoritoPerfil"/>;
 }

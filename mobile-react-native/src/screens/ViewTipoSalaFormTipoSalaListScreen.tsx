@@ -1,5 +1,6 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import {ModuleList} from '../ModuleListScreen';
+
 export default function ViewTipoSalaFormTipoSalaListScreen() {
-  return <ModuleList path="/api/view/tipoSala/formTipoSala" />;
+    return <ModuleList path="/api/view/tipoSala/formTipoSala"/>;
 }

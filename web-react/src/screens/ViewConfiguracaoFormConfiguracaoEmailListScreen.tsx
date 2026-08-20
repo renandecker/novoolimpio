@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewConfiguracaoFormConfiguracaoEmailListScreen(){return <PermissionGate permission="READ"><main><h1>Form Configuracao Email</h1><DataTable path="/api/view/configuracao/formConfiguracaoEmail"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewConfiguracaoFormConfiguracaoEmailListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Form Configuracao Email</h1><DataTable path="/api/view/configuracao/formConfiguracaoEmail"/></main>
+    </PermissionGate>
+}

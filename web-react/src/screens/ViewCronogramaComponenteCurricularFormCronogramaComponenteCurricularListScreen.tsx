@@ -1,1 +1,9 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewCronogramaComponenteCurricularFormCronogramaComponenteCurricularListScreen(){return <PermissionGate permission="READ"><main><h1>Form Cronograma Componente Curricular</h1><DataTable path="/api/view/cronogramaComponenteCurricular/formCronogramaComponenteCurricular"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewCronogramaComponenteCurricularFormCronogramaComponenteCurricularListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Form Cronograma Componente Curricular</h1><DataTable
+            path="/api/view/cronogramaComponenteCurricular/formCronogramaComponenteCurricular"/></main>
+    </PermissionGate>
+}

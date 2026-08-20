@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.etnia.service;
+
 import br.com.sol7.olimpio.shared.PagedResponse;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.etnia.dto.EtniaRequest;
 import br.com.sol7.olimpio.basico.etnia.dto.EtniaResponse;
 import br.com.sol7.olimpio.basico.etnia.entity.Etnia;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.etnia.repository.EtniaRepository;
 @WithTransaction
 public class EtniaService {
 
-    @Inject EtniaRepository repository;
+    @Inject
+    EtniaRepository repository;
 
     public Uni<List<EtniaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,9 @@ public class EtniaService {
                         : Uni.createFrom().failure(new NotFoundException("Etnia not found")));
     }
 
-    private void apply(Etnia e, EtniaRequest r) { e.descricao = r.descricao(); }
+    private void apply(Etnia e, EtniaRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private EtniaResponse toResponse(Etnia e) {
         return new EtniaResponse(e.id, e.descricao);

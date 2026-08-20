@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.sala;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class SalaService {
 
-    @Inject SalaRepository repository;
+    @Inject
+    SalaRepository repository;
 
     public Uni<List<SalaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,18 @@ public class SalaService {
                         : Uni.createFrom().failure(new NotFoundException("Sala not found")));
     }
 
-    private void apply(Sala e, SalaRequest r) { e.descricao = r.descricao(); e.sucinto = r.sucinto(); e.unidadeId = r.unidadeId(); e.tipoSalaId = r.tipoSalaId(); e.quantidadeAlunos = r.quantidadeAlunos(); e.predio = r.predio(); e.andar = r.andar(); e.numero = r.numero(); e.arCondicionado = r.arCondicionado(); e.ensalamentoAutomatico = r.ensalamentoAutomatico(); }
+    private void apply(Sala e, SalaRequest r) {
+        e.descricao = r.descricao();
+        e.sucinto = r.sucinto();
+        e.unidadeId = r.unidadeId();
+        e.tipoSalaId = r.tipoSalaId();
+        e.quantidadeAlunos = r.quantidadeAlunos();
+        e.predio = r.predio();
+        e.andar = r.andar();
+        e.numero = r.numero();
+        e.arCondicionado = r.arCondicionado();
+        e.ensalamentoAutomatico = r.ensalamentoAutomatico();
+    }
 
     private SalaResponse toResponse(Sala e) {
         return new SalaResponse(e.id, e.descricao, e.sucinto, e.unidadeId, e.tipoSalaId, e.quantidadeAlunos, e.predio, e.andar, e.numero, e.arCondicionado, e.ensalamentoAutomatico);
@@ -112,7 +126,7 @@ public class SalaService {
     //         return getSalaRepository().buscarSalasDaUnidade(unidade);
     //     }
     public Uni<List<Long>> buscarSalasDaUnidade(Long unidadeId) {
-                return repository.find("unidadeId = ?1 order by sucinto", unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("unidadeId = ?1 order by sucinto", unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

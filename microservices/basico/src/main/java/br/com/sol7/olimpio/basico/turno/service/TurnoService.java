@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.turno.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.turno.dto.TurnoRequest;
 import br.com.sol7.olimpio.basico.turno.dto.TurnoResponse;
 import br.com.sol7.olimpio.basico.turno.entity.Turno;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.turno.repository.TurnoRepository;
 @WithTransaction
 public class TurnoService {
 
-    @Inject TurnoRepository repository;
+    @Inject
+    TurnoRepository repository;
 
     public Uni<List<TurnoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,9 @@ public class TurnoService {
                         : Uni.createFrom().failure(new NotFoundException("Turno not found")));
     }
 
-    private void apply(Turno e, TurnoRequest r) { e.descricao = r.descricao(); }
+    private void apply(Turno e, TurnoRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private TurnoResponse toResponse(Turno e) {
         return new TurnoResponse(e.id, e.descricao);

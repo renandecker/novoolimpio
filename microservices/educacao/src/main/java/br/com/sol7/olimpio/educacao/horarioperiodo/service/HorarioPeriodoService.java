@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.horarioperiodo;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class HorarioPeriodoService {
 
-    @Inject HorarioPeriodoRepository repository;
+    @Inject
+    HorarioPeriodoRepository repository;
 
     public Uni<List<HorarioPeriodoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,17 @@ public class HorarioPeriodoService {
                         : Uni.createFrom().failure(new NotFoundException("HorarioPeriodo not found")));
     }
 
-    private void apply(HorarioPeriodo e, HorarioPeriodoRequest r) { e.descricao = r.descricao(); e.periodoId = r.periodoId(); e.turnoEducacaoId = r.turnoEducacaoId(); e.dataInicio = r.dataInicio(); e.dataFim = r.dataFim(); e.horaInicio = r.horaInicio(); e.horaFim = r.horaFim(); e.minutosAulaDiario = r.minutosAulaDiario(); e.minutosAula = r.minutosAula(); }
+    private void apply(HorarioPeriodo e, HorarioPeriodoRequest r) {
+        e.descricao = r.descricao();
+        e.periodoId = r.periodoId();
+        e.turnoEducacaoId = r.turnoEducacaoId();
+        e.dataInicio = r.dataInicio();
+        e.dataFim = r.dataFim();
+        e.horaInicio = r.horaInicio();
+        e.horaFim = r.horaFim();
+        e.minutosAulaDiario = r.minutosAulaDiario();
+        e.minutosAula = r.minutosAula();
+    }
 
     private HorarioPeriodoResponse toResponse(HorarioPeriodo e) {
         return new HorarioPeriodoResponse(e.id, e.descricao, e.periodoId, e.turnoEducacaoId, e.dataInicio, e.dataFim, e.horaInicio, e.horaFim, e.minutosAulaDiario, e.minutosAula);

@@ -34,9 +34,9 @@ public class CurriculoTrabalhoService {
     public Uni<PagedResponse<CurriculoTrabalhoResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
         int s = switch (size) {
-            case 10, 20, 50, 100 -> size;
-            default -> 10;
-        };
+            case 10,20, 50, 100 ->size;
+            default ->10;
+        } ;
         return repository.findAll().page(p, s).list()
                 .onItem().transformToUni(items -> toResponses(items)
                         .chain(responses -> repository.count()

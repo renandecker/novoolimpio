@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewDiaPagamentoListDiaPagamentoListScreen(){return <PermissionGate permission="READ"><main><h1>Dia Pagamento</h1><DataTable path="/api/view/diaPagamento/listDiaPagamento"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewDiaPagamentoListDiaPagamentoListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Dia Pagamento</h1><DataTable path="/api/view/diaPagamento/listDiaPagamento"/></main>
+    </PermissionGate>
+}

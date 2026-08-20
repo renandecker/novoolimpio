@@ -45,7 +45,8 @@ import static java.math.BigDecimal.ZERO;
 @WithTransaction
 public class AlunoService {
 
-    @Inject AlunoRepository repository;
+    @Inject
+    AlunoRepository repository;
 
     private static final Map<String, String> PRESENCA_DESCRICAO = Map.of(
             "p", "Presente", "m", "Meia presença", "a", "Ausente", "t", "Atestado",
@@ -53,9 +54,12 @@ public class AlunoService {
             "n", "Sem marcação", "d", "Atrasado", "i", "Irregular");
 
     private record GrauData(Long id, String descricao, BigDecimal notaMaxima, BigDecimal mediaSemExame,
-                            BigDecimal mediaFinal, BigDecimal frequenciaMinima, List<GrauNotaData> notas) {}
+                            BigDecimal mediaFinal, BigDecimal frequenciaMinima, List<GrauNotaData> notas) {
+    }
+
     private record GrauNotaData(Long id, Long idGrauNota, String nome, Integer numeroNota, BigDecimal peso,
-                                BigDecimal nota, List<AvaliacaoResponse> avaliacoes) {}
+                                BigDecimal nota, List<AvaliacaoResponse> avaliacoes) {
+    }
 
     public Uni<AlunoPerfilResponse> perfil(String username) {
         return repository.perfilPorUsername(username)
@@ -127,15 +131,16 @@ public class AlunoService {
                 String descricao = PRESENCA_DESCRICAO.getOrDefault(presenca, presenca.isEmpty() ? "Sem marcação" : presenca);
                 ocorrencias.add(new OcorrenciaPresencaResponse(asLocalDate(row[1]), presenca, descricao, asString(row[3])));
                 switch (presenca) {
-                    case "p" -> presentes++;
-                    case "m" -> meias++;
-                    case "a" -> ausentes++;
-                    case "t" -> atestados++;
-                    case "d" -> atrasos++;
-                    case "n" -> semMarcacao++;
-                    case "c" -> canceladas++;
-                    case "r" -> prorrogadas++;
-                    default -> {}
+                    case "p" ->presentes++;
+                    case "m" ->meias++;
+                    case "a" ->ausentes++;
+                    case "t" ->atestados++;
+                    case "d" ->atrasos++;
+                    case "n" ->semMarcacao++;
+                    case "c" ->canceladas++;
+                    case "r" ->prorrogadas++;
+                    default ->{
+                    }
                 }
             }
             BigDecimal perc = matricula.percentualPresenca();
@@ -310,7 +315,7 @@ public class AlunoService {
 
     private boolean asBoolean(Object o) {
         if (o == null) return false;
-        if (o instanceof Boolean b) return b;
+        if (o instanceof Boolean b)return b;
         return "true".equalsIgnoreCase(o.toString()) || "1".equals(o.toString()) || "t".equalsIgnoreCase(o.toString());
     }
 
@@ -342,27 +347,29 @@ public class AlunoService {
             porNcm.computeIfAbsent(asLong(row[0]), id -> new ArrayList<>())
                     .add(new AvaliacaoResponse(asInt(row[1]), asBigDecimal(row[2]), asString(row[3])));
         }
-        for (GrauData grau : graus) for (GrauNotaData nota : grau.notas()) {
-            nota.avaliacoes().addAll(porNcm.getOrDefault(nota.id(), List.of()));
-        }
+        for (GrauData grau : graus)
+            for (GrauNotaData nota : grau.notas()) {
+                nota.avaliacoes().addAll(porNcm.getOrDefault(nota.id(), List.of()));
+            }
     }
 
     private BigDecimal media(List<GrauData> graus) {
         BigDecimal soma = ZERO, pesos = ZERO;
         boolean temNota = false;
-        for (GrauData grau : graus) for (GrauNotaData nota : grau.notas()) {
-            BigDecimal valor = nota.nota();
-            if (valor == null) continue;
-            temNota = true;
-            BigDecimal peso = nota.peso();
-            if (peso != null && peso.signum() > 0) {
-                soma = soma.add(valor.multiply(peso));
-                pesos = pesos.add(peso);
-            } else {
-                soma = soma.add(valor);
-                pesos = pesos.add(ONE);
+        for (GrauData grau : graus)
+            for (GrauNotaData nota : grau.notas()) {
+                BigDecimal valor = nota.nota();
+                if (valor == null) continue;
+                temNota = true;
+                BigDecimal peso = nota.peso();
+                if (peso != null && peso.signum() > 0) {
+                    soma = soma.add(valor.multiply(peso));
+                    pesos = pesos.add(peso);
+                } else {
+                    soma = soma.add(valor);
+                    pesos = pesos.add(ONE);
+                }
             }
-        }
         if (!temNota || pesos.signum() == 0) return null;
         return soma.divide(pesos, 2, RoundingMode.HALF_UP);
     }
@@ -426,8 +433,8 @@ public class AlunoService {
     private GrauResponse toGrau(GrauData grau) {
         return new GrauResponse(grau.id(), grau.descricao(), grau.notaMaxima(), grau.mediaSemExame(), grau.mediaFinal(),
                 grau.frequenciaMinima(), grau.notas().stream()
-                        .map(n -> new GrauNotaResponse(n.id(), n.idGrauNota(), n.nome(), n.numeroNota(), n.peso(), n.nota(), n.avaliacoes()))
-                        .toList());
+                .map(n -> new GrauNotaResponse(n.id(), n.idGrauNota(), n.nome(), n.numeroNota(), n.peso(), n.nota(), n.avaliacoes()))
+                .toList());
     }
 
     private <T> Uni<List<T>> sequencial(List<Uni<T>> unis) {
@@ -442,22 +449,36 @@ public class AlunoService {
         });
     }
 
-    private String asString(Object o) { return o == null ? "" : o.toString(); }
-    private Long asLong(Object o) { if (o == null) return null; if (o instanceof Number n) return n.longValue(); return Long.valueOf(o.toString()); }
-    private Integer asInt(Object o) { if (o == null) return null; if (o instanceof Number n) return n.intValue(); return Integer.valueOf(o.toString()); }
+    private String asString(Object o) {
+        return o == null ? "" : o.toString();
+    }
+
+    private Long asLong(Object o) {
+        if (o == null) return null;
+        if (o instanceof Number n)return n.longValue();
+        return Long.valueOf(o.toString());
+    }
+
+    private Integer asInt(Object o) {
+        if (o == null) return null;
+        if (o instanceof Number n)return n.intValue();
+        return Integer.valueOf(o.toString());
+    }
+
     private BigDecimal asBigDecimal(Object o) {
         if (o == null) return null;
-        if (o instanceof BigDecimal b) return b;
-        if (o instanceof Number n) return BigDecimal.valueOf(n.doubleValue());
+        if (o instanceof BigDecimal b)return b;
+        if (o instanceof Number n)return BigDecimal.valueOf(n.doubleValue());
         return new BigDecimal(o.toString());
     }
+
     private LocalDate asLocalDate(Object o) {
         if (o == null) return null;
-        if (o instanceof LocalDate d) return d;
-        if (o instanceof LocalDateTime d) return d.toLocalDate();
-        if (o instanceof java.sql.Date d) return d.toLocalDate();
-        if (o instanceof java.sql.Timestamp d) return d.toLocalDateTime().toLocalDate();
-        if (o instanceof java.util.Date d) return d.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+        if (o instanceof LocalDate d)return d;
+        if (o instanceof LocalDateTime d)return d.toLocalDate();
+        if (o instanceof java.sql.Date d)return d.toLocalDate();
+        if (o instanceof java.sql.Timestamp d)return d.toLocalDateTime().toLocalDate();
+        if (o instanceof java.util.Date d)return d.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
         String s = o.toString();
         if (s.length() >= 10) {
             try {
@@ -471,10 +492,11 @@ public class AlunoService {
 
     private LocalDateTime asLocalDateTime(Object o) {
         if (o == null) return null;
-        if (o instanceof LocalDateTime d) return d;
-        if (o instanceof LocalDate d) return d.atStartOfDay();
-        if (o instanceof java.sql.Timestamp d) return d.toLocalDateTime();
-        if (o instanceof java.util.Date d) return d.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime();
+        if (o instanceof LocalDateTime d)return d;
+        if (o instanceof LocalDate d)return d.atStartOfDay();
+        if (o instanceof java.sql.Timestamp d)return d.toLocalDateTime();
+        if (o instanceof java.util.Date d)
+        return d.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime();
         String s = o.toString();
         if (s.length() >= 16) {
             try {

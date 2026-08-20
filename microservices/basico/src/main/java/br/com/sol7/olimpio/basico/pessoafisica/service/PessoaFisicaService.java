@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.pessoafisica.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.pessoa.repository.PessoaRepository;
 import br.com.sol7.olimpio.basico.pessoafisica.dto.PessoaFisicaRequest;
 import br.com.sol7.olimpio.basico.pessoafisica.dto.PessoaFisicaResponse;
@@ -17,8 +20,10 @@ import br.com.sol7.olimpio.basico.pessoafisica.repository.PessoaFisicaRepository
 @WithTransaction
 public class PessoaFisicaService {
 
-    @Inject PessoaFisicaRepository repository;
-    @Inject PessoaRepository pessoaRepository;
+    @Inject
+    PessoaFisicaRepository repository;
+    @Inject
+    PessoaRepository pessoaRepository;
 
     public Uni<List<PessoaFisicaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -58,7 +63,33 @@ public class PessoaFisicaService {
                         : Uni.createFrom().failure(new NotFoundException("PessoaFisica not found")));
     }
 
-    private void apply(PessoaFisica e, PessoaFisicaRequest r) { e.pessoaId = r.pessoaId(); e.nomeSocial = r.nomeSocial(); e.nome = r.nome(); e.cpf = r.cpf(); e.rg = r.rg(); e.nomeReferencia = r.nomeReferencia(); e.telefoneReferencia = r.telefoneReferencia(); e.celularReferencia = r.celularReferencia(); e.nomeReferencia2 = r.nomeReferencia2(); e.telefoneReferencia2 = r.telefoneReferencia2(); e.celularReferencia2 = r.celularReferencia2(); e.dataEmissaoRg = r.dataEmissaoRg(); e.orgaoEmissorRg = r.orgaoEmissorRg(); e.cidadeOrigemId = r.cidadeOrigemId(); e.nomePai = r.nomePai(); e.nomeMae = r.nomeMae(); e.dataNascimento = r.dataNascimento(); e.generoId = r.generoId(); e.etniaId = r.etniaId(); e.escolaridadeId = r.escolaridadeId(); e.estadoCivilId = r.estadoCivilId(); e.facebook = r.facebook(); e.twitter = r.twitter(); e.googlePlus = r.googlePlus(); e.telefoneComercial = r.telefoneComercial(); }
+    private void apply(PessoaFisica e, PessoaFisicaRequest r) {
+        e.pessoaId = r.pessoaId();
+        e.nomeSocial = r.nomeSocial();
+        e.nome = r.nome();
+        e.cpf = r.cpf();
+        e.rg = r.rg();
+        e.nomeReferencia = r.nomeReferencia();
+        e.telefoneReferencia = r.telefoneReferencia();
+        e.celularReferencia = r.celularReferencia();
+        e.nomeReferencia2 = r.nomeReferencia2();
+        e.telefoneReferencia2 = r.telefoneReferencia2();
+        e.celularReferencia2 = r.celularReferencia2();
+        e.dataEmissaoRg = r.dataEmissaoRg();
+        e.orgaoEmissorRg = r.orgaoEmissorRg();
+        e.cidadeOrigemId = r.cidadeOrigemId();
+        e.nomePai = r.nomePai();
+        e.nomeMae = r.nomeMae();
+        e.dataNascimento = r.dataNascimento();
+        e.generoId = r.generoId();
+        e.etniaId = r.etniaId();
+        e.escolaridadeId = r.escolaridadeId();
+        e.estadoCivilId = r.estadoCivilId();
+        e.facebook = r.facebook();
+        e.twitter = r.twitter();
+        e.googlePlus = r.googlePlus();
+        e.telefoneComercial = r.telefoneComercial();
+    }
 
     private PessoaFisicaResponse toResponse(PessoaFisica e) {
         return new PessoaFisicaResponse(e.id, e.pessoaId, e.nomeSocial, e.nome, e.cpf, e.rg, e.nomeReferencia, e.telefoneReferencia, e.celularReferencia, e.nomeReferencia2, e.telefoneReferencia2, e.celularReferencia2, e.dataEmissaoRg, e.orgaoEmissorRg, e.cidadeOrigemId, e.nomePai, e.nomeMae, e.dataNascimento, e.generoId, e.etniaId, e.escolaridadeId, e.estadoCivilId, e.facebook, e.twitter, e.googlePlus, e.telefoneComercial);

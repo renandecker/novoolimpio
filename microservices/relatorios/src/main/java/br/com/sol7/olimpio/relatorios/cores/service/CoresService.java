@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.relatorios.cores;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class CoresService {
 
-    @Inject CoresRepository repository;
+    @Inject
+    CoresRepository repository;
 
     public Uni<List<CoresResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,10 @@ public class CoresService {
                         : Uni.createFrom().failure(new NotFoundException("Cores not found")));
     }
 
-    private void apply(Cores e, CoresRequest r) { e.fundo = r.fundo(); e.texto = r.texto(); }
+    private void apply(Cores e, CoresRequest r) {
+        e.fundo = r.fundo();
+        e.texto = r.texto();
+    }
 
     private CoresResponse toResponse(Cores e) {
         return new CoresResponse(e.id, e.fundo, e.texto);

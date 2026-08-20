@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.criterio;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class CriterioService {
 
-    @Inject CriterioRepository repository;
+    @Inject
+    CriterioRepository repository;
 
     public Uni<List<CriterioResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,17 @@ public class CriterioService {
                         : Uni.createFrom().failure(new NotFoundException("Criterio not found")));
     }
 
-    private void apply(Criterio e, CriterioRequest r) { e.unidadeId = r.unidadeId(); e.curriculoId = r.curriculoId(); e.mes = r.mes(); e.periodo = r.periodo(); e.qtdTurmaAbertas = r.qtdTurmaAbertas(); e.qtdAulasToleraciaMatricula = r.qtdAulasToleraciaMatricula(); e.dataInicio = r.dataInicio(); e.dataFim = r.dataFim(); e.tipoMatricula = r.tipoMatricula(); }
+    private void apply(Criterio e, CriterioRequest r) {
+        e.unidadeId = r.unidadeId();
+        e.curriculoId = r.curriculoId();
+        e.mes = r.mes();
+        e.periodo = r.periodo();
+        e.qtdTurmaAbertas = r.qtdTurmaAbertas();
+        e.qtdAulasToleraciaMatricula = r.qtdAulasToleraciaMatricula();
+        e.dataInicio = r.dataInicio();
+        e.dataFim = r.dataFim();
+        e.tipoMatricula = r.tipoMatricula();
+    }
 
     private CriterioResponse toResponse(Criterio e) {
         return new CriterioResponse(e.id, e.unidadeId, e.curriculoId, e.mes, e.periodo, e.qtdTurmaAbertas, e.qtdAulasToleraciaMatricula, e.dataInicio, e.dataFim, e.tipoMatricula);
@@ -92,7 +105,7 @@ public class CriterioService {
     //         return getCriterioRepository().buscarCriterioComDiasSemana(curriculo, unidade);
     //     }
     public Uni<Long> buscarCriterioComDiasSemana(Long curriculoId, Long unidadeId) {
-                return repository.buscarCriterioComDiasSemana(curriculoId, unidadeId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarCriterioComDiasSemana(curriculoId, unidadeId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -104,7 +117,7 @@ public class CriterioService {
     //         return getCriterioRepository().buscarCriterioComTurno(curriculo, unidade);
     //     }
     public Uni<Long> buscarCriterioComTurno(Long curriculoId, Long unidadeId) {
-                return repository.buscarCriterioComTurno(curriculoId, unidadeId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarCriterioComTurno(curriculoId, unidadeId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -115,7 +128,7 @@ public class CriterioService {
     //         return getCriterioRepository().buscarCriterio(curriculo, unidade);
     //     }
     public Uni<List<Long>> buscarCriterio(Long curriculoId, Long unidadeId) {
-                return repository.find("curriculoId =?1 and unidadeId = ?2 order by id desc", curriculoId, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("curriculoId =?1 and unidadeId = ?2 order by id desc", curriculoId, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

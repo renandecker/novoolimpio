@@ -22,7 +22,8 @@ import jakarta.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 public class PagamentoController {
 
-    @Inject PagamentoService service;
+    @Inject
+    PagamentoService service;
 
     @POST
     public Uni<Response> efetuar(@Valid EfetuarPagamentoRequest r) {

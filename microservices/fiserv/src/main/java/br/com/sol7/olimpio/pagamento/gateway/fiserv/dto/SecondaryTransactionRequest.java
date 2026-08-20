@@ -7,13 +7,13 @@ package br.com.sol7.olimpio.pagamento.gateway.fiserv.dto;
  */
 public record SecondaryTransactionRequest(
         String requestType,
-        TransactionAmount transactionAmount) {
+        TransactionAmount transactionAmount){
 
-    public static SecondaryTransactionRequest voidTotal() {
-        return new SecondaryTransactionRequest("VoidTransaction", null);
-    }
+public static SecondaryTransactionRequest voidTotal(){
+        return new SecondaryTransactionRequest("VoidTransaction",null);
+        }
 
-    public static SecondaryTransactionRequest returnValor(String total, String currency) {
-        return new SecondaryTransactionRequest("ReturnTransaction", new TransactionAmount(total, currency));
-    }
-}
+public static SecondaryTransactionRequest returnValor(String total,String currency){
+        return new SecondaryTransactionRequest("ReturnTransaction",new TransactionAmount(total,currency));
+        }
+        }

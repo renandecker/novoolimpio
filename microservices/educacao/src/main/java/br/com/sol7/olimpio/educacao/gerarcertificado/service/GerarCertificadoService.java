@@ -1,9 +1,25 @@
 package br.com.sol7.olimpio.educacao.gerarcertificado;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
-import io.smallrye.mutiny.Uni; import jakarta.enterprise.context.ApplicationScoped; import jakarta.inject.Inject; import jakarta.ws.rs.NotFoundException; import java.util.List;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped @WithTransaction public class GerarCertificadoService { @Inject GerarCertificadoRepository repository; public Uni<List<GerarCertificadoResponse>> list(){return repository.listAll().map(items->items.stream().map(this::toResponse).toList());}
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
+
+import java.util.List;
+
+import io.smallrye.mutiny.Uni;
+
+@ApplicationScoped
+@WithTransaction
+public class GerarCertificadoService {
+    @Inject
+    GerarCertificadoRepository repository;
+
+    public Uni<List<GerarCertificadoResponse>> list() {
+        return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
+    }
 
     public Uni<PagedResponse<GerarCertificadoResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
@@ -12,7 +28,33 @@ import io.smallrye.mutiny.Uni;
                 .onItem().transformToUni(items -> repository.count()
                         .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
- public Uni<GerarCertificadoResponse> find(Long id){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("GerarCertificado not found")).map(this::toResponse);} public Uni<GerarCertificadoResponse> create(GerarCertificadoRequest r){var e=new GerarCertificado();apply(e,r);return repository.persist(e).replaceWith(()->toResponse(e));} public Uni<GerarCertificadoResponse> update(Long id,GerarCertificadoRequest r){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("GerarCertificado not found")).invoke(e->apply(e,r)).map(this::toResponse);} public Uni<Void> delete(Long id){return repository.deleteById(id).onItem().transformToUni(deleted->deleted?Uni.createFrom().voidItem():Uni.createFrom().failure(new NotFoundException("GerarCertificado not found")));} private void apply(GerarCertificado e,GerarCertificadoRequest r){e.nome=r.nome();e.dadosJson=r.dadosJson();} private GerarCertificadoResponse toResponse(GerarCertificado e){return new GerarCertificadoResponse(e.id,e.nome,e.dadosJson);} 
+
+    public Uni<GerarCertificadoResponse> find(Long id) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("GerarCertificado not found")).map(this::toResponse);
+    }
+
+    public Uni<GerarCertificadoResponse> create(GerarCertificadoRequest r) {
+        var e = new GerarCertificado();
+        apply(e, r);
+        return repository.persist(e).replaceWith(() -> toResponse(e));
+    }
+
+    public Uni<GerarCertificadoResponse> update(Long id, GerarCertificadoRequest r) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("GerarCertificado not found")).invoke(e -> apply(e, r)).map(this::toResponse);
+    }
+
+    public Uni<Void> delete(Long id) {
+        return repository.deleteById(id).onItem().transformToUni(deleted -> deleted ? Uni.createFrom().voidItem() : Uni.createFrom().failure(new NotFoundException("GerarCertificado not found")));
+    }
+
+    private void apply(GerarCertificado e, GerarCertificadoRequest r) {
+        e.nome = r.nome();
+        e.dadosJson = r.dadosJson();
+    }
+
+    private GerarCertificadoResponse toResponse(GerarCertificado e) {
+        return new GerarCertificadoResponse(e.id, e.nome, e.dadosJson);
+    }
 
     // Migrado de GerarCertificadoController.gerarCertificado (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GerarCertificadoController.java:44, camada controller)
     // Observacao: retorno: era StreamedContent no legado

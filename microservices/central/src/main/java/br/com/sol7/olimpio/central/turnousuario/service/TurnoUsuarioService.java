@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.central.turnousuario;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class TurnoUsuarioService {
 
-    @Inject TurnoUsuarioRepository repository;
+    @Inject
+    TurnoUsuarioRepository repository;
 
     public Uni<List<TurnoUsuarioResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,10 @@ public class TurnoUsuarioService {
                         : Uni.createFrom().failure(new NotFoundException("TurnoUsuario not found")));
     }
 
-    private void apply(TurnoUsuario e, TurnoUsuarioRequest r) { e.usuarioId = r.usuarioId(); e.turnoTrabalhoId = r.turnoTrabalhoId(); }
+    private void apply(TurnoUsuario e, TurnoUsuarioRequest r) {
+        e.usuarioId = r.usuarioId();
+        e.turnoTrabalhoId = r.turnoTrabalhoId();
+    }
 
     private TurnoUsuarioResponse toResponse(TurnoUsuario e) {
         return new TurnoUsuarioResponse(e.usuarioId, e.turnoTrabalhoId);
@@ -116,7 +122,7 @@ public class TurnoUsuarioService {
     //         return getTurnoUsuarioRepository().buscarTurnoUsuario(operador);
     //     }
     public Uni<List<Long>> buscarTurnoUsuario(Long operadorId) {
-                return repository.find("usuarioId = ?1", operadorId).list().map(list -> list.stream().map(x -> x.turnoTrabalhoId).toList());
+        return repository.find("usuarioId = ?1", operadorId).list().map(list -> list.stream().map(x -> x.turnoTrabalhoId).toList());
     }
 
 }

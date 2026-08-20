@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.estado.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.estado.dto.EstadoRequest;
 import br.com.sol7.olimpio.basico.estado.dto.EstadoResponse;
 import br.com.sol7.olimpio.basico.estado.entity.Estado;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.estado.repository.EstadoRepository;
 @WithTransaction
 public class EstadoService {
 
-    @Inject EstadoRepository repository;
+    @Inject
+    EstadoRepository repository;
 
     public Uni<List<EstadoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,11 @@ public class EstadoService {
                         : Uni.createFrom().failure(new NotFoundException("Estado not found")));
     }
 
-    private void apply(Estado e, EstadoRequest r) { e.nome = r.nome(); e.uf = r.uf(); e.paisId = r.paisId(); }
+    private void apply(Estado e, EstadoRequest r) {
+        e.nome = r.nome();
+        e.uf = r.uf();
+        e.paisId = r.paisId();
+    }
 
     private EstadoResponse toResponse(Estado e) {
         return new EstadoResponse(e.id, e.nome, e.uf, e.paisId);

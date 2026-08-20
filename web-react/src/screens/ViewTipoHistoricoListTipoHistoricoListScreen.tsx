@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewTipoHistoricoListTipoHistoricoListScreen(){return <PermissionGate permission="READ"><main><h1>Tipo Historico</h1><DataTable path="/api/view/tipoHistorico/listTipoHistorico"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewTipoHistoricoListTipoHistoricoListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Tipo Historico</h1><DataTable path="/api/view/tipoHistorico/listTipoHistorico"/></main>
+    </PermissionGate>
+}

@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewRelatoriosViewGraficoPizzaListScreen(){return <PermissionGate permission="READ"><main><h1>View Grafico Pizza</h1><DataTable path="/api/view/relatorios/viewGraficoPizza"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewRelatoriosViewGraficoPizzaListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>View Grafico Pizza</h1><DataTable path="/api/view/relatorios/viewGraficoPizza"/></main>
+    </PermissionGate>
+}

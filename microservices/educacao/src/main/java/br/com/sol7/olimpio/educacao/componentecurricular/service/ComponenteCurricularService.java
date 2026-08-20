@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.componentecurricular;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ComponenteCurricularService {
 
-    @Inject ComponenteCurricularRepository repository;
+    @Inject
+    ComponenteCurricularRepository repository;
 
     public Uni<List<ComponenteCurricularResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,17 @@ public class ComponenteCurricularService {
                         : Uni.createFrom().failure(new NotFoundException("ComponenteCurricular not found")));
     }
 
-    private void apply(ComponenteCurricular e, ComponenteCurricularRequest r) { e.descricao = r.descricao(); e.sucinto = r.sucinto(); e.ementa = r.ementa(); e.cargaHoraria = r.cargaHoraria(); e.qtdeCoringa = r.qtdeCoringa(); e.creditos = r.creditos(); e.tipoSalaId = r.tipoSalaId(); e.habilidadeCompetencia = r.habilidadeCompetencia(); e.baseTecnologica = r.baseTecnologica(); }
+    private void apply(ComponenteCurricular e, ComponenteCurricularRequest r) {
+        e.descricao = r.descricao();
+        e.sucinto = r.sucinto();
+        e.ementa = r.ementa();
+        e.cargaHoraria = r.cargaHoraria();
+        e.qtdeCoringa = r.qtdeCoringa();
+        e.creditos = r.creditos();
+        e.tipoSalaId = r.tipoSalaId();
+        e.habilidadeCompetencia = r.habilidadeCompetencia();
+        e.baseTecnologica = r.baseTecnologica();
+    }
 
     private ComponenteCurricularResponse toResponse(ComponenteCurricular e) {
         return new ComponenteCurricularResponse(e.id, e.descricao, e.sucinto, e.ementa, e.cargaHoraria, e.qtdeCoringa, e.creditos, e.tipoSalaId, e.habilidadeCompetencia, e.baseTecnologica);
@@ -76,7 +89,7 @@ public class ComponenteCurricularService {
     //         return getComponenteCurricularRepository().autocomplete(query, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autocomplete(String query) {
-                return repository.autocomplete(query).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autocomplete(query).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -111,7 +124,7 @@ public class ComponenteCurricularService {
     //         return getComponenteCurricularRepository().buscarComponenteCurricularComBaseTecnologica(entity);
     //     }
     public Uni<Long> buscarComponenteCurricularComBaseTecnologica(Long entityId) {
-                return repository.buscarComponenteCurricularComBaseTecnologica(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarComponenteCurricularComBaseTecnologica(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -123,7 +136,7 @@ public class ComponenteCurricularService {
     //         return getComponenteCurricularRepository().buscarComponenteCurricularComReferenciaBibliografica(entity);
     //     }
     public Uni<Long> buscarComponenteCurricularComReferenciaBibliografica(Long entityId) {
-                return repository.buscarComponenteCurricularComReferenciaBibliografica(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarComponenteCurricularComReferenciaBibliografica(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -135,7 +148,7 @@ public class ComponenteCurricularService {
     //         return getComponenteCurricularRepository().buscarComponenteCurricularComCronograma(entity);
     //     }
     public Uni<Long> buscarComponenteCurricularComCronograma(Long entityId) {
-                return repository.buscarComponenteCurricularComCronograma(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarComponenteCurricularComCronograma(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -147,7 +160,7 @@ public class ComponenteCurricularService {
     //         return getComponenteCurricularRepository().buscarExistenciaEmOferecimento(entity);
     //     }
     public Uni<List<Long>> buscarExistenciaEmOferecimento(Long entityId) {
-                return repository.buscarExistenciaEmOferecimento(entityId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarExistenciaEmOferecimento(entityId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

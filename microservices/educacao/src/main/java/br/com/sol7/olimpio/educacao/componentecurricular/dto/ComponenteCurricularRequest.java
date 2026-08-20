@@ -1,3 +1,3 @@
 package br.com.sol7.olimpio.educacao.componentecurricular;
 
-public record ComponenteCurricularRequest(String descricao, String sucinto, String ementa, Integer cargaHoraria, int qtdeCoringa, Integer creditos, Long tipoSalaId, String habilidadeCompetencia, String baseTecnologica) {}
+public record ComponenteCurricularRequest(String descricao,String sucinto,String ementa,Integer cargaHoraria,int qtdeCoringa,Integer creditos,Long tipoSalaId,String habilidadeCompetencia,String baseTecnologica){}

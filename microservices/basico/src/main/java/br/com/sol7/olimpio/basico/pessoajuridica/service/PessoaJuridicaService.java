@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.pessoajuridica.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.pessoa.repository.PessoaRepository;
 import br.com.sol7.olimpio.basico.pessoajuridica.dto.PessoaJuridicaRequest;
 import br.com.sol7.olimpio.basico.pessoajuridica.dto.PessoaJuridicaResponse;
@@ -17,8 +20,10 @@ import br.com.sol7.olimpio.basico.pessoajuridica.repository.PessoaJuridicaReposi
 @WithTransaction
 public class PessoaJuridicaService {
 
-    @Inject PessoaJuridicaRepository repository;
-    @Inject PessoaRepository pessoaRepository;
+    @Inject
+    PessoaJuridicaRepository repository;
+    @Inject
+    PessoaRepository pessoaRepository;
 
     public Uni<List<PessoaJuridicaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -58,7 +63,15 @@ public class PessoaJuridicaService {
                         : Uni.createFrom().failure(new NotFoundException("PessoaJuridica not found")));
     }
 
-    private void apply(PessoaJuridica e, PessoaJuridicaRequest r) { e.pessoaId = r.pessoaId(); e.nomeFantasia = r.nomeFantasia(); e.razaoSocial = r.razaoSocial(); e.cnpj = r.cnpj(); e.fax = r.fax(); e.inscricaoMunicipal = r.inscricaoMunicipal(); e.inscricaoEstadual = r.inscricaoEstadual(); }
+    private void apply(PessoaJuridica e, PessoaJuridicaRequest r) {
+        e.pessoaId = r.pessoaId();
+        e.nomeFantasia = r.nomeFantasia();
+        e.razaoSocial = r.razaoSocial();
+        e.cnpj = r.cnpj();
+        e.fax = r.fax();
+        e.inscricaoMunicipal = r.inscricaoMunicipal();
+        e.inscricaoEstadual = r.inscricaoEstadual();
+    }
 
     private PessoaJuridicaResponse toResponse(PessoaJuridica e) {
         return new PessoaJuridicaResponse(e.id, e.pessoaId, e.nomeFantasia, e.razaoSocial, e.cnpj, e.fax, e.inscricaoMunicipal, e.inscricaoEstadual);

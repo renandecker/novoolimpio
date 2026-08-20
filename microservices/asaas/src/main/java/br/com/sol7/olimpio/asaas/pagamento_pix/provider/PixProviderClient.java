@@ -1,16 +1,17 @@
 package br.com.sol7.olimpio.asaas.pagamento_pix.provider;
 
 import io.smallrye.mutiny.Uni;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
  * Ponto de extensao para a geracao real de cobrancas PIX junto a um PSP (ex.: Asaas).
  * Fluxo movido do fiserv para o asaas-service.
- *
+ * <p>
  * A implementacao default (StubPixProviderClient, marcada com @DefaultBean) e automaticamente
  * substituida quando existe outra implementacao ativa do contrato (ex.: AsaasPixProviderClient).
- *
+ * <p>
  * Os metodos sao reativos (Uni) para permitir implementacoes que chamam PSPs reais.
  */
 public interface PixProviderClient {
@@ -19,8 +20,12 @@ public interface PixProviderClient {
 
     Uni<PixChargeStatus> consultarStatus(String chargeId);
 
-    record PixCharge(String chargeId, String qrcode, String chave, String situacao) {}
+    record PixCharge(String chargeId, String qrcode, String chave, String situacao) {
+    }
 
-    /** endToEndId so vem preenchido quando situacao = "PAGO" (comprovante oficial do Banco Central). */
-    record PixChargeStatus(String chargeId, String situacao, BigDecimal valorPago, String endToEndId) {}
+    /**
+     * endToEndId so vem preenchido quando situacao = "PAGO" (comprovante oficial do Banco Central).
+     */
+    record PixChargeStatus(String chargeId, String situacao, BigDecimal valorPago, String endToEndId) {
+    }
 }

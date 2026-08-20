@@ -8,6 +8,7 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.Date;
 import java.util.List;
 
@@ -15,9 +16,12 @@ import java.util.List;
 @WithTransaction
 public class ControlePedidosService {
 
-    @Inject ControlePedidosRepository repository;
-    @Inject ProdutoRepository produtoRepository;
-    @Inject SolicitacaoEstoqueRepository solicitacaoEstoqueRepository;
+    @Inject
+    ControlePedidosRepository repository;
+    @Inject
+    ProdutoRepository produtoRepository;
+    @Inject
+    SolicitacaoEstoqueRepository solicitacaoEstoqueRepository;
 
     public Uni<List<ControlePedidosResponse>> list() {
         return repository.listAll().chain(items -> {
@@ -114,23 +118,23 @@ public class ControlePedidosService {
 
     private Uni<ControlePedidosResponse> enrichSingleResponse(ControlePedidosResponse r) {
         Uni<String> produtoNome = r.produtoId() != null
-            ? produtoRepository.findById(r.produtoId()).map(p -> p != null ? p.nome : null)
-            : Uni.createFrom().item((String) null);
+                ? produtoRepository.findById(r.produtoId()).map(p -> p != null ? p.nome : null)
+                : Uni.createFrom().item((String) null);
         Uni<String> produtoImagem = r.produtoId() != null
-            ? produtoRepository.findById(r.produtoId()).map(p -> p != null ? p.imagem : null)
-            : Uni.createFrom().item((String) null);
+                ? produtoRepository.findById(r.produtoId()).map(p -> p != null ? p.imagem : null)
+                : Uni.createFrom().item((String) null);
 
         return Uni.combine().all().unis(produtoNome, produtoImagem)
                 .asTuple()
                 .map(t -> new ControlePedidosResponse(
-                    r.id(), r.dataEntrega(), r.aprovado(), r.dataAprovacao(), r.dataPrevisao(),
-                    r.valor(), r.quantidade(), r.usuarioId(), r.solicitacaoEstoqueId(), r.movimentacaoEstoqueId(),
-                    r.produtoId(), r.unidadeId(),
-                    t.getItem1(), t.getItem2(), null, null, null, null, null, 0
+                        r.id(), r.dataEntrega(), r.aprovado(), r.dataAprovacao(), r.dataPrevisao(),
+                        r.valor(), r.quantidade(), r.usuarioId(), r.solicitacaoEstoqueId(), r.movimentacaoEstoqueId(),
+                        r.produtoId(), r.unidadeId(),
+                        t.getItem1(), t.getItem2(), null, null, null, null, null, 0
                 ));
     }
 
-private Uni<List<ControlePedidosResponse>> enrichResponses(List<ControlePedidosResponse> responses) {
+    private Uni<List<ControlePedidosResponse>> enrichResponses(List<ControlePedidosResponse> responses) {
         List<Uni<ControlePedidosResponse>> unis = responses.stream().map(this::enrichSingleResponse).toList();
         return Uni.join().all(unis).andFailFast();
     }

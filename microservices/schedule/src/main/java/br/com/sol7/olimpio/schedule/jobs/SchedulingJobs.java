@@ -8,13 +8,13 @@ import org.jboss.logging.Logger;
 
 /**
  * Portado de br.com.sol7.olimpio.service.services.SchedulingService (legado).
- *
+ * <p>
  * Cada rotina do legado virou um metodo separado (@Scheduled + @RunOnVirtualThread) e chama
  * diretamente os objetos de manutencao que usam a conexao compartilhada com o banco.
- *
+ * <p>
  * As rotinas de manutencao rodam a partir da 1h da manha (America/Sao_Paulo); o fechamento de
  * caixa e a correcao de avaliacoes permanecem as 23h.
- *
+ * <p>
  * A regra de ajuste de feriados (verificaFeriadosParaajustar) foi migrada do basico para o
  * schedule: agora o cron e o trigger manual executam a regra diretamente aqui via
  * FeriadoAjusteMaintenanceService.

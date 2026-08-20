@@ -1,909 +1,960 @@
-import { useState } from 'react';
-import type { ReactNode } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { api } from './api';
-import { PAGE_SIZES } from './DataTable';
+import {useState} from 'react';
+import type {ReactNode} from 'react';
+import {useQuery} from '@tanstack/react-query';
+import {api} from './api';
+import {PAGE_SIZES} from './DataTable';
 
 export interface PessoaDados {
-  id: number;
-  nome: string;
-  cpf: string;
-  rg: string;
-  dataNascimento: string | null;
-  email: string;
-  telefone: string;
-  celular: string;
+    id: number;
+    nome: string;
+    cpf: string;
+    rg: string;
+    dataNascimento: string | null;
+    email: string;
+    telefone: string;
+    celular: string;
 }
 
 export interface ResumoFinanceiro {
-  situacao: string;
-  diasAtraso: number;
-  qtdParcelasAtrasadas: number;
-  qtdParcelasRestantes: number;
-  valorPendente: number;
+    situacao: string;
+    diasAtraso: number;
+    qtdParcelasAtrasadas: number;
+    qtdParcelasRestantes: number;
+    valorPendente: number;
 }
 
 export interface ContratoFinanceiro {
-  id: number;
-  curso: string;
-  unidade: string;
-  unidadeResponsavel: string;
-  status: string;
-  qtdeReparcelamento: number;
-  proximaParcelaSequencia: number | null;
-  proximaParcelaData: string | null;
-  proximaParcelaValor: number | null;
-  ultimaParcelaSequencia: number | null;
-  ultimaParcelaData: string | null;
-  ultimaParcelaValor: number | null;
+    id: number;
+    curso: string;
+    unidade: string;
+    unidadeResponsavel: string;
+    status: string;
+    qtdeReparcelamento: number;
+    proximaParcelaSequencia: number | null;
+    proximaParcelaData: string | null;
+    proximaParcelaValor: number | null;
+    ultimaParcelaSequencia: number | null;
+    ultimaParcelaData: string | null;
+    ultimaParcelaValor: number | null;
 }
 
 export interface Parcela {
-  id: number;
-  contratoId: number | null;
-  parcela: number | null;
-  parcelaSequencia: number | null;
-  multa: number;
-  juros: number;
-  desconto: number;
-  dataVencimento: string | null;
-  dataPagamento: string | null;
-  dataCancelamento: string | null;
-  valor: number;
-  valorPago: number;
-  tipoPagamento: string;
-  reparcela: boolean;
-  cancelamento: boolean;
-  original: boolean;
-  vendaProduto: boolean;
-  multaLivro: boolean;
-  descricao: string;
-  descricaoCor: string;
-  situacao: string;
-  situacaoCor: string;
+    id: number;
+    contratoId: number | null;
+    parcela: number | null;
+    parcelaSequencia: number | null;
+    multa: number;
+    juros: number;
+    desconto: number;
+    dataVencimento: string | null;
+    dataPagamento: string | null;
+    dataCancelamento: string | null;
+    valor: number;
+    valorPago: number;
+    tipoPagamento: string;
+    reparcela: boolean;
+    cancelamento: boolean;
+    original: boolean;
+    vendaProduto: boolean;
+    multaLivro: boolean;
+    descricao: string;
+    descricaoCor: string;
+    situacao: string;
+    situacaoCor: string;
 }
 
 export interface Financeiro {
-  resumo: ResumoFinanceiro;
-  contratos: ContratoFinanceiro[];
-  parcelasMes: Parcela[];
-  parcelasMatricula: Parcela[];
-  parcelasProdutos: Parcela[];
-  parcelasCanceladas: Parcela[];
+    resumo: ResumoFinanceiro;
+    contratos: ContratoFinanceiro[];
+    parcelasMes: Parcela[];
+    parcelasMatricula: Parcela[];
+    parcelasProdutos: Parcela[];
+    parcelasCanceladas: Parcela[];
 }
 
 export interface LigacaoNap {
-  id: number;
-  dataInicial: string | null;
-  telefone: string;
-  observacao: string;
-  resultado: string;
-  retornoAula: string | null;
+    id: number;
+    dataInicial: string | null;
+    telefone: string;
+    observacao: string;
+    resultado: string;
+    retornoAula: string | null;
 }
 
 export interface EmailNap {
-  id: number;
-  data: string | null;
-  email: string;
-  assunto: string;
-  mensagem: string;
+    id: number;
+    data: string | null;
+    email: string;
+    assunto: string;
+    mensagem: string;
 }
 
 export interface HistoricoNap {
-  ligacoes: LigacaoNap[];
-  emails: EmailNap[];
+    ligacoes: LigacaoNap[];
+    emails: EmailNap[];
 }
 
 export interface LigacaoCobranca {
-  id: number;
-  dataInicial: string | null;
-  telefone: string;
-  observacao: string;
-  resultado: string;
-  qtdeParcela: number | null;
-  valor: number | null;
+    id: number;
+    dataInicial: string | null;
+    telefone: string;
+    observacao: string;
+    resultado: string;
+    qtdeParcela: number | null;
+    valor: number | null;
 }
 
 export interface EmailCobranca {
-  id: number;
-  data: string | null;
-  email: string;
-  assunto: string;
-  mensagem: string;
-  qtdeParcela: number | null;
-  valor: number | null;
+    id: number;
+    data: string | null;
+    email: string;
+    assunto: string;
+    mensagem: string;
+    qtdeParcela: number | null;
+    valor: number | null;
 }
 
 export interface HistoricoCobranca {
-  ligacoes: LigacaoCobranca[];
-  emails: EmailCobranca[];
+    ligacoes: LigacaoCobranca[];
+    emails: EmailCobranca[];
 }
 
 export interface Matricula {
-  id: number;
-  curso: string;
-  componente: string;
-  unidade: string;
-  turma: number | null;
-  periodo: string;
-  ano: number | null;
-  status: string;
-  data: string | null;
-  mediaFinal: number | null;
-  percentualPresenca: number | null;
-  qtdeAula: number | null;
-  qtdeAulaFeita: number | null;
-  qtdeAulaPresente: number | null;
-  qtdeAulaMeiaPresente: number | null;
-  qtdeFalta: number | null;
-  qtdeAulaAtrasado: number | null;
-  professor: string;
+    id: number;
+    curso: string;
+    componente: string;
+    unidade: string;
+    turma: number | null;
+    periodo: string;
+    ano: number | null;
+    status: string;
+    data: string | null;
+    mediaFinal: number | null;
+    percentualPresenca: number | null;
+    qtdeAula: number | null;
+    qtdeAulaFeita: number | null;
+    qtdeAulaPresente: number | null;
+    qtdeAulaMeiaPresente: number | null;
+    qtdeFalta: number | null;
+    qtdeAulaAtrasado: number | null;
+    professor: string;
 }
 
 export interface Avaliacao {
-  ordem: number | null;
-  nota: number | null;
-  conceito: string;
+    ordem: number | null;
+    nota: number | null;
+    conceito: string;
 }
 
 export interface GrauNota {
-  id: number;
-  idGrauNota: number;
-  nome: string;
-  numeroNota: number | null;
-  peso: number | null;
-  nota: number | null;
-  avaliacoes: Avaliacao[];
+    id: number;
+    idGrauNota: number;
+    nome: string;
+    numeroNota: number | null;
+    peso: number | null;
+    nota: number | null;
+    avaliacoes: Avaliacao[];
 }
 
 export interface Grau {
-  id: number;
-  descricao: string;
-  notaMaxima: number | null;
-  mediaSemExame: number | null;
-  mediaFinal: number | null;
-  frequenciaMinima: number | null;
-  notas: GrauNota[];
+    id: number;
+    descricao: string;
+    notaMaxima: number | null;
+    mediaSemExame: number | null;
+    mediaFinal: number | null;
+    frequenciaMinima: number | null;
+    notas: GrauNota[];
 }
 
 export interface Boletim {
-  matricula: Matricula;
-  graus: Grau[];
-  media: number | null;
-  status: string;
-  frequenciaPerc: number | null;
+    matricula: Matricula;
+    graus: Grau[];
+    media: number | null;
+    status: string;
+    frequenciaPerc: number | null;
 }
 
 export interface OcorrenciaPresenca {
-  data: string | null;
-  presenca: string;
-  presencaDescricao: string;
-  componente: string;
+    data: string | null;
+    presenca: string;
+    presencaDescricao: string;
+    componente: string;
 }
 
 export interface Frequencia {
-  matricula: Matricula;
-  ocorrencias: OcorrenciaPresenca[];
-  aulasRealizadas: number;
-  presentes: number;
-  meias: number;
-  ausentes: number;
-  atestados: number;
-  atrasos: number;
-  semMarcacao: number;
-  canceladas: number;
-  prorrogadas: number;
-  frequenciaPerc: number | null;
-  ausenciaPerc: number | null;
+    matricula: Matricula;
+    ocorrencias: OcorrenciaPresenca[];
+    aulasRealizadas: number;
+    presentes: number;
+    meias: number;
+    ausentes: number;
+    atestados: number;
+    atrasos: number;
+    semMarcacao: number;
+    canceladas: number;
+    prorrogadas: number;
+    frequenciaPerc: number | null;
+    ausenciaPerc: number | null;
 }
 
 export interface HistoricoAlunoRegistro {
-  id: number;
-  dataRegistro: string | null;
-  descricao: string;
-  usuarioId: number;
-  usuarioNome: string;
+    id: number;
+    dataRegistro: string | null;
+    descricao: string;
+    usuarioId: number;
+    usuarioNome: string;
 }
 
 interface GestaoModalProps {
-  pessoaId: number;
-  onClose: () => void;
+    pessoaId: number;
+    onClose: () => void;
 }
 
 const fmtData = (value?: string | null) =>
-  value ? new Date(value).toLocaleDateString('pt-BR') : '—';
+    value ? new Date(value).toLocaleDateString('pt-BR') : '—';
 const fmtDataHora = (value?: string | null) =>
-  value ? new Date(value).toLocaleString('pt-BR') : '—';
+    value ? new Date(value).toLocaleString('pt-BR') : '—';
 const fmtMoeda = (value?: number | null) =>
-  value === null || value === undefined
-    ? '—'
-    : value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    value === null || value === undefined
+        ? '—'
+        : value.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
 
 const apiError = (error: unknown) =>
-  (error as { response?: { data?: { error?: string } } })?.response?.data?.error
-  ?? (error as Error)?.message
-  ?? 'erro desconhecido';
+    (error as { response?: { data?: { error?: string } } })?.response?.data?.error
+        ? ? (error as Error)?.message
+        ? ? 'erro desconhecido';
 
-function ModalFrame({ titulo, onClose, children }: { titulo: string; onClose: () => void; children: ReactNode }) {
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal form-modal" onClick={(event) => event.stopPropagation()}>
-        <h2>{titulo}</h2>
-        {children}
-        <div className="modal-actions form-footer">
-          <button type="button" className="btn-form-back" onClick={onClose}>
-            Fechar
-          </button>
+function ModalFrame({titulo, onClose, children}: { titulo: string; onClose: () => void; children: ReactNode }) {
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal form-modal" onClick={(event) => event.stopPropagation()}>
+                <h2>{titulo}</h2>
+                {children}
+                <div className="modal-actions form-footer">
+                    <button type="button" className="btn-form-back" onClick={onClose}>
+                        Fechar
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }
 
 function Carregando() {
-  return <p className="master-detail-empty">Carregando...</p>;
+    return <p className="master-detail-empty">Carregando...</p>;
 }
 
-function Erro({ mensagem }: { mensagem: string }) {
-  return <p className="form-erro">Erro ao carregar os dados: {mensagem}</p>;
+function Erro({mensagem}: { mensagem: string }) {
+    return <p className="form-erro">Erro ao carregar os dados: {mensagem}</p>;
 }
 
-function Tabs({ tabs }: { tabs: { key: string; label: string; content: ReactNode }[] }) {
-  const [active, setActive] = useState(tabs[0]?.key ?? '');
-  return (
-    <div>
-      <div className="tabs">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            className={tab.key === active ? 'tab tab-active' : 'tab'}
-            onClick={() => setActive(tab.key)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-      <div className="tab-content">{tabs.find((tab) => tab.key === active)?.content ?? null}</div>
-    </div>
-  );
+function Tabs({tabs}: { tabs: { key: string; label: string; content: ReactNode }[] }) {
+    const [active, setActive] = useState(tabs[0]?.key ? ? '');
+    return (
+        <div>
+            <div className="tabs">
+                {tabs.map((tab) => (
+                    <button
+                        key={tab.key}
+                        type="button"
+                        className={tab.key === active ? 'tab tab-active' : 'tab'}
+                        onClick={() => setActive(tab.key)}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
+            <div className="tab-content">{tabs.find((tab) => tab.key === active)?.content ? ? null}</div>
+        </div>
+    );
 }
 
 interface TabelaColuna {
-  key: string;
-  label: string;
-  render?: (row: Record<string, unknown>) => ReactNode;
+    key: string;
+    label: string;
+    render?: (row: Record<string, unknown>) => ReactNode;
 }
 
-function TabelaDados({ colunas, linhas, vazio }: { colunas: TabelaColuna[]; linhas: Record<string, unknown>[]; vazio: string }) {
-  return (
-    <table className="lote-table">
-      <thead>
-        <tr>
-          {colunas.map((coluna) => (
-            <th key={coluna.key}>{coluna.label}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {linhas.length === 0 ? (
-          <tr>
-            <td colSpan={colunas.length}>{vazio}</td>
-          </tr>
-        ) : (
-          linhas.map((linha) => (
-            <tr key={String(linha.id)}>
-              {colunas.map((coluna) => (
-                <td key={coluna.key}>
-                  {coluna.render ? coluna.render(linha) : String(linha[coluna.key] ?? '')}
-                </td>
-              ))}
+function TabelaDados({colunas, linhas, vazio}: { colunas: TabelaColuna[]; linhas: Record<string, unknown>[]; vazio: string }) {
+    return (
+        <table className="lote-table">
+            <thead>
+            <tr>
+                {colunas.map((coluna) => (
+                    <th key={coluna.key}>{coluna.label}</th>
+                ))}
             </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  );
+            </thead>
+            <tbody>
+            {linhas.length === 0 ? (
+                <tr>
+                    <td colSpan={colunas.length}>{vazio}</td>
+                </tr>
+            ) : (
+                linhas.map((linha) => (
+                    <tr key={String(linha.id)}>
+                        {colunas.map((coluna) => (
+                            <td key={coluna.key}>
+                                {coluna.render ? coluna.render(linha) : String(linha[coluna.key] ? ? '')}
+                            </td>
+                        ))}
+                    </tr>
+                ))
+            )}
+            </tbody>
+        </table>
+    );
 }
 
 interface TabelaDadosPaginadaProps {
-  colunas: TabelaColuna[];
-  linhas: Record<string, unknown>[];
-  vazio: string;
-  pageSize?: number;
+    colunas: TabelaColuna[];
+    linhas: Record<string, unknown>[];
+    vazio: string;
+    pageSize?: number;
 }
 
-function TabelaDadosPaginada({ colunas, linhas, vazio, pageSize = 10 }: TabelaDadosPaginadaProps) {
-  const [page, setPage] = useState(0);
-  const [size, setSize] = useState(pageSize);
+function TabelaDadosPaginada({colunas, linhas, vazio, pageSize = 10}: TabelaDadosPaginadaProps) {
+    const [page, setPage] = useState(0);
+    const [size, setSize] = useState(pageSize);
 
-  const totalPages = Math.max(1, Math.ceil(linhas.length / size));
-  const start = page * size;
-  const end = start + size;
-  const paginaLinhas = linhas.slice(start, end);
+    const totalPages = Math.max(1, Math.ceil(linhas.length / size));
+    const start = page * size;
+    const end = start + size;
+    const paginaLinhas = linhas.slice(start, end);
 
-  return (
-    <table className="lote-table">
-      <thead>
-        <tr>
-          {colunas.map((coluna) => (
-            <th key={coluna.key}>{coluna.label}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {paginaLinhas.length === 0 ? (
-          <tr>
-            <td colSpan={colunas.length}>{vazio}</td>
-          </tr>
-        ) : (
-          paginaLinhas.map((linha) => (
-            <tr key={String(linha.id)}>
-              {colunas.map((coluna) => (
-                <td key={coluna.key}>
-                  {coluna.render ? coluna.render(linha) : String(linha[coluna.key] ?? '')}
-                </td>
-              ))}
+    return (
+        <table className="lote-table">
+            <thead>
+            <tr>
+                {colunas.map((coluna) => (
+                    <th key={coluna.key}>{coluna.label}</th>
+                ))}
             </tr>
-          ))
-        )}
-      </tbody>
-      {totalPages > 1 && (
-        <tfoot>
-          <tr>
-            <td colSpan={colunas.length} className="data-table-paginator">
-              <button onClick={() => setPage((current) => Math.max(0, current - 1))} disabled={page === 0}>
-                Anterior
-              </button>
-              <span>
+            </thead>
+            <tbody>
+            {paginaLinhas.length === 0 ? (
+                <tr>
+                    <td colSpan={colunas.length}>{vazio}</td>
+                </tr>
+            ) : (
+                paginaLinhas.map((linha) => (
+                    <tr key={String(linha.id)}>
+                        {colunas.map((coluna) => (
+                            <td key={coluna.key}>
+                                {coluna.render ? coluna.render(linha) : String(linha[coluna.key] ? ? '')}
+                            </td>
+                        ))}
+                    </tr>
+                ))
+            )}
+            </tbody>
+            {totalPages > 1 && (
+                <tfoot>
+                <tr>
+                    <td colSpan={colunas.length} className="data-table-paginator">
+                        <button onClick={() => setPage((current) => Math.max(0, current - 1))} disabled={page === 0}>
+                            Anterior
+                        </button>
+                        <span>
                 Página {page + 1} de {totalPages}
               </span>
-              <button onClick={() => setPage((current) => Math.min(totalPages - 1, current + 1))} disabled={page >= totalPages - 1}>
-                Próxima
-              </button>
-              <label>
-                Registros por página
-                <select
-                  value={size}
-                  onChange={(event) => {
-                    setSize(Number(event.target.value));
-                    setPage(0);
-                  }}
-                >
-                  {PAGE_SIZES.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <span>Total: {linhas.length}</span>
-            </td>
-          </tr>
-        </tfoot>
-      )}
-    </table>
-  );
+                        <button onClick={() => setPage((current) => Math.min(totalPages - 1, current + 1))}
+                                disabled={page >= totalPages - 1}>
+                            Próxima
+                        </button>
+                        <label>
+                            Registros por página
+                            <select
+                                value={size}
+                                onChange={(event) => {
+                                    setSize(Number(event.target.value));
+                                    setPage(0);
+                                }}
+                            >
+                                {PAGE_SIZES.map((option) => (
+                                    <option key={option} value={option}>
+                                        {option}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                        <span>Total: {linhas.length}</span>
+                    </td>
+                </tr>
+                </tfoot>
+            )}
+        </table>
+    );
 }
 
-function DadosPessoa({ dados }: { dados: PessoaDados }) {
-  const campos: [string, ReactNode][] = [
-    ['Nome', dados.nome],
-    ['CPF', dados.cpf],
-    ['RG', dados.rg],
-    ['Data de nascimento', fmtData(dados.dataNascimento)],
-    ['E-mail', dados.email],
-    ['Telefone', dados.telefone],
-    ['Celular', dados.celular],
-  ];
-  return (
-    <div className="form-grid">
-      {campos.map(([rotulo, valor]) => (
-        <label key={rotulo} className="form-field">
-          <span className="form-label">{rotulo}</span>
-          <input className="form-input" value={String(valor ?? '')} readOnly />
-        </label>
-      ))}
-    </div>
-  );
+function DadosPessoa({dados}: { dados: PessoaDados }) {
+    const campos: [string, ReactNode][] = [
+        ['Nome', dados.nome],
+        ['CPF', dados.cpf],
+        ['RG', dados.rg],
+        ['Data de nascimento', fmtData(dados.dataNascimento)],
+        ['E-mail', dados.email],
+        ['Telefone', dados.telefone],
+        ['Celular', dados.celular],
+    ];
+    return (
+        <div className="form-grid">
+            {campos.map(([rotulo, valor]) => (
+                <label key={rotulo} className="form-field">
+                    <span className="form-label">{rotulo}</span>
+                    <input className="form-input" value={String(valor ? ? '')} readOnly/>
+                </label>
+            ))}
+        </div>
+    );
 }
 
 const PARCELA_COLUNAS: TabelaColuna[] = [
-  { key: 'id', label: 'Parcela' },
-  { key: 'contratoId', label: 'Contrato' },
-  { key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null) },
-  { key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null) },
-  { key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null) },
-  { key: 'situacao', label: 'Situação', render: (linha) => {
-      const situacao = String(linha.situacao ?? '');
-      const situacaoCor = String(linha.situacaoCor ?? '');
-      const dataPagamento = linha.dataPagamento as string | null;
-      if (dataPagamento) {
-        return <span style={{ color: '#0000FF', cursor: 'pointer' }}>Pago</span>;
-      }
-      return situacaoCor ? <span style={{ color: situacaoCor, fontWeight: 'bold' }}>{situacao}</span> : situacao;
-    } },
+    {key: 'id', label: 'Parcela'},
+    {key: 'contratoId', label: 'Contrato'},
+    {key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null)},
+    {key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null)},
+    {key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null)},
+    {
+        key: 'situacao', label: 'Situação', render: (linha) => {
+            const situacao = String(linha.situacao ? ? '');
+            const situacaoCor = String(linha.situacaoCor ? ? '');
+            const dataPagamento = linha.dataPagamento as string | null;
+            if (dataPagamento) {
+                return <span style={{color: '#0000FF', cursor: 'pointer'}}>Pago</span>;
+            }
+            return situacaoCor ? <span style={{color: situacaoCor, fontWeight: 'bold'}}>{situacao}</span> : situacao;
+        }
+    },
 ];
 
 const PARCELA_MATRICULA_COLUNAS: TabelaColuna[] = [
-  { key: 'id', label: 'Parcela' },
-  { key: 'contratoId', label: 'Contrato' },
-  { key: 'parcela', label: 'Nº' },
-  { key: 'descricao', label: 'Descrição' },
-  { key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null) },
-  { key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null) },
-  { key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null) },
-  { key: 'valorPago', label: 'Valor pago', render: (linha) => fmtMoeda(linha.valorPago as number | null) },
-  { key: 'situacao', label: 'Situação', render: (linha) => {
-      const situacao = String(linha.situacao ?? '');
-      const situacaoCor = String(linha.situacaoCor ?? '');
-      const dataPagamento = linha.dataPagamento as string | null;
-      if (dataPagamento) {
-        return <span style={{ color: '#0000FF', cursor: 'pointer' }}>Pago</span>;
-      }
-      return situacaoCor ? <span style={{ color: situacaoCor, fontWeight: 'bold' }}>{situacao}</span> : situacao;
-    } },
+    {key: 'id', label: 'Parcela'},
+    {key: 'contratoId', label: 'Contrato'},
+    {key: 'parcela', label: 'Nº'},
+    {key: 'descricao', label: 'Descrição'},
+    {key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null)},
+    {key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null)},
+    {key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null)},
+    {key: 'valorPago', label: 'Valor pago', render: (linha) => fmtMoeda(linha.valorPago as number | null)},
+    {
+        key: 'situacao', label: 'Situação', render: (linha) => {
+            const situacao = String(linha.situacao ? ? '');
+            const situacaoCor = String(linha.situacaoCor ? ? '');
+            const dataPagamento = linha.dataPagamento as string | null;
+            if (dataPagamento) {
+                return <span style={{color: '#0000FF', cursor: 'pointer'}}>Pago</span>;
+            }
+            return situacaoCor ? <span style={{color: situacaoCor, fontWeight: 'bold'}}>{situacao}</span> : situacao;
+        }
+    },
 ];
 
 const PRODUTO_COLUNAS: TabelaColuna[] = [
-  { key: 'id', label: 'Parcela' },
-  { key: 'contratoId', label: 'Contrato' },
-  { key: 'descricao', label: 'Descrição' },
-  { key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null) },
-  { key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null) },
-  { key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null) },
-  { key: 'valorPago', label: 'Valor pago', render: (linha) => fmtMoeda(linha.valorPago as number | null) },
-  { key: 'situacao', label: 'Situação', render: (linha) => {
-      const situacao = String(linha.situacao ?? '');
-      const situacaoCor = String(linha.situacaoCor ?? '');
-      const dataPagamento = linha.dataPagamento as string | null;
-      if (dataPagamento) {
-        return <span style={{ color: '#0000FF', cursor: 'pointer' }}>Pago</span>;
-      }
-      return situacaoCor ? <span style={{ color: situacaoCor, fontWeight: 'bold' }}>{situacao}</span> : situacao;
-    } },
+    {key: 'id', label: 'Parcela'},
+    {key: 'contratoId', label: 'Contrato'},
+    {key: 'descricao', label: 'Descrição'},
+    {key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null)},
+    {key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null)},
+    {key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null)},
+    {key: 'valorPago', label: 'Valor pago', render: (linha) => fmtMoeda(linha.valorPago as number | null)},
+    {
+        key: 'situacao', label: 'Situação', render: (linha) => {
+            const situacao = String(linha.situacao ? ? '');
+            const situacaoCor = String(linha.situacaoCor ? ? '');
+            const dataPagamento = linha.dataPagamento as string | null;
+            if (dataPagamento) {
+                return <span style={{color: '#0000FF', cursor: 'pointer'}}>Pago</span>;
+            }
+            return situacaoCor ? <span style={{color: situacaoCor, fontWeight: 'bold'}}>{situacao}</span> : situacao;
+        }
+    },
 ];
 
 const CANCELADA_COLUNAS: TabelaColuna[] = [
-  { key: 'id', label: 'Parcela' },
-  { key: 'contratoId', label: 'Contrato' },
-  { key: 'descricao', label: 'Descrição' },
-  { key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null) },
-  { key: 'dataCancelamento', label: 'Cancelamento', render: (linha) => fmtData(linha.dataCancelamento as string | null) },
-  { key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null) },
+    {key: 'id', label: 'Parcela'},
+    {key: 'contratoId', label: 'Contrato'},
+    {key: 'descricao', label: 'Descrição'},
+    {key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null)},
+    {
+        key: 'dataCancelamento',
+        label: 'Cancelamento',
+        render: (linha) => fmtData(linha.dataCancelamento as string | null)
+    },
+    {key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null)},
 ];
 
-export function SituacaoFinanceiraModal({ pessoaId, onClose }: GestaoModalProps) {
-  const q = useQuery({
-    queryKey: ['gestao-aluno', 'financeiro', pessoaId],
-    queryFn: async () => (await api.get<Financeiro>(`/api/aluno/gestao/${pessoaId}/financeiro`)).data,
-  });
-  if (q.isLoading) return <ModalFrame titulo="Situação Financeira" onClose={onClose}><Carregando /></ModalFrame>;
-  if (q.isError || !q.data) return <ModalFrame titulo="Situação Financeira" onClose={onClose}><Erro mensagem={apiError(q.error)} /></ModalFrame>;
-  const { resumo, contratos, parcelasMes, parcelasMatricula, parcelasProdutos, parcelasCanceladas } = q.data;
-  const todasParcelas = [...parcelasMes, ...parcelasMatricula, ...parcelasProdutos, ...parcelasCanceladas];
-  return (
-    <ModalFrame titulo="Situação Financeira" onClose={onClose}>
-      <Tabs
-        tabs={[
-          {
-            key: 'financeiro',
-            label: 'Financeiro',
-            content: (
-              <>
-                <div className="form-grid">
-                  <label className="form-field">
-                    <span className="form-label">Situação</span>
-                    <input className="form-input" value={resumo.situacao} readOnly />
-                  </label>
-                  <label className="form-field">
-                    <span className="form-label">Maior dia em atraso</span>
-                    <input className="form-input" value={resumo.diasAtraso > 0 ? `${resumo.diasAtraso} (dias)` : 'Em dia'} readOnly />
-                  </label>
-                  <label className="form-field">
-                    <span className="form-label">Qtd parcelas em atraso</span>
-                    <input className="form-input" value={resumo.qtdParcelasAtrasadas} readOnly />
-                  </label>
-                  <label className="form-field">
-                    <span className="form-label">Qtd parcelas restantes</span>
-                    <input className="form-input" value={resumo.qtdParcelasRestantes} readOnly />
-                  </label>
-                  <label className="form-field">
-                    <span className="form-label">Valor pendente</span>
-                    <input className="form-input" value={fmtMoeda(resumo.valorPendente)} readOnly />
-                  </label>
-                </div>
-                <h3>Contratos</h3>
-                <TabelaDadosPaginada
-                  vazio="Nenhum contrato encontrado."
-                  colunas={[
-                    { key: 'id', label: 'Contrato' },
-                    { key: 'curso', label: 'Curso' },
-                    { key: 'unidade', label: 'Unidade' },
-                    { key: 'unidadeResponsavel', label: 'Unidade Responsável' },
-                    { key: 'status', label: 'Status' },
-                    { key: 'qtdeReparcelamento', label: 'Reparcelamentos' },
-                    { key: 'proxima', label: 'Próxima parcela', render: (linha) => `${linha.proximaParcelaSequencia ?? '—'} · ${fmtData(linha.proximaParcelaData as string | null)} · ${fmtMoeda(linha.proximaParcelaValor as number | null)}` },
-                    { key: 'ultima', label: 'Última parcela', render: (linha) => `${linha.ultimaParcelaSequencia ?? '—'} · ${fmtData(linha.ultimaParcelaData as string | null)} · ${fmtMoeda(linha.ultimaParcelaValor as number | null)}` },
-                  ]}
-                  linhas={contratos as unknown as Record<string, unknown>[]}
-                />
-              </>
-            ),
-          },
-          {
-            key: 'parcelasMes',
-            label: 'Parcelas do Mês e Vencidas',
-            content: (
-              <TabelaDadosPaginada
-                vazio="Nenhuma parcela para o mês corrente."
-                colunas={PARCELA_COLUNAS}
-                linhas={parcelasMes as unknown as Record<string, unknown>[]}
-              />
-            ),
-          },
-          {
-            key: 'verTodos',
-            label: 'Ver Todos',
-            content: (
-              <TabelaDadosPaginada
-                vazio="Nenhuma parcela encontrada."
-                colunas={PARCELA_COLUNAS}
-                linhas={todasParcelas as unknown as Record<string, unknown>[]}
-              />
-            ),
-          },
-          {
-            key: 'matricula',
-            label: 'Matrícula',
-            content: (
-              <TabelaDadosPaginada
-                vazio="Nenhuma parcela de matrícula encontrada."
-                colunas={PARCELA_MATRICULA_COLUNAS}
-                linhas={parcelasMatricula as unknown as Record<string, unknown>[]}
-              />
-            ),
-          },
-          {
-            key: 'produtos',
-            label: 'Produtos',
-            content: (
-              <TabelaDadosPaginada
-                vazio="Nenhuma parcela de produto encontrada."
-                colunas={PRODUTO_COLUNAS}
-                linhas={parcelasProdutos as unknown as Record<string, unknown>[]}
-              />
-            ),
-          },
-          {
-            key: 'canceladas',
-            label: 'Canceladas',
-            content: (
-              <TabelaDadosPaginada
-                vazio="Nenhuma parcela cancelada."
-                colunas={CANCELADA_COLUNAS}
-                linhas={parcelasCanceladas as unknown as Record<string, unknown>[]}
-              />
-            ),
-          },
-        ]}
-      />
-    </ModalFrame>
-  );
+export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
+    const q = useQuery({
+        queryKey: ['gestao-aluno', 'financeiro', pessoaId],
+        queryFn: async () => (await api.get<Financeiro>(`/api/aluno/gestao/${pessoaId}/financeiro`)).data,
+    });
+    if (q.isLoading) return <ModalFrame titulo="Situação Financeira" onClose={onClose}><Carregando/></ModalFrame>;
+    if (q.isError || !q.data) return <ModalFrame titulo="Situação Financeira" onClose={onClose}><Erro
+        mensagem={apiError(q.error)}/></ModalFrame>;
+    const {resumo, contratos, parcelasMes, parcelasMatricula, parcelasProdutos, parcelasCanceladas} = q.data;
+    const todasParcelas = [...parcelasMes, ...parcelasMatricula, ...parcelasProdutos, ...parcelasCanceladas];
+    return (
+        <ModalFrame titulo="Situação Financeira" onClose={onClose}>
+            <Tabs
+                tabs={[
+                    {
+                        key: 'financeiro',
+                        label: 'Financeiro',
+                        content: (
+                            <>
+                                <div className="form-grid">
+                                    <label className="form-field">
+                                        <span className="form-label">Situação</span>
+                                        <input className="form-input" value={resumo.situacao} readOnly/>
+                                    </label>
+                                    <label className="form-field">
+                                        <span className="form-label">Maior dia em atraso</span>
+                                        <input className="form-input"
+                                               value={resumo.diasAtraso > 0 ? `${resumo.diasAtraso} (dias)` : 'Em dia'}
+                                               readOnly/>
+                                    </label>
+                                    <label className="form-field">
+                                        <span className="form-label">Qtd parcelas em atraso</span>
+                                        <input className="form-input" value={resumo.qtdParcelasAtrasadas} readOnly/>
+                                    </label>
+                                    <label className="form-field">
+                                        <span className="form-label">Qtd parcelas restantes</span>
+                                        <input className="form-input" value={resumo.qtdParcelasRestantes} readOnly/>
+                                    </label>
+                                    <label className="form-field">
+                                        <span className="form-label">Valor pendente</span>
+                                        <input className="form-input" value={fmtMoeda(resumo.valorPendente)} readOnly/>
+                                    </label>
+                                </div>
+                                <h3>Contratos</h3>
+                                <TabelaDadosPaginada
+                                    vazio="Nenhum contrato encontrado."
+                                    colunas={[
+                                        {key: 'id', label: 'Contrato'},
+                                        {key: 'curso', label: 'Curso'},
+                                        {key: 'unidade', label: 'Unidade'},
+                                        {key: 'unidadeResponsavel', label: 'Unidade Responsável'},
+                                        {key: 'status', label: 'Status'},
+                                        {key: 'qtdeReparcelamento', label: 'Reparcelamentos'},
+                                        {
+                                            key: 'proxima',
+                                            label: 'Próxima parcela',
+                                            render: (linha) => `${linha.proximaParcelaSequencia ? ? '—'} · ${fmtData(linha.proximaParcelaData as string | null)} · ${fmtMoeda(linha.proximaParcelaValor as number | null)}`
+                                        },
+                                        {
+                                            key: 'ultima',
+                                            label: 'Última parcela',
+                                            render: (linha) => `${linha.ultimaParcelaSequencia ? ? '—'} · ${fmtData(linha.ultimaParcelaData as string | null)} · ${fmtMoeda(linha.ultimaParcelaValor as number | null)}`
+                                        },
+                                    ]}
+                                    linhas={contratos as unknown as Record<string, unknown>[]}
+                                />
+                            </>
+                        ),
+                    },
+                    {
+                        key: 'parcelasMes',
+                        label: 'Parcelas do Mês e Vencidas',
+                        content: (
+                            <TabelaDadosPaginada
+                                vazio="Nenhuma parcela para o mês corrente."
+                                colunas={PARCELA_COLUNAS}
+                                linhas={parcelasMes as unknown as Record<string, unknown>[]}
+                            />
+                        ),
+                    },
+                    {
+                        key: 'verTodos',
+                        label: 'Ver Todos',
+                        content: (
+                            <TabelaDadosPaginada
+                                vazio="Nenhuma parcela encontrada."
+                                colunas={PARCELA_COLUNAS}
+                                linhas={todasParcelas as unknown as Record<string, unknown>[]}
+                            />
+                        ),
+                    },
+                    {
+                        key: 'matricula',
+                        label: 'Matrícula',
+                        content: (
+                            <TabelaDadosPaginada
+                                vazio="Nenhuma parcela de matrícula encontrada."
+                                colunas={PARCELA_MATRICULA_COLUNAS}
+                                linhas={parcelasMatricula as unknown as Record<string, unknown>[]}
+                            />
+                        ),
+                    },
+                    {
+                        key: 'produtos',
+                        label: 'Produtos',
+                        content: (
+                            <TabelaDadosPaginada
+                                vazio="Nenhuma parcela de produto encontrada."
+                                colunas={PRODUTO_COLUNAS}
+                                linhas={parcelasProdutos as unknown as Record<string, unknown>[]}
+                            />
+                        ),
+                    },
+                    {
+                        key: 'canceladas',
+                        label: 'Canceladas',
+                        content: (
+                            <TabelaDadosPaginada
+                                vazio="Nenhuma parcela cancelada."
+                                colunas={CANCELADA_COLUNAS}
+                                linhas={parcelasCanceladas as unknown as Record<string, unknown>[]}
+                            />
+                        ),
+                    },
+                ]}
+            />
+        </ModalFrame>
+    );
 }
 
-export function DadosPessoaisModal({ pessoaId, onClose }: GestaoModalProps) {
-  const q = useQuery({
-    queryKey: ['gestao-aluno', 'perfil', pessoaId],
-    queryFn: async () => (await api.get<PessoaDados>(`/api/aluno/gestao/${pessoaId}/perfil`)).data,
-  });
-  if (q.isLoading) return <ModalFrame titulo="Dados Pessoais Aluno" onClose={onClose}><Carregando /></ModalFrame>;
-  if (q.isError || !q.data) return <ModalFrame titulo="Dados Pessoais Aluno" onClose={onClose}><Erro mensagem={apiError(q.error)} /></ModalFrame>;
-  return (
-    <ModalFrame titulo="Dados Pessoais Aluno" onClose={onClose}>
-      <DadosPessoa dados={q.data} />
-    </ModalFrame>
-  );
+export function DadosPessoaisModal({pessoaId, onClose}: GestaoModalProps) {
+    const q = useQuery({
+        queryKey: ['gestao-aluno', 'perfil', pessoaId],
+        queryFn: async () => (await api.get<PessoaDados>(`/api/aluno/gestao/${pessoaId}/perfil`)).data,
+    });
+    if (q.isLoading) return <ModalFrame titulo="Dados Pessoais Aluno" onClose={onClose}><Carregando/></ModalFrame>;
+    if (q.isError || !q.data) return <ModalFrame titulo="Dados Pessoais Aluno" onClose={onClose}><Erro
+        mensagem={apiError(q.error)}/></ModalFrame>;
+    return (
+        <ModalFrame titulo="Dados Pessoais Aluno" onClose={onClose}>
+            <DadosPessoa dados={q.data}/>
+        </ModalFrame>
+    );
 }
 
-export function ContratanteModal({ pessoaId, onClose }: GestaoModalProps) {
-  const q = useQuery({
-    queryKey: ['gestao-aluno', 'contratantes', pessoaId],
-    queryFn: async () => (await api.get<PessoaDados[]>(`/api/aluno/gestao/${pessoaId}/contratantes`)).data,
-  });
-  if (q.isLoading) return <ModalFrame titulo="Dados Pessoais Contratante" onClose={onClose}><Carregando /></ModalFrame>;
-  if (q.isError) return <ModalFrame titulo="Dados Pessoais Contratante" onClose={onClose}><Erro mensagem={apiError(q.error)} /></ModalFrame>;
-  const contratantes = q.data ?? [];
-  return (
-    <ModalFrame titulo="Dados Pessoais Contratante" onClose={onClose}>
-      {contratantes.length === 0 ? (
-        <p className="master-detail-empty">Nenhum contratante encontrado.</p>
-      ) : (
-        contratantes.map((contratante) => (
-          <div key={contratante.id} className="master-detail" style={{ marginBottom: '1rem' }}>
-            <DadosPessoa dados={contratante} />
-          </div>
-        ))
-      )}
-    </ModalFrame>
-  );
+export function ContratanteModal({pessoaId, onClose}: GestaoModalProps) {
+    const q = useQuery({
+        queryKey: ['gestao-aluno', 'contratantes', pessoaId],
+        queryFn: async () => (await api.get<PessoaDados[]>(`/api/aluno/gestao/${pessoaId}/contratantes`)).data,
+    });
+    if (q.isLoading) return <ModalFrame titulo="Dados Pessoais Contratante"
+                                        onClose={onClose}><Carregando/></ModalFrame>;
+    if (q.isError) return <ModalFrame titulo="Dados Pessoais Contratante" onClose={onClose}><Erro
+        mensagem={apiError(q.error)}/></ModalFrame>;
+    const contratantes = q.data ? ? [];
+    return (
+        <ModalFrame titulo="Dados Pessoais Contratante" onClose={onClose}>
+            {contratantes.length === 0 ? (
+                <p className="master-detail-empty">Nenhum contratante encontrado.</p>
+            ) : (
+                contratantes.map((contratante) => (
+                    <div key={contratante.id} className="master-detail" style={{marginBottom: '1rem'}}>
+                        <DadosPessoa dados={contratante}/>
+                    </div>
+                ))
+            )}
+        </ModalFrame>
+    );
 }
 
 const NAP_COLUNAS: TabelaColuna[] = [
-  { key: 'id', label: 'Id' },
-  { key: 'dataInicial', label: 'Data', render: (linha) => fmtDataHora(linha.dataInicial as string | null) },
-  { key: 'telefone', label: 'Telefone' },
-  { key: 'resultado', label: 'Resultado' },
-  { key: 'retornoAula', label: 'Retorno', render: (linha) => fmtData(linha.retornoAula as string | null) },
-  { key: 'observacao', label: 'Observação' },
+    {key: 'id', label: 'Id'},
+    {key: 'dataInicial', label: 'Data', render: (linha) => fmtDataHora(linha.dataInicial as string | null)},
+    {key: 'telefone', label: 'Telefone'},
+    {key: 'resultado', label: 'Resultado'},
+    {key: 'retornoAula', label: 'Retorno', render: (linha) => fmtData(linha.retornoAula as string | null)},
+    {key: 'observacao', label: 'Observação'},
 ];
 
 const NAP_EMAIL_COLUNAS: TabelaColuna[] = [
-  { key: 'id', label: 'Id' },
-  { key: 'data', label: 'Data', render: (linha) => fmtDataHora(linha.data as string | null) },
-  { key: 'email', label: 'E-mail' },
-  { key: 'assunto', label: 'Assunto' },
-  { key: 'mensagem', label: 'Mensagem' },
+    {key: 'id', label: 'Id'},
+    {key: 'data', label: 'Data', render: (linha) => fmtDataHora(linha.data as string | null)},
+    {key: 'email', label: 'E-mail'},
+    {key: 'assunto', label: 'Assunto'},
+    {key: 'mensagem', label: 'Mensagem'},
 ];
 
-export function HistoricoNapModal({ pessoaId, onClose }: GestaoModalProps) {
-  const q = useQuery({
-    queryKey: ['gestao-aluno', 'historico-nap', pessoaId],
-    queryFn: async () => (await api.get<HistoricoNap>(`/api/aluno/gestao/${pessoaId}/historico-nap`)).data,
-  });
-  if (q.isLoading) return <ModalFrame titulo="Histórico NAP" onClose={onClose}><Carregando /></ModalFrame>;
-  if (q.isError || !q.data) return <ModalFrame titulo="Histórico NAP" onClose={onClose}><Erro mensagem={apiError(q.error)} /></ModalFrame>;
-  return (
-    <ModalFrame titulo="Histórico NAP" onClose={onClose}>
-      <Tabs
-        tabs={[
-          {
-            key: 'ligacao',
-            label: 'Ligação',
-            content: <TabelaDadosPaginada vazio="Nenhuma ligação encontrada." colunas={NAP_COLUNAS} linhas={q.data.ligacoes as unknown as Record<string, unknown>[]} />,
-          },
-          {
-            key: 'email',
-            label: 'E-mail',
-            content: <TabelaDadosPaginada vazio="Nenhum e-mail encontrado." colunas={NAP_EMAIL_COLUNAS} linhas={q.data.emails as unknown as Record<string, unknown>[]} />,
-          },
-        ]}
-      />
-    </ModalFrame>
-  );
+export function HistoricoNapModal({pessoaId, onClose}: GestaoModalProps) {
+    const q = useQuery({
+        queryKey: ['gestao-aluno', 'historico-nap', pessoaId],
+        queryFn: async () => (await api.get<HistoricoNap>(`/api/aluno/gestao/${pessoaId}/historico-nap`)).data,
+    });
+    if (q.isLoading) return <ModalFrame titulo="Histórico NAP" onClose={onClose}><Carregando/></ModalFrame>;
+    if (q.isError || !q.data) return <ModalFrame titulo="Histórico NAP" onClose={onClose}><Erro
+        mensagem={apiError(q.error)}/></ModalFrame>;
+    return (
+        <ModalFrame titulo="Histórico NAP" onClose={onClose}>
+            <Tabs
+                tabs={[
+                    {
+                        key: 'ligacao',
+                        label: 'Ligação',
+                        content: <TabelaDadosPaginada vazio="Nenhuma ligação encontrada." colunas={NAP_COLUNAS}
+                                                      linhas={q.data.ligacoes as unknown as Record<string, unknown>[]}/>,
+                    },
+                    {
+                        key: 'email',
+                        label: 'E-mail',
+                        content: <TabelaDadosPaginada vazio="Nenhum e-mail encontrado." colunas={NAP_EMAIL_COLUNAS}
+                                                      linhas={q.data.emails as unknown as Record<string, unknown>[]}/>,
+                    },
+                ]}
+            />
+        </ModalFrame>
+    );
 }
 
 const COBRANCA_COLUNAS: TabelaColuna[] = [
-  { key: 'id', label: 'Id' },
-  { key: 'dataInicial', label: 'Data', render: (linha) => fmtDataHora(linha.dataInicial as string | null) },
-  { key: 'telefone', label: 'Telefone' },
-  { key: 'resultado', label: 'Resultado' },
-  { key: 'qtdeParcela', label: 'Qtd parcelas' },
-  { key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null) },
-  { key: 'observacao', label: 'Observação' },
+    {key: 'id', label: 'Id'},
+    {key: 'dataInicial', label: 'Data', render: (linha) => fmtDataHora(linha.dataInicial as string | null)},
+    {key: 'telefone', label: 'Telefone'},
+    {key: 'resultado', label: 'Resultado'},
+    {key: 'qtdeParcela', label: 'Qtd parcelas'},
+    {key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null)},
+    {key: 'observacao', label: 'Observação'},
 ];
 
 const COBRANCA_EMAIL_COLUNAS: TabelaColuna[] = [
-  { key: 'id', label: 'Id' },
-  { key: 'data', label: 'Data', render: (linha) => fmtDataHora(linha.data as string | null) },
-  { key: 'email', label: 'E-mail' },
-  { key: 'assunto', label: 'Assunto' },
-  { key: 'mensagem', label: 'Mensagem' },
-  { key: 'qtdeParcela', label: 'Qtd parcelas' },
-  { key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null) },
+    {key: 'id', label: 'Id'},
+    {key: 'data', label: 'Data', render: (linha) => fmtDataHora(linha.data as string | null)},
+    {key: 'email', label: 'E-mail'},
+    {key: 'assunto', label: 'Assunto'},
+    {key: 'mensagem', label: 'Mensagem'},
+    {key: 'qtdeParcela', label: 'Qtd parcelas'},
+    {key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null)},
 ];
 
-export function HistoricoCobrancaModal({ pessoaId, onClose }: GestaoModalProps) {
-  const q = useQuery({
-    queryKey: ['gestao-aluno', 'historico-cobranca', pessoaId],
-    queryFn: async () => (await api.get<HistoricoCobranca>(`/api/aluno/gestao/${pessoaId}/historico-cobranca`)).data,
-  });
-  if (q.isLoading) return <ModalFrame titulo="Histórico Cobrança" onClose={onClose}><Carregando /></ModalFrame>;
-  if (q.isError || !q.data) return <ModalFrame titulo="Histórico Cobrança" onClose={onClose}><Erro mensagem={apiError(q.error)} /></ModalFrame>;
-  return (
-    <ModalFrame titulo="Histórico Cobrança" onClose={onClose}>
-      <Tabs
-        tabs={[
-          {
-            key: 'ligacao',
-            label: 'Ligação',
-            content: <TabelaDadosPaginada vazio="Nenhuma ligação encontrada." colunas={COBRANCA_COLUNAS} linhas={q.data.ligacoes as unknown as Record<string, unknown>[]} />,
-          },
-          {
-            key: 'email',
-            label: 'E-mail',
-            content: <TabelaDadosPaginada vazio="Nenhum e-mail encontrado." colunas={COBRANCA_EMAIL_COLUNAS} linhas={q.data.emails as unknown as Record<string, unknown>[]} />,
-          },
-        ]}
-      />
-    </ModalFrame>
-  );
+export function HistoricoCobrancaModal({pessoaId, onClose}: GestaoModalProps) {
+    const q = useQuery({
+        queryKey: ['gestao-aluno', 'historico-cobranca', pessoaId],
+        queryFn: async () => (await api.get<HistoricoCobranca>(`/api/aluno/gestao/${pessoaId}/historico-cobranca`)).data,
+    });
+    if (q.isLoading) return <ModalFrame titulo="Histórico Cobrança" onClose={onClose}><Carregando/></ModalFrame>;
+    if (q.isError || !q.data) return <ModalFrame titulo="Histórico Cobrança" onClose={onClose}><Erro
+        mensagem={apiError(q.error)}/></ModalFrame>;
+    return (
+        <ModalFrame titulo="Histórico Cobrança" onClose={onClose}>
+            <Tabs
+                tabs={[
+                    {
+                        key: 'ligacao',
+                        label: 'Ligação',
+                        content: <TabelaDadosPaginada vazio="Nenhuma ligação encontrada." colunas={COBRANCA_COLUNAS}
+                                                      linhas={q.data.ligacoes as unknown as Record<string, unknown>[]}/>,
+                    },
+                    {
+                        key: 'email',
+                        label: 'E-mail',
+                        content: <TabelaDadosPaginada vazio="Nenhum e-mail encontrado." colunas={COBRANCA_EMAIL_COLUNAS}
+                                                      linhas={q.data.emails as unknown as Record<string, unknown>[]}/>,
+                    },
+                ]}
+            />
+        </ModalFrame>
+    );
 }
 
-function GrausDeNotas({ boletim }: { boletim: Boletim }) {
-  return (
-    <div>
-      {boletim.graus.map((grau) => (
-        <div key={grau.id} className="master-detail" style={{ marginBottom: '0.5rem' }}>
-          <strong>{grau.descricao}</strong>
-          <table className="lote-table">
-            <thead>
-              <tr>
-                <th>Nota</th>
-                <th>Peso</th>
-                <th>Nota obtida</th>
-              </tr>
-            </thead>
-            <tbody>
-              {grau.notas.length === 0 ? (
-                <tr>
-                  <td colSpan={3}>Sem notas lançadas.</td>
-                </tr>
-              ) : (
-                grau.notas.map((nota) => (
-                  <tr key={nota.id}>
-                    <td>{nota.nome}</td>
-                    <td>{nota.peso ?? '—'}</td>
-                    <td>{nota.nota ?? '—'}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+function GrausDeNotas({boletim}: { boletim: Boletim }) {
+    return (
+        <div>
+            {boletim.graus.map((grau) => (
+                <div key={grau.id} className="master-detail" style={{marginBottom: '0.5rem'}}>
+                    <strong>{grau.descricao}</strong>
+                    <table className="lote-table">
+                        <thead>
+                        <tr>
+                            <th>Nota</th>
+                            <th>Peso</th>
+                            <th>Nota obtida</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {grau.notas.length === 0 ? (
+                            <tr>
+                                <td colSpan={3}>Sem notas lançadas.</td>
+                            </tr>
+                        ) : (
+                            grau.notas.map((nota) => (
+                                <tr key={nota.id}>
+                                    <td>{nota.nome}</td>
+                                    <td>{nota.peso ? ? '—'}</td>
+                                    <td>{nota.nota ? ? '—'}</td>
+                                </tr>
+                            ))
+                        )}
+                        </tbody>
+                    </table>
+                </div>
+            ))}
         </div>
-      ))}
-    </div>
-  );
+    );
 }
 
-export function NotasModal({ pessoaId, onClose }: GestaoModalProps) {
-  const q = useQuery({
-    queryKey: ['gestao-aluno', 'boletim', pessoaId],
-    queryFn: async () => (await api.get<Boletim[]>(`/api/aluno/gestao/${pessoaId}/boletim`)).data,
-  });
-  if (q.isLoading) return <ModalFrame titulo="Notas" onClose={onClose}><Carregando /></ModalFrame>;
-  if (q.isError) return <ModalFrame titulo="Notas" onClose={onClose}><Erro mensagem={apiError(q.error)} /></ModalFrame>;
-  const boletins = q.data ?? [];
-  return (
-    <ModalFrame titulo="Notas" onClose={onClose}>
-      {boletins.length === 0 ? (
-        <p className="master-detail-empty">Nenhuma matrícula encontrada.</p>
-      ) : (
-        boletins.map((boletim) => (
-          <div key={boletim.matricula.id} className="master-detail" style={{ marginBottom: '1rem' }}>
-            <div className="form-grid">
-              <label className="form-field">
-                <span className="form-label">Curso</span>
-                <input className="form-input" value={boletim.matricula.curso} readOnly />
-              </label>
-              <label className="form-field">
-                <span className="form-label">Componente</span>
-                <input className="form-input" value={boletim.matricula.componente} readOnly />
-              </label>
-              <label className="form-field">
-                <span className="form-label">Turma</span>
-                <input className="form-input" value={boletim.matricula.turma ?? '—'} readOnly />
-              </label>
-              <label className="form-field">
-                <span className="form-label">Média</span>
-                <input className="form-input" value={boletim.media ?? '—'} readOnly />
-              </label>
-              <label className="form-field">
-                <span className="form-label">Situação</span>
-                <input className="form-input" value={boletim.status} readOnly />
-              </label>
-            </div>
-            <GrausDeNotas boletim={boletim} />
-          </div>
-        ))
-      )}
-    </ModalFrame>
-  );
+export function NotasModal({pessoaId, onClose}: GestaoModalProps) {
+    const q = useQuery({
+        queryKey: ['gestao-aluno', 'boletim', pessoaId],
+        queryFn: async () => (await api.get<Boletim[]>(`/api/aluno/gestao/${pessoaId}/boletim`)).data,
+    });
+    if (q.isLoading) return <ModalFrame titulo="Notas" onClose={onClose}><Carregando/></ModalFrame>;
+    if (q.isError) return <ModalFrame titulo="Notas" onClose={onClose}><Erro
+        mensagem={apiError(q.error)}/></ModalFrame>;
+    const boletins = q.data ? ? [];
+    return (
+        <ModalFrame titulo="Notas" onClose={onClose}>
+            {boletins.length === 0 ? (
+                <p className="master-detail-empty">Nenhuma matrícula encontrada.</p>
+            ) : (
+                boletins.map((boletim) => (
+                    <div key={boletim.matricula.id} className="master-detail" style={{marginBottom: '1rem'}}>
+                        <div className="form-grid">
+                            <label className="form-field">
+                                <span className="form-label">Curso</span>
+                                <input className="form-input" value={boletim.matricula.curso} readOnly/>
+                            </label>
+                            <label className="form-field">
+                                <span className="form-label">Componente</span>
+                                <input className="form-input" value={boletim.matricula.componente} readOnly/>
+                            </label>
+                            <label className="form-field">
+                                <span className="form-label">Turma</span>
+                                <input className="form-input" value={boletim.matricula.turma ? ? '—'} readOnly/>
+                            </label>
+                            <label className="form-field">
+                                <span className="form-label">Média</span>
+                                <input className="form-input" value={boletim.media ? ? '—'} readOnly/>
+                            </label>
+                            <label className="form-field">
+                                <span className="form-label">Situação</span>
+                                <input className="form-input" value={boletim.status} readOnly/>
+                            </label>
+                        </div>
+                        <GrausDeNotas boletim={boletim}/>
+                    </div>
+                ))
+            )}
+        </ModalFrame>
+    );
 }
 
 const PRESENCA_COR: Record<string, string> = {
-  p: 'Presente',
-  m: 'Meia presença',
-  a: 'Ausente',
-  t: 'Atestado',
-  c: 'Cancelado',
-  v: 'Troca de turma',
-  r: 'Prorrogado',
-  n: 'Sem marcação',
-  d: 'Atrasado',
-  i: 'Irregular',
+    p: 'Presente',
+    m: 'Meia presença',
+    a: 'Ausente',
+    t: 'Atestado',
+    c: 'Cancelado',
+    v: 'Troca de turma',
+    r: 'Prorrogado',
+    n: 'Sem marcação',
+    d: 'Atrasado',
+    i: 'Irregular',
 };
 
-export function PresencasModal({ pessoaId, onClose }: GestaoModalProps) {
-  const q = useQuery({
-    queryKey: ['gestao-aluno', 'frequencias', pessoaId],
-    queryFn: async () => (await api.get<Frequencia[]>(`/api/aluno/gestao/${pessoaId}/frequencias`)).data,
-  });
-  if (q.isLoading) return <ModalFrame titulo="Presenças" onClose={onClose}><Carregando /></ModalFrame>;
-  if (q.isError) return <ModalFrame titulo="Presenças" onClose={onClose}><Erro mensagem={apiError(q.error)} /></ModalFrame>;
-  const frequencias = q.data ?? [];
-  return (
-    <ModalFrame titulo="Presenças" onClose={onClose}>
-      <Tabs
-        tabs={[
-          {
-            key: 'matricula',
-            label: 'Matrícula',
-            content: frequencias.length === 0 ? (
-              <p className="master-detail-empty">Nenhuma matrícula encontrada.</p>
-            ) : (
-              frequencias.map((frequencia) => (
-                <div key={frequencia.matricula.id} className="master-detail" style={{ marginBottom: '1rem' }}>
-                  <div className="form-grid">
-                    <label className="form-field">
-                      <span className="form-label">Curso</span>
-                      <input className="form-input" value={frequencia.matricula.curso} readOnly />
-                    </label>
-                    <label className="form-field">
-                      <span className="form-label">Componente</span>
-                      <input className="form-input" value={frequencia.matricula.componente} readOnly />
-                    </label>
-                    <label className="form-field">
-                      <span className="form-label">Turma</span>
-                      <input className="form-input" value={frequencia.matricula.turma ?? '—'} readOnly />
-                    </label>
-                    <label className="form-field">
-                      <span className="form-label">Frequência</span>
-                      <input className="form-input" value={frequencia.frequenciaPerc == null ? '—' : `${frequencia.frequenciaPerc}%`} readOnly />
-                    </label>
-                    <label className="form-field">
-                      <span className="form-label">Presentes</span>
-                      <input className="form-input" value={frequencia.presentes} readOnly />
-                    </label>
-                    <label className="form-field">
-                      <span className="form-label">Ausentes</span>
-                      <input className="form-input" value={frequencia.ausentes} readOnly />
-                    </label>
-                  </div>
-                  <TabelaDadosPaginada
-                    vazio="Nenhuma ocorrência de presença."
-                    colunas={[
-                      { key: 'data', label: 'Data', render: (linha) => fmtData(linha.data as string | null) },
-                      { key: 'presenca', label: 'Presença', render: (linha) => PRESENCA_COR[String(linha.presenca ?? '')] ?? String(linha.presenca ?? '') },
-                      { key: 'componente', label: 'Componente' },
-                    ]}
-                    linhas={frequencia.ocorrencias as unknown as Record<string, unknown>[]}
-                  />
-                </div>
-              ))
-            ),
-          },
-          {
-            key: 'trocaTurma',
-            label: 'Troca Turma',
-            content: <p className="master-detail-empty">Nenhuma troca de turma registrada.</p>,
-          },
-        ]}
-      />
-    </ModalFrame>
-  );
+export function PresencasModal({pessoaId, onClose}: GestaoModalProps) {
+    const q = useQuery({
+        queryKey: ['gestao-aluno', 'frequencias', pessoaId],
+        queryFn: async () => (await api.get<Frequencia[]>(`/api/aluno/gestao/${pessoaId}/frequencias`)).data,
+    });
+    if (q.isLoading) return <ModalFrame titulo="Presenças" onClose={onClose}><Carregando/></ModalFrame>;
+    if (q.isError) return <ModalFrame titulo="Presenças" onClose={onClose}><Erro
+        mensagem={apiError(q.error)}/></ModalFrame>;
+    const frequencias = q.data ? ? [];
+    return (
+        <ModalFrame titulo="Presenças" onClose={onClose}>
+            <Tabs
+                tabs={[
+                    {
+                        key: 'matricula',
+                        label: 'Matrícula',
+                        content: frequencias.length === 0 ? (
+                            <p className="master-detail-empty">Nenhuma matrícula encontrada.</p>
+                        ) : (
+                            frequencias.map((frequencia) => (
+                                <div key={frequencia.matricula.id} className="master-detail"
+                                     style={{marginBottom: '1rem'}}>
+                                    <div className="form-grid">
+                                        <label className="form-field">
+                                            <span className="form-label">Curso</span>
+                                            <input className="form-input" value={frequencia.matricula.curso} readOnly/>
+                                        </label>
+                                        <label className="form-field">
+                                            <span className="form-label">Componente</span>
+                                            <input className="form-input" value={frequencia.matricula.componente}
+                                                   readOnly/>
+                                        </label>
+                                        <label className="form-field">
+                                            <span className="form-label">Turma</span>
+                                            <input className="form-input" value={frequencia.matricula.turma ? ? '—'}
+                                                   readOnly/>
+                                        </label>
+                                        <label className="form-field">
+                                            <span className="form-label">Frequência</span>
+                                            <input className="form-input"
+                                                   value={frequencia.frequenciaPerc == null ? '—' : `${frequencia.frequenciaPerc}%`}
+                                                   readOnly/>
+                                        </label>
+                                        <label className="form-field">
+                                            <span className="form-label">Presentes</span>
+                                            <input className="form-input" value={frequencia.presentes} readOnly/>
+                                        </label>
+                                        <label className="form-field">
+                                            <span className="form-label">Ausentes</span>
+                                            <input className="form-input" value={frequencia.ausentes} readOnly/>
+                                        </label>
+                                    </div>
+                                    <TabelaDadosPaginada
+                                        vazio="Nenhuma ocorrência de presença."
+                                        colunas={[
+                                            {
+                                                key: 'data',
+                                                label: 'Data',
+                                                render: (linha) => fmtData(linha.data as string | null)
+                                            },
+                                            {
+                                                key: 'presenca',
+                                                label: 'Presença',
+                                                render: (linha) => PRESENCA_COR[String(linha.presenca ? ? '')] ? ? String(linha.presenca ? ? '')
+                                            },
+                                            {key: 'componente', label: 'Componente'},
+                                        ]}
+                                        linhas={frequencia.ocorrencias as unknown as Record<string, unknown>[]}
+                                    />
+                                </div>
+                            ))
+                        ),
+                    },
+                    {
+                        key: 'trocaTurma',
+                        label: 'Troca Turma',
+                        content: <p className="master-detail-empty">Nenhuma troca de turma registrada.</p>,
+                    },
+                ]}
+            />
+        </ModalFrame>
+    );
 }
 
-export function HistoricoAlunoModal({ pessoaId, onClose }: GestaoModalProps) {
-  const q = useQuery({
-    queryKey: ['gestao-aluno', 'historico-aluno', pessoaId],
-    queryFn: async () => (await api.get<HistoricoAlunoRegistro[]>(`/api/aluno/gestao/${pessoaId}/historico-aluno`)).data,
-  });
-  if (q.isLoading) return <ModalFrame titulo="Histórico aluno" onClose={onClose}><Carregando /></ModalFrame>;
-  if (q.isError) return <ModalFrame titulo="Histórico aluno" onClose={onClose}><Erro mensagem={apiError(q.error)} /></ModalFrame>;
-  const registros = q.data ?? [];
-  return (
-    <ModalFrame titulo="Histórico aluno" onClose={onClose}>
-      <TabelaDadosPaginada
-        vazio="Nenhum registro no histórico do aluno."
-        colunas={[
-          { key: 'id', label: 'Id' },
-          { key: 'dataRegistro', label: 'Data', render: (linha) => fmtDataHora(linha.dataRegistro as string | null) },
-          { key: 'descricao', label: 'Descrição' },
-          { key: 'usuarioNome', label: 'Usuário' },
-        ]}
-        linhas={registros as unknown as Record<string, unknown>[]}
-      />
-    </ModalFrame>
-  );
+export function HistoricoAlunoModal({pessoaId, onClose}: GestaoModalProps) {
+    const q = useQuery({
+        queryKey: ['gestao-aluno', 'historico-aluno', pessoaId],
+        queryFn: async () => (await api.get<HistoricoAlunoRegistro[]>(`/api/aluno/gestao/${pessoaId}/historico-aluno`)).data,
+    });
+    if (q.isLoading) return <ModalFrame titulo="Histórico aluno" onClose={onClose}><Carregando/></ModalFrame>;
+    if (q.isError) return <ModalFrame titulo="Histórico aluno" onClose={onClose}><Erro
+        mensagem={apiError(q.error)}/></ModalFrame>;
+    const registros = q.data ? ? [];
+    return (
+        <ModalFrame titulo="Histórico aluno" onClose={onClose}>
+            <TabelaDadosPaginada
+                vazio="Nenhum registro no histórico do aluno."
+                colunas={[
+                    {key: 'id', label: 'Id'},
+                    {
+                        key: 'dataRegistro',
+                        label: 'Data',
+                        render: (linha) => fmtDataHora(linha.dataRegistro as string | null)
+                    },
+                    {key: 'descricao', label: 'Descrição'},
+                    {key: 'usuarioNome', label: 'Usuário'},
+                ]}
+                linhas={registros as unknown as Record<string, unknown>[]}
+            />
+        </ModalFrame>
+    );
 }

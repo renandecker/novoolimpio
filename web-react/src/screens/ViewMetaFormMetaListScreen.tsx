@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewMetaFormMetaListScreen(){return <PermissionGate permission="READ"><main><h1>Form Meta</h1><DataTable path="/api/view/meta/formMeta"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewMetaFormMetaListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Form Meta</h1><DataTable path="/api/view/meta/formMeta"/></main>
+    </PermissionGate>
+}

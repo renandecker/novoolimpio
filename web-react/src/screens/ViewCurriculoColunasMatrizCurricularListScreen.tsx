@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewCurriculoColunasMatrizCurricularListScreen(){return <PermissionGate permission="READ"><main><h1>Colunas Matriz Curricular</h1><DataTable path="/api/view/curriculo/colunasMatrizCurricular"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewCurriculoColunasMatrizCurricularListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Colunas Matriz Curricular</h1><DataTable path="/api/view/curriculo/colunasMatrizCurricular"/></main>
+    </PermissionGate>
+}

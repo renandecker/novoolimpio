@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.comercial.estrategia;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class EstrategiaService {
 
-    @Inject EstrategiaRepository repository;
+    @Inject
+    EstrategiaRepository repository;
 
     public Uni<List<EstrategiaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,9 @@ public class EstrategiaService {
                         : Uni.createFrom().failure(new NotFoundException("Estrategia not found")));
     }
 
-    private void apply(Estrategia e, EstrategiaRequest r) { e.descricao = r.descricao(); }
+    private void apply(Estrategia e, EstrategiaRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private EstrategiaResponse toResponse(Estrategia e) {
         return new EstrategiaResponse(e.id, e.descricao);

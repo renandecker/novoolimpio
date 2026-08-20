@@ -8,8 +8,8 @@ public record CurriculoTrabalhoRequest(
         Date dt_inicio,
         Date dt_fim,
         Boolean fl_ativo,
-        List<CampoInformacaoRequest> campo_informacoes) {
+        List<CampoInformacaoRequest> campo_informacoes){
 
-    public record CampoInformacaoRequest(Long id, Long id_campo, String valor) {
-    }
-}
+public record CampoInformacaoRequest(Long id,Long id_campo,String valor){
+        }
+        }

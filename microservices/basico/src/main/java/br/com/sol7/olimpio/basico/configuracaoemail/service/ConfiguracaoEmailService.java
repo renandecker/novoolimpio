@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.configuracaoemail.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.configuracaoemail.dto.ConfiguracaoEmailRequest;
 import br.com.sol7.olimpio.basico.configuracaoemail.dto.ConfiguracaoEmailResponse;
 import br.com.sol7.olimpio.basico.configuracaoemail.entity.ConfiguracaoEmail;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.configuracaoemail.repository.ConfiguracaoEmail
 @WithTransaction
 public class ConfiguracaoEmailService {
 
-    @Inject ConfiguracaoEmailRepository repository;
+    @Inject
+    ConfiguracaoEmailRepository repository;
 
     public Uni<List<ConfiguracaoEmailResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,36 @@ public class ConfiguracaoEmailService {
                         : Uni.createFrom().failure(new NotFoundException("ConfiguracaoEmail not found")));
     }
 
-    private void apply(ConfiguracaoEmail e, ConfiguracaoEmailRequest r) { e.host = r.host(); e.port = r.port(); e.protocol = r.protocol(); e.username = r.username(); e.password = r.password(); e.principal = r.principal(); e.periodicidade = r.periodicidade(); e.googleMapsApi = r.googleMapsApi(); e.googleMapsCota = r.googleMapsCota(); e.googleMapsUsar = r.googleMapsUsar(); e.googleMapsUsado = r.googleMapsUsado(); e.habilitarApi = r.habilitarApi(); e.tipoApiEmail = r.tipoApiEmail(); e.dateCota = r.dateCota(); e.cota = r.cota(); e.usado = r.usado(); e.tokenCorreio = r.tokenCorreio(); e.tokenSendgrip = r.tokenSendgrip(); e.clientId = r.clientId(); e.clientSecret = r.clientSecret(); e.accessToken = r.accessToken(); e.refreshToken = r.refreshToken(); e.quitwait = r.quitwait(); e.starttls = r.starttls(); e.auth = r.auth(); e.debug = r.debug(); e.autenticated = r.autenticated(); e.fallback = r.fallback(); }
+    private void apply(ConfiguracaoEmail e, ConfiguracaoEmailRequest r) {
+        e.host = r.host();
+        e.port = r.port();
+        e.protocol = r.protocol();
+        e.username = r.username();
+        e.password = r.password();
+        e.principal = r.principal();
+        e.periodicidade = r.periodicidade();
+        e.googleMapsApi = r.googleMapsApi();
+        e.googleMapsCota = r.googleMapsCota();
+        e.googleMapsUsar = r.googleMapsUsar();
+        e.googleMapsUsado = r.googleMapsUsado();
+        e.habilitarApi = r.habilitarApi();
+        e.tipoApiEmail = r.tipoApiEmail();
+        e.dateCota = r.dateCota();
+        e.cota = r.cota();
+        e.usado = r.usado();
+        e.tokenCorreio = r.tokenCorreio();
+        e.tokenSendgrip = r.tokenSendgrip();
+        e.clientId = r.clientId();
+        e.clientSecret = r.clientSecret();
+        e.accessToken = r.accessToken();
+        e.refreshToken = r.refreshToken();
+        e.quitwait = r.quitwait();
+        e.starttls = r.starttls();
+        e.auth = r.auth();
+        e.debug = r.debug();
+        e.autenticated = r.autenticated();
+        e.fallback = r.fallback();
+    }
 
     private ConfiguracaoEmailResponse toResponse(ConfiguracaoEmail e) {
         return new ConfiguracaoEmailResponse(e.id, e.host, e.port, e.protocol, e.username, e.password, e.principal, e.periodicidade, e.googleMapsApi, e.googleMapsCota, e.googleMapsUsar, e.googleMapsUsado, e.habilitarApi, e.tipoApiEmail, e.dateCota, e.cota, e.usado, e.tokenCorreio, e.tokenSendgrip, e.clientId, e.clientSecret, e.accessToken, e.refreshToken, e.quitwait, e.starttls, e.auth, e.debug, e.autenticated, e.fallback);

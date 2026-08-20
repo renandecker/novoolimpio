@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.rede.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.rede.dto.RedeRequest;
 import br.com.sol7.olimpio.basico.rede.dto.RedeResponse;
 import br.com.sol7.olimpio.basico.rede.entity.Rede;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.rede.repository.RedeRepository;
 @WithTransaction
 public class RedeService {
 
-    @Inject RedeRepository repository;
+    @Inject
+    RedeRepository repository;
 
     public Uni<List<RedeResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,14 @@ public class RedeService {
                         : Uni.createFrom().failure(new NotFoundException("Rede not found")));
     }
 
-    private void apply(Rede e, RedeRequest r) { e.layoutId = r.layoutId(); e.usuarioId = r.usuarioId(); e.razaoSocial = r.razaoSocial(); e.nomeFantasia = r.nomeFantasia(); e.cnpj = r.cnpj(); e.numero = r.numero(); }
+    private void apply(Rede e, RedeRequest r) {
+        e.layoutId = r.layoutId();
+        e.usuarioId = r.usuarioId();
+        e.razaoSocial = r.razaoSocial();
+        e.nomeFantasia = r.nomeFantasia();
+        e.cnpj = r.cnpj();
+        e.numero = r.numero();
+    }
 
     private RedeResponse toResponse(Rede e) {
         return new RedeResponse(e.id, e.layoutId, e.usuarioId, e.razaoSocial, e.nomeFantasia, e.cnpj, e.numero);
@@ -101,7 +112,7 @@ public class RedeService {
     //         return getRedeRepository().autoComplete(query.toLowerCase(), new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoComplete(String query) {
-                return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

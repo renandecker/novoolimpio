@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.cidade.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.cidade.dto.CidadeRequest;
 import br.com.sol7.olimpio.basico.cidade.dto.CidadeResponse;
 import br.com.sol7.olimpio.basico.cidade.entity.Cidade;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.cidade.repository.CidadeRepository;
 @WithTransaction
 public class CidadeService {
 
-    @Inject CidadeRepository repository;
+    @Inject
+    CidadeRepository repository;
 
     public Uni<List<CidadeResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,13 @@ public class CidadeService {
                         : Uni.createFrom().failure(new NotFoundException("Cidade not found")));
     }
 
-    private void apply(Cidade e, CidadeRequest r) { e.nome = r.nome(); e.praca = r.praca(); e.area = r.area(); e.ibge = r.ibge(); e.estadoId = r.estadoId(); }
+    private void apply(Cidade e, CidadeRequest r) {
+        e.nome = r.nome();
+        e.praca = r.praca();
+        e.area = r.area();
+        e.ibge = r.ibge();
+        e.estadoId = r.estadoId();
+    }
 
     private CidadeResponse toResponse(Cidade e) {
         return new CidadeResponse(e.id, e.nome, e.praca, e.area, e.ibge, e.estadoId);
@@ -112,7 +122,7 @@ public class CidadeService {
     //         return this.getCidadeRepository().autoCompleteComEstado(query.toLowerCase(), estado, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteComEstado(String query, Long estadoId) {
-                // Obs: condicao removida (depende de outro microservico): (lower(c.nome) like '%' || lower(?1) || '%'  OR  str(c.id) = ?1 or  lower(c.nome||c.estado.nome) like '%' || lower(?1) || '%' or  lower(c.nome||c.estado.uf) like '%' || ?1 || '%' or  lower(c.nome||' ('||c.estado.nome||')') like '%' || lower(?1) || '%' or  lower(c.nome||' ('||c.estado.uf||')') like '%' || lower(?1) || '%' or  replace(replace(lower(c.nome||' '||c.estado.nome),'(',''),')','') like '%' || lower(?1) || '%' or  replace(replace(lower(c.nome||' '||c.estado.uf),'(',''),')','') like '%' || lower(?1) || '%' )
+        // Obs: condicao removida (depende de outro microservico): (lower(c.nome) like '%' || lower(?1) || '%'  OR  str(c.id) = ?1 or  lower(c.nome||c.estado.nome) like '%' || lower(?1) || '%' or  lower(c.nome||c.estado.uf) like '%' || ?1 || '%' or  lower(c.nome||' ('||c.estado.nome||')') like '%' || lower(?1) || '%' or  lower(c.nome||' ('||c.estado.uf||')') like '%' || lower(?1) || '%' or  replace(replace(lower(c.nome||' '||c.estado.nome),'(',''),')','') like '%' || lower(?1) || '%' or  replace(replace(lower(c.nome||' '||c.estado.uf),'(',''),')','') like '%' || lower(?1) || '%' )
         return repository.find("estadoId = ?2 order by nome", query.toLowerCase(), estadoId).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 

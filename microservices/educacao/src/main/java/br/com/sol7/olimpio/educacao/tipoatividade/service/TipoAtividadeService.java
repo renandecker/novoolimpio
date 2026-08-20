@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.tipoatividade;
+
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -8,13 +9,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class TipoAtividadeService {
 
-    @Inject TipoAtividadeRepository repository;
+    @Inject
+    TipoAtividadeRepository repository;
 
     @CacheResult(cacheName = "tipo-atividade-cache")
     public Uni<List<TipoAtividadeResponse>> list() {
@@ -58,7 +61,11 @@ public class TipoAtividadeService {
                         : Uni.createFrom().failure(new NotFoundException("TipoAtividade not found")));
     }
 
-    private void apply(TipoAtividade e, TipoAtividadeRequest r) { e.descricao = r.descricao(); e.cargaHorariaMaxima = r.cargaHorariaMaxima(); e.cargaHorariaMinima = r.cargaHorariaMinima(); }
+    private void apply(TipoAtividade e, TipoAtividadeRequest r) {
+        e.descricao = r.descricao();
+        e.cargaHorariaMaxima = r.cargaHorariaMaxima();
+        e.cargaHorariaMinima = r.cargaHorariaMinima();
+    }
 
     private TipoAtividadeResponse toResponse(TipoAtividade e) {
         return new TipoAtividadeResponse(e.id, e.descricao, e.cargaHorariaMaxima, e.cargaHorariaMinima);

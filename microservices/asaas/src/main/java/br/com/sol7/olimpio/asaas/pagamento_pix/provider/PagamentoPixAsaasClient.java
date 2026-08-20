@@ -18,6 +18,7 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
  * Cliente REST reativo para os endpoints Asaas usados pela geracao/consulta de cobrancas PIX
  * (AsaasPixProviderClient). Fluxo movido do fiserv para o asaas-service. Corpo/consulta
  * trafegam como JSON generico (JsonNode) e o header de autenticacao (access_token) e injetado via
+ *
  * @ClientHeaderParam (ver AsaasAuth).
  */
 @RegisterRestClient(configKey = "asaas-api")
@@ -26,27 +27,37 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 @Produces(MediaType.APPLICATION_JSON)
 public interface PagamentoPixAsaasClient {
 
-    /** GET /v3/customers?cpfCnpj=... - busca cliente existente pelo CPF/CNPJ (para vincular a cobranca). */
+    /**
+     * GET /v3/customers?cpfCnpj=... - busca cliente existente pelo CPF/CNPJ (para vincular a cobranca).
+     */
     @GET
     @Path("/v3/customers")
     Uni<JsonNode> listarClientes(@QueryParam("cpfCnpj") String cpfCnpj);
 
-    /** POST /v3/customers - cria cliente no Asaas quando ainda nao existe. */
+    /**
+     * POST /v3/customers - cria cliente no Asaas quando ainda nao existe.
+     */
     @POST
     @Path("/v3/customers")
     Uni<JsonNode> criarCliente(JsonNode body);
 
-    /** POST /v3/payments - cria uma cobranca (billingType = PIX). */
+    /**
+     * POST /v3/payments - cria uma cobranca (billingType = PIX).
+     */
     @POST
     @Path("/v3/payments")
     Uni<JsonNode> criarCobrancaPix(JsonNode body);
 
-    /** GET /v3/payments/{id} - recupera a cobranca (status, paidValue, pixTransaction.endToEndId). */
+    /**
+     * GET /v3/payments/{id} - recupera a cobranca (status, paidValue, pixTransaction.endToEndId).
+     */
     @GET
     @Path("/v3/payments/{id}")
     Uni<JsonNode> recuperarCobranca(@PathParam("id") String id);
 
-    /** GET /v3/payments/{id}/pixQrCode - payload (EMV) do QR Code PIX. */
+    /**
+     * GET /v3/payments/{id}/pixQrCode - payload (EMV) do QR Code PIX.
+     */
     @GET
     @Path("/v3/payments/{id}/pixQrCode")
     Uni<JsonNode> obterQrCodePix(@PathParam("id") String id);

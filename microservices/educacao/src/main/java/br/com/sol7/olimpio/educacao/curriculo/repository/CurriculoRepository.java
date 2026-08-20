@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.educacao.curriculo;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class CurriculoRepository implements PanacheRepository<Curriculo> {
+
+@ApplicationScoped
+public class CurriculoRepository implements PanacheRepository<Curriculo> {
 
     // Migrado de CurriculoRepository.autoComplete (legado) - HQL original:
     // select c from Curriculo c where  (lower(c.descricao) like '%' || ?1 || '%'  OR lower(c.sucinto) like '%' || ?1 || '%'  OR  lower(c.curso.nome) like '%' || ?1 || '%'  OR str(c.id) = ?1)  AND (c.dataCancelamento > current_date  or c.dataCancelamento is null) order by c.curso.nome
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Curriculo>> autoComplete(String lowerCase) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Curriculo.class)
-                    .setParameter(1, lowerCase)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .getResultList());
     }
 
 
@@ -25,9 +30,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Curriculo>> autoCompleteComUnidades(String lowerCase, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_UNIDADES, Curriculo.class)
-                    .setParameter(1, lowerCase)
-                    .setParameter(2, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .setParameter(2, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -39,9 +44,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Curriculo>> autoCompleteComUnidade(String lowerCase, Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_UNIDADE, Curriculo.class)
-                    .setParameter(1, lowerCase)
-                    .setParameter(2, unidadeId)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .setParameter(2, unidadeId)
+                        .getResultList());
     }
 
 
@@ -53,8 +58,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Curriculo>> buscarCursoComUnidades(Long entityId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CURSO_COM_UNIDADES, Curriculo.class)
-                    .setParameter(1, entityId)
-                    .getResultList());
+                        .setParameter(1, entityId)
+                        .getResultList());
     }
 
 
@@ -66,8 +71,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Curriculo>> cursoComUnidades(List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_CURSO_COM_UNIDADES, Curriculo.class)
-                    .setParameter(1, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -79,8 +84,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Curriculo>> buscarCursoComMatrizCurriculares(Long entityId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CURSO_COM_MATRIZ_CURRICULARES, Curriculo.class)
-                    .setParameter(1, entityId)
-                    .getResultList());
+                        .setParameter(1, entityId)
+                        .getResultList());
     }
 
 
@@ -92,8 +97,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Curriculo>> buscarCursosDaUnidade(Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CURSOS_DA_UNIDADE, Curriculo.class)
-                    .setParameter(1, unidadeId)
-                    .getResultList());
+                        .setParameter(1, unidadeId)
+                        .getResultList());
     }
 
 
@@ -105,8 +110,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Curriculo>> unidadesCurso(List<Long> unidadeIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_UNIDADES_CURSO, Curriculo.class)
-                    .setParameter(1, unidadeIds)
-                    .getResultList());
+                        .setParameter(1, unidadeIds)
+                        .getResultList());
     }
 
 
@@ -118,9 +123,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Curriculo>> unidadesCursorematricula(List<Long> unidadeIds, Long pessoaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_UNIDADES_CURSOREMATRICULA, Curriculo.class)
-                    .setParameter(1, unidadeIds)
-                    .setParameter(2, pessoaId)
-                    .getResultList());
+                        .setParameter(1, unidadeIds)
+                        .setParameter(2, pessoaId)
+                        .getResultList());
     }
 
 
@@ -132,10 +137,10 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Curriculo>> autoCompleteComUnidadesrematricula(String lowerCase, List<Long> unidadesIds, Long pessoaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_UNIDADESREMATRICULA, Curriculo.class)
-                    .setParameter(1, lowerCase)
-                    .setParameter(2, unidadesIds)
-                    .setParameter(3, pessoaId)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .setParameter(2, unidadesIds)
+                        .setParameter(3, pessoaId)
+                        .getResultList());
     }
 
 
@@ -147,8 +152,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Curriculo>> unidadeCurso(Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_UNIDADE_CURSO, Curriculo.class)
-                    .setParameter(1, unidadeId)
-                    .getResultList());
+                        .setParameter(1, unidadeId)
+                        .getResultList());
     }
 
 
@@ -160,8 +165,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Curriculo>> curriculoComUnidades(Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_CURRICULO_COM_UNIDADES, Curriculo.class)
-                    .setParameter(1, unidadeId)
-                    .getResultList());
+                        .setParameter(1, unidadeId)
+                        .getResultList());
     }
 
 
@@ -173,8 +178,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Curriculo>> buscarCurriculoPorUnidades(List<Long> unidadeIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CURRICULO_POR_UNIDADES, Curriculo.class)
-                    .setParameter(1, unidadeIds)
-                    .getResultList());
+                        .setParameter(1, unidadeIds)
+                        .getResultList());
     }
 
 }

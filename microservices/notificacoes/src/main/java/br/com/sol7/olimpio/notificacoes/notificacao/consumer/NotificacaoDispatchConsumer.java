@@ -17,9 +17,9 @@ import org.slf4j.LoggerFactory;
  * Consome os topicos do fluxo Kafka de envio de notificacoes e executa a entrega
  * de cada canal:
  * <ul>
- *   <li>olimpio.notificacao.email  -> envia o e-mail (SMTP) e marca email_enviado</li>
- *   <li>olimpio.notificacao.mobile -> push em tempo real (SSE) ao react native e marca mobile_enviado</li>
- *   <li>olimpio.notificacao.web    -> push em tempo real (SSE) ao react web</li>
+ * <li>olimpio.notificacao.email  -> envia o e-mail (SMTP) e marca email_enviado</li>
+ * <li>olimpio.notificacao.mobile -> push em tempo real (SSE) ao react native e marca mobile_enviado</li>
+ * <li>olimpio.notificacao.web    -> push em tempo real (SSE) ao react web</li>
  * </ul>
  */
 @ApplicationScoped
@@ -76,7 +76,7 @@ public class NotificacaoDispatchConsumer {
         }
         return Panache.getSession()
                 .chain(session -> session.createNativeQuery(
-                                "UPDATE not_notificacao SET " + coluna + " = true WHERE id = ?1 AND " + coluna + " = false")
+                        "UPDATE not_notificacao SET " + coluna + " = true WHERE id = ?1 AND " + coluna + " = false")
                         .setParameter(1, id)
                         .executeUpdate())
                 .replaceWithVoid();

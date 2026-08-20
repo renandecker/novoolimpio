@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.feriado.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,8 +7,10 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 import java.util.Date;
+
 import br.com.sol7.olimpio.basico.feriado.dto.FeriadoRequest;
 import br.com.sol7.olimpio.basico.feriado.dto.FeriadoResponse;
 import br.com.sol7.olimpio.basico.feriado.entity.Feriado;
@@ -18,8 +21,10 @@ import br.com.sol7.olimpio.basico.feriado.repository.FeriadoRepository;
 @WithTransaction
 public class FeriadoService {
 
-    @Inject FeriadoRepository repository;
-    @Inject FeriadoKafkaProducer kafkaProducer;
+    @Inject
+    FeriadoRepository repository;
+    @Inject
+    FeriadoKafkaProducer kafkaProducer;
 
     public Uni<List<FeriadoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -59,7 +64,16 @@ public class FeriadoService {
                         : Uni.createFrom().failure(new NotFoundException("Feriado not found")));
     }
 
-    private void apply(Feriado e, FeriadoRequest r) { e.nome = r.nome(); e.descricao = r.descricao(); e.tipoFeriao = r.tipoFeriao(); e.dataFeriado = r.dataFeriado(); e.dataCriacao = r.dataCriacao(); e.nacional = r.nacional(); e.todosCursos = r.todosCursos(); e.feriadoFixo = r.feriadoFixo(); }
+    private void apply(Feriado e, FeriadoRequest r) {
+        e.nome = r.nome();
+        e.descricao = r.descricao();
+        e.tipoFeriao = r.tipoFeriao();
+        e.dataFeriado = r.dataFeriado();
+        e.dataCriacao = r.dataCriacao();
+        e.nacional = r.nacional();
+        e.todosCursos = r.todosCursos();
+        e.feriadoFixo = r.feriadoFixo();
+    }
 
     private FeriadoResponse toResponse(Feriado e) {
         return new FeriadoResponse(e.id, e.nome, e.descricao, e.tipoFeriao, e.dataFeriado, e.dataCriacao, e.nacional, e.todosCursos, e.feriadoFixo);
@@ -129,7 +143,7 @@ public class FeriadoService {
     //         return getFeriadoRepository().buscarFeriadoUnidade(unidade, data, tipoCurso);
     //     }
     public Uni<List<Long>> buscarFeriadoUnidade(Date data, Long unidadeId, Long tipoCursoId) {
-                return repository.buscarFeriadoUnidade(unidadeId, data, tipoCursoId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarFeriadoUnidade(unidadeId, data, tipoCursoId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -140,7 +154,7 @@ public class FeriadoService {
     //         return getFeriadoRepository().buscarFeriadoFixo();
     //     }
     public Uni<List<Long>> buscarFeriadoFixo() {
-                return repository.buscarFeriadoFixo().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarFeriadoFixo().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -150,7 +164,7 @@ public class FeriadoService {
     //         return !ObjectUtil.nullOrEmpty(getFeriadoRepository().verificarFeriadoExistente(data));
     //     }
     public Uni<Boolean> verificarFeriadoExistente(Date data) {
-                return repository.verificarFeriadoExistente(data).map(list -> !list.isEmpty());
+        return repository.verificarFeriadoExistente(data).map(list -> !list.isEmpty());
     }
 
 
@@ -162,7 +176,7 @@ public class FeriadoService {
     //         return getFeriadoRepository().buscarFeriadoDaUnidade(unidade, inicio, fim);
     //     }
     public Uni<List<Long>> buscarFeriadoDaUnidade(Long unidadeId, Date inicio, Date fim) {
-                return repository.buscarFeriadoDaUnidade(unidadeId, inicio, fim).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarFeriadoDaUnidade(unidadeId, inicio, fim).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -173,7 +187,7 @@ public class FeriadoService {
     //         return getFeriadoRepository().buscarFeriadoDaUnidadeList(unidade, inicio, fim);
     //     }
     public Uni<List<Long>> buscarFeriadoDaUnidadeList(List<Long> unidade, Date inicio, Date fim) {
-                return repository.buscarFeriadoDaUnidadeList(unidade, inicio, fim).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarFeriadoDaUnidadeList(unidade, inicio, fim).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -184,7 +198,7 @@ public class FeriadoService {
     //         return getFeriadoRepository().buscarFeriadoDaUnidadetipoCurso(inicio, fim);
     //     }
     public Uni<List<Long>> buscarFeriadoDaUnidadetipoCurso(Date inicio, Date fim) {
-                return repository.buscarFeriadoDaUnidadetipoCurso(inicio, fim).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarFeriadoDaUnidadetipoCurso(inicio, fim).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -196,7 +210,7 @@ public class FeriadoService {
     //         return getFeriadoRepository().buscarFeriadoComUnidades(entity);
     //     }
     public Uni<Long> buscarFeriadoComUnidades(Long entityId) {
-                return repository.buscarFeriadoComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarFeriadoComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -208,7 +222,7 @@ public class FeriadoService {
     //         return getFeriadoRepository().buscarFeriadosComUnidadeData(unidade, data);
     //     }
     public Uni<List<Long>> buscarFeriadosComUnidadeData(Long unidadeId, Date data) {
-                return repository.buscarFeriadosComUnidadeData(unidadeId, data).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarFeriadosComUnidadeData(unidadeId, data).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -220,7 +234,7 @@ public class FeriadoService {
     //         return getFeriadoRepository().buscarFeriadoComTipoCurso(entity);
     //     }
     public Uni<Long> buscarFeriadoComTipoCurso(Long entityId) {
-                return repository.buscarFeriadoComTipoCurso(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarFeriadoComTipoCurso(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 

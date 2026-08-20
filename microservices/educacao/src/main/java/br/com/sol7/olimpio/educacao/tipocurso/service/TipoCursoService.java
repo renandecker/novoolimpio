@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.tipocurso;
+
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -8,13 +9,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class TipoCursoService {
 
-    @Inject TipoCursoRepository repository;
+    @Inject
+    TipoCursoRepository repository;
 
     @CacheResult(cacheName = "tipo-curso-cache")
     public Uni<List<TipoCursoResponse>> list() {
@@ -58,7 +61,9 @@ public class TipoCursoService {
                         : Uni.createFrom().failure(new NotFoundException("TipoCurso not found")));
     }
 
-    private void apply(TipoCurso e, TipoCursoRequest r) { e.descricao = r.descricao(); }
+    private void apply(TipoCurso e, TipoCursoRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private TipoCursoResponse toResponse(TipoCurso e) {
         return new TipoCursoResponse(e.id, e.descricao);

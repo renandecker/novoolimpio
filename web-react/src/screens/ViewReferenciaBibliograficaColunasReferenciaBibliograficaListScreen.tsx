@@ -1,1 +1,9 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewReferenciaBibliograficaColunasReferenciaBibliograficaListScreen(){return <PermissionGate permission="READ"><main><h1>Colunas Referencia Bibliografica</h1><DataTable path="/api/view/referenciaBibliografica/colunasReferenciaBibliografica"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewReferenciaBibliograficaColunasReferenciaBibliograficaListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Colunas Referencia Bibliografica</h1><DataTable
+            path="/api/view/referenciaBibliografica/colunasReferenciaBibliografica"/></main>
+    </PermissionGate>
+}

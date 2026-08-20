@@ -2,6 +2,7 @@ package br.com.sol7.olimpio.shared.security;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.ForbiddenException;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +28,8 @@ public class PermissionGuard {
         } else {
             granted = globalPermissions != null && Arrays.stream(globalPermissions.split(",")).map(String::trim).anyMatch(permission.name()::equals);
         }
-        if (!granted) throw new ForbiddenException("Permissão insuficiente: " + permission + (outcome == null ? "" : " em " + outcome));
+        if (!granted)
+            throw new ForbiddenException("Permissão insuficiente: " + permission + (outcome == null ? "" : " em " + outcome));
     }
 }
 

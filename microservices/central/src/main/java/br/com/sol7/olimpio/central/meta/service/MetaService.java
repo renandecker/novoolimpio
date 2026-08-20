@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.central.meta;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,6 +7,7 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 import java.util.Date;
 
@@ -13,7 +15,8 @@ import java.util.Date;
 @WithTransaction
 public class MetaService {
 
-    @Inject MetaRepository repository;
+    @Inject
+    MetaRepository repository;
 
     public Uni<List<MetaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -53,7 +56,15 @@ public class MetaService {
                         : Uni.createFrom().failure(new NotFoundException("Meta not found")));
     }
 
-    private void apply(Meta e, MetaRequest r) { e.operadorId = r.operadorId(); e.meta = r.meta(); e.data = r.data(); e.dataInicial = r.dataInicial(); e.dataFinal = r.dataFinal(); e.operacionalId = r.operacionalId(); e.usuarioId = r.usuarioId(); }
+    private void apply(Meta e, MetaRequest r) {
+        e.operadorId = r.operadorId();
+        e.meta = r.meta();
+        e.data = r.data();
+        e.dataInicial = r.dataInicial();
+        e.dataFinal = r.dataFinal();
+        e.operacionalId = r.operacionalId();
+        e.usuarioId = r.usuarioId();
+    }
 
     private MetaResponse toResponse(Meta e) {
         return new MetaResponse(e.id, e.operadorId, e.meta, e.data, e.dataInicial, e.dataFinal, e.operacionalId, e.usuarioId);
@@ -125,7 +136,7 @@ public class MetaService {
     //         return getMetaRepository().buscarConflitoDatasComEquipe(dataInicial, dataFinal, operacional);
     //     }
     public Uni<List<Long>> buscarConflitoDatasComEquipe(Date dataInicial, Date dataFinal, Long operacionalId) {
-                return repository.find("operacionalId=?3 and (dataInicial BETWEEN ?1 AND ?2 or dataFinal BETWEEN ?1 AND ?2)", dataInicial, dataFinal, operacionalId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("operacionalId=?3 and (dataInicial BETWEEN ?1 AND ?2 or dataFinal BETWEEN ?1 AND ?2)", dataInicial, dataFinal, operacionalId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -136,7 +147,7 @@ public class MetaService {
     //         return getMetaRepository().buscarConflitoDatasComEquipeComMeta(dataInicial, dataFinal, operacional, id);
     //     }
     public Uni<List<Long>> buscarConflitoDatasComEquipeComMeta(Date dataInicial, Date dataFinal, Long operacionalId, Integer id) {
-                return repository.find("operacionalId=?3 and (dataInicial BETWEEN ?1 AND ?2 or dataFinal BETWEEN ?1 AND ?2) and id <> ?4", dataInicial, dataFinal, operacionalId, id).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("operacionalId=?3 and (dataInicial BETWEEN ?1 AND ?2 or dataFinal BETWEEN ?1 AND ?2) and id <> ?4", dataInicial, dataFinal, operacionalId, id).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -147,7 +158,7 @@ public class MetaService {
     //         return getMetaRepository().buscarConflitoDatasComOperador(dataInicial, dataFinal, operador);
     //     }
     public Uni<List<Long>> buscarConflitoDatasComOperador(Date dataInicial, Date dataFinal, Long operadorId) {
-                return repository.find("operadorId=?3 and (dataInicial BETWEEN ?1 AND ?2 or dataFinal BETWEEN ?1 AND ?2)", dataInicial, dataFinal, operadorId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("operadorId=?3 and (dataInicial BETWEEN ?1 AND ?2 or dataFinal BETWEEN ?1 AND ?2)", dataInicial, dataFinal, operadorId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -158,7 +169,7 @@ public class MetaService {
     //         return getMetaRepository().buscarConflitoDatasComOperadorComMeta(dataInicial, dataFinal, operador, id);
     //     }
     public Uni<List<Long>> buscarConflitoDatasComOperadorComMeta(Date dataInicial, Date dataFinal, Long operadorId, Integer id) {
-                return repository.find("operadorId=?3 and (dataInicial BETWEEN ?1 AND ?2 or dataFinal BETWEEN ?1 AND ?2) and id <> ?4", dataInicial, dataFinal, operadorId, id).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("operadorId=?3 and (dataInicial BETWEEN ?1 AND ?2 or dataFinal BETWEEN ?1 AND ?2) and id <> ?4", dataInicial, dataFinal, operadorId, id).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 

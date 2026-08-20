@@ -8,5 +8,5 @@ public record EmpresaUnidadeRequest(
         Time inicio,
         Time fim,
         Boolean pre_autorizado,
-        Long id_tipo_contrato) {
-}
+        Long id_tipo_contrato){
+        }

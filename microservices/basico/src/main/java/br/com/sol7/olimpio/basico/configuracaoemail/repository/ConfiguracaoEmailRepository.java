@@ -1,22 +1,27 @@
 package br.com.sol7.olimpio.basico.configuracaoemail.repository;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 import br.com.sol7.olimpio.basico.configuracaoemail.entity.ConfiguracaoEmail;
-@ApplicationScoped public class ConfiguracaoEmailRepository implements PanacheRepository<ConfiguracaoEmail> {
+
+@ApplicationScoped
+public class ConfiguracaoEmailRepository implements PanacheRepository<ConfiguracaoEmail> {
 
     // Migrado de ConfiguracaoEmailService.verificarCotaAuto (legado) - SQL nativo original (3 updates)
     public static final String SQL_VERIFICAR_COTA_DIARIO =
             "UPDATE bas_email taxa SET data_atualizacao = now(), usado = cota " +
-            "where taxa.fl_api_email = true and periodicidade = 'DIARIO' and taxa.data_atualizacao != current_date";
+                    "where taxa.fl_api_email = true and periodicidade = 'DIARIO' and taxa.data_atualizacao != current_date";
     public static final String SQL_VERIFICAR_COTA_SEMANAL =
             "UPDATE bas_email taxa SET data_atualizacao = now(), usado = cota " +
-            "where taxa.fl_api_email = true and periodicidade = 'SEMANAL' " +
-            "and (date_trunc('week', current_date) != date_trunc('week', taxa.data_atualizacao))";
+                    "where taxa.fl_api_email = true and periodicidade = 'SEMANAL' " +
+                    "and (date_trunc('week', current_date) != date_trunc('week', taxa.data_atualizacao))";
     public static final String SQL_VERIFICAR_COTA_MENSAL =
             "UPDATE bas_email taxa SET data_atualizacao = now(), usado = cota " +
-            "where taxa.fl_api_email = true and periodicidade = 'MENSAL' " +
-            "and date_trunc('month', current_date) != date_trunc('month', taxa.data_atualizacao)";
+                    "where taxa.fl_api_email = true and periodicidade = 'MENSAL' " +
+                    "and date_trunc('month', current_date) != date_trunc('month', taxa.data_atualizacao)";
 
     public Uni<Void> verificarCotaAutoNativo() {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
@@ -37,7 +42,7 @@ import br.com.sol7.olimpio.basico.configuracaoemail.entity.ConfiguracaoEmail;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LIST_EMAIL_COM_COTA, ConfiguracaoEmail.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -49,8 +54,8 @@ import br.com.sol7.olimpio.basico.configuracaoemail.entity.ConfiguracaoEmail;
     public Uni<java.util.List<ConfiguracaoEmail>> autoCompleteTokenGoogle(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_TOKEN_GOOGLE, ConfiguracaoEmail.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -63,7 +68,7 @@ import br.com.sol7.olimpio.basico.configuracaoemail.entity.ConfiguracaoEmail;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSA_CONFIGURACAO_EMAIL_PADRAO, ConfiguracaoEmail.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 }

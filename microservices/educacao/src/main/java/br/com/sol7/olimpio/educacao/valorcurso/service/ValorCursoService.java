@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.valorcurso;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ValorCursoService {
 
-    @Inject ValorCursoRepository repository;
+    @Inject
+    ValorCursoRepository repository;
 
     public Uni<List<ValorCursoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,25 @@ public class ValorCursoService {
                         : Uni.createFrom().failure(new NotFoundException("ValorCurso not found")));
     }
 
-    private void apply(ValorCurso e, ValorCursoRequest r) { e.data = r.data(); e.diasSpc = r.diasSpc(); e.diasToleranciaMulta = r.diasToleranciaMulta(); e.curriculoId = r.curriculoId(); e.valor = r.valor(); e.juros = r.juros(); e.multa = r.multa(); e.descontoCarne = r.descontoCarne(); e.valorDescontoAluno = r.valorDescontoAluno(); e.cobraRematricula = r.cobraRematricula(); e.valorHora = r.valorHora(); e.percDescJurMul = r.percDescJurMul(); e.percDescValor = r.percDescValor(); e.percValorMinEntrada = r.percValorMinEntrada(); e.prazoParcEntrada = r.prazoParcEntrada(); e.prazoParcSegunda = r.prazoParcSegunda(); e.qtdePacelas = r.qtdePacelas(); }
+    private void apply(ValorCurso e, ValorCursoRequest r) {
+        e.data = r.data();
+        e.diasSpc = r.diasSpc();
+        e.diasToleranciaMulta = r.diasToleranciaMulta();
+        e.curriculoId = r.curriculoId();
+        e.valor = r.valor();
+        e.juros = r.juros();
+        e.multa = r.multa();
+        e.descontoCarne = r.descontoCarne();
+        e.valorDescontoAluno = r.valorDescontoAluno();
+        e.cobraRematricula = r.cobraRematricula();
+        e.valorHora = r.valorHora();
+        e.percDescJurMul = r.percDescJurMul();
+        e.percDescValor = r.percDescValor();
+        e.percValorMinEntrada = r.percValorMinEntrada();
+        e.prazoParcEntrada = r.prazoParcEntrada();
+        e.prazoParcSegunda = r.prazoParcSegunda();
+        e.qtdePacelas = r.qtdePacelas();
+    }
 
     private ValorCursoResponse toResponse(ValorCurso e) {
         return new ValorCursoResponse(e.id, e.data, e.diasSpc, e.diasToleranciaMulta, e.curriculoId, e.valor, e.juros, e.multa, e.descontoCarne, e.valorDescontoAluno, e.cobraRematricula, e.valorHora, e.percDescJurMul, e.percDescValor, e.percValorMinEntrada, e.prazoParcEntrada, e.prazoParcSegunda, e.qtdePacelas);
@@ -96,7 +117,7 @@ public class ValorCursoService {
     //         return getValorCursoRepository().buscarValoresComDesconto(valorCurso);
     //     }
     public Uni<Long> buscarValoresComDesconto(Long valorCursoId) {
-                return repository.buscarValoresComDesconto(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarValoresComDesconto(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -122,7 +143,7 @@ public class ValorCursoService {
     //         return getValorCursoRepository().buscarValoresComTaxas(valorCurso);
     //     }
     public Uni<Long> buscarValoresComTaxas(Long valorCursoId) {
-                return repository.buscarValoresComTaxas(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarValoresComTaxas(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -134,7 +155,7 @@ public class ValorCursoService {
     //         return getValorCursoRepository().buscarValoresComFormaPagamento(valorCurso);
     //     }
     public Uni<Long> buscarValoresComFormasPagamento(Long valorCursoId) {
-                return repository.buscarValoresComFormaPagamento(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarValoresComFormaPagamento(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -146,7 +167,7 @@ public class ValorCursoService {
     //         return getValorCursoRepository().buscarValoresComDescontoAtivos(valorCurso);
     //     }
     public Uni<Long> buscarValoresComDescontoAtivos(Long valorCursoId) {
-                return repository.buscarValoresComDescontoAtivos(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarValoresComDescontoAtivos(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -158,7 +179,7 @@ public class ValorCursoService {
     //         return getValorCursoRepository().buscarValoresComTaxasAtivos(valorCurso);
     //     }
     public Uni<Long> buscarValoresComTaxasAtivos(Long valorCursoId) {
-                return repository.buscarValoresComTaxasAtivos(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarValoresComTaxasAtivos(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -170,7 +191,7 @@ public class ValorCursoService {
     //         return getValorCursoRepository().buscarValoresComFormaPagamentoAtivos(valorCurso);
     //     }
     public Uni<Long> buscarValoresComFormasPagamentoAtivos(Long valorCursoId) {
-                return repository.buscarValoresComFormaPagamentoAtivos(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarValoresComFormaPagamentoAtivos(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -182,7 +203,7 @@ public class ValorCursoService {
     //         return getValorCursoRepository().buscarValoresComRetencao(valorCurso);
     //     }
     public Uni<Long> buscarValoresComRetencao(Long valorCursoId) {
-                return repository.buscarValoresComRetencao(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarValoresComRetencao(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -194,7 +215,7 @@ public class ValorCursoService {
     //         return getValorCursoRepository().buscarValoresComUnidades(valorCurso);
     //     }
     public Uni<Long> buscarValoresComUnidades(Long valorCursoId) {
-                return repository.buscarValoresComUnidades(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarValoresComUnidades(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -206,7 +227,7 @@ public class ValorCursoService {
     //         return getValorCursoRepository().buscarValorCursoContrato(valorCurso);
     //     }
     public Uni<List<Long>> buscarValorCursoContrato(Long valorCursoId) {
-                return repository.buscarValorCursoContrato(valorCursoId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarValorCursoContrato(valorCursoId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

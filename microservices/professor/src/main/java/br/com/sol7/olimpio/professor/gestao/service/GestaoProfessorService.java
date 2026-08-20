@@ -136,12 +136,12 @@ public class GestaoProfessorService {
         });
     }
 
-public Uni<List<TurmaDto>> listarTurmas(Long professorId) {
+    public Uni<List<TurmaDto>> listarTurmas(Long professorId) {
         if (professorId == null) {
             return nativeQuery(SQL_TURMA.replace("INNER JOIN edc_professor p ON p.id = off.id_professor ", "LEFT JOIN edc_professor p ON p.id = off.id_professor ")).map(rows -> rows.stream().map(this::mapTurma).toList());
         }
         return nativeQuery(SQL_TURMAS, professorId).map(rows -> rows.stream().map(this::mapTurma).toList());
-      }
+    }
 
     public Uni<CadernoDto> buscarCaderno(Long turmaId) {
         return nativeQuery(SQL_TURMA + " WHERE off.id = ?1", turmaId).chain(rows -> {
@@ -231,11 +231,11 @@ public Uni<List<TurmaDto>> listarTurmas(Long professorId) {
                             ? null : String.valueOf(list.get(0));
                     String nova = p.presenca();
                     Uni<Integer> update = session.createNativeQuery(
-                                    "UPDATE edc_caderno_componente_curricular SET presenca = ?1, data_alteracao = now() WHERE id = ?2")
+                            "UPDATE edc_caderno_componente_curricular SET presenca = ?1, data_alteracao = now() WHERE id = ?2")
                             .setParameter(1, nova).setParameter(2, p.id()).executeUpdate();
                     if (anterior != null && !anterior.equals(nova)) {
                         return update.chain(v -> session.createNativeQuery(
-                                        "INSERT INTO edc_historico_caderno_chamada (id_usuario, data, id_matricula, id_ocorrencia_componente_curricular, presenca_anterior, presenca_posterior) VALUES (?1, now(), ?2, ?3, ?4, ?5)")
+                                "INSERT INTO edc_historico_caderno_chamada (id_usuario, data, id_matricula, id_ocorrencia_componente_curricular, presenca_anterior, presenca_posterior) VALUES (?1, now(), ?2, ?3, ?4, ?5)")
                                 .setParameter(1, usuarioId).setParameter(2, p.matriculaId())
                                 .setParameter(3, p.ocorrenciaId())
                                 .setParameter(4, anterior).setParameter(5, nova)
@@ -351,7 +351,7 @@ public Uni<List<TurmaDto>> listarTurmas(Long professorId) {
         if (value == null) {
             return "";
         }
-        if (value instanceof Date date) {
+        if (value instanceof Date date){
             return DIA.format(date);
         }
         return String.valueOf(value);

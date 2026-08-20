@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewCompromissoFormCompromissoListScreen(){return <PermissionGate permission="READ"><main><h1>Form Compromisso</h1><DataTable path="/api/view/compromisso/formCompromisso"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewCompromissoFormCompromissoListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Form Compromisso</h1><DataTable path="/api/view/compromisso/formCompromisso"/></main>
+    </PermissionGate>
+}

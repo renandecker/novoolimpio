@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewCaixaFormCaixaListScreen(){return <PermissionGate permission="READ"><main><h1>Form Caixa</h1><DataTable path="/api/view/caixa/formCaixa"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewCaixaFormCaixaListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Form Caixa</h1><DataTable path="/api/view/caixa/formCaixa"/></main>
+    </PermissionGate>
+}

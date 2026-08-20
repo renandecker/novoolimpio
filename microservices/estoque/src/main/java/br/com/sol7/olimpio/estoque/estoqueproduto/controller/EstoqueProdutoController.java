@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -15,8 +16,10 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class EstoqueProdutoController {
 
-    @Inject EstoqueProdutoService service;
-    @Inject br.com.sol7.olimpio.estoque.pendenciavendaproduto.PendenciaVendaProdutoService pendenciaVendaProdutoService;
+    @Inject
+    EstoqueProdutoService service;
+    @Inject
+    br.com.sol7.olimpio.estoque.pendenciavendaproduto.PendenciaVendaProdutoService pendenciaVendaProdutoService;
 
     // Migrado de EstoqueProdutoController.populaItens (legado)
     @GET

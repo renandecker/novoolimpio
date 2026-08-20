@@ -1,10 +1,16 @@
 package br.com.sol7.olimpio.basico.pessoajuridica.repository;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
 import br.com.sol7.olimpio.basico.pessoajuridica.entity.PessoaJuridica;
-@ApplicationScoped public class PessoaJuridicaRepository implements PanacheRepository<PessoaJuridica> {
+
+@ApplicationScoped
+public class PessoaJuridicaRepository implements PanacheRepository<PessoaJuridica> {
 
     // Migrado de PessoaJuridicaRepository.autoComplete (legado) - HQL original:
     // select distinct  p from Pessoa p left join p.unidades u where u IN (?2) and  (lower(p.pessoaJuridica.nomeFantasia) like '%' || ?1 || '%' OR (p.pessoaJuridica.cnpj) like '%' || ?1 || '%' OR  lower(p.pessoaJuridica.razaoSocial) like '%' || ?1 || '%' or replace(replace(p.pessoaJuridica.cnpj,'.',''),'-','') like '%' || ?1 || '%' or  lower(p.pessoaJuridica.nomeFantasia||p.pessoaJuridica.cnpj) like '%' || lower(?1) || '%' or  lower(p.pessoaJuridica.nomeFantasia||' ('||p.pessoaJuridica.cnpj||')') like '%' || lower(?1) || '%' or  replace(replace(lower(p.pessoaJuridica.nomeFantasia||' '||p.pessoaJuridica.cnpj),'(',''),')','') like '%' || lower(?1) || '%' )  AND u.ativo = true and p not in (select pr.pessoa from Professor pr)
@@ -16,9 +22,9 @@ import br.com.sol7.olimpio.basico.pessoajuridica.entity.PessoaJuridica;
     public Uni<java.util.List<Object>> autoComplete(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE)
-                    .setParameter(1, query)
-                    .setParameter(2, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -32,9 +38,9 @@ import br.com.sol7.olimpio.basico.pessoajuridica.entity.PessoaJuridica;
     public Uni<java.util.List<Object>> autoCompleteTodos(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_TODOS)
-                    .setParameter(1, query)
-                    .setParameter(2, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -47,8 +53,8 @@ import br.com.sol7.olimpio.basico.pessoajuridica.entity.PessoaJuridica;
     public Uni<java.util.List<Pessoa>> buscarPessoaComCnpj(String cnpj) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_PESSOA_COM_CNPJ, Pessoa.class)
-                    .setParameter(1, cnpj)
-                    .getResultList());
+                        .setParameter(1, cnpj)
+                        .getResultList());
     }
 
 }

@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.oferecimentocomponentecurricular;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 import br.com.sol7.olimpio.educacao.componentecurricular.ComponenteCurricular;
@@ -55,22 +56,38 @@ import java.util.stream.Collectors;
 @WithTransaction
 public class OferecimentoComponenteCurricularService {
 
-    @Inject OferecimentoComponenteCurricularRepository repository;
-    @Inject DiaAulaRepository diaAulaRepository;
-    @Inject TurnoEducacaoRepository turnoEducacaoRepository;
-    @Inject TempoAulaRepository tempoAulaRepository;
-    @Inject ComponenteCurricularRepository componenteCurricularRepository;
-    @Inject PeriodoRepository periodoRepository;
-    @Inject SalaRepository salaRepository;
-    @Inject GrupoRepository grupoRepository;
-    @Inject CurriculoRepository curriculoRepository;
-    @Inject UnidadeRepository unidadeRepository;
-    @Inject CursoRepository cursoRepository;
-    @Inject CriterioRepository criterioRepository;
-    @Inject CriterioService criterioService;
-    @Inject OcorrenciaComponenteCurricularRepository ocorrenciaRepository;
-    @Inject ProfessorRepository professorRepository;
-    @Inject PessoaFisicaRepository pessoaFisicaRepository;
+    @Inject
+    OferecimentoComponenteCurricularRepository repository;
+    @Inject
+    DiaAulaRepository diaAulaRepository;
+    @Inject
+    TurnoEducacaoRepository turnoEducacaoRepository;
+    @Inject
+    TempoAulaRepository tempoAulaRepository;
+    @Inject
+    ComponenteCurricularRepository componenteCurricularRepository;
+    @Inject
+    PeriodoRepository periodoRepository;
+    @Inject
+    SalaRepository salaRepository;
+    @Inject
+    GrupoRepository grupoRepository;
+    @Inject
+    CurriculoRepository curriculoRepository;
+    @Inject
+    UnidadeRepository unidadeRepository;
+    @Inject
+    CursoRepository cursoRepository;
+    @Inject
+    CriterioRepository criterioRepository;
+    @Inject
+    CriterioService criterioService;
+    @Inject
+    OcorrenciaComponenteCurricularRepository ocorrenciaRepository;
+    @Inject
+    ProfessorRepository professorRepository;
+    @Inject
+    PessoaFisicaRepository pessoaFisicaRepository;
 
     // Migrado de SchedulingService.replicarOferecimentoAuto() (legado, L279-326): rotina automatica
     // de replicacao de oferecimentos. Roda verificarDisciplina (status de disciplinas), seleciona os
@@ -145,7 +162,35 @@ public class OferecimentoComponenteCurricularService {
                         : Uni.createFrom().failure(new NotFoundException("OferecimentoComponenteCurricular not found")));
     }
 
-    private void apply(OferecimentoComponenteCurricular e, OferecimentoComponenteCurricularRequest r) { e.unidadeId = r.unidadeId(); e.periodoId = r.periodoId(); e.grupoId = r.grupoId(); e.salaId = r.salaId(); e.dataInicio = r.dataInicio(); e.dataFim = r.dataFim(); e.dataAlteracao = r.dataAlteracao(); e.tipoReplicacao = r.tipoReplicacao(); e.tipoPlanejamento = r.tipoPlanejamento() != null && !r.tipoPlanejamento().isBlank() ? TipoPlanejamentoAula.fromNameOrDefault(r.tipoPlanejamento()).name() : null; e.diasReplicar = r.diasReplicar(); e.qtdeSequencia = r.qtdeSequencia(); e.qtdeEspacoCaderno = r.qtdeEspacoCaderno(); e.curriculoId = r.curriculoId(); e.professorId = r.professorId(); e.componenteCurricularId = r.componenteCurricularId(); e.componenteCurricularReplicarId = r.componenteCurricularReplicarId(); e.vagas = r.vagas(); e.inscritos = r.inscritos(); e.dataCancelamento = r.dataCancelamento(); e.registraFrequencia = r.registraFrequencia(); e.possuiAvaliacao = r.possuiAvaliacao(); e.replicar = r.replicar(); e.replicado = r.replicado(); e.detalharReplicacao = r.detalharReplicacao(); e.salas = r.salas(); e.status = r.status(); e.sequencia = r.sequencia(); }
+    private void apply(OferecimentoComponenteCurricular e, OferecimentoComponenteCurricularRequest r) {
+        e.unidadeId = r.unidadeId();
+        e.periodoId = r.periodoId();
+        e.grupoId = r.grupoId();
+        e.salaId = r.salaId();
+        e.dataInicio = r.dataInicio();
+        e.dataFim = r.dataFim();
+        e.dataAlteracao = r.dataAlteracao();
+        e.tipoReplicacao = r.tipoReplicacao();
+        e.tipoPlanejamento = r.tipoPlanejamento() != null && !r.tipoPlanejamento().isBlank() ? TipoPlanejamentoAula.fromNameOrDefault(r.tipoPlanejamento()).name() : null;
+        e.diasReplicar = r.diasReplicar();
+        e.qtdeSequencia = r.qtdeSequencia();
+        e.qtdeEspacoCaderno = r.qtdeEspacoCaderno();
+        e.curriculoId = r.curriculoId();
+        e.professorId = r.professorId();
+        e.componenteCurricularId = r.componenteCurricularId();
+        e.componenteCurricularReplicarId = r.componenteCurricularReplicarId();
+        e.vagas = r.vagas();
+        e.inscritos = r.inscritos();
+        e.dataCancelamento = r.dataCancelamento();
+        e.registraFrequencia = r.registraFrequencia();
+        e.possuiAvaliacao = r.possuiAvaliacao();
+        e.replicar = r.replicar();
+        e.replicado = r.replicado();
+        e.detalharReplicacao = r.detalharReplicacao();
+        e.salas = r.salas();
+        e.status = r.status();
+        e.sequencia = r.sequencia();
+    }
 
     private OferecimentoComponenteCurricularResponse toResponse(OferecimentoComponenteCurricular e, Refs refs) {
         return new OferecimentoComponenteCurricularResponse(e.id, e.unidadeId, e.periodoId, e.grupoId, e.salaId, e.dataInicio, e.dataFim, e.dataAlteracao, e.tipoReplicacao, e.tipoPlanejamento, e.diasReplicar, e.qtdeSequencia, e.qtdeEspacoCaderno, e.curriculoId, e.professorId, e.componenteCurricularId, e.componenteCurricularReplicarId, e.vagas, e.inscritos, e.dataCancelamento, e.registraFrequencia, e.possuiAvaliacao, e.replicar, e.replicado, e.detalharReplicacao, e.salas, e.status, e.sequencia,
@@ -181,19 +226,37 @@ public class OferecimentoComponenteCurricularService {
                         List<Curriculo> curriculos, List<ComponenteCurricular> componentes,
                         List<Unidade> unidades, List<Curso> cursos,
                         List<Professor> professores, List<PessoaFisica> pessoasFisicas) {
-        Periodo periodo(Long id) { if (id == null) return null; return periodos.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null); }
-        Grupo grupo(Long id) { if (id == null) return null; return grupos.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null); }
-        Sala sala(Long id) { if (id == null) return null; return salas.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null); }
-        Curriculo curriculo(Long id) { if (id == null) return null; return curriculos.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null); }
-        ComponenteCurricular componente(Long id) { if (id == null) return null; return componentes.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null); }
-        Unidade unidade(Long id) { if (id == null) return null; return unidades.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null); }
-        Curso curso(Long id) {
+        Periodo periodo (Long id){
+            if (id == null) return null;
+            return periodos.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null);
+        }
+        Grupo grupo (Long id){
+            if (id == null) return null;
+            return grupos.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null);
+        }
+        Sala sala (Long id){
+            if (id == null) return null;
+            return salas.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null);
+        }
+        Curriculo curriculo (Long id){
+            if (id == null) return null;
+            return curriculos.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null);
+        }
+        ComponenteCurricular componente (Long id){
+            if (id == null) return null;
+            return componentes.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null);
+        }
+        Unidade unidade (Long id){
+            if (id == null) return null;
+            return unidades.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null);
+        }
+        Curso curso (Long id){
             if (id == null) return null;
             Curriculo c = curriculo(id);
             if (c == null || c.cursoId == null) return null;
             return cursos.stream().filter(x -> x.id.equals(c.cursoId)).findFirst().orElse(null);
         }
-        String professorNome(Long professorId) {
+        String professorNome (Long professorId){
             if (professorId == null) return null;
             Professor p = professores.stream().filter(x -> x.id.equals(professorId)).findFirst().orElse(null);
             if (p == null) return null;
@@ -339,10 +402,10 @@ public class OferecimentoComponenteCurricularService {
     }
 
     private List<OcorrenciaComponenteCurricular> gerarOcorrencias(OferecimentoComponenteCurricular of,
-                                                                   List<DiaAula> selecionados, Set<Date> feriadoSet,
-                                                                   List<OcorrenciaComponenteCurricular> existentes,
-                                                                   Criterio criterio, Date dataInicio, long quantidadeAulas,
-                                                                   Map<Long, Long> diaAulaTurno) {
+                                                                  List<DiaAula> selecionados, Set<Date> feriadoSet,
+                                                                  List<OcorrenciaComponenteCurricular> existentes,
+                                                                  Criterio criterio, Date dataInicio, long quantidadeAulas,
+                                                                  Map<Long, Long> diaAulaTurno) {
         List<OcorrenciaComponenteCurricular> geradas = new ArrayList<>();
         Calendar calendario = Calendar.getInstance();
         calendario.setTime(dataInicio);
@@ -452,7 +515,10 @@ public class OferecimentoComponenteCurricularService {
                         if (professorId != null) of.professorId = professorId;
                         return ocorrenciaRepository.delete("ativo = true and oferecimentoComponenteCurricularId = ?1", of.id)
                                 .flatMap(v -> gerarAula(of, dataInicio, diasAulaSelecionado))
-                                .map(g -> { lista.addAll(g); return lista; });
+                                .map(g -> {
+                                    lista.addAll(g);
+                                    return lista;
+                                });
                     }));
         }
         return acc.flatMap(lista -> ocorrenciaRepository.persist(lista).replaceWith(lista.size()));
@@ -586,13 +652,13 @@ public class OferecimentoComponenteCurricularService {
                 .onItem().ifNull().continueWith(() -> null)
                 .flatMap(o -> o == null || o.diaAulaId == null ? Uni.createFrom().item("")
                         : diaAulaRepository.findById(o.diaAulaId)
+                        .onItem().ifNull().continueWith(() -> null)
+                        .flatMap(da -> da == null || da.turnoEducacaoId == null ? Uni.createFrom().item("")
+                                : turnoEducacaoRepository.findById(da.turnoEducacaoId)
                                 .onItem().ifNull().continueWith(() -> null)
-                                .flatMap(da -> da == null || da.turnoEducacaoId == null ? Uni.createFrom().item("")
-                                        : turnoEducacaoRepository.findById(da.turnoEducacaoId)
-                                                .onItem().ifNull().continueWith(() -> null)
-                                                .map(t -> t == null ? ""
-                                                        : t.descricao + ": " + DateTimeFormatter.ofPattern("HH:mm").format(t.inicio)
-                                                        + " as " + DateTimeFormatter.ofPattern("HH:mm").format(t.fim))));
+                                .map(t -> t == null ? ""
+                                        : t.descricao + ": " + DateTimeFormatter.ofPattern("HH:mm").format(t.inicio)
+                                        + " as " + DateTimeFormatter.ofPattern("HH:mm").format(t.fim))));
     }
 
     // Turmas (OferecimentoComponenteCurricular) de um grupo - migrado de GrupoRepository.listarOferecimentos.
@@ -747,7 +813,7 @@ public class OferecimentoComponenteCurricularService {
     //         return getOferecimentoComponenteCurricularRepository().buscarMatrizCurricular(curriculo);
     //     }
     public Uni<List<Long>> buscarMatrizCurricular(Long curriculoId) {
-                return repository.find("curriculoId = ?1 order by ordem", curriculoId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("curriculoId = ?1 order by ordem", curriculoId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -811,7 +877,7 @@ public class OferecimentoComponenteCurricularService {
     //         return getOferecimentoComponenteCurricularRepository().buscarOcorrenciaComOFerecimento(entity);
     //     }
     public Uni<Long> buscarOcorrenciaComOFerecimento(Long entityId) {
-                return repository.buscarOcorrenciaComOFerecimento(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarOcorrenciaComOFerecimento(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -823,7 +889,7 @@ public class OferecimentoComponenteCurricularService {
     //         return getOferecimentoComponenteCurricularRepository().buscarTodosOcorrenciaComOFerecimento(entity);
     //     }
     public Uni<Long> buscarTodosOcorrenciaComOFerecimento(Long entityId) {
-                return repository.buscarTodosOcorrenciaComOFerecimento(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarTodosOcorrenciaComOFerecimento(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -834,7 +900,7 @@ public class OferecimentoComponenteCurricularService {
     //         return getOferecimentoComponenteCurricularRepository().buscarOferecimentoAbertasComSala(sala);
     //     }
     public Uni<List<Long>> buscarOferecimentoAbertasComSala(Long salaId) {
-                // Obs: condicao removida (depende de outro microservico): o.unidade.ativo = true
+        // Obs: condicao removida (depende de outro microservico): o.unidade.ativo = true
         return repository.find("salaId = ?1 and (status = 'LIBERADA' or status  = 'PENDENTE' or status  = 'LOTADA' or status = 'EM_ANDAMENTO')", salaId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
@@ -847,7 +913,7 @@ public class OferecimentoComponenteCurricularService {
     //         return getOferecimentoComponenteCurricularRepository().buscarOferecimentoComOcorrencia(entity);
     //     }
     public Uni<Long> buscarOferecimentoComOcorrencia(Long entityId) {
-                return repository.buscarOferecimentoComOcorrencia(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarOferecimentoComOcorrencia(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -859,7 +925,7 @@ public class OferecimentoComponenteCurricularService {
     //         return getOferecimentoComponenteCurricularRepository().buscarOferecimentoComOcorrenciaTodos(entity);
     //     }
     public Uni<Long> buscarOferecimentoComOcorrenciaTodos(Long entityId) {
-                return repository.buscarOferecimentoComOcorrenciaTodos(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarOferecimentoComOcorrenciaTodos(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -870,7 +936,7 @@ public class OferecimentoComponenteCurricularService {
     //         return getOferecimentoComponenteCurricularRepository().verificarExisteConflito(data, sala, unidade);
     //     }
     public Uni<List<Long>> verificarExisteConflito(Date data, Long salaId, Long unidadeId) {
-                // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade.ativo = true
+        // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade = ?3
         return repository.find("ativo = true and data = ?1 and salaId = ?2", data, salaId, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
@@ -883,7 +949,7 @@ public class OferecimentoComponenteCurricularService {
     //         return getOferecimentoComponenteCurricularRepository().verificarExisteConflitoComOferecimento(data, sala, oferecimentoComponenteCurricular, unidade);
     //     }
     public Uni<List<Long>> verificarExisteConflitoComOferecimento(Date data, Long salaId, Long oferecimentoComponenteCurricularId, Long unidadeId) {
-                // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade.ativo = true
+        // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade = ?4
         return repository.find("ativo = true and data = ?1 and salaId = ?2 and oferecimentoComponenteCurricular <> ?3", data, salaId, oferecimentoComponenteCurricularId, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
@@ -896,7 +962,7 @@ public class OferecimentoComponenteCurricularService {
     //         return getOferecimentoComponenteCurricularRepository().verificarExisteConflitoComOferecimentos(data, sala, oferecimentoComponenteCurricular, unidade);
     //     }
     public Uni<List<Long>> verificarExisteConflitoComOferecimentos(Date data, Long salaId, List<Long> oferecimentoComponenteCurricular, Long unidadeId) {
-                // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade.ativo = true
+        // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade = ?4
         return repository.find("ativo = true and data = ?1 and salaId = ?2 and oferecimentoComponenteCurricular not in (?3)", data, salaId, oferecimentoComponenteCurricular, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
@@ -909,7 +975,7 @@ public class OferecimentoComponenteCurricularService {
     //         return getOferecimentoComponenteCurricularRepository().buscarComponentessDoOferecimentos(componenteCurricular);
     //     }
     public Uni<List<Long>> buscarComponentessDoOferecimentos(Long componenteCurricularId) {
-                // Obs: condicao removida (depende de outro microservico): o.unidade.ativo = true
+        // Obs: condicao removida (depende de outro microservico): o.unidade.ativo = true
         return repository.find("componenteCurricularId = ?1", componenteCurricularId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
@@ -921,7 +987,7 @@ public class OferecimentoComponenteCurricularService {
     //         return getOferecimentoComponenteCurricularRepository().verificarExisteConflitoProrrogandoDisciplina(data, sala, o);
     //     }
     public Uni<List<Long>> verificarExisteConflitoProrrogandoDisciplina(Date data, Long salaId, Long oId) {
-                // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade.ativo = true
+        // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade.ativo = true
         return repository.find("ativo = true and data = ?1 and salaId = ?2 and oferecimentoComponenteCurricular <> ?3", data, salaId, oId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
@@ -952,7 +1018,7 @@ public class OferecimentoComponenteCurricularService {
     //         return getOferecimentoComponenteCurricularRepository().buscarOferecimentoComDiasAula(entity);
     //     }
     public Uni<Long> buscarOferecimentoComDiasAula(Long entityId) {
-                return repository.buscarOferecimentoComDiasAula(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarOferecimentoComDiasAula(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -998,7 +1064,7 @@ public class OferecimentoComponenteCurricularService {
     //         return getOferecimentoComponenteCurricularRepository().autoCompleteComUnidade(query.toLowerCase().trim(), unidades, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteComUnidade(String query, List<Long> unidades) {
-                // Obs: condicao removida (depende de outro microservico): o.unidade.ativo = true
+        // Obs: condicao removida (depende de outro microservico): o.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): (lower(o.componenteCurricular.descricao) like '%' || ?1 || '%' or str(o.id) like '%' || ?1 || '%')
         return repository.find("status = 'EM_ANDAMENTO' and unidadeId in (?2) order by id", query.toLowerCase().trim(), unidades).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
@@ -1010,7 +1076,7 @@ public class OferecimentoComponenteCurricularService {
     //         return getOferecimentoComponenteCurricularRepository().autoCompleteComUnidadeChamadaAssinada(query.toLowerCase().trim(), unidades, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteComUnidadeChamadaAssinada(String query, List<Long> unidades) {
-                // Obs: condicao removida (depende de outro microservico): o.unidade.ativo = true
+        // Obs: condicao removida (depende de outro microservico): o.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): (lower(o.componenteCurricular.descricao) like '%' || ?1 || '%' or str(o.id) like '%' || ?1 || '%')
         return repository.find("(status = 'EM_ANDAMENTO' or status = 'LIBERADA') and unidadeId in (?2) order by id", query.toLowerCase().trim(), unidades).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
@@ -1032,7 +1098,7 @@ public class OferecimentoComponenteCurricularService {
     //                 }
     //             }
     // // ... (truncado, ver fonte original)
-public Uni<Long> buscarCriterios(Long oferecimentoComponenteCurricularId) {
+    public Uni<Long> buscarCriterios(Long oferecimentoComponenteCurricularId) {
         return repository.findById(oferecimentoComponenteCurricularId)
                 .onItem().ifNull().continueWith(() -> null)
                 .flatMap(of -> of == null ? Uni.createFrom().nullItem() : carregarCriterio(of).map(c -> c == null ? null : c.id));

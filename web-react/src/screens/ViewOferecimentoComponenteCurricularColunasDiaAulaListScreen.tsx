@@ -1,1 +1,9 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewOferecimentoComponenteCurricularColunasDiaAulaListScreen(){return <PermissionGate permission="READ"><main><h1>Colunas Dia Aula</h1><DataTable path="/api/view/oferecimentoComponenteCurricular/colunasDiaAula"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewOferecimentoComponenteCurricularColunasDiaAulaListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Colunas Dia Aula</h1><DataTable path="/api/view/oferecimentoComponenteCurricular/colunasDiaAula"/>
+        </main>
+    </PermissionGate>
+}

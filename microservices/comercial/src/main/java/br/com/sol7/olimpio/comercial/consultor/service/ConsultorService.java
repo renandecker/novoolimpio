@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.comercial.consultor;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ConsultorService {
 
-    @Inject ConsultorRepository repository;
+    @Inject
+    ConsultorRepository repository;
 
     public Uni<List<ConsultorResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,9 @@ public class ConsultorService {
                         : Uni.createFrom().failure(new NotFoundException("Consultor not found")));
     }
 
-    private void apply(Consultor e, ConsultorRequest r) { e.usuarioId = r.usuarioId(); }
+    private void apply(Consultor e, ConsultorRequest r) {
+        e.usuarioId = r.usuarioId();
+    }
 
     private ConsultorResponse toResponse(Consultor e) {
         return new ConsultorResponse(e.id, e.usuarioId);
@@ -78,7 +83,7 @@ public class ConsultorService {
     //         return getConsultorRepository().buscarConsultorComTurnos(entity);
     //     }
     public Uni<Long> buscarConsultorComTurnos(Long entityId) {
-                return repository.buscarConsultorComTurnos(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarConsultorComTurnos(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -89,7 +94,7 @@ public class ConsultorService {
     //         return getConsultorRepository().buscarUsuarioNoConsultor(entity);
     //     }
     public Uni<Long> buscarUsuarioNoConsultor(Long entityId) {
-                return repository.find("usuarioId = ?1", entityId).firstResult().map(x -> x == null ? null : x.id);
+        return repository.find("usuarioId = ?1", entityId).firstResult().map(x -> x == null ? null : x.id);
     }
 
 }

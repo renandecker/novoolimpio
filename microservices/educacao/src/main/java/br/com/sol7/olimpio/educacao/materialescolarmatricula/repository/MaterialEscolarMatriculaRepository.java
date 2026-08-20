@@ -3,6 +3,7 @@ package br.com.sol7.olimpio.educacao.materialescolarmatricula;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+
 import java.util.List;
 
 @ApplicationScoped

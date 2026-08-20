@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewEscolaridadeFormEscolaridadeListScreen(){return <PermissionGate permission="READ"><main><h1>Form Escolaridade</h1><DataTable path="/api/view/escolaridade/formEscolaridade"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewEscolaridadeFormEscolaridadeListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Form Escolaridade</h1><DataTable path="/api/view/escolaridade/formEscolaridade"/></main>
+    </PermissionGate>
+}

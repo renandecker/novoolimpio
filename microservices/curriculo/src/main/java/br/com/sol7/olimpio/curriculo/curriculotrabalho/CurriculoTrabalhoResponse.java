@@ -9,8 +9,8 @@ public record CurriculoTrabalhoResponse(
         Date dt_inicio,
         Date dt_fim,
         Boolean fl_ativo,
-        List<CampoInformacaoResponse> campo_informacoes) {
+        List<CampoInformacaoResponse> campo_informacoes){
 
-    public record CampoInformacaoResponse(Long id, Long id_campo, String valor) {
-    }
-}
+public record CampoInformacaoResponse(Long id,Long id_campo,String valor){
+        }
+        }

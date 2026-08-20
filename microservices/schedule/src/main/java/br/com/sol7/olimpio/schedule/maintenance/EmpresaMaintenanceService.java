@@ -17,7 +17,7 @@ import java.util.Map;
  * Acessa as tabelas cur_vaga/cur_entrevista_vaga_empresa e a configuracao bas_config
  * (ID_VAGA_ALUNO) diretamente pelo datasource reativo "empresa-db" - sem chamada REST para o
  * microsservico curriculo.
- *
+ * <p>
  * Observacao: o envio efetivo de e-mail nao foi portado (nao ha infra de e-mail neste backend);
  * cada candidato e registrado em log e o cursor ID_VAGA_ALUNO e avancado para o proximo lote.
  */
@@ -39,22 +39,40 @@ public class EmpresaMaintenanceService {
             "SELECT id FROM cur_vaga WHERE fl_ativo = true ORDER BY id";
 
     private static final String SQL_INSERIR_ENTREVISTAS = """
-            INSERT INTO cur_entrevista_vaga_empresa (id_usuario, id_vaga, data_final, fl_email_enviado_aluno, fl_email_enviado_empresa)
-            SELECT DISTINCT u.id, v.id, v.data_fim, false, false
-            FROM cur_vaga v
-            JOIN bas_usuario u ON u.fl_ativo = true AND (
-                EXISTS(SELECT 1 FROM cur_vaga_usuario vus WHERE vus.id_vaga = v.id AND vus.id_usuario = u.id)
-                OR EXISTS(SELECT 1 FROM cur_vaga_perfil vp JOIN bas_usuario_perfil up ON up.id_perfil = vp.id_perfil WHERE vp.id_vaga = v.id AND up.id_usuario = u.id)
-                OR EXISTS(SELECT 1 FROM cur_vaga_unidade vu JOIN bas_usuario_unidade uu ON uu.id_unidade = vu.id_unidade WHERE vu.id_vaga = v.id AND uu.id_usuario = u.id)
-                OR EXISTS(SELECT 1 FROM cur_vaga_empresa vemp JOIN cur_empresa cemp ON cemp.id = vemp.id_empresa WHERE vemp.id_vaga = v.id AND cemp.id_pessoa = u.id_pessoa)
-                OR EXISTS(SELECT 1 FROM cur_vaga_oferecimento vo JOIN edc_oferecimento_componente_curricular offc ON offc.id = vo.id_oferecimento JOIN edc_matricula m ON m.id_oferecimento_componente_curricular = offc.id JOIN edc_contrato c ON c.id = m.id_contrato WHERE vo.id_vaga = v.id AND c.id_pessoa = u.id_pessoa)
-                OR EXISTS(SELECT 1 FROM cur_vaga_componente vcomp JOIN edc_componente_curricular comp ON comp.id = vcomp.id_componente JOIN edc_oferecimento_componente_curricular offcomp ON offcomp.id_componente_curricular = comp.id JOIN edc_matricula m2 ON m2.id_oferecimento_componente_curricular = offcomp.id JOIN edc_contrato c2 ON c2.id = m2.id_contrato WHERE vcomp.id_vaga = v.id AND c2.id_pessoa = u.id_pessoa)
-                OR EXISTS(SELECT 1 FROM cur_vaga_curriculo vcur JOIN edc_contrato c3 ON c3.id_curso = vcur.id_curriculo WHERE vcur.id_vaga = v.id AND c3.id_pessoa = u.id_pessoa)
-                OR EXISTS(SELECT 1 FROM cur_vaga_grupo vg JOIN edc_grupo gr ON gr.id = vg.id_grupo JOIN edc_oferecimento_componente_curricular offgr ON offgr.id_grupo = gr.id JOIN edc_curriculo currgr ON currgr.id = offgr.id_curso JOIN edc_contrato c4 ON c4.id_curso = currgr.id WHERE vg.id_vaga = v.id AND c4.id_pessoa = u.id_pessoa)
+    INSERT INTO
+
+    cur_entrevista_vaga_empresa(id_usuario, id_vaga, data_final, fl_email_enviado_aluno, fl_email_enviado_empresa)
+
+    SELECT DISTINCT
+    u.id,v.id,v.data_fim,false,false
+    FROM cur_vaga
+    v
+    JOIN bas_usuario
+    u ON
+    u.fl_ativo =true
+
+    AND(
+            EXISTS(SELECT 1FROM cur_vaga_usuario vus WHERE vus.id_vaga=v.id AND vus.id_usuario=u.id)
+
+    OR EXISTS(SELECT 1FROM cur_vaga_perfil vp JOIN bas_usuario_perfil up ON up.id_perfil=vp.id_perfil WHERE vp.id_vaga=v.id AND up.id_usuario=u.id)
+
+    OR EXISTS(SELECT 1FROM cur_vaga_unidade vu JOIN bas_usuario_unidade uu ON uu.id_unidade=vu.id_unidade WHERE vu.id_vaga=v.id AND uu.id_usuario=u.id)
+
+    OR EXISTS(SELECT 1FROM cur_vaga_empresa vemp JOIN cur_empresa cemp ON cemp.id=vemp.id_empresa WHERE vemp.id_vaga=v.id AND cemp.id_pessoa=u.id_pessoa)
+
+    OR EXISTS(SELECT 1FROM cur_vaga_oferecimento vo JOIN edc_oferecimento_componente_curricular offc ON offc.id=vo.id_oferecimento JOIN edc_matricula m ON m.id_oferecimento_componente_curricular=offc.id JOIN edc_contrato c ON c.id=m.id_contrato WHERE vo.id_vaga=v.id AND c.id_pessoa=u.id_pessoa)
+
+    OR EXISTS(SELECT 1FROM cur_vaga_componente vcomp JOIN edc_componente_curricular comp ON comp.id=vcomp.id_componente JOIN edc_oferecimento_componente_curricular offcomp ON offcomp.id_componente_curricular=comp.id JOIN edc_matricula m2 ON m2.id_oferecimento_componente_curricular=offcomp.id JOIN edc_contrato c2 ON c2.id=m2.id_contrato WHERE vcomp.id_vaga=v.id AND c2.id_pessoa=u.id_pessoa)
+
+    OR EXISTS(SELECT 1FROM cur_vaga_curriculo vcur JOIN edc_contrato c3 ON c3.id_curso=vcur.id_curriculo WHERE vcur.id_vaga=v.id AND c3.id_pessoa=u.id_pessoa)
+
+    OR EXISTS(SELECT 1FROM cur_vaga_grupo vg JOIN edc_grupo gr ON gr.id=vg.id_grupo JOIN edc_oferecimento_componente_curricular offgr ON offgr.id_grupo=gr.id JOIN edc_curriculo currgr ON currgr.id=offgr.id_curso JOIN edc_contrato c4 ON c4.id_curso=currgr.id WHERE vg.id_vaga=v.id AND c4.id_pessoa=u.id_pessoa)
             )
-            WHERE v.id = $1
-              AND v.fl_ativo = true
-              AND NOT EXISTS(SELECT 1 FROM cur_entrevista_vaga_empresa ceve WHERE ceve.id_vaga = v.id)
+    WHERE v.id =$1
+    AND v.fl_ativo =true
+    AND NOT
+
+    EXISTS(SELECT 1FROM cur_entrevista_vaga_empresa ceve WHERE ceve.id_vaga=v.id)
             """;
 
     public Uni<Map<String, Object>> criarEntrevistas() {
@@ -85,14 +103,23 @@ public class EmpresaMaintenanceService {
     // Migrado de VagaService.enviarVagasAlunos() - processa lotes de ate 100 entrevistas sem
     // envio, avancando o cursor bas_config ID_VAGA_ALUNO a cada lote (evita reprocessamento).
     private static final String SQL_BUSCAR_CANDIDATOS = """
-            SELECT a.id, u.login, p.email, v.nome, v.titulo_email
-            FROM cur_entrevista_vaga_empresa a
-            JOIN bas_usuario u ON u.id = a.id_usuario
-            JOIN bas_pessoa p ON p.id = u.id_pessoa
-            JOIN cur_vaga v ON v.id = a.id_vaga
-            WHERE a.fl_email_enviado_aluno = false AND a.id > $1
-            ORDER BY a.id
-            LIMIT 100
+    SELECT a.id,u.login,p.email,v.nome,v.titulo_email
+    FROM cur_entrevista_vaga_empresa
+    a
+    JOIN bas_usuario
+    u ON
+    u.id =a.id_usuario
+    JOIN bas_pessoa
+    p ON
+    p.id =u.id_pessoa
+    JOIN cur_vaga
+    v ON
+    v.id =a.id_vaga
+    WHERE a.fl_email_enviado_aluno =false
+    AND a.id >$1
+    ORDER BY
+    a.id
+    LIMIT 100
             """;
 
     public Uni<Map<String, Object>> enviarVagasAlunos() {

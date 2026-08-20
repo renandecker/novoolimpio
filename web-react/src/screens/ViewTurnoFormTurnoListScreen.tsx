@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewTurnoFormTurnoListScreen(){return <PermissionGate permission="READ"><main><h1>Form Turno</h1><DataTable path="/api/view/turno/formTurno"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewTurnoFormTurnoListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Form Turno</h1><DataTable path="/api/view/turno/formTurno"/></main>
+    </PermissionGate>
+}

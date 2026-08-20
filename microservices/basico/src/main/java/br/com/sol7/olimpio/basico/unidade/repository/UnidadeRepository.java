@@ -1,9 +1,15 @@
 package br.com.sol7.olimpio.basico.unidade.repository;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
-@ApplicationScoped public class UnidadeRepository implements PanacheRepository<Unidade> {
+
+@ApplicationScoped
+public class UnidadeRepository implements PanacheRepository<Unidade> {
 
     // Migrado de UnidadeRepository.autoCompleteComUnidades (legado) - HQL original:
     // select distinct  u from Curriculo usu inner join usu.unidades u  where (lower(u.sucinto) like '%' || ?1 || '%' OR lower(u.nomeFantasia) like '%' || ?1 || '%'  OR lower(u.CNPJ) like '%' || ?1 || '%' OR lower(u.razaoSocial) like '%' || ?1 || '%' OR str(u.id) = ?1)  and u in (?2) order by u.sucinto
@@ -13,9 +19,9 @@ import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
     public Uni<java.util.List<Unidade>> autoCompleteComUnidades(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_UNIDADES, Unidade.class)
-                    .setParameter(1, query)
-                    .setParameter(2, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -27,9 +33,9 @@ import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
     public Uni<java.util.List<Unidade>> autoCompleteComUsuario(String query, Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_USUARIO, Unidade.class)
-                    .setParameter(1, query)
-                    .setParameter(2, usuarioId)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, usuarioId)
+                        .getResultList());
     }
 
 
@@ -41,8 +47,8 @@ import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
     public Uni<java.util.List<Unidade>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Unidade.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -55,7 +61,7 @@ import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_ALL, Unidade.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -68,7 +74,7 @@ import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_TODOS, Unidade.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -80,8 +86,8 @@ import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
     public Uni<java.util.List<Unidade>> buscarUnidadeComTelefones(Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_UNIDADE_COM_TELEFONES, Unidade.class)
-                    .setParameter(1, unidadeId)
-                    .getResultList());
+                        .setParameter(1, unidadeId)
+                        .getResultList());
     }
 
 
@@ -93,8 +99,8 @@ import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
     public Uni<java.util.List<Unidade>> autoCompleteComCurriculoSemBusca(List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_CURRICULO_SEM_BUSCA, Unidade.class)
-                    .setParameter(1, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -106,9 +112,9 @@ import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
     public Uni<java.util.List<Unidade>> buscarUnidadeComTurnosDiaSemana(int diaSemana, Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_UNIDADE_COM_TURNOS_DIA_SEMANA, Unidade.class)
-                    .setParameter(1, diaSemana)
-                    .setParameter(2, usuarioId)
-                    .getResultList());
+                        .setParameter(1, diaSemana)
+                        .setParameter(2, usuarioId)
+                        .getResultList());
     }
 
 
@@ -120,8 +126,8 @@ import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
     public Uni<java.util.List<Unidade>> autoCompleteDoUsuario(Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_DO_USUARIO, Unidade.class)
-                    .setParameter(1, usuarioId)
-                    .getResultList());
+                        .setParameter(1, usuarioId)
+                        .getResultList());
     }
 
 
@@ -133,8 +139,8 @@ import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
     public Uni<java.util.List<Unidade>> buscarUnidadeComTurnos(Long entityId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_UNIDADE_COM_TURNOS, Unidade.class)
-                    .setParameter(1, entityId)
-                    .getResultList());
+                        .setParameter(1, entityId)
+                        .getResultList());
     }
 
 
@@ -146,8 +152,8 @@ import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
     public Uni<java.util.List<Unidade>> buscarUnidade(Long regiaoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_UNIDADE, Unidade.class)
-                    .setParameter(1, regiaoId)
-                    .getResultList());
+                        .setParameter(1, regiaoId)
+                        .getResultList());
     }
 
 
@@ -160,7 +166,7 @@ import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_UNIDADES, Unidade.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -172,8 +178,8 @@ import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
     public Uni<java.util.List<Object>> buscarUnidadeDaLigacao(Long operacionalId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_UNIDADE_DA_LIGACAO)
-                    .setParameter(1, operacionalId)
-                    .getResultList());
+                        .setParameter(1, operacionalId)
+                        .getResultList());
     }
 
 
@@ -185,9 +191,9 @@ import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
     public Uni<java.util.List<Object>> autoCompleteGrupo(String query, Long grupoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_GRUPO)
-                    .setParameter(1, query)
-                    .setParameter(2, grupoId)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, grupoId)
+                        .getResultList());
     }
 
 
@@ -199,8 +205,8 @@ import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
     public Uni<java.util.List<Object>> autoCompleteAllGrupo(Long grupoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_ALL_GRUPO)
-                    .setParameter(1, grupoId)
-                    .getResultList());
+                        .setParameter(1, grupoId)
+                        .getResultList());
     }
 
 

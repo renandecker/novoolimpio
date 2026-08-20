@@ -17,7 +17,7 @@ import org.jboss.logging.Logger;
 
 /**
  * Executa as rotinas de manutencao chamadas diretamente pelo SchedulingJobs.
- *
+ * <p>
  * Cada metodo roda em uma virtual thread e executa a
  * rotina de manutencao do dominio chamando os maintenance services de forma "sincrona" via
  * await().indefinitely(). Uma falha num passo nao impede os demais (mesmo espirito do try/catch
@@ -209,7 +209,9 @@ public class MaintenanceConsumer {
         }
     }
 
-    /** Executa um passo isolado: loga sucesso/erro e sempre continua para o proximo (nao propaga falha). */
+    /**
+     * Executa um passo isolado: loga sucesso/erro e sempre continua para o proximo (nao propaga falha).
+     */
     private <T> Uni<Void> step(String name, Uni<T> action) {
         return action.replaceWithVoid()
                 .invoke(() -> LOG.debugf("MaintenanceConsumer - passo '%s' concluido", name))

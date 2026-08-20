@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.unidade.service;
+
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -10,7 +11,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.unidade.dto.UnidadeRequest;
 import br.com.sol7.olimpio.basico.unidade.dto.UnidadeResponse;
 import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
@@ -20,7 +23,8 @@ import br.com.sol7.olimpio.basico.unidade.repository.UnidadeRepository;
 @WithTransaction
 public class UnidadeService {
 
-    @Inject UnidadeRepository repository;
+    @Inject
+    UnidadeRepository repository;
     private static final Logger logger = LoggerFactory.getLogger(UnidadeService.class);
 
     @CacheResult(cacheName = "unidade-list-cache")
@@ -65,7 +69,28 @@ public class UnidadeService {
                         : Uni.createFrom().failure(new NotFoundException("Unidade not found")));
     }
 
-    private void apply(Unidade e, UnidadeRequest r) { e.razaoSocial = r.razaoSocial(); e.nomeFantasia = r.nomeFantasia(); e.CNPJ = r.CNPJ(); e.inscricaoEstadual = r.inscricaoEstadual(); e.logradouroId = r.logradouroId(); e.email = r.email(); e.numero = r.numero(); e.area = r.area(); e.emailRH = r.emailRH(); e.tipoUnidadeId = r.tipoUnidadeId(); e.regiaoId = r.regiaoId(); e.responsavelId = r.responsavelId(); e.layoutId = r.layoutId(); e.pontoReferencia = r.pontoReferencia(); e.sucinto = r.sucinto(); e.diretorEnsino = r.diretorEnsino(); e.coordenador = r.coordenador(); e.cep = r.cep(); e.registro = r.registro(); e.ativo = r.ativo(); }
+    private void apply(Unidade e, UnidadeRequest r) {
+        e.razaoSocial = r.razaoSocial();
+        e.nomeFantasia = r.nomeFantasia();
+        e.CNPJ = r.CNPJ();
+        e.inscricaoEstadual = r.inscricaoEstadual();
+        e.logradouroId = r.logradouroId();
+        e.email = r.email();
+        e.numero = r.numero();
+        e.area = r.area();
+        e.emailRH = r.emailRH();
+        e.tipoUnidadeId = r.tipoUnidadeId();
+        e.regiaoId = r.regiaoId();
+        e.responsavelId = r.responsavelId();
+        e.layoutId = r.layoutId();
+        e.pontoReferencia = r.pontoReferencia();
+        e.sucinto = r.sucinto();
+        e.diretorEnsino = r.diretorEnsino();
+        e.coordenador = r.coordenador();
+        e.cep = r.cep();
+        e.registro = r.registro();
+        e.ativo = r.ativo();
+    }
 
     private UnidadeResponse toResponse(Unidade e) {
         return new UnidadeResponse(e.id, e.razaoSocial, e.nomeFantasia, e.CNPJ, e.inscricaoEstadual, e.logradouroId, e.email, e.numero, e.area, e.emailRH, e.tipoUnidadeId, e.regiaoId, e.responsavelId, e.layoutId, e.pontoReferencia, e.sucinto, e.diretorEnsino, e.coordenador, e.cep, e.registro, e.ativo);
@@ -167,7 +192,7 @@ public class UnidadeService {
     //         return getUnidadeRepository().buscarUnidadeComTelefones(unidade);
     //     }
     public Uni<Long> buscarUnidadeComTelefones(Long unidadeId) {
-                return repository.buscarUnidadeComTelefones(unidadeId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarUnidadeComTelefones(unidadeId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -177,7 +202,7 @@ public class UnidadeService {
     //         return getUnidadeRepository().buscarUnidades();
     //     }
     public Uni<List<Long>> buscarUnidades() {
-                return repository.find("order by sucinto").list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("order by sucinto").list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -187,7 +212,7 @@ public class UnidadeService {
     //         return getUnidadeRepository().autoCompleteAll(new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteAll() {
-                return repository.find("order by sucinto").page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("order by sucinto").page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -197,7 +222,7 @@ public class UnidadeService {
     //         return getUnidadeRepository().buscarTodos();
     //     }
     public Uni<List<Long>> buscarTodos() {
-                return repository.find("order by sucinto").list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("order by sucinto").list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -209,7 +234,7 @@ public class UnidadeService {
     //         return getUnidadeRepository().autoCompleteComUsuario(query.toLowerCase().trim(), usuario, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteComUsuario(String query, Long usuarioId) {
-                return repository.autoCompleteComUsuario(query.toLowerCase().trim(), usuarioId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoCompleteComUsuario(query.toLowerCase().trim(), usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -221,7 +246,7 @@ public class UnidadeService {
     //         return getUnidadeRepository().autoCompleteDoUsuario(usuario, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteDoUsuario(Long usuarioId) {
-                return repository.autoCompleteDoUsuario(usuarioId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoCompleteDoUsuario(usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -232,7 +257,7 @@ public class UnidadeService {
     //         return getUnidadeRepository().autoCompleteComCurriculoSemBusca(unidades);
     //     }
     public Uni<List<Long>> autoCompleteComCurriculoSemBusca(List<Long> unidades) {
-                return repository.autoCompleteComCurriculoSemBusca(unidades).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoCompleteComCurriculoSemBusca(unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -258,7 +283,7 @@ public class UnidadeService {
     //         return getUnidadeRepository().autoCompleteComUnidades(query.toLowerCase().trim(), unidades);
     //     }
     public Uni<List<Long>> autoCompleteComUnidades(String query, List<Long> unidades) {
-                return repository.autoCompleteComUnidades(query.toLowerCase().trim(), unidades).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoCompleteComUnidades(query.toLowerCase().trim(), unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -281,7 +306,7 @@ public class UnidadeService {
     //         return getUnidadeRepository().buscarUnidade(regiao);
     //     }
     public Uni<List<Long>> buscarUnidade(Long regiaoId) {
-                return repository.find("regiaoId = ?1", regiaoId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("regiaoId = ?1", regiaoId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -306,7 +331,7 @@ public class UnidadeService {
     //         return getUnidadeRepository().buscarUnidadeComTurnos(entity);
     //     }
     public Uni<Long> buscarUnidadeComTurnos(Long entityId) {
-                return repository.buscarUnidadeComTurnos(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarUnidadeComTurnos(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 

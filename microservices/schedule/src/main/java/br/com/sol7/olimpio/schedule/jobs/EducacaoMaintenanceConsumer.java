@@ -33,10 +33,10 @@ public class EducacaoMaintenanceConsumer {
         LOG.infof("EducacaoMaintenanceConsumer - recebido trigger manual do educacao: %s", action);
         try {
             switch (action) {
-                case "corrigirAvaliacoes" -> educacao.corrigirAvaliacoes().await().indefinitely();
-                case "carregarChamadasPendentes" -> educacao.carregarChamadasPendentesAutomatico().await().indefinitely();
-                case "removerExtratoresAntigos" -> relatorios.removerExtratoresAntigos().await().indefinitely();
-                default -> {
+                case "corrigirAvaliacoes" ->educacao.corrigirAvaliacoes().await().indefinitely();
+                case "carregarChamadasPendentes" ->educacao.carregarChamadasPendentesAutomatico().await().indefinitely();
+                case "removerExtratoresAntigos" ->relatorios.removerExtratoresAntigos().await().indefinitely();
+                default ->{
                     LOG.warnf("EducacaoMaintenanceConsumer - acao desconhecida: %s", action);
                     return;
                 }

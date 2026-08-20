@@ -20,6 +20,7 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotAuthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Arrays;
@@ -35,19 +36,25 @@ public class LoginService {
     private static final String RESET_REQUESTED = "Se o usuário informado existir, uma senha provisória será enviada ao e-mail cadastrado.";
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final char[] TEMP_PASSWORD_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789".toCharArray();
-    @Inject LoginRepository repository;
-    @Inject LoginSessionRepository sessions;
-    @Inject JwtTokenService jwt;
-    @Inject MailService mailService;
-    @Inject ModulePermissionService modulePermissions;
+    @Inject
+    LoginRepository repository;
+    @Inject
+    LoginSessionRepository sessions;
+    @Inject
+    JwtTokenService jwt;
+    @Inject
+    MailService mailService;
+    @Inject
+    ModulePermissionService modulePermissions;
 
     @WithTransaction
     public Uni<LoginResponse> authenticate(LoginRequest request) {
         return repository.findByUsername(request.username()).onItem().ifNull().failWith(() -> new NotAuthorizedException("Usuário ou senha inválidos"))
-            .onItem().transformToUni(login -> {
-                if (!login.active || !PasswordHasher.matches(request.password(), login.passwordHash)) throw new NotAuthorizedException("Usuário ou senha inválidos");
-                return issueSession(login);
-            });
+                .onItem().transformToUni(login -> {
+                    if (!login.active || !PasswordHasher.matches(request.password(), login.passwordHash))
+                        throw new NotAuthorizedException("Usuário ou senha inválidos");
+                    return issueSession(login);
+                });
     }
 
     @WithTransaction
@@ -65,49 +72,58 @@ public class LoginService {
 
     @WithTransaction
     public Uni<Void> logout(String authorization) {
-        if (authorization == null || !authorization.startsWith("Bearer ")) return Uni.createFrom().failure(new NotAuthorizedException("Token Bearer ausente"));
+        if (authorization == null || !authorization.startsWith("Bearer "))
+            return Uni.createFrom().failure(new NotAuthorizedException("Token Bearer ausente"));
         try {
             var claims = jwt.verify(authorization.substring(7));
             return sessions.deactivate(claims.jti()).replaceWithVoid();
-        } catch (IllegalArgumentException exception) { return Uni.createFrom().failure(new NotAuthorizedException("Token inválido ou expirado")); }
+        } catch (IllegalArgumentException exception) {
+            return Uni.createFrom().failure(new NotAuthorizedException("Token inválido ou expirado"));
+        }
     }
 
     @WithTransaction
     public Uni<MessageResponse> forgotPassword(ForgotPasswordRequest request) {
         String username = normalise(request.username());
         return repository.findByUsername(username)
-            .onItem().transformToUni(login -> {
-                if (login == null || !login.active) return Uni.createFrom().item(new MessageResponse(RESET_REQUESTED));
-                String temporaryPassword = generateTemporaryPassword();
-                login.passwordHash = PasswordHasher.hash(temporaryPassword);
-                return repository.findEmailByUsername(username)
-                    .onItem().transformToUni(email -> {
-                        if (email == null || email.isBlank()) {
-                            LOGGER.warn("Redefinição de senha solicitada para '{}', mas não há e-mail cadastrado.", username);
-                            return Uni.createFrom().item(new MessageResponse(RESET_REQUESTED));
-                        }
-                        return sessions.deactivateAllByUsername(username)
-                            .replaceWith(() -> mailService.sendTemporaryPassword(email, username, temporaryPassword))
-                            .replaceWith(new MessageResponse(RESET_REQUESTED));
-                    });
-            });
+                .onItem().transformToUni(login -> {
+                    if (login == null || !login.active)
+                        return Uni.createFrom().item(new MessageResponse(RESET_REQUESTED));
+                    String temporaryPassword = generateTemporaryPassword();
+                    login.passwordHash = PasswordHasher.hash(temporaryPassword);
+                    return repository.findEmailByUsername(username)
+                            .onItem().transformToUni(email -> {
+                                if (email == null || email.isBlank()) {
+                                    LOGGER.warn("Redefinição de senha solicitada para '{}', mas não há e-mail cadastrado.", username);
+                                    return Uni.createFrom().item(new MessageResponse(RESET_REQUESTED));
+                                }
+                                return sessions.deactivateAllByUsername(username)
+                                        .replaceWith(() -> mailService.sendTemporaryPassword(email, username, temporaryPassword))
+                                        .replaceWith(new MessageResponse(RESET_REQUESTED));
+                            });
+                });
     }
 
     @WithTransaction
     public Uni<LoginResponse> changePassword(String authorization, ChangePasswordRequest request) {
-        if (authorization == null || !authorization.startsWith("Bearer ")) return Uni.createFrom().failure(new NotAuthorizedException("Token Bearer ausente"));
+        if (authorization == null || !authorization.startsWith("Bearer "))
+            return Uni.createFrom().failure(new NotAuthorizedException("Token Bearer ausente"));
         try {
             var claims = jwt.verify(authorization.substring(7));
             String username = normalise(claims.subject());
             return repository.findByUsername(username)
-                .onItem().transformToUni(login -> {
-                    if (login == null || !login.active) return Uni.createFrom().failure(new NotAuthorizedException("Usuário não encontrado"));
-                    if (!PasswordHasher.matches(request.currentPassword(), login.passwordHash)) return Uni.createFrom().failure(new BadRequestException("Senha atual incorreta"));
-                    login.passwordHash = PasswordHasher.hash(request.newPassword());
-                    return sessions.deactivateAllByUsername(username)
-                        .onItem().transformToUni(ignored -> issueSession(login));
-                });
-        } catch (IllegalArgumentException exception) { return Uni.createFrom().failure(new NotAuthorizedException("Token inválido ou expirado")); }
+                    .onItem().transformToUni(login -> {
+                        if (login == null || !login.active)
+                            return Uni.createFrom().failure(new NotAuthorizedException("Usuário não encontrado"));
+                        if (!PasswordHasher.matches(request.currentPassword(), login.passwordHash))
+                            return Uni.createFrom().failure(new BadRequestException("Senha atual incorreta"));
+                        login.passwordHash = PasswordHasher.hash(request.newPassword());
+                        return sessions.deactivateAllByUsername(username)
+                                .onItem().transformToUni(ignored -> issueSession(login));
+                    });
+        } catch (IllegalArgumentException exception) {
+            return Uni.createFrom().failure(new NotAuthorizedException("Token inválido ou expirado"));
+        }
     }
 
     private String generateTemporaryPassword() {
@@ -121,27 +137,34 @@ public class LoginService {
         // bas_usuario_perfil referencia bas_usuario.id, nao bas_login.id.
         return modulePermissions.isAdministrator(login.idUsuario)
                 .onItem().transformToUni(administrator -> modulePermissions.resolve(login.idUsuario)
-                .onItem().transformToUni(perModule -> {
-                    Set<String> permissions = administrator ? ALL_PERMISSIONS : configuredPermissions;
-                    Map<String, Set<String>> tokenModulePermissions = administrator ? Map.of() : perModule;
-                    var token = jwt.issue(login.username, permissions, tokenModulePermissions);
-                    var session = new LoginSession();
-                    session.id = UUID.fromString(token.jti());
-                    session.username = login.username;
-                    session.createdAt = Instant.now();
-                    session.expiresAt = Instant.ofEpochSecond(token.expiresAt());
-                    session.active = true;
-                    return sessions.persist(session)
-                            .onItem().transformToUni(ignored -> modulePermissions.resolveDefaultOutcome(login.idUsuario))
-                            .onItem().transformToUni(defaultOutcome -> repository.perfilPorUsername(login.username)
-                                    .map(perfil -> new LoginResponse(token.token(), token.expiresAt(), login.username, permissions, tokenModulePermissions,
-                                            perfil == null ? null : str(perfil[2]), perfil == null ? null : str(perfil[1]),
-                                            perfil == null ? null : str(perfil[3]), perfil == null ? null : str(perfil[0]),
-                                            defaultOutcome, perfil == null ? null : str(perfil[4]))));
-                }));
+                        .onItem().transformToUni(perModule -> {
+                            Set<String> permissions = administrator ? ALL_PERMISSIONS : configuredPermissions;
+                            Map<String, Set<String>> tokenModulePermissions = administrator ? Map.of() : perModule;
+                            var token = jwt.issue(login.username, permissions, tokenModulePermissions);
+                            var session = new LoginSession();
+                            session.id = UUID.fromString(token.jti());
+                            session.username = login.username;
+                            session.createdAt = Instant.now();
+                            session.expiresAt = Instant.ofEpochSecond(token.expiresAt());
+                            session.active = true;
+                            return sessions.persist(session)
+                                    .onItem().transformToUni(ignored -> modulePermissions.resolveDefaultOutcome(login.idUsuario))
+                                    .onItem().transformToUni(defaultOutcome -> repository.perfilPorUsername(login.username)
+                                            .map(perfil -> new LoginResponse(token.token(), token.expiresAt(), login.username, permissions, tokenModulePermissions,
+                                                    perfil == null ? null : str(perfil[2]), perfil == null ? null : str(perfil[1]),
+                                                    perfil == null ? null : str(perfil[3]), perfil == null ? null : str(perfil[0]),
+                                                    defaultOutcome, perfil == null ? null : str(perfil[4]))));
+                        }));
     }
-    private String normalise(String username) { return username.trim().toLowerCase(); }
-    private String str(Object value) { return value == null ? null : value.toString(); }
+
+    private String normalise(String username) {
+        return username.trim().toLowerCase();
+    }
+
+    private String str(Object value) {
+        return value == null ? null : value.toString();
+    }
+
     private Set<String> parsePermissions(String value) {
         var result = new LinkedHashSet<String>();
         Arrays.stream(value.split(",")).map(String::trim).map(String::toUpperCase).filter(ALL_PERMISSIONS::contains).forEach(result::add);

@@ -21,10 +21,14 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 public class RelatorioDisponivelController {
 
-    @Inject RelatorioDisponivelService service;
-    @Inject TabelaService tabelaService;
-    @Inject GraficoService graficoService;
-    @Inject MapaService mapaService;
+    @Inject
+    RelatorioDisponivelService service;
+    @Inject
+    TabelaService tabelaService;
+    @Inject
+    GraficoService graficoService;
+    @Inject
+    MapaService mapaService;
 
     @GET
     public Uni<PagedResponse<RelatorioDisponivelResponse>> listar(
@@ -44,17 +48,18 @@ public class RelatorioDisponivelController {
         String tipoNormalizado = tipo == null ? "" : tipo.toUpperCase();
         return service.podeAcessar(username, tipoNormalizado, id)
                 .onItem().transformToUni(permitido -> {
-                    if (!permitido) return Uni.createFrom().failure(new ForbiddenException("Relatório não disponível para este usuário"));
+                    if (!permitido)
+                        return Uni.createFrom().failure(new ForbiddenException("Relatório não disponível para este usuário"));
                     return switch (tipoNormalizado) {
-                        case "TABELA" -> tabelaService.find(id)
+                        case "TABELA" ->tabelaService.find(id)
                                 .chain(r -> tabelaService.executar(id)
                                         .map(dados -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, dados)));
-                        case "GRAFICO" -> graficoService.find(id)
+                        case "GRAFICO" ->graficoService.find(id)
                                 .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, null));
-                        case "MAPA" -> mapaService.find(id)
+                        case "MAPA" ->mapaService.find(id)
                                 .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, null));
-                        default -> Uni.createFrom().failure(new ForbiddenException("Tipo de relatório inválido"));
-                    };
+                        default ->Uni.createFrom().failure(new ForbiddenException("Tipo de relatório inválido"));
+                    } ;
                 });
     }
 }

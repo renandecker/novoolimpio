@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.central.operacional;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class OperacionalRepository implements PanacheRepository<Operacional> {
+
+@ApplicationScoped
+public class OperacionalRepository implements PanacheRepository<Operacional> {
 
     // Migrado de OperacionalRepository.buscarOperacionalComCoordenador (legado) - HQL original:
     // select op from Operacional op left join fetch op.coordenador where op.id = ?1
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Operacional>> buscarOperacionalComCoordenador(Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_OPERACIONAL_COM_COORDENADOR, Operacional.class)
-                    .setParameter(1, id)
-                    .getResultList());
+                        .setParameter(1, id)
+                        .getResultList());
     }
 
 
@@ -25,8 +30,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Operacional>> buscarOperacionaisDoCoordenador(Long coordenadorId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_OPERACIONAIS_DO_COORDENADOR, Operacional.class)
-                    .setParameter(1, coordenadorId)
-                    .getResultList());
+                        .setParameter(1, coordenadorId)
+                        .getResultList());
     }
 
 
@@ -39,7 +44,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_OPERACIONAL_EXPIRADOS, Operacional.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -51,8 +56,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> buscarCoordenadorOperacional(Long operacionalId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_COORDENADOR_OPERACIONAL)
-                    .setParameter(1, operacionalId)
-                    .getResultList());
+                        .setParameter(1, operacionalId)
+                        .getResultList());
     }
 
 
@@ -66,8 +71,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> buscarProspectos(Long operacionalId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_PROSPECTOS)
-                    .setParameter(1, operacionalId)
-                    .getResultList());
+                        .setParameter(1, operacionalId)
+                        .getResultList());
     }
 
 
@@ -79,8 +84,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<Integer> atualizarStatusExpirado(Long operacionalId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_ATUALIZAR_STATUS_EXPIRADO)
-                    .setParameter(1, operacionalId)
-                    .executeUpdate());
+                        .setParameter(1, operacionalId)
+                        .executeUpdate());
     }
 
 }

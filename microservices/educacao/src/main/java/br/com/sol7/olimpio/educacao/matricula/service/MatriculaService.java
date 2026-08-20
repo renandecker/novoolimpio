@@ -1,19 +1,23 @@
 package br.com.sol7.olimpio.educacao.matricula;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
+
 import java.util.Date;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class MatriculaService {
 
-    @Inject MatriculaRepository repository;
+    @Inject
+    MatriculaRepository repository;
 
     public Uni<List<MatriculaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -53,7 +57,27 @@ public class MatriculaService {
                         : Uni.createFrom().failure(new NotFoundException("Matricula not found")));
     }
 
-    private void apply(Matricula e, MatriculaRequest r) { e.oferecimentoComponenteCurricularId = r.oferecimentoComponenteCurricularId(); e.contratoId = r.contratoId(); e.cadernoComponenteCurricularId = r.cadernoComponenteCurricularId(); e.formaPagamentoId = r.formaPagamentoId(); e.dataCancelamento = r.dataCancelamento(); e.motivoCancelamento = r.motivoCancelamento(); e.status = r.status(); e.mediaFinal = r.mediaFinal(); e.percentualPresenca = r.percentualPresenca(); e.qtdeChamadaFrequencia = r.qtdeChamadaFrequencia(); e.data = r.data(); e.totalAulas = r.totalAulas(); e.totalAulasFeitas = r.totalAulasFeitas(); e.totalAulasPresente = r.totalAulasPresente(); e.totalAulasMeiaPresenca = r.totalAulasMeiaPresenca(); e.totalFaltas = r.totalFaltas(); e.cancelamentoProprio = r.cancelamentoProprio(); e.trocaTurma = r.trocaTurma(); e.cancelamentoId = r.cancelamentoId(); }
+    private void apply(Matricula e, MatriculaRequest r) {
+        e.oferecimentoComponenteCurricularId = r.oferecimentoComponenteCurricularId();
+        e.contratoId = r.contratoId();
+        e.cadernoComponenteCurricularId = r.cadernoComponenteCurricularId();
+        e.formaPagamentoId = r.formaPagamentoId();
+        e.dataCancelamento = r.dataCancelamento();
+        e.motivoCancelamento = r.motivoCancelamento();
+        e.status = r.status();
+        e.mediaFinal = r.mediaFinal();
+        e.percentualPresenca = r.percentualPresenca();
+        e.qtdeChamadaFrequencia = r.qtdeChamadaFrequencia();
+        e.data = r.data();
+        e.totalAulas = r.totalAulas();
+        e.totalAulasFeitas = r.totalAulasFeitas();
+        e.totalAulasPresente = r.totalAulasPresente();
+        e.totalAulasMeiaPresenca = r.totalAulasMeiaPresenca();
+        e.totalFaltas = r.totalFaltas();
+        e.cancelamentoProprio = r.cancelamentoProprio();
+        e.trocaTurma = r.trocaTurma();
+        e.cancelamentoId = r.cancelamentoId();
+    }
 
     private MatriculaResponse toResponse(Matricula e) {
         return new MatriculaResponse(e.id, e.oferecimentoComponenteCurricularId, e.contratoId, e.cadernoComponenteCurricularId, e.formaPagamentoId, e.dataCancelamento, e.motivoCancelamento, e.status, e.mediaFinal, e.percentualPresenca, e.qtdeChamadaFrequencia, e.data, e.totalAulas, e.totalAulasFeitas, e.totalAulasPresente, e.totalAulasMeiaPresenca, e.totalFaltas, e.cancelamentoProprio, e.trocaTurma, e.cancelamentoId);
@@ -202,7 +226,7 @@ public class MatriculaService {
     //         return getMatriculaRepository().buscarMatriculasPorOferecimento(oferecimentoComponenteCurricular);
     //     }
     public Uni<List<Long>> buscarMatriculasPorOferecimento(Long oferecimentoComponenteCurricularId) {
-                // Obs: condicao removida (depende de outro microservico): m.contrato.unidade.ativo = true
+        // Obs: condicao removida (depende de outro microservico): m.contrato.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): m.contrato.unidadeResponsavel.ativo = true
         return repository.find("oferecimentoComponenteCurricularId = ?1 and dataCancelamento is null order by contrato.pessoa.pessoaFisica.nome", oferecimentoComponenteCurricularId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
@@ -242,7 +266,7 @@ public class MatriculaService {
     //         return getMatriculaRepository().buscarMatriculasPorContrato(contrato);
     //     }
     public Uni<List<Long>> buscarMatriculasPorContrato(Long contratoId) {
-                // Obs: condicao removida (depende de outro microservico): m.contrato.unidade.ativo = true
+        // Obs: condicao removida (depende de outro microservico): m.contrato.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): m.contrato.unidadeResponsavel.ativo = true
         return repository.find("contratoId = ?1 order by oferecimentoComponenteCurricular.dataInicio, id,oferecimentoComponenteCurricular.id", contratoId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
@@ -256,7 +280,7 @@ public class MatriculaService {
     //         return getMatriculaRepository().buscarMatriculasComCadernoPorContrato(contrato);
     //     }
     public Uni<List<Long>> buscarMatriculasComCadernoPorContrato(Long contratoId) {
-                return repository.buscarMatriculasComCadernoPorContrato(contratoId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarMatriculasComCadernoPorContrato(contratoId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -267,7 +291,7 @@ public class MatriculaService {
     //         return getMatriculaRepository().buscarMatriculasAtivasNaoConcluidas(contrato);
     //     }
     public Uni<List<Long>> buscarMatriculasAtivasNaoConcluidas(Long contratoId) {
-                // Obs: condicao removida (depende de outro microservico): m.contrato.unidade.ativo = true
+        // Obs: condicao removida (depende de outro microservico): m.contrato.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): m.contrato.unidadeResponsavel.ativo = true
         return repository.find("contratoId = ?1 and dataCancelamento is null and status ='CURSANDO'", contratoId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
@@ -280,7 +304,7 @@ public class MatriculaService {
     //         return getMatriculaRepository().buscarMatriculasCanceladas(contrato);
     //     }
     public Uni<List<Long>> buscarMatriculasCanceladas(Long contratoId) {
-                // Obs: condicao removida (depende de outro microservico): m.contrato.unidade.ativo = true
+        // Obs: condicao removida (depende de outro microservico): m.contrato.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): m.contrato.unidadeResponsavel.ativo = true
         // Obs: condicao removida (depende de outro microservico): m.oferecimentoComponenteCurricular.status <> 'CANCELADA'
         // Obs: condicao removida (depende de outro microservico): m.contrato.ativo = false

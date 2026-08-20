@@ -4,4 +4,5 @@ import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-public class MarcaRepository implements PanacheRepository<Marca> {}
+public class MarcaRepository implements PanacheRepository<Marca> {
+}

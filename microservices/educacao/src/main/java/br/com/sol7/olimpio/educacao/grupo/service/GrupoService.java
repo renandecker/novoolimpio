@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.grupo;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class GrupoService {
 
-    @Inject GrupoRepository repository;
+    @Inject
+    GrupoRepository repository;
 
     public Uni<List<GrupoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,11 @@ public class GrupoService {
                         : Uni.createFrom().failure(new NotFoundException("Grupo not found")));
     }
 
-    private void apply(Grupo e, GrupoRequest r) { e.unidadeId = r.unidadeId(); e.curriculoId = r.curriculoId(); e.nome = r.nome(); }
+    private void apply(Grupo e, GrupoRequest r) {
+        e.unidadeId = r.unidadeId();
+        e.curriculoId = r.curriculoId();
+        e.nome = r.nome();
+    }
 
     private GrupoResponse toResponse(Grupo e) {
         return new GrupoResponse(e.id, e.unidadeId, e.curriculoId, e.nome);
@@ -82,7 +89,7 @@ public class GrupoService {
     //         return getGrupoRepository().autoCompleteComUnidades(lowerCase, unidades);
     //     }
     public Uni<List<Long>> autoCompleteComUnidades(String lowerCase, List<Long> unidades) {
-                return repository.find("(lower(nome) like '%' || ?1 || '%'  OR str(id) = ?1) and unidadeId in (?2) order by nome", lowerCase, unidades).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("(lower(nome) like '%' || ?1 || '%'  OR str(id) = ?1) and unidadeId in (?2) order by nome", lowerCase, unidades).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -93,7 +100,7 @@ public class GrupoService {
     //         return getGrupoRepository().autoCompleteComCurriculo(lowerCase, curriculo);
     //     }
     public Uni<List<Long>> autoCompleteComCurriculo(String lowerCase, Long curriculoId) {
-                return repository.find("(lower(nome) like '%' || ?1 || '%'  OR str(id) = ?1) and curriculoId = ?2 order by nome", lowerCase, curriculoId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("(lower(nome) like '%' || ?1 || '%'  OR str(id) = ?1) and curriculoId = ?2 order by nome", lowerCase, curriculoId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

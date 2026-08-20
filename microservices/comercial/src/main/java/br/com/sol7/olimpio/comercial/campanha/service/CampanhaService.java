@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.comercial.campanha;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class CampanhaService {
 
-    @Inject CampanhaRepository repository;
+    @Inject
+    CampanhaRepository repository;
 
     public Uni<List<CampanhaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,12 @@ public class CampanhaService {
                         : Uni.createFrom().failure(new NotFoundException("Campanha not found")));
     }
 
-    private void apply(Campanha e, CampanhaRequest r) { e.descricao = r.descricao(); e.meta = r.meta(); e.ativo = r.ativo(); e.dataInicial = r.dataInicial(); }
+    private void apply(Campanha e, CampanhaRequest r) {
+        e.descricao = r.descricao();
+        e.meta = r.meta();
+        e.ativo = r.ativo();
+        e.dataInicial = r.dataInicial();
+    }
 
     private CampanhaResponse toResponse(Campanha e) {
         return new CampanhaResponse(e.id, e.descricao, e.meta, e.ativo, e.dataInicial);
@@ -67,7 +75,7 @@ public class CampanhaService {
     //         return getCampanhaRepository().buscarCampanhaComAcoes(id);
     //     }
     public Uni<Long> buscarCampanhaComAcoes(Integer id) {
-                return repository.buscarCampanhaComAcoes(id).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarCampanhaComAcoes(id).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -91,7 +99,7 @@ public class CampanhaService {
     //         return getCampanhaRepository().buscarCampanhaComUnidades(entity);
     //     }
     public Uni<Long> buscarCampanhaComUnidades(Long entityId) {
-                return repository.buscarCampanhaComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarCampanhaComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 }

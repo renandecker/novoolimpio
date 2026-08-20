@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.central.turnotrabalho;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class TurnoTrabalhoRepository implements PanacheRepository<TurnoTrabalho> {
+
+@ApplicationScoped
+public class TurnoTrabalhoRepository implements PanacheRepository<TurnoTrabalho> {
 
     // Migrado de TurnoTrabalhoRepository.autoCompleteTurnoTrabalho (legado) - HQL original:
     // select distinct t from TurnoTrabalho t inner join t.unidades un inner join un.usuarios us where us in (?2) AND lower(t.descricao) like '%' || ?1 || '%'  OR str(t.id) = ?1
@@ -12,9 +17,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<TurnoTrabalho>> autoCompleteTurnoTrabalho(String query, Long usuarioLogadoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_TURNO_TRABALHO, TurnoTrabalho.class)
-                    .setParameter(1, query)
-                    .setParameter(2, usuarioLogadoId)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, usuarioLogadoId)
+                        .getResultList());
     }
 
 
@@ -26,8 +31,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<TurnoTrabalho>> buscarTurnosDaUnidade(Long usuarioLogadoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_TURNOS_DA_UNIDADE, TurnoTrabalho.class)
-                    .setParameter(1, usuarioLogadoId)
-                    .getResultList());
+                        .setParameter(1, usuarioLogadoId)
+                        .getResultList());
     }
 
 
@@ -39,8 +44,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<TurnoTrabalho>> buscarTurnoTrabalhoComUnidades(Long entityId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_TURNO_TRABALHO_COM_UNIDADES, TurnoTrabalho.class)
-                    .setParameter(1, entityId)
-                    .getResultList());
+                        .setParameter(1, entityId)
+                        .getResultList());
     }
 
 
@@ -53,7 +58,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_MIN_TURNO)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -66,7 +71,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_MAX_TURNO)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 }

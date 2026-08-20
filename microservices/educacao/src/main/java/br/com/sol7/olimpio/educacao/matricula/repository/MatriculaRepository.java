@@ -1,9 +1,15 @@
 package br.com.sol7.olimpio.educacao.matricula;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.educacao.valorcurso.ValorCurso;
-@ApplicationScoped public class MatriculaRepository implements PanacheRepository<Matricula> {
+
+@ApplicationScoped
+public class MatriculaRepository implements PanacheRepository<Matricula> {
 
     // Migrado de MatriculaRepository.buscarValorCurso (legado) - HQL original:
     // select v from ValorCurso v inner join v.unidades un where  un.ativo = true and v.curriculo = ?1 and un = ?2 order by v.data desc
@@ -13,9 +19,9 @@ import br.com.sol7.olimpio.educacao.valorcurso.ValorCurso;
     public Uni<java.util.List<br.com.sol7.olimpio.educacao.valorcurso.ValorCurso>> buscarValorCurso(Long curriculoId, Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_VALOR_CURSO, br.com.sol7.olimpio.educacao.valorcurso.ValorCurso.class)
-                    .setParameter(1, curriculoId)
-                    .setParameter(2, unidadeId)
-                    .getResultList());
+                        .setParameter(1, curriculoId)
+                        .setParameter(2, unidadeId)
+                        .getResultList());
     }
 
 
@@ -27,8 +33,8 @@ import br.com.sol7.olimpio.educacao.valorcurso.ValorCurso;
     public Uni<java.util.List<Matricula>> buscarMatriculasPorOferecimento(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_MATRICULAS_POR_OFERECIMENTO, Matricula.class)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .getResultList());
     }
 
 
@@ -40,8 +46,8 @@ import br.com.sol7.olimpio.educacao.valorcurso.ValorCurso;
     public Uni<java.util.List<Matricula>> buscarMatriculasPorContrato(Long contratoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_MATRICULAS_POR_CONTRATO, Matricula.class)
-                    .setParameter(1, contratoId)
-                    .getResultList());
+                        .setParameter(1, contratoId)
+                        .getResultList());
     }
 
 
@@ -53,8 +59,8 @@ import br.com.sol7.olimpio.educacao.valorcurso.ValorCurso;
     public Uni<java.util.List<Matricula>> buscarMatriculasComCadernoPorContrato(Long contratoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_MATRICULAS_COM_CADERNO_POR_CONTRATO, Matricula.class)
-                    .setParameter(1, contratoId)
-                    .getResultList());
+                        .setParameter(1, contratoId)
+                        .getResultList());
     }
 
 
@@ -66,8 +72,8 @@ import br.com.sol7.olimpio.educacao.valorcurso.ValorCurso;
     public Uni<java.util.List<Matricula>> buscarMatriculasAtivasNaoConcluidas(Long contratoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_MATRICULAS_ATIVAS_NAO_CONCLUIDAS, Matricula.class)
-                    .setParameter(1, contratoId)
-                    .getResultList());
+                        .setParameter(1, contratoId)
+                        .getResultList());
     }
 
 
@@ -79,8 +85,8 @@ import br.com.sol7.olimpio.educacao.valorcurso.ValorCurso;
     public Uni<java.util.List<Matricula>> buscarMatriculasCanceladas(Long contratoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_MATRICULAS_CANCELADAS, Matricula.class)
-                    .setParameter(1, contratoId)
-                    .getResultList());
+                        .setParameter(1, contratoId)
+                        .getResultList());
     }
 
 
@@ -92,8 +98,8 @@ import br.com.sol7.olimpio.educacao.valorcurso.ValorCurso;
     public Uni<java.util.List<Object>> buscarComponentesAprovadosPorAlunos(Long pessoaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_COMPONENTES_APROVADOS_POR_ALUNOS)
-                    .setParameter(1, pessoaId)
-                    .getResultList());
+                        .setParameter(1, pessoaId)
+                        .getResultList());
     }
 
 
@@ -105,8 +111,8 @@ import br.com.sol7.olimpio.educacao.valorcurso.ValorCurso;
     public Uni<java.util.List<Matricula>> matriculasAtivas(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_MATRICULAS_ATIVAS, Matricula.class)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .getResultList());
     }
 
 
@@ -118,8 +124,8 @@ import br.com.sol7.olimpio.educacao.valorcurso.ValorCurso;
     public Uni<java.util.List<Matricula>> matriculasAtivasComCaderno(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_MATRICULAS_ATIVAS_COM_CADERNO, Matricula.class)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .getResultList());
     }
 
 
@@ -131,8 +137,8 @@ import br.com.sol7.olimpio.educacao.valorcurso.ValorCurso;
     public Uni<java.util.List<Matricula>> matriculasAtivasDoCOntrato(Long contratoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_MATRICULAS_ATIVAS_DO_C_ONTRATO, Matricula.class)
-                    .setParameter(1, contratoId)
-                    .getResultList());
+                        .setParameter(1, contratoId)
+                        .getResultList());
     }
 
 
@@ -144,9 +150,9 @@ import br.com.sol7.olimpio.educacao.valorcurso.ValorCurso;
     public Uni<java.util.List<Object>> matriculasDesativadasComMatriculaAtiva(Long oferecimentoComponenteCurricularId, List<Long> matriculasIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_MATRICULAS_DESATIVADAS_COM_MATRICULA_ATIVA)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .setParameter(2, matriculasIds)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .setParameter(2, matriculasIds)
+                        .getResultList());
     }
 
 
@@ -158,8 +164,8 @@ import br.com.sol7.olimpio.educacao.valorcurso.ValorCurso;
     public Uni<java.util.List<Object>> matriculasDesativadasSemMatriculaAtiva(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_MATRICULAS_DESATIVADAS_SEM_MATRICULA_ATIVA)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .getResultList());
     }
 
 
@@ -171,8 +177,8 @@ import br.com.sol7.olimpio.educacao.valorcurso.ValorCurso;
     public Uni<java.util.List<Object>> qtdFaltasConsecutivas(Long matriculaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_QTD_FALTAS_CONSECUTIVAS)
-                    .setParameter(1, matriculaId)
-                    .getResultList());
+                        .setParameter(1, matriculaId)
+                        .getResultList());
     }
 
 }

@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.relatorios.mapa;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class MapaRepository implements PanacheRepository<Mapa> {
+
+@ApplicationScoped
+public class MapaRepository implements PanacheRepository<Mapa> {
 
     // Migrado de MapaRepository.buscarMapaPeloId (legado) - HQL original:
     // select a from Mapa a where a.id = ?1
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Mapa>> buscarMapaPeloId(int id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_MAPA_PELO_ID, Mapa.class)
-                    .setParameter(1, id)
-                    .getResultList());
+                        .setParameter(1, id)
+                        .getResultList());
     }
 
 
@@ -25,8 +30,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Mapa>> buscarMapsPeloFato(Long fatoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_MAPS_PELO_FATO, Mapa.class)
-                    .setParameter(1, fatoId)
-                    .getResultList());
+                        .setParameter(1, fatoId)
+                        .getResultList());
     }
 
 
@@ -38,9 +43,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Mapa>> autoComplete(String query, Long estruturaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Mapa.class)
-                    .setParameter(1, query)
-                    .setParameter(2, estruturaId)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, estruturaId)
+                        .getResultList());
     }
 
 

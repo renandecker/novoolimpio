@@ -1,6 +1,8 @@
 package br.com.sol7.olimpio.educacao.chamadaassinadaimpressa;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -12,15 +14,19 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ChamadaAssinadaImpressaService {
 
-    @Inject ChamadaAssinadaImpressaRepository repository;
-    @Inject OcorrenciaComponenteCurricularService ocorrenciaComponenteCurricularService;
-    @Inject OferecimentoComponenteCurricularService oferecimentoComponenteCurricularService;
+    @Inject
+    ChamadaAssinadaImpressaRepository repository;
+    @Inject
+    OcorrenciaComponenteCurricularService ocorrenciaComponenteCurricularService;
+    @Inject
+    OferecimentoComponenteCurricularService oferecimentoComponenteCurricularService;
 
     // TODO: portar ChamadaAssinadaImpressaService.carregarChamadasPendentes() (legado) - gera e imprime chamadas assinadas pendentes (normais e corrigidas). Logica de geracao de PDF/impressao nao portada automaticamente, ver RELATORIO_SCHEDULE.md.
     public Uni<Void> carregarChamadasPendentesAutomatico() {
@@ -66,7 +72,17 @@ public class ChamadaAssinadaImpressaService {
                         : Uni.createFrom().failure(new NotFoundException("ChamadaAssinadaImpressa not found")));
     }
 
-    private void apply(ChamadaAssinadaImpressa e, ChamadaAssinadaImpressaRequest r) { e.data = r.data(); e.oferecimentoComponenteCurricularId = r.oferecimentoComponenteCurricularId(); e.sequencia = r.sequencia(); e.quantidade = r.quantidade(); e.aulaCoringa = r.aulaCoringa(); e.ativo = r.ativo(); e.inicio = r.inicio(); e.fim = r.fim(); e.pendente = r.pendente(); }
+    private void apply(ChamadaAssinadaImpressa e, ChamadaAssinadaImpressaRequest r) {
+        e.data = r.data();
+        e.oferecimentoComponenteCurricularId = r.oferecimentoComponenteCurricularId();
+        e.sequencia = r.sequencia();
+        e.quantidade = r.quantidade();
+        e.aulaCoringa = r.aulaCoringa();
+        e.ativo = r.ativo();
+        e.inicio = r.inicio();
+        e.fim = r.fim();
+        e.pendente = r.pendente();
+    }
 
     private ChamadaAssinadaImpressaResponse toResponse(ChamadaAssinadaImpressa e) {
         return new ChamadaAssinadaImpressaResponse(e.id, e.data, e.oferecimentoComponenteCurricularId, e.sequencia, e.quantidade, e.aulaCoringa, e.ativo, e.inicio, e.fim, e.pendente);

@@ -17,25 +17,28 @@ import org.slf4j.LoggerFactory;
 public class MailService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MailService.class);
 
-    @Inject Vertx vertx;
-    @Inject ConfiguracaoEmailRepository emailConfigRepository;
+    @Inject
+    Vertx vertx;
+    @Inject
+    ConfiguracaoEmailRepository emailConfigRepository;
 
     public Uni<Void> sendTemporaryPassword(String to, String username, String temporaryPassword) {
         String subject = "Olímpio - Redefinição de senha";
-        String body = """
-            Olá %s,
+        String body = "" "
+        Olá % s,
 
-            Recebemos uma solicitação para redefinir a sua senha de acesso ao sistema Olímpio.
+                Recebemos uma solicitação para redefinir a sua senha de acesso ao sistema Olímpio.
 
-            Sua senha provisória é: %s
+        Sua senha provisória é: %s
 
-            Acesse o sistema com essa senha e, em seguida, utilize a opção "Trocar senha" do menu para definir uma nova senha pessoal.
+        Acesse o sistema com essa senha e, em seguida, utilize a opção "Trocar senha" do menu para definir uma
+        nova senha pessoal.
 
-            Se você não solicitou essa alteração, ignore este e-mail.
+                Se você não solicitou essa alteração, ignore este e -mail.
 
-            Atenciosamente,
-            Equipe Olímpio
-            """.formatted(username, temporaryPassword);
+                Atenciosamente,
+                Equipe Olímpio
+        "" ".formatted(username, temporaryPassword);
         return emailConfigRepository.findConfiguracaoEmailPadrao()
                 .onItem().transformToUni(config -> {
                     if (config == null || config.host == null || config.host.isBlank()) {

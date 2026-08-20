@@ -1,9 +1,25 @@
 package br.com.sol7.olimpio.educacao.gerarchamadaassinada;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
-import io.smallrye.mutiny.Uni; import jakarta.enterprise.context.ApplicationScoped; import jakarta.inject.Inject; import jakarta.ws.rs.NotFoundException; import java.util.List;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped @WithTransaction public class GerarChamadaAssinadaService { @Inject GerarChamadaAssinadaRepository repository; public Uni<List<GerarChamadaAssinadaResponse>> list(){return repository.listAll().map(items->items.stream().map(this::toResponse).toList());}
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
+
+import java.util.List;
+
+import io.smallrye.mutiny.Uni;
+
+@ApplicationScoped
+@WithTransaction
+public class GerarChamadaAssinadaService {
+    @Inject
+    GerarChamadaAssinadaRepository repository;
+
+    public Uni<List<GerarChamadaAssinadaResponse>> list() {
+        return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
+    }
 
     public Uni<PagedResponse<GerarChamadaAssinadaResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
@@ -12,7 +28,33 @@ import io.smallrye.mutiny.Uni;
                 .onItem().transformToUni(items -> repository.count()
                         .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
- public Uni<GerarChamadaAssinadaResponse> find(Long id){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("GerarChamadaAssinada not found")).map(this::toResponse);} public Uni<GerarChamadaAssinadaResponse> create(GerarChamadaAssinadaRequest r){var e=new GerarChamadaAssinada();apply(e,r);return repository.persist(e).replaceWith(()->toResponse(e));} public Uni<GerarChamadaAssinadaResponse> update(Long id,GerarChamadaAssinadaRequest r){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("GerarChamadaAssinada not found")).invoke(e->apply(e,r)).map(this::toResponse);} public Uni<Void> delete(Long id){return repository.deleteById(id).onItem().transformToUni(deleted->deleted?Uni.createFrom().voidItem():Uni.createFrom().failure(new NotFoundException("GerarChamadaAssinada not found")));} private void apply(GerarChamadaAssinada e,GerarChamadaAssinadaRequest r){e.nome=r.nome();e.dadosJson=r.dadosJson();} private GerarChamadaAssinadaResponse toResponse(GerarChamadaAssinada e){return new GerarChamadaAssinadaResponse(e.id,e.nome,e.dadosJson);} 
+
+    public Uni<GerarChamadaAssinadaResponse> find(Long id) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("GerarChamadaAssinada not found")).map(this::toResponse);
+    }
+
+    public Uni<GerarChamadaAssinadaResponse> create(GerarChamadaAssinadaRequest r) {
+        var e = new GerarChamadaAssinada();
+        apply(e, r);
+        return repository.persist(e).replaceWith(() -> toResponse(e));
+    }
+
+    public Uni<GerarChamadaAssinadaResponse> update(Long id, GerarChamadaAssinadaRequest r) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("GerarChamadaAssinada not found")).invoke(e -> apply(e, r)).map(this::toResponse);
+    }
+
+    public Uni<Void> delete(Long id) {
+        return repository.deleteById(id).onItem().transformToUni(deleted -> deleted ? Uni.createFrom().voidItem() : Uni.createFrom().failure(new NotFoundException("GerarChamadaAssinada not found")));
+    }
+
+    private void apply(GerarChamadaAssinada e, GerarChamadaAssinadaRequest r) {
+        e.nome = r.nome();
+        e.dadosJson = r.dadosJson();
+    }
+
+    private GerarChamadaAssinadaResponse toResponse(GerarChamadaAssinada e) {
+        return new GerarChamadaAssinadaResponse(e.id, e.nome, e.dadosJson);
+    }
 
     // Migrado de GerarChamadaAssinadaController.gerarChamadaAssinadaPaisagem (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GerarChamadaAssinadaController.java:482, camada controller)
     // Observacao: retorno: era StreamedContent no legado; parametro chamadaAssinadas: lista de ChamadaAssinada original

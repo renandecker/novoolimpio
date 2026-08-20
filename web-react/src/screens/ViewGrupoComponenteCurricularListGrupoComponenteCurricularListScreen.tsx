@@ -1,1 +1,9 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewGrupoComponenteCurricularListGrupoComponenteCurricularListScreen(){return <PermissionGate permission="READ"><main><h1>Grupo Componente Curricular</h1><DataTable path="/api/view/grupoComponenteCurricular/listGrupoComponenteCurricular"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewGrupoComponenteCurricularListGrupoComponenteCurricularListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Grupo Componente Curricular</h1><DataTable
+            path="/api/view/grupoComponenteCurricular/listGrupoComponenteCurricular"/></main>
+    </PermissionGate>
+}

@@ -18,20 +18,20 @@ import java.util.StringJoiner;
  * Portado de FeriadoAjusteService + FeriadoService.atualizarOferecimento +
  * OferecimentoComponenteCurricularService.ajutarOferecimento/atualizaDataOferecimento +
  * CadernoComponenteCurricularService.insereCadernoPorOferecimento (legado em olimpio.zip).
- *
+ * <p>
  * Regra (fiel ao legado):
- *  1. le a config FERIADO_AJUSTE (bas_config) - ultimo id processado;
- *  2. carrega ate 50 ajustes ativos (bas_feriado_ajuste) com id > config (ou todos, se vazio),
- *     ordenados por feriado.dt_feriado, id;
- *  3. grava a config com o ultimo id do lote e processa cada ajuste:
- *     - sem selecao de ocorrencias: ajusta todas as ocorrencias ativas do feriado;
- *     - com selecao: ajusta as marcadas em bas_feriado_ocorrencia_ajustar e depois todas menos
- *       as marcadas em bas_feriado_ocorrencia_nao_ajustar;
- *     - desativa o ajuste e repete o passo 2 ate nao sobrar lote.
- *  Por ocorrencia ajustada: marca os cadernos como removidos ('r'), desativa/remove a ocorrencia
- *  e "empurra" o oferecimento: acha o proximo dia de aula valido (mesmo dia da semana, sem
- *  feriado da unidade e fora do periodo do criterio), cria a nova ocorrencia, recalcula
- *  data_inicio/data_fim/status do oferecimento, insere cadernos e resolve conflitos de sala/horario.
+ * 1. le a config FERIADO_AJUSTE (bas_config) - ultimo id processado;
+ * 2. carrega ate 50 ajustes ativos (bas_feriado_ajuste) com id > config (ou todos, se vazio),
+ * ordenados por feriado.dt_feriado, id;
+ * 3. grava a config com o ultimo id do lote e processa cada ajuste:
+ * - sem selecao de ocorrencias: ajusta todas as ocorrencias ativas do feriado;
+ * - com selecao: ajusta as marcadas em bas_feriado_ocorrencia_ajustar e depois todas menos
+ * as marcadas em bas_feriado_ocorrencia_nao_ajustar;
+ * - desativa o ajuste e repete o passo 2 ate nao sobrar lote.
+ * Por ocorrencia ajustada: marca os cadernos como removidos ('r'), desativa/remove a ocorrencia
+ * e "empurra" o oferecimento: acha o proximo dia de aula valido (mesmo dia da semana, sem
+ * feriado da unidade e fora do periodo do criterio), cria a nova ocorrencia, recalcula
+ * data_inicio/data_fim/status do oferecimento, insere cadernos e resolve conflitos de sala/horario.
  */
 @ApplicationScoped
 public class FeriadoAjusteService {
@@ -134,15 +134,30 @@ public class FeriadoAjusteService {
 
     private static final int MAX_DIAS_BUSCA = 400;
 
-    public record FeriadoAjusteItem(Long id, Long feriadoId, Boolean ocorrencia) {}
-    private record FeriadoRow(LocalDate data, List<Long> unidades) {}
-    private record OferDiaRow(Long oferecimentoId, Long diaAulaId) {}
+    public record FeriadoAjusteItem(Long id, Long feriadoId, Boolean ocorrencia) {
+    }
+
+    private record FeriadoRow(LocalDate data, List<Long> unidades) {
+    }
+
+    private record OferDiaRow(Long oferecimentoId, Long diaAulaId) {
+    }
+
     private record OferecimentoRow(Long idUnidade, Long idSala, Long idProfessor, Long idCurso,
-                                   LocalDate dataInicio, LocalDate dataFim) {}
-    private record CriterioRow(LocalDate dataInicio, LocalDate dataFim) {}
-    private record DatasRow(LocalDate inicio, LocalDate fim) {}
-    private record TurnoRow(LocalTime inicio, LocalTime fim) {}
-    private record ConflitoRow(Long idOcorrencia, Long idDiaAula, LocalTime inicio, LocalTime fim, Long idOferecimento) {}
+                                   LocalDate dataInicio, LocalDate dataFim) {
+    }
+
+    private record CriterioRow(LocalDate dataInicio, LocalDate dataFim) {
+    }
+
+    private record DatasRow(LocalDate inicio, LocalDate fim) {
+    }
+
+    private record TurnoRow(LocalTime inicio, LocalTime fim) {
+    }
+
+    private record ConflitoRow(Long idOcorrencia, Long idDiaAula, LocalTime inicio, LocalTime fim, Long idOferecimento) {
+    }
 
     // -----------------------------------------------------------------------------------------
     // Rotina agendada (SchedulingService.verificaFeriadosParaajustar do legado)
@@ -364,11 +379,11 @@ public class FeriadoAjusteService {
                         .chain(feriado -> buscarIdsNaoAjustar(item.id())
                                 .chain(naoAjustar -> naoAjustar.isEmpty() ? Uni.createFrom().voidItem()
                                         : buscarOcorrenciasPorDataUnidade(feriado.data(), feriado.unidades())
-                                                .chain(ids -> {
-                                                    List<Long> restantes = ids.stream().filter(id -> !naoAjustar.contains(id)).toList();
-                                                    return restantes.isEmpty() ? Uni.createFrom().voidItem() : ajustarOcorrencias(restantes);
-                                                })))
-                                .chain(() -> desativarAjuste(item.id())));
+                                        .chain(ids -> {
+                                            List<Long> restantes = ids.stream().filter(id -> !naoAjustar.contains(id)).toList();
+                                            return restantes.isEmpty() ? Uni.createFrom().voidItem() : ajustarOcorrencias(restantes);
+                                        })))
+                        .chain(() -> desativarAjuste(item.id())));
             }
             return chain;
         }).replaceWith("Criado ajuste de ocorrencias nao ajustaveis com sucesso");

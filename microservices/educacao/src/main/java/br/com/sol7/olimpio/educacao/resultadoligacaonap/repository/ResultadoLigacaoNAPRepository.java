@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.educacao.resultadoligacaonap;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class ResultadoLigacaoNAPRepository implements PanacheRepository<ResultadoLigacaoNAP> {
+
+@ApplicationScoped
+public class ResultadoLigacaoNAPRepository implements PanacheRepository<ResultadoLigacaoNAP> {
 
     // Migrado de ResultadoLigacaoNAPRepository.buscarResultadoLigacaoNAPComEtapas (legado) - HQL original:
     // select r from ResultadoLigacaoNAP r left join fetch r.etapasNAPs where r = ?1
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ResultadoLigacaoNAP>> buscarResultadoLigacaoNAPComEtapas(Long resultadoLigacaoNAPId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_RESULTADO_LIGACAO_N_A_P_COM_ETAPAS, ResultadoLigacaoNAP.class)
-                    .setParameter(1, resultadoLigacaoNAPId)
-                    .getResultList());
+                        .setParameter(1, resultadoLigacaoNAPId)
+                        .getResultList());
     }
 
 
@@ -25,8 +30,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> listarResultadoLigacaoNAP(Long etapasNAPId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_RESULTADO_LIGACAO_N_A_P)
-                    .setParameter(1, etapasNAPId)
-                    .getResultList());
+                        .setParameter(1, etapasNAPId)
+                        .getResultList());
     }
 
 
@@ -38,8 +43,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ResultadoLigacaoNAP>> listarResultadoLigacaoCobrancaLimite(Long etapasCobrancaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_RESULTADO_LIGACAO_COBRANCA_LIMITE, ResultadoLigacaoNAP.class)
-                    .setParameter(1, etapasCobrancaId)
-                    .getResultList());
+                        .setParameter(1, etapasCobrancaId)
+                        .getResultList());
     }
 
 
@@ -51,9 +56,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ResultadoLigacaoNAP>> autoCompleteComEtapa(String query, Long etapasCobrancaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_ETAPA, ResultadoLigacaoNAP.class)
-                    .setParameter(1, query)
-                    .setParameter(2, etapasCobrancaId)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, etapasCobrancaId)
+                        .getResultList());
     }
 
 
@@ -65,8 +70,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ResultadoLigacaoNAP>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, ResultadoLigacaoNAP.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 }

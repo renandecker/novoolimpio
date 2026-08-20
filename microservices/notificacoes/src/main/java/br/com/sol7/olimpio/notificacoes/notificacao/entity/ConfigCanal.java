@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+
 import java.time.OffsetDateTime;
 
 @Entity
@@ -30,11 +31,13 @@ public class ConfigCanal extends PanacheEntity {
     @Column(name = "updated_at", nullable = false)
     public OffsetDateTime updatedAt;
 
-    @PrePersist void onCreate() {
+    @PrePersist
+    void onCreate() {
         createdAt = updatedAt = OffsetDateTime.now();
     }
 
-    @PreUpdate void onUpdate() {
+    @PreUpdate
+    void onUpdate() {
         updatedAt = OffsetDateTime.now();
     }
 }

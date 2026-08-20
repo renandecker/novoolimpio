@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewFavoritoUsuarioFormFavoritoUsuarioListScreen(){return <PermissionGate permission="READ"><main><h1>Form Favorito Usuario</h1><DataTable path="/api/view/favoritoUsuario/formFavoritoUsuario"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewFavoritoUsuarioFormFavoritoUsuarioListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Form Favorito Usuario</h1><DataTable path="/api/view/favoritoUsuario/formFavoritoUsuario"/></main>
+    </PermissionGate>
+}

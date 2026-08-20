@@ -1,10 +1,15 @@
 package br.com.sol7.olimpio.basico.disponibilidadepessoa.service;
+
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.DisponibilidadeScheduleEventResponse;
 import br.com.sol7.olimpio.shared.DisponibilidadeOpcaoResponse;
-import io.smallrye.mutiny.Uni; import jakarta.enterprise.context.ApplicationScoped; import jakarta.inject.Inject; import jakarta.ws.rs.NotFoundException; import org.hibernate.reactive.mutiny.Mutiny;
+import io.smallrye.mutiny.Uni;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
+import org.hibernate.reactive.mutiny.Mutiny;
 import br.com.sol7.olimpio.basico.disponibilidadepessoa.dto.DisponibilidadePessoaRequest;
 import br.com.sol7.olimpio.basico.disponibilidadepessoa.dto.DisponibilidadePessoaResponse;
 import br.com.sol7.olimpio.basico.disponibilidadepessoa.entity.DisponibilidadePessoa;
@@ -19,7 +24,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@ApplicationScoped @WithTransaction public class DisponibilidadePessoaService { @Inject DisponibilidadePessoaRepository repository;
+@ApplicationScoped
+@WithTransaction
+public class DisponibilidadePessoaService {
+    @Inject
+    DisponibilidadePessoaRepository repository;
 
     private static final DateTimeFormatter ISO = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -69,7 +78,9 @@ import java.util.List;
     private static final String SQL_TURNOS_EXTREMOS =
             "SELECT MIN(t.inicio), MAX(t.fim) FROM edc_turno t";
 
-    public Uni<List<DisponibilidadePessoaResponse>> list(){return repository.listAll().map(items->items.stream().map(this::toResponse).toList());}
+    public Uni<List<DisponibilidadePessoaResponse>> list() {
+        return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
+    }
 
     public Uni<PagedResponse<DisponibilidadePessoaResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
@@ -78,7 +89,33 @@ import java.util.List;
                 .onItem().transformToUni(items -> repository.count()
                         .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
- public Uni<DisponibilidadePessoaResponse> find(Long id){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("DisponibilidadePessoa not found")).map(this::toResponse);} public Uni<DisponibilidadePessoaResponse> create(DisponibilidadePessoaRequest r){var e=new DisponibilidadePessoa();apply(e,r);return repository.persist(e).replaceWith(()->toResponse(e));} public Uni<DisponibilidadePessoaResponse> update(Long id,DisponibilidadePessoaRequest r){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("DisponibilidadePessoa not found")).invoke(e->apply(e,r)).map(this::toResponse);} public Uni<Void> delete(Long id){return repository.deleteById(id).onItem().transformToUni(deleted->deleted?Uni.createFrom().voidItem():Uni.createFrom().failure(new NotFoundException("DisponibilidadePessoa not found")));} private void apply(DisponibilidadePessoa e,DisponibilidadePessoaRequest r){e.nome=r.nome();e.dadosJson=r.dadosJson();} private DisponibilidadePessoaResponse toResponse(DisponibilidadePessoa e){return new DisponibilidadePessoaResponse(e.id,e.nome,e.dadosJson);}
+
+    public Uni<DisponibilidadePessoaResponse> find(Long id) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("DisponibilidadePessoa not found")).map(this::toResponse);
+    }
+
+    public Uni<DisponibilidadePessoaResponse> create(DisponibilidadePessoaRequest r) {
+        var e = new DisponibilidadePessoa();
+        apply(e, r);
+        return repository.persist(e).replaceWith(() -> toResponse(e));
+    }
+
+    public Uni<DisponibilidadePessoaResponse> update(Long id, DisponibilidadePessoaRequest r) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("DisponibilidadePessoa not found")).invoke(e -> apply(e, r)).map(this::toResponse);
+    }
+
+    public Uni<Void> delete(Long id) {
+        return repository.deleteById(id).onItem().transformToUni(deleted -> deleted ? Uni.createFrom().voidItem() : Uni.createFrom().failure(new NotFoundException("DisponibilidadePessoa not found")));
+    }
+
+    private void apply(DisponibilidadePessoa e, DisponibilidadePessoaRequest r) {
+        e.nome = r.nome();
+        e.dadosJson = r.dadosJson();
+    }
+
+    private DisponibilidadePessoaResponse toResponse(DisponibilidadePessoa e) {
+        return new DisponibilidadePessoaResponse(e.id, e.nome, e.dadosJson);
+    }
 
     public Uni<List<DisponibilidadeOpcaoResponse>> opcoesPessoas() {
         return nativeQuery(SQL_OPCOES_PESSOAS)
@@ -100,7 +137,7 @@ import java.util.List;
             Uni<List<Object[]>> disponibilidades = nativeQuery(SQL_DISPONIBILIDADES_PROFESSOR, professorId);
             Uni<List<Object[]>> turnos = nativeQuery(SQL_TURNOS_EXTREMOS);
             return nativeQuery(SQL_UNIDADES_PROFESSOR, professorId).map(rows -> rows.stream()
-                            .map(r -> toLong(r[0])).toList())
+                    .map(r -> toLong(r[0])).toList())
                     .chain(unidades -> {
                         Uni<List<Object[]>> feriados = unidades.isEmpty()
                                 ? nativeQuery(SQL_FERIADOS_NACIONAIS, toDate(first), toDate(last.plusDays(1)))
@@ -112,8 +149,8 @@ import java.util.List;
     }
 
     private List<DisponibilidadeScheduleEventResponse> buildSchedule(List<Object[]> ocorrencias, List<Object[]> disponibilidades,
-                                                                    List<Object[]> turnosRows, List<Object[]> feriados,
-                                                                    LocalDate first, LocalDate last) {
+                                                                     List<Object[]> turnosRows, List<Object[]> feriados,
+                                                                     LocalDate first, LocalDate last) {
         List<DisponibilidadeScheduleEventResponse> events = new ArrayList<>();
         for (Object[] f : feriados) {
             String nome = toStr(f[0]);
@@ -199,21 +236,23 @@ import java.util.List;
         });
     }
 
-    private String iso(LocalDateTime dt) { return dt.format(ISO); }
+    private String iso(LocalDateTime dt) {
+        return dt.format(ISO);
+    }
 
     private LocalDate toLocalDate(Object value) {
         if (value == null) return null;
-        if (value instanceof LocalDate d) return d;
-        if (value instanceof java.sql.Date d) return d.toLocalDate();
-        if (value instanceof java.sql.Timestamp t) return t.toLocalDateTime().toLocalDate();
-        if (value instanceof Date d) return d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        if (value instanceof LocalDate d)return d;
+        if (value instanceof java.sql.Date d)return d.toLocalDate();
+        if (value instanceof java.sql.Timestamp t)return t.toLocalDateTime().toLocalDate();
+        if (value instanceof Date d)return d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         return null;
     }
 
     private LocalTime toTime(Object value) {
         if (value == null) return null;
-        if (value instanceof LocalTime t) return t;
-        if (value instanceof java.sql.Time t) return t.toLocalTime();
+        if (value instanceof LocalTime t)return t;
+        if (value instanceof java.sql.Time t)return t.toLocalTime();
         return null;
     }
 

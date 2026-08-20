@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.relatorios.estrutura;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class EstruturaService {
 
-    @Inject EstruturaRepository repository;
+    @Inject
+    EstruturaRepository repository;
 
     public Uni<List<EstruturaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,16 @@ public class EstruturaService {
                         : Uni.createFrom().failure(new NotFoundException("Estrutura not found")));
     }
 
-    private void apply(Estrutura e, EstruturaRequest r) { e.tabela = r.tabela(); e.condicao = r.condicao(); e.nome = r.nome(); e.zoom = r.zoom(); e.configuracaoEmailId = r.configuracaoEmailId(); e.dataAtualizacao = r.dataAtualizacao(); e.coordenada = r.coordenada(); e.nomeBanco = r.nomeBanco(); }
+    private void apply(Estrutura e, EstruturaRequest r) {
+        e.tabela = r.tabela();
+        e.condicao = r.condicao();
+        e.nome = r.nome();
+        e.zoom = r.zoom();
+        e.configuracaoEmailId = r.configuracaoEmailId();
+        e.dataAtualizacao = r.dataAtualizacao();
+        e.coordenada = r.coordenada();
+        e.nomeBanco = r.nomeBanco();
+    }
 
     private EstruturaResponse toResponse(Estrutura e) {
         return new EstruturaResponse(e.id, e.tabela, e.condicao, e.nome, e.zoom, e.configuracaoEmailId, e.dataAtualizacao, e.coordenada, e.nomeBanco);
@@ -75,7 +87,7 @@ public class EstruturaService {
     //         return getEstruturaRepository().buscarBancos(banco);
     //     }
     public Uni<List<Long>> buscarBancos(String banco) {
-                return repository.find("nomeBanco = ?1 order by id desc", banco).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("nomeBanco = ?1 order by id desc", banco).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -85,7 +97,7 @@ public class EstruturaService {
     //         return getEstruturaRepository().buscarBancosComId(banco, id);
     //     }
     public Uni<List<Long>> buscarBancosComId(String banco, Long id) {
-                return repository.find("nomeBanco = ?1 and id <> ?2 order by id desc", banco, id).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("nomeBanco = ?1 and id <> ?2 order by id desc", banco, id).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

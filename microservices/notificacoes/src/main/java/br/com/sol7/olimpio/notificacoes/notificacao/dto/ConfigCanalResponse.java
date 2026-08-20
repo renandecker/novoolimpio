@@ -9,4 +9,4 @@ public record ConfigCanalResponse(
         String destinatario,
         String descricao,
         OffsetDateTime createdAt,
-        OffsetDateTime updatedAt) {}
+        OffsetDateTime updatedAt){}

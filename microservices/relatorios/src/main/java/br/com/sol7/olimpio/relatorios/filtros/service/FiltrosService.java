@@ -6,13 +6,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class FiltrosService {
 
-    @Inject FiltrosRepository repository;
+    @Inject
+    FiltrosRepository repository;
 
     public Uni<List<FiltrosResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -137,7 +139,7 @@ public class FiltrosService {
 
     public Uni<List<Long>> buscarFiltrosUsuarioComFiltros(Long filtroRelatorioId) {
         return repository.buscarFiltrosUsuarioComFiltros(filtroRelatorioId).map(list -> list.stream().map(x -> x.id).toList());
-    } 
+    }
 
     // Migrado de FiltrosController.autoCompleteDimensao (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/FiltrosController.java:106, camada controller)
     // Logica original (adaptar):

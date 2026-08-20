@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 import java.util.List;
 
 @Path("/api/asaas/parcelas")

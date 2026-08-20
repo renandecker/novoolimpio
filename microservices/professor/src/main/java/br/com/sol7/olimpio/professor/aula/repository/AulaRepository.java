@@ -5,6 +5,7 @@ import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+
 import java.util.List;
 
 @ApplicationScoped
@@ -20,13 +21,13 @@ public class AulaRepository implements PanacheRepository<Aula> {
     }
 
     public Uni<List<Object[]>> ocorrenciasDoOferecimento(Long oferecimentoId) {
-        String sql = """
-            SELECT occ.id, occ.data, COALESCE(occ.aula_coringa, false) AS aula_coringa,
-                   COALESCE(occ.aula_presencial, false) AS aula_presencial
-            FROM edc_ocorrencia_componente_curricular occ
-            WHERE occ.id_oferecimento_componente_curricular = ?1 AND occ.fl_ativo = true
-            ORDER BY occ.data
-            """;
+        String sql = "" "
+        SELECT occ.id, occ.data, COALESCE(occ.aula_coringa, false) AS aula_coringa,
+        COALESCE(occ.aula_presencial, false) AS aula_presencial
+        FROM edc_ocorrencia_componente_curricular occ
+        WHERE occ.id_oferecimento_componente_curricular = ?1 AND occ.fl_ativo = true
+        ORDER BY occ.data
+        "" ";
         return nativeList(sql, oferecimentoId);
     }
 

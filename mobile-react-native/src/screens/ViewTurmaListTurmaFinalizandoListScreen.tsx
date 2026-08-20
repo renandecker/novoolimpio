@@ -1,5 +1,6 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import {ModuleList} from '../ModuleListScreen';
+
 export default function ViewTurmaListTurmaFinalizandoListScreen() {
-  return <ModuleList path="/api/view/turma/listTurmaFinalizando" />;
+    return <ModuleList path="/api/view/turma/listTurmaFinalizando"/>;
 }

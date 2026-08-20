@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.grupocomponentecurricular;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class GrupoComponenteCurricularService {
 
-    @Inject GrupoComponenteCurricularRepository repository;
+    @Inject
+    GrupoComponenteCurricularRepository repository;
 
     public Uni<List<GrupoComponenteCurricularResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,9 @@ public class GrupoComponenteCurricularService {
                         : Uni.createFrom().failure(new NotFoundException("GrupoComponenteCurricular not found")));
     }
 
-    private void apply(GrupoComponenteCurricular e, GrupoComponenteCurricularRequest r) { e.descricao = r.descricao(); }
+    private void apply(GrupoComponenteCurricular e, GrupoComponenteCurricularRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private GrupoComponenteCurricularResponse toResponse(GrupoComponenteCurricular e) {
         return new GrupoComponenteCurricularResponse(e.id, e.descricao);

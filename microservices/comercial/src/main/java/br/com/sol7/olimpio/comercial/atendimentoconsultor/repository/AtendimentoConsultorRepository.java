@@ -1,3 +1,8 @@
 package br.com.sol7.olimpio.comercial.atendimentoconsultor;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
-@ApplicationScoped public class AtendimentoConsultorRepository implements PanacheRepository<AtendimentoConsultor> {}
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
+public class AtendimentoConsultorRepository implements PanacheRepository<AtendimentoConsultor> {
+}

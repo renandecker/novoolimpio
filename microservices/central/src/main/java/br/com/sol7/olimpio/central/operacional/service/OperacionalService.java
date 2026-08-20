@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.central.operacional;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class OperacionalService {
 
-    @Inject OperacionalRepository repository;
+    @Inject
+    OperacionalRepository repository;
 
     // Migrado de SchedulingService.verificarOperacionalVencidos()
     public Uni<Void> verificarOperacionalVencidos() {
@@ -64,7 +67,12 @@ public class OperacionalService {
                         : Uni.createFrom().failure(new NotFoundException("Operacional not found")));
     }
 
-    private void apply(Operacional e, OperacionalRequest r) { e.pacoteId = r.pacoteId(); e.status = r.status(); e.direcionamento = r.direcionamento(); e.coordenadorId = r.coordenadorId(); }
+    private void apply(Operacional e, OperacionalRequest r) {
+        e.pacoteId = r.pacoteId();
+        e.status = r.status();
+        e.direcionamento = r.direcionamento();
+        e.coordenadorId = r.coordenadorId();
+    }
 
     private OperacionalResponse toResponse(Operacional e) {
         return new OperacionalResponse(e.id, e.pacoteId, e.status, e.direcionamento, e.coordenadorId);
@@ -183,7 +191,7 @@ public class OperacionalService {
     //         return getOperacionalRepository().buscarOperacionalComCoordenador(id);
     //     }
     public Uni<Long> buscarOperacionalComCoordenador(Integer id) {
-                return repository.buscarOperacionalComCoordenador(id).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarOperacionalComCoordenador(id).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -194,7 +202,7 @@ public class OperacionalService {
     //         return getOperacionalRepository().buscarOperacionaisDoCoordenador(coordenador);
     //     }
     public Uni<List<Long>> buscarOperacionaisDoCoordenador2(Long coordenadorId) {
-                return repository.find("coordenadorId = ?1 and status = 'INICIADO'", coordenadorId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("coordenadorId = ?1 and status = 'INICIADO'", coordenadorId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 

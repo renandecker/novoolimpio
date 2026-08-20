@@ -1,17 +1,20 @@
 package br.com.sol7.olimpio.educacao.ligacaonap;
+
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @io.quarkus.hibernate.reactive.panache.common.WithTransaction
 public class LigacaoNapService {
 
-    @Inject LigacaoNapRepository repository;
+    @Inject
+    LigacaoNapRepository repository;
 
     public Uni<List<LigacaoNapResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -69,7 +72,28 @@ public class LigacaoNapService {
     }
 
     private void apply(LigacaoNap e, LigacaoNapRequest r) {
-        e.usuarioId = r.usuarioId(); e.dataInicial = r.dataInicial(); e.dataFinal = r.dataFinal(); e.resultadoLigacaoNapId = r.resultadoLigacaoNapId(); e.telefone = r.telefone(); e.observacao = r.observacao(); e.compromissoId = r.compromissoId(); e.etapasNapId = r.etapasNapId(); e.retornoAula = r.retornoAula(); e.ativo = r.ativo(); e.qtdeAulaFeita = r.qtdeAulaFeita(); e.qtdeAulaPresente = r.qtdeAulaPresente(); e.qtdeAulaMeiaPresente = r.qtdeAulaMeiaPresente(); e.qtdeFalta = r.qtdeFalta(); e.mediaNota = r.mediaNota(); e.notaTotal = r.notaTotal(); e.notaExecutadas = r.notaExecutadas(); e.notaObtida = r.notaObtida(); e.qtdeAula = r.qtdeAula(); e.contratoId = r.contratoId(); e.cadernoRetornoId = r.cadernoRetornoId(); e.qtdeAulaAtrasado = r.qtdeAulaAtrasado();
+        e.usuarioId = r.usuarioId();
+        e.dataInicial = r.dataInicial();
+        e.dataFinal = r.dataFinal();
+        e.resultadoLigacaoNapId = r.resultadoLigacaoNapId();
+        e.telefone = r.telefone();
+        e.observacao = r.observacao();
+        e.compromissoId = r.compromissoId();
+        e.etapasNapId = r.etapasNapId();
+        e.retornoAula = r.retornoAula();
+        e.ativo = r.ativo();
+        e.qtdeAulaFeita = r.qtdeAulaFeita();
+        e.qtdeAulaPresente = r.qtdeAulaPresente();
+        e.qtdeAulaMeiaPresente = r.qtdeAulaMeiaPresente();
+        e.qtdeFalta = r.qtdeFalta();
+        e.mediaNota = r.mediaNota();
+        e.notaTotal = r.notaTotal();
+        e.notaExecutadas = r.notaExecutadas();
+        e.notaObtida = r.notaObtida();
+        e.qtdeAula = r.qtdeAula();
+        e.contratoId = r.contratoId();
+        e.cadernoRetornoId = r.cadernoRetornoId();
+        e.qtdeAulaAtrasado = r.qtdeAulaAtrasado();
     }
 
     private LigacaoNapResponse toResponse(LigacaoNap e) {

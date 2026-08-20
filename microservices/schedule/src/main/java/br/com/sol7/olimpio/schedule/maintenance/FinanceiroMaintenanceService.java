@@ -60,9 +60,11 @@ public class FinanceiroMaintenanceService {
             "UPDATE fin_caixa SET data_fechamento = now() WHERE id = $1";
 
     public record FechamentoCaixaResumo(Long caixaId, Long unidadeId, BigDecimal entradas,
-                                         BigDecimal saidas, BigDecimal sangria) {}
+                                        BigDecimal saidas, BigDecimal sangria) {
+    }
 
-    private record CaixaAberto(Long id, Long unidadeId) {}
+    private record CaixaAberto(Long id, Long unidadeId) {
+    }
 
     public Uni<List<FechamentoCaixaResumo>> fechamentoCaixaAbertos() {
         return pool.query(SQL_BUSCAR_CAIXAS_ABERTOS).execute()

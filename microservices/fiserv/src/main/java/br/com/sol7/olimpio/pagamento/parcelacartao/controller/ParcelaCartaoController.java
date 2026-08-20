@@ -20,9 +20,12 @@ import jakarta.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ParcelaCartaoController {
 
-    @Inject ParcelaCartaoService service;
+    @Inject
+    ParcelaCartaoService service;
 
-    /** Efetua a cobranca (VISTA ou PARCELADO) e vincula o resultado a fin_parcela.id_parcela_cartao. */
+    /**
+     * Efetua a cobranca (VISTA ou PARCELADO) e vincula o resultado a fin_parcela.id_parcela_cartao.
+     */
     @POST
     public Uni<Response> pagar(@Valid PagamentoCartaoRequest r) {
         return service.pagar(r).map(item -> Response.status(Response.Status.CREATED).entity(item).build());
@@ -34,14 +37,18 @@ public class ParcelaCartaoController {
         return service.buscar(id);
     }
 
-    /** Cancela (void) uma transacao aprovada do mesmo dia junto a Fiserv. */
+    /**
+     * Cancela (void) uma transacao aprovada do mesmo dia junto a Fiserv.
+     */
     @POST
     @Path("/{id}/cancelar")
     public Uni<ParcelaCartaoResponse> cancelar(@PathParam("id") Long id) {
         return service.cancelar(id);
     }
 
-    /** Estorna (return) uma transacao ja liquidada junto a Fiserv. */
+    /**
+     * Estorna (return) uma transacao ja liquidada junto a Fiserv.
+     */
     @POST
     @Path("/{id}/estornar")
     public Uni<ParcelaCartaoResponse> estornar(@PathParam("id") Long id) {

@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.tempoaula;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class TempoAulaService {
 
-    @Inject TempoAulaRepository repository;
+    @Inject
+    TempoAulaRepository repository;
 
     public Uni<List<TempoAulaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,11 @@ public class TempoAulaService {
                         : Uni.createFrom().failure(new NotFoundException("TempoAula not found")));
     }
 
-    private void apply(TempoAula e, TempoAulaRequest r) { e.descricao = r.descricao(); e.minutosAula = r.minutosAula(); e.minutos = r.minutos(); }
+    private void apply(TempoAula e, TempoAulaRequest r) {
+        e.descricao = r.descricao();
+        e.minutosAula = r.minutosAula();
+        e.minutos = r.minutos();
+    }
 
     private TempoAulaResponse toResponse(TempoAula e) {
         return new TempoAulaResponse(e.id, e.descricao, e.minutosAula, e.minutos);

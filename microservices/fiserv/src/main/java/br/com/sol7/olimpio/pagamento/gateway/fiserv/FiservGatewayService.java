@@ -12,13 +12,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 /**
  * Ponto unico de integracao com a Fiserv Commerce Hub / Payments Gateway (IPP).
- *
+ * <p>
  * As respostas da Fiserv sao devolvidas como {@link JsonNode} (e nao DTOs fortemente tipados):
  * a API e "polimorfica" (mesmo endpoint /payments aceita e retorna formatos diferentes
  * conforme o requestType) e a collection fornecida nao documenta um schema de resposta unico
@@ -42,38 +44,48 @@ public class FiservGatewayService {
     @Inject
     ObjectMapper mapper;
 
-    /** Tokeniza um cartao (cadastro), sem realizar cobranca. Usado por CartaoPessoaService. */
+    /**
+     * Tokeniza um cartao (cadastro), sem realizar cobranca. Usado por CartaoPessoaService.
+     */
     public Uni<JsonNode> tokenizarCartao(String numero, String cvv, String mes, String ano) {
         var request = TokenizationRequest.of(new PaymentCard(numero, cvv, new ExpiryDate(mes, ano)));
         return post(client::criarPaymentToken, request);
     }
 
-    /** Venda a vista (uma unica cobranca) usando os dados "crus" do cartao. */
+    /**
+     * Venda a vista (uma unica cobranca) usando os dados "crus" do cartao.
+     */
     public Uni<JsonNode> venderAVistaComCartao(String merchantTransactionId, String valor,
-                                                String numero, String cvv, String mes, String ano) {
+                                               String numero, String cvv, String mes, String ano) {
         var amount = new TransactionAmount(valor, properties.currency());
         var card = new PaymentCard(numero, cvv, new ExpiryDate(mes, ano));
         return post(client::criarPagamento, SaleRequest.comCartao(merchantTransactionId, amount, card));
     }
 
-    /** Venda a vista (uma unica cobranca) usando um paymentToken previamente cadastrado (fin_cartao_pessoa). */
+    /**
+     * Venda a vista (uma unica cobranca) usando um paymentToken previamente cadastrado (fin_cartao_pessoa).
+     */
     public Uni<JsonNode> venderAVistaComToken(String merchantTransactionId, String valor, String paymentToken) {
         var amount = new TransactionAmount(valor, properties.currency());
         return post(client::criarPagamento, SaleRequest.comToken(merchantTransactionId, amount, paymentToken));
     }
 
-    /** Venda parcelada (payment schedule) usando os dados "crus" do cartao. valorParcela = valor de CADA parcela. */
+    /**
+     * Venda parcelada (payment schedule) usando os dados "crus" do cartao. valorParcela = valor de CADA parcela.
+     */
     public Uni<JsonNode> venderParceladoComCartao(String invoiceNumber, int numeroDeParcelas, String valorParcela,
-                                                   String numero, String cvv, String mes, String ano) {
+                                                  String numero, String cvv, String mes, String ano) {
         var amount = new TransactionAmount(valorParcela, properties.currency());
         var card = new PaymentCard(numero, cvv, new ExpiryDate(mes, ano));
         var request = ScheduleRequest.comCartao(hoje(), numeroDeParcelas, invoiceNumber, amount, card);
         return post(client::criarPaymentSchedule, request);
     }
 
-    /** Venda parcelada (payment schedule) usando um paymentToken previamente cadastrado. */
+    /**
+     * Venda parcelada (payment schedule) usando um paymentToken previamente cadastrado.
+     */
     public Uni<JsonNode> venderParceladoComToken(String invoiceNumber, int numeroDeParcelas, String valorParcela,
-                                                  String paymentToken) {
+                                                 String paymentToken) {
         var amount = new TransactionAmount(valorParcela, properties.currency());
         var request = ScheduleRequest.comToken(hoje(), numeroDeParcelas, invoiceNumber, amount, paymentToken);
         return post(client::criarPaymentSchedule, request);
@@ -91,12 +103,16 @@ public class FiservGatewayService {
                 headers.timestamp(), headers.messageSignature());
     }
 
-    /** Cancela (void) uma transacao primaria do mesmo dia pelo ipgTransactionId. */
+    /**
+     * Cancela (void) uma transacao primaria do mesmo dia pelo ipgTransactionId.
+     */
     public Uni<JsonNode> cancelarPagamento(String transactionId) {
         return post(client::executarTransacaoSecundaria, transactionId, SecondaryTransactionRequest.voidTotal());
     }
 
-    /** Estorna (return) uma transacao primaria ja liquidada pelo ipgTransactionId. */
+    /**
+     * Estorna (return) uma transacao primaria ja liquidada pelo ipgTransactionId.
+     */
     public Uni<JsonNode> estornarPagamento(String transactionId, String valor) {
         return post(client::executarTransacaoSecundaria, transactionId,
                 SecondaryTransactionRequest.returnValor(valor, properties.currency()));

@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.comercial.tipocanal;
+
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -8,13 +9,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class TipoCanalService {
 
-    @Inject TipoCanalRepository repository;
+    @Inject
+    TipoCanalRepository repository;
 
     @CacheResult(cacheName = "tipo-canal-cache")
     public Uni<List<TipoCanalResponse>> list() {
@@ -58,7 +61,9 @@ public class TipoCanalService {
                         : Uni.createFrom().failure(new NotFoundException("TipoCanal not found")));
     }
 
-    private void apply(TipoCanal e, TipoCanalRequest r) { e.descricao = r.descricao(); }
+    private void apply(TipoCanal e, TipoCanalRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private TipoCanalResponse toResponse(TipoCanal e) {
         return new TipoCanalResponse(e.id, e.descricao);

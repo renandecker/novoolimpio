@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.educacao.contrato;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class ContratoRepository implements PanacheRepository<Contrato> {
+
+@ApplicationScoped
+public class ContratoRepository implements PanacheRepository<Contrato> {
 
     // Migrado de ContratoRepository.buscarContratosPessoa (legado) - HQL original:
     // Select c from Contrato c where c.unidade.ativo = true and c.unidadeResponsavel.ativo = true and c.pessoa = ?1 order by c.id desc
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Contrato>> buscarContratosPessoa(Long pessoaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CONTRATOS_PESSOA, Contrato.class)
-                    .setParameter(1, pessoaId)
-                    .getResultList());
+                        .setParameter(1, pessoaId)
+                        .getResultList());
     }
 
 
@@ -25,8 +30,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Contrato>> findContratoById(Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_FIND_CONTRATO_BY_ID, Contrato.class)
-                    .setParameter(1, id)
-                    .getResultList());
+                        .setParameter(1, id)
+                        .getResultList());
     }
 
 
@@ -38,8 +43,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Contrato>> findContratoCancelamentoById(Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_FIND_CONTRATO_CANCELAMENTO_BY_ID, Contrato.class)
-                    .setParameter(1, id)
-                    .getResultList());
+                        .setParameter(1, id)
+                        .getResultList());
     }
 
 
@@ -51,8 +56,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Contrato>> findContratoByIdOferecimento(Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_FIND_CONTRATO_BY_ID_OFERECIMENTO, Contrato.class)
-                    .setParameter(1, id)
-                    .getResultList());
+                        .setParameter(1, id)
+                        .getResultList());
     }
 
 
@@ -64,8 +69,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Contrato>> findContratoByIdTestemunha(Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_FIND_CONTRATO_BY_ID_TESTEMUNHA, Contrato.class)
-                    .setParameter(1, id)
-                    .getResultList());
+                        .setParameter(1, id)
+                        .getResultList());
     }
 
 
@@ -77,8 +82,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Contrato>> buscarContratosPessoaParcelasNaoPagas(Long pessoaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CONTRATOS_PESSOA_PARCELAS_NAO_PAGAS, Contrato.class)
-                    .setParameter(1, pessoaId)
-                    .getResultList());
+                        .setParameter(1, pessoaId)
+                        .getResultList());
     }
 
 
@@ -90,8 +95,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> buscarResponsaveisPessoa(Long pessoaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_RESPONSAVEIS_PESSOA)
-                    .setParameter(1, pessoaId)
-                    .getResultList());
+                        .setParameter(1, pessoaId)
+                        .getResultList());
     }
 
 
@@ -103,9 +108,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Contrato>> autoCompleteContrato(String query, Long pessoaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_CONTRATO, Contrato.class)
-                    .setParameter(1, query)
-                    .setParameter(2, pessoaId)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, pessoaId)
+                        .getResultList());
     }
 
 
@@ -117,8 +122,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Contrato>> buscarContratoPessoa(Long pessoaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CONTRATO_PESSOA, Contrato.class)
-                    .setParameter(1, pessoaId)
-                    .getResultList());
+                        .setParameter(1, pessoaId)
+                        .getResultList());
     }
 
 
@@ -132,26 +137,26 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> autoCompleteAluno(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_ALUNO)
-                    .setParameter(1, query)
-                    .setParameter(2, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, unidadesIds)
+                        .getResultList());
     }
 
     public static final String SQL_AUTO_COMPLETE_ALUNO_NOME =
             "SELECT DISTINCT p.id, COALESCE(pf.nome, pj.nome_fantasia, '') FROM edc_contrato c " +
-            "INNER JOIN bas_pessoa p ON p.id = c.id_pessoa " +
-            "LEFT JOIN bas_pessoa_fisica pf ON pf.id_pessoa = p.id " +
-            "LEFT JOIN bas_pessoa_juridica pj ON pj.id_pessoa = p.id " +
-            "WHERE (lower(COALESCE(pf.nome, '')) like '%' || ?1 || '%' " +
-            "OR lower(COALESCE(pj.nome_fantasia, '')) like '%' || ?1 || '%' " +
-            "OR pf.cpf like '%' || ?1 || '%' OR pj.cnpj like '%' || ?1 || '%') " +
-            "ORDER BY COALESCE(pf.nome, pj.nome_fantasia, '') LIMIT 20";
+                    "INNER JOIN bas_pessoa p ON p.id = c.id_pessoa " +
+                    "LEFT JOIN bas_pessoa_fisica pf ON pf.id_pessoa = p.id " +
+                    "LEFT JOIN bas_pessoa_juridica pj ON pj.id_pessoa = p.id " +
+                    "WHERE (lower(COALESCE(pf.nome, '')) like '%' || ?1 || '%' " +
+                    "OR lower(COALESCE(pj.nome_fantasia, '')) like '%' || ?1 || '%' " +
+                    "OR pf.cpf like '%' || ?1 || '%' OR pj.cnpj like '%' || ?1 || '%') " +
+                    "ORDER BY COALESCE(pf.nome, pj.nome_fantasia, '') LIMIT 20";
 
     public Uni<java.util.List<Object>> autoCompleteAlunoNome(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_ALUNO_NOME)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -165,9 +170,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> autoCompleteAlunoPagamentoPendente(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_ALUNO_PAGAMENTO_PENDENTE)
-                    .setParameter(1, query)
-                    .setParameter(2, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -181,9 +186,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> autoCompleteAlunoPagamentoPendenteUnidade(String query, Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_ALUNO_PAGAMENTO_PENDENTE_UNIDADE)
-                    .setParameter(1, query)
-                    .setParameter(2, unidadeId)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, unidadeId)
+                        .getResultList());
     }
 
 
@@ -195,8 +200,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Contrato>> validaAluno(Long pessoaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_VALIDA_ALUNO, Contrato.class)
-                    .setParameter(1, pessoaId)
-                    .getResultList());
+                        .setParameter(1, pessoaId)
+                        .getResultList());
     }
 
 
@@ -208,8 +213,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Contrato>> ultimoContratoSemContrato(Long pessoaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_ULTIMO_CONTRATO_SEM_CONTRATO, Contrato.class)
-                    .setParameter(1, pessoaId)
-                    .getResultList());
+                        .setParameter(1, pessoaId)
+                        .getResultList());
     }
 
 }

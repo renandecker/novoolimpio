@@ -1,9 +1,71 @@
 package br.com.sol7.olimpio.basico.disponibilidadepessoa.controller;
+
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.DisponibilidadeScheduleEventResponse;
 import br.com.sol7.olimpio.shared.DisponibilidadeOpcaoResponse;
-import io.smallrye.mutiny.Uni; import jakarta.inject.Inject; import jakarta.validation.Valid; import jakarta.ws.rs.*; import jakarta.ws.rs.core.*; import java.time.LocalDate; import java.util.List;
+import io.smallrye.mutiny.Uni;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
+
+import java.time.LocalDate;
+import java.util.List;
+
 import br.com.sol7.olimpio.basico.disponibilidadepessoa.dto.DisponibilidadePessoaRequest;
 import br.com.sol7.olimpio.basico.disponibilidadepessoa.dto.DisponibilidadePessoaResponse;
 import br.com.sol7.olimpio.basico.disponibilidadepessoa.service.DisponibilidadePessoaService;
-@Path("/api/basico/disponibilidade-pessoa") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON) public class DisponibilidadePessoaController { @Inject DisponibilidadePessoaService service; @GET public Uni<List<DisponibilidadePessoaResponse>> list(){return service.list();} @GET @Path("/paged") public Uni<PagedResponse<DisponibilidadePessoaResponse>> paged(@QueryParam("page") Integer page,@QueryParam("size") Integer size){return service.paged(page==null?0:page,size==null?10:size);} @GET @Path("/schedule-events") public Uni<List<DisponibilidadeScheduleEventResponse>> scheduleEvents(@QueryParam("pessoaId") Long pessoaId,@QueryParam("inicio") LocalDate inicio,@QueryParam("fim") LocalDate fim){return service.scheduleEvents(pessoaId,inicio,fim);} @GET @Path("/opcoes-pessoas") public Uni<List<DisponibilidadeOpcaoResponse>> opcoesPessoas(){return service.opcoesPessoas();} @GET @Path("/{id}") public Uni<DisponibilidadePessoaResponse> find(@PathParam("id") Long id){return service.find(id);}@POST public Uni<Response> create(@Valid DisponibilidadePessoaRequest r){return service.create(r).map(item->Response.status(Response.Status.CREATED).entity(item).build());}@PUT @Path("/{id}") public Uni<DisponibilidadePessoaResponse> update(@PathParam("id") Long id,@Valid DisponibilidadePessoaRequest r){return service.update(id,r);}@DELETE @Path("/{id}") public Uni<Void> delete(@PathParam("id") Long id){return service.delete(id);} }
+
+@Path("/api/basico/disponibilidade-pessoa")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class DisponibilidadePessoaController {
+    @Inject
+    DisponibilidadePessoaService service;
+
+    @GET
+    public Uni<List<DisponibilidadePessoaResponse>> list() {
+        return service.list();
+    }
+
+    @GET
+    @Path("/paged")
+    public Uni<PagedResponse<DisponibilidadePessoaResponse>> paged(@QueryParam("page") Integer page, @QueryParam("size") Integer size) {
+        return service.paged(page == null ? 0 : page, size == null ? 10 : size);
+    }
+
+    @GET
+    @Path("/schedule-events")
+    public Uni<List<DisponibilidadeScheduleEventResponse>> scheduleEvents(@QueryParam("pessoaId") Long pessoaId, @QueryParam("inicio") LocalDate inicio, @QueryParam("fim") LocalDate fim) {
+        return service.scheduleEvents(pessoaId, inicio, fim);
+    }
+
+    @GET
+    @Path("/opcoes-pessoas")
+    public Uni<List<DisponibilidadeOpcaoResponse>> opcoesPessoas() {
+        return service.opcoesPessoas();
+    }
+
+    @GET
+    @Path("/{id}")
+    public Uni<DisponibilidadePessoaResponse> find(@PathParam("id") Long id) {
+        return service.find(id);
+    }
+
+    @POST
+    public Uni<Response> create(@Valid DisponibilidadePessoaRequest r) {
+        return service.create(r).map(item -> Response.status(Response.Status.CREATED).entity(item).build());
+    }
+
+    @PUT
+    @Path("/{id}")
+    public Uni<DisponibilidadePessoaResponse> update(@PathParam("id") Long id, @Valid DisponibilidadePessoaRequest r) {
+        return service.update(id, r);
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Uni<Void> delete(@PathParam("id") Long id) {
+        return service.delete(id);
+    }
+}

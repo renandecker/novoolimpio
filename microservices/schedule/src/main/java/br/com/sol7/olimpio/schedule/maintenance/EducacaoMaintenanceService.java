@@ -106,29 +106,29 @@ public class EducacaoMaintenanceService {
 
     private static final String SQL_OFERECIMENTOS_SEM_CHAMADA =
             "SELECT o.id, COALESCE(o.qtde_sequencia, 0) AS qtde_seq " +
-            "FROM edc_oferecimento_componente_curricular o " +
-            "WHERE NOT EXISTS (" +
-            "  SELECT ch.id FROM edc_chamada_assinada_impressa ch " +
-            "  WHERE ch.id_oferecimento_componente_curricular = o.id" +
-            ") AND (o.status = 'LIBERADA' OR o.status = 'EM_ANDAMENTO')";
+                    "FROM edc_oferecimento_componente_curricular o " +
+                    "WHERE NOT EXISTS (" +
+                    "  SELECT ch.id FROM edc_chamada_assinada_impressa ch " +
+                    "  WHERE ch.id_oferecimento_componente_curricular = o.id" +
+                    ") AND (o.status = 'LIBERADA' OR o.status = 'EM_ANDAMENTO')";
 
     private static final String SQL_OCORRENCIAS =
             "SELECT id, data FROM edc_ocorrencia_componente_curricular " +
-            "WHERE id_oferecimento_componente_curricular = $1 AND tipo = $2 " +
-            "ORDER BY data";
+                    "WHERE id_oferecimento_componente_curricular = $1 AND tipo = $2 " +
+                    "ORDER BY data";
 
     private static final String SQL_MAIOR_SEQUENCIA =
             "SELECT MAX(sequencia) FROM edc_chamada_assinada_impressa " +
-            "WHERE id_oferecimento_componente_curricular = $1 AND ativo = true";
+                    "WHERE id_oferecimento_componente_curricular = $1 AND ativo = true";
 
     private static final String SQL_EXISTE_PENDENTE =
             "SELECT count(*) FROM edc_chamada_assinada_impressa " +
-            "WHERE id_oferecimento_componente_curricular = $1 AND sequencia = $2 AND ativo = true";
+                    "WHERE id_oferecimento_componente_curricular = $1 AND sequencia = $2 AND ativo = true";
 
     private static final String SQL_INSERIR_CHAMADA =
             "INSERT INTO edc_chamada_assinada_impressa " +
-            "(data, id_oferecimento_componente_curricular, sequencia, quantidade, aula_coringa, ativo, inicio, fim, pendente) " +
-            "VALUES (now(), $1, $2, 0, $3, true, $4, $5, true)";
+                    "(data, id_oferecimento_componente_curricular, sequencia, quantidade, aula_coringa, ativo, inicio, fim, pendente) " +
+                    "VALUES (now(), $1, $2, 0, $3, true, $4, $5, true)";
 
     public Uni<Void> carregarChamadasPendentesAutomatico() {
         LOG.info("carregarChamadasPendentesAutomatico - iniciando");
@@ -227,28 +227,28 @@ public class EducacaoMaintenanceService {
 
     private static final String SQL_ATIVAR_AVALIACOES =
             "UPDATE edc_avaliacao SET fl_ativo = true WHERE fl_ativo = false " +
-            "AND data_inicial <= current_date AND data_final >= current_date";
+                    "AND data_inicial <= current_date AND data_final >= current_date";
 
     private static final String SQL_DESATIVAR_AVALIACOES =
             "UPDATE edc_avaliacao SET fl_ativo = false WHERE fl_ativo = true " +
-            "AND (data_inicial > current_date OR data_final < current_date)";
+                    "AND (data_inicial > current_date OR data_final < current_date)";
 
     private static final String SQL_AVALIACOES_PARA_CORRIGIR =
             "SELECT id FROM edc_avaliacao WHERE data_final < current_date AND data_final IS NOT NULL";
 
     private static final String SQL_CORRIGIR_RESPOSTAS =
             "UPDATE edc_avaliacao_aluno aa " +
-            "SET nota_acerto = CASE " +
-            "  WHEN aa.id_avaliacao_resposta = p.id_avaliacao_resposta THEN p.percentual_questao " +
-            "  ELSE 0 " +
-            "END, " +
-            "percentual_correcao = CASE " +
-            "  WHEN aa.id_avaliacao_resposta = p.id_avaliacao_resposta THEN p.percentual_questao " +
-            "  ELSE 0 " +
-            "END " +
-            "FROM edc_avaliacao_pergunta p " +
-            "WHERE aa.id_avaliacao_pergunta = p.id " +
-            "AND aa.id_avaliacao = $1";
+                    "SET nota_acerto = CASE " +
+                    "  WHEN aa.id_avaliacao_resposta = p.id_avaliacao_resposta THEN p.percentual_questao " +
+                    "  ELSE 0 " +
+                    "END, " +
+                    "percentual_correcao = CASE " +
+                    "  WHEN aa.id_avaliacao_resposta = p.id_avaliacao_resposta THEN p.percentual_questao " +
+                    "  ELSE 0 " +
+                    "END " +
+                    "FROM edc_avaliacao_pergunta p " +
+                    "WHERE aa.id_avaliacao_pergunta = p.id " +
+                    "AND aa.id_avaliacao = $1";
 
     public Uni<Void> corrigirAvaliacoes() {
         LOG.info("corrigirAvaliacoes - iniciando");

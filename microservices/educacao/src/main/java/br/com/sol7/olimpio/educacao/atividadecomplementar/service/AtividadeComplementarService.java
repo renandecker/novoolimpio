@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.atividadecomplementar;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class AtividadeComplementarService {
 
-    @Inject AtividadeComplementarRepository repository;
+    @Inject
+    AtividadeComplementarRepository repository;
 
     public Uni<List<AtividadeComplementarResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,11 @@ public class AtividadeComplementarService {
                         : Uni.createFrom().failure(new NotFoundException("AtividadeComplementar not found")));
     }
 
-    private void apply(AtividadeComplementar e, AtividadeComplementarRequest r) { e.descricao = r.descricao(); e.cargaHoraria = r.cargaHoraria(); e.tipoAtividadeId = r.tipoAtividadeId(); }
+    private void apply(AtividadeComplementar e, AtividadeComplementarRequest r) {
+        e.descricao = r.descricao();
+        e.cargaHoraria = r.cargaHoraria();
+        e.tipoAtividadeId = r.tipoAtividadeId();
+    }
 
     private AtividadeComplementarResponse toResponse(AtividadeComplementar e) {
         return new AtividadeComplementarResponse(e.id, e.descricao, e.cargaHoraria, e.tipoAtividadeId);

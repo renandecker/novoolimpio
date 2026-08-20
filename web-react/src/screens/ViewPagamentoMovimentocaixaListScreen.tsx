@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewPagamentoMovimentocaixaListScreen(){return <PermissionGate permission="READ"><main><h1>Movimentocaixa</h1><DataTable path="/api/view/pagamento/movimentocaixa"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewPagamentoMovimentocaixaListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Movimentocaixa</h1><DataTable path="/api/view/pagamento/movimentocaixa"/></main>
+    </PermissionGate>
+}

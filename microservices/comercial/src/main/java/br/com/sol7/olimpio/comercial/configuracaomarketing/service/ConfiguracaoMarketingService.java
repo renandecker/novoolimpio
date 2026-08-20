@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.comercial.configuracaomarketing;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ConfiguracaoMarketingService {
 
-    @Inject ConfiguracaoMarketingRepository repository;
+    @Inject
+    ConfiguracaoMarketingRepository repository;
 
     public Uni<List<ConfiguracaoMarketingResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,16 @@ public class ConfiguracaoMarketingService {
                         : Uni.createFrom().failure(new NotFoundException("ConfiguracaoMarketing not found")));
     }
 
-    private void apply(ConfiguracaoMarketing e, ConfiguracaoMarketingRequest r) { e.notaMaximaBloquear = r.notaMaximaBloquear(); e.notaMaximaConfirmar = r.notaMaximaConfirmar(); e.tempoMaximoLigacao = r.tempoMaximoLigacao(); e.diasArquivoProcon = r.diasArquivoProcon(); e.tempoMaximoIntervalo = r.tempoMaximoIntervalo(); e.limiteMaximoRadar = r.limiteMaximoRadar(); e.resultadoContatoExpiradoId = r.resultadoContatoExpiradoId(); e.resultadoContatoRetornoId = r.resultadoContatoRetornoId(); }
+    private void apply(ConfiguracaoMarketing e, ConfiguracaoMarketingRequest r) {
+        e.notaMaximaBloquear = r.notaMaximaBloquear();
+        e.notaMaximaConfirmar = r.notaMaximaConfirmar();
+        e.tempoMaximoLigacao = r.tempoMaximoLigacao();
+        e.diasArquivoProcon = r.diasArquivoProcon();
+        e.tempoMaximoIntervalo = r.tempoMaximoIntervalo();
+        e.limiteMaximoRadar = r.limiteMaximoRadar();
+        e.resultadoContatoExpiradoId = r.resultadoContatoExpiradoId();
+        e.resultadoContatoRetornoId = r.resultadoContatoRetornoId();
+    }
 
     private ConfiguracaoMarketingResponse toResponse(ConfiguracaoMarketing e) {
         return new ConfiguracaoMarketingResponse(e.id, e.notaMaximaBloquear, e.notaMaximaConfirmar, e.tempoMaximoLigacao, e.diasArquivoProcon, e.tempoMaximoIntervalo, e.limiteMaximoRadar, e.resultadoContatoExpiradoId, e.resultadoContatoRetornoId);

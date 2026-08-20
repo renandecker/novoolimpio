@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.comercial.arquivoprocon;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ArquivoProconService {
 
-    @Inject ArquivoProconRepository repository;
+    @Inject
+    ArquivoProconRepository repository;
 
     public Uni<List<ArquivoProconResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,13 @@ public class ArquivoProconService {
                         : Uni.createFrom().failure(new NotFoundException("ArquivoProcon not found")));
     }
 
-    private void apply(ArquivoProcon e, ArquivoProconRequest r) { e.data = r.data(); e.numeroLinhas = r.numeroLinhas(); e.usuarioId = r.usuarioId(); e.hash = r.hash(); e.prospectosDeletadosPacote = r.prospectosDeletadosPacote(); }
+    private void apply(ArquivoProcon e, ArquivoProconRequest r) {
+        e.data = r.data();
+        e.numeroLinhas = r.numeroLinhas();
+        e.usuarioId = r.usuarioId();
+        e.hash = r.hash();
+        e.prospectosDeletadosPacote = r.prospectosDeletadosPacote();
+    }
 
     private ArquivoProconResponse toResponse(ArquivoProcon e) {
         return new ArquivoProconResponse(e.id, e.data, e.numeroLinhas, e.usuarioId, e.hash, e.prospectosDeletadosPacote);
@@ -65,7 +74,7 @@ public class ArquivoProconService {
     //         return getArquivoProconRepository().verificarHash(hash);
     //     }
     public Uni<List<Long>> verificarHash(String hash) {
-                return repository.find("hash = ?1", hash).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("hash = ?1", hash).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

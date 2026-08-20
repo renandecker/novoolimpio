@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewRegiaoFormRegiaoListScreen(){return <PermissionGate permission="READ"><main><h1>Form Regiao</h1><DataTable path="/api/view/regiao/formRegiao"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewRegiaoFormRegiaoListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Form Regiao</h1><DataTable path="/api/view/regiao/formRegiao"/></main>
+    </PermissionGate>
+}

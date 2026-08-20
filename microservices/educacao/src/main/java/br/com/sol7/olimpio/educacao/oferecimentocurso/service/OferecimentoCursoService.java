@@ -23,11 +23,16 @@ import java.util.List;
 @WithTransaction
 public class OferecimentoCursoService {
 
-    @Inject GrupoRepository grupoRepository;
-    @Inject CurriculoRepository curriculoRepository;
-    @Inject UnidadeRepository unidadeRepository;
-    @Inject CursoRepository cursoRepository;
-    @Inject OferecimentoComponenteCurricularService oferecimentoService;
+    @Inject
+    GrupoRepository grupoRepository;
+    @Inject
+    CurriculoRepository curriculoRepository;
+    @Inject
+    UnidadeRepository unidadeRepository;
+    @Inject
+    CursoRepository cursoRepository;
+    @Inject
+    OferecimentoComponenteCurricularService oferecimentoService;
 
     public Uni<List<OferecimentoCursoResponse>> list() {
         return withRefs(grupoRepository.listAll());
@@ -129,17 +134,17 @@ public class OferecimentoCursoService {
     // ----- resolucao de descricoes (refs locais, sem N+1) -----
 
     private record Refs(List<Curriculo> curriculos, List<Unidade> unidades, List<Curso> cursos) {
-        Curriculo curriculo(Long id) {
+        Curriculo curriculo (Long id){
             if (id == null) return null;
             return curriculos.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null);
         }
 
-        Unidade unidade(Long id) {
+        Unidade unidade (Long id){
             if (id == null) return null;
             return unidades.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null);
         }
 
-        Curso curso(Long id) {
+        Curso curso (Long id){
             if (id == null) return null;
             return cursos.stream().filter(x -> x.id.equals(id)).findFirst().orElse(null);
         }

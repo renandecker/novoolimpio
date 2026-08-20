@@ -1,14 +1,32 @@
 package br.com.sol7.olimpio.basico.calendarioagenda.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
-import io.smallrye.mutiny.Uni; import jakarta.enterprise.context.ApplicationScoped; import jakarta.inject.Inject; import jakarta.ws.rs.NotFoundException; import java.util.List;
 import io.smallrye.mutiny.Uni;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
+
+import java.util.List;
+
+import io.smallrye.mutiny.Uni;
+
 import java.util.Date;
+
 import br.com.sol7.olimpio.basico.calendarioagenda.dto.CalendarioAgendaRequest;
 import br.com.sol7.olimpio.basico.calendarioagenda.dto.CalendarioAgendaResponse;
 import br.com.sol7.olimpio.basico.calendarioagenda.entity.CalendarioAgenda;
 import br.com.sol7.olimpio.basico.calendarioagenda.repository.CalendarioAgendaRepository;
-@ApplicationScoped @WithTransaction public class CalendarioAgendaService { @Inject CalendarioAgendaRepository repository; public Uni<List<CalendarioAgendaResponse>> list(){return repository.listAll().map(items->items.stream().map(this::toResponse).toList());}
+
+@ApplicationScoped
+@WithTransaction
+public class CalendarioAgendaService {
+    @Inject
+    CalendarioAgendaRepository repository;
+
+    public Uni<List<CalendarioAgendaResponse>> list() {
+        return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
+    }
 
     public Uni<PagedResponse<CalendarioAgendaResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
@@ -17,7 +35,33 @@ import br.com.sol7.olimpio.basico.calendarioagenda.repository.CalendarioAgendaRe
                 .onItem().transformToUni(items -> repository.count()
                         .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
- public Uni<CalendarioAgendaResponse> find(Long id){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("CalendarioAgenda not found")).map(this::toResponse);} public Uni<CalendarioAgendaResponse> create(CalendarioAgendaRequest r){var e=new CalendarioAgenda();apply(e,r);return repository.persist(e).replaceWith(()->toResponse(e));} public Uni<CalendarioAgendaResponse> update(Long id,CalendarioAgendaRequest r){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("CalendarioAgenda not found")).invoke(e->apply(e,r)).map(this::toResponse);} public Uni<Void> delete(Long id){return repository.deleteById(id).onItem().transformToUni(deleted->deleted?Uni.createFrom().voidItem():Uni.createFrom().failure(new NotFoundException("CalendarioAgenda not found")));} private void apply(CalendarioAgenda e,CalendarioAgendaRequest r){e.nome=r.nome();e.dadosJson=r.dadosJson();} private CalendarioAgendaResponse toResponse(CalendarioAgenda e){return new CalendarioAgendaResponse(e.id,e.nome,e.dadosJson);} 
+
+    public Uni<CalendarioAgendaResponse> find(Long id) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("CalendarioAgenda not found")).map(this::toResponse);
+    }
+
+    public Uni<CalendarioAgendaResponse> create(CalendarioAgendaRequest r) {
+        var e = new CalendarioAgenda();
+        apply(e, r);
+        return repository.persist(e).replaceWith(() -> toResponse(e));
+    }
+
+    public Uni<CalendarioAgendaResponse> update(Long id, CalendarioAgendaRequest r) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("CalendarioAgenda not found")).invoke(e -> apply(e, r)).map(this::toResponse);
+    }
+
+    public Uni<Void> delete(Long id) {
+        return repository.deleteById(id).onItem().transformToUni(deleted -> deleted ? Uni.createFrom().voidItem() : Uni.createFrom().failure(new NotFoundException("CalendarioAgenda not found")));
+    }
+
+    private void apply(CalendarioAgenda e, CalendarioAgendaRequest r) {
+        e.nome = r.nome();
+        e.dadosJson = r.dadosJson();
+    }
+
+    private CalendarioAgendaResponse toResponse(CalendarioAgenda e) {
+        return new CalendarioAgendaResponse(e.id, e.nome, e.dadosJson);
+    }
 
     // Migrado de CalendarioAgendaController.buscarDetalhes (src/main/java/br/com/sol7/olimpio/control/controllers/basico/CalendarioAgendaController.java:127, camada controller)
     // Observacao: parametro event: era ToggleEvent no legado

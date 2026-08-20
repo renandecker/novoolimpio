@@ -16,6 +16,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 import java.util.List;
 
 @Path("/api/pagamento/cartao-pessoa")
@@ -23,7 +24,8 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class CartaoPessoaController {
 
-    @Inject CartaoPessoaService service;
+    @Inject
+    CartaoPessoaService service;
 
     @GET
     public Uni<List<CartaoPessoaResponse>> listar(@QueryParam("idPessoa") Long idPessoa) {

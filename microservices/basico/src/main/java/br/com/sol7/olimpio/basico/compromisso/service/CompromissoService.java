@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.compromisso.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import org.slf4j.Logger;
@@ -8,8 +9,10 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 import java.util.Date;
+
 import br.com.sol7.olimpio.basico.compromisso.dto.CompromissoRequest;
 import br.com.sol7.olimpio.basico.compromisso.dto.CompromissoResponse;
 import br.com.sol7.olimpio.basico.compromisso.entity.Compromisso;
@@ -19,7 +22,8 @@ import br.com.sol7.olimpio.basico.compromisso.repository.CompromissoRepository;
 @WithTransaction
 public class CompromissoService {
 
-    @Inject CompromissoRepository repository;
+    @Inject
+    CompromissoRepository repository;
     private static final Logger logger = LoggerFactory.getLogger(CompromissoService.class);
 
     // Migrado de SchedulingService.atualizarCompromissosAutomaticos()
@@ -68,7 +72,25 @@ public class CompromissoService {
                         : Uni.createFrom().failure(new NotFoundException("Compromisso not found")));
     }
 
-    private void apply(Compromisso e, CompromissoRequest r) { e.descricao = r.descricao(); e.data = r.data(); e.horarioId = r.horarioId(); e.tipoCompromissoId = r.tipoCompromissoId(); e.agendaId = r.agendaId(); e.pessoaId = r.pessoaId(); e.dataChegada = r.dataChegada(); e.dataAlteracao = r.dataAlteracao(); e.dataInicio = r.dataInicio(); e.dataConclusao = r.dataConclusao(); e.observacao = r.observacao(); e.ativo = r.ativo(); e.usuarioId = r.usuarioId(); e.statusCompromissoId = r.statusCompromissoId(); e.prospectoId = r.prospectoId(); e.atendenteId = r.atendenteId(); e.usuarioFinalizouId = r.usuarioFinalizouId(); }
+    private void apply(Compromisso e, CompromissoRequest r) {
+        e.descricao = r.descricao();
+        e.data = r.data();
+        e.horarioId = r.horarioId();
+        e.tipoCompromissoId = r.tipoCompromissoId();
+        e.agendaId = r.agendaId();
+        e.pessoaId = r.pessoaId();
+        e.dataChegada = r.dataChegada();
+        e.dataAlteracao = r.dataAlteracao();
+        e.dataInicio = r.dataInicio();
+        e.dataConclusao = r.dataConclusao();
+        e.observacao = r.observacao();
+        e.ativo = r.ativo();
+        e.usuarioId = r.usuarioId();
+        e.statusCompromissoId = r.statusCompromissoId();
+        e.prospectoId = r.prospectoId();
+        e.atendenteId = r.atendenteId();
+        e.usuarioFinalizouId = r.usuarioFinalizouId();
+    }
 
     private CompromissoResponse toResponse(Compromisso e) {
         return new CompromissoResponse(e.id, e.descricao, e.data, e.horarioId, e.tipoCompromissoId, e.agendaId, e.pessoaId, e.dataChegada, e.dataAlteracao, e.dataInicio, e.dataConclusao, e.observacao, e.ativo, e.usuarioId, e.statusCompromissoId, e.prospectoId, e.atendenteId, e.usuarioFinalizouId);
@@ -317,7 +339,7 @@ public class CompromissoService {
     //         return getCompromissoRepository().buscarCompromissoComResultados(id);
     //     }
     public Uni<Long> buscarCompromissoComResultados(Integer id) {
-                return repository.buscarCompromissoComResultados(id).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarCompromissoComResultados(id).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -328,7 +350,7 @@ public class CompromissoService {
     //         return getCompromissoRepository().buscarLigacaoAgendamentoVencido(compromisso);
     //     }
     public Uni<Long> buscarLigacaoAgendamentoVencido(Long compromissoId) {
-                return repository.find("compromisso = ?1", compromissoId).firstResult().map(x -> x == null ? null : x.id);
+        return repository.find("compromisso = ?1", compromissoId).firstResult().map(x -> x == null ? null : x.id);
     }
 
 

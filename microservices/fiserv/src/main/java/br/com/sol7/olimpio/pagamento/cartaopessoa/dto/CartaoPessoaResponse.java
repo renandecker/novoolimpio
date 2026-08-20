@@ -15,4 +15,4 @@ public record CartaoPessoaResponse(
         String apelido,
         boolean ativo,
         boolean principal,
-        LocalDateTime dataCadastro) {}
+        LocalDateTime dataCadastro){}

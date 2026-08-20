@@ -1,9 +1,14 @@
 package br.com.sol7.olimpio.basico.escolaridade.repository;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 import br.com.sol7.olimpio.basico.escolaridade.entity.Escolaridade;
-@ApplicationScoped public class EscolaridadeRepository implements PanacheRepository<Escolaridade> {
+
+@ApplicationScoped
+public class EscolaridadeRepository implements PanacheRepository<Escolaridade> {
 
     // Migrado de EscolaridadeRepository.findAll (legado) - HQL original:
     // Select a from Escolaridade a order by a.descricao
@@ -14,7 +19,7 @@ import br.com.sol7.olimpio.basico.escolaridade.entity.Escolaridade;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_FIND_ALL, Escolaridade.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -27,7 +32,7 @@ import br.com.sol7.olimpio.basico.escolaridade.entity.Escolaridade;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_FIND_ALL_ORDEM, Escolaridade.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -40,7 +45,7 @@ import br.com.sol7.olimpio.basico.escolaridade.entity.Escolaridade;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_FIND_ALL_ORDEM_INVERTIDO, Escolaridade.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -52,8 +57,8 @@ import br.com.sol7.olimpio.basico.escolaridade.entity.Escolaridade;
     public Uni<java.util.List<Escolaridade>> autoComplete(String lowerCase) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Escolaridade.class)
-                    .setParameter(1, lowerCase)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .getResultList());
     }
 
 }

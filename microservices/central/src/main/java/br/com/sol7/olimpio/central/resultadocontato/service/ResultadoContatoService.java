@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.central.resultadocontato;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ResultadoContatoService {
 
-    @Inject ResultadoContatoRepository repository;
+    @Inject
+    ResultadoContatoRepository repository;
 
     public Uni<List<ResultadoContatoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,16 @@ public class ResultadoContatoService {
                         : Uni.createFrom().failure(new NotFoundException("ResultadoContato not found")));
     }
 
-    private void apply(ResultadoContato e, ResultadoContatoRequest r) { e.nota = r.nota(); e.descricao = r.descricao(); e.voltar = r.voltar(); e.relato = r.relato(); e.visivel = r.visivel(); e.qtdeRetorno = r.qtdeRetorno(); e.outro = r.outro(); e.tela = r.tela(); }
+    private void apply(ResultadoContato e, ResultadoContatoRequest r) {
+        e.nota = r.nota();
+        e.descricao = r.descricao();
+        e.voltar = r.voltar();
+        e.relato = r.relato();
+        e.visivel = r.visivel();
+        e.qtdeRetorno = r.qtdeRetorno();
+        e.outro = r.outro();
+        e.tela = r.tela();
+    }
 
     private ResultadoContatoResponse toResponse(ResultadoContato e) {
         return new ResultadoContatoResponse(e.id, e.nota, e.descricao, e.voltar, e.relato, e.visivel, e.qtdeRetorno, e.outro, e.tela);
@@ -65,7 +77,7 @@ public class ResultadoContatoService {
     //         return getResultadoContatoRepository().buscarResultadosOrdenado();
     //     }
     public Uni<List<Long>> buscarResultadosOrdenado() {
-                return repository.find("order by descricao").list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("order by descricao").list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -75,7 +87,7 @@ public class ResultadoContatoService {
     //         return getResultadoContatoRepository().buscarResultadosOrdenadoLigacao();
     //     }
     public Uni<List<Long>> buscarResultadosOrdenadoLigacao() {
-                return repository.find("visivel = true order by descricao").list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("visivel = true order by descricao").list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

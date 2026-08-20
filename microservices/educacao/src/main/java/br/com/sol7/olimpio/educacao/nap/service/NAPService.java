@@ -6,13 +6,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class NAPService {
 
-    @Inject NAPRepository repository;
+    @Inject
+    NAPRepository repository;
 
     public Uni<List<NAPResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());

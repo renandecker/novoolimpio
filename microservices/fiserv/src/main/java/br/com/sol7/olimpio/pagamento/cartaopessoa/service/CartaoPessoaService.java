@@ -13,14 +13,17 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 @ApplicationScoped
 public class CartaoPessoaService {
 
-    @Inject CartaoPessoaRepository repository;
-    @Inject FiservGatewayService fiserv;
+    @Inject
+    CartaoPessoaRepository repository;
+    @Inject
+    FiservGatewayService fiserv;
 
     @WithSession
     public Uni<List<CartaoPessoaResponse>> listarPorPessoa(Long idPessoa) {
@@ -71,7 +74,9 @@ public class CartaoPessoaService {
                 }).replaceWithVoid();
     }
 
-    /** Usado internamente pelo modulo de pagamento para recuperar o token de cobranca. */
+    /**
+     * Usado internamente pelo modulo de pagamento para recuperar o token de cobranca.
+     */
     @WithSession
     public Uni<CartaoPessoa> buscarEntidadeAtiva(Long idPessoa, Long idCartao) {
         return repository.buscarAtivoDaPessoa(idPessoa, idCartao)

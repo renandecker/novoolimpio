@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.tipocontrato;
+
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -8,13 +9,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class TipoContratoService {
 
-    @Inject TipoContratoRepository repository;
+    @Inject
+    TipoContratoRepository repository;
 
     @CacheResult(cacheName = "tipo-contrato-cache")
     public Uni<List<TipoContratoResponse>> list() {
@@ -58,7 +61,9 @@ public class TipoContratoService {
                         : Uni.createFrom().failure(new NotFoundException("TipoContrato not found")));
     }
 
-    private void apply(TipoContrato e, TipoContratoRequest r) { e.descricao = r.descricao(); }
+    private void apply(TipoContrato e, TipoContratoRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private TipoContratoResponse toResponse(TipoContrato e) {
         return new TipoContratoResponse(e.id, e.descricao);

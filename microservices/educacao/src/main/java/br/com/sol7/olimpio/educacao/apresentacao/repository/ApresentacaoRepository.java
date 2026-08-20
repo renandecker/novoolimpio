@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.educacao.apresentacao;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class ApresentacaoRepository implements PanacheRepository<Apresentacao> {
+
+@ApplicationScoped
+public class ApresentacaoRepository implements PanacheRepository<Apresentacao> {
 
     // Migrado de ApresentacaoRepository.maiorOrdem (legado) - HQL original:
     // Select max(a.ordem) from Apresentacao a
@@ -13,7 +18,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_MAIOR_ORDEM)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -26,7 +31,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_APRESENTACOES_ORDENADO, Apresentacao.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 }

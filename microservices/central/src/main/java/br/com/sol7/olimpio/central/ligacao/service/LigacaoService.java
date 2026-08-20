@@ -1,19 +1,23 @@
 package br.com.sol7.olimpio.central.ligacao;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+
 import java.util.Date;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class LigacaoService {
 
-    @Inject LigacaoRepository repository;
+    @Inject
+    LigacaoRepository repository;
 
     public Uni<List<LigacaoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -53,7 +57,17 @@ public class LigacaoService {
                         : Uni.createFrom().failure(new NotFoundException("Ligacao not found")));
     }
 
-    private void apply(Ligacao e, LigacaoRequest r) { e.usuarioId = r.usuarioId(); e.dataInicial = r.dataInicial(); e.dataFinal = r.dataFinal(); e.relato = r.relato(); e.ordemLigacaoId = r.ordemLigacaoId(); e.resultadoContatoId = r.resultadoContatoId(); e.compromissoId = r.compromissoId(); e.telefoneDiscado = r.telefoneDiscado(); e.cursoInteresseId = r.cursoInteresseId(); }
+    private void apply(Ligacao e, LigacaoRequest r) {
+        e.usuarioId = r.usuarioId();
+        e.dataInicial = r.dataInicial();
+        e.dataFinal = r.dataFinal();
+        e.relato = r.relato();
+        e.ordemLigacaoId = r.ordemLigacaoId();
+        e.resultadoContatoId = r.resultadoContatoId();
+        e.compromissoId = r.compromissoId();
+        e.telefoneDiscado = r.telefoneDiscado();
+        e.cursoInteresseId = r.cursoInteresseId();
+    }
 
     private LigacaoResponse toResponse(Ligacao e) {
         return new LigacaoResponse(e.id, e.usuarioId, e.dataInicial, e.dataFinal, e.relato, e.ordemLigacaoId, e.resultadoContatoId, e.compromissoId, e.telefoneDiscado, e.cursoInteresseId);
@@ -138,7 +152,7 @@ public class LigacaoService {
     //         return getLigacaoRepository().buscarHistoricoLigacao(prospecto, new PageRequest(0, 5)).getContent();
     //     }
     public Uni<List<Long>> buscarHistoricoLigacao(Integer prospecto) {
-                // Obs: condicao removida (depende de outro microservico): l.ordemLigacao.prospecto.id = ?1
+        // Obs: condicao removida (depende de outro microservico): l.ordemLigacao.prospecto.id = ?1
         return repository.find("resultadoContatoId is not null and dataFinal is not null order by dataInicial desc", prospecto).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
@@ -149,7 +163,7 @@ public class LigacaoService {
     //         return getLigacaoRepository().buscarHistoricoTodasLigacaoProspecto(prospecto);
     //     }
     public Uni<List<Long>> buscarHistoricoTodasLigacaoProspecto(Integer prospecto) {
-                // Obs: condicao removida (depende de outro microservico): l.ordemLigacao.prospecto.id = ?1
+        // Obs: condicao removida (depende de outro microservico): l.ordemLigacao.prospecto.id = ?1
         return repository.find("order by dataInicial desc", prospecto).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 

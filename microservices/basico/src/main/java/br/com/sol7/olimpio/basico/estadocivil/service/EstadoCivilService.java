@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.estadocivil.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.estadocivil.dto.EstadoCivilRequest;
 import br.com.sol7.olimpio.basico.estadocivil.dto.EstadoCivilResponse;
 import br.com.sol7.olimpio.basico.estadocivil.entity.EstadoCivil;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.estadocivil.repository.EstadoCivilRepository;
 @WithTransaction
 public class EstadoCivilService {
 
-    @Inject EstadoCivilRepository repository;
+    @Inject
+    EstadoCivilRepository repository;
 
     public Uni<List<EstadoCivilResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,9 @@ public class EstadoCivilService {
                         : Uni.createFrom().failure(new NotFoundException("EstadoCivil not found")));
     }
 
-    private void apply(EstadoCivil e, EstadoCivilRequest r) { e.descricao = r.descricao(); }
+    private void apply(EstadoCivil e, EstadoCivilRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private EstadoCivilResponse toResponse(EstadoCivil e) {
         return new EstadoCivilResponse(e.id, e.descricao);

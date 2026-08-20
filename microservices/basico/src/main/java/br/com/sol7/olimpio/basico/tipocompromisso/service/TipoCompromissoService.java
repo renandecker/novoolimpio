@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.tipocompromisso.service;
+
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -8,7 +9,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.tipocompromisso.dto.TipoCompromissoRequest;
 import br.com.sol7.olimpio.basico.tipocompromisso.dto.TipoCompromissoResponse;
 import br.com.sol7.olimpio.basico.tipocompromisso.entity.TipoCompromisso;
@@ -18,7 +21,8 @@ import br.com.sol7.olimpio.basico.tipocompromisso.repository.TipoCompromissoRepo
 @WithTransaction
 public class TipoCompromissoService {
 
-    @Inject TipoCompromissoRepository repository;
+    @Inject
+    TipoCompromissoRepository repository;
 
     @CacheResult(cacheName = "tipo-compromisso-cache")
     public Uni<List<TipoCompromissoResponse>> list() {
@@ -62,7 +66,9 @@ public class TipoCompromissoService {
                         : Uni.createFrom().failure(new NotFoundException("TipoCompromisso not found")));
     }
 
-    private void apply(TipoCompromisso e, TipoCompromissoRequest r) { e.descricao = r.descricao(); }
+    private void apply(TipoCompromisso e, TipoCompromissoRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private TipoCompromissoResponse toResponse(TipoCompromisso e) {
         return new TipoCompromissoResponse(e.id, e.descricao);

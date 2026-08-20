@@ -14,11 +14,11 @@ import java.util.List;
 /**
  * Portado de CobrancaEmailService.rotinaEmailCobranca() do legado
  * (br.com.sol7.olimpio.service.services.financeiro.CobrancaEmailService).
- *
+ * <p>
  * Para cada configuracao ativa em fin_cobranca_email_envio monta o SQL da cobranca (from +
  * joins + caseCor da situacao) e registra um registro em fin_cobranca_email para cada contrato
  * que atende as regras. Nao foi portado o envio efetivo: aqui fica registrado o envio pendente + log.
- *
+ * <p>
  * Acessa o banco pelo datasource reativo "financeiro-db" (SQL nativo, sem REST).
  */
 @ApplicationScoped
@@ -56,7 +56,7 @@ public class CobrancaEmailMaintenanceService {
 
     // Portado de CobrancaEmailService.rotinaEmailCobranca() - joins do legado.
     private static final String INNER_BASE =
-                    " left join fin_cobranca cobranca on (contrato.id = cobranca.id_contrato) " +
+            " left join fin_cobranca cobranca on (contrato.id = cobranca.id_contrato) " +
                     " left join fin_etapas_cobranca etapa on (cobranca.id_cobranca_etapas = etapa.id) " +
                     " left join fin_cobranca_ligacao ligacaocobranca on (cobranca.id_cobranca_ligacao = ligacaocobranca.id) " +
                     " left join bas_compromisso compromisso on (ligacaocobranca.id_compromisso = compromisso.id) " +
@@ -65,9 +65,11 @@ public class CobrancaEmailMaintenanceService {
                     " left join fin_cobranca_prioritaria prioritario on (prioritario.id_cobranca_ligacao = ligacaocobranca.id)";
 
     public record CobrancaEmailConfig(Long id, Integer tipo, String situacao, Long idEtapa,
-                                      boolean customizado, String campoCustomizado) {}
+                                      boolean customizado, String campoCustomizado) {
+    }
 
-    public record RotinaEmailCobrancaResumo(int configuracoes, int destinatarios) {}
+    public record RotinaEmailCobrancaResumo(int configuracoes, int destinatarios) {
+    }
 
     public Uni<RotinaEmailCobrancaResumo> rotinaEmailCobranca() {
         return pool.query(SQL_LISTAR_CONFIGS).execute()

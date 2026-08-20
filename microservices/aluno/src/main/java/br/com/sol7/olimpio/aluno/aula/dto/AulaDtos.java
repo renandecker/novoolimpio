@@ -4,19 +4,27 @@ import java.util.Date;
 
 public final class AulaDtos {
 
-    private AulaDtos() {}
+    private AulaDtos() {
+    }
 
-    public record AulaResponse(Long id, String nome, String descricao, Long ocorrenciaComponenteCurricularId) {}
+    public record AulaResponse(Long id, String nome, String descricao, Long ocorrenciaComponenteCurricularId) {
+    }
 
-    public record AulaAnexoResponse(Long id, Long aulaId, String nome, String anexo, String tipo) {}
+    public record AulaAnexoResponse(Long id, Long aulaId, String nome, String anexo, String tipo) {
+    }
 
-    public record ContratoAulaResponse(Long id, String curso) {}
+    public record ContratoAulaResponse(Long id, String curso) {
+    }
 
-    public record OferecimentoAulaResponse(Long id, String modulo) {}
+    public record OferecimentoAulaResponse(Long id, String modulo) {
+    }
 
-    public record OcorrenciaAulaResponse(Long id, String data, boolean aulaCoringa, boolean aulaPresencial) {}
+    public record OcorrenciaAulaResponse(Long id, String data, boolean aulaCoringa, boolean aulaPresencial) {
+    }
 
-    public record AulaAssistidaRequest(Long pessoaId) {}
+    public record AulaAssistidaRequest(Long pessoaId) {
+    }
 
-    public record AulaAssistidaResponse(Long aulaId, Long pessoaId, Date dataAssistida) {}
+    public record AulaAssistidaResponse(Long aulaId, Long pessoaId, Date dataAssistida) {
+    }
 }

@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.grau;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class GrauService {
 
-    @Inject GrauRepository repository;
+    @Inject
+    GrauRepository repository;
 
     public Uni<List<GrauResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,24 @@ public class GrauService {
                         : Uni.createFrom().failure(new NotFoundException("Grau not found")));
     }
 
-    private void apply(Grau e, GrauRequest r) { e.descricao = r.descricao(); e.tipoGrau = r.tipoGrau(); e.frequenciaMinima = r.frequenciaMinima(); e.mediaSemExame = r.mediaSemExame(); e.mediaFinal = r.mediaFinal(); e.notaMaxima = r.notaMaxima(); e.conceitoSemExame = r.conceitoSemExame(); e.conceitoFinal = r.conceitoFinal(); e.cancelado = r.cancelado(); e.limiteManual = r.limiteManual(); e.limiteManualAluno = r.limiteManualAluno(); e.recuperacao = r.recuperacao(); e.manual = r.manual(); e.manualAluno = r.manualAluno(); e.pesoDistinto = r.pesoDistinto(); e.notasParciais = r.notasParciais(); }
+    private void apply(Grau e, GrauRequest r) {
+        e.descricao = r.descricao();
+        e.tipoGrau = r.tipoGrau();
+        e.frequenciaMinima = r.frequenciaMinima();
+        e.mediaSemExame = r.mediaSemExame();
+        e.mediaFinal = r.mediaFinal();
+        e.notaMaxima = r.notaMaxima();
+        e.conceitoSemExame = r.conceitoSemExame();
+        e.conceitoFinal = r.conceitoFinal();
+        e.cancelado = r.cancelado();
+        e.limiteManual = r.limiteManual();
+        e.limiteManualAluno = r.limiteManualAluno();
+        e.recuperacao = r.recuperacao();
+        e.manual = r.manual();
+        e.manualAluno = r.manualAluno();
+        e.pesoDistinto = r.pesoDistinto();
+        e.notasParciais = r.notasParciais();
+    }
 
     private GrauResponse toResponse(Grau e) {
         return new GrauResponse(e.id, e.descricao, e.tipoGrau, e.frequenciaMinima, e.mediaSemExame, e.mediaFinal, e.notaMaxima, e.conceitoSemExame, e.conceitoFinal, e.cancelado, e.limiteManual, e.limiteManualAluno, e.recuperacao, e.manual, e.manualAluno, e.pesoDistinto, e.notasParciais);
@@ -67,7 +87,7 @@ public class GrauService {
     //         return getGrauRepository().buscarGrauComNota(grau);
     //     }
     public Uni<Long> buscarGrauComNota(Long grauId) {
-                return repository.buscarGrauComNota(grauId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarGrauComNota(grauId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -79,7 +99,7 @@ public class GrauService {
     //         return getGrauRepository().buscarGrauComConceito(grau);
     //     }
     public Uni<Long> buscarGrauComConceito(Long grauId) {
-                return repository.buscarGrauComConceito(grauId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarGrauComConceito(grauId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 }

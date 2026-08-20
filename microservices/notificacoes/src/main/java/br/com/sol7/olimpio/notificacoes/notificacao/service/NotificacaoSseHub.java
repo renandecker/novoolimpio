@@ -3,6 +3,7 @@ package br.com.sol7.olimpio.notificacoes.notificacao.service;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 import jakarta.enterprise.context.ApplicationScoped;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 

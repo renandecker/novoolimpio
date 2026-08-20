@@ -7,14 +7,17 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ControleEntregaService {
 
-    @Inject ControleEntregaRepository repository;
-    @Inject EntregaRepository entregaRepository;
+    @Inject
+    ControleEntregaRepository repository;
+    @Inject
+    EntregaRepository entregaRepository;
 
     public Uni<List<ControleEntregaResponse>> list() {
         return repository.listAll().chain(items -> {
@@ -87,14 +90,14 @@ public class ControleEntregaService {
                 .map(entrega -> {
                     if (entrega == null) return r;
                     return new ControleEntregaResponse(
-                        r.id(), r.ativo(), r.quantidade(), r.status(), r.dataSaida(), r.rastreio(),
-                        r.entregaId(), r.usuarioId(),
-                        entrega.descricao
+                            r.id(), r.ativo(), r.quantidade(), r.status(), r.dataSaida(), r.rastreio(),
+                            r.entregaId(), r.usuarioId(),
+                            entrega.descricao
                     );
                 });
     }
 
-private Uni<List<ControleEntregaResponse>> enrichResponses(List<ControleEntregaResponse> responses) {
+    private Uni<List<ControleEntregaResponse>> enrichResponses(List<ControleEntregaResponse> responses) {
         List<Uni<ControleEntregaResponse>> unis = responses.stream().map(this::enrichSingleResponse).toList();
         return Uni.join().all(unis).andFailFast();
     }

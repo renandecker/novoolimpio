@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 /**
  * Cobranca PIX de uma parcela - tabela legada (fin_parcela_pix), vinculada a
  * fin_parcela.id_parcela_pix. Fluxo movido do fiserv para o asaas-service.
- *
+ * <p>
  * As colunas valor/valorPago/providerChargeId/endToEndId/dataCriacao/dataPagamento foram
  * adicionadas em V3__ajuste_pix.sql (aplicado pelo restore do Docker como 0022__ajuste_pix.sql)
  * - a tabela original (V1__base.sql) nao tinha nem o valor da cobranca nem um identificador
@@ -57,11 +58,15 @@ public class ParcelaPix extends PanacheEntityBase {
     @Column(name = "moeda")
     public String moeda = "BRL";
 
-    /** Identificador da cobranca no PSP plugado via PixProviderClient (generico, qualquer provedor). */
+    /**
+     * Identificador da cobranca no PSP plugado via PixProviderClient (generico, qualquer provedor).
+     */
     @Column(name = "provider_charge_id")
     public String providerChargeId;
 
-    /** Comprovante oficial do Banco Central, disponivel apos a confirmacao do pagamento. */
+    /**
+     * Comprovante oficial do Banco Central, disponivel apos a confirmacao do pagamento.
+     */
     @Column(name = "end_to_end_id")
     public String endToEndId;
 

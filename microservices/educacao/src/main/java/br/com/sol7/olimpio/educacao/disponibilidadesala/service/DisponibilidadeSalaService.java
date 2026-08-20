@@ -1,9 +1,14 @@
 package br.com.sol7.olimpio.educacao.disponibilidadesala;
+
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 import br.com.sol7.olimpio.educacao.shared.DisponibilidadeScheduleEventResponse;
-import io.smallrye.mutiny.Uni; import jakarta.enterprise.context.ApplicationScoped; import jakarta.inject.Inject; import jakarta.ws.rs.NotFoundException; import org.hibernate.reactive.mutiny.Mutiny;
+import io.smallrye.mutiny.Uni;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
+import org.hibernate.reactive.mutiny.Mutiny;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,7 +19,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@ApplicationScoped @WithTransaction public class DisponibilidadeSalaService { @Inject DisponibilidadeSalaRepository repository;
+@ApplicationScoped
+@WithTransaction
+public class DisponibilidadeSalaService {
+    @Inject
+    DisponibilidadeSalaRepository repository;
 
     private static final DateTimeFormatter ISO = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -45,7 +54,9 @@ import java.util.List;
                     " WHERE off.id_unidade = ?1 AND o.fl_ativo = true AND o.id_sala IS NOT NULL " +
                     " AND o.data >= ?2 AND o.data < ?3 ORDER BY o.data, t.inicio";
 
-    public Uni<List<DisponibilidadeSalaResponse>> list(){return repository.listAll().map(items->items.stream().map(this::toResponse).toList());}
+    public Uni<List<DisponibilidadeSalaResponse>> list() {
+        return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
+    }
 
     public Uni<PagedResponse<DisponibilidadeSalaResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
@@ -54,7 +65,33 @@ import java.util.List;
                 .onItem().transformToUni(items -> repository.count()
                         .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
- public Uni<DisponibilidadeSalaResponse> find(Long id){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("DisponibilidadeSala not found")).map(this::toResponse);} public Uni<DisponibilidadeSalaResponse> create(DisponibilidadeSalaRequest r){var e=new DisponibilidadeSala();apply(e,r);return repository.persist(e).replaceWith(()->toResponse(e));} public Uni<DisponibilidadeSalaResponse> update(Long id,DisponibilidadeSalaRequest r){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("DisponibilidadeSala not found")).invoke(e->apply(e,r)).map(this::toResponse);} public Uni<Void> delete(Long id){return repository.deleteById(id).onItem().transformToUni(deleted->deleted?Uni.createFrom().voidItem():Uni.createFrom().failure(new NotFoundException("DisponibilidadeSala not found")));} private void apply(DisponibilidadeSala e,DisponibilidadeSalaRequest r){e.nome=r.nome();e.dadosJson=r.dadosJson();} private DisponibilidadeSalaResponse toResponse(DisponibilidadeSala e){return new DisponibilidadeSalaResponse(e.id,e.nome,e.dadosJson);}
+
+    public Uni<DisponibilidadeSalaResponse> find(Long id) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("DisponibilidadeSala not found")).map(this::toResponse);
+    }
+
+    public Uni<DisponibilidadeSalaResponse> create(DisponibilidadeSalaRequest r) {
+        var e = new DisponibilidadeSala();
+        apply(e, r);
+        return repository.persist(e).replaceWith(() -> toResponse(e));
+    }
+
+    public Uni<DisponibilidadeSalaResponse> update(Long id, DisponibilidadeSalaRequest r) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("DisponibilidadeSala not found")).invoke(e -> apply(e, r)).map(this::toResponse);
+    }
+
+    public Uni<Void> delete(Long id) {
+        return repository.deleteById(id).onItem().transformToUni(deleted -> deleted ? Uni.createFrom().voidItem() : Uni.createFrom().failure(new NotFoundException("DisponibilidadeSala not found")));
+    }
+
+    private void apply(DisponibilidadeSala e, DisponibilidadeSalaRequest r) {
+        e.nome = r.nome();
+        e.dadosJson = r.dadosJson();
+    }
+
+    private DisponibilidadeSalaResponse toResponse(DisponibilidadeSala e) {
+        return new DisponibilidadeSalaResponse(e.id, e.nome, e.dadosJson);
+    }
 
     public Uni<List<DisponibilidadeScheduleEventResponse>> scheduleEvents(Long unidadeId, Long salaId, LocalDate inicio, LocalDate fim) {
         if (unidadeId == null) {
@@ -72,7 +109,7 @@ import java.util.List;
     }
 
     private List<DisponibilidadeScheduleEventResponse> buildSchedule(List<Object[]> feriados, List<Object[]> ocorrencias,
-                                                                    boolean porSala, LocalDate first, LocalDate last) {
+                                                                     boolean porSala, LocalDate first, LocalDate last) {
         List<DisponibilidadeScheduleEventResponse> events = new ArrayList<>();
         for (Object[] f : feriados) {
             LocalDate data = toLocalDate(f[1]);
@@ -123,21 +160,23 @@ import java.util.List;
         return LocalDateTime.of(data, hora == null ? LocalTime.MIDNIGHT : hora).format(ISO);
     }
 
-    private String hora(LocalTime t) { return t.format(DateTimeFormatter.ofPattern("HH:mm")); }
+    private String hora(LocalTime t) {
+        return t.format(DateTimeFormatter.ofPattern("HH:mm"));
+    }
 
     private LocalDate toLocalDate(Object value) {
         if (value == null) return null;
-        if (value instanceof LocalDate d) return d;
-        if (value instanceof java.sql.Date d) return d.toLocalDate();
-        if (value instanceof java.sql.Timestamp t) return t.toLocalDateTime().toLocalDate();
-        if (value instanceof Date d) return d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        if (value instanceof LocalDate d)return d;
+        if (value instanceof java.sql.Date d)return d.toLocalDate();
+        if (value instanceof java.sql.Timestamp t)return t.toLocalDateTime().toLocalDate();
+        if (value instanceof Date d)return d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         return null;
     }
 
     private LocalTime toTime(Object value) {
         if (value == null) return null;
-        if (value instanceof LocalTime t) return t;
-        if (value instanceof java.sql.Time t) return t.toLocalTime();
+        if (value instanceof LocalTime t)return t;
+        if (value instanceof java.sql.Time t)return t.toLocalTime();
         return null;
     }
 

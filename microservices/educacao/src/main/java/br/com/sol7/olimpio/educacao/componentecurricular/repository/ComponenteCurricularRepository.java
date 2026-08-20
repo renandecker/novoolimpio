@@ -1,9 +1,14 @@
 package br.com.sol7.olimpio.educacao.componentecurricular;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.educacao.oferecimentocomponentecurricular.OferecimentoComponenteCurricular;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class ComponenteCurricularRepository implements PanacheRepository<ComponenteCurricular> {
+
+@ApplicationScoped
+public class ComponenteCurricularRepository implements PanacheRepository<ComponenteCurricular> {
 
     // Migrado de ComponenteCurricularRepository.componenteCurricularDoCurso (legado) - HQL original:
     // select mc.componenteCurricular from MatrizCurricular mc where mc.curriculo = ?1 order by mc.componenteCurricular.descricao
@@ -13,8 +18,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> componenteCurricularDoCurso(Long curriculoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_COMPONENTE_CURRICULAR_DO_CURSO)
-                    .setParameter(1, curriculoId)
-                    .getResultList());
+                        .setParameter(1, curriculoId)
+                        .getResultList());
     }
 
 
@@ -26,8 +31,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ComponenteCurricular>> autocomplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTOCOMPLETE, ComponenteCurricular.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -39,9 +44,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> autocompleteComponenteAtivoProfessor(String query, Long professorId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTOCOMPLETE_COMPONENTE_ATIVO_PROFESSOR, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, query)
-                    .setParameter(2, professorId)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, professorId)
+                        .getResultList());
     }
 
 
@@ -53,8 +58,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> autocompleteComponenteAtivo(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTOCOMPLETE_COMPONENTE_ATIVO, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -66,8 +71,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ComponenteCurricular>> buscarComponenteCurricularComBaseTecnologica(Long entityId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_COMPONENTE_CURRICULAR_COM_BASE_TECNOLOGICA, ComponenteCurricular.class)
-                    .setParameter(1, entityId)
-                    .getResultList());
+                        .setParameter(1, entityId)
+                        .getResultList());
     }
 
 
@@ -79,8 +84,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ComponenteCurricular>> buscarComponenteCurricularComReferenciaBibliografica(Long entityId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_COMPONENTE_CURRICULAR_COM_REFERENCIA_BIBLIOGRAFICA, ComponenteCurricular.class)
-                    .setParameter(1, entityId)
-                    .getResultList());
+                        .setParameter(1, entityId)
+                        .getResultList());
     }
 
 
@@ -92,8 +97,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ComponenteCurricular>> buscarComponenteCurricularComCronograma(Long entityId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_COMPONENTE_CURRICULAR_COM_CRONOGRAMA, ComponenteCurricular.class)
-                    .setParameter(1, entityId)
-                    .getResultList());
+                        .setParameter(1, entityId)
+                        .getResultList());
     }
 
 
@@ -105,8 +110,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ComponenteCurricular>> buscarExistenciaEmOferecimento(Long entityId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_EXISTENCIA_EM_OFERECIMENTO, ComponenteCurricular.class)
-                    .setParameter(1, entityId)
-                    .getResultList());
+                        .setParameter(1, entityId)
+                        .getResultList());
     }
 
 }

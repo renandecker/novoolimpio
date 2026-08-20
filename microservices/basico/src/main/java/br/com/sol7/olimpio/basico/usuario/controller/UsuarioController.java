@@ -1,10 +1,20 @@
 package br.com.sol7.olimpio.basico.usuario.controller;
+
 import br.com.sol7.olimpio.shared.PagedResponse;
-import io.smallrye.mutiny.Uni; import jakarta.inject.Inject; import jakarta.validation.Valid; import jakarta.ws.rs.*; import jakarta.ws.rs.container.ContainerRequestContext; import jakarta.ws.rs.core.*; import java.util.List;
+import io.smallrye.mutiny.Uni;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.*;
+
+import java.util.List;
+
 import br.com.sol7.olimpio.basico.usuario.dto.UsuarioFotoRequest;
 import br.com.sol7.olimpio.basico.usuario.dto.UsuarioRequest;
 import br.com.sol7.olimpio.basico.usuario.dto.UsuarioResponse;
 import br.com.sol7.olimpio.basico.usuario.service.UsuarioService;
+
 @Path("/api/basico/usuario")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

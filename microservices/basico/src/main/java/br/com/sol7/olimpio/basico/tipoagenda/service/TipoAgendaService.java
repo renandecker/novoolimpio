@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.tipoagenda.service;
+
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -8,7 +9,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.tipoagenda.dto.TipoAgendaRequest;
 import br.com.sol7.olimpio.basico.tipoagenda.dto.TipoAgendaResponse;
 import br.com.sol7.olimpio.basico.tipoagenda.entity.TipoAgenda;
@@ -18,7 +21,8 @@ import br.com.sol7.olimpio.basico.tipoagenda.repository.TipoAgendaRepository;
 @WithTransaction
 public class TipoAgendaService {
 
-    @Inject TipoAgendaRepository repository;
+    @Inject
+    TipoAgendaRepository repository;
 
     @CacheResult(cacheName = "tipo-agenda-cache")
     public Uni<List<TipoAgendaResponse>> list() {
@@ -62,7 +66,10 @@ public class TipoAgendaService {
                         : Uni.createFrom().failure(new NotFoundException("TipoAgenda not found")));
     }
 
-    private void apply(TipoAgenda e, TipoAgendaRequest r) { e.descricao = r.descricao(); e.cor = r.cor(); }
+    private void apply(TipoAgenda e, TipoAgendaRequest r) {
+        e.descricao = r.descricao();
+        e.cor = r.cor();
+    }
 
     private TipoAgendaResponse toResponse(TipoAgenda e) {
         return new TipoAgendaResponse(e.id, e.descricao, e.cor);

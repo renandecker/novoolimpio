@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.regiao.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.regiao.dto.RegiaoRequest;
 import br.com.sol7.olimpio.basico.regiao.dto.RegiaoResponse;
 import br.com.sol7.olimpio.basico.regiao.entity.Regiao;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.regiao.repository.RegiaoRepository;
 @WithTransaction
 public class RegiaoService {
 
-    @Inject RegiaoRepository repository;
+    @Inject
+    RegiaoRepository repository;
 
     public Uni<List<RegiaoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,9 @@ public class RegiaoService {
                         : Uni.createFrom().failure(new NotFoundException("Regiao not found")));
     }
 
-    private void apply(Regiao e, RegiaoRequest r) { e.descricao = r.descricao(); }
+    private void apply(Regiao e, RegiaoRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private RegiaoResponse toResponse(Regiao e) {
         return new RegiaoResponse(e.id, e.descricao);

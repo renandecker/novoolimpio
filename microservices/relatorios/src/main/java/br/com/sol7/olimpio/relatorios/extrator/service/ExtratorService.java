@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.relatorios.extrator;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ExtratorService {
 
-    @Inject ExtratorRepository repository;
+    @Inject
+    ExtratorRepository repository;
 
     // Migrado de ExtratorService.remove() (legado)
     public Uni<Void> remover() {
@@ -57,7 +60,16 @@ public class ExtratorService {
                         : Uni.createFrom().failure(new NotFoundException("Extrator not found")));
     }
 
-    private void apply(Extrator e, ExtratorRequest r) { e.log = r.log(); e.situacao = r.situacao(); e.tipo = r.tipo(); e.sql = r.sql(); e.usuarioId = r.usuarioId(); e.tabelaId = r.tabelaId(); e.dataInicio = r.dataInicio(); e.dataFim = r.dataFim(); }
+    private void apply(Extrator e, ExtratorRequest r) {
+        e.log = r.log();
+        e.situacao = r.situacao();
+        e.tipo = r.tipo();
+        e.sql = r.sql();
+        e.usuarioId = r.usuarioId();
+        e.tabelaId = r.tabelaId();
+        e.dataInicio = r.dataInicio();
+        e.dataFim = r.dataFim();
+    }
 
     private ExtratorResponse toResponse(Extrator e) {
         return new ExtratorResponse(e.id, e.log, e.situacao, e.tipo, e.sql, e.usuarioId, e.tabelaId, e.dataInicio, e.dataFim);

@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.periodo;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class PeriodoService {
 
-    @Inject PeriodoRepository repository;
+    @Inject
+    PeriodoRepository repository;
 
     public Uni<List<PeriodoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,16 @@ public class PeriodoService {
                         : Uni.createFrom().failure(new NotFoundException("Periodo not found")));
     }
 
-    private void apply(Periodo e, PeriodoRequest r) { e.descricao = r.descricao(); e.tipoCursoId = r.tipoCursoId(); e.dataInicio = r.dataInicio(); e.dataFim = r.dataFim(); e.frequenciaMinima = r.frequenciaMinima(); e.mediaSemExame = r.mediaSemExame(); e.mediaFinal = r.mediaFinal(); e.conceitoFinal = r.conceitoFinal(); }
+    private void apply(Periodo e, PeriodoRequest r) {
+        e.descricao = r.descricao();
+        e.tipoCursoId = r.tipoCursoId();
+        e.dataInicio = r.dataInicio();
+        e.dataFim = r.dataFim();
+        e.frequenciaMinima = r.frequenciaMinima();
+        e.mediaSemExame = r.mediaSemExame();
+        e.mediaFinal = r.mediaFinal();
+        e.conceitoFinal = r.conceitoFinal();
+    }
 
     private PeriodoResponse toResponse(Periodo e) {
         return new PeriodoResponse(e.id, e.descricao, e.tipoCursoId, e.dataInicio, e.dataFim, e.frequenciaMinima, e.mediaSemExame, e.mediaFinal, e.conceitoFinal);
@@ -67,7 +79,7 @@ public class PeriodoService {
     //         return getPeriodoRepository().buscarPeriodoComUnidades(entity);
     //     }
     public Uni<Long> buscarPeriodoComUnidades(Long entityId) {
-                return repository.buscarPeriodoComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarPeriodoComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 }

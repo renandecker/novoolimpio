@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.agenda.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -11,7 +12,9 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import io.smallrye.mutiny.Uni;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.agenda.dto.AgendaRequest;
 import br.com.sol7.olimpio.basico.agenda.dto.AgendaResponse;
 import br.com.sol7.olimpio.basico.agenda.entity.Agenda;
@@ -20,8 +23,12 @@ import br.com.sol7.olimpio.basico.agenda.repository.AgendaRepository;
 @ApplicationScoped
 @WithTransaction
 public class AgendaService {
-    @Inject AgendaRepository repository;
-    public Uni<List<AgendaResponse>> list() { return repository.listAll().map(items -> items.stream().map(this::toResponse).toList()); }
+    @Inject
+    AgendaRepository repository;
+
+    public Uni<List<AgendaResponse>> list() {
+        return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
+    }
 
     public Uni<PagedResponse<AgendaResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
@@ -31,20 +38,52 @@ public class AgendaService {
                         .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
 
-    public Uni<AgendaResponse> find(Long id) { return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Agenda nao encontrada")).map(this::toResponse); }
-    public Uni<AgendaResponse> create(AgendaRequest request) { validateSpecificRules(request); var entity = new Agenda(); apply(entity, request); return repository.persist(entity).replaceWith(() -> toResponse(entity)); }
-    public Uni<AgendaResponse> update(Long id, AgendaRequest request) { validateSpecificRules(request); return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Agenda nao encontrada")).invoke(entity -> apply(entity, request)).map(this::toResponse); }
-    public Uni<Void> delete(Long id) { return repository.deleteById(id).onItem().transformToUni(deleted -> deleted ? Uni.createFrom().voidItem() : Uni.createFrom().failure(new NotFoundException("Agenda nao encontrada"))); }
+    public Uni<AgendaResponse> find(Long id) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Agenda nao encontrada")).map(this::toResponse);
+    }
+
+    public Uni<AgendaResponse> create(AgendaRequest request) {
+        validateSpecificRules(request);
+        var entity = new Agenda();
+        apply(entity, request);
+        return repository.persist(entity).replaceWith(() -> toResponse(entity));
+    }
+
+    public Uni<AgendaResponse> update(Long id, AgendaRequest request) {
+        validateSpecificRules(request);
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Agenda nao encontrada")).invoke(entity -> apply(entity, request)).map(this::toResponse);
+    }
+
+    public Uni<Void> delete(Long id) {
+        return repository.deleteById(id).onItem().transformToUni(deleted -> deleted ? Uni.createFrom().voidItem() : Uni.createFrom().failure(new NotFoundException("Agenda nao encontrada")));
+    }
+
     private void validateSpecificRules(AgendaRequest request) {
         // Migrado de AgendaService.save: tempo deve seguir HH:mm e minutos entre 00 e 59.
-        if (!request.tempoTolerancia().matches("\\d{2}:\\d{2}")) throw new BadRequestException("A hora deve seguir o padrao Ex.: 01:30");
+        if (!request.tempoTolerancia().matches("\\d{2}:\\d{2}"))
+            throw new BadRequestException("A hora deve seguir o padrao Ex.: 01:30");
         int minute = Integer.parseInt(request.tempoTolerancia().substring(3));
         if (minute > 59) throw new BadRequestException("O minuto deve estar no intervalo de 0 a 59m. Ex.: 01:30");
         // Migrado de AgendaController.saveOrUpdate: status final e obrigatorio.
-        if (request.statusCompromissoUltimoId() == null) throw new BadRequestException("Troca de status sem o ultimo status compromisso");
+        if (request.statusCompromissoUltimoId() == null)
+            throw new BadRequestException("Troca de status sem o ultimo status compromisso");
     }
-    private void apply(Agenda e, AgendaRequest r) { e.descricao=r.descricao(); e.proprio=r.proprio(); e.diasMaximo=r.diasMaximo(); e.quantidadeDiasMaximo=r.quantidadeDiasMaximo(); e.tipoAgendaId=r.tipoAgendaId(); e.statusCompromissoId=r.statusCompromissoId(); e.statusCompromissoUltimoId=r.statusCompromissoUltimoId(); e.unidadeId=r.unidadeId(); e.tempoTolerancia=r.tempoTolerancia(); }
-    private AgendaResponse toResponse(Agenda e) { return new AgendaResponse(e.id,e.descricao,e.proprio,e.diasMaximo,e.quantidadeDiasMaximo,e.tipoAgendaId,e.statusCompromissoId,e.statusCompromissoUltimoId,e.unidadeId,e.tempoTolerancia); }
+
+    private void apply(Agenda e, AgendaRequest r) {
+        e.descricao = r.descricao();
+        e.proprio = r.proprio();
+        e.diasMaximo = r.diasMaximo();
+        e.quantidadeDiasMaximo = r.quantidadeDiasMaximo();
+        e.tipoAgendaId = r.tipoAgendaId();
+        e.statusCompromissoId = r.statusCompromissoId();
+        e.statusCompromissoUltimoId = r.statusCompromissoUltimoId();
+        e.unidadeId = r.unidadeId();
+        e.tempoTolerancia = r.tempoTolerancia();
+    }
+
+    private AgendaResponse toResponse(Agenda e) {
+        return new AgendaResponse(e.id, e.descricao, e.proprio, e.diasMaximo, e.quantidadeDiasMaximo, e.tipoAgendaId, e.statusCompromissoId, e.statusCompromissoUltimoId, e.unidadeId, e.tempoTolerancia);
+    }
 
 
     // Migrado de AgendaController.carregarUsuarios (src/main/java/br/com/sol7/olimpio/control/controllers/basico/AgendaController.java:88, camada controller)
@@ -88,7 +127,7 @@ public class AgendaService {
     //         return getAgendaRepository().buscarAgendasPorUnidade(unidade);
     //     }
     public Uni<List<Long>> buscarAgendasPorUnidade(Long unidadeId) {
-                // Obs: condicao removida (depende de outro microservico): a.unidade.ativo = true
+        // Obs: condicao removida (depende de outro microservico): a.unidade.ativo = true
         return repository.find("unidadeId = ?1", unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
@@ -101,7 +140,7 @@ public class AgendaService {
     //         return getAgendaRepository().buscarAgendaComResultados(id);
     //     }
     public Uni<Long> buscarAgendaComResultados(Long id) {
-                return repository.buscarAgendaComResultados(id).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarAgendaComResultados(id).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -113,7 +152,7 @@ public class AgendaService {
     //         return getAgendaRepository().buscarAgendaComStatus(id);
     //     }
     public Uni<Long> buscarAgendaComStatus(Long id) {
-                return repository.buscarAgendaComStatus(id).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarAgendaComStatus(id).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -128,7 +167,7 @@ public class AgendaService {
     //         }
     //     }
     public Uni<Boolean> buscarAgendasDoUsuario(Long usuarioId) {
-                return repository.verificaAgendasDoUsuario(usuarioId).map(list -> !list.isEmpty());
+        return repository.verificaAgendasDoUsuario(usuarioId).map(list -> !list.isEmpty());
     }
 
 
@@ -138,7 +177,7 @@ public class AgendaService {
     //         return getAgendaRepository().autoCompleteAll(new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteAll() {
-                // Obs: condicao removida (depende de outro microservico): a.unidade.ativo = true
+        // Obs: condicao removida (depende de outro microservico): a.unidade.ativo = true
         return repository.find("order by descricao").page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
@@ -151,7 +190,7 @@ public class AgendaService {
     //         return getAgendaRepository().autoCompleteComUsuario(query.toLowerCase().trim(), usuario, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteComUsuario(String query, Long usuarioId) {
-                return repository.autoCompleteComUsuario(query.toLowerCase().trim(), usuarioId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoCompleteComUsuario(query.toLowerCase().trim(), usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -163,7 +202,7 @@ public class AgendaService {
     //         return getAgendaRepository().autoCompleteDoUsuario(usuario, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteDoUsuario(Long usuarioId) {
-                return repository.autoCompleteDoUsuario(usuarioId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoCompleteDoUsuario(usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -175,7 +214,7 @@ public class AgendaService {
     //         return getAgendaRepository().autoCompleteEstrategicoComUsuario(query.toLowerCase().trim(), usuario, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteEstrategicoComUsuario(String query, Long usuarioId) {
-                return repository.autoCompleteEstrategicoComUsuario(query.toLowerCase().trim(), usuarioId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoCompleteEstrategicoComUsuario(query.toLowerCase().trim(), usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -187,7 +226,7 @@ public class AgendaService {
     //         return getAgendaRepository().autoCompleteEstrategicoDoUsuario(usuario, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteEstrategicoDoUsuario(Long usuarioId) {
-                return repository.autoCompleteEstrategicoDoUsuario(usuarioId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoCompleteEstrategicoDoUsuario(usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

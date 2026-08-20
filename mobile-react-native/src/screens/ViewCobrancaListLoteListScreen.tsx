@@ -1,86 +1,102 @@
-import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
-import { api } from '../api';
-import { Tabs } from '../Tabs';
-import { LoteEmailModal, LoteLigacaoModal, SITUACOES_COBRANCA } from '../LoteModals';
+import React, {useState} from 'react';
+import {ActivityIndicator, Pressable, StyleSheet, Text, View} from 'react-native';
+import {useQuery} from '@tanstack/react-query';
+import {api} from '../api';
+import {Tabs} from '../Tabs';
+import {LoteEmailModal, LoteLigacaoModal, SITUACOES_COBRANCA} from '../LoteModals';
 
 interface EtapaCobranca {
-  id: number;
-  descricao: string;
+    id: number;
+    descricao: string;
 }
 
 const BASE_PATH = '/api/financeiro/cobranca/lote';
 
 export default function ViewCobrancaListLoteListScreen() {
-  const etapasQuery = useQuery({
-    queryKey: ['etapas-cobranca'],
-    queryFn: async () => (await api.get<EtapaCobranca[]>('/api/financeiro/etapas-cobranca')).data,
-  });
-  const etapas = etapasQuery.data ?? [];
-  const [emailEtapa, setEmailEtapa] = useState<EtapaCobranca | null>(null);
-  const [ligacaoEtapa, setLigacaoEtapa] = useState<EtapaCobranca | null>(null);
+    const etapasQuery = useQuery({
+        queryKey: ['etapas-cobranca'],
+        queryFn: async () => (await api.get<EtapaCobranca[]>('/api/financeiro/etapas-cobranca')).data,
+    });
+    const etapas = etapasQuery.data ? ? [];
+    const [emailEtapa, setEmailEtapa] = useState<EtapaCobranca | null>(null);
+    const [ligacaoEtapa, setLigacaoEtapa] = useState<EtapaCobranca | null>(null);
 
-  if (etapasQuery.isLoading && etapas.length === 0) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.page}>
-      <Text style={styles.title}>Cobrança em lote</Text>
-      {etapasQuery.isError ? <Text style={styles.errorText}>Erro ao carregar as etapas.</Text> : null}
-      <Tabs
-        tabs={etapas.map((etapa) => ({
-          key: String(etapa.id),
-          label: etapa.descricao || `Etapa ${etapa.id}`,
-          content: (
-            <View style={styles.actions}>
-              <Pressable style={[styles.actionButton, styles.emailButton]} onPress={() => setEmailEtapa(etapa)}>
-                <Text style={styles.actionButtonText}>@ E-mail</Text>
-              </Pressable>
-              <Pressable style={[styles.actionButton, styles.ligacaoButton]} onPress={() => setLigacaoEtapa(etapa)}>
-                <Text style={styles.actionButtonText}>Ligação</Text>
-              </Pressable>
+    if (etapasQuery.isLoading && etapas.length === 0) {
+        return (
+            <View style={styles.center}>
+                <ActivityIndicator/>
             </View>
-          ),
-        }))}
-      />
-      {emailEtapa && (
-        <LoteEmailModal
-          basePath={BASE_PATH}
-          etapaKey="etapasCobrancaId"
-          etapaId={emailEtapa.id}
-          etapaLabel={emailEtapa.descricao || `Etapa ${emailEtapa.id}`}
-          situacoes={SITUACOES_COBRANCA}
-          onClose={() => setEmailEtapa(null)}
-        />
-      )}
-      {ligacaoEtapa && (
-        <LoteLigacaoModal
-          basePath={BASE_PATH}
-          etapaKey="etapasCobrancaId"
-          etapaId={ligacaoEtapa.id}
-          etapaLabel={ligacaoEtapa.descricao || `Etapa ${ligacaoEtapa.id}`}
-          situacoes={SITUACOES_COBRANCA}
-          onClose={() => setLigacaoEtapa(null)}
-        />
-      )}
-    </View>
-  );
+        );
+    }
+
+    return (
+        <View style={styles.page}>
+            <Text style={styles.title}>Cobrança em lote</Text>
+            {etapasQuery.isError ? <Text style={styles.errorText}>Erro ao carregar as etapas.</Text> : null}
+            <Tabs
+                tabs={etapas.map((etapa) => ({
+                    key: String(etapa.id),
+                    label: etapa.descricao || `Etapa ${etapa.id}`,
+                    content: (
+                        <View style={styles.actions}>
+                            <Pressable style={[styles.actionButton, styles.emailButton]}
+                                       onPress={() => setEmailEtapa(etapa)}>
+                                <Text style={styles.actionButtonText}>@ E-mail</Text>
+                            </Pressable>
+                            <Pressable style={[styles.actionButton, styles.ligacaoButton]}
+                                       onPress={() => setLigacaoEtapa(etapa)}>
+                                <Text style={styles.actionButtonText}>Ligação</Text>
+                            </Pressable>
+                        </View>
+                    ),
+                }))}
+            />
+            {emailEtapa && (
+                <LoteEmailModal
+                    basePath={BASE_PATH}
+                    etapaKey="etapasCobrancaId"
+                    etapaId={emailEtapa.id}
+                    etapaLabel={emailEtapa.descricao || `Etapa ${emailEtapa.id}`}
+                    situacoes={SITUACOES_COBRANCA}
+                    onClose={() => setEmailEtapa(null)}
+                />
+            )}
+            {ligacaoEtapa && (
+                <LoteLigacaoModal
+                    basePath={BASE_PATH}
+                    etapaKey="etapasCobrancaId"
+                    etapaId={ligacaoEtapa.id}
+                    etapaLabel={ligacaoEtapa.descricao || `Etapa ${ligacaoEtapa.id}`}
+                    situacoes={SITUACOES_COBRANCA}
+                    onClose={() => setLigacaoEtapa(null)}
+                />
+            )}
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
-  page: { flex: 1, padding: 16 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 22, fontWeight: 'bold', color: '#1d2025', marginBottom: 12 },
-  errorText: { color: '#a61b29', fontSize: 14, marginBottom: 8 },
-  actions: { flexDirection: 'row', gap: 8, paddingVertical: 16 },
-  actionButton: { borderRadius: 8, paddingHorizontal: 20, paddingVertical: 10 },
-  emailButton: { backgroundColor: '#2a5a88', shadowColor: '#2a5a88', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
-  ligacaoButton: { backgroundColor: '#c2aa3c', shadowColor: '#c2aa3c', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
-  actionButtonText: { color: '#ffffff', fontSize: 14, fontWeight: '600' },
+    page: {flex: 1, padding: 16},
+    center: {flex: 1, justifyContent: 'center', alignItems: 'center'},
+    title: {fontSize: 22, fontWeight: 'bold', color: '#1d2025', marginBottom: 12},
+    errorText: {color: '#a61b29', fontSize: 14, marginBottom: 8},
+    actions: {flexDirection: 'row', gap: 8, paddingVertical: 16},
+    actionButton: {borderRadius: 8, paddingHorizontal: 20, paddingVertical: 10},
+    emailButton: {
+        backgroundColor: '#2a5a88',
+        shadowColor: '#2a5a88',
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 3
+    },
+    ligacaoButton: {
+        backgroundColor: '#c2aa3c',
+        shadowColor: '#c2aa3c',
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 3
+    },
+    actionButtonText: {color: '#ffffff', fontSize: 14, fontWeight: '600'},
 });

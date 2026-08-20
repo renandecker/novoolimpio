@@ -14,5 +14,5 @@ public record EntrevistaResponse(
         Boolean fl_resposta,
         Date data_final,
         Date data_aceite_aluno,
-        List<Long> agendas) {
-}
+        List<Long> agendas){
+        }

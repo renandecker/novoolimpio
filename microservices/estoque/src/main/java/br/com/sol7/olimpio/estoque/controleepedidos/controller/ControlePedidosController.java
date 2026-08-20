@@ -6,6 +6,7 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
+
 import java.util.Date;
 import java.util.List;
 
@@ -14,49 +15,64 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ControlePedidosController {
 
-    @Inject ControlePedidosService service;
+    @Inject
+    ControlePedidosService service;
 
     @GET
     public Uni<List<ControlePedidosResponse>> list(@QueryParam("unidadeId") Long unidadeId) {
         return unidadeId != null ? service.listByUnidade(unidadeId) : service.list();
     }
 
-    @GET @Path("/paged")
+    @GET
+    @Path("/paged")
     public Uni<PagedResponse<ControlePedidosResponse>> paged(@QueryParam("page") Integer page, @QueryParam("size") Integer size) {
         return service.paged(page == null ? 0 : page, size == null ? 10 : size);
     }
 
-    @GET @Path("/listar-pedidos")
+    @GET
+    @Path("/listar-pedidos")
     public Uni<List<ControlePedidosResponse>> listarPedidos(@QueryParam("unidadeId") Long unidadeId, @QueryParam("inicio") Date inicio, @QueryParam("fim") Date fim) {
         return service.listarPedidos(unidadeId, inicio, fim);
     }
 
-    @GET @Path("/listar-pedidos-sem-entrega")
+    @GET
+    @Path("/listar-pedidos-sem-entrega")
     public Uni<List<ControlePedidosResponse>> listarPedidosSemEntrega(@QueryParam("unidadeId") Long unidadeId) {
         return service.listarPedidosSemEntrega(unidadeId);
     }
 
-    @GET @Path("/count-aprovado-nao-entregue")
+    @GET
+    @Path("/count-aprovado-nao-entregue")
     public Uni<Long> countAprovadoNaoEntregue(@QueryParam("unidadeId") Long unidadeId, @QueryParam("produtoId") Long produtoId) {
         return service.countAprovadoNaoEntregue(unidadeId, produtoId);
     }
 
-    @GET @Path("/solicitacao/{solicitacaoEstoqueId}")
+    @GET
+    @Path("/solicitacao/{solicitacaoEstoqueId}")
     public Uni<List<ControlePedidosResponse>> listBySolicitacao(@PathParam("solicitacaoEstoqueId") Long solicitacaoEstoqueId) {
         return service.listBySolicitacao(solicitacaoEstoqueId);
     }
 
-    @GET @Path("/{id}")
-    public Uni<ControlePedidosResponse> find(@PathParam("id") Long id) { return service.find(id); }
+    @GET
+    @Path("/{id}")
+    public Uni<ControlePedidosResponse> find(@PathParam("id") Long id) {
+        return service.find(id);
+    }
 
     @POST
     public Uni<Response> create(@Valid ControlePedidosRequest r) {
         return service.create(r).map(item -> Response.status(Response.Status.CREATED).entity(item).build());
     }
 
-    @PUT @Path("/{id}")
-    public Uni<ControlePedidosResponse> update(@PathParam("id") Long id, @Valid ControlePedidosRequest r) { return service.update(id, r); }
+    @PUT
+    @Path("/{id}")
+    public Uni<ControlePedidosResponse> update(@PathParam("id") Long id, @Valid ControlePedidosRequest r) {
+        return service.update(id, r);
+    }
 
-    @DELETE @Path("/{id}")
-    public Uni<Void> delete(@PathParam("id") Long id) { return service.delete(id); }
+    @DELETE
+    @Path("/{id}")
+    public Uni<Void> delete(@PathParam("id") Long id) {
+        return service.delete(id);
+    }
 }

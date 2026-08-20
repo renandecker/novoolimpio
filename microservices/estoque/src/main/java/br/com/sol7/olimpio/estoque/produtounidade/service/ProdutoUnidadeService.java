@@ -4,13 +4,15 @@ import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ProdutoUnidadeService {
 
-    @Inject ProdutoUnidadeRepository repository;
+    @Inject
+    ProdutoUnidadeRepository repository;
 
     public Uni<List<Long>> listUnidadeIdsByProduto(Long produtoId) {
         return repository.listByProduto(produtoId).map(list -> list.stream().map(x -> x.unidadeId).toList());

@@ -1,9 +1,14 @@
 package br.com.sol7.olimpio.basico.cidade.repository;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 import br.com.sol7.olimpio.basico.cidade.entity.Cidade;
-@ApplicationScoped public class CidadeRepository implements PanacheRepository<Cidade> {
+
+@ApplicationScoped
+public class CidadeRepository implements PanacheRepository<Cidade> {
 
     // Migrado de CidadeRepository.autoComplete (legado) - HQL original:
     // select c from Cidade c where  lower(c.nome) like '%' || lower(?1) || '%'  OR  str(c.id) = ?1 or  lower(c.nome||c.estado.nome) like '%' || lower(?1) || '%' or  lower(c.nome||c.estado.uf) like '%' || ?1 || '%' or  lower(c.nome||' ('||c.estado.nome||')') like '%' || lower(?1) || '%' or  lower(c.nome||' ('||c.estado.uf||')') like '%' || lower(?1) || '%' or  replace(replace(lower(c.nome||' '||c.estado.nome),'(',''),')','') like '%' || lower(?1) || '%' or  replace(replace(lower(c.nome||' '||c.estado.uf),'(',''),')','') like '%' || lower(?1) || '%'  order by c.nome
@@ -13,8 +18,8 @@ import br.com.sol7.olimpio.basico.cidade.entity.Cidade;
     public Uni<java.util.List<Cidade>> autoComplete(String lowerCase) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Cidade.class)
-                    .setParameter(1, lowerCase)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .getResultList());
     }
 
 
@@ -26,9 +31,9 @@ import br.com.sol7.olimpio.basico.cidade.entity.Cidade;
     public Uni<java.util.List<Object>> autoCompleteComCep(String lowerCase, String cep) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_CEP)
-                    .setParameter(1, lowerCase)
-                    .setParameter(2, cep)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .setParameter(2, cep)
+                        .getResultList());
     }
 
 
@@ -40,9 +45,9 @@ import br.com.sol7.olimpio.basico.cidade.entity.Cidade;
     public Uni<java.util.List<Cidade>> autoCompleteComEstado(String lowerCase, Long estadoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_ESTADO, Cidade.class)
-                    .setParameter(1, lowerCase)
-                    .setParameter(2, estadoId)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .setParameter(2, estadoId)
+                        .getResultList());
     }
 
 
@@ -54,10 +59,10 @@ import br.com.sol7.olimpio.basico.cidade.entity.Cidade;
     public Uni<java.util.List<Object>> autoCompleteComEstadoComCep(String lowerCase, Long estadoId, String cep) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_ESTADO_COM_CEP)
-                    .setParameter(1, lowerCase)
-                    .setParameter(2, estadoId)
-                    .setParameter(3, cep)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .setParameter(2, estadoId)
+                        .setParameter(3, cep)
+                        .getResultList());
     }
 
 
@@ -69,9 +74,9 @@ import br.com.sol7.olimpio.basico.cidade.entity.Cidade;
     public Uni<java.util.List<Cidade>> buscaCidadeComEstadoEuf(String cidade, String estado) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCA_CIDADE_COM_ESTADO_EUF, Cidade.class)
-                    .setParameter(1, cidade)
-                    .setParameter(2, estado)
-                    .getResultList());
+                        .setParameter(1, cidade)
+                        .setParameter(2, estado)
+                        .getResultList());
     }
 
 
@@ -83,8 +88,8 @@ import br.com.sol7.olimpio.basico.cidade.entity.Cidade;
     public Uni<java.util.List<Object>> nomeCidade(Integer idCidade) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_NOME_CIDADE)
-                    .setParameter(1, idCidade)
-                    .getResultList());
+                        .setParameter(1, idCidade)
+                        .getResultList());
     }
 
 }

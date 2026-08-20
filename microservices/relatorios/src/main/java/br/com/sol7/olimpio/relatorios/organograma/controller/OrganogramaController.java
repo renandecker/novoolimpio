@@ -1,7 +1,54 @@
 package br.com.sol7.olimpio.relatorios.organograma;
+
 import br.com.sol7.olimpio.shared.PagedResponse;
-import io.smallrye.mutiny.Uni; import jakarta.inject.Inject; import jakarta.validation.Valid; import jakarta.ws.rs.*; import jakarta.ws.rs.core.*; import java.util.List;
-@Path("/api/relatorios/organograma") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON) public class OrganogramaController { @Inject OrganogramaService service; @GET public Uni<List<OrganogramaResponse>> list(){return service.list();} @GET @Path("/paged") public Uni<PagedResponse<OrganogramaResponse>> paged(@QueryParam("page") Integer page,@QueryParam("size") Integer size){return service.paged(page==null?0:page,size==null?10:size);} @GET @Path("/{id}") public Uni<OrganogramaResponse> find(@PathParam("id") Long id){return service.find(id);}@POST public Uni<Response> create(@Valid OrganogramaRequest r){return service.create(r).map(item->Response.status(Response.Status.CREATED).entity(item).build());}@PUT @Path("/{id}") public Uni<OrganogramaResponse> update(@PathParam("id") Long id,@Valid OrganogramaRequest r){return service.update(id,r);}@DELETE @Path("/{id}") public Uni<Void> delete(@PathParam("id") Long id){return service.delete(id);} 
+import io.smallrye.mutiny.Uni;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
+
+import java.util.List;
+
+@Path("/api/relatorios/organograma")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class OrganogramaController {
+    @Inject
+    OrganogramaService service;
+
+    @GET
+    public Uni<List<OrganogramaResponse>> list() {
+        return service.list();
+    }
+
+    @GET
+    @Path("/paged")
+    public Uni<PagedResponse<OrganogramaResponse>> paged(@QueryParam("page") Integer page, @QueryParam("size") Integer size) {
+        return service.paged(page == null ? 0 : page, size == null ? 10 : size);
+    }
+
+    @GET
+    @Path("/{id}")
+    public Uni<OrganogramaResponse> find(@PathParam("id") Long id) {
+        return service.find(id);
+    }
+
+    @POST
+    public Uni<Response> create(@Valid OrganogramaRequest r) {
+        return service.create(r).map(item -> Response.status(Response.Status.CREATED).entity(item).build());
+    }
+
+    @PUT
+    @Path("/{id}")
+    public Uni<OrganogramaResponse> update(@PathParam("id") Long id, @Valid OrganogramaRequest r) {
+        return service.update(id, r);
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Uni<Void> delete(@PathParam("id") Long id) {
+        return service.delete(id);
+    }
 
     @GET
     @Path("/auto-complete")

@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.estoque.entrega;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class EntregaService {
 
-    @Inject EntregaRepository repository;
+    @Inject
+    EntregaRepository repository;
 
     public Uni<List<EntregaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,14 @@ public class EntregaService {
                         : Uni.createFrom().failure(new NotFoundException("Entrega not found")));
     }
 
-    private void apply(Entrega e, EntregaRequest r) { e.descricao = r.descricao(); e.area = r.area(); e.zoom = r.zoom(); e.longitude = r.longitude(); e.latitude = r.latitude(); e.pessoaId = r.pessoaId(); }
+    private void apply(Entrega e, EntregaRequest r) {
+        e.descricao = r.descricao();
+        e.area = r.area();
+        e.zoom = r.zoom();
+        e.longitude = r.longitude();
+        e.latitude = r.latitude();
+        e.pessoaId = r.pessoaId();
+    }
 
     private EntregaResponse toResponse(Entrega e) {
         return new EntregaResponse(e.id, e.descricao, e.area, e.zoom, e.longitude, e.latitude, e.pessoaId);

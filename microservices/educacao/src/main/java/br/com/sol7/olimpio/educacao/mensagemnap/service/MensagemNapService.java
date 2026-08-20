@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.mensagemnap;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class MensagemNapService {
 
-    @Inject MensagemNapRepository repository;
+    @Inject
+    MensagemNapRepository repository;
 
     public Uni<List<MensagemNapResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,12 @@ public class MensagemNapService {
                         : Uni.createFrom().failure(new NotFoundException("MensagemNap not found")));
     }
 
-    private void apply(MensagemNap e, MensagemNapRequest r) { e.descricao = r.descricao(); e.assunto = r.assunto(); e.mensagem = r.mensagem(); e.flagEmail = r.flagEmail(); }
+    private void apply(MensagemNap e, MensagemNapRequest r) {
+        e.descricao = r.descricao();
+        e.assunto = r.assunto();
+        e.mensagem = r.mensagem();
+        e.flagEmail = r.flagEmail();
+    }
 
     private MensagemNapResponse toResponse(MensagemNap e) {
         return new MensagemNapResponse(e.id, e.descricao, e.assunto, e.mensagem, e.flagEmail);

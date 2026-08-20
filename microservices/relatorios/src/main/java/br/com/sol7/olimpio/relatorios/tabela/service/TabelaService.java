@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.relatorios.tabela;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,10 +7,12 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import br.com.sol7.olimpio.relatorios.tabela.dto.TabelaResponse;
 import br.com.sol7.olimpio.relatorios.tabela.dto.TabelaRequest;
 import br.com.sol7.olimpio.relatorios.tabela.dto.TabelaExecutadaResponse;
@@ -25,14 +28,16 @@ import io.quarkus.hibernate.reactive.panache.Panache;
 @WithTransaction
 public class TabelaService {
 
-    @Inject TabelaRepository repository;
-    @Inject TabelaColunaRepository colunaRepository;
+    @Inject
+    TabelaRepository repository;
+    @Inject
+    TabelaColunaRepository colunaRepository;
 
     public Uni<List<TabelaResponse>> list() {
         return repository.listAll().chain(items ->
-            io.smallrye.mutiny.Multi.createFrom().iterable(items)
-                .onItem().transformToUniAndConcatenate(this::toResponse)
-                .collect().asList());
+                io.smallrye.mutiny.Multi.createFrom().iterable(items)
+                        .onItem().transformToUniAndConcatenate(this::toResponse)
+                        .collect().asList());
     }
 
     public Uni<PagedResponse<TabelaResponse>> paged(int page, int size) {
@@ -75,7 +80,9 @@ public class TabelaService {
     private static final String SQL_COLUNAS = "SELECT tc.ordem, d.nome_visualizacao, d.tipo_info_dimensao, dc.coluna, m.nome_visualizacao, m.tipo_info_medida, mc.coluna FROM rel_tabela_colunas tc LEFT JOIN rel_dimensao d ON d.id = tc.id_dimensao LEFT JOIN rel_coluna dc ON dc.id = d.id_coluna LEFT JOIN rel_medida m ON m.id = tc.id_medida LEFT JOIN rel_coluna mc ON mc.id = m.id_coluna WHERE tc.id_tabela = ?1 ORDER BY tc.ordem, tc.id";
     private static final String SQL_ESTRUTURA = "SELECT e.tabela, e.condicao FROM rel_tabela t INNER JOIN rel_estrutura e ON e.id = t.id_estrutura WHERE t.id = ?1";
 
-    /** Executa a consulta montada pela estrutura e pelas colunas configuradas, com paginação via LIMIT/OFFSET do PostgreSQL. */
+    /**
+     * Executa a consulta montada pela estrutura e pelas colunas configuradas, com paginação via LIMIT/OFFSET do PostgreSQL.
+     */
     public Uni<TabelaExecutadaResponse> executar(Long tabelaId, int page, int size) {
         int p = Math.max(0, page);
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
@@ -93,7 +100,8 @@ public class TabelaService {
         if (configuracoes.isEmpty()) return Uni.createFrom().item(new TabelaExecutadaResponse(List.of(), List.of()));
         String origem = texto(estrutura[0]);
         String condicao = texto(estrutura[1]);
-        validarFragmento(origem); validarFragmento(condicao);
+        validarFragmento(origem);
+        validarFragmento(condicao);
         List<String> expressoes = new ArrayList<>(), cabecalhos = new ArrayList<>(), grupos = new ArrayList<>();
         boolean possuiAgregacao = false;
         for (Object configuracao : configuracoes) {
@@ -138,18 +146,40 @@ public class TabelaService {
         for (Object registro : resultado) {
             Object[] valores = registro instanceof Object[] array ? array : new Object[]{registro};
             Map<String, Object> linha = new LinkedHashMap<>();
-            for (int indice = 0; indice < cabecalhos.size(); indice++) linha.put(cabecalhos.get(indice), indice < valores.length ? valores[indice] : null);
+            for (int indice = 0; indice < cabecalhos.size(); indice++)
+                linha.put(cabecalhos.get(indice), indice < valores.length ? valores[indice] : null);
             linhas.add(linha);
         }
         return linhas;
     }
 
-    private String expressaoMedida(String expressao, String tipoInfo) { if ("CONTAGEM-DISTINTA".equalsIgnoreCase(tipoInfo)) return "count(DISTINCT " + expressao + ")"; if ("CONTAGEM".equalsIgnoreCase(tipoInfo)) return "count(" + expressao + ")"; return expressao; }
-    private String semAlias(String coluna) { return coluna.replaceFirst("(?i)\\s+as\\s+.*$", "").trim(); }
-    private String texto(Object valor) { return valor == null ? "" : valor.toString().trim(); }
-    private void validarFragmento(String fragmento) { if (fragmento.contains(";")) throw new IllegalArgumentException("Configuração SQL inválida"); }
+    private String expressaoMedida(String expressao, String tipoInfo) {
+        if ("CONTAGEM-DISTINTA".equalsIgnoreCase(tipoInfo)) return "count(DISTINCT " + expressao + ")";
+        if ("CONTAGEM".equalsIgnoreCase(tipoInfo)) return "count(" + expressao + ")";
+        return expressao;
+    }
 
-    private void apply(Tabela e, TabelaRequest r) { e.nome = r.nome(); e.dataCadastro = r.dataCadastro(); e.dataAlteracao = r.dataAlteracao(); e.todosUnidades = r.todosUnidades(); e.todosPerfis = r.todosPerfis(); e.todosUsuarios = r.todosUsuarios(); e.estruturaId = r.estruturaId(); }
+    private String semAlias(String coluna) {
+        return coluna.replaceFirst("(?i)\\s+as\\s+.*$", "").trim();
+    }
+
+    private String texto(Object valor) {
+        return valor == null ? "" : valor.toString().trim();
+    }
+
+    private void validarFragmento(String fragmento) {
+        if (fragmento.contains(";")) throw new IllegalArgumentException("Configuração SQL inválida");
+    }
+
+    private void apply(Tabela e, TabelaRequest r) {
+        e.nome = r.nome();
+        e.dataCadastro = r.dataCadastro();
+        e.dataAlteracao = r.dataAlteracao();
+        e.todosUnidades = r.todosUnidades();
+        e.todosPerfis = r.todosPerfis();
+        e.todosUsuarios = r.todosUsuarios();
+        e.estruturaId = r.estruturaId();
+    }
 
     private Uni<TabelaResponse> toResponse(Tabela e) {
         return colunaRepository.find("tabelaId = ?1", e.id).list().map(colunas -> new TabelaResponse(e.id, e.nome, e.dataCadastro, e.dataAlteracao, e.todosUnidades, e.todosPerfis, e.todosUsuarios, e.estruturaId, colunas.stream().map(coluna -> new TabelaColunaResponse(coluna.id, coluna.dimensaoId, coluna.medidaId, coluna.ordem)).toList()));
@@ -180,7 +210,9 @@ public class TabelaService {
                         .map(this::campos).map(listaMedidas -> new TabelaOpcoesResponse(listaDimensoes, listaMedidas)));
     }
 
-    private List<TabelaCampoResponse> campos(List<?> resultado) { return resultado.stream().map(item -> (Object[]) item).map(item -> new TabelaCampoResponse(((Number) item[0]).longValue(), texto(item[1]), texto(item[2]), texto(item[3]))).toList(); }
+    private List<TabelaCampoResponse> campos(List<?> resultado) {
+        return resultado.stream().map(item -> (Object[]) item).map(item -> new TabelaCampoResponse(((Number) item[0]).longValue(), texto(item[1]), texto(item[2]), texto(item[3]))).toList();
+    }
 
 
     // Migrado de TabelaController.gerarSql (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/TabelaController.java:184, camada controller)

@@ -21,6 +21,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
+
 import java.util.List;
 
 @Path("/api/aluno")
@@ -28,7 +29,8 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class AlunoController {
 
-    @Inject AlunoService service;
+    @Inject
+    AlunoService service;
 
     @GET
     @Path("/perfil")

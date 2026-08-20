@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.comercial.indicador;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class IndicadorService {
 
-    @Inject IndicadorRepository repository;
+    @Inject
+    IndicadorRepository repository;
 
     public Uni<List<IndicadorResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,16 @@ public class IndicadorService {
                         : Uni.createFrom().failure(new NotFoundException("Indicador not found")));
     }
 
-    private void apply(Indicador e, IndicadorRequest r) { e.nome = r.nome(); e.data_criacao = r.data_criacao(); e.formato_indicador = r.formato_indicador(); e.dia = r.dia(); e.mes = r.mes(); e.ano = r.ano(); e.semana = r.semana(); e.vinculadoVendedor = r.vinculadoVendedor(); }
+    private void apply(Indicador e, IndicadorRequest r) {
+        e.nome = r.nome();
+        e.data_criacao = r.data_criacao();
+        e.formato_indicador = r.formato_indicador();
+        e.dia = r.dia();
+        e.mes = r.mes();
+        e.ano = r.ano();
+        e.semana = r.semana();
+        e.vinculadoVendedor = r.vinculadoVendedor();
+    }
 
     private IndicadorResponse toResponse(Indicador e) {
         return new IndicadorResponse(e.id, e.nome, e.data_criacao, e.formato_indicador, e.dia, e.mes, e.ano, e.semana, e.vinculadoVendedor);

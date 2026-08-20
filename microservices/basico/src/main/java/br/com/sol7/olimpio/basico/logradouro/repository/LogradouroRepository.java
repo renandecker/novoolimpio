@@ -1,9 +1,14 @@
 package br.com.sol7.olimpio.basico.logradouro.repository;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 import br.com.sol7.olimpio.basico.logradouro.entity.Logradouro;
-@ApplicationScoped public class LogradouroRepository implements PanacheRepository<Logradouro> {
+
+@ApplicationScoped
+public class LogradouroRepository implements PanacheRepository<Logradouro> {
 
     // Migrado de LogradouroService.atualizar() (legado, chamado por SchedulingService.tudo()) -
     // so a parte de limpeza (2 deletes); a parte que consulta o webservice dos Correios
@@ -11,11 +16,11 @@ import br.com.sol7.olimpio.basico.logradouro.entity.Logradouro;
     // (integracao externa) - ver RELATORIO_SCHEDULE.md.
     public static final String SQL_LIMPAR_LOGRADOUROS_ORFAOS =
             "DELETE FROM bas_logradouro log WHERE " +
-            "not exists(select pes.id FROM bas_pessoa pes WHERE log.id = pes.id_logradouro) " +
-            "and not exists(select pes.id FROM bas_unidade pes WHERE log.id = pes.id_logradouro)";
+                    "not exists(select pes.id FROM bas_pessoa pes WHERE log.id = pes.id_logradouro) " +
+                    "and not exists(select pes.id FROM bas_unidade pes WHERE log.id = pes.id_logradouro)";
     public static final String SQL_LIMPAR_BAIRROS_ORFAOS =
             "DELETE FROM bas_bairro log WHERE " +
-            "not exists(select pes.id FROM bas_logradouro pes WHERE log.id = pes.id_bairro)";
+                    "not exists(select pes.id FROM bas_logradouro pes WHERE log.id = pes.id_bairro)";
 
     public Uni<Void> limparOrfaosNativo() {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
@@ -33,8 +38,8 @@ import br.com.sol7.olimpio.basico.logradouro.entity.Logradouro;
     public Uni<java.util.List<Logradouro>> autoComplete(String lowerCase) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Logradouro.class)
-                    .setParameter(1, lowerCase)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .getResultList());
     }
 
 
@@ -46,9 +51,9 @@ import br.com.sol7.olimpio.basico.logradouro.entity.Logradouro;
     public Uni<java.util.List<Logradouro>> autoCompleteComBairro(String lowerCase, Long bairroId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_BAIRRO, Logradouro.class)
-                    .setParameter(1, lowerCase)
-                    .setParameter(2, bairroId)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .setParameter(2, bairroId)
+                        .getResultList());
     }
 
 
@@ -60,8 +65,8 @@ import br.com.sol7.olimpio.basico.logradouro.entity.Logradouro;
     public Uni<java.util.List<Logradouro>> buscaCep(String lowerCase) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCA_CEP, Logradouro.class)
-                    .setParameter(1, lowerCase)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .getResultList());
     }
 
 
@@ -73,8 +78,8 @@ import br.com.sol7.olimpio.basico.logradouro.entity.Logradouro;
     public Uni<java.util.List<Logradouro>> buscaLogradouro(Long bairroId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCA_LOGRADOURO, Logradouro.class)
-                    .setParameter(1, bairroId)
-                    .getResultList());
+                        .setParameter(1, bairroId)
+                        .getResultList());
     }
 
 
@@ -87,7 +92,7 @@ import br.com.sol7.olimpio.basico.logradouro.entity.Logradouro;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCA_LOGRADOURO_SEM_LOGRADOURO, Logradouro.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 }

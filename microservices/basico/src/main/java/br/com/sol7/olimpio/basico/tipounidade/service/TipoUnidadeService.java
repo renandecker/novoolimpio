@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.tipounidade.service;
+
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -8,7 +9,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.tipounidade.dto.TipoUnidadeRequest;
 import br.com.sol7.olimpio.basico.tipounidade.dto.TipoUnidadeResponse;
 import br.com.sol7.olimpio.basico.tipounidade.entity.TipoUnidade;
@@ -18,7 +21,8 @@ import br.com.sol7.olimpio.basico.tipounidade.repository.TipoUnidadeRepository;
 @WithTransaction
 public class TipoUnidadeService {
 
-    @Inject TipoUnidadeRepository repository;
+    @Inject
+    TipoUnidadeRepository repository;
 
     @CacheResult(cacheName = "tipo-unidade-cache")
     public Uni<List<TipoUnidadeResponse>> list() {
@@ -62,7 +66,9 @@ public class TipoUnidadeService {
                         : Uni.createFrom().failure(new NotFoundException("TipoUnidade not found")));
     }
 
-    private void apply(TipoUnidade e, TipoUnidadeRequest r) { e.descricao = r.descricao(); }
+    private void apply(TipoUnidade e, TipoUnidadeRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private TipoUnidadeResponse toResponse(TipoUnidade e) {
         return new TipoUnidadeResponse(e.id, e.descricao);

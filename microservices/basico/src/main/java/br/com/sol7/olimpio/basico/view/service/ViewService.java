@@ -1,10 +1,12 @@
 package br.com.sol7.olimpio.basico.view.service;
+
 import br.com.sol7.olimpio.shared.PagedResponse;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.NotFoundException;
 import org.hibernate.reactive.mutiny.Mutiny;
+
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -32,15 +34,15 @@ public class ViewService {
             "COALESCE(NULLIF(pf.nome, ''), NULLIF(pf.nome_social, ''), NULLIF(pj.nome_fantasia, ''), pj.razao_social) ";
 
     private record RefInfo(String table, String descCol, String special) {
-        static RefInfo direct(String table, String descCol) {
+        static RefInfo direct (String table, String descCol){
             return new RefInfo(table, descCol, null);
         }
 
-        static RefInfo special(String name) {
+        static RefInfo special (String name){
             return new RefInfo(null, null, name);
         }
 
-        boolean isSpecial() {
+        boolean isSpecial () {
             return special != null;
         }
     }
@@ -224,7 +226,8 @@ public class ViewService {
     }
 
     private Uni<Map<String, Object>> update(String table, Long id, Map<String, Object> body) {
-        if (body == null || body.isEmpty()) return Uni.createFrom().failure(new NotFoundException("Nenhum campo para atualizar"));
+        if (body == null || body.isEmpty())
+            return Uni.createFrom().failure(new NotFoundException("Nenhum campo para atualizar"));
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> columns(session, table).flatMap(cols -> {
                     List<Map.Entry<String, Object>> updatable = cols.stream()
@@ -232,7 +235,8 @@ public class ViewService {
                             .map(col -> Map.entry(col, body.get(col)))
                             .filter(e -> e.getValue() != null)
                             .toList();
-                    if (updatable.isEmpty()) return Uni.createFrom().failure(new NotFoundException("Nenhum campo atualizável para /" + table + "/" + id));
+                    if (updatable.isEmpty())
+                        return Uni.createFrom().failure(new NotFoundException("Nenhum campo atualizável para /" + table + "/" + id));
                     String setClause = updatable.stream()
                             .map(e -> quote(e.getKey()) + " = :" + e.getKey())
                             .collect(Collectors.joining(", "));
@@ -241,7 +245,12 @@ public class ViewService {
                     for (Map.Entry<String, Object> e : updatable) query.setParameter(e.getKey(), e.getValue());
                     return query.getSingleResult()
                             .onItem().ifNull().failWith(() -> new NotFoundException("Registro " + id + " não encontrado em " + table))
-                            .map(ignored -> { Map<String, Object> m = new LinkedHashMap<>(); m.put("id", id); for (Map.Entry<String, Object> e : updatable) m.put(e.getKey(), e.getValue()); return m; });
+                            .map(ignored -> {
+                                Map<String, Object> m = new LinkedHashMap<>();
+                                m.put("id", id);
+                                for (Map.Entry<String, Object> e : updatable) m.put(e.getKey(), e.getValue());
+                                return m;
+                            });
                 }));
     }
 
@@ -361,11 +370,11 @@ public class ViewService {
             chain = chain.onItem().transformToUni(found -> found != null
                     ? Uni.createFrom().item(found)
                     : tableExists(session, name).flatMap(table -> {
-                        if (table == null) return Uni.createFrom().nullItem();
-                        if (SPECIAL_TABLES.contains(name)) return Uni.createFrom().item(RefInfo.direct(name, null));
-                        return descriptionColumn(session, name).map(col ->
-                                col == null ? null : RefInfo.direct(name, col));
-                    }));
+                if (table == null) return Uni.createFrom().nullItem();
+                if (SPECIAL_TABLES.contains(name)) return Uni.createFrom().item(RefInfo.direct(name, null));
+                return descriptionColumn(session, name).map(col ->
+                        col == null ? null : RefInfo.direct(name, col));
+            }));
         }
         return chain;
     }

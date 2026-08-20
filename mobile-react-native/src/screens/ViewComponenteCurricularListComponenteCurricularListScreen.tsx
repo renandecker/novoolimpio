@@ -1,5 +1,6 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import {ModuleList} from '../ModuleListScreen';
+
 export default function ViewComponenteCurricularListComponenteCurricularListScreen() {
-  return <ModuleList path="/api/view/componenteCurricular/listComponenteCurricular" />;
+    return <ModuleList path="/api/view/componenteCurricular/listComponenteCurricular"/>;
 }

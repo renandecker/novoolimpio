@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.estoque.vendaproduto;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class VendaProdutoService {
 
-    @Inject VendaProdutoRepository repository;
+    @Inject
+    VendaProdutoRepository repository;
 
     public Uni<List<VendaProdutoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,16 @@ public class VendaProdutoService {
                         : Uni.createFrom().failure(new NotFoundException("VendaProduto not found")));
     }
 
-    private void apply(VendaProduto e, VendaProdutoRequest r) { e.dataCompra = r.dataCompra(); e.unidadeId = r.unidadeId(); e.usuarioId = r.usuarioId(); e.pessoaId = r.pessoaId(); e.tipoFormaPagamento = r.tipoFormaPagamento(); e.valor = r.valor(); e.formaPagamentoId = r.formaPagamentoId(); e.quantidade = r.quantidade(); }
+    private void apply(VendaProduto e, VendaProdutoRequest r) {
+        e.dataCompra = r.dataCompra();
+        e.unidadeId = r.unidadeId();
+        e.usuarioId = r.usuarioId();
+        e.pessoaId = r.pessoaId();
+        e.tipoFormaPagamento = r.tipoFormaPagamento();
+        e.valor = r.valor();
+        e.formaPagamentoId = r.formaPagamentoId();
+        e.quantidade = r.quantidade();
+    }
 
     private VendaProdutoResponse toResponse(VendaProduto e) {
         return new VendaProdutoResponse(e.id, e.dataCompra, e.unidadeId, e.usuarioId, e.pessoaId, e.tipoFormaPagamento, e.valor, e.formaPagamentoId, e.quantidade);

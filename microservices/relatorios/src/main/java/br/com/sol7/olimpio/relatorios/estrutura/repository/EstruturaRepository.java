@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.relatorios.estrutura;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class EstruturaRepository implements PanacheRepository<Estrutura> {
+
+@ApplicationScoped
+public class EstruturaRepository implements PanacheRepository<Estrutura> {
 
     // Migrado de EstruturaRepository.buscarEstruturas (legado) - HQL original:
     // select a from Estrutura a order by a.nome
@@ -13,7 +18,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_ESTRUTURAS, Estrutura.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -25,8 +30,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Estrutura>> buscarBancos(String banco) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_BANCOS, Estrutura.class)
-                    .setParameter(1, banco)
-                    .getResultList());
+                        .setParameter(1, banco)
+                        .getResultList());
     }
 
 
@@ -38,9 +43,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Estrutura>> buscarBancosComId(String banco, Long id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_BANCOS_COM_ID, Estrutura.class)
-                    .setParameter(1, banco)
-                    .setParameter(2, id)
-                    .getResultList());
+                        .setParameter(1, banco)
+                        .setParameter(2, id)
+                        .getResultList());
     }
 
 
@@ -52,8 +57,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Estrutura>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Estrutura.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 }

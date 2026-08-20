@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.auditoria.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.auditoria.dto.AuditoriaRequest;
 import br.com.sol7.olimpio.basico.auditoria.dto.AuditoriaResponse;
 import br.com.sol7.olimpio.basico.auditoria.entity.Auditoria;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.auditoria.repository.AuditoriaRepository;
 @WithTransaction
 public class AuditoriaService {
 
-    @Inject AuditoriaRepository repository;
+    @Inject
+    AuditoriaRepository repository;
 
     public Uni<List<AuditoriaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,11 @@ public class AuditoriaService {
                         : Uni.createFrom().failure(new NotFoundException("Auditoria not found")));
     }
 
-    private void apply(Auditoria e, AuditoriaRequest r) { e.username = r.username(); e.action = r.action(); e.timestamp = r.timestamp(); }
+    private void apply(Auditoria e, AuditoriaRequest r) {
+        e.username = r.username();
+        e.action = r.action();
+        e.timestamp = r.timestamp();
+    }
 
     private AuditoriaResponse toResponse(Auditoria e) {
         return new AuditoriaResponse(e.id, e.username, e.action, e.timestamp);

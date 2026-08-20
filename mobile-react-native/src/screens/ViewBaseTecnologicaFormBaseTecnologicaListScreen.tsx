@@ -1,5 +1,6 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import {ModuleList} from '../ModuleListScreen';
+
 export default function ViewBaseTecnologicaFormBaseTecnologicaListScreen() {
-  return <ModuleList path="/api/view/baseTecnologica/formBaseTecnologica" />;
+    return <ModuleList path="/api/view/baseTecnologica/formBaseTecnologica"/>;
 }

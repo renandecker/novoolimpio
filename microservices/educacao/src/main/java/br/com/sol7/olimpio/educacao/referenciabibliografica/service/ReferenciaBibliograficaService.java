@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.referenciabibliografica;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ReferenciaBibliograficaService {
 
-    @Inject ReferenciaBibliograficaRepository repository;
+    @Inject
+    ReferenciaBibliograficaRepository repository;
 
     public Uni<List<ReferenciaBibliograficaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,11 @@ public class ReferenciaBibliograficaService {
                         : Uni.createFrom().failure(new NotFoundException("ReferenciaBibliografica not found")));
     }
 
-    private void apply(ReferenciaBibliografica e, ReferenciaBibliograficaRequest r) { e.autor = r.autor(); e.titulo = r.titulo(); e.volume = r.volume(); }
+    private void apply(ReferenciaBibliografica e, ReferenciaBibliograficaRequest r) {
+        e.autor = r.autor();
+        e.titulo = r.titulo();
+        e.volume = r.volume();
+    }
 
     private ReferenciaBibliograficaResponse toResponse(ReferenciaBibliografica e) {
         return new ReferenciaBibliograficaResponse(e.id, e.autor, e.titulo, e.volume);

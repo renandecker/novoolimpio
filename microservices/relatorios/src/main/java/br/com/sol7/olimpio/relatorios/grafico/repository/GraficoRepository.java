@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.relatorios.grafico;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class GraficoRepository implements PanacheRepository<Grafico> {
+
+@ApplicationScoped
+public class GraficoRepository implements PanacheRepository<Grafico> {
 
     // Migrado de GraficoRepository.autoComplete (legado) - HQL original:
     // select p from Grafico p where (lower(p.nome) like '%' || ?1 || '%' OR  str(p.id) = ?1) and  p.estrutura = ?2 order by p.nome
@@ -12,9 +17,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Grafico>> autoComplete(String query, Long estruturaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Grafico.class)
-                    .setParameter(1, query)
-                    .setParameter(2, estruturaId)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, estruturaId)
+                        .getResultList());
     }
 
 
@@ -38,8 +43,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Grafico>> buscarGraficoPeloFato(Long fatoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_GRAFICO_PELO_FATO, Grafico.class)
-                    .setParameter(1, fatoId)
-                    .getResultList());
+                        .setParameter(1, fatoId)
+                        .getResultList());
     }
 
 

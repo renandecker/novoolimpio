@@ -18,9 +18,11 @@ public class CanalEmailService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CanalEmailService.class);
 
-    private record ConfigSmtp(String host, Integer port, String username, String password, Boolean tls, Boolean ssl) {}
+    private record ConfigSmtp(String host, Integer port, String username, String password, Boolean tls, Boolean ssl) {
+    }
 
-    @Inject Vertx vertx;
+    @Inject
+    Vertx vertx;
 
     public Uni<Void> enviar(NotificacaoMessage msg) {
         return enviar(msg, null);
@@ -54,13 +56,13 @@ public class CanalEmailService {
     private Uni<ConfigSmtp> configSmtpPadrao() {
         return Panache.getSession()
                 .chain(session -> session.createNativeQuery(
-                                "SELECT host, port, username, password, tls, ssl FROM bas_email WHERE fl_principal = true LIMIT 1")
+                        "SELECT host, port, username, password, tls, ssl FROM bas_email WHERE fl_principal = true LIMIT 1")
                         .getResultList())
                 .chain(list -> {
                     if (!list.isEmpty()) return Uni.createFrom().item(toConfigSmtp(list.get(0)));
                     return Panache.getSession()
                             .chain(session -> session.createNativeQuery(
-                                            "SELECT host, port, username, password, tls, ssl FROM bas_email ORDER BY id ASC LIMIT 1")
+                                    "SELECT host, port, username, password, tls, ssl FROM bas_email ORDER BY id ASC LIMIT 1")
                                     .getResultList())
                             .map(rows -> rows.isEmpty() ? null : toConfigSmtp(rows.get(0)));
                 });
@@ -87,11 +89,11 @@ public class CanalEmailService {
                         FROM bas_login l
                         LEFT JOIN bas_usuario u ON u.id = l.id_usuario
                         LEFT JOIN bas_pessoa p ON p.id = u.id_pessoa
-                        WHERE lower(l.username) = lower(?1)
+                        WHERE lower(l.username) = lower( ? 1)
                         LIMIT 1
                         """)
-                        .setParameter(1, username)
-                        .getResultList())
+                                .setParameter(1, username)
+                                .getResultList())
                 .map(list -> list.isEmpty() || list.get(0) == null ? null : list.get(0).toString().trim());
     }
 
@@ -101,7 +103,7 @@ public class CanalEmailService {
         }
         return Panache.getSession()
                 .chain(session -> session.createNativeQuery(
-                                "UPDATE not_notificacao SET email_enviado = true WHERE id = ?1 AND email_enviado = false")
+                        "UPDATE not_notificacao SET email_enviado = true WHERE id = ?1 AND email_enviado = false")
                         .setParameter(1, id)
                         .executeUpdate())
                 .replaceWithVoid();

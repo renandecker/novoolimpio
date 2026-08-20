@@ -15,9 +15,11 @@ import java.util.Objects;
 @IdClass(TurnoUsuario.TurnoUsuarioId.class)
 public class TurnoUsuario extends PanacheEntityBase {
 
-    @Id @Column(name = "id_usuario")
+    @Id
+    @Column(name = "id_usuario")
     public Long usuarioId;  // referencia a Usuario (id, cross-service)
-    @Id @Column(name = "id_turno")
+    @Id
+    @Column(name = "id_turno")
     public Long turnoTrabalhoId;  // referencia a TurnoTrabalho (id, cross-service)
 
     public static class TurnoUsuarioId implements Serializable {

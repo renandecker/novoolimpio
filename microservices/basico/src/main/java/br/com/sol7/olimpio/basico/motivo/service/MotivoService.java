@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.motivo.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.motivo.dto.MotivoRequest;
 import br.com.sol7.olimpio.basico.motivo.dto.MotivoResponse;
 import br.com.sol7.olimpio.basico.motivo.entity.Motivo;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.motivo.repository.MotivoRepository;
 @WithTransaction
 public class MotivoService {
 
-    @Inject MotivoRepository repository;
+    @Inject
+    MotivoRepository repository;
 
     public Uni<List<MotivoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,11 @@ public class MotivoService {
                         : Uni.createFrom().failure(new NotFoundException("Motivo not found")));
     }
 
-    private void apply(Motivo e, MotivoRequest r) { e.descricao = r.descricao(); e.style = r.style(); e.ativo = r.ativo(); }
+    private void apply(Motivo e, MotivoRequest r) {
+        e.descricao = r.descricao();
+        e.style = r.style();
+        e.ativo = r.ativo();
+    }
 
     private MotivoResponse toResponse(Motivo e) {
         return new MotivoResponse(e.id, e.descricao, e.style, e.ativo);
@@ -85,7 +93,7 @@ public class MotivoService {
     //         return getMotivoRepository().autoCompleteList(new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteList() {
-                return repository.find("ativo = true order by descricao").page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("ativo = true order by descricao").page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

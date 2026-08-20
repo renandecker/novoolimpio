@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.relatorios.grafico;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class GraficoService {
 
-    @Inject GraficoRepository repository;
+    @Inject
+    GraficoRepository repository;
 
     public Uni<List<GraficoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,34 @@ public class GraficoService {
                         : Uni.createFrom().failure(new NotFoundException("Grafico not found")));
     }
 
-    private void apply(Grafico e, GraficoRequest r) { e.nome = r.nome(); e.todosUnidades = r.todosUnidades(); e.todosPerfis = r.todosPerfis(); e.todosUsuarios = r.todosUsuarios(); e.formatoData = r.formatoData(); e.dataAlteracao = r.dataAlteracao(); e.tipo = r.tipo(); e.ordemGrafico = r.ordemGrafico(); e.exibirPercentual = r.exibirPercentual(); e.exibirLegenda = r.exibirLegenda(); e.colunaLegenda = r.colunaLegenda(); e.limite = r.limite(); e.coluna = r.coluna(); e.altura = r.altura(); e.margem = r.margem(); e.diametro = r.diametro(); e.exibirValor = r.exibirValor(); e.valorAcumulado = r.valorAcumulado(); e.tipoEixo = r.tipoEixo(); e.posicao = r.posicao(); e.estruturaId = r.estruturaId(); e.dimensaoReferenciaId = r.dimensaoReferenciaId(); e.dimensaoInformacaoId = r.dimensaoInformacaoId(); e.medidaInformacaoId = r.medidaInformacaoId(); e.dimensaoCombinadoId = r.dimensaoCombinadoId(); e.medidaCombinadoId = r.medidaCombinadoId(); }
+    private void apply(Grafico e, GraficoRequest r) {
+        e.nome = r.nome();
+        e.todosUnidades = r.todosUnidades();
+        e.todosPerfis = r.todosPerfis();
+        e.todosUsuarios = r.todosUsuarios();
+        e.formatoData = r.formatoData();
+        e.dataAlteracao = r.dataAlteracao();
+        e.tipo = r.tipo();
+        e.ordemGrafico = r.ordemGrafico();
+        e.exibirPercentual = r.exibirPercentual();
+        e.exibirLegenda = r.exibirLegenda();
+        e.colunaLegenda = r.colunaLegenda();
+        e.limite = r.limite();
+        e.coluna = r.coluna();
+        e.altura = r.altura();
+        e.margem = r.margem();
+        e.diametro = r.diametro();
+        e.exibirValor = r.exibirValor();
+        e.valorAcumulado = r.valorAcumulado();
+        e.tipoEixo = r.tipoEixo();
+        e.posicao = r.posicao();
+        e.estruturaId = r.estruturaId();
+        e.dimensaoReferenciaId = r.dimensaoReferenciaId();
+        e.dimensaoInformacaoId = r.dimensaoInformacaoId();
+        e.medidaInformacaoId = r.medidaInformacaoId();
+        e.dimensaoCombinadoId = r.dimensaoCombinadoId();
+        e.medidaCombinadoId = r.medidaCombinadoId();
+    }
 
     private GraficoResponse toResponse(Grafico e) {
         return new GraficoResponse(e.id, e.nome, e.todosUnidades, e.todosPerfis, e.todosUsuarios, e.formatoData, e.dataAlteracao, e.tipo, e.ordemGrafico, e.exibirPercentual, e.exibirLegenda, e.colunaLegenda, e.limite, e.coluna, e.altura, e.margem, e.diametro, e.exibirValor, e.valorAcumulado, e.tipoEixo, e.posicao, e.estruturaId, e.dimensaoReferenciaId, e.dimensaoInformacaoId, e.medidaInformacaoId, e.dimensaoCombinadoId, e.medidaCombinadoId);

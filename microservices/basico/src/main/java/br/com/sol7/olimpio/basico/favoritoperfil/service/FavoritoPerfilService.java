@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.favoritoperfil.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.favoritoperfil.dto.FavoritoPerfilRequest;
 import br.com.sol7.olimpio.basico.favoritoperfil.dto.FavoritoPerfilResponse;
 import br.com.sol7.olimpio.basico.favoritoperfil.entity.FavoritoPerfil;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.favoritoperfil.repository.FavoritoPerfilReposi
 @WithTransaction
 public class FavoritoPerfilService {
 
-    @Inject FavoritoPerfilRepository repository;
+    @Inject
+    FavoritoPerfilRepository repository;
 
     public Uni<List<FavoritoPerfilResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,12 @@ public class FavoritoPerfilService {
                         : Uni.createFrom().failure(new NotFoundException("FavoritoPerfil not found")));
     }
 
-    private void apply(FavoritoPerfil e, FavoritoPerfilRequest r) { e.nome = r.nome(); e.icon = r.icon(); e.perfilId = r.perfilId(); e.moduloId = r.moduloId(); }
+    private void apply(FavoritoPerfil e, FavoritoPerfilRequest r) {
+        e.nome = r.nome();
+        e.icon = r.icon();
+        e.perfilId = r.perfilId();
+        e.moduloId = r.moduloId();
+    }
 
     private FavoritoPerfilResponse toResponse(FavoritoPerfil e) {
         return new FavoritoPerfilResponse(e.id, e.nome, e.icon, e.perfilId, e.moduloId);
@@ -70,7 +79,7 @@ public class FavoritoPerfilService {
     //         return getFavoritoPerfilRepository().buscarPerfilComFavoritos(perfil);
     //     }
     public Uni<List<Long>> buscarPerfilComFavoritos(Long perfilId) {
-                return repository.find("perfilId = ?1", perfilId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("perfilId = ?1", perfilId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -80,7 +89,7 @@ public class FavoritoPerfilService {
     //         return getFavoritoPerfilRepository().buscarPerfilsComFavoritos(perfil);
     //     }
     public Uni<List<Long>> buscarPerfilsComFavoritos(List<Long> perfil) {
-                return repository.find("perfilId in (?1)", perfil).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("perfilId in (?1)", perfil).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

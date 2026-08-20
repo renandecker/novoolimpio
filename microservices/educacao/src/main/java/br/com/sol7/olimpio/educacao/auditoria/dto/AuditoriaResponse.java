@@ -11,4 +11,4 @@ public record AuditoriaResponse(
         Date data,
         String usuario,
         String acao,
-        List<AuditoriaCampo> campos) {}
+        List<AuditoriaCampo> campos){}

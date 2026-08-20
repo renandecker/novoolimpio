@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.horario.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,8 +7,10 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 import java.util.Date;
+
 import br.com.sol7.olimpio.basico.horario.dto.HorarioRequest;
 import br.com.sol7.olimpio.basico.horario.dto.HorarioResponse;
 import br.com.sol7.olimpio.basico.horario.entity.Horario;
@@ -17,7 +20,8 @@ import br.com.sol7.olimpio.basico.horario.repository.HorarioRepository;
 @WithTransaction
 public class HorarioService {
 
-    @Inject HorarioRepository repository;
+    @Inject
+    HorarioRepository repository;
 
     public Uni<List<HorarioResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -57,7 +61,9 @@ public class HorarioService {
                         : Uni.createFrom().failure(new NotFoundException("Horario not found")));
     }
 
-    private void apply(Horario e, HorarioRequest r) { e.hora = r.hora(); }
+    private void apply(Horario e, HorarioRequest r) {
+        e.hora = r.hora();
+    }
 
     private HorarioResponse toResponse(Horario e) {
         return new HorarioResponse(e.id, e.hora);
@@ -81,7 +87,7 @@ public class HorarioService {
     //         return getHorarioRepository().buscarHorarioPorHora(hora);
     //     }
     public Uni<Long> buscarHorarioPorHora(String hora) {
-                return repository.find("hora = ?1", hora).firstResult().map(x -> x == null ? null : x.id);
+        return repository.find("hora = ?1", hora).firstResult().map(x -> x == null ? null : x.id);
     }
 
 

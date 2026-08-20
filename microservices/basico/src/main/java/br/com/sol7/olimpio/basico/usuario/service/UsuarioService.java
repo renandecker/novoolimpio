@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.usuario.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import org.slf4j.Logger;
@@ -9,7 +10,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.pessoa.repository.PessoaRepository;
 import br.com.sol7.olimpio.basico.usuario.dto.UsuarioRequest;
 import br.com.sol7.olimpio.basico.usuario.dto.UsuarioResponse;
@@ -20,8 +23,10 @@ import br.com.sol7.olimpio.basico.usuario.repository.UsuarioRepository;
 @WithTransaction
 public class UsuarioService {
 
-    @Inject UsuarioRepository repository;
-    @Inject PessoaRepository pessoaRepository;
+    @Inject
+    UsuarioRepository repository;
+    @Inject
+    PessoaRepository pessoaRepository;
     private static final Logger logger = LoggerFactory.getLogger(UsuarioService.class);
 
     public Uni<List<UsuarioResponse>> list() {
@@ -82,7 +87,19 @@ public class UsuarioService {
                 .map(this::toResponse);
     }
 
-    private void apply(Usuario e, UsuarioRequest r) { e.login = r.login(); e.senha = r.senha(); e.foto = r.foto(); e.fotoBase64 = r.fotoBase64(); e.hierarquia = r.hierarquia(); e.qtdeNotify = r.qtdeNotify(); e.ativo = r.ativo(); e.senhaProvisoria = r.senhaProvisoria(); e.pessoaId = r.pessoaId(); e.funcionarioId = r.funcionarioId(); e.unidadeDefaultId = r.unidadeDefaultId(); }
+    private void apply(Usuario e, UsuarioRequest r) {
+        e.login = r.login();
+        e.senha = r.senha();
+        e.foto = r.foto();
+        e.fotoBase64 = r.fotoBase64();
+        e.hierarquia = r.hierarquia();
+        e.qtdeNotify = r.qtdeNotify();
+        e.ativo = r.ativo();
+        e.senhaProvisoria = r.senhaProvisoria();
+        e.pessoaId = r.pessoaId();
+        e.funcionarioId = r.funcionarioId();
+        e.unidadeDefaultId = r.unidadeDefaultId();
+    }
 
     private UsuarioResponse toResponse(Usuario e) {
         return new UsuarioResponse(e.id, e.login, e.senha, e.foto, e.fotoBase64, e.hierarquia, e.qtdeNotify, e.ativo, e.senhaProvisoria, e.pessoaId, e.funcionarioId, e.unidadeDefaultId);
@@ -267,7 +284,7 @@ public class UsuarioService {
     //         return getRepository().buscarUsuarioComTurnos(entity);
     //     }
     public Uni<Long> buscarUsuarioComTurnos(Long entityId) {
-                return repository.buscarUsuarioComTurnos(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarUsuarioComTurnos(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -279,7 +296,7 @@ public class UsuarioService {
     //         return getRepository().buscarUsuarioPorPerfil(perfil);
     //     }
     public Uni<List<Long>> buscarUsuarioPorPerfil(Long perfilId) {
-                return repository.buscarUsuarioPorPerfil(perfilId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarUsuarioPorPerfil(perfilId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -290,7 +307,7 @@ public class UsuarioService {
     //         return getRepository().buscarUsuarioPorUnidades(unidade);
     //     }
     public Uni<List<Long>> buscarUsuarioPorUnidades(List<Long> unidade) {
-                return repository.buscarUsuarioPorUnidades(unidade).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarUsuarioPorUnidades(unidade).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -302,7 +319,7 @@ public class UsuarioService {
     //         return getRepository().buscarUsuarioPorUnidade(unidade, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> buscarUsuarioPorUnidade(Long unidadeId) {
-                return repository.buscarUsuarioPorUnidade(unidadeId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarUsuarioPorUnidade(unidadeId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -314,7 +331,7 @@ public class UsuarioService {
     //         return getRepository().autoCompleteUsuario(query.toLowerCase().trim(), unidade, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteUsuario(String query, Long unidadeId) {
-                return repository.autoCompleteUsuario(query.toLowerCase().trim(), unidadeId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoCompleteUsuario(query.toLowerCase().trim(), unidadeId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -350,7 +367,7 @@ public class UsuarioService {
     //         return getRepository().buscarUsuarioComUnidades(entity);
     //     }
     public Uni<Long> buscarUsuarioComUnidades(Long entityId) {
-                return repository.buscarUsuarioComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarUsuarioComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -362,7 +379,7 @@ public class UsuarioService {
     //         return getRepository().buscarUsuarioComAgendas(entity);
     //     }
     public Uni<Long> buscarUsuarioComAgendas(Long entityId) {
-                return repository.buscarUsuarioComAgendas(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarUsuarioComAgendas(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -386,7 +403,7 @@ public class UsuarioService {
     //         return getRepository().buscarConsultoresComAgenda(agenda, diaSemana);
     //     }
     public Uni<List<Long>> buscarConsultoresComAgenda(Long agendaId, Integer diaSemana) {
-                return repository.buscarConsultoresComAgenda(agendaId, diaSemana).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarConsultoresComAgenda(agendaId, diaSemana).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -396,7 +413,7 @@ public class UsuarioService {
     //         return !ObjectUtil.nullOrEmpty(getRepository().buscarLoginExistente(login));
     //     }
     public Uni<Boolean> buscarLoginExistente(String login) {
-                return repository.buscarLoginExistente(login).map(list -> !list.isEmpty());
+        return repository.buscarLoginExistente(login).map(list -> !list.isEmpty());
     }
 
 
@@ -406,7 +423,7 @@ public class UsuarioService {
     //         return !ObjectUtil.nullOrEmpty(getRepository().buscarLoginEemailExistente(login, email));
     //     }
     public Uni<Boolean> buscarLoginEemailExistente(String login, String email) {
-                return repository.buscarLoginEemailExistente(login, email).map(list -> !list.isEmpty());
+        return repository.buscarLoginEemailExistente(login, email).map(list -> !list.isEmpty());
     }
 
 
@@ -418,7 +435,7 @@ public class UsuarioService {
     //         return getRepository().buscarUsuarioComPerfil(entity);
     //     }
     public Uni<Long> buscarUsuarioComPerfil(Long entityId) {
-                return repository.buscarUsuarioComPerfil(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarUsuarioComPerfil(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -441,7 +458,7 @@ public class UsuarioService {
     //         return getRepository().autoCompleteComUnidade(query.toLowerCase().trim(), unidades, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteComUnidade(String query, List<Long> unidades) {
-                return repository.autoCompleteComUnidade(query.toLowerCase().trim(), unidades).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoCompleteComUnidade(query.toLowerCase().trim(), unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 

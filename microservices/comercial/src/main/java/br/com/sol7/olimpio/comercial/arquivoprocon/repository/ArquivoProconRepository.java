@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.comercial.arquivoprocon;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class ArquivoProconRepository implements PanacheRepository<ArquivoProcon> {
+
+@ApplicationScoped
+public class ArquivoProconRepository implements PanacheRepository<ArquivoProcon> {
 
     // Migrado de ArquivoProconRepository.verificarHash (legado) - HQL original:
     // Select a from ArquivoProcon a where a.hash = ?1
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ArquivoProcon>> verificarHash(String hash) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_VERIFICAR_HASH, ArquivoProcon.class)
-                    .setParameter(1, hash)
-                    .getResultList());
+                        .setParameter(1, hash)
+                        .getResultList());
     }
 
 
@@ -26,7 +31,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTA_ARQUIVO_PROCON, ArquivoProcon.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 }

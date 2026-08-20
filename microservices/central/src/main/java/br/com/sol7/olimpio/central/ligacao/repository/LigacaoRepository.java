@@ -1,9 +1,15 @@
 package br.com.sol7.olimpio.central.ligacao;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
+
 import java.util.Date;
-@ApplicationScoped public class LigacaoRepository implements PanacheRepository<Ligacao> {
+
+@ApplicationScoped
+public class LigacaoRepository implements PanacheRepository<Ligacao> {
 
     // Migrado de LigacaoRepository.buscarHistoricoLigacao (legado) - HQL original:
     // SELECT l FROM Ligacao l WHERE l.ordemLigacao.prospecto.id = ?1 and l.resultadoContato is not null and l.dataFinal is not null order by l.dataInicial desc
@@ -13,8 +19,8 @@ import java.util.Date;
     public Uni<java.util.List<Ligacao>> buscarHistoricoLigacao(Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_HISTORICO_LIGACAO, Ligacao.class)
-                    .setParameter(1, id)
-                    .getResultList());
+                        .setParameter(1, id)
+                        .getResultList());
     }
 
 
@@ -26,8 +32,8 @@ import java.util.Date;
     public Uni<java.util.List<Ligacao>> buscarHistoricoTodasLigacaoProspecto(Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_HISTORICO_TODAS_LIGACAO_PROSPECTO, Ligacao.class)
-                    .setParameter(1, id)
-                    .getResultList());
+                        .setParameter(1, id)
+                        .getResultList());
     }
 
 
@@ -39,10 +45,10 @@ import java.util.Date;
     public Uni<java.util.List<Object>> buscarQtdeLigadosProspectoComResultadoOperacional(Long prospectoId, Long resultadoContatoId, Long operacionalId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_QTDE_LIGADOS_PROSPECTO_COM_RESULTADO_OPERACIONAL)
-                    .setParameter(1, prospectoId)
-                    .setParameter(2, resultadoContatoId)
-                    .setParameter(3, operacionalId)
-                    .getResultList());
+                        .setParameter(1, prospectoId)
+                        .setParameter(2, resultadoContatoId)
+                        .setParameter(3, operacionalId)
+                        .getResultList());
     }
 
 
@@ -54,10 +60,10 @@ import java.util.Date;
     public Uni<java.util.List<Object>> resultadoPorOperacional(Long operacionalId, int resultadoContato, Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_RESULTADO_POR_OPERACIONAL)
-                    .setParameter(1, operacionalId)
-                    .setParameter(2, resultadoContato)
-                    .setParameter(3, usuarioId)
-                    .getResultList());
+                        .setParameter(1, operacionalId)
+                        .setParameter(2, resultadoContato)
+                        .setParameter(3, usuarioId)
+                        .getResultList());
     }
 
 
@@ -69,9 +75,9 @@ import java.util.Date;
     public Uni<java.util.List<Ligacao>> buscarLigacaoComNumero(Long usuarioId, String numero) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_LIGACAO_COM_NUMERO, Ligacao.class)
-                    .setParameter(1, usuarioId)
-                    .setParameter(2, numero)
-                    .getResultList());
+                        .setParameter(1, usuarioId)
+                        .setParameter(2, numero)
+                        .getResultList());
     }
 
 
@@ -83,10 +89,10 @@ import java.util.Date;
     public Uni<java.util.List<Object>> resultadoPorData(Date data, int resultadoContato, Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_RESULTADO_POR_DATA)
-                    .setParameter(1, data)
-                    .setParameter(2, resultadoContato)
-                    .setParameter(3, usuarioId)
-                    .getResultList());
+                        .setParameter(1, data)
+                        .setParameter(2, resultadoContato)
+                        .setParameter(3, usuarioId)
+                        .getResultList());
     }
 
 }

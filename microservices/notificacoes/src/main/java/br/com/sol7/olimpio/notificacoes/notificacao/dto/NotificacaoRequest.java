@@ -5,9 +5,9 @@ import jakarta.validation.constraints.Size;
 
 public record NotificacaoRequest(
         String username,
-        @NotBlank @Size(max = 255) String titulo,
+@NotBlank @Size(max = 255) String titulo,
         String mensagem,
         String tipo,
         String link,
         Boolean canalMobile,
-        Boolean canalEmail) {}
+        Boolean canalEmail){}

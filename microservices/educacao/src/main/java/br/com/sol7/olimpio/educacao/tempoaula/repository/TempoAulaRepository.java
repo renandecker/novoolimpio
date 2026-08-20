@@ -1,3 +1,8 @@
 package br.com.sol7.olimpio.educacao.tempoaula;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
-@ApplicationScoped public class TempoAulaRepository implements PanacheRepository<TempoAula> {}
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
+public class TempoAulaRepository implements PanacheRepository<TempoAula> {
+}

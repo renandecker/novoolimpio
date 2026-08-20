@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+
 import java.time.OffsetDateTime;
 
 @Entity
@@ -39,6 +40,13 @@ public class Login extends PanacheEntityBase {
     @Column(name = "updated_at", nullable = false)
     public OffsetDateTime updatedAt;
 
-    @PrePersist void onCreate() { createdAt = updatedAt = OffsetDateTime.now(); }
-    @PreUpdate void onUpdate() { updatedAt = OffsetDateTime.now(); }
+    @PrePersist
+    void onCreate() {
+        createdAt = updatedAt = OffsetDateTime.now();
+    }
+
+    @PreUpdate
+    void onUpdate() {
+        updatedAt = OffsetDateTime.now();
+    }
 }

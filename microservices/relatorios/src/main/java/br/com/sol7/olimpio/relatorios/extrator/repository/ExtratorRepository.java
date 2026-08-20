@@ -1,9 +1,14 @@
 package br.com.sol7.olimpio.relatorios.extrator;
+
 import java.util.Date;
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class ExtratorRepository implements PanacheRepository<Extrator> {
+
+@ApplicationScoped
+public class ExtratorRepository implements PanacheRepository<Extrator> {
 
     // Migrado de ExtratorService.remove() (legado, chamado por SchedulingService.tudo()) -
     // so a parte de banco (2 updates); a limpeza de arquivos temporarios em disco ficou de
@@ -30,7 +35,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LIST_EXTRATORNA_FILA, Extrator.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -42,8 +47,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Extrator>> buscaTodosComCOnexao(Long tabelaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCA_TODOS_COM_C_ONEXAO, Extrator.class)
-                    .setParameter(1, tabelaId)
-                    .getResultList());
+                        .setParameter(1, tabelaId)
+                        .getResultList());
     }
 
 
@@ -55,8 +60,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> buscaSituacaoExtrator(Long conexaoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCA_SITUACAO_EXTRATOR)
-                    .setParameter(1, conexaoId)
-                    .getResultList());
+                        .setParameter(1, conexaoId)
+                        .getResultList());
     }
 
 
@@ -68,8 +73,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Extrator>> buscaEstratorComTabela(Long tabelaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCA_ESTRATOR_COM_TABELA, Extrator.class)
-                    .setParameter(1, tabelaId)
-                    .getResultList());
+                        .setParameter(1, tabelaId)
+                        .getResultList());
     }
 
 }

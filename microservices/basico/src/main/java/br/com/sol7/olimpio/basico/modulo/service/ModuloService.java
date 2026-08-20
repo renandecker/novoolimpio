@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.modulo.service;
+
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -8,7 +9,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.modulo.dto.ModuloRequest;
 import br.com.sol7.olimpio.basico.modulo.dto.ModuloResponse;
 import br.com.sol7.olimpio.basico.modulo.entity.Modulo;
@@ -18,7 +21,8 @@ import br.com.sol7.olimpio.basico.modulo.repository.ModuloRepository;
 @WithTransaction
 public class ModuloService {
 
-    @Inject ModuloRepository repository;
+    @Inject
+    ModuloRepository repository;
 
     @CacheResult(cacheName = "modulo-menu-cache")
     public Uni<List<ModuloResponse>> list() {
@@ -62,7 +66,15 @@ public class ModuloService {
                         : Uni.createFrom().failure(new NotFoundException("Modulo not found")));
     }
 
-    private void apply(Modulo e, ModuloRequest r) { e.antecessorId = r.antecessorId(); e.rotulo = r.rotulo(); e.descricao = r.descricao(); e.icone = r.icone(); e.ajuda = r.ajuda(); e.outcome = r.outcome(); e.ordem = r.ordem(); }
+    private void apply(Modulo e, ModuloRequest r) {
+        e.antecessorId = r.antecessorId();
+        e.rotulo = r.rotulo();
+        e.descricao = r.descricao();
+        e.icone = r.icone();
+        e.ajuda = r.ajuda();
+        e.outcome = r.outcome();
+        e.ordem = r.ordem();
+    }
 
     private ModuloResponse toResponse(Modulo e) {
         return new ModuloResponse(e.id, e.antecessorId, e.rotulo, e.descricao, e.icone, e.ajuda, e.outcome, e.ordem);
@@ -169,7 +181,7 @@ public class ModuloService {
     //         return getModuloRepository().buscarPorRotulo(id);
     //     }
     public Uni<Long> buscarPorRotulo(String id) {
-                return repository.find("rotulo = ?1", id).firstResult().map(x -> x == null ? null : x.id);
+        return repository.find("rotulo = ?1", id).firstResult().map(x -> x == null ? null : x.id);
     }
 
 
@@ -180,7 +192,7 @@ public class ModuloService {
     //         return getModuloRepository().buscarAntecessoPorRotulo(modulo);
     //     }
     public Uni<List<Long>> buscarAntecessoPorRotulo(Long moduloId) {
-                return repository.find("antecessorId = ?1", moduloId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("antecessorId = ?1", moduloId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

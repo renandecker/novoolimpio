@@ -1,10 +1,15 @@
 package br.com.sol7.olimpio.basico.horario.repository;
+
 import java.util.Date;
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 import br.com.sol7.olimpio.basico.horario.entity.Horario;
-@ApplicationScoped public class HorarioRepository implements PanacheRepository<Horario> {
+
+@ApplicationScoped
+public class HorarioRepository implements PanacheRepository<Horario> {
 
     // Migrado de HorarioRepository.autoComplete (legado) - HQL original:
     // Select h from Horario h where h.hora like '%' || ?1 || '%'  order by h.hora
@@ -14,8 +19,8 @@ import br.com.sol7.olimpio.basico.horario.entity.Horario;
     public Uni<java.util.List<Horario>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Horario.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -27,8 +32,8 @@ import br.com.sol7.olimpio.basico.horario.entity.Horario;
     public Uni<java.util.List<Horario>> buscarHorarioPorHora(String hora) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_HORARIO_POR_HORA, Horario.class)
-                    .setParameter(1, hora)
-                    .getResultList());
+                        .setParameter(1, hora)
+                        .getResultList());
     }
 
 
@@ -40,9 +45,9 @@ import br.com.sol7.olimpio.basico.horario.entity.Horario;
     public Uni<java.util.List<Object>> buscarHorariosPrenchidos(Long agendaId, Date data) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_HORARIOS_PRENCHIDOS)
-                    .setParameter(1, agendaId)
-                    .setParameter(2, data)
-                    .getResultList());
+                        .setParameter(1, agendaId)
+                        .setParameter(2, data)
+                        .getResultList());
     }
 
 }

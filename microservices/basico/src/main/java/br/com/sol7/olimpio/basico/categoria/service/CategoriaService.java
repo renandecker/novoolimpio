@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.categoria.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.categoria.dto.CategoriaRequest;
 import br.com.sol7.olimpio.basico.categoria.dto.CategoriaResponse;
 import br.com.sol7.olimpio.basico.categoria.entity.Categoria;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.categoria.repository.CategoriaRepository;
 @WithTransaction
 public class CategoriaService {
 
-    @Inject CategoriaRepository repository;
+    @Inject
+    CategoriaRepository repository;
 
     public Uni<List<CategoriaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,11 @@ public class CategoriaService {
                         : Uni.createFrom().failure(new NotFoundException("Categoria not found")));
     }
 
-    private void apply(Categoria e, CategoriaRequest r) { e.descricao = r.descricao(); e.descricaocompleta = r.descricaocompleta(); e.categoriaId = r.categoriaId(); }
+    private void apply(Categoria e, CategoriaRequest r) {
+        e.descricao = r.descricao();
+        e.descricaocompleta = r.descricaocompleta();
+        e.categoriaId = r.categoriaId();
+    }
 
     private CategoriaResponse toResponse(Categoria e) {
         return new CategoriaResponse(e.id, e.descricao, e.descricaocompleta, e.categoriaId);

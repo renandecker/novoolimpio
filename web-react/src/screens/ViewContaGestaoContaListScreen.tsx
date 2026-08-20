@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewContaGestaoContaListScreen(){return <PermissionGate permission="READ"><main><h1>Gestao Conta</h1><DataTable path="/api/view/conta/gestaoConta"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewContaGestaoContaListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Gestao Conta</h1><DataTable path="/api/view/conta/gestaoConta"/></main>
+    </PermissionGate>
+}

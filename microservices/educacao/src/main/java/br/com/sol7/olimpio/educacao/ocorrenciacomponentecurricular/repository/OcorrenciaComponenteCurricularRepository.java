@@ -1,9 +1,14 @@
 package br.com.sol7.olimpio.educacao.ocorrenciacomponentecurricular;
+
 import java.util.Date;
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class OcorrenciaComponenteCurricularRepository implements PanacheRepository<OcorrenciaComponenteCurricular> {
+
+@ApplicationScoped
+public class OcorrenciaComponenteCurricularRepository implements PanacheRepository<OcorrenciaComponenteCurricular> {
 
     // Migrado de OcorrenciaComponenteCurricularRepository.buscarOcorrenciaPorProfessor (legado) - HQL original:
     // select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe  where o.ativo = true  and o.professor= ?1 and o.data  between ?2 and ?3  order by o.data
@@ -13,10 +18,10 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorProfessor(Long professorId, Date inicio, Date fim) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_OCORRENCIA_POR_PROFESSOR, OcorrenciaComponenteCurricular.class)
-                    .setParameter(1, professorId)
-                    .setParameter(2, inicio)
-                    .setParameter(3, fim)
-                    .getResultList());
+                        .setParameter(1, professorId)
+                        .setParameter(2, inicio)
+                        .setParameter(3, fim)
+                        .getResultList());
     }
 
 
@@ -28,8 +33,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaExtras(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_OCORRENCIA_EXTRAS, OcorrenciaComponenteCurricular.class)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .getResultList());
     }
 
 
@@ -41,8 +46,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaNormais(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_OCORRENCIA_NORMAIS, OcorrenciaComponenteCurricular.class)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .getResultList());
     }
 
 
@@ -54,10 +59,10 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorOferecimentoEDatas(Long oferecimentoComponenteCurricularId, Date inicio, Date fim) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_OCORRENCIA_POR_OFERECIMENTO_E_DATAS, OcorrenciaComponenteCurricular.class)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .setParameter(2, inicio)
-                    .setParameter(3, fim)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .setParameter(2, inicio)
+                        .setParameter(3, fim)
+                        .getResultList());
     }
 
 
@@ -69,11 +74,11 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorOferecimentoEDatasCoringa(Long oferecimentoComponenteCurricularId, Date inicio, Date fim, Boolean coring) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_OCORRENCIA_POR_OFERECIMENTO_E_DATAS_CORINGA, OcorrenciaComponenteCurricular.class)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .setParameter(2, inicio)
-                    .setParameter(3, fim)
-                    .setParameter(4, coring)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .setParameter(2, inicio)
+                        .setParameter(3, fim)
+                        .setParameter(4, coring)
+                        .getResultList());
     }
 
 
@@ -85,8 +90,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorOferecimento(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_OCORRENCIA_POR_OFERECIMENTO, OcorrenciaComponenteCurricular.class)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .getResultList());
     }
 
 
@@ -98,8 +103,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarTodasOcorrenciaPorOferecimento(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_TODAS_OCORRENCIA_POR_OFERECIMENTO, OcorrenciaComponenteCurricular.class)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .getResultList());
     }
 
 
@@ -111,10 +116,10 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorDataUnidade(Date inicio, Date fim, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_OCORRENCIA_POR_DATA_UNIDADE, OcorrenciaComponenteCurricular.class)
-                    .setParameter(1, inicio)
-                    .setParameter(2, fim)
-                    .setParameter(3, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, inicio)
+                        .setParameter(2, fim)
+                        .setParameter(3, unidadesIds)
+                        .getResultList());
     }
 
     public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorDataUnidade(Date date, List<Long> unidadesIds) {
@@ -130,8 +135,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorOferecimentoComGrupo(Long grupoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_OCORRENCIA_POR_OFERECIMENTO_COM_GRUPO, OcorrenciaComponenteCurricular.class)
-                    .setParameter(1, grupoId)
-                    .getResultList());
+                        .setParameter(1, grupoId)
+                        .getResultList());
     }
 
 }

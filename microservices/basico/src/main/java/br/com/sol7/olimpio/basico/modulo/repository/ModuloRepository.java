@@ -1,9 +1,14 @@
 package br.com.sol7.olimpio.basico.modulo.repository;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 import br.com.sol7.olimpio.basico.modulo.entity.Modulo;
-@ApplicationScoped public class ModuloRepository implements PanacheRepository<Modulo> {
+
+@ApplicationScoped
+public class ModuloRepository implements PanacheRepository<Modulo> {
 
     // Migrado de ModuloRepository.autoComplete (legado) - HQL original:
     // select m from Modulo m where (lower(m.rotulo) like '%' || ?1 || '%' OR lower(m.descricao) like '%' || ?1 || '%'  OR str(m.id) = ?1) AND NOT (m.outcome is null OR m.outcome = '') order by m.rotulo
@@ -13,8 +18,8 @@ import br.com.sol7.olimpio.basico.modulo.entity.Modulo;
     public Uni<java.util.List<Modulo>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Modulo.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -26,9 +31,9 @@ import br.com.sol7.olimpio.basico.modulo.entity.Modulo;
     public Uni<java.util.List<Modulo>> autoCompleteFavorito(Long perfilId, String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_FAVORITO, Modulo.class)
-                    .setParameter(1, perfilId)
-                    .setParameter(2, query)
-                    .getResultList());
+                        .setParameter(1, perfilId)
+                        .setParameter(2, query)
+                        .getResultList());
     }
 
 
@@ -40,8 +45,8 @@ import br.com.sol7.olimpio.basico.modulo.entity.Modulo;
     public Uni<java.util.List<Modulo>> autoCompleteAntecessor(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_ANTECESSOR, Modulo.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -53,8 +58,8 @@ import br.com.sol7.olimpio.basico.modulo.entity.Modulo;
     public Uni<java.util.List<Modulo>> autoCompleteAntecessorOutcome(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_ANTECESSOR_OUTCOME, Modulo.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -66,8 +71,8 @@ import br.com.sol7.olimpio.basico.modulo.entity.Modulo;
     public Uni<java.util.List<Modulo>> buscarPorRotulo(String rotulo) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_POR_ROTULO, Modulo.class)
-                    .setParameter(1, rotulo)
-                    .getResultList());
+                        .setParameter(1, rotulo)
+                        .getResultList());
     }
 
 
@@ -79,8 +84,8 @@ import br.com.sol7.olimpio.basico.modulo.entity.Modulo;
     public Uni<java.util.List<Modulo>> buscarAntecessoPorRotulo(Long moduloId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_ANTECESSO_POR_ROTULO, Modulo.class)
-                    .setParameter(1, moduloId)
-                    .getResultList());
+                        .setParameter(1, moduloId)
+                        .getResultList());
     }
 
 
@@ -92,8 +97,8 @@ import br.com.sol7.olimpio.basico.modulo.entity.Modulo;
     public Uni<java.util.List<Modulo>> buscarPorOutcome(String url) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_POR_OUTCOME, Modulo.class)
-                    .setParameter(1, url)
-                    .getResultList());
+                        .setParameter(1, url)
+                        .getResultList());
     }
 
 
@@ -106,7 +111,7 @@ import br.com.sol7.olimpio.basico.modulo.entity.Modulo;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_POR_ORDEM, Modulo.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -118,8 +123,8 @@ import br.com.sol7.olimpio.basico.modulo.entity.Modulo;
     public Uni<java.util.List<Object>> ajuda(int id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AJUDA)
-                    .setParameter(1, id)
-                    .getResultList());
+                        .setParameter(1, id)
+                        .getResultList());
     }
 
 }

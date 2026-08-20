@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewFornecedorListFornecedorListScreen(){return <PermissionGate permission="READ"><main><h1>Fornecedor</h1><DataTable path="/api/view/fornecedor/listFornecedor"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewFornecedorListFornecedorListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Fornecedor</h1><DataTable path="/api/view/fornecedor/listFornecedor"/></main>
+    </PermissionGate>
+}

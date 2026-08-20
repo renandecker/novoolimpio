@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.logradouro.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.logradouro.dto.LogradouroRequest;
 import br.com.sol7.olimpio.basico.logradouro.dto.LogradouroResponse;
 import br.com.sol7.olimpio.basico.logradouro.entity.Logradouro;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.logradouro.repository.LogradouroRepository;
 @WithTransaction
 public class LogradouroService {
 
-    @Inject LogradouroRepository repository;
+    @Inject
+    LogradouroRepository repository;
 
     public Uni<List<LogradouroResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,16 @@ public class LogradouroService {
                         : Uni.createFrom().failure(new NotFoundException("Logradouro not found")));
     }
 
-    private void apply(Logradouro e, LogradouroRequest r) { e.descricao = r.descricao(); e.cep = r.cep(); e.tipo = r.tipo(); e.complemento = r.complemento(); e.local = r.local(); e.longitude = r.longitude(); e.latitude = r.latitude(); e.bairroId = r.bairroId(); }
+    private void apply(Logradouro e, LogradouroRequest r) {
+        e.descricao = r.descricao();
+        e.cep = r.cep();
+        e.tipo = r.tipo();
+        e.complemento = r.complemento();
+        e.local = r.local();
+        e.longitude = r.longitude();
+        e.latitude = r.latitude();
+        e.bairroId = r.bairroId();
+    }
 
     private LogradouroResponse toResponse(Logradouro e) {
         return new LogradouroResponse(e.id, e.descricao, e.cep, e.tipo, e.complemento, e.local, e.longitude, e.latitude, e.bairroId);
@@ -341,7 +354,7 @@ public class LogradouroService {
     //         return this.getLogradouroRepository().autoCompleteComBairro(query.toLowerCase().trim(), bairro, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteComBairro(String query, Long bairroId) {
-                return repository.find("bairroId = ?2 and (lower(descricao) like '%' || ?1 || '%') order by descricao", query.toLowerCase().trim(), bairroId).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("bairroId = ?2 and (lower(descricao) like '%' || ?1 || '%') order by descricao", query.toLowerCase().trim(), bairroId).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 

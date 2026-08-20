@@ -5,4 +5,5 @@ import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-public class TabelaColunaRepository implements PanacheRepository<TabelaColuna> {}
+public class TabelaColunaRepository implements PanacheRepository<TabelaColuna> {
+}

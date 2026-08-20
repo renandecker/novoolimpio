@@ -1,9 +1,14 @@
 package br.com.sol7.olimpio.basico.layout.repository;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 import br.com.sol7.olimpio.basico.layout.entity.Layout;
-@ApplicationScoped public class LayoutRepository implements PanacheRepository<Layout> {
+
+@ApplicationScoped
+public class LayoutRepository implements PanacheRepository<Layout> {
 
     // Migrado de LayoutRepository.buscaLayout (legado) - HQL original:
     // Select c from Layout c where c.temaPadrao = true
@@ -14,7 +19,7 @@ import br.com.sol7.olimpio.basico.layout.entity.Layout;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCA_LAYOUT, Layout.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -26,8 +31,8 @@ import br.com.sol7.olimpio.basico.layout.entity.Layout;
     public Uni<java.util.List<Layout>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Layout.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -40,7 +45,7 @@ import br.com.sol7.olimpio.basico.layout.entity.Layout;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_FIND_DEFAULT, Layout.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -52,8 +57,8 @@ import br.com.sol7.olimpio.basico.layout.entity.Layout;
     public Uni<java.util.List<Object>> temaRede(Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_TEMA_REDE)
-                    .setParameter(1, unidadeId)
-                    .getResultList());
+                        .setParameter(1, unidadeId)
+                        .getResultList());
     }
 
 
@@ -65,8 +70,8 @@ import br.com.sol7.olimpio.basico.layout.entity.Layout;
     public Uni<java.util.List<Object>> temaUnidade(Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_TEMA_UNIDADE)
-                    .setParameter(1, unidadeId)
-                    .getResultList());
+                        .setParameter(1, unidadeId)
+                        .getResultList());
     }
 
 }

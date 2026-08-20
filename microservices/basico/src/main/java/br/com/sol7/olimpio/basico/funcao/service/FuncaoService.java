@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.funcao.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.funcao.dto.FuncaoRequest;
 import br.com.sol7.olimpio.basico.funcao.dto.FuncaoResponse;
 import br.com.sol7.olimpio.basico.funcao.entity.Funcao;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.funcao.repository.FuncaoRepository;
 @WithTransaction
 public class FuncaoService {
 
-    @Inject FuncaoRepository repository;
+    @Inject
+    FuncaoRepository repository;
 
     public Uni<List<FuncaoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,9 @@ public class FuncaoService {
                         : Uni.createFrom().failure(new NotFoundException("Funcao not found")));
     }
 
-    private void apply(Funcao e, FuncaoRequest r) { e.descricao = r.descricao(); }
+    private void apply(Funcao e, FuncaoRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private FuncaoResponse toResponse(Funcao e) {
         return new FuncaoResponse(e.id, e.descricao);

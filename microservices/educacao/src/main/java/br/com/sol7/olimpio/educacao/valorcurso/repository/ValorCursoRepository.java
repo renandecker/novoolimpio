@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.educacao.valorcurso;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class ValorCursoRepository implements PanacheRepository<ValorCurso> {
+
+@ApplicationScoped
+public class ValorCursoRepository implements PanacheRepository<ValorCurso> {
 
     // Migrado de ValorCursoRepository.buscarValoresComFormaPagamento (legado) - HQL original:
     // select v from ValorCurso v left join fetch v.formasPagamento f where v = ?1 order by f.vezes
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ValorCurso>> buscarValoresComFormaPagamento(Long valorCursoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_VALORES_COM_FORMA_PAGAMENTO, ValorCurso.class)
-                    .setParameter(1, valorCursoId)
-                    .getResultList());
+                        .setParameter(1, valorCursoId)
+                        .getResultList());
     }
 
 
@@ -25,8 +30,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ValorCurso>> buscarValoresComTaxas(Long valorCursoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_VALORES_COM_TAXAS, ValorCurso.class)
-                    .setParameter(1, valorCursoId)
-                    .getResultList());
+                        .setParameter(1, valorCursoId)
+                        .getResultList());
     }
 
 
@@ -38,8 +43,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ValorCurso>> buscarValoresComDesconto(Long valorCursoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_VALORES_COM_DESCONTO, ValorCurso.class)
-                    .setParameter(1, valorCursoId)
-                    .getResultList());
+                        .setParameter(1, valorCursoId)
+                        .getResultList());
     }
 
 
@@ -51,8 +56,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ValorCurso>> buscarValoresComRetencao(Long valorCursoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_VALORES_COM_RETENCAO, ValorCurso.class)
-                    .setParameter(1, valorCursoId)
-                    .getResultList());
+                        .setParameter(1, valorCursoId)
+                        .getResultList());
     }
 
 
@@ -64,8 +69,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ValorCurso>> buscarValoresComUnidades(Long valorCursoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_VALORES_COM_UNIDADES, ValorCurso.class)
-                    .setParameter(1, valorCursoId)
-                    .getResultList());
+                        .setParameter(1, valorCursoId)
+                        .getResultList());
     }
 
 
@@ -77,8 +82,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ValorCurso>> buscarValorCursoContrato(Long valorCursoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_VALOR_CURSO_CONTRATO, ValorCurso.class)
-                    .setParameter(1, valorCursoId)
-                    .getResultList());
+                        .setParameter(1, valorCursoId)
+                        .getResultList());
     }
 
 
@@ -90,8 +95,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ValorCurso>> buscarValoresComFormaPagamentoAtivos(Long valorCursoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_VALORES_COM_FORMA_PAGAMENTO_ATIVOS, ValorCurso.class)
-                    .setParameter(1, valorCursoId)
-                    .getResultList());
+                        .setParameter(1, valorCursoId)
+                        .getResultList());
     }
 
 
@@ -103,8 +108,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ValorCurso>> buscarValoresComTaxasAtivos(Long valorCursoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_VALORES_COM_TAXAS_ATIVOS, ValorCurso.class)
-                    .setParameter(1, valorCursoId)
-                    .getResultList());
+                        .setParameter(1, valorCursoId)
+                        .getResultList());
     }
 
 
@@ -116,8 +121,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ValorCurso>> buscarValoresComDescontoAtivos(Long valorCursoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_VALORES_COM_DESCONTO_ATIVOS, ValorCurso.class)
-                    .setParameter(1, valorCursoId)
-                    .getResultList());
+                        .setParameter(1, valorCursoId)
+                        .getResultList());
     }
 
 
@@ -129,8 +134,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ValorCurso>> buscarexistenciaValorCursoContrato(Long valorCursoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAREXISTENCIA_VALOR_CURSO_CONTRATO, ValorCurso.class)
-                    .setParameter(1, valorCursoId)
-                    .getResultList());
+                        .setParameter(1, valorCursoId)
+                        .getResultList());
     }
 
 }

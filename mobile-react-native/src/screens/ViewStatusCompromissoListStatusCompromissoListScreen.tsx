@@ -1,5 +1,6 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import {ModuleList} from '../ModuleListScreen';
+
 export default function ViewStatusCompromissoListStatusCompromissoListScreen() {
-  return <ModuleList path="/api/view/statusCompromisso/listStatusCompromisso" />;
+    return <ModuleList path="/api/view/statusCompromisso/listStatusCompromisso"/>;
 }

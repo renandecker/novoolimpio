@@ -1,5 +1,6 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import {ModuleList} from '../ModuleListScreen';
+
 export default function ViewEtapasCobrancaColunasEtapasCobrancaListScreen() {
-  return <ModuleList path="/api/view/etapasCobranca/colunasEtapasCobranca" />;
+    return <ModuleList path="/api/view/etapasCobranca/colunasEtapasCobranca"/>;
 }

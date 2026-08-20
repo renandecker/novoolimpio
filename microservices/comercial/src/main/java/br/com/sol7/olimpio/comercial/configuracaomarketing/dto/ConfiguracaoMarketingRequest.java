@@ -2,4 +2,4 @@ package br.com.sol7.olimpio.comercial.configuracaomarketing;
 
 import java.math.BigDecimal;
 
-public record ConfiguracaoMarketingRequest(BigDecimal notaMaximaBloquear, BigDecimal notaMaximaConfirmar, Integer tempoMaximoLigacao, Integer diasArquivoProcon, Integer tempoMaximoIntervalo, Integer limiteMaximoRadar, Long resultadoContatoExpiradoId, Long resultadoContatoRetornoId) {}
+public record ConfiguracaoMarketingRequest(BigDecimal notaMaximaBloquear,BigDecimal notaMaximaConfirmar,Integer tempoMaximoLigacao,Integer diasArquivoProcon,Integer tempoMaximoIntervalo,Integer limiteMaximoRadar,Long resultadoContatoExpiradoId,Long resultadoContatoRetornoId){}

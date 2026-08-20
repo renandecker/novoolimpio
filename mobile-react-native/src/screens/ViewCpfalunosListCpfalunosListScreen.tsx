@@ -1,5 +1,6 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import {ModuleList} from '../ModuleListScreen';
+
 export default function ViewCpfalunosListCpfalunosListScreen() {
-  return <ModuleList path="/api/view/cpfalunos/listCpfalunos" />;
+    return <ModuleList path="/api/view/cpfalunos/listCpfalunos"/>;
 }

@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.professor.professor.service;
+
 import br.com.sol7.olimpio.professor.professor.entity.Professor;
 import br.com.sol7.olimpio.professor.professor.repository.ProfessorRepository;
 import br.com.sol7.olimpio.professor.professor.dto.ProfessorRequest;
@@ -11,6 +12,7 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 import java.util.Date;
 
@@ -18,7 +20,8 @@ import java.util.Date;
 @WithTransaction
 public class ProfessorService {
 
-    @Inject ProfessorRepository repository;
+    @Inject
+    ProfessorRepository repository;
 
     public Uni<List<ProfessorResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -57,7 +60,13 @@ public class ProfessorService {
                         : Uni.createFrom().failure(new NotFoundException("Professor not found")));
     }
 
-    private void apply(Professor e, ProfessorRequest r) { e.pessoaId = r.pessoaId(); e.ativo = r.ativo(); e.cadernoBola = r.cadernoBola(); e.dataInicio = r.dataInicio(); e.dataFim = r.dataFim(); }
+    private void apply(Professor e, ProfessorRequest r) {
+        e.pessoaId = r.pessoaId();
+        e.ativo = r.ativo();
+        e.cadernoBola = r.cadernoBola();
+        e.dataInicio = r.dataInicio();
+        e.dataFim = r.dataFim();
+    }
 
     private ProfessorResponse toResponse(Professor e) {
         return new ProfessorResponse(e.id, e.pessoaId, e.ativo, e.cadernoBola, e.dataInicio, e.dataFim);
@@ -87,15 +96,15 @@ public class ProfessorService {
     }
 
     public Uni<Long> buscarProfessorComUnidades(Long entityId) {
-                return repository.buscarProfessorComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarProfessorComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
     public Uni<Long> buscarProfessorComComponenteCurricular(Long entityId) {
-                return repository.buscarProfessorComComponenteCurricular(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarProfessorComComponenteCurricular(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
     public Uni<List<Long>> buscarListaProfessoresParaTurma(Long componenteCurricularId, Long unidadeId) {
-                return repository.buscarListaProfessoresParaTurma(componenteCurricularId, unidadeId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarListaProfessoresParaTurma(componenteCurricularId, unidadeId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
     public Uni<List<Long>> buscarDisponibilidadeProfessorTurno(Date data, Long professorId, Date inicio, Date fim) {
@@ -117,7 +126,7 @@ public class ProfessorService {
     }
 
     public Uni<List<Long>> buscarProfessorPorUnidades(List<Long> unidade) {
-                return repository.buscarProfessorPorUnidades(unidade).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarProfessorPorUnidades(unidade).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

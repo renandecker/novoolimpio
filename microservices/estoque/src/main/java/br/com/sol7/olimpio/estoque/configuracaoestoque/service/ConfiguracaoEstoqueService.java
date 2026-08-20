@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.estoque.configuracaoestoque;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ConfiguracaoEstoqueService {
 
-    @Inject ConfiguracaoEstoqueRepository repository;
+    @Inject
+    ConfiguracaoEstoqueRepository repository;
 
     public Uni<List<ConfiguracaoEstoqueResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,15 @@ public class ConfiguracaoEstoqueService {
                         : Uni.createFrom().failure(new NotFoundException("ConfiguracaoEstoque not found")));
     }
 
-    private void apply(ConfiguracaoEstoque e, ConfiguracaoEstoqueRequest r) { e.central = r.central(); e.diasPrevisao = r.diasPrevisao(); e.usuarioId = r.usuarioId(); e.unidadeId = r.unidadeId(); e.email = r.email(); e.zoom = r.zoom(); e.area = r.area(); }
+    private void apply(ConfiguracaoEstoque e, ConfiguracaoEstoqueRequest r) {
+        e.central = r.central();
+        e.diasPrevisao = r.diasPrevisao();
+        e.usuarioId = r.usuarioId();
+        e.unidadeId = r.unidadeId();
+        e.email = r.email();
+        e.zoom = r.zoom();
+        e.area = r.area();
+    }
 
     private ConfiguracaoEstoqueResponse toResponse(ConfiguracaoEstoque e) {
         return new ConfiguracaoEstoqueResponse(e.id, e.central, e.diasPrevisao, e.usuarioId, e.unidadeId, e.email, e.zoom, e.area);
@@ -77,7 +88,7 @@ public class ConfiguracaoEstoqueService {
     //         return getConfiguracaoEstoqueRepository().buscarConfiguracaoComUnidadeUsuario(unidade);
     //     }
     public Uni<Long> buscarConfiguracaoComUnidadeUsuario(Long unidadeId) {
-                return repository.find("unidadeId = ?1 order by id desc", unidadeId).firstResult().map(x -> x == null ? null : x.id);
+        return repository.find("unidadeId = ?1 order by id desc", unidadeId).firstResult().map(x -> x == null ? null : x.id);
     }
 
 
@@ -88,7 +99,7 @@ public class ConfiguracaoEstoqueService {
     //         return getConfiguracaoEstoqueRepository().buscarCentral();
     //     }
     public Uni<Long> buscarCentral() {
-                return repository.find("central = true order by id desc").firstResult().map(x -> x == null ? null : x.id);
+        return repository.find("central = true order by id desc").firstResult().map(x -> x == null ? null : x.id);
     }
 
 }

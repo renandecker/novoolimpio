@@ -1,9 +1,14 @@
 package br.com.sol7.olimpio.basico.perfil.repository;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 import br.com.sol7.olimpio.basico.perfil.entity.Perfil;
-@ApplicationScoped public class PerfilRepository implements PanacheRepository<Perfil> {
+
+@ApplicationScoped
+public class PerfilRepository implements PanacheRepository<Perfil> {
 
     // Migrado de PerfilRepository.autoComplete (legado) - HQL original:
     // select p from Perfil p where lower(p.descricao) like '%' || ?1 || '%'  OR str(p.id) = ?1  order by p.descricao
@@ -13,8 +18,8 @@ import br.com.sol7.olimpio.basico.perfil.entity.Perfil;
     public Uni<java.util.List<Perfil>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Perfil.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -32,8 +37,8 @@ import br.com.sol7.olimpio.basico.perfil.entity.Perfil;
     public Uni<java.util.List<Object>> buscarPerfilModulosComPerfil(Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_PERFIL_MODULOS_COM_PERFIL)
-                    .setParameter(1, id)
-                    .getResultList());
+                        .setParameter(1, id)
+                        .getResultList());
     }
 
 
@@ -45,8 +50,8 @@ import br.com.sol7.olimpio.basico.perfil.entity.Perfil;
     public Uni<java.util.List<Perfil>> buscarPerfilComModulos(Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_PERFIL_COM_MODULOS, Perfil.class)
-                    .setParameter(1, id)
-                    .getResultList());
+                        .setParameter(1, id)
+                        .getResultList());
     }
 
 
@@ -58,8 +63,8 @@ import br.com.sol7.olimpio.basico.perfil.entity.Perfil;
     public Uni<java.util.List<Perfil>> perfilsDoUsuario(Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_PERFILS_DO_USUARIO, Perfil.class)
-                    .setParameter(1, usuarioId)
-                    .getResultList());
+                        .setParameter(1, usuarioId)
+                        .getResultList());
     }
 
 
@@ -72,7 +77,7 @@ import br.com.sol7.olimpio.basico.perfil.entity.Perfil;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_ALL, Perfil.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -84,9 +89,9 @@ import br.com.sol7.olimpio.basico.perfil.entity.Perfil;
     public Uni<java.util.List<Perfil>> autoCompleteComUsuario(String query, Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_USUARIO, Perfil.class)
-                    .setParameter(1, query)
-                    .setParameter(2, usuarioId)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, usuarioId)
+                        .getResultList());
     }
 
 
@@ -98,8 +103,8 @@ import br.com.sol7.olimpio.basico.perfil.entity.Perfil;
     public Uni<java.util.List<Perfil>> autoCompleteDoUsuario(Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_DO_USUARIO, Perfil.class)
-                    .setParameter(1, usuarioId)
-                    .getResultList());
+                        .setParameter(1, usuarioId)
+                        .getResultList());
     }
 
 }

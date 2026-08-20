@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewEtniaFormEtniaListScreen(){return <PermissionGate permission="READ"><main><h1>Form Etnia</h1><DataTable path="/api/view/etnia/formEtnia"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewEtniaFormEtniaListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Form Etnia</h1><DataTable path="/api/view/etnia/formEtnia"/></main>
+    </PermissionGate>
+}

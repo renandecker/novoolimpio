@@ -1,5 +1,6 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import {ModuleList} from '../ModuleListScreen';
+
 export default function ViewTipoAgendaListTipoAgendaListScreen() {
-  return <ModuleList path="/api/view/tipoAgenda/listTipoAgenda" />;
+    return <ModuleList path="/api/view/tipoAgenda/listTipoAgenda"/>;
 }

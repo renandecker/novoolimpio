@@ -23,5 +23,5 @@ public record VagaRequest(
         List<Long> grupos,
         List<Long> curriculos,
         List<Long> empresas,
-        List<Long> usuarios) {
-}
+        List<Long> usuarios){
+        }

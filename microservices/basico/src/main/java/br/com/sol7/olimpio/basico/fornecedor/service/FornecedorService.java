@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.fornecedor.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.fornecedor.dto.FornecedorRequest;
 import br.com.sol7.olimpio.basico.fornecedor.dto.FornecedorResponse;
 import br.com.sol7.olimpio.basico.fornecedor.entity.Fornecedor;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.fornecedor.repository.FornecedorRepository;
 @WithTransaction
 public class FornecedorService {
 
-    @Inject FornecedorRepository repository;
+    @Inject
+    FornecedorRepository repository;
 
     public Uni<List<FornecedorResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,12 @@ public class FornecedorService {
                         : Uni.createFrom().failure(new NotFoundException("Fornecedor not found")));
     }
 
-    private void apply(Fornecedor e, FornecedorRequest r) { e.pessoaId = r.pessoaId(); e.ativo = r.ativo(); e.longitude = r.longitude(); e.latitude = r.latitude(); }
+    private void apply(Fornecedor e, FornecedorRequest r) {
+        e.pessoaId = r.pessoaId();
+        e.ativo = r.ativo();
+        e.longitude = r.longitude();
+        e.latitude = r.latitude();
+    }
 
     private FornecedorResponse toResponse(Fornecedor e) {
         return new FornecedorResponse(e.id, e.pessoaId, e.ativo, e.longitude, e.latitude);
@@ -118,7 +127,7 @@ public class FornecedorService {
     //         return this.getFornecedorRepository().autoComplete(query.toLowerCase(), unidades, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoComplete2(String query, List<Long> unidades) {
-                return repository.autoComplete(query.toLowerCase(), unidades).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoComplete(query.toLowerCase(), unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -153,7 +162,7 @@ public class FornecedorService {
     //         return this.getFornecedorRepository().autoCompleteFornecedor(query.toLowerCase(), unidades, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteFornecedor2(String query, List<Long> unidades) {
-                return repository.autoCompleteFornecedor(query.toLowerCase(), unidades).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoCompleteFornecedor(query.toLowerCase(), unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -164,7 +173,7 @@ public class FornecedorService {
     //         return this.getFornecedorRepository().autoCompleteSOmenteUnidadeFornecedor(unidades, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteSOmenteUnidadeFornecedor(List<Long> unidades) {
-                return repository.autoCompleteSOmenteUnidadeFornecedor(unidades).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoCompleteSOmenteUnidadeFornecedor(unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

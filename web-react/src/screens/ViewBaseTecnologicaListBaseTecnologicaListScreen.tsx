@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewBaseTecnologicaListBaseTecnologicaListScreen(){return <PermissionGate permission="READ"><main><h1>Base Tecnologica</h1><DataTable path="/api/view/baseTecnologica/listBaseTecnologica"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewBaseTecnologicaListBaseTecnologicaListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Base Tecnologica</h1><DataTable path="/api/view/baseTecnologica/listBaseTecnologica"/></main>
+    </PermissionGate>
+}

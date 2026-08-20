@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.escolaridade.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.escolaridade.dto.EscolaridadeRequest;
 import br.com.sol7.olimpio.basico.escolaridade.dto.EscolaridadeResponse;
 import br.com.sol7.olimpio.basico.escolaridade.entity.Escolaridade;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.escolaridade.repository.EscolaridadeRepository
 @WithTransaction
 public class EscolaridadeService {
 
-    @Inject EscolaridadeRepository repository;
+    @Inject
+    EscolaridadeRepository repository;
 
     public Uni<List<EscolaridadeResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,10 @@ public class EscolaridadeService {
                         : Uni.createFrom().failure(new NotFoundException("Escolaridade not found")));
     }
 
-    private void apply(Escolaridade e, EscolaridadeRequest r) { e.descricao = r.descricao(); e.ordem = r.ordem(); }
+    private void apply(Escolaridade e, EscolaridadeRequest r) {
+        e.descricao = r.descricao();
+        e.ordem = r.ordem();
+    }
 
     private EscolaridadeResponse toResponse(Escolaridade e) {
         return new EscolaridadeResponse(e.id, e.descricao, e.ordem);
@@ -88,7 +95,7 @@ public class EscolaridadeService {
     //         return this.getEscolaridadeRepository().autoComplete(new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoComplete2() {
-                return repository.findAllEscolaridade().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.findAllEscolaridade().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

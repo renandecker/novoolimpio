@@ -17,7 +17,8 @@ import java.util.Map;
 @Consumes(MediaType.APPLICATION_JSON)
 public class DiaAulaController {
 
-    @Inject DiaAulaService service;
+    @Inject
+    DiaAulaService service;
 
     @GET
     public Uni<List<DiaAulaResponse>> list() {

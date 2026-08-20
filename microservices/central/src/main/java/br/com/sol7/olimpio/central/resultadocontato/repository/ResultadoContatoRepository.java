@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.central.resultadocontato;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class ResultadoContatoRepository implements PanacheRepository<ResultadoContato> {
+
+@ApplicationScoped
+public class ResultadoContatoRepository implements PanacheRepository<ResultadoContato> {
 
     // Migrado de ResultadoContatoRepository.buscarResultadosOrdenado (legado) - HQL original:
     // Select a from ResultadoContato a  order by a.descricao
@@ -13,7 +18,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_RESULTADOS_ORDENADO, ResultadoContato.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -26,7 +31,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_RESULTADOS_ORDENADO_LIGACAO, ResultadoContato.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 }

@@ -1,10 +1,15 @@
 package br.com.sol7.olimpio.basico.compromisso.repository;
+
 import java.util.Date;
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 import br.com.sol7.olimpio.basico.compromisso.entity.Compromisso;
-@ApplicationScoped public class CompromissoRepository implements PanacheRepository<Compromisso> {
+
+@ApplicationScoped
+public class CompromissoRepository implements PanacheRepository<Compromisso> {
 
     // Migrado de SchedulingService.atualizarCompromissosAutomaticos() (legado) - traduzido para
     // um unico UPDATE (o efeito final e o mesmo: troca o status do compromisso para o
@@ -13,11 +18,11 @@ import br.com.sol7.olimpio.basico.compromisso.entity.Compromisso;
     // RELATORIO_SCHEDULE.md.
     public static final String SQL_ATUALIZAR_COMPROMISSOS_AUTOMATICOS =
             "UPDATE bas_compromisso a SET id_status_compromisso = sss.id_status_troca_auto, data_alteracao = now() " +
-            "FROM bas_status_compromisso sss " +
-            "WHERE sss.id = a.id_status_compromisso " +
-            "AND (a.data - cast((cast(sss.dias as text)||' day') as interval)) < current_date " +
-            "AND sss.dias <> 0 AND sss.trocaautomatomatica = true AND sss.id <> sss.id_status_troca_auto " +
-            "AND a.data::date <> current_date";
+                    "FROM bas_status_compromisso sss " +
+                    "WHERE sss.id = a.id_status_compromisso " +
+                    "AND (a.data - cast((cast(sss.dias as text)||' day') as interval)) < current_date " +
+                    "AND sss.dias <> 0 AND sss.trocaautomatomatica = true AND sss.id <> sss.id_status_troca_auto " +
+                    "AND a.data::date <> current_date";
 
     public Uni<Void> atualizarCompromissosAutomaticos() {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
@@ -34,7 +39,7 @@ import br.com.sol7.olimpio.basico.compromisso.entity.Compromisso;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_COMPROMISSO_AUTO, Compromisso.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -46,8 +51,8 @@ import br.com.sol7.olimpio.basico.compromisso.entity.Compromisso;
     public Uni<java.util.List<Compromisso>> buscarCompromissoComResultados(Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_COMPROMISSO_COM_RESULTADOS, Compromisso.class)
-                    .setParameter(1, id)
-                    .getResultList());
+                        .setParameter(1, id)
+                        .getResultList());
     }
 
 
@@ -59,10 +64,10 @@ import br.com.sol7.olimpio.basico.compromisso.entity.Compromisso;
     public Uni<java.util.List<Compromisso>> listarCompromissosComAgendaComStatus(Long agendaId, Date data, int status) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_COMPROMISSOS_COM_AGENDA_COM_STATUS, Compromisso.class)
-                    .setParameter(1, agendaId)
-                    .setParameter(2, data)
-                    .setParameter(3, status)
-                    .getResultList());
+                        .setParameter(1, agendaId)
+                        .setParameter(2, data)
+                        .setParameter(3, status)
+                        .getResultList());
     }
 
 
@@ -74,9 +79,9 @@ import br.com.sol7.olimpio.basico.compromisso.entity.Compromisso;
     public Uni<java.util.List<Compromisso>> listarCompromissosComAgenda(Long agendaId, Date data) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_COMPROMISSOS_COM_AGENDA, Compromisso.class)
-                    .setParameter(1, agendaId)
-                    .setParameter(2, data)
-                    .getResultList());
+                        .setParameter(1, agendaId)
+                        .setParameter(2, data)
+                        .getResultList());
     }
 
 
@@ -88,8 +93,8 @@ import br.com.sol7.olimpio.basico.compromisso.entity.Compromisso;
     public Uni<java.util.List<Compromisso>> listarCompromissosPeloProspecto(Long prospectoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_COMPROMISSOS_PELO_PROSPECTO, Compromisso.class)
-                    .setParameter(1, prospectoId)
-                    .getResultList());
+                        .setParameter(1, prospectoId)
+                        .getResultList());
     }
 
 
@@ -101,9 +106,9 @@ import br.com.sol7.olimpio.basico.compromisso.entity.Compromisso;
     public Uni<Integer> modificarStatusCompromisso(Long compromissoId, Long statusId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_MODIFICAR_STATUS_COMPROMISSO)
-                    .setParameter(1, compromissoId)
-                    .setParameter(2, statusId)
-                    .executeUpdate());
+                        .setParameter(1, compromissoId)
+                        .setParameter(2, statusId)
+                        .executeUpdate());
     }
 
 
@@ -115,8 +120,8 @@ import br.com.sol7.olimpio.basico.compromisso.entity.Compromisso;
     public Uni<java.util.List<Object>> buscarProspectoDoCompromisso(Long compromissoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_PROSPECTO_DO_COMPROMISSO)
-                    .setParameter(1, compromissoId)
-                    .getResultList());
+                        .setParameter(1, compromissoId)
+                        .getResultList());
     }
 
 
@@ -130,8 +135,8 @@ import br.com.sol7.olimpio.basico.compromisso.entity.Compromisso;
     public Uni<java.util.List<Object>> buscarLigacaoAgendamentoVencido(Long compromissoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_LIGACAO_AGENDAMENTO_VENCIDO)
-                    .setParameter(1, compromissoId)
-                    .getResultList());
+                        .setParameter(1, compromissoId)
+                        .getResultList());
     }
 
 }

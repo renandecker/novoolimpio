@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.pessoadocumento.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.pessoadocumento.dto.PessoaDocumentoRequest;
 import br.com.sol7.olimpio.basico.pessoadocumento.dto.PessoaDocumentoResponse;
 import br.com.sol7.olimpio.basico.pessoadocumento.entity.PessoaDocumento;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.pessoadocumento.repository.PessoaDocumentoRepo
 @WithTransaction
 public class PessoaDocumentoService {
 
-    @Inject PessoaDocumentoRepository repository;
+    @Inject
+    PessoaDocumentoRepository repository;
 
     public Uni<List<PessoaDocumentoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,12 @@ public class PessoaDocumentoService {
                         : Uni.createFrom().failure(new NotFoundException("PessoaDocumento not found")));
     }
 
-    private void apply(PessoaDocumento e, PessoaDocumentoRequest r) { e.nome = r.nome(); e.documento = r.documento(); e.dataAtualizacao = r.dataAtualizacao(); e.pessoaId = r.pessoaId(); }
+    private void apply(PessoaDocumento e, PessoaDocumentoRequest r) {
+        e.nome = r.nome();
+        e.documento = r.documento();
+        e.dataAtualizacao = r.dataAtualizacao();
+        e.pessoaId = r.pessoaId();
+    }
 
     private PessoaDocumentoResponse toResponse(PessoaDocumento e) {
         return new PessoaDocumentoResponse(e.id, e.nome, e.documento, e.dataAtualizacao, e.pessoaId);
@@ -70,7 +79,7 @@ public class PessoaDocumentoService {
     //         return getPessoaDocumentoRepository().buscarPessoaDocumento(pessoa);
     //     }
     public Uni<List<Long>> buscarPessoaDocumento(Long pessoaId) {
-                return repository.find("pessoaId = ?1", pessoaId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("pessoaId = ?1", pessoaId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

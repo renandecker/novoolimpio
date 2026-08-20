@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.curriculo;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class CurriculoService {
 
-    @Inject CurriculoRepository repository;
+    @Inject
+    CurriculoRepository repository;
 
     public Uni<List<CurriculoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,35 @@ public class CurriculoService {
                         : Uni.createFrom().failure(new NotFoundException("Curriculo not found")));
     }
 
-    private void apply(Curriculo e, CurriculoRequest r) { e.cursoId = r.cursoId(); e.descricao = r.descricao(); e.tipoCursoId = r.tipoCursoId(); e.sucinto = r.sucinto(); e.descricaoDiploma = r.descricaoDiploma(); e.sigla = r.sigla(); e.cargaHoraria = r.cargaHoraria(); e.qtdeIniciando = r.qtdeIniciando(); e.qtdeFinalizando = r.qtdeFinalizando(); e.numeroParecer = r.numeroParecer(); e.licenca = r.licenca(); e.reconhecimento = r.reconhecimento(); e.qtdMaximaAlunos = r.qtdMaximaAlunos(); e.tipoModeloContrato = r.tipoModeloContrato(); e.tipoModeloBoletim = r.tipoModeloBoletim(); e.tipoModeloCertificado = r.tipoModeloCertificado(); e.tipoModeloPromissoria = r.tipoModeloPromissoria(); e.escolaridadeId = r.escolaridadeId(); e.idadeMinima = r.idadeMinima(); e.idadeMaxima = r.idadeMaxima(); e.dataCancelamento = r.dataCancelamento(); e.templateContrato = r.templateContrato(); e.templateCertificado = r.templateCertificado(); e.templateBoletim = r.templateBoletim(); e.templatePromissoria = r.templatePromissoria(); e.grauId = r.grauId(); e.possuiRematricula = r.possuiRematricula(); }
+    private void apply(Curriculo e, CurriculoRequest r) {
+        e.cursoId = r.cursoId();
+        e.descricao = r.descricao();
+        e.tipoCursoId = r.tipoCursoId();
+        e.sucinto = r.sucinto();
+        e.descricaoDiploma = r.descricaoDiploma();
+        e.sigla = r.sigla();
+        e.cargaHoraria = r.cargaHoraria();
+        e.qtdeIniciando = r.qtdeIniciando();
+        e.qtdeFinalizando = r.qtdeFinalizando();
+        e.numeroParecer = r.numeroParecer();
+        e.licenca = r.licenca();
+        e.reconhecimento = r.reconhecimento();
+        e.qtdMaximaAlunos = r.qtdMaximaAlunos();
+        e.tipoModeloContrato = r.tipoModeloContrato();
+        e.tipoModeloBoletim = r.tipoModeloBoletim();
+        e.tipoModeloCertificado = r.tipoModeloCertificado();
+        e.tipoModeloPromissoria = r.tipoModeloPromissoria();
+        e.escolaridadeId = r.escolaridadeId();
+        e.idadeMinima = r.idadeMinima();
+        e.idadeMaxima = r.idadeMaxima();
+        e.dataCancelamento = r.dataCancelamento();
+        e.templateContrato = r.templateContrato();
+        e.templateCertificado = r.templateCertificado();
+        e.templateBoletim = r.templateBoletim();
+        e.templatePromissoria = r.templatePromissoria();
+        e.grauId = r.grauId();
+        e.possuiRematricula = r.possuiRematricula();
+    }
 
     private CurriculoResponse toResponse(Curriculo e) {
         return new CurriculoResponse(e.id, e.cursoId, e.descricao, e.tipoCursoId, e.sucinto, e.descricaoDiploma, e.sigla, e.cargaHoraria, e.qtdeIniciando, e.qtdeFinalizando, e.numeroParecer, e.licenca, e.reconhecimento, e.qtdMaximaAlunos, e.tipoModeloContrato, e.tipoModeloBoletim, e.tipoModeloCertificado, e.tipoModeloPromissoria, e.escolaridadeId, e.idadeMinima, e.idadeMaxima, e.dataCancelamento, e.templateContrato, e.templateCertificado, e.templateBoletim, e.templatePromissoria, e.grauId, e.possuiRematricula);

@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.educacao.tipocurso;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class TipoCursoRepository implements PanacheRepository<TipoCurso> {
+
+@ApplicationScoped
+public class TipoCursoRepository implements PanacheRepository<TipoCurso> {
 
     // Migrado de TipoCursoRepository.autoComplete (legado) - HQL original:
     // select u from TipoCurso u where lower(u.descricao) like '%' || ?1 || '%'  OR str(u.id) = ?1 order by u.descricao
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<TipoCurso>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, TipoCurso.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 }

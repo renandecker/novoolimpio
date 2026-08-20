@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.bairro.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.bairro.dto.BairroRequest;
 import br.com.sol7.olimpio.basico.bairro.dto.BairroResponse;
 import br.com.sol7.olimpio.basico.bairro.entity.Bairro;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.bairro.repository.BairroRepository;
 @WithTransaction
 public class BairroService {
 
-    @Inject BairroRepository repository;
+    @Inject
+    BairroRepository repository;
 
     public Uni<List<BairroResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,10 @@ public class BairroService {
                         : Uni.createFrom().failure(new NotFoundException("Bairro not found")));
     }
 
-    private void apply(Bairro e, BairroRequest r) { e.descricao = r.descricao(); e.cidadeId = r.cidadeId(); }
+    private void apply(Bairro e, BairroRequest r) {
+        e.descricao = r.descricao();
+        e.cidadeId = r.cidadeId();
+    }
 
     private BairroResponse toResponse(Bairro e) {
         return new BairroResponse(e.id, e.descricao, e.cidadeId);
@@ -116,7 +123,7 @@ public class BairroService {
     //         return this.getBairroRepository().autoCompleteComCidade(query.toLowerCase(), cidade, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteComCidade(String query, Long cidadeId) {
-                return repository.find("cidadeId = ?2 and (lower(descricao) like '%' || ?1 || '%') order by descricao", query.toLowerCase(), cidadeId).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("cidadeId = ?2 and (lower(descricao) like '%' || ?1 || '%') order by descricao", query.toLowerCase(), cidadeId).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -139,7 +146,7 @@ public class BairroService {
     //         return this.getBairroRepository().autoCompleteComCidadeEstado(query.toLowerCase(), cidade, estado, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteComCidadeEstado(String query, Long cidadeId, Long estadoId) {
-                // Obs: condicao removida (depende de outro microservico): c.cidade.estado = ?3
+        // Obs: condicao removida (depende de outro microservico): c.cidade.estado = ?3
         return repository.find("cidadeId = ?2 and (lower(descricao) like '%' || ?1 || '%') order by descricao", query.toLowerCase(), cidadeId, estadoId).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 

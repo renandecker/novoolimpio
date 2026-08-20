@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.comercial.acao;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
+
 import java.util.List;
-@ApplicationScoped public class AcaoRepository implements PanacheRepository<Acao> {
+
+@ApplicationScoped
+public class AcaoRepository implements PanacheRepository<Acao> {
 
     // Migrado de AcaoRepository.buscarAcaoComCampos (legado) - HQL original:
     // select a from Acao a left join fetch a.acaoCampos as ac where a.id = ?1 order by ac.ordem
@@ -12,8 +17,8 @@ import java.util.List;
     public Uni<java.util.List<Acao>> buscarAcaoComCampos(Integer idAcao) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_ACAO_COM_CAMPOS, Acao.class)
-                    .setParameter(1, idAcao)
-                    .getResultList());
+                        .setParameter(1, idAcao)
+                        .getResultList());
     }
 
 
@@ -25,8 +30,8 @@ import java.util.List;
     public Uni<java.util.List<Acao>> buscarAcaoComUnidades(Long acaoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_ACAO_COM_UNIDADES, Acao.class)
-                    .setParameter(1, acaoId)
-                    .getResultList());
+                        .setParameter(1, acaoId)
+                        .getResultList());
     }
 
 
@@ -38,9 +43,9 @@ import java.util.List;
     public Uni<java.util.List<Acao>> autoCompleteEmAberto(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_EM_ABERTO, Acao.class)
-                    .setParameter(1, query)
-                    .setParameter(2, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -52,8 +57,8 @@ import java.util.List;
     public Uni<java.util.List<Acao>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Acao.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -65,8 +70,8 @@ import java.util.List;
     public Uni<java.util.List<Acao>> acaoUnidade(List<Long> unidadeIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_ACAO_UNIDADE, Acao.class)
-                    .setParameter(1, unidadeIds)
-                    .getResultList());
+                        .setParameter(1, unidadeIds)
+                        .getResultList());
     }
 
 }

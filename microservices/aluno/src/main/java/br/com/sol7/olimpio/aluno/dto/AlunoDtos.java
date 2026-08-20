@@ -12,44 +12,55 @@ public final class AlunoDtos {
             LocalDate dataNascimento, String email, String telefone, String celular, String foto,
             String nomePai, String nomeMae, String nomeReferencia, String telefoneReferencia,
             String facebook, String twitter, String telefoneComercial,
-            String genero, String etnia, String escolaridade, String estadoCivil) {}
+            String genero, String etnia, String escolaridade, String estadoCivil) {
+    }
 
     public record MatriculaResponse(
             Long id, String curso, String componente, String unidade, Integer turma, String periodo, Integer ano,
             String status, LocalDate data, BigDecimal mediaFinal, BigDecimal percentualPresenca,
             Integer qtdeAula, Integer qtdeAulaFeita, Integer qtdeAulaPresente, Integer qtdeAulaMeiaPresente,
-            Integer qtdeFalta, Integer qtdeAulaAtrasado, String professor) {}
+            Integer qtdeFalta, Integer qtdeAulaAtrasado, String professor) {
+    }
 
-    public record AvaliacaoResponse(Integer ordem, BigDecimal nota, String conceito) {}
+    public record AvaliacaoResponse(Integer ordem, BigDecimal nota, String conceito) {
+    }
 
     public record GrauNotaResponse(
             Long id, Long idGrauNota, String nome, Integer numeroNota, BigDecimal peso, BigDecimal nota,
-            List<AvaliacaoResponse> avaliacoes) {}
+            List<AvaliacaoResponse> avaliacoes) {
+    }
 
     public record GrauResponse(
             Long id, String descricao, BigDecimal notaMaxima, BigDecimal mediaSemExame, BigDecimal mediaFinal,
-            BigDecimal frequenciaMinima, List<GrauNotaResponse> notas) {}
+            BigDecimal frequenciaMinima, List<GrauNotaResponse> notas) {
+    }
 
     public record BoletimResponse(
             MatriculaResponse matricula, List<GrauResponse> graus, BigDecimal media, String status,
-            BigDecimal frequenciaPerc) {}
+            BigDecimal frequenciaPerc) {
+    }
 
-    public record OcorrenciaPresencaResponse(LocalDate data, String presenca, String presencaDescricao, String componente) {}
+    public record OcorrenciaPresencaResponse(LocalDate data, String presenca, String presencaDescricao, String componente) {
+    }
 
     public record FrequenciaResponse(
             MatriculaResponse matricula, List<OcorrenciaPresencaResponse> ocorrencias, Integer aulasRealizadas,
             Integer presentes, Integer meias, Integer ausentes, Integer atestados, Integer atrasos,
             Integer semMarcacao, Integer canceladas, Integer prorrogadas, BigDecimal frequenciaPerc,
-            BigDecimal ausenciaPerc) {}
+            BigDecimal ausenciaPerc) {
+    }
 
     public record BoletimResumoResponse(
-            MatriculaResponse matricula, BigDecimal media, String status, BigDecimal frequenciaPerc) {}
+            MatriculaResponse matricula, BigDecimal media, String status, BigDecimal frequenciaPerc) {
+    }
 
-    public record DashboardResponse(List<MatriculaResponse> matriculas, List<BoletimResumoResponse> boletins) {}
+    public record DashboardResponse(List<MatriculaResponse> matriculas, List<BoletimResumoResponse> boletins) {
+    }
 
     public record ResumoFinanceiroResponse(
             String situacao, Integer diasAtraso, Integer qtdParcelasAtrasadas,
-            Integer qtdParcelasRestantes, BigDecimal valorPendente) {}
+            Integer qtdParcelasRestantes, BigDecimal valorPendente) {
+    }
 
     public record ParcelaResponse(
             Long id, Long contratoId, Integer parcela, Integer parcelaSequencia,
@@ -58,13 +69,15 @@ public final class AlunoDtos {
             BigDecimal valor, BigDecimal valorPago, String tipoPagamento,
             Boolean reparcela, Boolean cancelamento, Boolean original,
             boolean vendaProduto, boolean multaLivro,
-            String descricao, String descricaoCor, String situacao, String situacaoCor) {}
+            String descricao, String descricaoCor, String situacao, String situacaoCor) {
+    }
 
     public record ContratoFinanceiroResponse(
             Long id, String curso, String unidade, String unidadeResponsavel, String status,
             Integer qtdeReparcelamento, Integer proximaParcelaSequencia, LocalDate proximaParcelaData,
             BigDecimal proximaParcelaValor, Integer ultimaParcelaSequencia, LocalDate ultimaParcelaData,
-            BigDecimal ultimaParcelaValor) {}
+            BigDecimal ultimaParcelaValor) {
+    }
 
     public record FinanceiroResponse(
             ResumoFinanceiroResponse resumo,
@@ -72,33 +85,42 @@ public final class AlunoDtos {
             List<ParcelaResponse> parcelasMes,
             List<ParcelaResponse> parcelasMatricula,
             List<ParcelaResponse> parcelasProdutos,
-            List<ParcelaResponse> parcelasCanceladas) {}
+            List<ParcelaResponse> parcelasCanceladas) {
+    }
 
     public record PessoaDadosResponse(
             Long id, String nome, String cpf, String rg, LocalDate dataNascimento,
-            String email, String telefone, String celular) {}
+            String email, String telefone, String celular) {
+    }
 
     public record LigacaoNapResponse(
             Long id, LocalDateTime dataInicial, String telefone, String observacao,
-            String resultado, LocalDate retornoAula) {}
+            String resultado, LocalDate retornoAula) {
+    }
 
     public record EmailNapResponse(
-            Long id, LocalDateTime data, String email, String assunto, String mensagem) {}
+            Long id, LocalDateTime data, String email, String assunto, String mensagem) {
+    }
 
     public record HistoricoNapResponse(
-            List<LigacaoNapResponse> ligacoes, List<EmailNapResponse> emails) {}
+            List<LigacaoNapResponse> ligacoes, List<EmailNapResponse> emails) {
+    }
 
     public record LigacaoCobrancaResponse(
             Long id, LocalDateTime dataInicial, String telefone, String observacao,
-            String resultado, Integer qtdeParcela, BigDecimal valor) {}
+            String resultado, Integer qtdeParcela, BigDecimal valor) {
+    }
 
     public record EmailCobrancaResponse(
             Long id, LocalDateTime data, String email, String assunto, String mensagem,
-            Integer qtdeParcela, BigDecimal valor) {}
+            Integer qtdeParcela, BigDecimal valor) {
+    }
 
     public record HistoricoCobrancaResponse(
-            List<LigacaoCobrancaResponse> ligacoes, List<EmailCobrancaResponse> emails) {}
+            List<LigacaoCobrancaResponse> ligacoes, List<EmailCobrancaResponse> emails) {
+    }
 
     public record HistoricoAlunoResponse(
-            Long id, LocalDateTime dataRegistro, String descricao, Long usuarioId, String usuarioNome) {}
+            Long id, LocalDateTime dataRegistro, String descricao, Long usuarioId, String usuarioNome) {
+    }
 }

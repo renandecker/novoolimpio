@@ -1,10 +1,16 @@
 package br.com.sol7.olimpio.basico.pessoafisica.repository;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
 import br.com.sol7.olimpio.basico.pessoafisica.entity.PessoaFisica;
-@ApplicationScoped public class PessoaFisicaRepository implements PanacheRepository<PessoaFisica> {
+
+@ApplicationScoped
+public class PessoaFisicaRepository implements PanacheRepository<PessoaFisica> {
 
     // Migrado de PessoaFisicaRepository.autoComplete (legado) - HQL original:
     // select distinct p from Pessoa p inner join p.unidades u where u in (?2) and  (lower(p.pessoaFisica.nome) like '%' || ?1 || '%' OR (p.pessoaFisica.cpf) like '%' || ?1 || '%' OR  lower(p.pessoaFisica.nome) like '%' || ?1 || '%' or p.pessoaFisica.cpf like '%' || ?1 || '%' or replace(replace(p.pessoaFisica.cpf,'.',''),'-','') like '%' || ?1 || '%' or lower(p.pessoaFisica.nome||p.pessoaFisica.cpf) like '%' || lower(?1) || '%' or  lower(p.pessoaFisica.nome||' ('||p.pessoaFisica.cpf||')') like '%' || lower(?1) || '%' or  replace(replace(lower(p.pessoaFisica.nome||' '||p.pessoaFisica.cpf),'(',''),')','') like '%' || lower(?1) || '%' )  and  u.ativo = true AND p not in (select pr.pessoa from Professor pr)
@@ -16,9 +22,9 @@ import br.com.sol7.olimpio.basico.pessoafisica.entity.PessoaFisica;
     public Uni<java.util.List<Object>> autoComplete(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE)
-                    .setParameter(1, query)
-                    .setParameter(2, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -32,9 +38,9 @@ import br.com.sol7.olimpio.basico.pessoafisica.entity.PessoaFisica;
     public Uni<java.util.List<Object>> autoCompleteTodos(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_TODOS)
-                    .setParameter(1, query)
-                    .setParameter(2, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -47,8 +53,8 @@ import br.com.sol7.olimpio.basico.pessoafisica.entity.PessoaFisica;
     public Uni<java.util.List<Pessoa>> autoCompleteAcao(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_ACAO, Pessoa.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -61,8 +67,8 @@ import br.com.sol7.olimpio.basico.pessoafisica.entity.PessoaFisica;
     public Uni<java.util.List<Pessoa>> buscarPessoaComCpf(String cpf) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_PESSOA_COM_CPF, Pessoa.class)
-                    .setParameter(1, cpf)
-                    .getResultList());
+                        .setParameter(1, cpf)
+                        .getResultList());
     }
 
 
@@ -76,9 +82,9 @@ import br.com.sol7.olimpio.basico.pessoafisica.entity.PessoaFisica;
     public Uni<java.util.List<Object>> autoCompleteTestemunha(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_TESTEMUNHA)
-                    .setParameter(1, query)
-                    .setParameter(2, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, unidadesIds)
+                        .getResultList());
     }
 
 }

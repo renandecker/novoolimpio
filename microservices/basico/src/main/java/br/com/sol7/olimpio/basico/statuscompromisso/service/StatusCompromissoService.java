@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.statuscompromisso.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.statuscompromisso.dto.StatusCompromissoRequest;
 import br.com.sol7.olimpio.basico.statuscompromisso.dto.StatusCompromissoResponse;
 import br.com.sol7.olimpio.basico.statuscompromisso.entity.StatusCompromisso;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.statuscompromisso.repository.StatusCompromisso
 @WithTransaction
 public class StatusCompromissoService {
 
-    @Inject StatusCompromissoRepository repository;
+    @Inject
+    StatusCompromissoRepository repository;
 
     public Uni<List<StatusCompromissoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,19 @@ public class StatusCompromissoService {
                         : Uni.createFrom().failure(new NotFoundException("StatusCompromisso not found")));
     }
 
-    private void apply(StatusCompromisso e, StatusCompromissoRequest r) { e.descricao = r.descricao(); e.cor = r.cor(); e.ativo = r.ativo(); e.alguem = r.alguem(); e.trocaautomatomatica = r.trocaautomatomatica(); e.dias = r.dias(); e.perfilId = r.perfilId(); e.descricaoPessoa = r.descricaoPessoa(); e.qtdeUsuario = r.qtdeUsuario(); e.proxStatusCompromissoId = r.proxStatusCompromissoId(); e.statusCompromissoTrocaAutoId = r.statusCompromissoTrocaAutoId(); }
+    private void apply(StatusCompromisso e, StatusCompromissoRequest r) {
+        e.descricao = r.descricao();
+        e.cor = r.cor();
+        e.ativo = r.ativo();
+        e.alguem = r.alguem();
+        e.trocaautomatomatica = r.trocaautomatomatica();
+        e.dias = r.dias();
+        e.perfilId = r.perfilId();
+        e.descricaoPessoa = r.descricaoPessoa();
+        e.qtdeUsuario = r.qtdeUsuario();
+        e.proxStatusCompromissoId = r.proxStatusCompromissoId();
+        e.statusCompromissoTrocaAutoId = r.statusCompromissoTrocaAutoId();
+    }
 
     private StatusCompromissoResponse toResponse(StatusCompromisso e) {
         return new StatusCompromissoResponse(e.id, e.descricao, e.cor, e.ativo, e.alguem, e.trocaautomatomatica, e.dias, e.perfilId, e.descricaoPessoa, e.qtdeUsuario, e.proxStatusCompromissoId, e.statusCompromissoTrocaAutoId);
@@ -87,7 +103,7 @@ public class StatusCompromissoService {
     //         return getStatusCompromissoRepository().buscarStatusComModulo(id);
     //     }
     public Uni<Long> buscarStatusComModulo(Integer id) {
-                return repository.buscarStatusComModulo(id).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarStatusComModulo(id).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 }

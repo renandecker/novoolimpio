@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.historicoaluno;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class HistoricoAlunoService {
 
-    @Inject HistoricoAlunoRepository repository;
+    @Inject
+    HistoricoAlunoRepository repository;
 
     public Uni<List<HistoricoAlunoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,12 @@ public class HistoricoAlunoService {
                         : Uni.createFrom().failure(new NotFoundException("HistoricoAluno not found")));
     }
 
-    private void apply(HistoricoAluno e, HistoricoAlunoRequest r) { e.descricao = r.descricao(); e.usuarioId = r.usuarioId(); e.alunoId = r.alunoId(); e.dataRegistro = r.dataRegistro(); }
+    private void apply(HistoricoAluno e, HistoricoAlunoRequest r) {
+        e.descricao = r.descricao();
+        e.usuarioId = r.usuarioId();
+        e.alunoId = r.alunoId();
+        e.dataRegistro = r.dataRegistro();
+    }
 
     private HistoricoAlunoResponse toResponse(HistoricoAluno e) {
         return new HistoricoAlunoResponse(e.id, e.descricao, e.usuarioId, e.alunoId, e.dataRegistro);
@@ -85,7 +93,7 @@ public class HistoricoAlunoService {
     //         return getHistoricoAlunoRepository().buscarHistoricoAlunoComCompromissos(historico);
     //     }
     public Uni<Long> buscarHistoricoAlunoComCompromissos(Long historico) {
-                return repository.buscarHistoricoAlunoComCompromissos(historico).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarHistoricoAlunoComCompromissos(historico).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 }

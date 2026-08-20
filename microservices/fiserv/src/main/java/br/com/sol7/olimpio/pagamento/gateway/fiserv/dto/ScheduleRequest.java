@@ -13,17 +13,17 @@ public record ScheduleRequest(
         String transactionOrigin,
         Frequency frequency,
         PaymentMethod paymentMethod,
-        TransactionAmount transactionAmount) {
+        TransactionAmount transactionAmount){
 
-    public static ScheduleRequest comCartao(String startDate, int numberOfPayments, String invoiceNumber,
-                                             TransactionAmount valorDaParcela, PaymentCard card) {
-        return new ScheduleRequest("PaymentMethodPaymentSchedulesRequest", startDate, numberOfPayments, 1,
-                invoiceNumber, "ECOM", Frequency.mensal(), PaymentMethod.ofCard(card), valorDaParcela);
-    }
+public static ScheduleRequest comCartao(String startDate,int numberOfPayments,String invoiceNumber,
+        TransactionAmount valorDaParcela,PaymentCard card){
+        return new ScheduleRequest("PaymentMethodPaymentSchedulesRequest",startDate,numberOfPayments,1,
+        invoiceNumber,"ECOM",Frequency.mensal(),PaymentMethod.ofCard(card),valorDaParcela);
+        }
 
-    public static ScheduleRequest comToken(String startDate, int numberOfPayments, String invoiceNumber,
-                                            TransactionAmount valorDaParcela, String tokenValue) {
-        return new ScheduleRequest("PaymentMethodPaymentSchedulesRequest", startDate, numberOfPayments, 1,
-                invoiceNumber, "ECOM", Frequency.mensal(), PaymentMethod.ofToken(tokenValue), valorDaParcela);
-    }
-}
+public static ScheduleRequest comToken(String startDate,int numberOfPayments,String invoiceNumber,
+        TransactionAmount valorDaParcela,String tokenValue){
+        return new ScheduleRequest("PaymentMethodPaymentSchedulesRequest",startDate,numberOfPayments,1,
+        invoiceNumber,"ECOM",Frequency.mensal(),PaymentMethod.ofToken(tokenValue),valorDaParcela);
+        }
+        }

@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.relatorios.painel;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class PainelService {
 
-    @Inject PainelRepository repository;
+    @Inject
+    PainelRepository repository;
 
     public Uni<List<PainelResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,9 @@ public class PainelService {
                         : Uni.createFrom().failure(new NotFoundException("Painel not found")));
     }
 
-    private void apply(Painel e, PainelRequest r) { e.nome = r.nome(); }
+    private void apply(Painel e, PainelRequest r) {
+        e.nome = r.nome();
+    }
 
     private PainelResponse toResponse(Painel e) {
         return new PainelResponse(e.id, e.nome);

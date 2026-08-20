@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.ocorrenciacomponentecurricular;
+
 import br.com.sol7.olimpio.educacao.componentecurricular.ComponenteCurricular;
 import br.com.sol7.olimpio.educacao.componentecurricular.ComponenteCurricularRepository;
 import br.com.sol7.olimpio.educacao.diaaula.DiaAula;
@@ -22,6 +23,7 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Date;
@@ -30,15 +32,24 @@ import java.util.Date;
 @WithTransaction
 public class OcorrenciaComponenteCurricularService {
 
-    @Inject OcorrenciaComponenteCurricularRepository repository;
-    @Inject SalaRepository salaRepository;
-    @Inject DiaAulaRepository diaAulaRepository;
-    @Inject TurnoEducacaoRepository turnoEducacaoRepository;
-    @Inject TempoAulaRepository tempoAulaRepository;
-    @Inject OferecimentoComponenteCurricularRepository oferecimentoRepository;
-    @Inject ComponenteCurricularRepository componenteCurricularRepository;
-    @Inject ProfessorRepository professorRepository;
-    @Inject PessoaFisicaRepository pessoaFisicaRepository;
+    @Inject
+    OcorrenciaComponenteCurricularRepository repository;
+    @Inject
+    SalaRepository salaRepository;
+    @Inject
+    DiaAulaRepository diaAulaRepository;
+    @Inject
+    TurnoEducacaoRepository turnoEducacaoRepository;
+    @Inject
+    TempoAulaRepository tempoAulaRepository;
+    @Inject
+    OferecimentoComponenteCurricularRepository oferecimentoRepository;
+    @Inject
+    ComponenteCurricularRepository componenteCurricularRepository;
+    @Inject
+    ProfessorRepository professorRepository;
+    @Inject
+    PessoaFisicaRepository pessoaFisicaRepository;
 
     public Uni<List<OcorrenciaComponenteCurricularResponse>> list() {
         return withRefs(repository.listAll());
@@ -80,7 +91,16 @@ public class OcorrenciaComponenteCurricularService {
                         : Uni.createFrom().failure(new NotFoundException("OcorrenciaComponenteCurricular not found")));
     }
 
-    private void apply(OcorrenciaComponenteCurricular e, OcorrenciaComponenteCurricularRequest r) { e.professorId = r.professorId(); e.salaId = r.salaId(); e.ativo = r.ativo(); e.oferecimentoComponenteCurricularId = r.oferecimentoComponenteCurricularId(); e.data = r.data(); e.diaAulaId = r.diaAulaId(); e.aulaCoringa = r.aulaCoringa(); e.aulaPresencial = r.aulaPresencial(); }
+    private void apply(OcorrenciaComponenteCurricular e, OcorrenciaComponenteCurricularRequest r) {
+        e.professorId = r.professorId();
+        e.salaId = r.salaId();
+        e.ativo = r.ativo();
+        e.oferecimentoComponenteCurricularId = r.oferecimentoComponenteCurricularId();
+        e.data = r.data();
+        e.diaAulaId = r.diaAulaId();
+        e.aulaCoringa = r.aulaCoringa();
+        e.aulaPresencial = r.aulaPresencial();
+    }
 
     // ----- resolucao de descricoes (refs locais, sem N+1) -----
 
@@ -88,11 +108,11 @@ public class OcorrenciaComponenteCurricularService {
                         List<OferecimentoComponenteCurricular> oferecimentos,
                         List<ComponenteCurricular> componentes,
                         List<Professor> professores, List<PessoaFisica> pessoasFisicas) {
-        String salaDescricao(Long id) {
+        String salaDescricao (Long id){
             if (id == null) return null;
             return salas.stream().filter(x -> x.id.equals(id)).map(x -> x.descricao).findFirst().orElse(null);
         }
-        String diaAulaDescricao(Long id) {
+        String diaAulaDescricao (Long id){
             if (id == null) return null;
             return diaAulas.stream().filter(x -> x.id.equals(id)).map(d -> {
                 TurnoEducacao t = d.turnoEducacao;
@@ -101,7 +121,7 @@ public class OcorrenciaComponenteCurricularService {
                         + " as " + DateTimeFormatter.ofPattern("HH:mm").format(t.fim);
             }).findFirst().orElse(null);
         }
-        String oferecimentoDescricao(Long id) {
+        String oferecimentoDescricao (Long id){
             if (id == null) return null;
             return oferecimentos.stream().filter(x -> x.id.equals(id)).findFirst()
                     .map(of -> of.componenteCurricularId != null
@@ -109,7 +129,7 @@ public class OcorrenciaComponenteCurricularService {
                             : null)
                     .orElse(null);
         }
-        String professorNome(Long professorId) {
+        String professorNome (Long professorId){
             if (professorId == null) return null;
             Professor p = professores.stream().filter(x -> x.id.equals(professorId)).findFirst().orElse(null);
             if (p == null) return null;
@@ -137,7 +157,8 @@ public class OcorrenciaComponenteCurricularService {
                                                         .onItem().transformToUni(componentes -> professorRepository.listAll()
                                                                 .onItem().transformToUni(professores -> pessoaFisicaRepository.listAll()
                                                                         .map(pessoasFisicas -> {
-                                                                            for (DiaAula d : dias) hydrate(d, turnos, tempos);
+                                                                            for (DiaAula d : dias)
+                                                                                hydrate(d, turnos, tempos);
                                                                             return new Refs(salas, dias, oferecimentos, componentes, professores, pessoasFisicas);
                                                                         }))))))));
     }
@@ -163,7 +184,7 @@ public class OcorrenciaComponenteCurricularService {
     //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorProfessor(professor, inicio, fim);
     //     }
     public Uni<List<Long>> buscarOcorrenciaPorProfessor(Long professorId, Date inicio, Date fim) {
-                return repository.buscarOcorrenciaPorProfessor(professorId, inicio, fim).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarOcorrenciaPorProfessor(professorId, inicio, fim).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -175,7 +196,7 @@ public class OcorrenciaComponenteCurricularService {
     //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorOferecimentoEDatas(oferecimentoComponenteCurricular, inicio, fim);
     //     }
     public Uni<List<Long>> buscarOcorrenciaPorOferecimentoEDatas(Long oferecimentoComponenteCurricularId, Date inicio, Date fim) {
-                return repository.buscarOcorrenciaPorOferecimentoEDatas(oferecimentoComponenteCurricularId, inicio, fim).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarOcorrenciaPorOferecimentoEDatas(oferecimentoComponenteCurricularId, inicio, fim).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -187,7 +208,7 @@ public class OcorrenciaComponenteCurricularService {
     //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorOferecimentoEDatasCoringa(oferecimentoComponenteCurricular, inicio, fim,coringa);
     //     }
     public Uni<List<Long>> buscarOcorrenciaPorOferecimentoEDatasCoringa(Long oferecimentoComponenteCurricularId, Date inicio, Date fim, Boolean coringa) {
-                return repository.buscarOcorrenciaPorOferecimentoEDatasCoringa(oferecimentoComponenteCurricularId, inicio, fim, coringa).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarOcorrenciaPorOferecimentoEDatasCoringa(oferecimentoComponenteCurricularId, inicio, fim, coringa).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -199,7 +220,7 @@ public class OcorrenciaComponenteCurricularService {
     //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaExtras(oferecimentoComponenteCurricular);
     //     }
     public Uni<List<Long>> buscarOcorrenciaExtras(Long oferecimentoComponenteCurricularId) {
-                return repository.buscarOcorrenciaExtras(oferecimentoComponenteCurricularId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarOcorrenciaExtras(oferecimentoComponenteCurricularId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -211,7 +232,7 @@ public class OcorrenciaComponenteCurricularService {
     //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaNormais(oferecimentoComponenteCurricular);
     //     }
     public Uni<List<Long>> buscarOcorrenciaNormais(Long oferecimentoComponenteCurricularId) {
-                return repository.buscarOcorrenciaNormais(oferecimentoComponenteCurricularId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarOcorrenciaNormais(oferecimentoComponenteCurricularId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -223,7 +244,7 @@ public class OcorrenciaComponenteCurricularService {
     //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorOferecimento(oferecimentoComponenteCurricular);
     //     }
     public Uni<List<Long>> buscarOcorrenciaPorOferecimento(Long oferecimentoComponenteCurricularId) {
-                return repository.buscarOcorrenciaPorOferecimento(oferecimentoComponenteCurricularId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarOcorrenciaPorOferecimento(oferecimentoComponenteCurricularId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -235,7 +256,7 @@ public class OcorrenciaComponenteCurricularService {
     //         return getOcorrenciaComponenteCurricularRepository().buscarTodasOcorrenciaPorOferecimento(oferecimentoComponenteCurricular);
     //     }
     public Uni<List<Long>> buscarTodasOcorrenciaPorOferecimento(Long oferecimentoComponenteCurricularId) {
-                return repository.buscarTodasOcorrenciaPorOferecimento(oferecimentoComponenteCurricularId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarTodasOcorrenciaPorOferecimento(oferecimentoComponenteCurricularId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -246,7 +267,7 @@ public class OcorrenciaComponenteCurricularService {
     //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorDataUnidade(date, unidades);
     //     }
     public Uni<List<Long>> buscarOcorrenciaPorDataUnidade(Date date, List<Long> unidades) {
-                return repository.buscarOcorrenciaPorDataUnidade(date, unidades).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarOcorrenciaPorDataUnidade(date, unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -257,7 +278,7 @@ public class OcorrenciaComponenteCurricularService {
     //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorDataUnidade(inicio, fim, unidades);
     //     }
     public Uni<List<Long>> buscarOcorrenciaPorDataUnidade2(Date inicio, Date fim, List<Long> unidades) {
-                return repository.buscarOcorrenciaPorDataUnidade(inicio, fim, unidades).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarOcorrenciaPorDataUnidade(inicio, fim, unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -269,7 +290,7 @@ public class OcorrenciaComponenteCurricularService {
     //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorOferecimentoComGrupo(grupo);
     //     }
     public Uni<List<Long>> buscarOcorrenciaPorOferecimentoComGrupo(Long grupoId) {
-                return repository.buscarOcorrenciaPorOferecimentoComGrupo(grupoId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarOcorrenciaPorOferecimentoComGrupo(grupoId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

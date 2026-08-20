@@ -24,5 +24,5 @@ public record PagamentoConfirmadoEvent(
         String status,
         BigDecimal valor,
         String idGateway,
-        LocalDateTime dataConfirmacao) {
-}
+        LocalDateTime dataConfirmacao){
+        }

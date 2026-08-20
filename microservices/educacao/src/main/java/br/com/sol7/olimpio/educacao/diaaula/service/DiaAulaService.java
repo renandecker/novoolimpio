@@ -24,9 +24,12 @@ import java.util.stream.Collectors;
 @WithTransaction
 public class DiaAulaService {
 
-    @Inject DiaAulaRepository repository;
-    @Inject TurnoEducacaoRepository turnoEducacaoRepository;
-    @Inject TempoAulaRepository tempoAulaRepository;
+    @Inject
+    DiaAulaRepository repository;
+    @Inject
+    TurnoEducacaoRepository turnoEducacaoRepository;
+    @Inject
+    TempoAulaRepository tempoAulaRepository;
 
     public Uni<List<DiaAulaResponse>> list() {
         return withRefs(repository.listAll());
@@ -116,11 +119,11 @@ public class DiaAulaService {
     }
 
     private record Refs(List<TurnoEducacao> turnos, List<TempoAula> tempos) {
-        TurnoEducacao turnoById(Long id) {
+        TurnoEducacao turnoById (Long id){
             if (id == null) return null;
             return turnos.stream().filter(t -> t.id.equals(id)).findFirst().orElse(null);
         }
-        TempoAula tempoById(Long id) {
+        TempoAula tempoById (Long id){
             if (id == null) return null;
             return tempos.stream().filter(t -> t.id.equals(id)).findFirst().orElse(null);
         }

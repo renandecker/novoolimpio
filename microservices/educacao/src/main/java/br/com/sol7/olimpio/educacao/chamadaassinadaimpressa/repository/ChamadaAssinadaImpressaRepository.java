@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.educacao.chamadaassinadaimpressa;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class ChamadaAssinadaImpressaRepository implements PanacheRepository<ChamadaAssinadaImpressa> {
+
+@ApplicationScoped
+public class ChamadaAssinadaImpressaRepository implements PanacheRepository<ChamadaAssinadaImpressa> {
 
     // Migrado de ChamadaAssinadaImpressaRepository.verificaPossuiPendentes (legado) - HQL original:
     // select count(c) from ChamadaAssinadaImpressa c where c.oferecimentoComponenteCurricular = ?1 AND c.sequencia = ?2 and c.ativo = true
@@ -12,9 +17,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> verificaPossuiPendentes(Long oferecimentoComponenteCurricularId, int sequencia) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_VERIFICA_POSSUI_PENDENTES)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .setParameter(2, sequencia)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .setParameter(2, sequencia)
+                        .getResultList());
     }
 
 
@@ -26,8 +31,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ChamadaAssinadaImpressa>> chamadasAtivas(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_CHAMADAS_ATIVAS, ChamadaAssinadaImpressa.class)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .getResultList());
     }
 
 
@@ -39,8 +44,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> maiorSequencia(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_MAIOR_SEQUENCIA)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .getResultList());
     }
 
 
@@ -52,8 +57,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ChamadaAssinadaImpressa>> chamadasAtivasNaoDigitadas(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_CHAMADAS_ATIVAS_NAO_DIGITADAS, ChamadaAssinadaImpressa.class)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .getResultList());
     }
 
 
@@ -65,8 +70,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ChamadaAssinadaImpressa>> verificaPossuiChamadasPendentes(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_VERIFICA_POSSUI_CHAMADAS_PENDENTES, ChamadaAssinadaImpressa.class)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .getResultList());
     }
 
 
@@ -78,8 +83,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<ChamadaAssinadaImpressa>> verificaUltimaBaixada(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_VERIFICA_ULTIMA_BAIXADA, ChamadaAssinadaImpressa.class)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .getResultList());
     }
 
 
@@ -94,7 +99,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_TESTE)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 }

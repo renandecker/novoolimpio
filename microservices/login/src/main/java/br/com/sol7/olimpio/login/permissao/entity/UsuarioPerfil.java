@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -27,7 +28,7 @@ public class UsuarioPerfil extends PanacheEntityBase {
         @Override
         public boolean equals(Object other) {
             if (this == other) return true;
-            if (!(other instanceof UsuarioPerfilId that)) return false;
+            if (!(other instanceof UsuarioPerfilId that))return false;
             return Objects.equals(usuarioId, that.usuarioId) && Objects.equals(perfilId, that.perfilId);
         }
 

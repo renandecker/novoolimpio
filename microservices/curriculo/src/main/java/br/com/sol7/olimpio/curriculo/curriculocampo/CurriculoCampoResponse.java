@@ -4,5 +4,5 @@ public record CurriculoCampoResponse(
         Long id,
         Long id_campo,
         Boolean obrigatorio,
-        Integer ordem) {
-}
+        Integer ordem){
+        }

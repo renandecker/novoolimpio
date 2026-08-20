@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.comercial.campanha;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class CampanhaRepository implements PanacheRepository<Campanha> {
+
+@ApplicationScoped
+public class CampanhaRepository implements PanacheRepository<Campanha> {
 
     // Migrado de CampanhaRepository.buscarCampanhaComAcoes (legado) - HQL original:
     // select a from Campanha a left join fetch a.acoesDeCampanha where a.id = ?1
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Campanha>> buscarCampanhaComAcoes(Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CAMPANHA_COM_ACOES, Campanha.class)
-                    .setParameter(1, id)
-                    .getResultList());
+                        .setParameter(1, id)
+                        .getResultList());
     }
 
 
@@ -25,8 +30,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Campanha>> buscarCampanhaDaUnidade(Long usuarioLogadoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CAMPANHA_DA_UNIDADE, Campanha.class)
-                    .setParameter(1, usuarioLogadoId)
-                    .getResultList());
+                        .setParameter(1, usuarioLogadoId)
+                        .getResultList());
     }
 
 
@@ -38,8 +43,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Campanha>> buscarCampanhaComUnidades(Long entityId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CAMPANHA_COM_UNIDADES, Campanha.class)
-                    .setParameter(1, entityId)
-                    .getResultList());
+                        .setParameter(1, entityId)
+                        .getResultList());
     }
 
 }

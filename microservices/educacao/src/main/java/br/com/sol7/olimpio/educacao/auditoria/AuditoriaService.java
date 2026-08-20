@@ -8,6 +8,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.Tuple;
 import jakarta.ws.rs.BadRequestException;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -73,7 +74,7 @@ public class AuditoriaService {
 
     private static Date data(Tuple row, String alias) {
         Object valor = row.get(alias);
-        if (valor instanceof Number numero) {
+        if (valor instanceof Number numero){
             return new Date(numero.longValue());
         }
         return valor instanceof Date data ? data : null;

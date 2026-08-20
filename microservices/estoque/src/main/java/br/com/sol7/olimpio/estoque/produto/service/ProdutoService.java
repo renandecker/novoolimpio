@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.estoque.produto;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ProdutoService {
 
-    @Inject ProdutoRepository repository;
+    @Inject
+    ProdutoRepository repository;
 
     public Uni<List<ProdutoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,17 @@ public class ProdutoService {
                         : Uni.createFrom().failure(new NotFoundException("Produto not found")));
     }
 
-    private void apply(Produto e, ProdutoRequest r) { e.valor = r.valor(); e.imagem = r.imagem(); e.quantidade = r.quantidade(); e.nome = r.nome(); e.tamanho = r.tamanho(); e.ativo = r.ativo(); e.dataCadastro = r.dataCadastro(); e.categoriaId = r.categoriaId(); e.marcaId = r.marcaId(); }
+    private void apply(Produto e, ProdutoRequest r) {
+        e.valor = r.valor();
+        e.imagem = r.imagem();
+        e.quantidade = r.quantidade();
+        e.nome = r.nome();
+        e.tamanho = r.tamanho();
+        e.ativo = r.ativo();
+        e.dataCadastro = r.dataCadastro();
+        e.categoriaId = r.categoriaId();
+        e.marcaId = r.marcaId();
+    }
 
     private ProdutoResponse toResponse(Produto e) {
         return new ProdutoResponse(e.id, e.valor, e.imagem, e.quantidade, e.nome, e.tamanho, e.ativo, e.dataCadastro, e.categoriaId, e.marcaId);
@@ -112,7 +125,7 @@ public class ProdutoService {
     //         return this.getProdutoRepository().autoComplete(query.toLowerCase(), new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoComplete(String query) {
-                return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -124,7 +137,7 @@ public class ProdutoService {
     //         return getProdutoRepository().buscarProdutoEstoque(produtoestoque);
     //     }
     public Uni<Long> buscarProduto(Integer produtoestoque) {
-                return repository.buscarProdutoEstoque(produtoestoque).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarProdutoEstoque(produtoestoque).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -136,7 +149,7 @@ public class ProdutoService {
     //         return getProdutoRepository().carregarCampos(livro);
     //     }
     public Uni<Long> carregarCampos(Long livroId) {
-                return repository.carregarCampos(livroId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.carregarCampos(livroId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -148,7 +161,7 @@ public class ProdutoService {
     //         return getProdutoRepository().carregarUnidade(produto);
     //     }
     public Uni<Long> carregarUnidade(Long produtoId) {
-                return repository.carregarUnidade(produtoId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.carregarUnidade(produtoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -160,7 +173,7 @@ public class ProdutoService {
     //         return getProdutoRepository().carregarFornecedor(produto);
     //     }
     public Uni<Long> carregarFornecedor(Long produtoId) {
-                return repository.carregarFornecedor(produtoId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.carregarFornecedor(produtoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 }

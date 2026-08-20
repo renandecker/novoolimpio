@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewResultadoFormResultadoListScreen(){return <PermissionGate permission="READ"><main><h1>Form Resultado</h1><DataTable path="/api/view/resultado/formResultado"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewResultadoFormResultadoListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Form Resultado</h1><DataTable path="/api/view/resultado/formResultado"/></main>
+    </PermissionGate>
+}

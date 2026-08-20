@@ -8,6 +8,7 @@ import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -42,7 +43,8 @@ public class ModulePermissionService {
                                 if (perfis.stream().anyMatch(this::isAdmin)) return todosOsModulos();
                                 return PerfilModulo.<PerfilModulo>find("perfilId in ?1", perfilIds).list()
                                         .onItem().transformToUni(acessos -> {
-                                            if (acessos == null || acessos.isEmpty()) return Uni.createFrom().item(Map.of());
+                                            if (acessos == null || acessos.isEmpty())
+                                                return Uni.createFrom().item(Map.of());
                                             List<Long> moduloIds = acessos.stream().map(a -> a.moduloId).distinct().toList();
                                             return Modulo.<Modulo>find("id in ?1", moduloIds).list()
                                                     .map(modulos -> montarMapa(acessos, modulos));
@@ -134,7 +136,8 @@ public class ModulePermissionService {
                                 if (melhorPerfil == null) return Uni.createFrom().item(null);
                                 return Modulo.<Modulo>find("id", melhorPerfil.idModulo).firstResult()
                                         .map(modulo -> {
-                                            if (modulo == null || modulo.outcome == null || modulo.outcome.isBlank()) return null;
+                                            if (modulo == null || modulo.outcome == null || modulo.outcome.isBlank())
+                                                return null;
                                             return normalizar(modulo.outcome);
                                         });
                             });
@@ -144,16 +147,17 @@ public class ModulePermissionService {
     private int hierarquiaOrdinal(String hierarquia) {
         if (hierarquia == null) return 0;
         return switch (hierarquia.trim().toUpperCase(java.util.Locale.ROOT)) {
-            case "ADMIN" -> 3;
-            case "ESTRATEGICO" -> 2;
-            case "OPERACIONAL" -> 1;
-            default -> 0;
-        };
+            case "ADMIN" ->3;
+            case "ESTRATEGICO" ->2;
+            case "OPERACIONAL" ->1;
+            default ->0;
+        } ;
     }
 
     private String normalizar(String outcome) {
         String valor = outcome.trim();
-        if (valor.toLowerCase(java.util.Locale.ROOT).endsWith(".xhtml")) valor = valor.substring(0, valor.length() - ".xhtml".length());
+        if (valor.toLowerCase(java.util.Locale.ROOT).endsWith(".xhtml"))
+            valor = valor.substring(0, valor.length() - ".xhtml".length());
         while (valor.startsWith("/")) valor = valor.substring(1);
         while (valor.endsWith("/")) valor = valor.substring(0, valor.length() - 1);
         return valor;

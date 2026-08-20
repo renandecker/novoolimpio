@@ -10,6 +10,7 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.Date;
 import java.util.List;
 
@@ -17,9 +18,12 @@ import java.util.List;
 @WithTransaction
 public class MovimentacaoEstoqueService {
 
-    @Inject MovimentacaoEstoqueRepository repository;
-    @Inject ControleEstoqueRepository controleEstoqueRepository;
-    @Inject ProdutoRepository produtoRepository;
+    @Inject
+    MovimentacaoEstoqueRepository repository;
+    @Inject
+    ControleEstoqueRepository controleEstoqueRepository;
+    @Inject
+    ProdutoRepository produtoRepository;
 
     public Uni<List<MovimentacaoEstoqueResponse>> list() {
         return repository.listAll().chain(items -> {
@@ -166,10 +170,10 @@ public class MovimentacaoEstoqueService {
                 .map(produto -> {
                     if (produto == null) return r;
                     return new MovimentacaoEstoqueResponse(
-                        r.id(), r.valor(), r.quantidade(), r.tipoMovimentacao(), r.dataMovimento(),
-                        r.usuarioId(), r.produtoId(), r.unidadeId(), r.vendaProdutoId(),
-                        r.unidadeCentralId(), r.fornecedorId(), r.central(),
-                        produto.nome, null, null
+                            r.id(), r.valor(), r.quantidade(), r.tipoMovimentacao(), r.dataMovimento(),
+                            r.usuarioId(), r.produtoId(), r.unidadeId(), r.vendaProdutoId(),
+                            r.unidadeCentralId(), r.fornecedorId(), r.central(),
+                            produto.nome, null, null
                     );
                 });
     }

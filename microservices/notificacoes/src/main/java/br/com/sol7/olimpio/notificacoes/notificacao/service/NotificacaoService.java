@@ -12,8 +12,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.NotFoundException;
+
 import java.time.OffsetDateTime;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,9 +25,12 @@ public class NotificacaoService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificacaoService.class);
 
-    @Inject NotificacaoRepository repository;
-    @Inject ConfigCanalService configCanalService;
-    @Inject NotificacaoKafkaProducer kafkaProducer;
+    @Inject
+    NotificacaoRepository repository;
+    @Inject
+    ConfigCanalService configCanalService;
+    @Inject
+    NotificacaoKafkaProducer kafkaProducer;
 
     public Uni<List<NotificacaoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -104,7 +109,8 @@ public class NotificacaoService {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Notificacao not found"))
                 .invoke(e -> {
-                    if (!e.username.equals(username)) throw new ForbiddenException("Notificacao pertence a outro usuário");
+                    if (!e.username.equals(username))
+                        throw new ForbiddenException("Notificacao pertence a outro usuário");
                     e.lida = true;
                     e.dataLeitura = OffsetDateTime.now();
                 })

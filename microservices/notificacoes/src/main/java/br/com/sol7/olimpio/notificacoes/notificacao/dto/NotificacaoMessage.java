@@ -13,4 +13,4 @@ public record NotificacaoMessage(
         String link,
         boolean canalSistema,
         boolean canalMobile,
-        boolean canalEmail) {}
+        boolean canalEmail){}

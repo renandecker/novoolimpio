@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.telefone.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.telefone.dto.TelefoneRequest;
 import br.com.sol7.olimpio.basico.telefone.dto.TelefoneResponse;
 import br.com.sol7.olimpio.basico.telefone.entity.Telefone;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.telefone.repository.TelefoneRepository;
 @WithTransaction
 public class TelefoneService {
 
-    @Inject TelefoneRepository repository;
+    @Inject
+    TelefoneRepository repository;
 
     public Uni<List<TelefoneResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,12 @@ public class TelefoneService {
                         : Uni.createFrom().failure(new NotFoundException("Telefone not found")));
     }
 
-    private void apply(Telefone e, TelefoneRequest r) { e.numero = r.numero(); e.token = r.token(); e.operadora = r.operadora(); e.tipoTelefoneId = r.tipoTelefoneId(); }
+    private void apply(Telefone e, TelefoneRequest r) {
+        e.numero = r.numero();
+        e.token = r.token();
+        e.operadora = r.operadora();
+        e.tipoTelefoneId = r.tipoTelefoneId();
+    }
 
     private TelefoneResponse toResponse(Telefone e) {
         return new TelefoneResponse(e.id, e.numero, e.token, e.operadora, e.tipoTelefoneId);
@@ -88,7 +97,7 @@ public class TelefoneService {
     //         return getTelefoneRepository().buscarTelefoneUnidadePorUsuario(usuario);
     //     }
     public Uni<List<Long>> buscarTelefoneUnidadePorUsuario(Long usuarioId) {
-                return repository.buscarTelefoneUnidadePorUsuario(usuarioId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarTelefoneUnidadePorUsuario(usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

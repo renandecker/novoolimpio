@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.resultado.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.resultado.dto.ResultadoRequest;
 import br.com.sol7.olimpio.basico.resultado.dto.ResultadoResponse;
 import br.com.sol7.olimpio.basico.resultado.entity.Resultado;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.resultado.repository.ResultadoRepository;
 @WithTransaction
 public class ResultadoService {
 
-    @Inject ResultadoRepository repository;
+    @Inject
+    ResultadoRepository repository;
 
     public Uni<List<ResultadoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,10 @@ public class ResultadoService {
                         : Uni.createFrom().failure(new NotFoundException("Resultado not found")));
     }
 
-    private void apply(Resultado e, ResultadoRequest r) { e.descricao = r.descricao(); e.venda = r.venda(); }
+    private void apply(Resultado e, ResultadoRequest r) {
+        e.descricao = r.descricao();
+        e.venda = r.venda();
+    }
 
     private ResultadoResponse toResponse(Resultado e) {
         return new ResultadoResponse(e.id, e.descricao, e.venda);

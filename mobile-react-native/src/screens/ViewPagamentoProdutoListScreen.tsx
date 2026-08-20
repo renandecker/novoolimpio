@@ -1,5 +1,6 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import {ModuleList} from '../ModuleListScreen';
+
 export default function ViewPagamentoProdutoListScreen() {
-  return <ModuleList path="/api/view/pagamento/produto" />;
+    return <ModuleList path="/api/view/pagamento/produto"/>;
 }

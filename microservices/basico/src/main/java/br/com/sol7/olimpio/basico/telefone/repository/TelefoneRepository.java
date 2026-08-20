@@ -1,9 +1,14 @@
 package br.com.sol7.olimpio.basico.telefone.repository;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 import br.com.sol7.olimpio.basico.telefone.entity.Telefone;
-@ApplicationScoped public class TelefoneRepository implements PanacheRepository<Telefone> {
+
+@ApplicationScoped
+public class TelefoneRepository implements PanacheRepository<Telefone> {
 
     // Migrado de TelefoneRepository.autoComplete (legado) - HQL original:
     // select t from Telefone t where lower(t.numero) like '%' || ?1 || '%' OR lower(str(t.operadora)) like '%' || ?1 || '%'  OR str(t.id) = ?1  order by t.operadora
@@ -13,8 +18,8 @@ import br.com.sol7.olimpio.basico.telefone.entity.Telefone;
     public Uni<java.util.List<Telefone>> autoComplete(String lowerCase) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Telefone.class)
-                    .setParameter(1, lowerCase)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .getResultList());
     }
 
 
@@ -26,8 +31,8 @@ import br.com.sol7.olimpio.basico.telefone.entity.Telefone;
     public Uni<java.util.List<Telefone>> buscarTelefoneUnidadePorUsuario(Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_TELEFONE_UNIDADE_POR_USUARIO, Telefone.class)
-                    .setParameter(1, usuarioId)
-                    .getResultList());
+                        .setParameter(1, usuarioId)
+                        .getResultList());
     }
 
 }

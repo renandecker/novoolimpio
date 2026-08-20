@@ -1,9 +1,25 @@
 package br.com.sol7.olimpio.comercial.gerarpacote;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
-import io.smallrye.mutiny.Uni; import jakarta.enterprise.context.ApplicationScoped; import jakarta.inject.Inject; import jakarta.ws.rs.NotFoundException; import java.util.List;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped @WithTransaction public class GerarPacoteService { @Inject GerarPacoteRepository repository; public Uni<List<GerarPacoteResponse>> list(){return repository.listAll().map(items->items.stream().map(this::toResponse).toList());}
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
+
+import java.util.List;
+
+import io.smallrye.mutiny.Uni;
+
+@ApplicationScoped
+@WithTransaction
+public class GerarPacoteService {
+    @Inject
+    GerarPacoteRepository repository;
+
+    public Uni<List<GerarPacoteResponse>> list() {
+        return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
+    }
 
     public Uni<PagedResponse<GerarPacoteResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
@@ -12,7 +28,33 @@ import io.smallrye.mutiny.Uni;
                 .onItem().transformToUni(items -> repository.count()
                         .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
- public Uni<GerarPacoteResponse> find(Long id){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("GerarPacote not found")).map(this::toResponse);} public Uni<GerarPacoteResponse> create(GerarPacoteRequest r){var e=new GerarPacote();apply(e,r);return repository.persist(e).replaceWith(()->toResponse(e));} public Uni<GerarPacoteResponse> update(Long id,GerarPacoteRequest r){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("GerarPacote not found")).invoke(e->apply(e,r)).map(this::toResponse);} public Uni<Void> delete(Long id){return repository.deleteById(id).onItem().transformToUni(deleted->deleted?Uni.createFrom().voidItem():Uni.createFrom().failure(new NotFoundException("GerarPacote not found")));} private void apply(GerarPacote e,GerarPacoteRequest r){e.nome=r.nome();e.dadosJson=r.dadosJson();} private GerarPacoteResponse toResponse(GerarPacote e){return new GerarPacoteResponse(e.id,e.nome,e.dadosJson);} 
+
+    public Uni<GerarPacoteResponse> find(Long id) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("GerarPacote not found")).map(this::toResponse);
+    }
+
+    public Uni<GerarPacoteResponse> create(GerarPacoteRequest r) {
+        var e = new GerarPacote();
+        apply(e, r);
+        return repository.persist(e).replaceWith(() -> toResponse(e));
+    }
+
+    public Uni<GerarPacoteResponse> update(Long id, GerarPacoteRequest r) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("GerarPacote not found")).invoke(e -> apply(e, r)).map(this::toResponse);
+    }
+
+    public Uni<Void> delete(Long id) {
+        return repository.deleteById(id).onItem().transformToUni(deleted -> deleted ? Uni.createFrom().voidItem() : Uni.createFrom().failure(new NotFoundException("GerarPacote not found")));
+    }
+
+    private void apply(GerarPacote e, GerarPacoteRequest r) {
+        e.nome = r.nome();
+        e.dadosJson = r.dadosJson();
+    }
+
+    private GerarPacoteResponse toResponse(GerarPacote e) {
+        return new GerarPacoteResponse(e.id, e.nome, e.dadosJson);
+    }
 
     // Migrado de GerarPacoteController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/GerarPacoteController.java:197, camada controller)
     // Observacao: retorno: era Set<Acao> no legado

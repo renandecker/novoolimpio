@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.turnoeducacao;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class TurnoEducacaoService {
 
-    @Inject TurnoEducacaoRepository repository;
+    @Inject
+    TurnoEducacaoRepository repository;
 
     public Uni<List<TurnoEducacaoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,12 @@ public class TurnoEducacaoService {
                         : Uni.createFrom().failure(new NotFoundException("TurnoEducacao not found")));
     }
 
-    private void apply(TurnoEducacao e, TurnoEducacaoRequest r) { e.descricao = r.descricao(); e.sucinto = r.sucinto(); e.inicio = r.inicio(); e.fim = r.fim(); }
+    private void apply(TurnoEducacao e, TurnoEducacaoRequest r) {
+        e.descricao = r.descricao();
+        e.sucinto = r.sucinto();
+        e.inicio = r.inicio();
+        e.fim = r.fim();
+    }
 
     private TurnoEducacaoResponse toResponse(TurnoEducacao e) {
         return new TurnoEducacaoResponse(e.id, e.descricao, e.sucinto, e.inicio, e.fim);

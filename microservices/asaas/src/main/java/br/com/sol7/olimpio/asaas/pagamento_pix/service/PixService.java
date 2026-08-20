@@ -15,6 +15,7 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -26,10 +27,14 @@ import java.util.Set;
 @ApplicationScoped
 public class PixService {
 
-    @Inject ParcelaPixRepository parcelaPixRepository;
-    @Inject ParcelaRepository parcelaRepository;
-    @Inject PixProviderClient provider;
-    @Inject PagamentoConfirmadoProducer pagamentoConfirmadoProducer;
+    @Inject
+    ParcelaPixRepository parcelaPixRepository;
+    @Inject
+    ParcelaRepository parcelaRepository;
+    @Inject
+    PixProviderClient provider;
+    @Inject
+    PagamentoConfirmadoProducer pagamentoConfirmadoProducer;
 
     @WithTransaction
     public Uni<ParcelaPixResponse> gerarCobranca(GerarCobrancaPixRequest r) {
@@ -64,7 +69,9 @@ public class PixService {
                 .map(this::toResponse);
     }
 
-    /** Consulta o status atual junto ao provider (PSP) e atualiza situacao/valorPago/endToEndId localmente. */
+    /**
+     * Consulta o status atual junto ao provider (PSP) e atualiza situacao/valorPago/endToEndId localmente.
+     */
     @WithTransaction
     public Uni<ParcelaPixResponse> atualizarStatus(Long id) {
         return parcelaPixRepository.findById(id)

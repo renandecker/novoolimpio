@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewValorCursoColunasRetencoesListScreen(){return <PermissionGate permission="READ"><main><h1>Colunas Retencoes</h1><DataTable path="/api/view/valorCurso/colunasRetencoes"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewValorCursoColunasRetencoesListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Colunas Retencoes</h1><DataTable path="/api/view/valorCurso/colunasRetencoes"/></main>
+    </PermissionGate>
+}

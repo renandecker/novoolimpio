@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.gerirnap;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class GerirNapService {
 
-    @Inject GerirNapRepository repository;
+    @Inject
+    GerirNapRepository repository;
 
     public Uni<List<GerirNapResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,22 @@ public class GerirNapService {
                         : Uni.createFrom().failure(new NotFoundException("GerirNap not found")));
     }
 
-    private void apply(GerirNap e, GerirNapRequest r) { e.data = r.data(); e.qtdEmails = r.qtdEmails(); e.qtdCartas = r.qtdCartas(); e.qtdLigacoes = r.qtdLigacoes(); e.qtdPresente = r.qtdPresente(); e.qtdAusente = r.qtdAusente(); e.qtdAtestado = r.qtdAtestado(); e.qtdMeiaPresenca = r.qtdMeiaPresenca(); e.qtdSemRegistro = r.qtdSemRegistro(); e.qtdCancelado = r.qtdCancelado(); e.qtdTrocaTurma = r.qtdTrocaTurma(); e.qtdProrrogado = r.qtdProrrogado(); e.qtdDesistente = r.qtdDesistente(); e.qtdAtrasado = r.qtdAtrasado(); }
+    private void apply(GerirNap e, GerirNapRequest r) {
+        e.data = r.data();
+        e.qtdEmails = r.qtdEmails();
+        e.qtdCartas = r.qtdCartas();
+        e.qtdLigacoes = r.qtdLigacoes();
+        e.qtdPresente = r.qtdPresente();
+        e.qtdAusente = r.qtdAusente();
+        e.qtdAtestado = r.qtdAtestado();
+        e.qtdMeiaPresenca = r.qtdMeiaPresenca();
+        e.qtdSemRegistro = r.qtdSemRegistro();
+        e.qtdCancelado = r.qtdCancelado();
+        e.qtdTrocaTurma = r.qtdTrocaTurma();
+        e.qtdProrrogado = r.qtdProrrogado();
+        e.qtdDesistente = r.qtdDesistente();
+        e.qtdAtrasado = r.qtdAtrasado();
+    }
 
     private GerirNapResponse toResponse(GerirNap e) {
         return new GerirNapResponse(e.id, e.data, e.qtdEmails, e.qtdCartas, e.qtdLigacoes, e.qtdPresente, e.qtdAusente, e.qtdAtestado, e.qtdMeiaPresenca, e.qtdSemRegistro, e.qtdCancelado, e.qtdTrocaTurma, e.qtdProrrogado, e.qtdDesistente, e.qtdAtrasado);

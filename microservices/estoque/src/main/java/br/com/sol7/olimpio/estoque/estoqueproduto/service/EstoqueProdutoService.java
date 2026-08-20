@@ -14,6 +14,7 @@ import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -21,20 +22,26 @@ import java.util.List;
 @WithTransaction
 public class EstoqueProdutoService {
 
-    @Inject ControleEstoqueRepository controleEstoqueRepository;
-    @Inject MovimentacaoEstoqueService movimentacaoEstoqueService;
-    @Inject SolicitacaoEstoqueService solicitacaoEstoqueService;
-    @Inject ControlePedidosService controlePedidosService;
-    @Inject PendenciaVendaProdutoService pendenciaVendaProdutoService;
-    @Inject ProdutoRepository produtoRepository;
+    @Inject
+    ControleEstoqueRepository controleEstoqueRepository;
+    @Inject
+    MovimentacaoEstoqueService movimentacaoEstoqueService;
+    @Inject
+    SolicitacaoEstoqueService solicitacaoEstoqueService;
+    @Inject
+    ControlePedidosService controlePedidosService;
+    @Inject
+    PendenciaVendaProdutoService pendenciaVendaProdutoService;
+    @Inject
+    ProdutoRepository produtoRepository;
 
     // Migrado de EstoqueProdutoController.populaItens (legado) - controle de estoque da unidade
     public Uni<List<ControleEstoqueResponse>> listarControlePorUnidade(Long unidadeId) {
         return controleEstoqueRepository.buscarItenUnidade(unidadeId)
                 .chain(items -> {
                     var responses = items.stream().map(ce -> new ControleEstoqueResponse(
-                        ce.id, ce.valor, ce.quantidade, ce.qtdeSolicitado, ce.qtdeDefeito, ce.qtdeFalta,
-                        ce.qtdeNaoEncontrado, ce.qtdeReservado, ce.qtdeAprovadoNaoEntregue, ce.produtoId, ce.unidadeId)).toList();
+                            ce.id, ce.valor, ce.quantidade, ce.qtdeSolicitado, ce.qtdeDefeito, ce.qtdeFalta,
+                            ce.qtdeNaoEncontrado, ce.qtdeReservado, ce.qtdeAprovadoNaoEntregue, ce.produtoId, ce.unidadeId)).toList();
                     List<Uni<ControleEstoqueResponse>> unis = responses.stream().map(this::enrichControleResponse).toList();
                     return Uni.join().all(unis).andCollectFailures();
                 });
@@ -46,11 +53,11 @@ public class EstoqueProdutoService {
                 .map(produto -> {
                     if (produto == null) return r;
                     return new ControleEstoqueResponse(
-                        r.id(), r.valor(), r.quantidade(), r.qtdeSolicitado(), r.qtdeDefeito(),
-                        r.qtdeFalta(), r.qtdeNaoEncontrado(), r.qtdeReservado(), r.qtdeAprovadoNaoEntregue(),
-                        r.produtoId(), r.unidadeId(),
-                        produto.nome, produto.imagem, produto.valor, produto.quantidade,
-                        null, null, null
+                            r.id(), r.valor(), r.quantidade(), r.qtdeSolicitado(), r.qtdeDefeito(),
+                            r.qtdeFalta(), r.qtdeNaoEncontrado(), r.qtdeReservado(), r.qtdeAprovadoNaoEntregue(),
+                            r.produtoId(), r.unidadeId(),
+                            produto.nome, produto.imagem, produto.valor, produto.quantidade,
+                            null, null, null
                     );
                 });
     }

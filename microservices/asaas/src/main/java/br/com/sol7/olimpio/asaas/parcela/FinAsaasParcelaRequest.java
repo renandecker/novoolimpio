@@ -24,4 +24,4 @@ public record FinAsaasParcelaRequest(
         String qrCodeImage,
         String keyPix,
         Boolean flAtivo,
-        String payload) {}
+        String payload){}

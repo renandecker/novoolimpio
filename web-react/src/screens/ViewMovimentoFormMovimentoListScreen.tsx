@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewMovimentoFormMovimentoListScreen(){return <PermissionGate permission="READ"><main><h1>Form Movimento</h1><DataTable path="/api/view/movimento/formMovimento"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewMovimentoFormMovimentoListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Form Movimento</h1><DataTable path="/api/view/movimento/formMovimento"/></main>
+    </PermissionGate>
+}

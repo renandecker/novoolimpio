@@ -49,9 +49,9 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
     ports:
-      - "5454:5432"
+    - "5454:5432"
     volumes:
-      - olimpio-postgres-data:/var/lib/postgresql/data
+    - olimpio-postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -71,51 +71,51 @@ services:
     environment:
       PGPASSWORD: postgres
     volumes:
-      # Monta a pasta postgres inteira dentro de /backup
-      - ./docker/postgres:/backup:ro 
+    # Monta a pasta postgres inteira dentro de /backup
+    - ./docker/postgres:/backup:ro
     entrypoint: ["/bin/sh", "-e", "-c"]
     command:
-      - |
-        echo "[restore] Aguardando o Postgres aceitar conexoes..."
-        until pg_isready -h postgres -U postgres; do sleep 1; done
-        echo "[restore] Restaurando 001_olimpio.sql no banco 'olimpio'..."
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -c "DROP DATABASE IF EXISTS olimpio WITH (FORCE);"
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -c "CREATE DATABASE olimpio;"
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/olimpio.sql
-        echo "[restore] Aplicando migracoes..."
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/002_create_bas_login.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/003__temas.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/004__admin_login.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/005__admin_acesso_total.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/006__login_session.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/007__menu_react_e_perfil_admin.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/008__provisionar_usuarios_legados.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/008_1__asaas_menu.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/009__acesso_aluno.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0010__remove_whatsapp_telegram.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0011__menu_recriar_calendario_academico.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0012__remove_pagina_inicial.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0013__corrigir_modulo_genero.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0014__temas_posicao_e_menu.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0015__foto_base64_usuario.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0015_1__menu_lote_nap_cobranca.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0015_2__auditoria_menu.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0017__fiserv.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0018__financeiro_aluno.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0019__admin_acesso_total.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0020__perfil_admin_acesso_total.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0021__pagamento_fiserv.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0022__ajuste_pix.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0023__schema_aula.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0024__avaliacao_fl_ativo.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0025__asaas_base.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0026__schema_curriculo.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0027__menu_curriculo.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0028__create_notificacoes.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0029__icones_menu_principais.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0030__menu_aluno.sql
-        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0031__remove_biblioteca_livros.sql
-        echo "[restore] Restore concluido."
+    - |
+      echo "[restore] Aguardando o Postgres aceitar conexoes..."
+      until pg_isready -h postgres -U postgres; do sleep 1; done
+      echo "[restore] Restaurando 001_olimpio.sql no banco 'olimpio'..."
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -c "DROP DATABASE IF EXISTS olimpio WITH (FORCE);"
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -c "CREATE DATABASE olimpio;"
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/olimpio.sql
+      echo "[restore] Aplicando migracoes..."
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/002_create_bas_login.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/003__temas.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/004__admin_login.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/005__admin_acesso_total.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/006__login_session.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/007__menu_react_e_perfil_admin.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/008__provisionar_usuarios_legados.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/008_1__asaas_menu.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/009__acesso_aluno.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0010__remove_whatsapp_telegram.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0011__menu_recriar_calendario_academico.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0012__remove_pagina_inicial.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0013__corrigir_modulo_genero.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0014__temas_posicao_e_menu.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0015__foto_base64_usuario.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0015_1__menu_lote_nap_cobranca.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0015_2__auditoria_menu.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0017__fiserv.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0018__financeiro_aluno.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0019__admin_acesso_total.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0020__perfil_admin_acesso_total.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0021__pagamento_fiserv.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0022__ajuste_pix.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0023__schema_aula.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0024__avaliacao_fl_ativo.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0025__asaas_base.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0026__schema_curriculo.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0027__menu_curriculo.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0028__create_notificacoes.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0029__icones_menu_principais.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0030__menu_aluno.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0031__remove_biblioteca_livros.sql
+      echo "[restore] Restore concluido."
 
   # Broker Kafka (KRaft). O schedule publica os triggers de rotina e o basico
   # consome o topico olimpio.schedule.feriado.
@@ -137,14 +137,14 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
     ports:
-      - "9092:9092"
+    - "9092:9092"
     healthcheck:
       test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list > /dev/null 2>&1 || exit 1"]
       interval: 10s
       timeout: 10s
       retries: 15
       start_period: 30s
-      
+
   basico:
     build: ./microservices/basico
     container_name: olimpio-basico
@@ -154,7 +154,7 @@ services:
       DATABASE_URL: postgresql://postgres:5432/olimpio
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
-      - "8081:8081"
+    - "8081:8081"
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -173,7 +173,7 @@ services:
       DATABASE_URL: postgresql://postgres:5432/olimpio
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
-      - "8082:8082"
+    - "8082:8082"
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -190,7 +190,7 @@ services:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
     ports:
-      - "8083:8083"
+    - "8083:8083"
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -205,7 +205,7 @@ services:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
     ports:
-      - "8084:8084"
+    - "8084:8084"
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -221,7 +221,7 @@ services:
       DATABASE_URL: postgresql://postgres:5432/olimpio
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
-      - "8085:8085"
+    - "8085:8085"
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -238,7 +238,7 @@ services:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
     ports:
-      - "8086:8086"
+    - "8086:8086"
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -253,7 +253,7 @@ services:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
     ports:
-      - "8087:8087"
+    - "8087:8087"
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -268,7 +268,7 @@ services:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
     ports:
-      - "8088:8088"
+    - "8088:8088"
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -292,7 +292,7 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       RELATORIOS_TABELAS_PATH: /tmp/olimpio/tabelas
     ports:
-      - "8089:8089"
+    - "8089:8089"
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -310,7 +310,7 @@ services:
       DATABASE_URL: postgresql://postgres:5432/olimpio
       PROFESSOR_AULA_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
     ports:
-      - "8091:8091"
+    - "8091:8091"
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -326,7 +326,7 @@ services:
       DATABASE_URL: postgresql://postgres:5432/olimpio
       LOGIN_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
     ports:
-      - "8090:8090"
+    - "8090:8090"
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:8090/q/health || exit 1"]
       interval: 5s
@@ -346,7 +346,7 @@ services:
       DATABASE_URL: postgresql://postgres:5432/olimpio
       ALUNO_AULA_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
     ports:
-      - "8092:8092"
+    - "8092:8092"
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -362,7 +362,7 @@ services:
       DATABASE_URL: postgresql://postgres:5432/olimpio
       CURRICULO_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
     ports:
-      - "8095:8095"
+    - "8095:8095"
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -381,7 +381,7 @@ services:
       ASAAS_BASE_URL: ${ASAAS_BASE_URL:-https://api-sandbox.asaas.com}
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
-      - "8094:8094"
+    - "8094:8094"
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -389,7 +389,7 @@ services:
         condition: service_healthy
       login:
         condition: service_healthy
-        
+
   fiserv:
     build: ./microservices/fiserv
     container_name: olimpio-fiserv
@@ -399,7 +399,7 @@ services:
       DATABASE_URL: postgresql://postgres:5432/olimpio
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
-      - "8097:8096"
+    - "8097:8096"
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -407,31 +407,31 @@ services:
         condition: service_healthy
       login:
         condition: service_healthy
-        
+
   # O modulo Fiserv (cartao) vive em fiserv (porta 8097); o fluxo PIX (Asaas) vive em asaas-service (porta 8094).
-  
+
   gateway:
     build: ./docker/gateway
     container_name: olimpio-gateway
     restart: unless-stopped
     ports:
-      - "8080:8080"
+    - "8080:8080"
     depends_on:
-      - aluno
-      - asaas
-      - basico
-      - central
-      - comercial
-      - curriculo
-      - educacao
-      - estoque
-      - financeiro
-      - login
-      - notificacoes
-      - fiserv
-      - professor
-      - relatorios
-      - schedule
+    - aluno
+    - asaas
+    - basico
+    - central
+    - comercial
+    - curriculo
+    - educacao
+    - estoque
+    - financeiro
+    - login
+    - notificacoes
+    - fiserv
+    - professor
+    - relatorios
+    - schedule
 
   web-react:
     build:
@@ -441,9 +441,9 @@ services:
     container_name: olimpio-web
     restart: unless-stopped
     ports:
-      - "3000:3000"
+    - "3000:3000"
     depends_on:
-      - gateway
+    - gateway
 
 volumes:
   olimpio-postgres-data:

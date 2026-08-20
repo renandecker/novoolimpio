@@ -27,10 +27,13 @@ import br.com.sol7.olimpio.login.tema.service.TemaService;
 @Consumes(MediaType.APPLICATION_JSON)
 public class TemaController {
 
-    @Inject TemaService service;
+    @Inject
+    TemaService service;
 
     @GET
-    public Uni<List<TemaResponse>> list() { return service.list(); }
+    public Uni<List<TemaResponse>> list() {
+        return service.list();
+    }
 
     @GET
     @Path("/paged")
@@ -40,7 +43,9 @@ public class TemaController {
 
     @GET
     @Path("/{id}")
-    public Uni<TemaResponse> find(@PathParam("id") Long id) { return service.find(id); }
+    public Uni<TemaResponse> find(@PathParam("id") Long id) {
+        return service.find(id);
+    }
 
     @POST
     public Uni<Response> create(@Valid TemaRequest r) {
@@ -49,11 +54,15 @@ public class TemaController {
 
     @PUT
     @Path("/{id}")
-    public Uni<TemaResponse> update(@PathParam("id") Long id, @Valid TemaRequest r) { return service.update(id, r); }
+    public Uni<TemaResponse> update(@PathParam("id") Long id, @Valid TemaRequest r) {
+        return service.update(id, r);
+    }
 
     @DELETE
     @Path("/{id}")
-    public Uni<Void> delete(@PathParam("id") Long id) { return service.delete(id); }
+    public Uni<Void> delete(@PathParam("id") Long id) {
+        return service.delete(id);
+    }
 
     @GET
     @Path("/auto-complete")

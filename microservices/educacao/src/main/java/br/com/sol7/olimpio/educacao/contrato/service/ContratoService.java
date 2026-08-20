@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.contrato;
+
 import br.com.sol7.olimpio.educacao.contrato.dto.ContratoAutoCompleteResponse;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
@@ -7,13 +8,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ContratoService {
 
-    @Inject ContratoRepository repository;
+    @Inject
+    ContratoRepository repository;
 
     public Uni<List<ContratoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -53,7 +56,46 @@ public class ContratoService {
                         : Uni.createFrom().failure(new NotFoundException("Contrato not found")));
     }
 
-    private void apply(Contrato e, ContratoRequest r) { e.curriculoId = r.curriculoId(); e.unidadeId = r.unidadeId(); e.unidadeResponsavelId = r.unidadeResponsavelId(); e.ultimoContratoId = r.ultimoContratoId(); e.contratoAnteriorId = r.contratoAnteriorId(); e.compromissoId = r.compromissoId(); e.valorCursoId = r.valorCursoId(); e.pessoaId = r.pessoaId(); e.descontoCursoId = r.descontoCursoId(); e.taxaCursoId = r.taxaCursoId(); e.formaPagamentoId = r.formaPagamentoId(); e.valorDesconto = r.valorDesconto(); e.valorTaxa = r.valorTaxa(); e.responsavelId = r.responsavelId(); e.dataConclusao = r.dataConclusao(); e.local = r.local(); e.usuarioId = r.usuarioId(); e.testemunha1Id = r.testemunha1Id(); e.testemunha2Id = r.testemunha2Id(); e.ativo = r.ativo(); e.inscricao = r.inscricao(); e.desistente = r.desistente(); e.contratoDesistenteId = r.contratoDesistenteId(); e.pdf = r.pdf(); e.data = r.data(); e.dataReparcelamento = r.dataReparcelamento(); e.dataCancelamento = r.dataCancelamento(); e.qtdeReparcelamento = r.qtdeReparcelamento(); e.cadernoComponenteCurricularId = r.cadernoComponenteCurricularId(); e.ultimaParcelaId = r.ultimaParcelaId(); e.cancelamentoId = r.cancelamentoId(); e.proximaParcelaId = r.proximaParcelaId(); e.oferecimentoInicioId = r.oferecimentoInicioId(); e.oferecimentoFimId = r.oferecimentoFimId(); e.qtdParcelasAtrasadas = r.qtdParcelasAtrasadas(); e.qtdParcelasNaoPagas = r.qtdParcelasNaoPagas(); e.valorParcelas = r.valorParcelas(); e.trocaTurma = r.trocaTurma(); }
+    private void apply(Contrato e, ContratoRequest r) {
+        e.curriculoId = r.curriculoId();
+        e.unidadeId = r.unidadeId();
+        e.unidadeResponsavelId = r.unidadeResponsavelId();
+        e.ultimoContratoId = r.ultimoContratoId();
+        e.contratoAnteriorId = r.contratoAnteriorId();
+        e.compromissoId = r.compromissoId();
+        e.valorCursoId = r.valorCursoId();
+        e.pessoaId = r.pessoaId();
+        e.descontoCursoId = r.descontoCursoId();
+        e.taxaCursoId = r.taxaCursoId();
+        e.formaPagamentoId = r.formaPagamentoId();
+        e.valorDesconto = r.valorDesconto();
+        e.valorTaxa = r.valorTaxa();
+        e.responsavelId = r.responsavelId();
+        e.dataConclusao = r.dataConclusao();
+        e.local = r.local();
+        e.usuarioId = r.usuarioId();
+        e.testemunha1Id = r.testemunha1Id();
+        e.testemunha2Id = r.testemunha2Id();
+        e.ativo = r.ativo();
+        e.inscricao = r.inscricao();
+        e.desistente = r.desistente();
+        e.contratoDesistenteId = r.contratoDesistenteId();
+        e.pdf = r.pdf();
+        e.data = r.data();
+        e.dataReparcelamento = r.dataReparcelamento();
+        e.dataCancelamento = r.dataCancelamento();
+        e.qtdeReparcelamento = r.qtdeReparcelamento();
+        e.cadernoComponenteCurricularId = r.cadernoComponenteCurricularId();
+        e.ultimaParcelaId = r.ultimaParcelaId();
+        e.cancelamentoId = r.cancelamentoId();
+        e.proximaParcelaId = r.proximaParcelaId();
+        e.oferecimentoInicioId = r.oferecimentoInicioId();
+        e.oferecimentoFimId = r.oferecimentoFimId();
+        e.qtdParcelasAtrasadas = r.qtdParcelasAtrasadas();
+        e.qtdParcelasNaoPagas = r.qtdParcelasNaoPagas();
+        e.valorParcelas = r.valorParcelas();
+        e.trocaTurma = r.trocaTurma();
+    }
 
     private ContratoResponse toResponse(Contrato e) {
         return new ContratoResponse(e.id, e.curriculoId, e.unidadeId, e.unidadeResponsavelId, e.ultimoContratoId, e.contratoAnteriorId, e.compromissoId, e.valorCursoId, e.pessoaId, e.descontoCursoId, e.taxaCursoId, e.formaPagamentoId, e.valorDesconto, e.valorTaxa, e.responsavelId, e.dataConclusao, e.local, e.usuarioId, e.testemunha1Id, e.testemunha2Id, e.ativo, e.inscricao, e.desistente, e.contratoDesistenteId, e.pdf, e.data, e.dataReparcelamento, e.dataCancelamento, e.qtdeReparcelamento, e.cadernoComponenteCurricularId, e.ultimaParcelaId, e.cancelamentoId, e.proximaParcelaId, e.oferecimentoInicioId, e.oferecimentoFimId, e.qtdParcelasAtrasadas, e.qtdParcelasNaoPagas, e.valorParcelas, e.trocaTurma);
@@ -103,7 +145,7 @@ public class ContratoService {
     //         return getContratoRepository().buscarContratosPessoa(pessoa);
     //     }
     public Uni<List<Long>> buscarContratosPessoa(Long pessoaId) {
-                // Obs: condicao removida (depende de outro microservico): c.unidade.ativo = true
+        // Obs: condicao removida (depende de outro microservico): c.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): c.unidadeResponsavel.ativo = true
         return repository.find("pessoaId = ?1 order by id desc", pessoaId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
@@ -130,7 +172,7 @@ public class ContratoService {
     //         return this.getContratoRepository().autoCompleteContrato(query.toLowerCase().trim(), pessoa, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteContrato2(String query, Long pessoaId) {
-                return repository.autoCompleteContrato(query.toLowerCase().trim(), pessoaId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoCompleteContrato(query.toLowerCase().trim(), pessoaId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -141,7 +183,7 @@ public class ContratoService {
     //         return this.getContratoRepository().buscarContratoPessoa(pessoa, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> buscarContratoPessoa(Long pessoaId) {
-                // Obs: condicao removida (depende de outro microservico): c.unidade.ativo = true
+        // Obs: condicao removida (depende de outro microservico): c.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): c.unidadeResponsavel.ativo = true
         return repository.find("pessoaId in (?1)", pessoaId).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }

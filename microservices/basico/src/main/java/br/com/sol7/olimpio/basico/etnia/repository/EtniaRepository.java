@@ -1,9 +1,14 @@
 package br.com.sol7.olimpio.basico.etnia.repository;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 import br.com.sol7.olimpio.basico.etnia.entity.Etnia;
-@ApplicationScoped public class EtniaRepository implements PanacheRepository<Etnia> {
+
+@ApplicationScoped
+public class EtniaRepository implements PanacheRepository<Etnia> {
 
     // Migrado de EtniaRepository.buscaTodosOrdenado (legado) - HQL original:
     // select u from Etnia u order by u.descricao
@@ -14,7 +19,7 @@ import br.com.sol7.olimpio.basico.etnia.entity.Etnia;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCA_TODOS_ORDENADO, Etnia.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 }

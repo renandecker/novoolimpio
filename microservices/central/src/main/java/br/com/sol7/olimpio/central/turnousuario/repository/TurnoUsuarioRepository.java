@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.central.turnousuario;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepositoryBase; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepositoryBase;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class TurnoUsuarioRepository implements PanacheRepositoryBase<TurnoUsuario, TurnoUsuario.TurnoUsuarioId> {
+
+@ApplicationScoped
+public class TurnoUsuarioRepository implements PanacheRepositoryBase<TurnoUsuario, TurnoUsuario.TurnoUsuarioId> {
 
     // Migrado de TurnoUsuarioRepository.buscarTurno (legado) - HQL original:
     // Select tu.turnoTrabalho from TurnoUsuario tu where tu.usuario = ?1 order by tu.turnoTrabalho.inicio
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> buscarTurno(Long operadorId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_TURNO)
-                    .setParameter(1, operadorId)
-                    .getResultList());
+                        .setParameter(1, operadorId)
+                        .getResultList());
     }
 
 
@@ -25,9 +30,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> buscarTurnoDiaSemana(Long operadorId, int diaSemana) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_TURNO_DIA_SEMANA)
-                    .setParameter(1, operadorId)
-                    .setParameter(2, diaSemana)
-                    .getResultList());
+                        .setParameter(1, operadorId)
+                        .setParameter(2, diaSemana)
+                        .getResultList());
     }
 
 
@@ -39,9 +44,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> verificarTurnoDiaSemana(Long operadorId, int diaSemana) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_VERIFICAR_TURNO_DIA_SEMANA)
-                    .setParameter(1, operadorId)
-                    .setParameter(2, diaSemana)
-                    .getResultList());
+                        .setParameter(1, operadorId)
+                        .setParameter(2, diaSemana)
+                        .getResultList());
     }
 
 
@@ -53,8 +58,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<TurnoUsuario>> buscarTurnoUsuario(Long operadorId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_TURNO_USUARIO, TurnoUsuario.class)
-                    .setParameter(1, operadorId)
-                    .getResultList());
+                        .setParameter(1, operadorId)
+                        .getResultList());
     }
 
 }

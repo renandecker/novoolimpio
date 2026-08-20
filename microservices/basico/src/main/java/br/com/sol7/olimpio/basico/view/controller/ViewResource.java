@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.view.controller;
+
 import br.com.sol7.olimpio.basico.view.service.ViewService;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.security.Permission;
@@ -10,6 +11,7 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,8 +20,10 @@ import java.util.Set;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ViewResource {
-    @Inject ViewService service;
-    @Inject PermissionGuard permissions;
+    @Inject
+    ViewService service;
+    @Inject
+    PermissionGuard permissions;
 
     @GET
     @Path("/{feature}/{resource}/paged")

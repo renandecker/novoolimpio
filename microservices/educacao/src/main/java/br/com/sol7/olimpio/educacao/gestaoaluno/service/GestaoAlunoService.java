@@ -1,10 +1,28 @@
 package br.com.sol7.olimpio.educacao.gestaoaluno;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
+
 import java.util.Date;
-import io.smallrye.mutiny.Uni; import jakarta.enterprise.context.ApplicationScoped; import jakarta.inject.Inject; import jakarta.ws.rs.NotFoundException; import java.util.List;
+
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped @WithTransaction public class GestaoAlunoService { @Inject GestaoAlunoRepository repository; public Uni<List<GestaoAlunoResponse>> list(){return repository.listAll().map(items->items.stream().map(this::toResponse).toList());}
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
+
+import java.util.List;
+
+import io.smallrye.mutiny.Uni;
+
+@ApplicationScoped
+@WithTransaction
+public class GestaoAlunoService {
+    @Inject
+    GestaoAlunoRepository repository;
+
+    public Uni<List<GestaoAlunoResponse>> list() {
+        return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
+    }
 
     public Uni<PagedResponse<GestaoAlunoResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
@@ -13,7 +31,33 @@ import io.smallrye.mutiny.Uni;
                 .onItem().transformToUni(items -> repository.count()
                         .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
- public Uni<GestaoAlunoResponse> find(Long id){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("GestaoAluno not found")).map(this::toResponse);} public Uni<GestaoAlunoResponse> create(GestaoAlunoRequest r){var e=new GestaoAluno();apply(e,r);return repository.persist(e).replaceWith(()->toResponse(e));} public Uni<GestaoAlunoResponse> update(Long id,GestaoAlunoRequest r){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("GestaoAluno not found")).invoke(e->apply(e,r)).map(this::toResponse);} public Uni<Void> delete(Long id){return repository.deleteById(id).onItem().transformToUni(deleted->deleted?Uni.createFrom().voidItem():Uni.createFrom().failure(new NotFoundException("GestaoAluno not found")));} private void apply(GestaoAluno e,GestaoAlunoRequest r){e.nome=r.nome();e.dadosJson=r.dadosJson();} private GestaoAlunoResponse toResponse(GestaoAluno e){return new GestaoAlunoResponse(e.id,e.nome,e.dadosJson);} 
+
+    public Uni<GestaoAlunoResponse> find(Long id) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("GestaoAluno not found")).map(this::toResponse);
+    }
+
+    public Uni<GestaoAlunoResponse> create(GestaoAlunoRequest r) {
+        var e = new GestaoAluno();
+        apply(e, r);
+        return repository.persist(e).replaceWith(() -> toResponse(e));
+    }
+
+    public Uni<GestaoAlunoResponse> update(Long id, GestaoAlunoRequest r) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("GestaoAluno not found")).invoke(e -> apply(e, r)).map(this::toResponse);
+    }
+
+    public Uni<Void> delete(Long id) {
+        return repository.deleteById(id).onItem().transformToUni(deleted -> deleted ? Uni.createFrom().voidItem() : Uni.createFrom().failure(new NotFoundException("GestaoAluno not found")));
+    }
+
+    private void apply(GestaoAluno e, GestaoAlunoRequest r) {
+        e.nome = r.nome();
+        e.dadosJson = r.dadosJson();
+    }
+
+    private GestaoAlunoResponse toResponse(GestaoAluno e) {
+        return new GestaoAlunoResponse(e.id, e.nome, e.dadosJson);
+    }
 
     // Migrado de GestaoAlunoController.carregarPreCancelamentosContrato (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GestaoAlunoController.java:204, camada controller)
     // Observacao: parametro contratoId: era Contrato (referencia por id)

@@ -12,7 +12,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
@@ -23,9 +25,11 @@ public class ConfigCanalService {
     public static final String CANAL_MOBILE = "MOBILE";
     public static final String CANAL_EMAIL = "EMAIL";
 
-    public record CanaisAtivos(boolean sistema, boolean mobile, boolean email) {}
+    public record CanaisAtivos(boolean sistema, boolean mobile, boolean email) {
+    }
 
-    @Inject ConfigCanalRepository repository;
+    @Inject
+    ConfigCanalRepository repository;
 
     @ConfigProperty(name = "olimpio.notificacoes.canal.sistema", defaultValue = "true")
     boolean canalSistemaDefault;
@@ -82,10 +86,14 @@ public class ConfigCanalService {
             boolean email = canalEmailDefault;
             for (ConfigCanal c : configs) {
                 switch (c.canal.toUpperCase().trim()) {
-                    case CANAL_SISTEMA -> sistema = c.ativo;
-                    case CANAL_MOBILE -> mobile = c.ativo;
-                    case CANAL_EMAIL -> email = c.ativo;
-                    default -> { }
+                    case CANAL_SISTEMA -> sistema = c.ativo
+                        ;
+                    case CANAL_MOBILE -> mobile = c.ativo
+                        ;
+                    case CANAL_EMAIL -> email = c.ativo
+                        ;
+                    default ->{
+                    }
                 }
             }
             return new CanaisAtivos(sistema, mobile, email);

@@ -25,7 +25,8 @@ import jakarta.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 public class PixCobrancaController {
 
-    @Inject PixService service;
+    @Inject
+    PixService service;
 
     @POST
     public Uni<Response> gerar(@Valid GerarCobrancaPixRequest r) {

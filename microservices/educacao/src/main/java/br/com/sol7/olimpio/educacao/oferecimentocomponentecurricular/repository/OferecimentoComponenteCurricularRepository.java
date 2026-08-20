@@ -1,10 +1,15 @@
 package br.com.sol7.olimpio.educacao.oferecimentocomponentecurricular;
+
 import java.util.Date;
 import java.util.List;
+
 import br.com.sol7.olimpio.educacao.diaaula.DiaAula;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class OferecimentoComponenteCurricularRepository implements PanacheRepository<OferecimentoComponenteCurricular> {
+
+@ApplicationScoped
+public class OferecimentoComponenteCurricularRepository implements PanacheRepository<OferecimentoComponenteCurricular> {
 
     // Migrado de OferecimentoComponenteCurricularRepository.buscarMatrizCurricular (legado) - HQL original:
     // select m from MatrizCurricular m where m.curriculo = ?1 order by m.ordem
@@ -16,8 +21,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> buscarMatrizCurricular(Long curriculoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_MATRIZ_CURRICULAR)
-                    .setParameter(1, curriculoId)
-                    .getResultList());
+                        .setParameter(1, curriculoId)
+                        .getResultList());
     }
 
 
@@ -29,10 +34,10 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> autocompleteComCurriculoGrupoComQuery(String query, Long grupoId, Long curriculoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTOCOMPLETE_COM_CURRICULO_GRUPO_COM_QUERY)
-                    .setParameter(1, query)
-                    .setParameter(2, grupoId)
-                    .setParameter(3, curriculoId)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, grupoId)
+                        .setParameter(3, curriculoId)
+                        .getResultList());
     }
 
 
@@ -44,9 +49,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> autocompleteComCurriculoGrupoSemQuery(Long grupoId, Long curriculoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTOCOMPLETE_COM_CURRICULO_GRUPO_SEM_QUERY)
-                    .setParameter(1, grupoId)
-                    .setParameter(2, curriculoId)
-                    .getResultList());
+                        .setParameter(1, grupoId)
+                        .setParameter(2, curriculoId)
+                        .getResultList());
     }
 
 
@@ -58,9 +63,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> autocompleteComCurriculoComQuery(String query, Long curriculoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTOCOMPLETE_COM_CURRICULO_COM_QUERY)
-                    .setParameter(1, query)
-                    .setParameter(2, curriculoId)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, curriculoId)
+                        .getResultList());
     }
 
 
@@ -72,8 +77,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> autocompleteComCurriculoSemQuery(Long curriculoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTOCOMPLETE_COM_CURRICULO_SEM_QUERY)
-                    .setParameter(1, curriculoId)
-                    .getResultList());
+                        .setParameter(1, curriculoId)
+                        .getResultList());
     }
 
 
@@ -86,7 +91,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_TODOS, OferecimentoComponenteCurricular.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -100,10 +105,10 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> verificarExisteConflito(Date data, Long salaId, Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_VERIFICAR_EXISTE_CONFLITO)
-                    .setParameter(1, data)
-                    .setParameter(2, salaId)
-                    .setParameter(3, unidadeId)
-                    .getResultList());
+                        .setParameter(1, data)
+                        .setParameter(2, salaId)
+                        .setParameter(3, unidadeId)
+                        .getResultList());
     }
 
 
@@ -117,11 +122,11 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> verificarExisteConflitoComOferecimento(Date data, Long salaId, Long oferecimentoComponenteCurricularId, Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_VERIFICAR_EXISTE_CONFLITO_COM_OFERECIMENTO)
-                    .setParameter(1, data)
-                    .setParameter(2, salaId)
-                    .setParameter(3, oferecimentoComponenteCurricularId)
-                    .setParameter(4, unidadeId)
-                    .getResultList());
+                        .setParameter(1, data)
+                        .setParameter(2, salaId)
+                        .setParameter(3, oferecimentoComponenteCurricularId)
+                        .setParameter(4, unidadeId)
+                        .getResultList());
     }
 
 
@@ -135,11 +140,11 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> verificarExisteConflitoComOferecimentos(Date data, Long salaId, List<Long> oferecimentoComponenteCurricularIds, Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_VERIFICAR_EXISTE_CONFLITO_COM_OFERECIMENTOS)
-                    .setParameter(1, data)
-                    .setParameter(2, salaId)
-                    .setParameter(3, oferecimentoComponenteCurricularIds)
-                    .setParameter(4, unidadeId)
-                    .getResultList());
+                        .setParameter(1, data)
+                        .setParameter(2, salaId)
+                        .setParameter(3, oferecimentoComponenteCurricularIds)
+                        .setParameter(4, unidadeId)
+                        .getResultList());
     }
 
 
@@ -151,8 +156,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> buscarComponentessDoOferecimentos(Long componenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_COMPONENTESS_DO_OFERECIMENTOS, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, componenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, componenteCurricularId)
+                        .getResultList());
     }
 
 
@@ -166,10 +171,10 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> verificarExisteConflitoProrrogandoDisciplina(Date data, Long salaId, Long oId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_VERIFICAR_EXISTE_CONFLITO_PRORROGANDO_DISCIPLINA)
-                    .setParameter(1, data)
-                    .setParameter(2, salaId)
-                    .setParameter(3, oId)
-                    .getResultList());
+                        .setParameter(1, data)
+                        .setParameter(2, salaId)
+                        .setParameter(3, oId)
+                        .getResultList());
     }
 
 
@@ -181,8 +186,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> buscarOferecimentoComOcorrencia(Long entityId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_OFERECIMENTO_COM_OCORRENCIA, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, entityId)
-                    .getResultList());
+                        .setParameter(1, entityId)
+                        .getResultList());
     }
 
 
@@ -194,8 +199,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> buscarOferecimentoComOcorrenciaTodos(Long entityId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_OFERECIMENTO_COM_OCORRENCIA_TODOS, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, entityId)
-                    .getResultList());
+                        .setParameter(1, entityId)
+                        .getResultList());
     }
 
 
@@ -207,8 +212,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> buscarOferecimentoAbertasComSala(Long salaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_OFERECIMENTO_ABERTAS_COM_SALA, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, salaId)
-                    .getResultList());
+                        .setParameter(1, salaId)
+                        .getResultList());
     }
 
 
@@ -220,8 +225,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> buscarOferecimentoComDiasAula(Long entityId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_OFERECIMENTO_COM_DIAS_AULA, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, entityId)
-                    .getResultList());
+                        .setParameter(1, entityId)
+                        .getResultList());
     }
 
 
@@ -234,7 +239,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_OFERECIMENTOS_EM_ANDAMENTO, OferecimentoComponenteCurricular.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -246,8 +251,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> listarOferecimentosPendentes(List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_OFERECIMENTOS_PENDENTES, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -259,10 +264,10 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> listarOferecimentosDisponiveis(List<Long> componentesIds, List<Long> unidadesIds, Long pessoaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_OFERECIMENTOS_DISPONIVEIS, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, componentesIds)
-                    .setParameter(2, unidadesIds)
-                    .setParameter(3, pessoaId)
-                    .getResultList());
+                        .setParameter(1, componentesIds)
+                        .setParameter(2, unidadesIds)
+                        .setParameter(3, pessoaId)
+                        .getResultList());
     }
 
 
@@ -274,11 +279,11 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> listarOferecimentosDisponiveisComGrupo(List<Long> componentesIds, List<Long> unidadesIds, Long pessoaId, String grupo) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_OFERECIMENTOS_DISPONIVEIS_COM_GRUPO, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, componentesIds)
-                    .setParameter(2, unidadesIds)
-                    .setParameter(3, pessoaId)
-                    .setParameter(4, grupo)
-                    .getResultList());
+                        .setParameter(1, componentesIds)
+                        .setParameter(2, unidadesIds)
+                        .setParameter(3, pessoaId)
+                        .setParameter(4, grupo)
+                        .getResultList());
     }
 
 
@@ -290,11 +295,11 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> listarOferecimentosRematriculaDisponiveisComGrupo(List<Long> componentesIds, List<Long> unidadesIds, Long pessoaId, String grupo) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_OFERECIMENTOS_REMATRICULA_DISPONIVEIS_COM_GRUPO, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, componentesIds)
-                    .setParameter(2, unidadesIds)
-                    .setParameter(3, pessoaId)
-                    .setParameter(4, grupo)
-                    .getResultList());
+                        .setParameter(1, componentesIds)
+                        .setParameter(2, unidadesIds)
+                        .setParameter(3, pessoaId)
+                        .setParameter(4, grupo)
+                        .getResultList());
     }
 
 
@@ -306,11 +311,11 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> listarOferecimentosDisponiveisComGrupoUnidade(List<Long> componentesIds, Integer codunidade, Long pessoaId, String grupo) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_OFERECIMENTOS_DISPONIVEIS_COM_GRUPO_UNIDADE, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, componentesIds)
-                    .setParameter(2, codunidade)
-                    .setParameter(3, pessoaId)
-                    .setParameter(4, grupo)
-                    .getResultList());
+                        .setParameter(1, componentesIds)
+                        .setParameter(2, codunidade)
+                        .setParameter(3, pessoaId)
+                        .setParameter(4, grupo)
+                        .getResultList());
     }
 
 
@@ -322,8 +327,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> buscarOcorrenciaComOFerecimento(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_OCORRENCIA_COM_O_FERECIMENTO, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .getResultList());
     }
 
 
@@ -335,8 +340,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> buscarTodosOcorrenciaComOFerecimento(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_TODOS_OCORRENCIA_COM_O_FERECIMENTO, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .getResultList());
     }
 
 
@@ -350,10 +355,10 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> listagemOferecimentoPorUnidadeCalendario(Long unidadesId, Date inicio, Date fim) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAGEM_OFERECIMENTO_POR_UNIDADE_CALENDARIO)
-                    .setParameter(1, unidadesId)
-                    .setParameter(2, inicio)
-                    .setParameter(3, fim)
-                    .getResultList());
+                        .setParameter(1, unidadesId)
+                        .setParameter(2, inicio)
+                        .setParameter(3, fim)
+                        .getResultList());
     }
 
 
@@ -365,9 +370,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> autoCompleteComUnidade(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_UNIDADE, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, query)
-                    .setParameter(2, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -379,9 +384,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> autoCompleteComUnidadeChamadaAssinada(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_UNIDADE_CHAMADA_ASSINADA, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, query)
-                    .setParameter(2, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -393,9 +398,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> listarGruposDisponiveisComUnidades(Long curriculoId, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_GRUPOS_DISPONIVEIS_COM_UNIDADES)
-                    .setParameter(1, curriculoId)
-                    .setParameter(2, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, curriculoId)
+                        .setParameter(2, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -407,10 +412,10 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> listarGruposDisponiveisComUnidadesRematricula(Long curriculoId, List<Long> unidadesIds, Long pessoaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_GRUPOS_DISPONIVEIS_COM_UNIDADES_REMATRICULA)
-                    .setParameter(1, curriculoId)
-                    .setParameter(2, unidadesIds)
-                    .setParameter(3, pessoaId)
-                    .getResultList());
+                        .setParameter(1, curriculoId)
+                        .setParameter(2, unidadesIds)
+                        .setParameter(3, pessoaId)
+                        .getResultList());
     }
 
 
@@ -422,8 +427,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> ultimoOferecimentoDoGrupo(Long grupoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_ULTIMO_OFERECIMENTO_DO_GRUPO, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, grupoId)
-                    .getResultList());
+                        .setParameter(1, grupoId)
+                        .getResultList());
     }
 
 
@@ -435,9 +440,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> ultimoOferecimentoDoGrupoCOmID(Long grupoId, Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_ULTIMO_OFERECIMENTO_DO_GRUPO_C_OM_I_D, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, grupoId)
-                    .setParameter(2, id)
-                    .getResultList());
+                        .setParameter(1, grupoId)
+                        .setParameter(2, id)
+                        .getResultList());
     }
 
 
@@ -449,9 +454,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> ultimoOferecimentoDoGrupoComponente(Long grupoId, Long componenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_ULTIMO_OFERECIMENTO_DO_GRUPO_COMPONENTE, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, grupoId)
-                    .setParameter(2, componenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, grupoId)
+                        .setParameter(2, componenteCurricularId)
+                        .getResultList());
     }
 
 
@@ -463,8 +468,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<OferecimentoComponenteCurricular>> consultaListarOferecimentos(Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_CONSULTA_LISTAR_OFERECIMENTOS, OferecimentoComponenteCurricular.class)
-                    .setParameter(1, unidadeId)
-                    .getResultList());
+                        .setParameter(1, unidadeId)
+                        .getResultList());
     }
 
 
@@ -480,20 +485,20 @@ import io.smallrye.mutiny.Uni;
     // FeriadoRepository.buscarFeriadoUnidade do legado (basico).
     public static final String SQL_BUSCAR_FERIADOS =
             "SELECT DISTINCT f.dt_feriado FROM bas_feriado f " +
-            "LEFT JOIN bas_feriado_unidade fu ON fu.id_feriado = f.id " +
-            "LEFT JOIN bas_feriado_tipo_curso ft ON ft.id_feriado = f.id " +
-            "WHERE f.dt_feriado between ?1 and ?2 " +
-            "AND (f.fl_nacional = true OR (?3 IS NOT NULL AND fu.id_unidade = ?3)) " +
-            "AND (COALESCE(f.fl_tipo_curso, false) = false OR (?4 IS NOT NULL AND ft.id_tipo_curso = ?4))";
+                    "LEFT JOIN bas_feriado_unidade fu ON fu.id_feriado = f.id " +
+                    "LEFT JOIN bas_feriado_tipo_curso ft ON ft.id_feriado = f.id " +
+                    "WHERE f.dt_feriado between ?1 and ?2 " +
+                    "AND (f.fl_nacional = true OR (?3 IS NOT NULL AND fu.id_unidade = ?3)) " +
+                    "AND (COALESCE(f.fl_tipo_curso, false) = false OR (?4 IS NOT NULL AND ft.id_tipo_curso = ?4))";
 
     public Uni<java.util.List<java.util.Date>> buscarFeriados(Date inicio, Date fim, Long unidadeId, Long tipoCursoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_FERIADOS)
-                    .setParameter(1, inicio)
-                    .setParameter(2, fim)
-                    .setParameter(3, unidadeId)
-                    .setParameter(4, tipoCursoId)
-                    .getResultList())
+                        .setParameter(1, inicio)
+                        .setParameter(2, fim)
+                        .setParameter(3, unidadeId)
+                        .setParameter(4, tipoCursoId)
+                        .getResultList())
                 .map(list -> list.stream().map(java.util.Date.class::cast).toList());
     }
 
@@ -501,86 +506,86 @@ import io.smallrye.mutiny.Uni;
     // Dias de aula de todos os oferecimentos de um grupo (join table edc_oferecimento_dias_aula).
     public static final String SQL_BUSCAR_DIAS_AULA_POR_GRUPO =
             "SELECT DISTINCT da.* FROM edc_oferecimento_dias_aula oda " +
-            "JOIN edc_oferecimento_componente_curricular o ON o.id = oda.id_oferecimento_componente_curricular " +
-            "JOIN edc_dia_aula da ON da.id = oda.id_dia_aula " +
-            "WHERE o.id_grupo = ?1 ORDER BY da.id";
+                    "JOIN edc_oferecimento_componente_curricular o ON o.id = oda.id_oferecimento_componente_curricular " +
+                    "JOIN edc_dia_aula da ON da.id = oda.id_dia_aula " +
+                    "WHERE o.id_grupo = ?1 ORDER BY da.id";
 
     public Uni<java.util.List<DiaAula>> buscarDiasAulaPorGrupo(Long grupoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_DIAS_AULA_POR_GRUPO, DiaAula.class)
-                    .setParameter(1, grupoId)
-                    .getResultList());
+                        .setParameter(1, grupoId)
+                        .getResultList());
     }
 
     // Dias de aula de um oferecimento especifico (join table edc_oferecimento_dias_aula) -
     // migrado de DiaAulaService.buscaDiasAulaOferecimentoList (legado).
     public static final String SQL_BUSCAR_DIAS_AULA_POR_OFERECIMENTO =
             "SELECT DISTINCT da.* FROM edc_oferecimento_dias_aula oda " +
-            "JOIN edc_dia_aula da ON da.id = oda.id_dia_aula " +
-            "WHERE oda.id_oferecimento_componente_curricular = ?1 ORDER BY da.id";
+                    "JOIN edc_dia_aula da ON da.id = oda.id_dia_aula " +
+                    "WHERE oda.id_oferecimento_componente_curricular = ?1 ORDER BY da.id";
 
     public Uni<java.util.List<DiaAula>> buscarDiasAulaPorOferecimento(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_DIAS_AULA_POR_OFERECIMENTO, DiaAula.class)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .getResultList());
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .getResultList());
     }
 
     // Migrado de OferecimentoComponenteCurricularService.atualizaDataOferecimento (legado) -
     // recalcula data_inicio/data_fim a partir das ocorrencias ativas e o status.
     public static final String SQL_ATUALIZA_DATA_OFERECIMENTO_DATAS =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
-            " data_inicio = (select oco.data from edc_ocorrencia_componente_curricular oco " +
-            "   where oco.id_oferecimento_componente_curricular = o.id and oco.fl_ativo = true order by oco.data limit 1), " +
-            " data_fim = (select oco.data from edc_ocorrencia_componente_curricular oco " +
-            "   where oco.id_oferecimento_componente_curricular = o.id and oco.fl_ativo = true order by oco.data desc limit 1) " +
-            " where o.id = ?1";
+                    " data_inicio = (select oco.data from edc_ocorrencia_componente_curricular oco " +
+                    "   where oco.id_oferecimento_componente_curricular = o.id and oco.fl_ativo = true order by oco.data limit 1), " +
+                    " data_fim = (select oco.data from edc_ocorrencia_componente_curricular oco " +
+                    "   where oco.id_oferecimento_componente_curricular = o.id and oco.fl_ativo = true order by oco.data desc limit 1) " +
+                    " where o.id = ?1";
 
     public static final String SQL_ATUALIZA_DATA_OFERECIMENTO_STATUS =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
-            " status = (case when o.data_inicio > current_date and vagas <= inscritos then 'LOTADA' " +
-            "   when o.data_inicio > current_date and vagas > inscritos then 'LIBERADA' " +
-            "   when o.data_inicio < current_date and o.data_fim > current_date then 'EM_ANDAMENTO' " +
-            "   when o.data_fim < current_date then 'FINALIZADA' " +
-            "   when o.data_cancelamento is not null then 'CANCELADA' else 'LIBERADA' end) " +
-            " where o.id = ?1";
+                    " status = (case when o.data_inicio > current_date and vagas <= inscritos then 'LOTADA' " +
+                    "   when o.data_inicio > current_date and vagas > inscritos then 'LIBERADA' " +
+                    "   when o.data_inicio < current_date and o.data_fim > current_date then 'EM_ANDAMENTO' " +
+                    "   when o.data_fim < current_date then 'FINALIZADA' " +
+                    "   when o.data_cancelamento is not null then 'CANCELADA' else 'LIBERADA' end) " +
+                    " where o.id = ?1";
 
     public Uni<Integer> atualizaDataOferecimento(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_ATUALIZA_DATA_OFERECIMENTO_DATAS)
-                    .setParameter(1, oferecimentoComponenteCurricularId).executeUpdate())
+                        .setParameter(1, oferecimentoComponenteCurricularId).executeUpdate())
                 .chain(() -> io.quarkus.hibernate.reactive.panache.Panache.getSession())
                 .chain(session -> session.createNativeQuery(SQL_ATUALIZA_DATA_OFERECIMENTO_STATUS)
-                    .setParameter(1, oferecimentoComponenteCurricularId).executeUpdate());
+                        .setParameter(1, oferecimentoComponenteCurricularId).executeUpdate());
     }
 
     // Migrado de OferecimentoComponenteCurricularService.atulizarStatosInscritosOferecimento
     // (legado) - recalcula inscritos (contratos ativos) e o status.
     public static final String SQL_ATUALIZA_INSCRITOS_OFERECIMENTO =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
-            " inscritos = COALESCE((select count(distinct(con.id)) " +
-            "   from edc_matricula mat inner join edc_contrato con on (con.id = mat.id_contrato) " +
-            "   inner join edc_oferecimento_componente_curricular off on (off.id = mat.id_oferecimento_componente_curricular) " +
-            "   where con.ativo = true and mat.data_cancelamento is null and con.desistente = false and o.id = off.id), 0) " +
-            " where o.id = ?1";
+                    " inscritos = COALESCE((select count(distinct(con.id)) " +
+                    "   from edc_matricula mat inner join edc_contrato con on (con.id = mat.id_contrato) " +
+                    "   inner join edc_oferecimento_componente_curricular off on (off.id = mat.id_oferecimento_componente_curricular) " +
+                    "   where con.ativo = true and mat.data_cancelamento is null and con.desistente = false and o.id = off.id), 0) " +
+                    " where o.id = ?1";
 
     public static final String SQL_ATUALIZA_STATUS_INSCRITOS_OFERECIMENTO =
             "UPDATE edc_oferecimento_componente_curricular ofere SET status = " +
-            " (case when ofere.data_fim < current_date then 'FINALIZADA' " +
-            "   when ofere.id_professor is null then 'PENDENTE' " +
-            "   when ofere.inscritos >= ofere.vagas and ofere.data_inicio > current_date and ofere.data_fim > current_date then 'LOTADA' " +
-            "   when ofere.inscritos < ofere.vagas and ofere.data_inicio > current_date and ofere.data_fim > current_date then 'LIBERADA' " +
-            "   when ofere.data_fim < current_date then 'FINALIZADA' " +
-            "   when ofere.data_inicio <= current_date and ofere.data_fim >= current_date then 'EM_ANDAMENTO' end) " +
-            " where ofere.id = ?1";
+                    " (case when ofere.data_fim < current_date then 'FINALIZADA' " +
+                    "   when ofere.id_professor is null then 'PENDENTE' " +
+                    "   when ofere.inscritos >= ofere.vagas and ofere.data_inicio > current_date and ofere.data_fim > current_date then 'LOTADA' " +
+                    "   when ofere.inscritos < ofere.vagas and ofere.data_inicio > current_date and ofere.data_fim > current_date then 'LIBERADA' " +
+                    "   when ofere.data_fim < current_date then 'FINALIZADA' " +
+                    "   when ofere.data_inicio <= current_date and ofere.data_fim >= current_date then 'EM_ANDAMENTO' end) " +
+                    " where ofere.id = ?1";
 
     public Uni<Integer> atualizaStatosInscritosOferecimento(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_ATUALIZA_INSCRITOS_OFERECIMENTO)
-                    .setParameter(1, oferecimentoComponenteCurricularId).executeUpdate())
+                        .setParameter(1, oferecimentoComponenteCurricularId).executeUpdate())
                 .chain(() -> io.quarkus.hibernate.reactive.panache.Panache.getSession())
                 .chain(session -> session.createNativeQuery(SQL_ATUALIZA_STATUS_INSCRITOS_OFERECIMENTO)
-                    .setParameter(1, oferecimentoComponenteCurricularId).executeUpdate());
+                        .setParameter(1, oferecimentoComponenteCurricularId).executeUpdate());
     }
 
     // Migrado de OferecimentoComponenteCurricularService.verificarDisciplina (legado, L431-458) -
@@ -642,12 +647,12 @@ import io.smallrye.mutiny.Uni;
     // Fallback para o SQL do Config (o mesmo do legado quando a chave nao existe no banco).
     public static final String SQL_REPLICAR_OFERECIMENTOS_PADRAO =
             "SELECT o.id FROM edc_oferecimento_componente_curricular o " +
-            "WHERE o.data_inicio <= (cast(current_date as date) + (o.qtde_dias_replicar)) " +
-            "AND o.status != 'CANCELADA' AND o.fl_replicar = true " +
-            "AND NOT EXISTS (SELECT faju.id FROM bas_feriado_ajuste faju " +
-            "  INNER JOIN bas_feriado fer ON (fer.id = faju.id_feriado) " +
-            "  WHERE faju.fl_ativo = true AND fer.dt_feriado between o.data_inicio and o.data_fim) " +
-            "ORDER BY o.data_inicio LIMIT 50";
+                    "WHERE o.data_inicio <= (cast(current_date as date) + (o.qtde_dias_replicar)) " +
+                    "AND o.status != 'CANCELADA' AND o.fl_replicar = true " +
+                    "AND NOT EXISTS (SELECT faju.id FROM bas_feriado_ajuste faju " +
+                    "  INNER JOIN bas_feriado fer ON (fer.id = faju.id_feriado) " +
+                    "  WHERE faju.fl_ativo = true AND fer.dt_feriado between o.data_inicio and o.data_fim) " +
+                    "ORDER BY o.data_inicio LIMIT 50";
 
     public Uni<java.util.List<Long>> listarIdsParaReplicacao(String sql) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
@@ -658,90 +663,90 @@ import io.smallrye.mutiny.Uni;
     // Migrado de OferecimentoComponenteCurricularService.atulizarStatosInscritosOferecimentoTrocaTurma (legado)
     public static final String SQL_ATUALIZA_INSCRITOS_OFERECIMENTO_TROCA_TURMA =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
-            " inscritos = COALESCE((SELECT COUNT(DISTINCT con.id) " +
-            "   FROM edc_matricula mat INNER JOIN edc_contrato con ON (con.id = mat.id_contrato) " +
-            "   INNER JOIN edc_oferecimento_componente_curricular off ON (off.id = mat.id_oferecimento_componente_curricular) " +
-            "   WHERE con.ativo = true AND mat.data_cancelamento IS NULL AND con.desistente = false AND o.id = off.id " +
-            "   AND mat.id_contrato = ?1), 0) " +
-            " WHERE o.id = ?1";
+                    " inscritos = COALESCE((SELECT COUNT(DISTINCT con.id) " +
+                    "   FROM edc_matricula mat INNER JOIN edc_contrato con ON (con.id = mat.id_contrato) " +
+                    "   INNER JOIN edc_oferecimento_componente_curricular off ON (off.id = mat.id_oferecimento_componente_curricular) " +
+                    "   WHERE con.ativo = true AND mat.data_cancelamento IS NULL AND con.desistente = false AND o.id = off.id " +
+                    "   AND mat.id_contrato = ?1), 0) " +
+                    " WHERE o.id = ?1";
 
     public static final String SQL_ATUALIZA_STATUS_INSCRITOS_OFERECIMENTO_TROCA_TURMA =
             "UPDATE edc_oferecimento_componente_curricular ofere SET status = " +
-            " (CASE WHEN ofere.data_fim < current_date THEN 'FINALIZADA' " +
-            "   WHEN ofere.id_professor IS NULL THEN 'PENDENTE' " +
-            "   WHEN ofere.inscritos >= ofere.vagas AND ofere.data_inicio > current_date AND ofere.data_fim > current_date THEN 'LOTADA' " +
-            "   WHEN ofere.inscritos < ofere.vagas AND ofere.data_inicio > current_date AND ofere.data_fim > current_date THEN 'LIBERADA' " +
-            "   WHEN ofere.data_fim < current_date THEN 'FINALIZADA' " +
-            "   WHEN ofere.data_inicio <= current_date AND ofere.data_fim >= current_date THEN 'EM_ANDAMENTO' END) " +
-            " WHERE ofere.id = ?1";
+                    " (CASE WHEN ofere.data_fim < current_date THEN 'FINALIZADA' " +
+                    "   WHEN ofere.id_professor IS NULL THEN 'PENDENTE' " +
+                    "   WHEN ofere.inscritos >= ofere.vagas AND ofere.data_inicio > current_date AND ofere.data_fim > current_date THEN 'LOTADA' " +
+                    "   WHEN ofere.inscritos < ofere.vagas AND ofere.data_inicio > current_date AND ofere.data_fim > current_date THEN 'LIBERADA' " +
+                    "   WHEN ofere.data_fim < current_date THEN 'FINALIZADA' " +
+                    "   WHEN ofere.data_inicio <= current_date AND ofere.data_fim >= current_date THEN 'EM_ANDAMENTO' END) " +
+                    " WHERE ofere.id = ?1";
 
     public Uni<Void> atulizarStatosInscritosOferecimentoTrocaTurma(Long contratoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_ATUALIZA_INSCRITOS_OFERECIMENTO_TROCA_TURMA)
-                    .setParameter(1, contratoId).executeUpdate())
+                        .setParameter(1, contratoId).executeUpdate())
                 .chain(() -> io.quarkus.hibernate.reactive.panache.Panache.getSession())
                 .chain(session -> session.createNativeQuery(SQL_ATUALIZA_STATUS_INSCRITOS_OFERECIMENTO_TROCA_TURMA)
-                    .setParameter(1, contratoId).executeUpdate())
+                        .setParameter(1, contratoId).executeUpdate())
                 .replaceWithVoid();
     }
 
     // Migrado de OferecimentoComponenteCurricularService.atulizarStatosInscritosOferecimentoGrupo (legado)
     public static final String SQL_ATUALIZA_INSCRITOS_OFERECIMENTO_GRUPO =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
-            " inscritos = COALESCE((SELECT COUNT(DISTINCT con.id) " +
-            "   FROM edc_matricula mat INNER JOIN edc_contrato con ON (con.id = mat.id_contrato) " +
-            "   INNER JOIN edc_oferecimento_componente_curricular off ON (off.id = mat.id_oferecimento_componente_curricular) " +
-            "   WHERE con.ativo = true AND mat.data_cancelamento IS NULL AND con.desistente = false AND o.id = off.id " +
-            "   AND off.id_grupo = ?1), 0) " +
-            " WHERE o.id_grupo = ?1";
+                    " inscritos = COALESCE((SELECT COUNT(DISTINCT con.id) " +
+                    "   FROM edc_matricula mat INNER JOIN edc_contrato con ON (con.id = mat.id_contrato) " +
+                    "   INNER JOIN edc_oferecimento_componente_curricular off ON (off.id = mat.id_oferecimento_componente_curricular) " +
+                    "   WHERE con.ativo = true AND mat.data_cancelamento IS NULL AND con.desistente = false AND o.id = off.id " +
+                    "   AND off.id_grupo = ?1), 0) " +
+                    " WHERE o.id_grupo = ?1";
 
     public static final String SQL_ATUALIZA_STATUS_INSCRITOS_OFERECIMENTO_GRUPO =
             "UPDATE edc_oferecimento_componente_curricular ofere SET status = " +
-            " (CASE WHEN ofere.data_fim < current_date THEN 'FINALIZADA' " +
-            "   WHEN ofere.id_professor IS NULL THEN 'PENDENTE' " +
-            "   WHEN ofere.inscritos >= ofere.vagas AND ofere.data_inicio > current_date AND ofere.data_fim > current_date THEN 'LOTADA' " +
-            "   WHEN ofere.inscritos < ofere.vagas AND ofere.data_inicio > current_date AND ofere.data_fim > current_date THEN 'LIBERADA' " +
-            "   WHEN ofere.data_fim < current_date THEN 'FINALIZADA' " +
-            "   WHEN ofere.data_inicio <= current_date AND ofere.data_fim >= current_date THEN 'EM_ANDAMENTO' END) " +
-            " WHERE ofere.id_grupo = ?1";
+                    " (CASE WHEN ofere.data_fim < current_date THEN 'FINALIZADA' " +
+                    "   WHEN ofere.id_professor IS NULL THEN 'PENDENTE' " +
+                    "   WHEN ofere.inscritos >= ofere.vagas AND ofere.data_inicio > current_date AND ofere.data_fim > current_date THEN 'LOTADA' " +
+                    "   WHEN ofere.inscritos < ofere.vagas AND ofere.data_inicio > current_date AND ofere.data_fim > current_date THEN 'LIBERADA' " +
+                    "   WHEN ofere.data_fim < current_date THEN 'FINALIZADA' " +
+                    "   WHEN ofere.data_inicio <= current_date AND ofere.data_fim >= current_date THEN 'EM_ANDAMENTO' END) " +
+                    " WHERE ofere.id_grupo = ?1";
 
     public Uni<Void> atulizarStatosInscritosOferecimentoGrupo(Long grupoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_ATUALIZA_INSCRITOS_OFERECIMENTO_GRUPO)
-                    .setParameter(1, grupoId).executeUpdate())
+                        .setParameter(1, grupoId).executeUpdate())
                 .chain(() -> io.quarkus.hibernate.reactive.panache.Panache.getSession())
                 .chain(session -> session.createNativeQuery(SQL_ATUALIZA_STATUS_INSCRITOS_OFERECIMENTO_GRUPO)
-                    .setParameter(1, grupoId).executeUpdate())
+                        .setParameter(1, grupoId).executeUpdate())
                 .replaceWithVoid();
     }
 
     // Migrado de OferecimentoComponenteCurricularService.atulizarSalasOferecimentoComGrupo (legado)
     public static final String SQL_ATUALIZA_SALAS_OFERECIMENTO_COM_GRUPO =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
-            " id_sala = (SELECT s.id FROM edc_sala s " +
-            "   WHERE s.id_unidade = o.id_unidade AND s.capacidade >= o.vagas " +
-            "   ORDER BY s.capacidade LIMIT 1) " +
-            " WHERE o.id_grupo = ?1 AND o.id_sala IS NULL";
+                    " id_sala = (SELECT s.id FROM edc_sala s " +
+                    "   WHERE s.id_unidade = o.id_unidade AND s.capacidade >= o.vagas " +
+                    "   ORDER BY s.capacidade LIMIT 1) " +
+                    " WHERE o.id_grupo = ?1 AND o.id_sala IS NULL";
 
     public Uni<Void> atulizarSalasOferecimentoComGrupo(Long grupoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_ATUALIZA_SALAS_OFERECIMENTO_COM_GRUPO)
-                    .setParameter(1, grupoId).executeUpdate())
+                        .setParameter(1, grupoId).executeUpdate())
                 .replaceWithVoid();
     }
 
     // Migrado de OferecimentoComponenteCurricularService.atulizarSalasOferecimentoComOferecimento (legado)
     public static final String SQL_ATUALIZA_SALAS_OFERECIMENTO_COM_OFERECIMENTO =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
-            " id_sala = (SELECT s.id FROM edc_sala s " +
-            "   WHERE s.id_unidade = o.id_unidade AND s.capacidade >= o.vagas " +
-            "   ORDER BY s.capacidade LIMIT 1) " +
-            " WHERE o.id = ?1 AND o.id_sala IS NULL";
+                    " id_sala = (SELECT s.id FROM edc_sala s " +
+                    "   WHERE s.id_unidade = o.id_unidade AND s.capacidade >= o.vagas " +
+                    "   ORDER BY s.capacidade LIMIT 1) " +
+                    " WHERE o.id = ?1 AND o.id_sala IS NULL";
 
     public Uni<Void> atulizarSalasOferecimentoComOferecimento(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_ATUALIZA_SALAS_OFERECIMENTO_COM_OFERECIMENTO)
-                    .setParameter(1, oferecimentoComponenteCurricularId).executeUpdate())
+                        .setParameter(1, oferecimentoComponenteCurricularId).executeUpdate())
                 .replaceWithVoid();
     }
 
@@ -752,8 +757,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<Void> atulizarVagasOferecimento(Long oferecimentoComponenteCurricularId, Integer vagas) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_ATUALIZA_VAGAS_OFERECIMENTO)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .setParameter(2, vagas).executeUpdate())
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .setParameter(2, vagas).executeUpdate())
                 .replaceWithVoid();
     }
 
@@ -767,58 +772,58 @@ import io.smallrye.mutiny.Uni;
     // Migrado de OferecimentoComponenteCurricularService.atulizarStatosInscritosOferecimentoCurso (legado)
     public static final String SQL_ATUALIZA_INSCRITOS_OFERECIMENTO_CURSO =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
-            " inscritos = COALESCE((SELECT COUNT(DISTINCT con.id) " +
-            "   FROM edc_matricula mat INNER JOIN edc_contrato con ON (con.id = mat.id_contrato) " +
-            "   INNER JOIN edc_oferecimento_componente_curricular off ON (off.id = mat.id_oferecimento_componente_curricular) " +
-            "   WHERE con.ativo = true AND mat.data_cancelamento IS NULL AND con.desistente = false AND o.id = off.id " +
-            "   AND off.id_curso = ?1), 0) " +
-            " WHERE o.id_curso = ?1";
+                    " inscritos = COALESCE((SELECT COUNT(DISTINCT con.id) " +
+                    "   FROM edc_matricula mat INNER JOIN edc_contrato con ON (con.id = mat.id_contrato) " +
+                    "   INNER JOIN edc_oferecimento_componente_curricular off ON (off.id = mat.id_oferecimento_componente_curricular) " +
+                    "   WHERE con.ativo = true AND mat.data_cancelamento IS NULL AND con.desistente = false AND o.id = off.id " +
+                    "   AND off.id_curso = ?1), 0) " +
+                    " WHERE o.id_curso = ?1";
 
     public static final String SQL_ATUALIZA_STATUS_INSCRITOS_OFERECIMENTO_CURSO =
             "UPDATE edc_oferecimento_componente_curricular ofere SET status = " +
-            " (CASE WHEN ofere.data_fim < current_date THEN 'FINALIZADA' " +
-            "   WHEN ofere.id_professor IS NULL THEN 'PENDENTE' " +
-            "   WHEN ofere.inscritos >= ofere.vagas AND ofere.data_inicio > current_date AND ofere.data_fim > current_date THEN 'LOTADA' " +
-            "   WHEN ofere.inscritos < ofere.vagas AND ofere.data_inicio > current_date AND ofere.data_fim > current_date THEN 'LIBERADA' " +
-            "   WHEN ofere.data_fim < current_date THEN 'FINALIZADA' " +
-            "   WHEN ofere.data_inicio <= current_date AND ofere.data_fim >= current_date THEN 'EM_ANDAMENTO' END) " +
-            " WHERE ofere.id_curso = ?1";
+                    " (CASE WHEN ofere.data_fim < current_date THEN 'FINALIZADA' " +
+                    "   WHEN ofere.id_professor IS NULL THEN 'PENDENTE' " +
+                    "   WHEN ofere.inscritos >= ofere.vagas AND ofere.data_inicio > current_date AND ofere.data_fim > current_date THEN 'LOTADA' " +
+                    "   WHEN ofere.inscritos < ofere.vagas AND ofere.data_inicio > current_date AND ofere.data_fim > current_date THEN 'LIBERADA' " +
+                    "   WHEN ofere.data_fim < current_date THEN 'FINALIZADA' " +
+                    "   WHEN ofere.data_inicio <= current_date AND ofere.data_fim >= current_date THEN 'EM_ANDAMENTO' END) " +
+                    " WHERE ofere.id_curso = ?1";
 
     public Uni<Void> atulizarStatosInscritosOferecimentoCurso(Long curriculoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_ATUALIZA_INSCRITOS_OFERECIMENTO_CURSO)
-                    .setParameter(1, curriculoId).executeUpdate())
+                        .setParameter(1, curriculoId).executeUpdate())
                 .chain(() -> io.quarkus.hibernate.reactive.panache.Panache.getSession())
                 .chain(session -> session.createNativeQuery(SQL_ATUALIZA_STATUS_INSCRITOS_OFERECIMENTO_CURSO)
-                    .setParameter(1, curriculoId).executeUpdate())
+                        .setParameter(1, curriculoId).executeUpdate())
                 .replaceWithVoid();
     }
 
     // Migrado de OferecimentoComponenteCurricularService.atualizaDataOferecimentoGrupo (legado)
     public static final String SQL_ATUALIZA_DATA_OFERECIMENTO_GRUPO_DATAS =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
-            " data_inicio = (SELECT oco.data FROM edc_ocorrencia_componente_curricular oco " +
-            "   WHERE oco.id_oferecimento_componente_curricular = o.id AND oco.fl_ativo = true ORDER BY oco.data LIMIT 1), " +
-            " data_fim = (SELECT oco.data FROM edc_ocorrencia_componente_curricular oco " +
-            "   WHERE oco.id_oferecimento_componente_curricular = o.id AND oco.fl_ativo = true ORDER BY oco.data DESC LIMIT 1) " +
-            " WHERE o.id_grupo = ?1";
+                    " data_inicio = (SELECT oco.data FROM edc_ocorrencia_componente_curricular oco " +
+                    "   WHERE oco.id_oferecimento_componente_curricular = o.id AND oco.fl_ativo = true ORDER BY oco.data LIMIT 1), " +
+                    " data_fim = (SELECT oco.data FROM edc_ocorrencia_componente_curricular oco " +
+                    "   WHERE oco.id_oferecimento_componente_curricular = o.id AND oco.fl_ativo = true ORDER BY oco.data DESC LIMIT 1) " +
+                    " WHERE o.id_grupo = ?1";
 
     public static final String SQL_ATUALIZA_DATA_OFERECIMENTO_GRUPO_STATUS =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
-            " status = (CASE WHEN o.data_inicio > current_date AND vagas <= inscritos THEN 'LOTADA' " +
-            "   WHEN o.data_inicio > current_date AND vagas > inscritos THEN 'LIBERADA' " +
-            "   WHEN o.data_inicio < current_date AND o.data_fim > current_date THEN 'EM_ANDAMENTO' " +
-            "   WHEN o.data_fim < current_date THEN 'FINALIZADA' " +
-            "   WHEN o.data_cancelamento IS NOT NULL THEN 'CANCELADA' ELSE 'LIBERADA' END) " +
-            " WHERE o.id_grupo = ?1";
+                    " status = (CASE WHEN o.data_inicio > current_date AND vagas <= inscritos THEN 'LOTADA' " +
+                    "   WHEN o.data_inicio > current_date AND vagas > inscritos THEN 'LIBERADA' " +
+                    "   WHEN o.data_inicio < current_date AND o.data_fim > current_date THEN 'EM_ANDAMENTO' " +
+                    "   WHEN o.data_fim < current_date THEN 'FINALIZADA' " +
+                    "   WHEN o.data_cancelamento IS NOT NULL THEN 'CANCELADA' ELSE 'LIBERADA' END) " +
+                    " WHERE o.id_grupo = ?1";
 
     public Uni<Void> atualizaDataOferecimentoGrupo(Long grupoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_ATUALIZA_DATA_OFERECIMENTO_GRUPO_DATAS)
-                    .setParameter(1, grupoId).executeUpdate())
+                        .setParameter(1, grupoId).executeUpdate())
                 .chain(() -> io.quarkus.hibernate.reactive.panache.Panache.getSession())
                 .chain(session -> session.createNativeQuery(SQL_ATUALIZA_DATA_OFERECIMENTO_GRUPO_STATUS)
-                    .setParameter(1, grupoId).executeUpdate())
+                        .setParameter(1, grupoId).executeUpdate())
                 .replaceWithVoid();
     }
 
@@ -829,8 +834,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<Void> ajutarOferecimento(Long oferecimentoComponenteCurricularId, Long diaAulaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AJUTAR_OFERECIMENTO)
-                    .setParameter(1, oferecimentoComponenteCurricularId)
-                    .setParameter(2, diaAulaId).executeUpdate())
+                        .setParameter(1, oferecimentoComponenteCurricularId)
+                        .setParameter(2, diaAulaId).executeUpdate())
                 .replaceWithVoid();
     }
 

@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.perfil.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.perfil.dto.PerfilRequest;
 import br.com.sol7.olimpio.basico.perfil.dto.PerfilResponse;
 import br.com.sol7.olimpio.basico.perfil.entity.Perfil;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.perfil.repository.PerfilRepository;
 @WithTransaction
 public class PerfilService {
 
-    @Inject PerfilRepository repository;
+    @Inject
+    PerfilRepository repository;
 
     public Uni<List<PerfilResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,17 @@ public class PerfilService {
                         : Uni.createFrom().failure(new NotFoundException("Perfil not found")));
     }
 
-    private void apply(Perfil e, PerfilRequest r) { e.descricao = r.descricao(); e.exibirFavorito = r.exibirFavorito(); e.ajustarFavoritos = r.ajustarFavoritos(); e.exibirFoto = r.exibirFoto(); e.exibirSenha = r.exibirSenha(); e.exibirMenu = r.exibirMenu(); e.comunicar = r.comunicar(); e.moduloId = r.moduloId(); e.hierarquia = r.hierarquia(); }
+    private void apply(Perfil e, PerfilRequest r) {
+        e.descricao = r.descricao();
+        e.exibirFavorito = r.exibirFavorito();
+        e.ajustarFavoritos = r.ajustarFavoritos();
+        e.exibirFoto = r.exibirFoto();
+        e.exibirSenha = r.exibirSenha();
+        e.exibirMenu = r.exibirMenu();
+        e.comunicar = r.comunicar();
+        e.moduloId = r.moduloId();
+        e.hierarquia = r.hierarquia();
+    }
 
     private PerfilResponse toResponse(Perfil e) {
         return new PerfilResponse(e.id, e.descricao, e.exibirFavorito, e.ajustarFavoritos, e.exibirFoto, e.exibirSenha, e.exibirMenu, e.comunicar, e.moduloId, e.hierarquia);
@@ -101,7 +115,7 @@ public class PerfilService {
     //         return getPerfilRepository().autoCompleteAll(new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteAll() {
-                return repository.find("order by descricao").page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("order by descricao").page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -113,7 +127,7 @@ public class PerfilService {
     //         return getPerfilRepository().autoCompleteComUsuario(query.toLowerCase().trim(), usuario, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteComUsuario(String query, Long usuarioId) {
-                return repository.autoCompleteComUsuario(query.toLowerCase().trim(), usuarioId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoCompleteComUsuario(query.toLowerCase().trim(), usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -125,7 +139,7 @@ public class PerfilService {
     //         return getPerfilRepository().autoCompleteDoUsuario(usuario, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteDoUsuario(Long usuarioId) {
-                return repository.autoCompleteDoUsuario(usuarioId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoCompleteDoUsuario(usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -137,7 +151,7 @@ public class PerfilService {
     //         return getPerfilRepository().buscarPerfilComModulos(id);
     //     }
     public Uni<Long> buscarPerfilComModulos(Integer id) {
-                return repository.buscarPerfilComModulos(id).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarPerfilComModulos(id).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 

@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.comercial.indicador;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class IndicadorRepository implements PanacheRepository<Indicador> {
+
+@ApplicationScoped
+public class IndicadorRepository implements PanacheRepository<Indicador> {
 
     // Migrado de IndicadorRepository.indicadorOrder (legado) - HQL original:
     // select i from Indicador i order by i.nome asc
@@ -13,7 +18,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_INDICADOR_ORDER, Indicador.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -26,7 +31,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_GET_ALL_ORDER, Indicador.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -38,8 +43,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Indicador>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Indicador.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 }

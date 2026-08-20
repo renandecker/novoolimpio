@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.tipomatrizcurricular;
+
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -8,13 +9,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class TipoMatrizCurricularService {
 
-    @Inject TipoMatrizCurricularRepository repository;
+    @Inject
+    TipoMatrizCurricularRepository repository;
 
     @CacheResult(cacheName = "tipo-matriz-curricular-cache")
     public Uni<List<TipoMatrizCurricularResponse>> list() {
@@ -58,7 +61,9 @@ public class TipoMatrizCurricularService {
                         : Uni.createFrom().failure(new NotFoundException("TipoMatrizCurricular not found")));
     }
 
-    private void apply(TipoMatrizCurricular e, TipoMatrizCurricularRequest r) { e.descricao = r.descricao(); }
+    private void apply(TipoMatrizCurricular e, TipoMatrizCurricularRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private TipoMatrizCurricularResponse toResponse(TipoMatrizCurricular e) {
         return new TipoMatrizCurricularResponse(e.id, e.descricao);

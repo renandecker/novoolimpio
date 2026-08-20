@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.agenda.repository;
+
 import java.util.List;
 
 import br.com.sol7.olimpio.basico.usuarioperfil.repository.UsuarioPerfilRepository;
@@ -18,8 +19,8 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     public Uni<java.util.List<Agenda>> buscarAgendasPorUnidade(Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_AGENDAS_POR_UNIDADE, Agenda.class)
-                    .setParameter(1, unidadeId)
-                    .getResultList());
+                        .setParameter(1, unidadeId)
+                        .getResultList());
     }
 
 
@@ -31,8 +32,8 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     public Uni<java.util.List<Agenda>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Agenda.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -44,8 +45,8 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     public Uni<java.util.List<Agenda>> buscarAgendaComResultados(Long agendaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_AGENDA_COM_RESULTADOS, Agenda.class)
-                    .setParameter(1, agendaId)
-                    .getResultList());
+                        .setParameter(1, agendaId)
+                        .getResultList());
     }
 
 
@@ -57,8 +58,8 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     public Uni<java.util.List<Agenda>> buscarAgendaComStatus(Long agendaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_AGENDA_COM_STATUS, Agenda.class)
-                    .setParameter(1, agendaId)
-                    .getResultList());
+                        .setParameter(1, agendaId)
+                        .getResultList());
     }
 
 
@@ -72,8 +73,8 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     public Uni<java.util.List<Object>> buscarAgendaComUsuarios(Long id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_AGENDA_COM_USUARIOS)
-                    .setParameter(1, id)
-                    .getResultList());
+                        .setParameter(1, id)
+                        .getResultList());
     }
 
 
@@ -85,8 +86,8 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     public Uni<java.util.List<Agenda>> buscarAgendasDoUsuario(Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_AGENDAS_DO_USUARIO, Agenda.class)
-                    .setParameter(1, usuarioId)
-                    .getResultList());
+                        .setParameter(1, usuarioId)
+                        .getResultList());
     }
 
 
@@ -98,8 +99,8 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     public Uni<java.util.List<Agenda>> verificaAgendasDoUsuario(Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_VERIFICA_AGENDAS_DO_USUARIO, Agenda.class)
-                    .setParameter(1, usuarioId)
-                    .getResultList());
+                        .setParameter(1, usuarioId)
+                        .getResultList());
     }
 
 
@@ -112,7 +113,7 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_ALL, Agenda.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -124,9 +125,9 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     public Uni<java.util.List<Agenda>> autoCompleteComUsuario(String query, Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_USUARIO, Agenda.class)
-                    .setParameter(1, query)
-                    .setParameter(2, usuarioId)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, usuarioId)
+                        .getResultList());
     }
 
 
@@ -138,8 +139,8 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     public Uni<java.util.List<Agenda>> autoCompleteDoUsuario(Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_DO_USUARIO, Agenda.class)
-                    .setParameter(1, usuarioId)
-                    .getResultList());
+                        .setParameter(1, usuarioId)
+                        .getResultList());
     }
 
 
@@ -151,9 +152,9 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     public Uni<java.util.List<Agenda>> autoCompleteEstrategicoComUsuario(String query, Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_ESTRATEGICO_COM_USUARIO, Agenda.class)
-                    .setParameter(1, query)
-                    .setParameter(2, usuarioId)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, usuarioId)
+                        .getResultList());
     }
 
 
@@ -165,8 +166,8 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     public Uni<java.util.List<Agenda>> autoCompleteEstrategicoDoUsuario(Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_ESTRATEGICO_DO_USUARIO, Agenda.class)
-                    .setParameter(1, usuarioId)
-                    .getResultList());
+                        .setParameter(1, usuarioId)
+                        .getResultList());
     }
 
 }

@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.desistente;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class DesistenteService {
 
-    @Inject DesistenteRepository repository;
+    @Inject
+    DesistenteRepository repository;
 
     public Uni<List<DesistenteResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,14 @@ public class DesistenteService {
                         : Uni.createFrom().failure(new NotFoundException("Desistente not found")));
     }
 
-    private void apply(Desistente e, DesistenteRequest r) { e.descricao = r.descricao(); e.dataCriacao = r.dataCriacao(); e.pessoaFuncionarioId = r.pessoaFuncionarioId(); e.contratoId = r.contratoId(); e.motivoId = r.motivoId(); e.ativo = r.ativo(); }
+    private void apply(Desistente e, DesistenteRequest r) {
+        e.descricao = r.descricao();
+        e.dataCriacao = r.dataCriacao();
+        e.pessoaFuncionarioId = r.pessoaFuncionarioId();
+        e.contratoId = r.contratoId();
+        e.motivoId = r.motivoId();
+        e.ativo = r.ativo();
+    }
 
     private DesistenteResponse toResponse(Desistente e) {
         return new DesistenteResponse(e.id, e.descricao, e.dataCriacao, e.pessoaFuncionarioId, e.contratoId, e.motivoId, e.ativo);

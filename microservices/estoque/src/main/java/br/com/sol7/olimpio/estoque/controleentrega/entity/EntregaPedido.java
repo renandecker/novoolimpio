@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -26,7 +27,8 @@ public class EntregaPedido {
         public Long entregaId;
         public Long pedidoId;
 
-        public EntregaPedidoId() {}
+        public EntregaPedidoId() {
+        }
 
         public EntregaPedidoId(Long entregaId, Long pedidoId) {
             this.entregaId = entregaId;

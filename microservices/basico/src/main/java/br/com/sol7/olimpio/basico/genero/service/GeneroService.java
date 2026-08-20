@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.genero.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.genero.dto.GeneroRequest;
 import br.com.sol7.olimpio.basico.genero.dto.GeneroResponse;
 import br.com.sol7.olimpio.basico.genero.entity.Genero;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.genero.repository.GeneroRepository;
 @WithTransaction
 public class GeneroService {
 
-    @Inject GeneroRepository repository;
+    @Inject
+    GeneroRepository repository;
 
     public Uni<List<GeneroResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,9 @@ public class GeneroService {
                         : Uni.createFrom().failure(new NotFoundException("Genero not found")));
     }
 
-    private void apply(Genero e, GeneroRequest r) { e.descricao = r.descricao(); }
+    private void apply(Genero e, GeneroRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private GeneroResponse toResponse(Genero e) {
         return new GeneroResponse(e.id, e.descricao);

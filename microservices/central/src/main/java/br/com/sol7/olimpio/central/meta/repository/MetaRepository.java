@@ -1,9 +1,15 @@
 package br.com.sol7.olimpio.central.meta;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
+
 import java.util.Date;
-@ApplicationScoped public class MetaRepository implements PanacheRepository<Meta> {
+
+@ApplicationScoped
+public class MetaRepository implements PanacheRepository<Meta> {
 
     // Migrado de MetaRepository.buscarMetaOperadorDia (legado) - HQL original:
     // Select m from Meta m where m.data = date(?1) and m.operador = ?2 order by m.id desc
@@ -13,9 +19,9 @@ import java.util.Date;
     public Uni<java.util.List<Meta>> buscarMetaOperadorDia(Date data, Long operadorId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_META_OPERADOR_DIA, Meta.class)
-                    .setParameter(1, data)
-                    .setParameter(2, operadorId)
-                    .getResultList());
+                        .setParameter(1, data)
+                        .setParameter(2, operadorId)
+                        .getResultList());
     }
 
 
@@ -27,9 +33,9 @@ import java.util.Date;
     public Uni<java.util.List<Meta>> buscarMetaOperadorPeriodo(Date data, Long operadorId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_META_OPERADOR_PERIODO, Meta.class)
-                    .setParameter(1, data)
-                    .setParameter(2, operadorId)
-                    .getResultList());
+                        .setParameter(1, data)
+                        .setParameter(2, operadorId)
+                        .getResultList());
     }
 
 
@@ -41,10 +47,10 @@ import java.util.Date;
     public Uni<java.util.List<Meta>> buscarConflitoDatasComEquipe(Date dataInicial, Date dataFinal, Long operacionalId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CONFLITO_DATAS_COM_EQUIPE, Meta.class)
-                    .setParameter(1, dataInicial)
-                    .setParameter(2, dataFinal)
-                    .setParameter(3, operacionalId)
-                    .getResultList());
+                        .setParameter(1, dataInicial)
+                        .setParameter(2, dataFinal)
+                        .setParameter(3, operacionalId)
+                        .getResultList());
     }
 
 
@@ -56,11 +62,11 @@ import java.util.Date;
     public Uni<java.util.List<Meta>> buscarConflitoDatasComEquipeComMeta(Date dataInicial, Date dataFinal, Long operacionalId, int id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CONFLITO_DATAS_COM_EQUIPE_COM_META, Meta.class)
-                    .setParameter(1, dataInicial)
-                    .setParameter(2, dataFinal)
-                    .setParameter(3, operacionalId)
-                    .setParameter(4, id)
-                    .getResultList());
+                        .setParameter(1, dataInicial)
+                        .setParameter(2, dataFinal)
+                        .setParameter(3, operacionalId)
+                        .setParameter(4, id)
+                        .getResultList());
     }
 
 
@@ -72,10 +78,10 @@ import java.util.Date;
     public Uni<java.util.List<Meta>> buscarConflitoDatasComOperador(Date dataInicial, Date dataFinal, Long operadorId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CONFLITO_DATAS_COM_OPERADOR, Meta.class)
-                    .setParameter(1, dataInicial)
-                    .setParameter(2, dataFinal)
-                    .setParameter(3, operadorId)
-                    .getResultList());
+                        .setParameter(1, dataInicial)
+                        .setParameter(2, dataFinal)
+                        .setParameter(3, operadorId)
+                        .getResultList());
     }
 
 
@@ -87,11 +93,11 @@ import java.util.Date;
     public Uni<java.util.List<Meta>> buscarConflitoDatasComOperadorComMeta(Date dataInicial, Date dataFinal, Long operadorId, int id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CONFLITO_DATAS_COM_OPERADOR_COM_META, Meta.class)
-                    .setParameter(1, dataInicial)
-                    .setParameter(2, dataFinal)
-                    .setParameter(3, operadorId)
-                    .setParameter(4, id)
-                    .getResultList());
+                        .setParameter(1, dataInicial)
+                        .setParameter(2, dataFinal)
+                        .setParameter(3, operadorId)
+                        .setParameter(4, id)
+                        .getResultList());
     }
 
 
@@ -103,9 +109,9 @@ import java.util.Date;
     public Uni<java.util.List<Meta>> buscarMetaOperador(Date data, Long operadorId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_META_OPERADOR, Meta.class)
-                    .setParameter(1, data)
-                    .setParameter(2, operadorId)
-                    .getResultList());
+                        .setParameter(1, data)
+                        .setParameter(2, operadorId)
+                        .getResultList());
     }
 
 }

@@ -20,7 +20,8 @@ import jakarta.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 public class FiservWebhookController {
 
-    @Inject FiservWebhookService service;
+    @Inject
+    FiservWebhookService service;
 
     @POST
     public Uni<Response> receber(JsonNode payload) {

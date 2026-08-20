@@ -11,6 +11,7 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -86,23 +87,25 @@ public class AulaService {
         return new AulaResponse(e.id, e.nome, e.descricao, e.ocorrenciaComponenteCurricularId);
     }
 
-    private String asString(Object o) { return o == null ? "" : o.toString(); }
+    private String asString(Object o) {
+        return o == null ? "" : o.toString();
+    }
 
     private Long asLong(Object o) {
         if (o == null) return null;
-        if (o instanceof Number n) return n.longValue();
+        if (o instanceof Number n)return n.longValue();
         return Long.valueOf(o.toString());
     }
 
     private Date asDate(Object o) {
         if (o == null) return null;
-        if (o instanceof Date d) return d;
+        if (o instanceof Date d)return d;
         return java.sql.Date.valueOf(o.toString());
     }
 
     private boolean asBoolean(Object o) {
         if (o == null) return false;
-        if (o instanceof Boolean b) return b;
+        if (o instanceof Boolean b)return b;
         return "true".equalsIgnoreCase(o.toString()) || "1".equals(o.toString());
     }
 

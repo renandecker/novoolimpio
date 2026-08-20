@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.educacao.grupo;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class GrupoRepository implements PanacheRepository<Grupo> {
+
+@ApplicationScoped
+public class GrupoRepository implements PanacheRepository<Grupo> {
 
     // Migrado de GrupoRepository.listarGrupos (legado) - HQL original:
     // select distinct o from Grupo o where o.curriculo = ?1  and  o.unidade = ?2 order by o.nome
@@ -12,9 +17,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Grupo>> listarGrupos(Long curriculoId, Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_GRUPOS, Grupo.class)
-                    .setParameter(1, curriculoId)
-                    .setParameter(2, unidadeId)
-                    .getResultList());
+                        .setParameter(1, curriculoId)
+                        .setParameter(2, unidadeId)
+                        .getResultList());
     }
 
 
@@ -26,10 +31,10 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Grupo>> listarGruposExistente(Long curriculoId, Long unidadeId, String nome) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_GRUPOS_EXISTENTE, Grupo.class)
-                    .setParameter(1, curriculoId)
-                    .setParameter(2, unidadeId)
-                    .setParameter(3, nome)
-                    .getResultList());
+                        .setParameter(1, curriculoId)
+                        .setParameter(2, unidadeId)
+                        .setParameter(3, nome)
+                        .getResultList());
     }
 
 
@@ -43,8 +48,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Object>> listarOferecimentos(Long grupoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_OFERECIMENTOS)
-                    .setParameter(1, grupoId)
-                    .getResultList());
+                        .setParameter(1, grupoId)
+                        .getResultList());
     }
 
 
@@ -56,8 +61,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Grupo>> autoComplete(String lowerCase) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Grupo.class)
-                    .setParameter(1, lowerCase)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .getResultList());
     }
 
 
@@ -69,9 +74,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Grupo>> autoCompleteComUnidades(String lowerCase, List<Long> unidadeIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_UNIDADES, Grupo.class)
-                    .setParameter(1, lowerCase)
-                    .setParameter(2, unidadeIds)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .setParameter(2, unidadeIds)
+                        .getResultList());
     }
 
 
@@ -83,8 +88,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Grupo>> unidadesGrupo(List<Long> unidadeIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_UNIDADES_GRUPO, Grupo.class)
-                    .setParameter(1, unidadeIds)
-                    .getResultList());
+                        .setParameter(1, unidadeIds)
+                        .getResultList());
     }
 
 
@@ -96,9 +101,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Grupo>> autoCompleteComCurriculo(String lowerCase, Long curriculoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_CURRICULO, Grupo.class)
-                    .setParameter(1, lowerCase)
-                    .setParameter(2, curriculoId)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .setParameter(2, curriculoId)
+                        .getResultList());
     }
 
 
@@ -110,8 +115,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Grupo>> grupoCurriculo(Long curriculoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_GRUPO_CURRICULO, Grupo.class)
-                    .setParameter(1, curriculoId)
-                    .getResultList());
+                        .setParameter(1, curriculoId)
+                        .getResultList());
     }
 
 }

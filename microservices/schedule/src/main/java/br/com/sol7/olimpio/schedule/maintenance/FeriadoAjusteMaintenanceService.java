@@ -117,15 +117,30 @@ public class FeriadoAjusteMaintenanceService {
 
     private static final int MAX_DIAS_BUSCA = 400;
 
-    public record FeriadoAjusteItem(Long id, Long feriadoId, Boolean ocorrencia) {}
-    private record FeriadoRow(LocalDate data, List<Long> unidades) {}
-    private record OferDiaRow(Long oferecimentoId, Long diaAulaId) {}
+    public record FeriadoAjusteItem(Long id, Long feriadoId, Boolean ocorrencia) {
+    }
+
+    private record FeriadoRow(LocalDate data, List<Long> unidades) {
+    }
+
+    private record OferDiaRow(Long oferecimentoId, Long diaAulaId) {
+    }
+
     private record OferecimentoRow(Long idUnidade, Long idSala, Long idProfessor, Long idCurso,
-                                   LocalDate dataInicio, LocalDate dataFim) {}
-    private record CriterioRow(LocalDate dataInicio, LocalDate dataFim) {}
-    private record DatasRow(LocalDate inicio, LocalDate fim) {}
-    private record TurnoRow(LocalTime inicio, LocalTime fim) {}
-    private record ConflitoRow(Long idOcorrencia, Long idDiaAula, LocalTime inicio, LocalTime fim, Long idOferecimento) {}
+                                   LocalDate dataInicio, LocalDate dataFim) {
+    }
+
+    private record CriterioRow(LocalDate dataInicio, LocalDate dataFim) {
+    }
+
+    private record DatasRow(LocalDate inicio, LocalDate fim) {
+    }
+
+    private record TurnoRow(LocalTime inicio, LocalTime fim) {
+    }
+
+    private record ConflitoRow(Long idOcorrencia, Long idDiaAula, LocalTime inicio, LocalTime fim, Long idOferecimento) {
+    }
 
     // -----------------------------------------------------------------------------------------
     // Rotina agendada / manual - verificaFeriadosParaajustar
@@ -180,11 +195,11 @@ public class FeriadoAjusteMaintenanceService {
                         .chain(feriado -> buscarIdsNaoAjustar(item.id())
                                 .chain(naoAjustar -> naoAjustar.isEmpty() ? Uni.createFrom().voidItem()
                                         : buscarOcorrenciasPorDataUnidade(feriado.data(), feriado.unidades())
-                                                .chain(ids -> {
-                                                    List<Long> restantes = ids.stream().filter(id -> !naoAjustar.contains(id)).toList();
-                                                    return restantes.isEmpty() ? Uni.createFrom().voidItem() : ajustarOcorrencias(restantes);
-                                                })))
-                                .chain(() -> desativarAjuste(item.id())));
+                                        .chain(ids -> {
+                                            List<Long> restantes = ids.stream().filter(id -> !naoAjustar.contains(id)).toList();
+                                            return restantes.isEmpty() ? Uni.createFrom().voidItem() : ajustarOcorrencias(restantes);
+                                        })))
+                        .chain(() -> desativarAjuste(item.id())));
             }
             return chain;
         }).replaceWith("Criado ajuste de ocorrencias nao ajustaveis com sucesso");

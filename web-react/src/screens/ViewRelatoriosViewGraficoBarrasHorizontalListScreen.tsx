@@ -1,1 +1,9 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewRelatoriosViewGraficoBarrasHorizontalListScreen(){return <PermissionGate permission="READ"><main><h1>View Grafico Barras Horizontal</h1><DataTable path="/api/view/relatorios/viewGraficoBarrasHorizontal"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewRelatoriosViewGraficoBarrasHorizontalListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>View Grafico Barras Horizontal</h1><DataTable
+            path="/api/view/relatorios/viewGraficoBarrasHorizontal"/></main>
+    </PermissionGate>
+}

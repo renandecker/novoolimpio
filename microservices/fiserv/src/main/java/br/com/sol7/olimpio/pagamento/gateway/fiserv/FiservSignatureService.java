@@ -2,6 +2,7 @@ package br.com.sol7.olimpio.pagamento.gateway.fiserv;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.UUID;
@@ -10,11 +11,11 @@ import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Gera os headers de autenticacao HMAC exigidos pela Fiserv Commerce Hub / Payments Gateway.
- *
+ * <p>
  * Algoritmo oficial (https://docs.fiserv.dev/public/docs/message-signature):
- *   rawSignature   = apiKey + clientRequestId + timestamp(ms) + corpoDaRequisicaoSerializado
- *   messageSignature = Base64( HMAC-SHA256(apiSecret, rawSignature) )
- *
+ * rawSignature   = apiKey + clientRequestId + timestamp(ms) + corpoDaRequisicaoSerializado
+ * messageSignature = Base64( HMAC-SHA256(apiSecret, rawSignature) )
+ * <p>
  * Headers enviados em toda chamada: Api-Key, Client-Request-Id, Timestamp, Message-Signature.
  */
 @ApplicationScoped
@@ -43,5 +44,6 @@ public class FiservSignatureService {
         }
     }
 
-    public record FiservAuthHeaders(String apiKey, String clientRequestId, String timestamp, String messageSignature) {}
+    public record FiservAuthHeaders(String apiKey, String clientRequestId, String timestamp, String messageSignature) {
+    }
 }

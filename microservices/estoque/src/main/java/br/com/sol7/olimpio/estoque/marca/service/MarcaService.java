@@ -7,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class MarcaService {
 
-    @Inject MarcaRepository repository;
+    @Inject
+    MarcaRepository repository;
 
     public Uni<List<MarcaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +54,9 @@ public class MarcaService {
                         : Uni.createFrom().failure(new NotFoundException("Marca not found")));
     }
 
-    private void apply(Marca e, MarcaRequest r) { e.descricao = r.descricao(); }
+    private void apply(Marca e, MarcaRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private MarcaResponse toResponse(Marca e) {
         return new MarcaResponse(e.id, e.descricao);

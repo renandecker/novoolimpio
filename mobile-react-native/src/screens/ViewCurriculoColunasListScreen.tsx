@@ -1,5 +1,6 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import {ModuleList} from '../ModuleListScreen';
+
 export default function ViewCurriculoColunasListScreen() {
-  return <ModuleList path="/api/view/curriculo/colunas" />;
+    return <ModuleList path="/api/view/curriculo/colunas"/>;
 }

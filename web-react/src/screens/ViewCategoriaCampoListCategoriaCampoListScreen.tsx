@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewCategoriaCampoListCategoriaCampoListScreen(){return <PermissionGate permission="READ"><main><h1>Categoria Campo</h1><DataTable path="/api/view/categoriaCampo/listCategoriaCampo"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewCategoriaCampoListCategoriaCampoListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Categoria Campo</h1><DataTable path="/api/view/categoriaCampo/listCategoriaCampo"/></main>
+    </PermissionGate>
+}

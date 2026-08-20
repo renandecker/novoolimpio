@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.relatorios.comentario;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ComentarioService {
 
-    @Inject ComentarioRepository repository;
+    @Inject
+    ComentarioRepository repository;
 
     public Uni<List<ComentarioResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,12 @@ public class ComentarioService {
                         : Uni.createFrom().failure(new NotFoundException("Comentario not found")));
     }
 
-    private void apply(Comentario e, ComentarioRequest r) { e.assunto = r.assunto(); e.comentarioId = r.comentarioId(); e.usuarioId = r.usuarioId(); e.dataAtualizacao = r.dataAtualizacao(); }
+    private void apply(Comentario e, ComentarioRequest r) {
+        e.assunto = r.assunto();
+        e.comentarioId = r.comentarioId();
+        e.usuarioId = r.usuarioId();
+        e.dataAtualizacao = r.dataAtualizacao();
+    }
 
     private ComentarioResponse toResponse(Comentario e) {
         return new ComentarioResponse(e.id, e.assunto, e.comentarioId, e.usuarioId, e.dataAtualizacao);

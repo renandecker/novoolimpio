@@ -11,6 +11,7 @@ import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -26,9 +27,12 @@ public class FiservWebhookService {
     private static final Set<String> STATUS_APROVADO = Set.of("APPROVED", "SUCCESS", "SETTLED", "AUTHORIZED", "CAPTURED");
     private static final Set<String> STATUS_REVERSO = Set.of("VOIDED", "RETURNED", "REVERSED", "CANCELADO", "ESTORNADO");
 
-    @Inject ParcelaCartaoRepository repository;
-    @Inject ParcelaRepository parcelaRepository;
-    @Inject PagamentoConfirmadoProducer pagamentoConfirmadoProducer;
+    @Inject
+    ParcelaCartaoRepository repository;
+    @Inject
+    ParcelaRepository parcelaRepository;
+    @Inject
+    PagamentoConfirmadoProducer pagamentoConfirmadoProducer;
 
     @WithTransaction
     public Uni<Void> processar(JsonNode payload) {

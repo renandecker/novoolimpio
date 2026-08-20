@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.comercial.acao;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class AcaoService {
 
-    @Inject AcaoRepository repository;
+    @Inject
+    AcaoRepository repository;
 
     public Uni<List<AcaoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,17 @@ public class AcaoService {
                         : Uni.createFrom().failure(new NotFoundException("Acao not found")));
     }
 
-    private void apply(Acao e, AcaoRequest r) { e.descricao = r.descricao(); e.dataColeta = r.dataColeta(); e.tipoAcaoId = r.tipoAcaoId(); e.dataInicial = r.dataInicial(); e.dataFinalCaptacao = r.dataFinalCaptacao(); e.dataFinal = r.dataFinal(); e.meta = r.meta(); e.custo = r.custo(); e.responsavelId = r.responsavelId(); }
+    private void apply(Acao e, AcaoRequest r) {
+        e.descricao = r.descricao();
+        e.dataColeta = r.dataColeta();
+        e.tipoAcaoId = r.tipoAcaoId();
+        e.dataInicial = r.dataInicial();
+        e.dataFinalCaptacao = r.dataFinalCaptacao();
+        e.dataFinal = r.dataFinal();
+        e.meta = r.meta();
+        e.custo = r.custo();
+        e.responsavelId = r.responsavelId();
+    }
 
     private AcaoResponse toResponse(Acao e) {
         return new AcaoResponse(e.id, e.descricao, e.dataColeta, e.tipoAcaoId, e.dataInicial, e.dataFinalCaptacao, e.dataFinal, e.meta, e.custo, e.responsavelId);
@@ -88,7 +101,7 @@ public class AcaoService {
     //         return getAcaoRepository().buscarAcaoComCampos(idAcao);
     //     }
     public Uni<Long> buscarAcaoComCampos(Integer idAcao) {
-                return repository.buscarAcaoComCampos(idAcao).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarAcaoComCampos(idAcao).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -100,7 +113,7 @@ public class AcaoService {
     //         return getAcaoRepository().buscarAcaoComUnidades(acao);
     //     }
     public Uni<Long> buscarAcaoComUnidades(Long acaoId) {
-                return repository.buscarAcaoComUnidades(acaoId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarAcaoComUnidades(acaoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -111,7 +124,7 @@ public class AcaoService {
     //         return getAcaoRepository().autoCompleteEmAberto(query, unidades);
     //     }
     public Uni<List<Long>> autoCompleteEmAberto2(String query, List<Long> unidades) {
-                return repository.autoCompleteEmAberto(query, unidades).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoCompleteEmAberto(query, unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

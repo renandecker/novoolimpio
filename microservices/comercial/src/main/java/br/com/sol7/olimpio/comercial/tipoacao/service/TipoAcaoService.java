@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.comercial.tipoacao;
+
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -8,13 +9,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class TipoAcaoService {
 
-    @Inject TipoAcaoRepository repository;
+    @Inject
+    TipoAcaoRepository repository;
 
     @CacheResult(cacheName = "tipo-acao-cache")
     public Uni<List<TipoAcaoResponse>> list() {
@@ -58,7 +61,9 @@ public class TipoAcaoService {
                         : Uni.createFrom().failure(new NotFoundException("TipoAcao not found")));
     }
 
-    private void apply(TipoAcao e, TipoAcaoRequest r) { e.descricao = r.descricao(); }
+    private void apply(TipoAcao e, TipoAcaoRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private TipoAcaoResponse toResponse(TipoAcao e) {
         return new TipoAcaoResponse(e.id, e.descricao);

@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewCargaFormCargaListScreen(){return <PermissionGate permission="READ"><main><h1>Form Carga</h1><DataTable path="/api/view/carga/formCarga"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewCargaFormCargaListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Form Carga</h1><DataTable path="/api/view/carga/formCarga"/></main>
+    </PermissionGate>
+}

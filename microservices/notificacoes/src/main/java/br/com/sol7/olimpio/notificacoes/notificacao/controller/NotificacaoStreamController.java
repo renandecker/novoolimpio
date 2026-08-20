@@ -17,8 +17,8 @@ import jakarta.ws.rs.core.Response;
 /**
  * Streaming em tempo real (Server-Sent Events) das notificacoes por canal.
  * <ul>
- *   <li>GET /api/notificacoes/stream/WEB    -> react web</li>
- *   <li>GET /api/notificacoes/stream/MOBILE -> react native</li>
+ * <li>GET /api/notificacoes/stream/WEB    -> react web</li>
+ * <li>GET /api/notificacoes/stream/MOBILE -> react native</li>
  * </ul>
  * Autenticacao via token no query param (?token=...) porque o EventSource dos
  * navegadores nao permite cabecalho Authorization.

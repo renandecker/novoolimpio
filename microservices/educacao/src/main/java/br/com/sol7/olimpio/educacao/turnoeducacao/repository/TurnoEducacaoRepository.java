@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.educacao.turnoeducacao;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class TurnoEducacaoRepository implements PanacheRepository<TurnoEducacao> {
+
+@ApplicationScoped
+public class TurnoEducacaoRepository implements PanacheRepository<TurnoEducacao> {
 
     // Migrado de TurnoEducacaoRepository.autoComplete (legado) - HQL original:
     // select distinct t from TurnoEducacao t  where lower(t.descricao) like '%' || ?1 || '%'  OR str(t.id) = ?1 OR lower(t.sucinto) like '%' || ?1 ||  '%' order by t.descricao
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<TurnoEducacao>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, TurnoEducacao.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -25,9 +30,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<TurnoEducacao>> listarTurnosCriterio(Long uId, Long cId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_TURNOS_CRITERIO, TurnoEducacao.class)
-                    .setParameter(1, uId)
-                    .setParameter(2, cId)
-                    .getResultList());
+                        .setParameter(1, uId)
+                        .setParameter(2, cId)
+                        .getResultList());
     }
 
 
@@ -40,7 +45,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_TODOS_TURNOS, TurnoEducacao.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -53,7 +58,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_MIN_TURNO)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -66,7 +71,7 @@ import io.smallrye.mutiny.Uni;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_MAX_TURNO)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 }

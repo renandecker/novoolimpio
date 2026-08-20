@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.pessoa.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.pessoa.dto.PessoaRequest;
 import br.com.sol7.olimpio.basico.pessoa.dto.PessoaResponse;
 import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.pessoa.repository.PessoaRepository;
 @WithTransaction
 public class PessoaService {
 
-    @Inject PessoaRepository repository;
+    @Inject
+    PessoaRepository repository;
 
     public Uni<List<PessoaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,22 @@ public class PessoaService {
                         : Uni.createFrom().failure(new NotFoundException("Pessoa not found")));
     }
 
-    private void apply(Pessoa e, PessoaRequest r) { e.numero = r.numero(); e.complemento = r.complemento(); e.email = r.email(); e.telefone = r.telefone(); e.celular = r.celular(); e.foto = r.foto(); e.observacao = r.observacao(); e.comunicado = r.comunicado(); e.logradouroId = r.logradouroId(); e.dataCadastro = r.dataCadastro(); e.dataAlteracao = r.dataAlteracao(); e.pessoaFisicaId = r.pessoaFisicaId(); e.pessoaJuridicaId = r.pessoaJuridicaId(); e.professorId = r.professorId(); }
+    private void apply(Pessoa e, PessoaRequest r) {
+        e.numero = r.numero();
+        e.complemento = r.complemento();
+        e.email = r.email();
+        e.telefone = r.telefone();
+        e.celular = r.celular();
+        e.foto = r.foto();
+        e.observacao = r.observacao();
+        e.comunicado = r.comunicado();
+        e.logradouroId = r.logradouroId();
+        e.dataCadastro = r.dataCadastro();
+        e.dataAlteracao = r.dataAlteracao();
+        e.pessoaFisicaId = r.pessoaFisicaId();
+        e.pessoaJuridicaId = r.pessoaJuridicaId();
+        e.professorId = r.professorId();
+    }
 
     private PessoaResponse toResponse(Pessoa e) {
         return new PessoaResponse(e.id, e.numero, e.complemento, e.email, e.telefone, e.celular, e.foto, e.observacao, e.comunicado, e.logradouroId, e.dataCadastro, e.dataAlteracao, e.pessoaFisicaId, e.pessoaJuridicaId, e.professorId);
@@ -92,7 +111,7 @@ public class PessoaService {
     //         return getPessoaRepository().buscarPessoaComUnidades(entity);
     //     }
     public Uni<Long> buscarPessoaComUnidades(Long entityId) {
-                return repository.buscarPessoaComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarPessoaComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
@@ -103,7 +122,7 @@ public class PessoaService {
     //         return getPessoaRepository().buscarPessoaPorUnidades(unidade);
     //     }
     public Uni<List<Long>> buscarPessoaPorUnidades(List<Long> unidade) {
-                return repository.buscarPessoaPorUnidades(unidade).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarPessoaPorUnidades(unidade).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.tipotelefone.service;
+
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -8,7 +9,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.tipotelefone.dto.TipoTelefoneRequest;
 import br.com.sol7.olimpio.basico.tipotelefone.dto.TipoTelefoneResponse;
 import br.com.sol7.olimpio.basico.tipotelefone.entity.TipoTelefone;
@@ -18,7 +21,8 @@ import br.com.sol7.olimpio.basico.tipotelefone.repository.TipoTelefoneRepository
 @WithTransaction
 public class TipoTelefoneService {
 
-    @Inject TipoTelefoneRepository repository;
+    @Inject
+    TipoTelefoneRepository repository;
 
     @CacheResult(cacheName = "tipo-telefone-cache")
     public Uni<List<TipoTelefoneResponse>> list() {
@@ -62,7 +66,9 @@ public class TipoTelefoneService {
                         : Uni.createFrom().failure(new NotFoundException("TipoTelefone not found")));
     }
 
-    private void apply(TipoTelefone e, TipoTelefoneRequest r) { e.descricao = r.descricao(); }
+    private void apply(TipoTelefone e, TipoTelefoneRequest r) {
+        e.descricao = r.descricao();
+    }
 
     private TipoTelefoneResponse toResponse(TipoTelefone e) {
         return new TipoTelefoneResponse(e.id, e.descricao);

@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.educacao.grau;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class GrauRepository implements PanacheRepository<Grau> {
+
+@ApplicationScoped
+public class GrauRepository implements PanacheRepository<Grau> {
 
     // Migrado de GrauRepository.buscarGrauComNota (legado) - HQL original:
     // select g from Grau g left join fetch g.grauNota n where g = ?1 order by n.numeroNota
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Grau>> buscarGrauComNota(Long grauId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_GRAU_COM_NOTA, Grau.class)
-                    .setParameter(1, grauId)
-                    .getResultList());
+                        .setParameter(1, grauId)
+                        .getResultList());
     }
 
 
@@ -25,8 +30,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Grau>> buscarGrauComConceito(Long grauId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_GRAU_COM_CONCEITO, Grau.class)
-                    .setParameter(1, grauId)
-                    .getResultList());
+                        .setParameter(1, grauId)
+                        .getResultList());
     }
 
 }

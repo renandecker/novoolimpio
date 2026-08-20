@@ -17,7 +17,8 @@ import br.com.sol7.olimpio.login.tema.repository.TemaRepository;
 @ApplicationScoped
 public class TemaService {
 
-    @Inject TemaRepository repository;
+    @Inject
+    TemaRepository repository;
 
     @WithTransaction
     public Uni<List<TemaResponse>> list() {

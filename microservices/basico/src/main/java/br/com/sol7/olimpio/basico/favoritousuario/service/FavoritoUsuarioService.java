@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.favoritousuario.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.favoritousuario.dto.FavoritoUsuarioRequest;
 import br.com.sol7.olimpio.basico.favoritousuario.dto.FavoritoUsuarioResponse;
 import br.com.sol7.olimpio.basico.favoritousuario.entity.FavoritoUsuario;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.favoritousuario.repository.FavoritoUsuarioRepo
 @WithTransaction
 public class FavoritoUsuarioService {
 
-    @Inject FavoritoUsuarioRepository repository;
+    @Inject
+    FavoritoUsuarioRepository repository;
 
     public Uni<List<FavoritoUsuarioResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,12 @@ public class FavoritoUsuarioService {
                         : Uni.createFrom().failure(new NotFoundException("FavoritoUsuario not found")));
     }
 
-    private void apply(FavoritoUsuario e, FavoritoUsuarioRequest r) { e.nome = r.nome(); e.icon = r.icon(); e.usuarioId = r.usuarioId(); e.moduloId = r.moduloId(); }
+    private void apply(FavoritoUsuario e, FavoritoUsuarioRequest r) {
+        e.nome = r.nome();
+        e.icon = r.icon();
+        e.usuarioId = r.usuarioId();
+        e.moduloId = r.moduloId();
+    }
 
     private FavoritoUsuarioResponse toResponse(FavoritoUsuario e) {
         return new FavoritoUsuarioResponse(e.id, e.nome, e.icon, e.usuarioId, e.moduloId);
@@ -83,7 +92,7 @@ public class FavoritoUsuarioService {
     //         return getFavoritoUsuarioRepository().buscarUsuarioPorPerfil(usuarios);
     //     }
     public Uni<List<Long>> buscarUsuarioeFavoritos(Long usuariosId) {
-                return repository.buscarUsuarioPorPerfil(usuariosId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarUsuarioPorPerfil(usuariosId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -95,7 +104,7 @@ public class FavoritoUsuarioService {
     //         return getFavoritoUsuarioRepository().buscarUsuarioModuloPorPerfil(usuarios, modulo);
     //     }
     public Uni<List<Long>> buscarUsuarioModuloPorPerfil(Long usuariosId, Long moduloId) {
-                return repository.buscarUsuarioModuloPorPerfil(usuariosId, moduloId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarUsuarioModuloPorPerfil(usuariosId, moduloId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 

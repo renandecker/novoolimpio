@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.central.turnotrabalho;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class TurnoTrabalhoService {
 
-    @Inject TurnoTrabalhoRepository repository;
+    @Inject
+    TurnoTrabalhoRepository repository;
 
     public Uni<List<TurnoTrabalhoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,12 @@ public class TurnoTrabalhoService {
                         : Uni.createFrom().failure(new NotFoundException("TurnoTrabalho not found")));
     }
 
-    private void apply(TurnoTrabalho e, TurnoTrabalhoRequest r) { e.descricao = r.descricao(); e.inicio = r.inicio(); e.fim = r.fim(); e.diaSemanaId = r.diaSemanaId(); }
+    private void apply(TurnoTrabalho e, TurnoTrabalhoRequest r) {
+        e.descricao = r.descricao();
+        e.inicio = r.inicio();
+        e.fim = r.fim();
+        e.diaSemanaId = r.diaSemanaId();
+    }
 
     private TurnoTrabalhoResponse toResponse(TurnoTrabalho e) {
         return new TurnoTrabalhoResponse(e.id, e.descricao, e.inicio, e.fim, e.diaSemanaId);
@@ -96,7 +104,7 @@ public class TurnoTrabalhoService {
     //         return getTurnoTrabalhoRepository().buscarTurnoTrabalhoComUnidades(entity);
     //     }
     public Uni<Long> buscarTurnoTrabalhoComUnidades(Long entityId) {
-                return repository.buscarTurnoTrabalhoComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
+        return repository.buscarTurnoTrabalhoComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 

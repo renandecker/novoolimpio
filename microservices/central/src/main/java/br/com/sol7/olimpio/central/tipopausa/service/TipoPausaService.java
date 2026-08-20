@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.central.tipopausa;
+
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -8,13 +9,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class TipoPausaService {
 
-    @Inject TipoPausaRepository repository;
+    @Inject
+    TipoPausaRepository repository;
 
     @CacheResult(cacheName = "tipo-pausa-cache")
     public Uni<List<TipoPausaResponse>> list() {
@@ -58,7 +61,10 @@ public class TipoPausaService {
                         : Uni.createFrom().failure(new NotFoundException("TipoPausa not found")));
     }
 
-    private void apply(TipoPausa e, TipoPausaRequest r) { e.descricao = r.descricao(); e.tempo = r.tempo(); }
+    private void apply(TipoPausa e, TipoPausaRequest r) {
+        e.descricao = r.descricao();
+        e.tempo = r.tempo();
+    }
 
     private TipoPausaResponse toResponse(TipoPausa e) {
         return new TipoPausaResponse(e.id, e.descricao, e.tempo);

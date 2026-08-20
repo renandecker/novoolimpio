@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewTelefoneFormTelefoneListScreen(){return <PermissionGate permission="READ"><main><h1>Form Telefone</h1><DataTable path="/api/view/telefone/formTelefone"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewTelefoneFormTelefoneListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Form Telefone</h1><DataTable path="/api/view/telefone/formTelefone"/></main>
+    </PermissionGate>
+}

@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.basetecnologica;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class BaseTecnologicaService {
 
-    @Inject BaseTecnologicaRepository repository;
+    @Inject
+    BaseTecnologicaRepository repository;
 
     public Uni<List<BaseTecnologicaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,10 @@ public class BaseTecnologicaService {
                         : Uni.createFrom().failure(new NotFoundException("BaseTecnologica not found")));
     }
 
-    private void apply(BaseTecnologica e, BaseTecnologicaRequest r) { e.descricao = r.descricao(); e.nome = r.nome(); }
+    private void apply(BaseTecnologica e, BaseTecnologicaRequest r) {
+        e.descricao = r.descricao();
+        e.nome = r.nome();
+    }
 
     private BaseTecnologicaResponse toResponse(BaseTecnologica e) {
         return new BaseTecnologicaResponse(e.id, e.descricao, e.nome);

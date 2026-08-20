@@ -15,7 +15,7 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 /**
  * Endpoints da Fiserv Commerce Hub / Payments Gateway (IPP) usados por este microsservico -
  * extraidos da collection "fiserv.dev" (pasta Ecommerce/Payments - Live).
- *
+ * <p>
  * O corpo e enviado como String JA SERIALIZADA (ver FiservGatewayService), pois a assinatura
  * HMAC (Message-Signature) precisa ser calculada sobre os MESMOS bytes que serao enviados.
  */
@@ -24,7 +24,9 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 @Produces(MediaType.APPLICATION_JSON)
 public interface FiservPaymentClient {
 
-    /** POST /ipp/payments-gateway/v2/payments - venda a vista (PaymentCardSaleTransaction / PaymentTokenSaleTransaction). */
+    /**
+     * POST /ipp/payments-gateway/v2/payments - venda a vista (PaymentCardSaleTransaction / PaymentTokenSaleTransaction).
+     */
     @POST
     @Path("/ipp/payments-gateway/v2/payments")
     Uni<JsonNode> criarPagamento(
@@ -34,7 +36,9 @@ public interface FiservPaymentClient {
             @HeaderParam("Message-Signature") String messageSignature,
             String requestBodyJson);
 
-    /** GET /ipp/payments-gateway/v2/payments/{ipgTransactionId} - consulta o estado de uma transacao. */
+    /**
+     * GET /ipp/payments-gateway/v2/payments/{ipgTransactionId} - consulta o estado de uma transacao.
+     */
     @GET
     @Path("/ipp/payments-gateway/v2/payments/{ipgTransactionId}")
     Uni<JsonNode> consultarPagamento(
@@ -44,7 +48,9 @@ public interface FiservPaymentClient {
             @HeaderParam("Timestamp") String timestamp,
             @HeaderParam("Message-Signature") String messageSignature);
 
-    /** POST /ipp/payments-gateway/v2/payment-schedules - cria o parcelamento (venda parcelada). */
+    /**
+     * POST /ipp/payments-gateway/v2/payment-schedules - cria o parcelamento (venda parcelada).
+     */
     @POST
     @Path("/ipp/payments-gateway/v2/payment-schedules")
     Uni<JsonNode> criarPaymentSchedule(
@@ -54,7 +60,9 @@ public interface FiservPaymentClient {
             @HeaderParam("Message-Signature") String messageSignature,
             String requestBodyJson);
 
-    /** GET /ipp/payments-gateway/v2/payment-schedules/{orderId} - consulta um parcelamento. */
+    /**
+     * GET /ipp/payments-gateway/v2/payment-schedules/{orderId} - consulta um parcelamento.
+     */
     @GET
     @Path("/ipp/payments-gateway/v2/payment-schedules/{orderId}")
     Uni<JsonNode> consultarPaymentSchedule(
@@ -64,7 +72,9 @@ public interface FiservPaymentClient {
             @HeaderParam("Timestamp") String timestamp,
             @HeaderParam("Message-Signature") String messageSignature);
 
-    /** POST /ipp/payments-gateway/v2/payment-tokens - cadastra/tokeniza um cartao (sem cobranca). */
+    /**
+     * POST /ipp/payments-gateway/v2/payment-tokens - cadastra/tokeniza um cartao (sem cobranca).
+     */
     @POST
     @Path("/ipp/payments-gateway/v2/payment-tokens")
     Uni<JsonNode> criarPaymentToken(
@@ -74,7 +84,9 @@ public interface FiservPaymentClient {
             @HeaderParam("Message-Signature") String messageSignature,
             String requestBodyJson);
 
-    /** POST /ipp/payments-gateway/v2/payments/{transaction-id} - transacao secundaria (void/return) da transacao primaria. */
+    /**
+     * POST /ipp/payments-gateway/v2/payments/{transaction-id} - transacao secundaria (void/return) da transacao primaria.
+     */
     @POST
     @Path("/ipp/payments-gateway/v2/payments/{transactionId}")
     Uni<JsonNode> executarTransacaoSecundaria(

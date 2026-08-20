@@ -1,5 +1,6 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import {ModuleList} from '../ModuleListScreen';
+
 export default function ViewTipoTelefoneListTipoTelefoneListScreen() {
-  return <ModuleList path="/api/view/tipoTelefone/listTipoTelefone" />;
+    return <ModuleList path="/api/view/tipoTelefone/listTipoTelefone"/>;
 }

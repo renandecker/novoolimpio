@@ -30,9 +30,9 @@ public class EmpresaUnidadeService {
     public Uni<PagedResponse<EmpresaUnidadeResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
         int s = switch (size) {
-            case 10, 20, 50, 100 -> size;
-            default -> 10;
-        };
+            case 10,20, 50, 100 ->size;
+            default ->10;
+        } ;
         return repository.findAll().page(p, s).list()
                 .onItem().transformToUni(items -> repository.count()
                         .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));

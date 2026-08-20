@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.relatorios.organograma;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class OrganogramaService {
 
-    @Inject OrganogramaRepository repository;
+    @Inject
+    OrganogramaRepository repository;
 
     public Uni<List<OrganogramaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,11 @@ public class OrganogramaService {
                         : Uni.createFrom().failure(new NotFoundException("Organograma not found")));
     }
 
-    private void apply(Organograma e, OrganogramaRequest r) { e.nome = r.nome(); e.dataCadastro = r.dataCadastro(); e.dataAlteracao = r.dataAlteracao(); }
+    private void apply(Organograma e, OrganogramaRequest r) {
+        e.nome = r.nome();
+        e.dataCadastro = r.dataCadastro();
+        e.dataAlteracao = r.dataAlteracao();
+    }
 
     private OrganogramaResponse toResponse(Organograma e) {
         return new OrganogramaResponse(e.id, e.nome, e.dataCadastro, e.dataAlteracao);
@@ -65,7 +72,7 @@ public class OrganogramaService {
     //         return this.getOrganogramaRepository().autoComplete(query.toLowerCase(), new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoComplete(String query) {
-                return repository.find("(lower(nome) like '%' || ?1 || '%' OR  str(id) = ?1) order by nome", query.toLowerCase()).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("(lower(nome) like '%' || ?1 || '%' OR  str(id) = ?1) order by nome", query.toLowerCase()).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 

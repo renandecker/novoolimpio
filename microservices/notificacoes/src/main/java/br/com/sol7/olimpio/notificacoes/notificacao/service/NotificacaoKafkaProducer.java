@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Publica a notificacao no Kafka em um topico por canal de entrega:
  * <ul>
- *   <li>olimpio.notificacao.email  -> consumido para envio via SMTP (CanalEmailService)</li>
- *   <li>olimpio.notificacao.mobile -> consumido para push em tempo real no react native</li>
- *   <li>olimpio.notificacao.web    -> consumido para push em tempo real no react web</li>
+ * <li>olimpio.notificacao.email  -> consumido para envio via SMTP (CanalEmailService)</li>
+ * <li>olimpio.notificacao.mobile -> consumido para push em tempo real no react native</li>
+ * <li>olimpio.notificacao.web    -> consumido para push em tempo real no react web</li>
  * </ul>
  * A mensagem vai apenas para os topicos dos canais habilitados na notificacao.
  */

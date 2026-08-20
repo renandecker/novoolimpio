@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.etapasnap;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class EtapasNAPService {
 
-    @Inject EtapasNAPRepository repository;
+    @Inject
+    EtapasNAPRepository repository;
 
     public Uni<List<EtapasNAPResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,18 @@ public class EtapasNAPService {
                         : Uni.createFrom().failure(new NotFoundException("EtapasNAP not found")));
     }
 
-    private void apply(EtapasNAP e, EtapasNAPRequest r) { e.descricao = r.descricao(); e.usuario = r.usuario(); e.perfil = r.perfil(); e.campoCustomizado = r.campoCustomizado(); e.tipoModeloDocumento = r.tipoModeloDocumento(); e.localDocumento = r.localDocumento(); e.nomeDocumento = r.nomeDocumento(); e.campoDetalhes = r.campoDetalhes(); e.customizado = r.customizado(); e.ordem = r.ordem(); }
+    private void apply(EtapasNAP e, EtapasNAPRequest r) {
+        e.descricao = r.descricao();
+        e.usuario = r.usuario();
+        e.perfil = r.perfil();
+        e.campoCustomizado = r.campoCustomizado();
+        e.tipoModeloDocumento = r.tipoModeloDocumento();
+        e.localDocumento = r.localDocumento();
+        e.nomeDocumento = r.nomeDocumento();
+        e.campoDetalhes = r.campoDetalhes();
+        e.customizado = r.customizado();
+        e.ordem = r.ordem();
+    }
 
     private EtapasNAPResponse toResponse(EtapasNAP e) {
         return new EtapasNAPResponse(e.id, e.descricao, e.usuario, e.perfil, e.campoCustomizado, e.tipoModeloDocumento, e.localDocumento, e.nomeDocumento, e.campoDetalhes, e.customizado, e.ordem);

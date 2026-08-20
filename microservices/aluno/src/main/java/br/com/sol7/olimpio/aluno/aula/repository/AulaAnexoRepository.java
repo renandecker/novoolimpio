@@ -4,6 +4,7 @@ import br.com.sol7.olimpio.aluno.aula.entity.AulaAnexo;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+
 import java.util.List;
 
 @ApplicationScoped

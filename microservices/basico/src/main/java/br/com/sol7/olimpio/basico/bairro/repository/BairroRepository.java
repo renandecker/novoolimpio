@@ -1,9 +1,14 @@
 package br.com.sol7.olimpio.basico.bairro.repository;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 import br.com.sol7.olimpio.basico.bairro.entity.Bairro;
-@ApplicationScoped public class BairroRepository implements PanacheRepository<Bairro> {
+
+@ApplicationScoped
+public class BairroRepository implements PanacheRepository<Bairro> {
 
     // Migrado de BairroRepository.autoComplete (legado) - HQL original:
     // select distinct c from Bairro c where lower(c.descricao) like '%' || ?1 || '%'  OR str(c.id) = ?1  order by c.descricao
@@ -13,8 +18,8 @@ import br.com.sol7.olimpio.basico.bairro.entity.Bairro;
     public Uni<java.util.List<Bairro>> autoComplete(String lowerCase) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Bairro.class)
-                    .setParameter(1, lowerCase)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .getResultList());
     }
 
 
@@ -26,9 +31,9 @@ import br.com.sol7.olimpio.basico.bairro.entity.Bairro;
     public Uni<java.util.List<Object>> autoCompleteComCep(String lowerCase, String cep) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_CEP)
-                    .setParameter(1, lowerCase)
-                    .setParameter(2, cep)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .setParameter(2, cep)
+                        .getResultList());
     }
 
 
@@ -40,9 +45,9 @@ import br.com.sol7.olimpio.basico.bairro.entity.Bairro;
     public Uni<java.util.List<Bairro>> autoCompleteComCidade(String lowerCase, Long cidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_CIDADE, Bairro.class)
-                    .setParameter(1, lowerCase)
-                    .setParameter(2, cidadeId)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .setParameter(2, cidadeId)
+                        .getResultList());
     }
 
 
@@ -54,10 +59,10 @@ import br.com.sol7.olimpio.basico.bairro.entity.Bairro;
     public Uni<java.util.List<Object>> autoCompleteComCidadeComCep(String lowerCase, Long cidadeId, String cep) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_CIDADE_COM_CEP)
-                    .setParameter(1, lowerCase)
-                    .setParameter(2, cidadeId)
-                    .setParameter(3, cep)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .setParameter(2, cidadeId)
+                        .setParameter(3, cep)
+                        .getResultList());
     }
 
 
@@ -69,10 +74,10 @@ import br.com.sol7.olimpio.basico.bairro.entity.Bairro;
     public Uni<java.util.List<Bairro>> autoCompleteComCidadeEstado(String lowerCase, Long cidadeId, Long estadoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_CIDADE_ESTADO, Bairro.class)
-                    .setParameter(1, lowerCase)
-                    .setParameter(2, cidadeId)
-                    .setParameter(3, estadoId)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .setParameter(2, cidadeId)
+                        .setParameter(3, estadoId)
+                        .getResultList());
     }
 
 
@@ -84,11 +89,11 @@ import br.com.sol7.olimpio.basico.bairro.entity.Bairro;
     public Uni<java.util.List<Object>> autoCompleteComCidadeEstadoComCep(String lowerCase, Long cidadeId, Long estadoId, String cep) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_CIDADE_ESTADO_COM_CEP)
-                    .setParameter(1, lowerCase)
-                    .setParameter(2, cidadeId)
-                    .setParameter(3, estadoId)
-                    .setParameter(4, cep)
-                    .getResultList());
+                        .setParameter(1, lowerCase)
+                        .setParameter(2, cidadeId)
+                        .setParameter(3, estadoId)
+                        .setParameter(4, cep)
+                        .getResultList());
     }
 
 
@@ -100,8 +105,8 @@ import br.com.sol7.olimpio.basico.bairro.entity.Bairro;
     public Uni<java.util.List<Bairro>> buscaBairro(Long cidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCA_BAIRRO, Bairro.class)
-                    .setParameter(1, cidadeId)
-                    .getResultList());
+                        .setParameter(1, cidadeId)
+                        .getResultList());
     }
 
 }

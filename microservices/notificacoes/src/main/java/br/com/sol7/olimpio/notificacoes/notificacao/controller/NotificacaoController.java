@@ -19,19 +19,25 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 import java.util.List;
 
-@Path("/api/notificacoes/notificacao") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
+@Path("/api/notificacoes/notificacao")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class NotificacaoController {
 
-    @Inject NotificacaoService service;
+    @Inject
+    NotificacaoService service;
 
     private String currentUser(@HeaderParam("X-Authenticated-Username") String username) {
         return username == null ? "admin" : username;
     }
 
     @GET
-    public Uni<List<NotificacaoResponse>> list() { return service.list(); }
+    public Uni<List<NotificacaoResponse>> list() {
+        return service.list();
+    }
 
     @GET
     @Path("/paged")
@@ -53,7 +59,9 @@ public class NotificacaoController {
 
     @GET
     @Path("/{id}")
-    public Uni<NotificacaoResponse> find(@PathParam("id") Long id) { return service.find(id); }
+    public Uni<NotificacaoResponse> find(@PathParam("id") Long id) {
+        return service.find(id);
+    }
 
     @POST
     public Uni<Response> create(@Valid NotificacaoRequest r) {
@@ -62,11 +70,15 @@ public class NotificacaoController {
 
     @PUT
     @Path("/{id}")
-    public Uni<NotificacaoResponse> update(@PathParam("id") Long id, @Valid NotificacaoRequest r) { return service.update(id, r); }
+    public Uni<NotificacaoResponse> update(@PathParam("id") Long id, @Valid NotificacaoRequest r) {
+        return service.update(id, r);
+    }
 
     @DELETE
     @Path("/{id}")
-    public Uni<Void> delete(@PathParam("id") Long id) { return service.delete(id); }
+    public Uni<Void> delete(@PathParam("id") Long id) {
+        return service.delete(id);
+    }
 
     @POST
     @Path("/{id}/ler")

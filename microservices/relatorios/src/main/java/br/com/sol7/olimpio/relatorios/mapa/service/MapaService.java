@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.relatorios.mapa;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class MapaService {
 
-    @Inject MapaRepository repository;
+    @Inject
+    MapaRepository repository;
 
     public Uni<List<MapaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,22 @@ public class MapaService {
                         : Uni.createFrom().failure(new NotFoundException("Mapa not found")));
     }
 
-    private void apply(Mapa e, MapaRequest r) { e.nome = r.nome(); e.todosUnidades = r.todosUnidades(); e.todosPerfis = r.todosPerfis(); e.todosUsuarios = r.todosUsuarios(); e.zoom = r.zoom(); e.coordenada = r.coordenada(); e.utilizando = r.utilizando(); e.altura = r.altura(); e.markerTamanho = r.markerTamanho(); e.dataAlteracao = r.dataAlteracao(); e.georeferenciaId = r.georeferenciaId(); e.dimensaoId = r.dimensaoId(); e.medidaId = r.medidaId(); e.estruturaId = r.estruturaId(); }
+    private void apply(Mapa e, MapaRequest r) {
+        e.nome = r.nome();
+        e.todosUnidades = r.todosUnidades();
+        e.todosPerfis = r.todosPerfis();
+        e.todosUsuarios = r.todosUsuarios();
+        e.zoom = r.zoom();
+        e.coordenada = r.coordenada();
+        e.utilizando = r.utilizando();
+        e.altura = r.altura();
+        e.markerTamanho = r.markerTamanho();
+        e.dataAlteracao = r.dataAlteracao();
+        e.georeferenciaId = r.georeferenciaId();
+        e.dimensaoId = r.dimensaoId();
+        e.medidaId = r.medidaId();
+        e.estruturaId = r.estruturaId();
+    }
 
     private MapaResponse toResponse(Mapa e) {
         return new MapaResponse(e.id, e.nome, e.todosUnidades, e.todosPerfis, e.todosUsuarios, e.zoom, e.coordenada, e.utilizando, e.altura, e.markerTamanho, e.dataAlteracao, e.georeferenciaId, e.dimensaoId, e.medidaId, e.estruturaId);

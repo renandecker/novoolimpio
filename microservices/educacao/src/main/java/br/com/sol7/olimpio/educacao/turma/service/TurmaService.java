@@ -1,10 +1,28 @@
 package br.com.sol7.olimpio.educacao.turma;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
+
 import java.math.BigDecimal;
-import io.smallrye.mutiny.Uni; import jakarta.enterprise.context.ApplicationScoped; import jakarta.inject.Inject; import jakarta.ws.rs.NotFoundException; import java.util.List;
+
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped @WithTransaction public class TurmaService { @Inject TurmaRepository repository; public Uni<List<TurmaResponse>> list(){return repository.listAll().map(items->items.stream().map(this::toResponse).toList());}
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
+
+import java.util.List;
+
+import io.smallrye.mutiny.Uni;
+
+@ApplicationScoped
+@WithTransaction
+public class TurmaService {
+    @Inject
+    TurmaRepository repository;
+
+    public Uni<List<TurmaResponse>> list() {
+        return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
+    }
 
     public Uni<PagedResponse<TurmaResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
@@ -13,7 +31,33 @@ import io.smallrye.mutiny.Uni;
                 .onItem().transformToUni(items -> repository.count()
                         .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
- public Uni<TurmaResponse> find(Long id){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("Turma not found")).map(this::toResponse);} public Uni<TurmaResponse> create(TurmaRequest r){var e=new Turma();apply(e,r);return repository.persist(e).replaceWith(()->toResponse(e));} public Uni<TurmaResponse> update(Long id,TurmaRequest r){return repository.findById(id).onItem().ifNull().failWith(()->new NotFoundException("Turma not found")).invoke(e->apply(e,r)).map(this::toResponse);} public Uni<Void> delete(Long id){return repository.deleteById(id).onItem().transformToUni(deleted->deleted?Uni.createFrom().voidItem():Uni.createFrom().failure(new NotFoundException("Turma not found")));} private void apply(Turma e,TurmaRequest r){e.nome=r.nome();e.dadosJson=r.dadosJson();} private TurmaResponse toResponse(Turma e){return new TurmaResponse(e.id,e.nome,e.dadosJson);} 
+
+    public Uni<TurmaResponse> find(Long id) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Turma not found")).map(this::toResponse);
+    }
+
+    public Uni<TurmaResponse> create(TurmaRequest r) {
+        var e = new Turma();
+        apply(e, r);
+        return repository.persist(e).replaceWith(() -> toResponse(e));
+    }
+
+    public Uni<TurmaResponse> update(Long id, TurmaRequest r) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Turma not found")).invoke(e -> apply(e, r)).map(this::toResponse);
+    }
+
+    public Uni<Void> delete(Long id) {
+        return repository.deleteById(id).onItem().transformToUni(deleted -> deleted ? Uni.createFrom().voidItem() : Uni.createFrom().failure(new NotFoundException("Turma not found")));
+    }
+
+    private void apply(Turma e, TurmaRequest r) {
+        e.nome = r.nome();
+        e.dadosJson = r.dadosJson();
+    }
+
+    private TurmaResponse toResponse(Turma e) {
+        return new TurmaResponse(e.id, e.nome, e.dadosJson);
+    }
 
     // Migrado de TurmaController.carregarInformacoes (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/TurmaController.java:187, camada controller)
     // Observacao: parametro oferecimentoComponenteCurricularId: era OferecimentoComponenteCurricular (referencia por id)

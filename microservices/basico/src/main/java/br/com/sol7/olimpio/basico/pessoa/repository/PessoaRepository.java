@@ -1,9 +1,15 @@
 package br.com.sol7.olimpio.basico.pessoa.repository;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
-@ApplicationScoped public class PessoaRepository implements PanacheRepository<Pessoa> {
+
+@ApplicationScoped
+public class PessoaRepository implements PanacheRepository<Pessoa> {
 
     // Migrado de PessoaRepository.buscarPessoaComUnidades (legado) - HQL original:
     // Select p from Pessoa p left join fetch p.unidades u where  p = ?1
@@ -13,8 +19,8 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
     public Uni<java.util.List<Pessoa>> buscarPessoaComUnidades(Long entityId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_PESSOA_COM_UNIDADES, Pessoa.class)
-                    .setParameter(1, entityId)
-                    .getResultList());
+                        .setParameter(1, entityId)
+                        .getResultList());
     }
 
 
@@ -28,8 +34,8 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
     public Uni<java.util.List<Object>> existenciaUsuarioComNome(String nome) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_EXISTENCIA_USUARIO_COM_NOME)
-                    .setParameter(1, nome)
-                    .getResultList());
+                        .setParameter(1, nome)
+                        .getResultList());
     }
 
 
@@ -41,8 +47,8 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
     public Uni<java.util.List<Object>> existenciaPessoaComNome(String nome) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_EXISTENCIA_PESSOA_COM_NOME)
-                    .setParameter(1, nome)
-                    .getResultList());
+                        .setParameter(1, nome)
+                        .getResultList());
     }
 
 
@@ -56,8 +62,8 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
     public Uni<java.util.List<Object>> existenciaUsuarioComRg(String nome) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_EXISTENCIA_USUARIO_COM_RG)
-                    .setParameter(1, nome)
-                    .getResultList());
+                        .setParameter(1, nome)
+                        .getResultList());
     }
 
 
@@ -69,8 +75,8 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
     public Uni<java.util.List<Object>> existenciaPessoaComRg(String nome) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_EXISTENCIA_PESSOA_COM_RG)
-                    .setParameter(1, nome)
-                    .getResultList());
+                        .setParameter(1, nome)
+                        .getResultList());
     }
 
 
@@ -82,9 +88,9 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
     public Uni<java.util.List<Object>> existenciaPessoaComRg(String nome, Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_EXISTENCIA_PESSOA_COM_RG_COM_ID)
-                    .setParameter(1, nome)
-                    .setParameter(2, id)
-                    .getResultList());
+                        .setParameter(1, nome)
+                        .setParameter(2, id)
+                        .getResultList());
     }
 
 
@@ -98,8 +104,8 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
     public Uni<java.util.List<Object>> existenciaUsuarioComCpf(String cpf) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_EXISTENCIA_USUARIO_COM_CPF)
-                    .setParameter(1, cpf)
-                    .getResultList());
+                        .setParameter(1, cpf)
+                        .getResultList());
     }
 
 
@@ -111,8 +117,8 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
     public Uni<java.util.List<Object>> existenciaPessoaComCpf(String cpf) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_EXISTENCIA_PESSOA_COM_CPF)
-                    .setParameter(1, cpf)
-                    .getResultList());
+                        .setParameter(1, cpf)
+                        .getResultList());
     }
 
 
@@ -124,9 +130,9 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
     public Uni<java.util.List<Object>> existenciaPessoaComCpf(String cpf, Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_EXISTENCIA_PESSOA_COM_CPF_COM_ID)
-                    .setParameter(1, cpf)
-                    .setParameter(2, id)
-                    .getResultList());
+                        .setParameter(1, cpf)
+                        .setParameter(2, id)
+                        .getResultList());
     }
 
 
@@ -138,9 +144,9 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
     public Uni<java.util.List<Object>> existenciaPessoaComCnpj(String cnpj, Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_EXISTENCIA_PESSOA_COM_CNPJ)
-                    .setParameter(1, cnpj)
-                    .setParameter(2, id)
-                    .getResultList());
+                        .setParameter(1, cnpj)
+                        .setParameter(2, id)
+                        .getResultList());
     }
 
 
@@ -152,8 +158,8 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
     public Uni<java.util.List<Object>> existenciaPessoaComCnpj(String cnpj) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_EXISTENCIA_PESSOA_COM_CNPJ_SEM_ID)
-                    .setParameter(1, cnpj)
-                    .getResultList());
+                        .setParameter(1, cnpj)
+                        .getResultList());
     }
 
 
@@ -165,9 +171,9 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
     public Uni<java.util.List<Object>> existenciaPessoaComRazaoSocial(String nome, Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_EXISTENCIA_PESSOA_COM_RAZAO_SOCIAL)
-                    .setParameter(1, nome)
-                    .setParameter(2, id)
-                    .getResultList());
+                        .setParameter(1, nome)
+                        .setParameter(2, id)
+                        .getResultList());
     }
 
 
@@ -181,8 +187,8 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
     public Uni<java.util.List<Object>> existenciaUsuarioComEmail(String email) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_EXISTENCIA_USUARIO_COM_EMAIL)
-                    .setParameter(1, email)
-                    .getResultList());
+                        .setParameter(1, email)
+                        .getResultList());
     }
 
 
@@ -194,8 +200,8 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
     public Uni<java.util.List<Object>> existenciaPessoaComEmail(String email) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_EXISTENCIA_PESSOA_COM_EMAIL)
-                    .setParameter(1, email)
-                    .getResultList());
+                        .setParameter(1, email)
+                        .getResultList());
     }
 
 
@@ -207,9 +213,9 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
     public Uni<java.util.List<Object>> existenciaPessoaComEmail(String email, Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_EXISTENCIA_PESSOA_COM_EMAIL_COM_ID)
-                    .setParameter(1, email)
-                    .setParameter(2, id)
-                    .getResultList());
+                        .setParameter(1, email)
+                        .setParameter(2, id)
+                        .getResultList());
     }
 
 
@@ -221,8 +227,8 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
     public Uni<java.util.List<Pessoa>> pessoaComUnidades(Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_PESSOA_COM_UNIDADES, Pessoa.class)
-                    .setParameter(1, unidadeId)
-                    .getResultList());
+                        .setParameter(1, unidadeId)
+                        .getResultList());
     }
 
 
@@ -234,8 +240,8 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
     public Uni<java.util.List<Pessoa>> buscarPessoaPorUnidades(List<Long> unidadeIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_PESSOA_POR_UNIDADES, Pessoa.class)
-                    .setParameter(1, unidadeIds)
-                    .getResultList());
+                        .setParameter(1, unidadeIds)
+                        .getResultList());
     }
 
 }

@@ -1,5 +1,6 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import {ModuleList} from '../ModuleListScreen';
+
 export default function ViewContratoSituacaoFormContratoSituacaoListScreen() {
-  return <ModuleList path="/api/view/contratoSituacao/formContratoSituacao" />;
+    return <ModuleList path="/api/view/contratoSituacao/formContratoSituacao"/>;
 }

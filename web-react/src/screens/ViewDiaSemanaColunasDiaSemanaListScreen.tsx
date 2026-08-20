@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewDiaSemanaColunasDiaSemanaListScreen(){return <PermissionGate permission="READ"><main><h1>Colunas Dia Semana</h1><DataTable path="/api/view/diaSemana/colunasDiaSemana"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewDiaSemanaColunasDiaSemanaListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Colunas Dia Semana</h1><DataTable path="/api/view/diaSemana/colunasDiaSemana"/></main>
+    </PermissionGate>
+}

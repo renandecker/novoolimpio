@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewTipoAcaoListTipoAcaoListScreen(){return <PermissionGate permission="READ"><main><h1>Tipo Acao</h1><DataTable path="/api/view/tipoAcao/listTipoAcao"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewTipoAcaoListTipoAcaoListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Tipo Acao</h1><DataTable path="/api/view/tipoAcao/listTipoAcao"/></main>
+    </PermissionGate>
+}

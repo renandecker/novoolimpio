@@ -1,7 +1,11 @@
 package br.com.sol7.olimpio.comercial.categoriacampo;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class CategoriaCampoRepository implements PanacheRepository<CategoriaCampo> {
+
+@ApplicationScoped
+public class CategoriaCampoRepository implements PanacheRepository<CategoriaCampo> {
 
     // NAO TRADUZIDA AUTOMATICAMENTE (campo 'descricaocompleta' nao encontrado em Categoria)
     // Migrado de CategoriaCampoRepository.autoComplete (legado) - HQL original:

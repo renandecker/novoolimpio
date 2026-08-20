@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.professor.disponibilidade.service;
+
 import br.com.sol7.olimpio.professor.disponibilidade.entity.DisponibilidadeProfessor;
 import br.com.sol7.olimpio.professor.disponibilidade.repository.DisponibilidadeProfessorRepository;
 import br.com.sol7.olimpio.professor.disponibilidade.dto.DisponibilidadeProfessorRequest;
@@ -73,7 +74,8 @@ public class DisponibilidadeProfessorService {
     private static final String SQL_TURNOS_EXTREMOS =
             "SELECT MIN(t.inicio), MAX(t.fim) FROM edc_turno t";
 
-    @Inject DisponibilidadeProfessorRepository repository;
+    @Inject
+    DisponibilidadeProfessorRepository repository;
 
     public Uni<List<DisponibilidadeProfessorResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -127,7 +129,7 @@ public class DisponibilidadeProfessorService {
         Uni<List<Object[]>> disponibilidades = nativeQuery(SQL_DISPONIBILIDADES_PROFESSOR, professorId);
         Uni<List<Object[]>> turnos = nativeQuery(SQL_TURNOS_EXTREMOS);
         return nativeQuery(SQL_UNIDADES_PROFESSOR, professorId).map(rows -> rows.stream()
-                        .map(r -> toLong(r[0])).toList())
+                .map(r -> toLong(r[0])).toList())
                 .chain(unidades -> {
                     Uni<List<Object[]>> feriados = unidades.isEmpty()
                             ? nativeQuery(SQL_FERIADOS_NACIONAIS, toDate(first), toDate(last.plusDays(1)))
@@ -138,8 +140,8 @@ public class DisponibilidadeProfessorService {
     }
 
     private List<DisponibilidadeScheduleEventResponse> buildSchedule(List<Object[]> ocorrencias, List<Object[]> disponibilidades,
-                                                                    List<Object[]> turnosRows, List<Object[]> feriados,
-                                                                    LocalDate first, LocalDate last) {
+                                                                     List<Object[]> turnosRows, List<Object[]> feriados,
+                                                                     LocalDate first, LocalDate last) {
         List<DisponibilidadeScheduleEventResponse> events = new ArrayList<>();
         for (Object[] f : feriados) {
             String nome = toStr(f[0]);
@@ -225,27 +227,36 @@ public class DisponibilidadeProfessorService {
         });
     }
 
-    private void apply(DisponibilidadeProfessor e, DisponibilidadeProfessorRequest r) { e.professorId = r.professorId(); e.unidadeId = r.unidadeId(); e.tipoContratoId = r.tipoContratoId(); e.inicio = r.inicio(); e.fim = r.fim(); e.preAutorizado = r.preAutorizado(); }
+    private void apply(DisponibilidadeProfessor e, DisponibilidadeProfessorRequest r) {
+        e.professorId = r.professorId();
+        e.unidadeId = r.unidadeId();
+        e.tipoContratoId = r.tipoContratoId();
+        e.inicio = r.inicio();
+        e.fim = r.fim();
+        e.preAutorizado = r.preAutorizado();
+    }
 
     private DisponibilidadeProfessorResponse toResponse(DisponibilidadeProfessor e) {
         return new DisponibilidadeProfessorResponse(e.id, e.professorId, e.unidadeId, e.tipoContratoId, e.inicio, e.fim, e.preAutorizado);
     }
 
-    private String iso(LocalDateTime dt) { return dt.format(ISO); }
+    private String iso(LocalDateTime dt) {
+        return dt.format(ISO);
+    }
 
     private LocalDate toLocalDate(Object value) {
         if (value == null) return null;
-        if (value instanceof LocalDate d) return d;
-        if (value instanceof java.sql.Date d) return d.toLocalDate();
-        if (value instanceof java.sql.Timestamp t) return t.toLocalDateTime().toLocalDate();
-        if (value instanceof Date d) return d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        if (value instanceof LocalDate d)return d;
+        if (value instanceof java.sql.Date d)return d.toLocalDate();
+        if (value instanceof java.sql.Timestamp t)return t.toLocalDateTime().toLocalDate();
+        if (value instanceof Date d)return d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         return null;
     }
 
     private LocalTime toTime(Object value) {
         if (value == null) return null;
-        if (value instanceof LocalTime t) return t;
-        if (value instanceof java.sql.Time t) return t.toLocalTime();
+        if (value instanceof LocalTime t)return t;
+        if (value instanceof java.sql.Time t)return t.toLocalTime();
         return null;
     }
 

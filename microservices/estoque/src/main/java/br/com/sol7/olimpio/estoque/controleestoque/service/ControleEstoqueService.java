@@ -1,13 +1,16 @@
 package br.com.sol7.olimpio.estoque.controleestoque;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.estoque.produto.ProdutoRepository;
+
 import java.util.Date;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,8 +19,10 @@ import java.util.concurrent.ConcurrentHashMap;
 @WithTransaction
 public class ControleEstoqueService {
 
-    @Inject ControleEstoqueRepository repository;
-    @Inject ProdutoRepository produtoRepository;
+    @Inject
+    ControleEstoqueRepository repository;
+    @Inject
+    ProdutoRepository produtoRepository;
 
     private final Map<Long, String> unidadeCache = new ConcurrentHashMap<>();
     private final Map<Long, String> usuarioCache = new ConcurrentHashMap<>();
@@ -90,11 +95,11 @@ public class ControleEstoqueService {
                 .map(produto -> {
                     if (produto == null) return r;
                     return new ControleEstoqueResponse(
-                        r.id(), r.valor(), r.quantidade(), r.qtdeSolicitado(), r.qtdeDefeito(),
-                        r.qtdeFalta(), r.qtdeNaoEncontrado(), r.qtdeReservado(), r.qtdeAprovadoNaoEntregue(),
-                        r.produtoId(), r.unidadeId(),
-                        produto.nome, produto.imagem, produto.valor, produto.quantidade,
-                        null, null, null
+                            r.id(), r.valor(), r.quantidade(), r.qtdeSolicitado(), r.qtdeDefeito(),
+                            r.qtdeFalta(), r.qtdeNaoEncontrado(), r.qtdeReservado(), r.qtdeAprovadoNaoEntregue(),
+                            r.produtoId(), r.unidadeId(),
+                            produto.nome, produto.imagem, produto.valor, produto.quantidade,
+                            null, null, null
                     );
                 });
     }
@@ -171,7 +176,7 @@ public class ControleEstoqueService {
     //         return this.getControleEstoqueRepository().autoComplete(query.toLowerCase(), unidades, new PageRequest(0, 20)).getContent();
     //     }
     public Uni<List<Long>> autoComplete2(String query, Long unidadesId) {
-                return repository.autoComplete(query.toLowerCase(), unidadesId).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoComplete(query.toLowerCase(), unidadesId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -182,7 +187,7 @@ public class ControleEstoqueService {
     //         return this.getControleEstoqueRepository().autoCompleteComUnidade(unidades);
     //     }
     public Uni<List<Long>> autoCompleteComUnidade(Long unidadesId) {
-                return repository.find("unidadeId = ?1 order by produto.id", unidadesId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("unidadeId = ?1 order by produto.id", unidadesId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -193,7 +198,7 @@ public class ControleEstoqueService {
     //         return getControleEstoqueRepository().buscarExistenciaProduto(unidade, produto);
     //     }
     public Uni<Long> buscarExistenciaProduto(Long unidadeId, Long produtoId) {
-                return repository.find("unidadeId = ?1 and produtoId = ?2", unidadeId, produtoId).firstResult().map(x -> x == null ? null : x.id);
+        return repository.find("unidadeId = ?1 and produtoId = ?2", unidadeId, produtoId).firstResult().map(x -> x == null ? null : x.id);
     }
 
 
@@ -204,7 +209,7 @@ public class ControleEstoqueService {
     //         return getControleEstoqueRepository().buscarProdutoEstoque(produtoestoque);
     //     }
     public Uni<Long> buscarProdutoEstoque(Integer produtoestoque) {
-                return repository.find("id = ?1", produtoestoque).firstResult().map(x -> x == null ? null : x.id);
+        return repository.find("id = ?1", produtoestoque).firstResult().map(x -> x == null ? null : x.id);
     }
 
 
@@ -215,7 +220,7 @@ public class ControleEstoqueService {
     //         return getControleEstoqueRepository().buscarItenUnidade(unidade);
     //     }
     public Uni<List<Long>> buscarItenUnidade(Long unidadeId) {
-                return repository.find("unidadeId = ?1 order by produto.id", unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("unidadeId = ?1 order by produto.id", unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

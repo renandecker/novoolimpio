@@ -15,4 +15,4 @@ public record ParcelaCartaoResponse(
         String orderId,
         String codigoAutorizacao,
         String mensagemRetorno,
-        LocalDateTime dataTransacao) {}
+        LocalDateTime dataTransacao){}

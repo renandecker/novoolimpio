@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewEstadoListEstadoListScreen(){return <PermissionGate permission="READ"><main><h1>Estado</h1><DataTable path="/api/view/estado/listEstado"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewEstadoListEstadoListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Estado</h1><DataTable path="/api/view/estado/listEstado"/></main>
+    </PermissionGate>
+}

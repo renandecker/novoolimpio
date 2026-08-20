@@ -16,4 +16,4 @@ public record NotificacaoResponse(
         boolean emailEnviado,
         boolean mobileEnviado,
         OffsetDateTime dataLeitura,
-        OffsetDateTime createdAt) {}
+        OffsetDateTime createdAt){}

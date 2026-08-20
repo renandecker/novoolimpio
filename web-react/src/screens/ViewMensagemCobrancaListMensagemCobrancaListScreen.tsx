@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewMensagemCobrancaListMensagemCobrancaListScreen(){return <PermissionGate permission="READ"><main><h1>Mensagem Cobranca</h1><DataTable path="/api/view/mensagemCobranca/listMensagemCobranca"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewMensagemCobrancaListMensagemCobrancaListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Mensagem Cobranca</h1><DataTable path="/api/view/mensagemCobranca/listMensagemCobranca"/></main>
+    </PermissionGate>
+}

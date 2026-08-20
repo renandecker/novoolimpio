@@ -1,9 +1,14 @@
 package br.com.sol7.olimpio.basico.fornecedor.repository;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 import br.com.sol7.olimpio.basico.fornecedor.entity.Fornecedor;
-@ApplicationScoped public class FornecedorRepository implements PanacheRepository<Fornecedor> {
+
+@ApplicationScoped
+public class FornecedorRepository implements PanacheRepository<Fornecedor> {
 
     // Migrado de FornecedorRepository.autoComplete (legado) - HQL original:
     // select distinct f from Fornecedor f inner join f.pessoa p inner join  p.unidades u where u IN (?2) and (lower(p.pessoaJuridica.nomeFantasia) like '%' || ?1 || '%' OR (p.pessoaJuridica.cnpj) like '%' || ?1 || '%' OR (p.pessoaJuridica.razaoSocial) like '%' || ?1 || '%')  order by p.pessoaJuridica.nomeFantasia
@@ -13,9 +18,9 @@ import br.com.sol7.olimpio.basico.fornecedor.entity.Fornecedor;
     public Uni<java.util.List<Fornecedor>> autoComplete(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Fornecedor.class)
-                    .setParameter(1, query)
-                    .setParameter(2, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -29,9 +34,9 @@ import br.com.sol7.olimpio.basico.fornecedor.entity.Fornecedor;
     public Uni<java.util.List<Object>> autoCompletePessoa(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_PESSOA)
-                    .setParameter(1, query)
-                    .setParameter(2, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -45,8 +50,8 @@ import br.com.sol7.olimpio.basico.fornecedor.entity.Fornecedor;
     public Uni<java.util.List<Object>> autoCompleteSOmenteUnidade(List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_S_OMENTE_UNIDADE)
-                    .setParameter(1, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -59,7 +64,7 @@ import br.com.sol7.olimpio.basico.fornecedor.entity.Fornecedor;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCA_FORNECEDOR_ATIVOS, Fornecedor.class)
 
-                    .getResultList());
+                        .getResultList());
     }
 
 
@@ -71,9 +76,9 @@ import br.com.sol7.olimpio.basico.fornecedor.entity.Fornecedor;
     public Uni<java.util.List<Fornecedor>> autoCompleteFornecedor(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_FORNECEDOR, Fornecedor.class)
-                    .setParameter(1, query)
-                    .setParameter(2, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, unidadesIds)
+                        .getResultList());
     }
 
 
@@ -85,8 +90,8 @@ import br.com.sol7.olimpio.basico.fornecedor.entity.Fornecedor;
     public Uni<java.util.List<Fornecedor>> autoCompleteSOmenteUnidadeFornecedor(List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_S_OMENTE_UNIDADE_FORNECEDOR, Fornecedor.class)
-                    .setParameter(1, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, unidadesIds)
+                        .getResultList());
     }
 
 }

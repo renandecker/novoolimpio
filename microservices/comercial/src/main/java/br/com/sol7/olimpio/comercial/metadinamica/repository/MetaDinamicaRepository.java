@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.comercial.metadinamica;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class MetaDinamicaRepository implements PanacheRepository<MetaDinamica> {
+
+@ApplicationScoped
+public class MetaDinamicaRepository implements PanacheRepository<MetaDinamica> {
 
     // Migrado de MetaDinamicaRepository.verificarMetaAnoMesUnidade (legado) - HQL original:
     // select m from MetaDinamica m where m.mes = ?1 and m.ano = ?2 and m.indicador = ?3 and m.unidade = ?4
@@ -12,11 +17,11 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<MetaDinamica>> verificarMetaAnoMesUnidade(Integer mes, Integer ano, Long indicadorId, Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_VERIFICAR_META_ANO_MES_UNIDADE, MetaDinamica.class)
-                    .setParameter(1, mes)
-                    .setParameter(2, ano)
-                    .setParameter(3, indicadorId)
-                    .setParameter(4, unidadeId)
-                    .getResultList());
+                        .setParameter(1, mes)
+                        .setParameter(2, ano)
+                        .setParameter(3, indicadorId)
+                        .setParameter(4, unidadeId)
+                        .getResultList());
     }
 
 
@@ -28,10 +33,10 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<MetaDinamica>> verificarMetaAnoUnidade(Integer ano, Long indicadorId, Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_VERIFICAR_META_ANO_UNIDADE, MetaDinamica.class)
-                    .setParameter(1, ano)
-                    .setParameter(2, indicadorId)
-                    .setParameter(3, unidadeId)
-                    .getResultList());
+                        .setParameter(1, ano)
+                        .setParameter(2, indicadorId)
+                        .setParameter(3, unidadeId)
+                        .getResultList());
     }
 
 
@@ -43,9 +48,9 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<MetaDinamica>> verificarMetaUnidade(Long indicadorId, Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_VERIFICAR_META_UNIDADE, MetaDinamica.class)
-                    .setParameter(1, indicadorId)
-                    .setParameter(2, unidadeId)
-                    .getResultList());
+                        .setParameter(1, indicadorId)
+                        .setParameter(2, unidadeId)
+                        .getResultList());
     }
 
 
@@ -57,8 +62,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<MetaDinamica>> getMetaDinamicasByIndicador(Long indicadorId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_GET_META_DINAMICAS_BY_INDICADOR, MetaDinamica.class)
-                    .setParameter(1, indicadorId)
-                    .getResultList());
+                        .setParameter(1, indicadorId)
+                        .getResultList());
     }
 
 }

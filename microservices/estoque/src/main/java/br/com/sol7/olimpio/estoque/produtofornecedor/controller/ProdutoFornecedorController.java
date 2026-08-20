@@ -4,6 +4,7 @@ import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
+
 import java.util.List;
 
 @Path("/api/estoque/produto-fornecedor")
@@ -11,7 +12,8 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ProdutoFornecedorController {
 
-    @Inject ProdutoFornecedorService service;
+    @Inject
+    ProdutoFornecedorService service;
 
     @GET
     @Path("/produto/{produtoId}")

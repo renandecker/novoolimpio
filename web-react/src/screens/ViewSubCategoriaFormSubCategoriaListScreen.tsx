@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewSubCategoriaFormSubCategoriaListScreen(){return <PermissionGate permission="READ"><main><h1>Form Sub Categoria</h1><DataTable path="/api/view/subCategoria/formSubCategoria"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewSubCategoriaFormSubCategoriaListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Form Sub Categoria</h1><DataTable path="/api/view/subCategoria/formSubCategoria"/></main>
+    </PermissionGate>
+}

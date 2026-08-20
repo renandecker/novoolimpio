@@ -18,15 +18,21 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 import java.util.List;
 
-@Path("/api/notificacoes/config-canal") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
+@Path("/api/notificacoes/config-canal")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class ConfigCanalController {
 
-    @Inject ConfigCanalService service;
+    @Inject
+    ConfigCanalService service;
 
     @GET
-    public Uni<List<ConfigCanalResponse>> list() { return service.list(); }
+    public Uni<List<ConfigCanalResponse>> list() {
+        return service.list();
+    }
 
     @GET
     @Path("/paged")
@@ -36,7 +42,9 @@ public class ConfigCanalController {
 
     @GET
     @Path("/{id}")
-    public Uni<ConfigCanalResponse> find(@PathParam("id") Long id) { return service.find(id); }
+    public Uni<ConfigCanalResponse> find(@PathParam("id") Long id) {
+        return service.find(id);
+    }
 
     @POST
     public Uni<Response> create(@Valid ConfigCanalRequest r) {
@@ -45,9 +53,13 @@ public class ConfigCanalController {
 
     @PUT
     @Path("/{id}")
-    public Uni<ConfigCanalResponse> update(@PathParam("id") Long id, @Valid ConfigCanalRequest r) { return service.update(id, r); }
+    public Uni<ConfigCanalResponse> update(@PathParam("id") Long id, @Valid ConfigCanalRequest r) {
+        return service.update(id, r);
+    }
 
     @DELETE
     @Path("/{id}")
-    public Uni<Void> delete(@PathParam("id") Long id) { return service.delete(id); }
+    public Uni<Void> delete(@PathParam("id") Long id) {
+        return service.delete(id);
+    }
 }

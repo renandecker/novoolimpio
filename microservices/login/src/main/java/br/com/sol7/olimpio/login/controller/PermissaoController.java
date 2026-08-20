@@ -12,6 +12,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
+
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -21,8 +22,10 @@ import java.util.Set;
 @Consumes(MediaType.APPLICATION_JSON)
 public class PermissaoController {
 
-    @Inject ModulePermissionService modulePermissions;
-    @Inject LoginRepository loginRepository;
+    @Inject
+    ModulePermissionService modulePermissions;
+    @Inject
+    LoginRepository loginRepository;
 
     /**
      * Permissões por coluna (outcome) do usuário autenticado, resolvidas do banco

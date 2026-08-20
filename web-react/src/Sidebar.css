@@ -1,192 +1,196 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
 .sidebar {
-  width: 260px;
-  min-height: 100vh;
-  background: linear-gradient(180deg, #1a1d22 0%, #24272e 100%);
-  border-right: 1px solid #3a3f4a;
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  z-index: 30;
-  overflow-y: auto;
-  transform: translateX(calc(-100% + 22px));
-  transition: transform 0.25s ease;
+    width: 260px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #1a1d22 0%, #24272e 100%);
+    border-right: 1px solid #3a3f4a;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 30;
+    overflow-y: auto;
+    transform: translateX(calc(-100% + 22px));
+    transition: transform 0.25s ease;
 }
 
 .sidebar:hover,
 .sidebar:focus-within {
-  transform: translateX(0);
+    transform: translateX(0);
 }
 
 .sidebar-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 16px;
-  border-bottom: 1px solid #3a3f4a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px;
+    border-bottom: 1px solid #3a3f4a;
 }
 
 .sidebar-logo {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(180deg, #2f333b 0%, #1a1d22 100%);
-  border: 2px solid #c2aa3c;
-  color: #e8d27a;
-  font-size: 18px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: Georgia, 'Times New Roman', serif;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #2f333b 0%, #1a1d22 100%);
+    border: 2px solid #c2aa3c;
+    color: #e8d27a;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Georgia, 'Times New Roman', serif;
 }
 
 .sidebar-title {
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: bold;
-  letter-spacing: 1px;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 1px;
 }
 
 .sidebar-nav {
-  flex: 1;
-  padding: 8px 0;
+    flex: 1;
+    padding: 8px 0;
 }
 
 .sidebar-search {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 4px 12px 10px;
-  padding: 6px 10px;
-  border: 1px solid #3a3f4a;
-  border-radius: 6px;
-  background-color: rgba(255, 255, 255, 0.04);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 4px 12px 10px;
+    padding: 6px 10px;
+    border: 1px solid #3a3f4a;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.04);
 }
 
 .sidebar-search:focus-within {
-  border-color: #c2aa3c;
-  background-color: rgba(255, 255, 255, 0.07);
+    border-color: #c2aa3c;
+    background-color: rgba(255, 255, 255, 0.07);
 }
 
 .sidebar-search-icon {
-  color: #888;
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
+    color: #888;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
 }
 
 .sidebar-search-input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  outline: none;
-  background: none;
-  color: #ffffff;
-  font-size: 13px;
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: none;
+    color: #ffffff;
+    font-size: 13px;
 }
 
 .sidebar-search-input::placeholder {
-  color: #777;
+    color: #777;
 }
 
 .sidebar-search-clear {
-  border: none;
-  background: none;
-  color: #888;
-  font-size: 16px;
-  line-height: 1;
-  cursor: pointer;
-  padding: 0 2px;
-  flex-shrink: 0;
+    border: none;
+    background: none;
+    color: #888;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 2px;
+    flex-shrink: 0;
 }
 
 .sidebar-search-clear:hover {
-  color: #ffffff;
+    color: #ffffff;
 }
 
 .sidebar-search-result {
-  font-size: 13px;
+    font-size: 13px;
 }
 
 .sidebar-search-parent {
-  color: #888;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
+    color: #888;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
 }
 
 .sidebar-search-empty {
-  padding: 18px 16px;
-  color: #888;
-  font-size: 13px;
-  text-align: center;
+    padding: 18px 16px;
+    color: #888;
+    font-size: 13px;
+    text-align: center;
 }
 
 .sidebar-group {
-  margin-bottom: 2px;
+    margin-bottom: 2px;
 }
 
 .sidebar-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
-  color: #c0c0c0;
-  text-decoration: none;
-  font-size: 14px;
-  cursor: pointer;
-  border: none;
-  background: none;
-  width: 100%;
-  text-align: left;
-  transition: background-color 0.15s, color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    color: #c0c0c0;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    transition: background-color 0.15s, color 0.15s;
 }
 
 .sidebar-item:hover {
-  background-color: rgba(194, 170, 60, 0.1);
-  color: #ffffff;
+    background-color: rgba(194, 170, 60, 0.1);
+    color: #ffffff;
 }
 
 .sidebar-item.active {
-  background-color: rgba(194, 170, 60, 0.2);
-  color: #e8d27a;
-  border-left: 3px solid #c2aa3c;
+    background-color: rgba(194, 170, 60, 0.2);
+    color: #e8d27a;
+    border-left: 3px solid #c2aa3c;
 }
 
 .sidebar-group-header {
-  justify-content: space-between;
+    justify-content: space-between;
 }
 
 .sidebar-icon {
-  font-size: 16px;
-  width: 24px;
-  text-align: center;
+    font-size: 16px;
+    width: 24px;
+    text-align: center;
 }
 
 .sidebar-label {
-  flex: 1;
+    flex: 1;
 }
 
 .sidebar-arrow {
-  font-size: 14px;
-  color: #888;
-  line-height: 1;
+    font-size: 14px;
+    color: #888;
+    line-height: 1;
 }
 
 .sidebar-submenu {
-  padding-left: 24px;
+    padding-left: 24px;
 }
 
 .sidebar-subitem {
-  padding: 6px 16px;
-  font-size: 13px;
+    padding: 6px 16px;
+    font-size: 13px;
 }
 
 .sidebar-subitem.active {
-  border-left: 2px solid #c2aa3c;
+    border-left: 2px solid #c2aa3c;
 }

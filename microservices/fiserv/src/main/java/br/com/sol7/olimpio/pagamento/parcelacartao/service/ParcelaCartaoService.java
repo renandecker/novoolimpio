@@ -19,6 +19,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -33,11 +34,16 @@ public class ParcelaCartaoService {
 
     private static final Set<String> STATUS_APROVADO = Set.of("APPROVED", "SUCCESS", "SETTLED", "AUTHORIZED", "CAPTURED");
 
-    @Inject ParcelaCartaoRepository repository;
-    @Inject ParcelaRepository parcelaRepository;
-    @Inject CartaoPessoaService cartaoPessoaService;
-    @Inject FiservGatewayService fiserv;
-    @Inject PagamentoConfirmadoProducer pagamentoConfirmadoProducer;
+    @Inject
+    ParcelaCartaoRepository repository;
+    @Inject
+    ParcelaRepository parcelaRepository;
+    @Inject
+    CartaoPessoaService cartaoPessoaService;
+    @Inject
+    FiservGatewayService fiserv;
+    @Inject
+    PagamentoConfirmadoProducer pagamentoConfirmadoProducer;
 
     @WithTransaction
     public Uni<ParcelaCartaoResponse> pagar(PagamentoCartaoRequest r) {
@@ -61,9 +67,9 @@ public class ParcelaCartaoService {
 
         return vista
                 ? fiserv.venderAVistaComCartao(merchantTransactionId, r.valor().toPlainString(),
-                        r.numeroCartao(), r.cvvCartao(), r.validadeMes(), r.validadeAno())
+                r.numeroCartao(), r.cvvCartao(), r.validadeMes(), r.validadeAno())
                 : fiserv.venderParceladoComCartao(merchantTransactionId, r.qtdParcelas(), r.valor().toPlainString(),
-                        r.numeroCartao(), r.cvvCartao(), r.validadeMes(), r.validadeAno());
+                r.numeroCartao(), r.cvvCartao(), r.validadeMes(), r.validadeAno());
     }
 
     private Uni<ParcelaCartaoResponse> persistirResultado(Parcela parcela, PagamentoCartaoRequest r, JsonNode json) {
@@ -117,7 +123,9 @@ public class ParcelaCartaoService {
                 .map(this::toResponse);
     }
 
-    /** Cancela (void) uma transacao aprovada do mesmo dia junto a Fiserv. */
+    /**
+     * Cancela (void) uma transacao aprovada do mesmo dia junto a Fiserv.
+     */
     @WithTransaction
     public Uni<ParcelaCartaoResponse> cancelar(Long id) {
         return repository.findById(id)
@@ -125,7 +133,9 @@ public class ParcelaCartaoService {
                 .onItem().transformToUni(entity -> executarSecundaria(entity, true));
     }
 
-    /** Estorna (return) uma transacao ja liquidada junto a Fiserv. */
+    /**
+     * Estorna (return) uma transacao ja liquidada junto a Fiserv.
+     */
     @WithTransaction
     public Uni<ParcelaCartaoResponse> estornar(Long id) {
         return repository.findById(id)
@@ -152,12 +162,12 @@ public class ParcelaCartaoService {
             return repository.persist(entity).onItem().transformToUni(v ->
                     parcelaRepository.find("idParcelaCartao", entity.id).firstResult()
                             .onItem().transformToUni(parcela -> {
-                                if (parcela != null) {
-                                    parcela.dataPagamento = null;
-                                    return parcelaRepository.persist(parcela).map(x -> toResponse(entity));
-                                }
-                                return Uni.createFrom().item(toResponse(entity));
-                            }));
+                        if (parcela != null) {
+                            parcela.dataPagamento = null;
+                            return parcelaRepository.persist(parcela).map(x -> toResponse(entity));
+                        }
+                        return Uni.createFrom().item(toResponse(entity));
+                    }));
         });
     }
 

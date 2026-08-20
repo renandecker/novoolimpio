@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.pais.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.pais.dto.PaisRequest;
 import br.com.sol7.olimpio.basico.pais.dto.PaisResponse;
 import br.com.sol7.olimpio.basico.pais.entity.Pais;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.pais.repository.PaisRepository;
 @WithTransaction
 public class PaisService {
 
-    @Inject PaisRepository repository;
+    @Inject
+    PaisRepository repository;
 
     public Uni<List<PaisResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,10 @@ public class PaisService {
                         : Uni.createFrom().failure(new NotFoundException("Pais not found")));
     }
 
-    private void apply(Pais e, PaisRequest r) { e.nome = r.nome(); e.nacionalidade = r.nacionalidade(); }
+    private void apply(Pais e, PaisRequest r) {
+        e.nome = r.nome();
+        e.nacionalidade = r.nacionalidade();
+    }
 
     private PaisResponse toResponse(Pais e) {
         return new PaisResponse(e.id, e.nome, e.nacionalidade);
@@ -70,7 +77,7 @@ public class PaisService {
     //         return this.getPaisRepository().autoComplete(query.toLowerCase());
     //     }
     public Uni<List<Long>> autoComplete(String query) {
-                return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
+        return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

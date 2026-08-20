@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.cpfalunos.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.cpfalunos.dto.CpfAlunosRequest;
 import br.com.sol7.olimpio.basico.cpfalunos.dto.CpfAlunosResponse;
 import br.com.sol7.olimpio.basico.cpfalunos.entity.CpfAlunos;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.cpfalunos.repository.CpfAlunosRepository;
 @WithTransaction
 public class CpfAlunosService {
 
-    @Inject CpfAlunosRepository repository;
+    @Inject
+    CpfAlunosRepository repository;
 
     public Uni<List<CpfAlunosResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,10 @@ public class CpfAlunosService {
                         : Uni.createFrom().failure(new NotFoundException("CpfAlunos not found")));
     }
 
-    private void apply(CpfAlunos e, CpfAlunosRequest r) { e.cpf = r.cpf(); e.nome = r.nome(); }
+    private void apply(CpfAlunos e, CpfAlunosRequest r) {
+        e.cpf = r.cpf();
+        e.nome = r.nome();
+    }
 
     private CpfAlunosResponse toResponse(CpfAlunos e) {
         return new CpfAlunosResponse(e.id, e.cpf, e.nome);

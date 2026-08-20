@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.basico.layout.service;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,7 +7,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
+
 import br.com.sol7.olimpio.basico.layout.dto.LayoutRequest;
 import br.com.sol7.olimpio.basico.layout.dto.LayoutResponse;
 import br.com.sol7.olimpio.basico.layout.entity.Layout;
@@ -16,7 +19,8 @@ import br.com.sol7.olimpio.basico.layout.repository.LayoutRepository;
 @WithTransaction
 public class LayoutService {
 
-    @Inject LayoutRepository repository;
+    @Inject
+    LayoutRepository repository;
 
     public Uni<List<LayoutResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,7 +60,23 @@ public class LayoutService {
                         : Uni.createFrom().failure(new NotFoundException("Layout not found")));
     }
 
-    private void apply(Layout e, LayoutRequest r) { e.keyFeriado = r.keyFeriado(); e.icon = r.icon(); e.folderLogin = r.folderLogin(); e.folderDocumento = r.folderDocumento(); e.temaPadrao = r.temaPadrao(); e.folderBackgound = r.folderBackgound(); e.loginPosicao = r.loginPosicao(); e.temaEmail = r.temaEmail(); e.tema = r.tema(); e.forderBarra = r.forderBarra(); e.url = r.url(); e.titulo = r.titulo(); e.posicaoLogo = r.posicaoLogo(); e.repositorio = r.repositorio(); e.imagemEmail = r.imagemEmail(); }
+    private void apply(Layout e, LayoutRequest r) {
+        e.keyFeriado = r.keyFeriado();
+        e.icon = r.icon();
+        e.folderLogin = r.folderLogin();
+        e.folderDocumento = r.folderDocumento();
+        e.temaPadrao = r.temaPadrao();
+        e.folderBackgound = r.folderBackgound();
+        e.loginPosicao = r.loginPosicao();
+        e.temaEmail = r.temaEmail();
+        e.tema = r.tema();
+        e.forderBarra = r.forderBarra();
+        e.url = r.url();
+        e.titulo = r.titulo();
+        e.posicaoLogo = r.posicaoLogo();
+        e.repositorio = r.repositorio();
+        e.imagemEmail = r.imagemEmail();
+    }
 
     private LayoutResponse toResponse(Layout e) {
         return new LayoutResponse(e.id, e.keyFeriado, e.icon, e.folderLogin, e.folderDocumento, e.temaPadrao, e.folderBackgound, e.loginPosicao, e.temaEmail, e.tema, e.forderBarra, e.url, e.titulo, e.posicaoLogo, e.repositorio, e.imagemEmail);

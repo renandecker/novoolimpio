@@ -1,1 +1,8 @@
-import { PermissionGate } from '../permissions';import { DataTable } from '../DataTable'; export default function ViewPagamentoEfetuarPagamentoListScreen(){return <PermissionGate permission="READ"><main><h1>Efetuar Pagamento</h1><DataTable path="/api/view/pagamento/efetuarPagamento"/></main></PermissionGate>}
+import {PermissionGate} from '../permissions';
+import {DataTable} from '../DataTable';
+
+export default function ViewPagamentoEfetuarPagamentoListScreen() {
+    return <PermissionGate permission="READ">
+        <main><h1>Efetuar Pagamento</h1><DataTable path="/api/view/pagamento/efetuarPagamento"/></main>
+    </PermissionGate>
+}

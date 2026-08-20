@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.contratosituacao;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ContratoSituacaoService {
 
-    @Inject ContratoSituacaoRepository repository;
+    @Inject
+    ContratoSituacaoRepository repository;
 
     public Uni<List<ContratoSituacaoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,11 @@ public class ContratoSituacaoService {
                         : Uni.createFrom().failure(new NotFoundException("ContratoSituacao not found")));
     }
 
-    private void apply(ContratoSituacao e, ContratoSituacaoRequest r) { e.descricao = r.descricao(); e.sucinto = r.sucinto(); e.fl_aprovado = r.fl_aprovado(); }
+    private void apply(ContratoSituacao e, ContratoSituacaoRequest r) {
+        e.descricao = r.descricao();
+        e.sucinto = r.sucinto();
+        e.fl_aprovado = r.fl_aprovado();
+    }
 
     private ContratoSituacaoResponse toResponse(ContratoSituacao e) {
         return new ContratoSituacaoResponse(e.id, e.descricao, e.sucinto, e.fl_aprovado);

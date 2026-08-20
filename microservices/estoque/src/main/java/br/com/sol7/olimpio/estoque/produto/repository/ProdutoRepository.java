@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.estoque.produto;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
-@ApplicationScoped public class ProdutoRepository implements PanacheRepository<Produto> {
+
+@ApplicationScoped
+public class ProdutoRepository implements PanacheRepository<Produto> {
 
     // Migrado de ProdutoRepository.carregarUnidade (legado) - HQL original:
     // select p from Produto p left join fetch p.unidades where p = ?1
@@ -12,8 +17,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Produto>> carregarUnidade(Long produtoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_CARREGAR_UNIDADE, Produto.class)
-                    .setParameter(1, produtoId)
-                    .getResultList());
+                        .setParameter(1, produtoId)
+                        .getResultList());
     }
 
 
@@ -25,8 +30,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Produto>> carregarFornecedor(Long produtoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_CARREGAR_FORNECEDOR, Produto.class)
-                    .setParameter(1, produtoId)
-                    .getResultList());
+                        .setParameter(1, produtoId)
+                        .getResultList());
     }
 
 
@@ -38,8 +43,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Produto>> buscarProdutoEstoque(int codigo) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_PRODUTO_ESTOQUE, Produto.class)
-                    .setParameter(1, codigo)
-                    .getResultList());
+                        .setParameter(1, codigo)
+                        .getResultList());
     }
 
 
@@ -51,8 +56,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Produto>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, Produto.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -64,8 +69,8 @@ import io.smallrye.mutiny.Uni;
     public Uni<java.util.List<Produto>> carregarCampos(Long livroId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_CARREGAR_CAMPOS, Produto.class)
-                    .setParameter(1, livroId)
-                    .getResultList());
+                        .setParameter(1, livroId)
+                        .getResultList());
     }
 
 }

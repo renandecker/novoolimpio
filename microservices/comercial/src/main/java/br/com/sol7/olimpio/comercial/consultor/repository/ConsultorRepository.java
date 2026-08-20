@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.comercial.consultor;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
+
 import java.util.List;
-@ApplicationScoped public class ConsultorRepository implements PanacheRepository<Consultor> {
+
+@ApplicationScoped
+public class ConsultorRepository implements PanacheRepository<Consultor> {
 
     // Migrado de ConsultorRepository.buscarConsultorComTurnos (legado) - HQL original:
     // Select c from Consultor c left join fetch c.turnoTrabalhos where c = ?1
@@ -12,8 +17,8 @@ import java.util.List;
     public Uni<java.util.List<Consultor>> buscarConsultorComTurnos(Long entityId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_CONSULTOR_COM_TURNOS, Consultor.class)
-                    .setParameter(1, entityId)
-                    .getResultList());
+                        .setParameter(1, entityId)
+                        .getResultList());
     }
 
 
@@ -25,8 +30,8 @@ import java.util.List;
     public Uni<java.util.List<Consultor>> buscarUsuarioNoConsultor(Long entityId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_USUARIO_NO_CONSULTOR, Consultor.class)
-                    .setParameter(1, entityId)
-                    .getResultList());
+                        .setParameter(1, entityId)
+                        .getResultList());
     }
 
 
@@ -38,9 +43,9 @@ import java.util.List;
     public Uni<java.util.List<Object>> autoCompleteComUnidade(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_COM_UNIDADE)
-                    .setParameter(1, query)
-                    .setParameter(2, unidadesIds)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .setParameter(2, unidadesIds)
+                        .getResultList());
     }
 
 }

@@ -1,19 +1,23 @@
 package br.com.sol7.olimpio.comercial.metadinamica;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+
 import java.math.BigDecimal;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class MetaDinamicaService {
 
-    @Inject MetaDinamicaRepository repository;
+    @Inject
+    MetaDinamicaRepository repository;
 
     public Uni<List<MetaDinamicaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -53,7 +57,20 @@ public class MetaDinamicaService {
                         : Uni.createFrom().failure(new NotFoundException("MetaDinamica not found")));
     }
 
-    private void apply(MetaDinamica e, MetaDinamicaRequest r) { e.mes = r.mes(); e.ano = r.ano(); e.percSegunda = r.percSegunda(); e.percTerca = r.percTerca(); e.percQuarta = r.percQuarta(); e.percQuinta = r.percQuinta(); e.percSexta = r.percSexta(); e.percSabado = r.percSabado(); e.percDomingo = r.percDomingo(); e.indicadorId = r.indicadorId(); e.unidadeId = r.unidadeId(); e.dataAtualizacao = r.dataAtualizacao(); }
+    private void apply(MetaDinamica e, MetaDinamicaRequest r) {
+        e.mes = r.mes();
+        e.ano = r.ano();
+        e.percSegunda = r.percSegunda();
+        e.percTerca = r.percTerca();
+        e.percQuarta = r.percQuarta();
+        e.percQuinta = r.percQuinta();
+        e.percSexta = r.percSexta();
+        e.percSabado = r.percSabado();
+        e.percDomingo = r.percDomingo();
+        e.indicadorId = r.indicadorId();
+        e.unidadeId = r.unidadeId();
+        e.dataAtualizacao = r.dataAtualizacao();
+    }
 
     private MetaDinamicaResponse toResponse(MetaDinamica e) {
         return new MetaDinamicaResponse(e.id, e.mes, e.ano, e.percSegunda, e.percTerca, e.percQuarta, e.percQuinta, e.percSexta, e.percSabado, e.percDomingo, e.indicadorId, e.unidadeId, e.dataAtualizacao);
@@ -267,7 +284,7 @@ public class MetaDinamicaService {
     //         return getMetaDinamicaRepository().verificarMetaAnoMesUnidade(mes, ano, indicador, unidade);
     //     }
     public Uni<List<Long>> verificarMetaAnoMesUnidade(Integer mes, Integer ano, Long indicadorId, Long unidadeId) {
-                return repository.find("mes = ?1 and ano = ?2 and indicadorId = ?3 and unidadeId = ?4", mes, ano, indicadorId, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("mes = ?1 and ano = ?2 and indicadorId = ?3 and unidadeId = ?4", mes, ano, indicadorId, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -278,7 +295,7 @@ public class MetaDinamicaService {
     //         return getMetaDinamicaRepository().verificarMetaAnoUnidade(ano, indicador, unidade);
     //     }
     public Uni<List<Long>> verificarMetaAnoUnidade(Integer ano, Long indicadorId, Long unidadeId) {
-                return repository.find("ano = ?1 and indicadorId = ?2 and unidadeId = ?3", ano, indicadorId, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("ano = ?1 and indicadorId = ?2 and unidadeId = ?3", ano, indicadorId, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -289,7 +306,7 @@ public class MetaDinamicaService {
     //         return getMetaDinamicaRepository().verificarMetaUnidade(indicador, unidade);
     //     }
     public Uni<List<Long>> verificarMetaUnidade(Long indicadorId, Long unidadeId) {
-                return repository.find("indicadorId = ?2 and unidadeId = ?3", indicadorId, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.find("indicadorId = ?2 and unidadeId = ?3", indicadorId, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

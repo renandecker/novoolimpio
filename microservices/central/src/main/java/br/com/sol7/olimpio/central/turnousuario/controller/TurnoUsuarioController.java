@@ -1,7 +1,54 @@
 package br.com.sol7.olimpio.central.turnousuario;
+
 import br.com.sol7.olimpio.shared.PagedResponse;
-import io.smallrye.mutiny.Uni; import jakarta.inject.Inject; import jakarta.validation.Valid; import jakarta.ws.rs.*; import jakarta.ws.rs.core.*; import java.util.List;
-@Path("/api/central/turno-usuario") @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON) public class TurnoUsuarioController { @Inject TurnoUsuarioService service; @GET public Uni<List<TurnoUsuarioResponse>> list(){return service.list();} @GET @Path("/paged") public Uni<PagedResponse<TurnoUsuarioResponse>> paged(@QueryParam("page") Integer page,@QueryParam("size") Integer size){return service.paged(page==null?0:page,size==null?10:size);} @GET @Path("/{usuarioId}/{turnoTrabalhoId}") public Uni<TurnoUsuarioResponse> find(@PathParam("usuarioId") Long usuarioId,@PathParam("turnoTrabalhoId") Long turnoTrabalhoId){return service.find(usuarioId,turnoTrabalhoId);}@POST public Uni<Response> create(@Valid TurnoUsuarioRequest r){return service.create(r).map(item->Response.status(Response.Status.CREATED).entity(item).build());}@PUT @Path("/{usuarioId}/{turnoTrabalhoId}") public Uni<TurnoUsuarioResponse> update(@PathParam("usuarioId") Long usuarioId,@PathParam("turnoTrabalhoId") Long turnoTrabalhoId,@Valid TurnoUsuarioRequest r){return service.update(usuarioId,turnoTrabalhoId,r);}@DELETE @Path("/{usuarioId}/{turnoTrabalhoId}") public Uni<Void> delete(@PathParam("usuarioId") Long usuarioId,@PathParam("turnoTrabalhoId") Long turnoTrabalhoId){return service.delete(usuarioId,turnoTrabalhoId);} 
+import io.smallrye.mutiny.Uni;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
+
+import java.util.List;
+
+@Path("/api/central/turno-usuario")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class TurnoUsuarioController {
+    @Inject
+    TurnoUsuarioService service;
+
+    @GET
+    public Uni<List<TurnoUsuarioResponse>> list() {
+        return service.list();
+    }
+
+    @GET
+    @Path("/paged")
+    public Uni<PagedResponse<TurnoUsuarioResponse>> paged(@QueryParam("page") Integer page, @QueryParam("size") Integer size) {
+        return service.paged(page == null ? 0 : page, size == null ? 10 : size);
+    }
+
+    @GET
+    @Path("/{usuarioId}/{turnoTrabalhoId}")
+    public Uni<TurnoUsuarioResponse> find(@PathParam("usuarioId") Long usuarioId, @PathParam("turnoTrabalhoId") Long turnoTrabalhoId) {
+        return service.find(usuarioId, turnoTrabalhoId);
+    }
+
+    @POST
+    public Uni<Response> create(@Valid TurnoUsuarioRequest r) {
+        return service.create(r).map(item -> Response.status(Response.Status.CREATED).entity(item).build());
+    }
+
+    @PUT
+    @Path("/{usuarioId}/{turnoTrabalhoId}")
+    public Uni<TurnoUsuarioResponse> update(@PathParam("usuarioId") Long usuarioId, @PathParam("turnoTrabalhoId") Long turnoTrabalhoId, @Valid TurnoUsuarioRequest r) {
+        return service.update(usuarioId, turnoTrabalhoId, r);
+    }
+
+    @DELETE
+    @Path("/{usuarioId}/{turnoTrabalhoId}")
+    public Uni<Void> delete(@PathParam("usuarioId") Long usuarioId, @PathParam("turnoTrabalhoId") Long turnoTrabalhoId) {
+        return service.delete(usuarioId, turnoTrabalhoId);
+    }
 
     @POST
     @Path("/atualizar-lista-de-turnos")

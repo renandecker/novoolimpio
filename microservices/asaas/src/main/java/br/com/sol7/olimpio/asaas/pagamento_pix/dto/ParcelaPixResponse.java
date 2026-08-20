@@ -15,4 +15,4 @@ public record ParcelaPixResponse(
         String endToEndId,
         LocalDate dataVencimento,
         LocalDateTime dataCriacao,
-        LocalDateTime dataPagamento) {}
+        LocalDateTime dataPagamento){}

@@ -1,9 +1,14 @@
 package br.com.sol7.olimpio.basico.statuscompromisso.repository;
+
 import java.util.List;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository; import jakarta.enterprise.context.ApplicationScoped;
+
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 import br.com.sol7.olimpio.basico.statuscompromisso.entity.StatusCompromisso;
-@ApplicationScoped public class StatusCompromissoRepository implements PanacheRepository<StatusCompromisso> {
+
+@ApplicationScoped
+public class StatusCompromissoRepository implements PanacheRepository<StatusCompromisso> {
 
     // Migrado de StatusCompromissoRepository.autoComplete (legado) - HQL original:
     // select s from StatusCompromisso s where lower(s.descricao) like '%' || ?1 || '%' OR str(s.id) = ?1  order by s.descricao
@@ -13,8 +18,8 @@ import br.com.sol7.olimpio.basico.statuscompromisso.entity.StatusCompromisso;
     public Uni<java.util.List<StatusCompromisso>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE, StatusCompromisso.class)
-                    .setParameter(1, query)
-                    .getResultList());
+                        .setParameter(1, query)
+                        .getResultList());
     }
 
 
@@ -26,8 +31,8 @@ import br.com.sol7.olimpio.basico.statuscompromisso.entity.StatusCompromisso;
     public Uni<java.util.List<StatusCompromisso>> buscarStatusComModulo(Integer id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCAR_STATUS_COM_MODULO, StatusCompromisso.class)
-                    .setParameter(1, id)
-                    .getResultList());
+                        .setParameter(1, id)
+                        .getResultList());
     }
 
 }

@@ -35,7 +35,7 @@ public class AsaasProxySupport {
     }
 
     public JsonNode cleanBody(JsonNode body) {
-        if (!(body instanceof ObjectNode obj)) return body;
+        if (!(body instanceof ObjectNode obj))return body;
         obj.remove("nome");
         obj.remove("id");
         return obj;

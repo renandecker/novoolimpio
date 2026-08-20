@@ -1,5 +1,6 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import {ModuleList} from '../ModuleListScreen';
+
 export default function ViewComunicacaoColunasComunicacaoListScreen() {
-  return <ModuleList path="/api/view/comunicacao/colunasComunicacao" />;
+    return <ModuleList path="/api/view/comunicacao/colunasComunicacao"/>;
 }

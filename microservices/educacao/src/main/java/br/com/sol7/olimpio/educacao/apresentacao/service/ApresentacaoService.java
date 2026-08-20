@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.educacao.apresentacao;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class ApresentacaoService {
 
-    @Inject ApresentacaoRepository repository;
+    @Inject
+    ApresentacaoRepository repository;
 
     public Uni<List<ApresentacaoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,10 @@ public class ApresentacaoService {
                         : Uni.createFrom().failure(new NotFoundException("Apresentacao not found")));
     }
 
-    private void apply(Apresentacao e, ApresentacaoRequest r) { e.ordem = r.ordem(); e.local = r.local(); }
+    private void apply(Apresentacao e, ApresentacaoRequest r) {
+        e.ordem = r.ordem();
+        e.local = r.local();
+    }
 
     private ApresentacaoResponse toResponse(Apresentacao e) {
         return new ApresentacaoResponse(e.id, e.ordem, e.local);

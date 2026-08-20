@@ -8,6 +8,7 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.Date;
 import java.util.List;
 
@@ -15,9 +16,12 @@ import java.util.List;
 @WithTransaction
 public class PendenciaVendaProdutoService {
 
-    @Inject PendenciaVendaProdutoRepository repository;
-    @Inject ProdutoRepository produtoRepository;
-    @Inject VendaProdutoRepository vendaProdutoRepository;
+    @Inject
+    PendenciaVendaProdutoRepository repository;
+    @Inject
+    ProdutoRepository produtoRepository;
+    @Inject
+    VendaProdutoRepository vendaProdutoRepository;
 
     public Uni<List<PendenciaVendaProdutoResponse>> list() {
         return repository.listAll().chain(items -> {
@@ -99,24 +103,24 @@ public class PendenciaVendaProdutoService {
 
     private Uni<PendenciaVendaProdutoResponse> enrichSingleResponse(PendenciaVendaProdutoResponse r) {
         Uni<String> produtoNome = r.produtoId() != null
-            ? produtoRepository.findById(r.produtoId()).map(p -> p != null ? p.nome : null)
-            : Uni.createFrom().item((String) null);
+                ? produtoRepository.findById(r.produtoId()).map(p -> p != null ? p.nome : null)
+                : Uni.createFrom().item((String) null);
         Uni<String> produtoImagem = r.produtoId() != null
-            ? produtoRepository.findById(r.produtoId()).map(p -> p != null ? p.imagem : null)
-            : Uni.createFrom().item((String) null);
+                ? produtoRepository.findById(r.produtoId()).map(p -> p != null ? p.imagem : null)
+                : Uni.createFrom().item((String) null);
 
         Uni<java.util.Date> vendaDataCompra = r.vendaProdutoId() != null
-            ? vendaProdutoRepository.findById(r.vendaProdutoId()).map(v -> v != null ? v.dataCompra : null)
-            : Uni.createFrom().item((java.util.Date) null);
+                ? vendaProdutoRepository.findById(r.vendaProdutoId()).map(v -> v != null ? v.dataCompra : null)
+                : Uni.createFrom().item((java.util.Date) null);
         Uni<java.math.BigDecimal> vendaValor = r.vendaProdutoId() != null
-            ? vendaProdutoRepository.findById(r.vendaProdutoId()).map(v -> v != null ? v.valor : null)
-            : Uni.createFrom().item((java.math.BigDecimal) null);
+                ? vendaProdutoRepository.findById(r.vendaProdutoId()).map(v -> v != null ? v.valor : null)
+                : Uni.createFrom().item((java.math.BigDecimal) null);
 
         return Uni.combine().all().unis(produtoNome, produtoImagem, vendaDataCompra, vendaValor)
                 .asTuple()
                 .map(t -> new PendenciaVendaProdutoResponse(
-                    r.id(), r.quantidade(), r.vendaProdutoId(), r.produtoId(), r.dataEntrega(),
-                    t.getItem1(), t.getItem2(), null, t.getItem3(), t.getItem4()
+                        r.id(), r.quantidade(), r.vendaProdutoId(), r.produtoId(), r.dataEntrega(),
+                        t.getItem1(), t.getItem2(), null, t.getItem3(), t.getItem4()
                 ));
     }
 

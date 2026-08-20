@@ -1,75 +1,75 @@
 .alterar-senha-form {
-  background-color: #ffffff;
-  border: 1px solid #d3d3d3;
-  border-radius: 4px;
-  box-shadow: 1px 2px 10px rgba(50, 50, 50, 0.2);
-  padding: 20px;
-  max-width: 460px;
+    background-color: #ffffff;
+    border: 1px solid #d3d3d3;
+    border-radius: 4px;
+    box-shadow: 1px 2px 10px rgba(50, 50, 50, 0.2);
+    padding: 20px;
+    max-width: 460px;
 }
 
 .alterar-senha-field {
-  margin-bottom: 14px;
+    margin-bottom: 14px;
 }
 
 .alterar-senha-field label {
-  display: block;
-  color: #616161;
-  font-weight: bold;
-  font-size: 14px;
-  margin-bottom: 4px;
+    display: block;
+    color: #616161;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 4px;
 }
 
 .alterar-senha-field input {
-  width: 100%;
-  padding: 10px;
-  font-size: 14px;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  color: #2b2b2b;
-  border: 1px solid #c9c9c9;
-  background-color: #ffffff;
-  border-radius: 4px;
-  outline: none;
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #2b2b2b;
+    border: 1px solid #c9c9c9;
+    background-color: #ffffff;
+    border-radius: 4px;
+    outline: none;
 }
 
 .alterar-senha-field input:focus {
-  border-color: #c2aa3c;
+    border-color: #c2aa3c;
 }
 
 .alterar-senha-submit {
-  margin-top: 6px;
-  padding: 8px 18px;
-  border: none;
-  cursor: pointer;
-  color: #ffffff;
-  background-image: linear-gradient(180deg, #337ab7, #265a88);
-  border-radius: 4px;
-  font-size: 15px;
-  font-weight: bold;
+    margin-top: 6px;
+    padding: 8px 18px;
+    border: none;
+    cursor: pointer;
+    color: #ffffff;
+    background-image: linear-gradient(180deg, #337ab7, #265a88);
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: bold;
 }
 
 .alterar-senha-submit:disabled {
-  opacity: 0.7;
-  cursor: default;
+    opacity: 0.7;
+    cursor: default;
 }
 
 .alterar-senha-success {
-  margin-top: 14px;
-  padding: 8px 10px;
-  background-color: #e9f7ef;
-  border: 1px solid #b7e4c7;
-  border-radius: 4px;
-  color: #1e7e45;
-  font-size: 13px;
-  text-align: center;
+    margin-top: 14px;
+    padding: 8px 10px;
+    background-color: #e9f7ef;
+    border: 1px solid #b7e4c7;
+    border-radius: 4px;
+    color: #1e7e45;
+    font-size: 13px;
+    text-align: center;
 }
 
 .alterar-senha-error {
-  margin-top: 14px;
-  padding: 8px 10px;
-  background-color: #fdecea;
-  border: 1px solid #f5c6cb;
-  border-radius: 4px;
-  color: #a61b29;
-  font-size: 13px;
-  text-align: center;
+    margin-top: 14px;
+    padding: 8px 10px;
+    background-color: #fdecea;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    color: #a61b29;
+    font-size: 13px;
+    text-align: center;
 }

@@ -1,5 +1,6 @@
 import React from 'react';
-import { ModuleList } from '../ModuleListScreen';
+import {ModuleList} from '../ModuleListScreen';
+
 export default function ViewCronogramaComponenteCurricularListCronogramaComponenteCurricularListScreen() {
-  return <ModuleList path="/api/view/cronogramaComponenteCurricular/listCronogramaComponenteCurricular" />;
+    return <ModuleList path="/api/view/cronogramaComponenteCurricular/listCronogramaComponenteCurricular"/>;
 }

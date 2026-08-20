@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.comercial.campo;
+
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -6,13 +7,15 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
 import java.util.List;
 
 @ApplicationScoped
 @WithTransaction
 public class CampoService {
 
-    @Inject CampoRepository repository;
+    @Inject
+    CampoRepository repository;
 
     public Uni<List<CampoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -52,7 +55,25 @@ public class CampoService {
                         : Uni.createFrom().failure(new NotFoundException("Campo not found")));
     }
 
-    private void apply(Campo e, CampoRequest r) { e.nome = r.nome(); e.rotulo = r.rotulo(); e.maskara = r.maskara(); e.tipo = r.tipo(); e.tamanho = r.tamanho(); e.categoriaId = r.categoriaId(); e.flagNome = r.flagNome(); e.flagTelefone = r.flagTelefone(); e.flagEmail = r.flagEmail(); e.flagRedeSocial = r.flagRedeSocial(); e.flagEndereco = r.flagEndereco(); e.flagIdade = r.flagIdade(); e.flagBanco = r.flagBanco(); e.flagMaskara = r.flagMaskara(); e.flagDataNascimento = r.flagDataNascimento(); e.flagLogradouro = r.flagLogradouro(); e.flagUpload = r.flagUpload(); }
+    private void apply(Campo e, CampoRequest r) {
+        e.nome = r.nome();
+        e.rotulo = r.rotulo();
+        e.maskara = r.maskara();
+        e.tipo = r.tipo();
+        e.tamanho = r.tamanho();
+        e.categoriaId = r.categoriaId();
+        e.flagNome = r.flagNome();
+        e.flagTelefone = r.flagTelefone();
+        e.flagEmail = r.flagEmail();
+        e.flagRedeSocial = r.flagRedeSocial();
+        e.flagEndereco = r.flagEndereco();
+        e.flagIdade = r.flagIdade();
+        e.flagBanco = r.flagBanco();
+        e.flagMaskara = r.flagMaskara();
+        e.flagDataNascimento = r.flagDataNascimento();
+        e.flagLogradouro = r.flagLogradouro();
+        e.flagUpload = r.flagUpload();
+    }
 
     private CampoResponse toResponse(Campo e) {
         return new CampoResponse(e.id, e.nome, e.rotulo, e.maskara, e.tipo, e.tamanho, e.categoriaId, e.flagNome, e.flagTelefone, e.flagEmail, e.flagRedeSocial, e.flagEndereco, e.flagIdade, e.flagBanco, e.flagMaskara, e.flagDataNascimento, e.flagLogradouro, e.flagUpload);
