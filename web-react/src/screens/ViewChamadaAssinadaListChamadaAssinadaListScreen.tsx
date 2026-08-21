@@ -20,7 +20,7 @@ const getOferecimentoDesc = (item: ApiItem): string => {
     if (oferta.descricao) return String(oferta.descricao);
     if (oferta.nome) return String(oferta.nome);
     if (oferta.sucinto) return String(oferta.sucinto);
-    if (oferta.grupo && grupo.nome) return String(grupo.nome);
+    if (oferta.grupo && oferta.grupo.nome) return String(oferta.grupo.nome);
     return '';
 };
 

@@ -19,12 +19,20 @@ public class AlunoRepository {
         }).map(list -> (List<T>) list);
     }
 
+    private Uni<Integer> nativeUpdate(String sql, Object... params) {
+        return Panache.getSession().onItem().transformToUni(session -> {
+            var query = session.createNativeQuery(sql);
+            for (int i = 0; i < params.length; i++) query.setParameter(i + 1, params[i]);
+            return query.executeUpdate();
+        });
+    }
+
     public Uni<Long> pessoaIdPorUsername(String username) {
         String sql = """
         SELECT u.id_pessoa
         FROM bas_login l
         JOIN bas_usuario u ON u.id = l.id_usuario
-        WHERE lower (l.username) = lower( ? 1)
+        WHERE lower (l.username) = lower(?1)
         LIMIT 1
         """;
         return nativeList(sql, username)
@@ -62,7 +70,7 @@ public class AlunoRepository {
         LEFT JOIN bas_etnia et ON et.id = f.id_etnia
         LEFT JOIN bas_escolaridade es ON es.id = f.id_escolaridade
         LEFT JOIN bas_estado_civil ec ON ec.id = f.id_estado_civil
-        WHERE lower (l.username) = lower( ? 1)
+        WHERE lower (l.username) = lower(?1)
         LIMIT 1
         """;
         return nativeList(sql, username)
@@ -166,9 +174,9 @@ public class AlunoRepository {
         AND p.data_vencimento<current_date AND p.id_pessoa = ?1
         ORDER BY p.data_vencimento
         LIMIT 1),0)AS dias_atraso,
-        COALESCE((SELECT SUM(c.qtde_parcelas_atrasadas)FROM edc_contrato c WHERE c.id_pessoa = ? 1),0)AS qtd_atrasadas,
-        COALESCE((SELECT SUM(c.qtde_parcelas_nao_pagas)FROM edc_contrato c WHERE c.id_pessoa = ? 1),0)AS qtd_restantes,
-        COALESCE((SELECT SUM(c.valor_parcelas)FROM edc_contrato c WHERE c.id_pessoa = ? 1),0)AS valor_pendente
+        COALESCE((SELECT SUM(c.qtde_parcelas_atrasadas) FROM edc_contrato c WHERE c.id_pessoa = ?1),0) AS qtd_atrasadas,
+        COALESCE((SELECT SUM(c.qtde_parcelas_nao_pagas) FROM edc_contrato c WHERE c.id_pessoa = ?1),0) AS qtd_restantes,
+        COALESCE((SELECT SUM(c.valor_parcelas) FROM edc_contrato c WHERE c.id_pessoa = ?1),0) AS valor_pendente
         """;
         return nativeList(sql, pessoaId)
                 .map(rows -> rows.isEmpty() ? null : (Object[]) rows.get(0));
@@ -361,6 +369,128 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
         ORDER BY ha.data_registro DESC NULLS LAST, ha.id DESC
         """;
         return nativeList(sql, pessoaId);
+    }
+
+    // Registro de aulas (edc_aula/edc_aula_aluno - legado V1_4_584__aulas.sql):
+    // aulas das turmas (oferecimentos) em que o aluno possui matricula ativa.
+
+    public Uni<List<Object[]>> chamadasPorPessoa(Long pessoaId) {
+        String sql = """
+        SELECT a.id,
+                COALESCE(a.nome, '') AS nome,
+        COALESCE(a.descricao, '') AS descricao,
+        COALESCE(cc.descricao, '') AS componente,
+        COALESCE(of.sequencia, 0) AS turma,
+        occ.data AS data_aula,
+        aa.data_assitida
+        FROM edc_aula a
+        JOIN edc_ocorrencia_componente_curricular occ ON occ.id = a.id_ocorrencia_componente_curricular
+        JOIN edc_oferecimento_componente_curricular of ON of.id = occ.id_oferecimento_componente_curricular
+        LEFT JOIN edc_componente_curricular cc ON cc.id = of.id_componente_curricular
+        LEFT JOIN edc_aula_aluno aa ON aa.id_aula = a.id AND aa.id_pessoa = ?1
+        WHERE of.id IN (
+        SELECT m.id_oferecimento_componente_curricular
+        FROM edc_matricula m
+        JOIN edc_contrato ct ON ct.id = m.id_contrato
+        WHERE ct.id_pessoa = ?1
+        AND m.data_cancelamento IS NULL
+        AND m.id_oferecimento_componente_curricular IS NOT NULL
+        )
+        ORDER BY occ.data DESC NULLS LAST, a.id DESC
+        """;
+        return nativeList(sql, pessoaId);
+    }
+
+    // Avaliacoes (edc_avaliacao/edc_avaliacao_pergunta/edc_avaliacao_resposta/
+    // edc_avaliacao_aluno): questionarios vinculados as matriculas do aluno.
+
+    public Uni<List<Object[]>> avaliacoesPorPessoa(Long pessoaId) {
+        String sql = """
+        SELECT av.id,
+                COALESCE(av.nome, '') AS nome,
+        COALESCE(av.descricao, '') AS descricao,
+        COALESCE(cc.descricao, '') AS componente,
+        COALESCE(of.sequencia, 0) AS turma,
+        av.data_inicial,
+        av.data_final,
+        COALESCE(av.fl_ativo, false) AS ativa,
+        EXISTS (SELECT 1 FROM edc_avaliacao_aluno aa
+        WHERE aa.id_avaliacao = av.id AND aa.id_pessoa = ?1
+        AND (aa.salvo <> 0 OR aa.resposta IS NOT NULL OR aa.id_avaliacao_resposta IS NOT NULL)) AS respondida
+        FROM edc_avaliacao av
+        LEFT JOIN edc_nota_componente_curricular_matricula ncm ON ncm.id = av.id_nota_componente_curricular_matricula
+        LEFT JOIN edc_matricula m ON m.id = ncm.id_matricula
+        LEFT JOIN edc_oferecimento_componente_curricular of ON of.id = m.id_oferecimento_componente_curricular
+        LEFT JOIN edc_componente_curricular cc ON cc.id = of.id_componente_curricular
+        WHERE m.id IN (
+        SELECT m2.id
+        FROM edc_matricula m2
+        JOIN edc_contrato ct ON ct.id = m2.id_contrato
+        WHERE ct.id_pessoa = ?1 AND m2.data_cancelamento IS NULL
+        )
+        ORDER BY av.data_final DESC NULLS LAST, av.id DESC
+        """;
+        return nativeList(sql, pessoaId);
+    }
+
+    public Uni<Boolean> avaliacaoPertenceAoAluno(Long avaliacaoId, Long pessoaId) {
+        String sql = """
+        SELECT 1
+        FROM edc_avaliacao av
+        JOIN edc_nota_componente_curricular_matricula ncm ON ncm.id = av.id_nota_componente_curricular_matricula
+        JOIN edc_matricula m ON m.id = ncm.id_matricula
+        JOIN edc_contrato ct ON ct.id = m.id_contrato
+        WHERE av.id = ?1 AND ct.id_pessoa = ?2
+        LIMIT 1
+        """;
+        return nativeList(sql, avaliacaoId, pessoaId).map(rows -> !rows.isEmpty());
+    }
+
+    public Uni<Object[]> avaliacaoPorId(Long avaliacaoId) {
+        String sql = """
+        SELECT av.id,
+                COALESCE(av.nome, '') AS nome,
+        COALESCE(av.descricao, '') AS descricao,
+        COALESCE(av.fl_ativo, false) AS ativa
+        FROM edc_avaliacao av
+        WHERE av.id = ?1
+        LIMIT 1
+        """;
+        return nativeList(sql, avaliacaoId).map(rows -> rows.isEmpty() ? null : (Object[]) rows.get(0));
+    }
+
+    public Uni<List<Object[]>> perguntasDaAvaliacao(Long avaliacaoId, Long pessoaId) {
+        String sql = """
+        SELECT p.id AS pergunta_id,
+                COALESCE(p.pergunta, '') AS pergunta,
+        COALESCE(p.tipo, '') AS tipo,
+        r.id AS resposta_id,
+        COALESCE(r.resposta, '') AS resposta_opcao,
+        aa.id_avaliacao_resposta AS escolhida_id,
+        aa.resposta AS resposta_aluno
+        FROM edc_avaliacao_pergunta p
+        LEFT JOIN edc_avaliacao_resposta r ON r.id_avaliacao_pergunta = p.id
+        LEFT JOIN edc_avaliacao_aluno aa ON aa.id_avaliacao_pergunta = p.id
+        AND aa.id_avaliacao = ?1 AND aa.id_pessoa = ?2
+        WHERE p.id_avaliacao = ?1
+        ORDER BY p.id, r.id
+        """;
+        return nativeList(sql, avaliacaoId, pessoaId);
+    }
+
+    public Uni<Void> removerRespostas(Long avaliacaoId, Long pessoaId) {
+        String sql = "DELETE FROM edc_avaliacao_aluno WHERE id_avaliacao = ?1 AND id_pessoa = ?2";
+        return nativeUpdate(sql, avaliacaoId, pessoaId).replaceWithVoid();
+    }
+
+    public Uni<Void> inserirResposta(Long pessoaId, Long avaliacaoId, Long perguntaId,
+                                     Long respostaId, String respostaTexto) {
+        String sql = """
+        INSERT INTO edc_avaliacao_aluno (id_pessoa, id_avaliacao, id_avaliacao_pergunta,
+        id_avaliacao_resposta, resposta, salvo)
+        VALUES (?1, ?2, ?3, ?4, ?5, 1)
+        """;
+        return nativeUpdate(sql, pessoaId, avaliacaoId, perguntaId, respostaId, respostaTexto).replaceWithVoid();
     }
 
     private Long asLong(Object o) {

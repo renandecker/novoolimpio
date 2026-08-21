@@ -490,6 +490,9 @@ import AlunoDashboardScreen from './screens/AlunoDashboardScreen';
 import AlunoBoletimScreen from './screens/AlunoBoletimScreen';
 import AlunoFrequenciaScreen from './screens/AlunoFrequenciaScreen';
 import AlunoFinanceiroScreen from './screens/AlunoFinanceiroScreen';
+import AlunoAulasScreen from './screens/AlunoAulasScreen';
+import AlunoAvaliacoesScreen from './screens/AlunoAvaliacoesScreen';
+import AlunoAvaliacaoResponderScreen from './screens/AlunoAvaliacaoResponderScreen';
 import AulaContratoScreen from './screens/AulaContratoScreen';
 import AulaOferecimentoScreen from './screens/AulaOferecimentoScreen';
 import AulaOcorrenciaScreen from './screens/AulaOcorrenciaScreen';
@@ -524,6 +527,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/aluno/financeiro" element={<AlunoFinanceiroScreen/>}/>
     <Route path="/aluno/aulas" element={<AlunoAulasScreen/>}/>
     <Route path="/aluno/avaliacoes" element={<AlunoAvaliacoesScreen/>}/>
+    <Route path="/aluno/avaliacao/:id" element={<AlunoAvaliacaoResponderScreen/>}/>
     <Route path="/aluno/aula" element={<AulaContratoScreen/>}/>
     <Route path="/aluno/aula/oferecimentos/:contratoId" element={<AulaOferecimentoScreen/>}/>
     <Route path="/aluno/aula/ocorrencias/:oferecimentoId" element={<AulaOcorrenciaScreen/>}/>

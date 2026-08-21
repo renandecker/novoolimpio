@@ -123,4 +123,29 @@ public final class AlunoDtos {
     public record HistoricoAlunoResponse(
             Long id, LocalDateTime dataRegistro, String descricao, Long usuarioId, String usuarioNome) {
     }
+
+    public record ChamadaAulaResponse(
+            Long id, String nome, String descricao, String componente, Integer turma,
+            LocalDate dataAula, LocalDateTime dataAssistida) {
+    }
+
+    public record AvaliacaoAlunoItemResponse(
+            Long id, String nome, String descricao, String componente, Integer turma,
+            LocalDate dataInicial, LocalDate dataFinal, Boolean ativa, Boolean respondida) {
+    }
+
+    public record AvaliacaoOpcaoResponse(Long id, String resposta) {
+    }
+
+    public record AvaliacaoPerguntaResponse(
+            Long id, String pergunta, String tipo, List<AvaliacaoOpcaoResponse> opcoes,
+            Long respostaEscolhidaId, String respostaTexto) {
+    }
+
+    public record AvaliacaoDetalheResponse(
+            Long id, String nome, String descricao, Boolean ativa, List<AvaliacaoPerguntaResponse> perguntas) {
+    }
+
+    public record AvaliacaoRespostaRequest(Long perguntaId, Long respostaId, String respostaTexto) {
+    }
 }

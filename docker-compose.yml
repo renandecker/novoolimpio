@@ -151,7 +151,7 @@ services:
     restart: unless-stopped
     environment:
       <<: *service-env
-      DATABASE_URL: postgresql://postgres:5454/olimpio
+      DATABASE_URL: postgresql://postgres:5432/olimpio
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
     - "8081:8081"
@@ -170,7 +170,7 @@ services:
     restart: unless-stopped
     environment:
       <<: *service-env
-      DATABASE_URL: postgresql://postgres:5454/olimpio
+      DATABASE_URL: postgresql://postgres:5432/olimpio
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
     - "8082:8082"
@@ -188,7 +188,7 @@ services:
     restart: unless-stopped
     environment:
       <<: *service-env
-      DATABASE_URL: postgresql://postgres:5454/olimpio
+      DATABASE_URL: postgresql://postgres:5432/olimpio
     ports:
     - "8083:8083"
     depends_on:
@@ -203,7 +203,7 @@ services:
     restart: unless-stopped
     environment:
       <<: *service-env
-      DATABASE_URL: postgresql://postgres:5454/olimpio
+      DATABASE_URL: postgresql://postgres:5432/olimpio
     ports:
     - "8084:8084"
     depends_on:
@@ -218,7 +218,7 @@ services:
     restart: unless-stopped
     environment:
       <<: *service-env
-      DATABASE_URL: postgresql://postgres:5454/olimpio
+      DATABASE_URL: postgresql://postgres:5432/olimpio
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
     - "8085:8085"
@@ -236,7 +236,7 @@ services:
     restart: unless-stopped
     environment:
       <<: *service-env
-      DATABASE_URL: postgresql://postgres:5454/olimpio
+      DATABASE_URL: postgresql://postgres:5432/olimpio
     ports:
     - "8086:8086"
     depends_on:
@@ -251,12 +251,15 @@ services:
     restart: unless-stopped
     environment:
       <<: *service-env
-      DATABASE_URL: postgresql://postgres:5454/olimpio
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
     - "8087:8087"
     depends_on:
       restore:
         condition: service_completed_successfully
+      kafka:
+        condition: service_healthy
       login:
         condition: service_healthy
 
@@ -266,7 +269,7 @@ services:
     restart: unless-stopped
     environment:
       <<: *service-env
-      DATABASE_URL: postgresql://postgres:5454/olimpio
+      DATABASE_URL: postgresql://postgres:5432/olimpio
     ports:
     - "8088:8088"
     depends_on:
@@ -281,16 +284,8 @@ services:
     restart: unless-stopped
     environment:
       <<: *service-env
-      DATABASE_URL: postgresql://postgres:5454/olimpio
-      BASICO_DATABASE_URL: postgresql://postgres:5454/olimpio
-      FINANCEIRO_DATABASE_URL: postgresql://postgres:5454/olimpio
-      CENTRAL_DATABASE_URL: postgresql://postgres:5454/olimpio
-      EDUCACAO_DATABASE_URL: postgresql://postgres:5454/olimpio
-      COMERCIAL_DATABASE_URL: postgresql://postgres:5454/olimpio
-      RELATORIOS_DATABASE_URL: postgresql://postgres:5454/olimpio
-      EMPRESA_DATABASE_URL: postgresql://postgres:5454/olimpio
+      DATABASE_URL: postgresql://postgres:5432/olimpio
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      RELATORIOS_TABELAS_PATH: /tmp/olimpio/tabelas
     ports:
     - "8089:8089"
     depends_on:
@@ -307,8 +302,8 @@ services:
     restart: unless-stopped
     environment:
       <<: *service-env
-      DATABASE_URL: postgresql://postgres:5454/olimpio
-      PROFESSOR_AULA_JDBC_URL: jdbc:postgresql://postgres:5454/olimpio
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+      PROFESSOR_AULA_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
     ports:
     - "8091:8091"
     depends_on:
@@ -323,8 +318,8 @@ services:
     restart: unless-stopped
     environment:
       <<: *service-env
-      DATABASE_URL: postgresql://postgres:5454/olimpio
-      LOGIN_JDBC_URL: jdbc:postgresql://postgres:5454/olimpio
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+      LOGIN_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
     ports:
     - "8090:8090"
     healthcheck:
@@ -343,8 +338,8 @@ services:
     restart: unless-stopped
     environment:
       <<: *service-env
-      DATABASE_URL: postgresql://postgres:5454/olimpio
-      ALUNO_AULA_JDBC_URL: jdbc:postgresql://postgres:5454/olimpio
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+      ALUNO_AULA_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
     ports:
     - "8092:8092"
     depends_on:
@@ -359,8 +354,8 @@ services:
     restart: unless-stopped
     environment:
       <<: *service-env
-      DATABASE_URL: postgresql://postgres:5454/olimpio
-      CURRICULO_JDBC_URL: jdbc:postgresql://postgres:5454/olimpio
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+      CURRICULO_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
     ports:
     - "8095:8095"
     depends_on:
@@ -375,8 +370,9 @@ services:
     restart: unless-stopped
     environment:
       <<: *service-env
-      DATABASE_URL: postgresql://postgres:5454/olimpio
-      ASAAS_JDBC_URL: jdbc:postgresql://postgres:5454/olimpio
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+      ASAAS_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
+      QUARKUS_DATASOURCE_ASAAS_REACTIVE_URL: postgresql://postgres:5432/olimpio  # <-- Adicionar esta linha
       ASAAS_API_KEY: $$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjE1MjVlNjliLTRhMDItNDkzZC1hMTI0LTcyYjgzNjVmMDNhNDo6JGFhY2hfYmM0OGJjMTQtZDk1OC00MDVmLWEyYmUtODQxN2U1YTY4MTFk
       ASAAS_BASE_URL: ${ASAAS_BASE_URL:-https://api-sandbox.asaas.com}
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
@@ -396,7 +392,8 @@ services:
     restart: unless-stopped
     environment:
       <<: *service-env
-      DATABASE_URL: postgresql://postgres:5454/olimpio
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+      DATABASE_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
     - "8097:8096"

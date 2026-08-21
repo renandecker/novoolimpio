@@ -19,7 +19,7 @@ public class LoginRepository implements PanacheRepository<Login> {
                         FROM bas_login l
                         LEFT JOIN bas_usuario u ON u.id = l.id_usuario
                         LEFT JOIN bas_pessoa p ON p.id = u.id_pessoa
-                        WHERE lower(l.username) = lower( ? 1)
+                        WHERE lower(l.username) = lower(?1)
                         LIMIT 1
                         """)
                                 .setParameter(1, username)
@@ -39,7 +39,7 @@ public class LoginRepository implements PanacheRepository<Login> {
                         LEFT JOIN bas_usuario u ON u.id = l.id_usuario
                         LEFT JOIN bas_pessoa p ON p.id = u.id_pessoa
                         LEFT JOIN bas_pessoa_fisica f ON f.id_pessoa = p.id
-                        WHERE lower(l.username) = lower( ? 1)
+                        WHERE lower(l.username) = lower(?1)
                         LIMIT 1
                         """)
                                 .setParameter(1, username)

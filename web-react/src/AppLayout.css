@@ -630,6 +630,58 @@
     padding-top: 4px;
 }
 
+/* ---- Accordion (estilo p:accordionPanel do PrimeFaces/JSF) ---- */
+.accordion {
+    border: 1px solid #d3d3d3;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.accordion-item + .accordion-item {
+    border-top: 1px solid #d3d3d3;
+}
+
+.accordion-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    border: none;
+    background-image: linear-gradient(180deg, #ffffff, #ededed);
+    color: #333;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.accordion-header:hover {
+    background-image: linear-gradient(180deg, #f2f8fd, #d9edf7);
+}
+
+.accordion-header-active,
+.accordion-header-active:hover {
+    background-image: linear-gradient(180deg, #337ab7, #265a88);
+    color: #ffffff;
+}
+
+.accordion-toggle-icon {
+    width: 12px;
+    display: inline-block;
+    text-align: center;
+}
+
+.accordion-title {
+    flex: 1;
+}
+
+.accordion-content {
+    padding: 12px 14px;
+    background-color: #ffffff;
+}
+
 /* ---- Componente Master-Detalhe (autocomplete + lista) ---- */
 .master-detail {
     display: flex;

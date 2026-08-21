@@ -4,6 +4,8 @@ import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -29,6 +31,7 @@ public class LigacaoNap extends PanacheEntity {
     @Column(name = "id_etapas_nap")
     public Long etapasNapId;  // referencia a EtapasNAP (id, cross-service)
     @Column(name = "retorno_aula")
+    @Temporal(TemporalType.DATE)
     public Date retornoAula;
     @Column(name = "ativo")
     public boolean ativo;

@@ -21,10 +21,10 @@ import {PerfilModuloPermissions} from '../useModulePaged';
 
 const CONTRACT_COLUMNS = [
     {key: 'id', label: 'Contrato'},
-    {key: 'id_pessoa', label: 'Aluno'},
-    {key: 'id_curso', label: 'Curso'},
-    {key: 'id_unidade', label: 'Unidade'},
-    {key: 'id_unidade_resposavel', label: 'Unidade Responsável'},
+    {key: 'pessoa_descricao', label: 'Aluno'},
+    {key: 'curso_descricao', label: 'Curso'},
+    {key: 'unidade_descricao', label: 'Unidade'},
+    {key: 'unidade_resposavel_descricao', label: 'Unidade Responsável'},
     {key: 'data', label: 'Data'},
     {key: 'ativo', label: 'Status'},
     {key: 'qtde_parcelas_atrasadas', label: 'Pendente'},
@@ -58,7 +58,10 @@ const renderValue = (item: ApiItem, key: string) => {
     return String(value);
 };
 
-function ContractsTable({searchedIds}: { searchedIds: number[] | null }) {
+function ContractsTable({searchedIds, onBuscarContratos}: {
+    searchedIds: number[] | null;
+    onBuscarContratos: (pessoaId: number, pessoaNome: string) => void;
+}) {
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(PAGE_SIZES[0]);
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -81,7 +84,7 @@ function ContractsTable({searchedIds}: { searchedIds: number[] | null }) {
         const carregarPermissoes = async () => {
             setPerfilModuloLoading(true);
             try {
-                const response = await api.get<PerfilModuloPermissions>(`/api/perfil-modulo/permissoes?caminho=${outcome}`);
+                const response = await api.get<PerfilModuloPermissions>(`/api/permissao/permissoes?caminho=${outcome}`);
                 setPerfilModuloPermissions(response.data);
             } catch (error) {
                 console.error('Erro ao carregar permissões do perfil-modulo:', error);
@@ -110,7 +113,7 @@ function ContractsTable({searchedIds}: { searchedIds: number[] | null }) {
     const items = searchedIds
         ? all.filter((item) => searchedIds.includes(Number(item.id)))
         : all;
-    const colSpan = 2 + CONTRACT_COLUMNS.length + (showActionsColumn ? 1 : 0);
+    const colSpan = 3 + CONTRACT_COLUMNS.length + (showActionsColumn ? 1 : 0);
 
     return (
         <div className="data-table">
@@ -120,6 +123,7 @@ function ContractsTable({searchedIds}: { searchedIds: number[] | null }) {
                 <table>
                     <thead>
                     <tr>
+                        <th className="col-toggle"></th>
                         <th className="col-toggle"></th>
                         <th className="col-id">Id</th>
                         {CONTRACT_COLUMNS.map((column) => (
@@ -271,6 +275,20 @@ function ContractsTable({searchedIds}: { searchedIds: number[] | null }) {
                                         <button
                                             type="button"
                                             className="btn-row-toggle"
+                                            title="Carregar dados do aluno e seus contratos"
+                                            disabled={!asRecord(item).id_pessoa}
+                                            onClick={() => onBuscarContratos(
+                                                Number(asRecord(item).id_pessoa),
+                                                String(asRecord(item).pessoa_descricao ?? ''),
+                                            )}
+                                        >
+                                            <i className="fa fa-search"/>
+                                        </button>
+                                    </td>
+                                    <td className="col-toggle">
+                                        <button
+                                            type="button"
+                                            className="btn-row-toggle"
                                             title={isOpen ? 'Recolher' : 'Expandir'}
                                             onClick={() => setExpanded((prev) => ({...prev, [rowKey]: !prev[rowKey]}))}
                                         >
@@ -408,6 +426,12 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
             .finally(() => setSearching(false));
     };
 
+    // Espelha gestaoAlunoController.trazerContratosPessoa(entity): define o aluno na combo
+    // e carrega os contratos dele, como ao selecionar o aluno no autoComplete.
+    const buscarContratosDoAluno = (pessoaId: number, pessoaNome: string) => {
+        selecionarAluno({id: pessoaId, label: pessoaNome || `#${pessoaId}`});
+    };
+
     const activeAction = ACTIONS.find((action) => action.key === openAction) ?? null;
 
     return (
@@ -477,7 +501,7 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
                         )}
                     </div>
                 </section>
-                <ContractsTable searchedIds={searchedIds}/>
+                <ContractsTable searchedIds={searchedIds} onBuscarContratos={buscarContratosDoAluno}/>
 
                 {activeAction && aluno && (
                     <>

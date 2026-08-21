@@ -4,6 +4,8 @@ import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -21,6 +23,7 @@ public class Matricula extends PanacheEntity {
     @Column(name = "id_forma_pagamento")
     public Long formaPagamentoId;  // referencia a FormaPagamento (id, cross-service)
     @Column(name = "data_cancelamento")
+    @Temporal(TemporalType.DATE)
     public Date dataCancelamento;
     @Column(name = "motivo_cancelamento", columnDefinition = "text")
     public String motivoCancelamento;
@@ -33,6 +36,7 @@ public class Matricula extends PanacheEntity {
     @Column(name = "qtde_chamadas_frenquencia")
     public int qtdeChamadaFrequencia;
     @Column(name = "data")
+    @Temporal(TemporalType.DATE)
     public Date data;
     @Column(name = "qtde_aula")
     public int totalAulas;

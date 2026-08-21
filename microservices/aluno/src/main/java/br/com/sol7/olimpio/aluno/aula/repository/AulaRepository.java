@@ -35,7 +35,7 @@ public class AulaRepository implements PanacheRepository<Aula> {
         SELECT u.id_pessoa
         FROM bas_login l
         JOIN bas_usuario u ON u.id = l.id_usuario
-        WHERE lower (l.username) = lower( ? 1)
+        WHERE lower (l.username) = lower(?1)
         LIMIT 1
         """;
         return nativeList(sql, username)
@@ -97,7 +97,7 @@ public class AulaRepository implements PanacheRepository<Aula> {
     public Uni<Date> marcarAssistida(Long aulaId, Long pessoaId) {
         String sql = """
         INSERT INTO edc_aula_aluno(id_aula, id_pessoa, data_assitida)
-        VALUES( ? 1, ?2, now())
+        VALUES(?1, ?2, now())
         ON CONFLICT (id_aula, id_pessoa)DO UPDATE SET data_assitida = now()
         RETURNING data_assitida
         """;

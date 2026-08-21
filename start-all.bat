@@ -2,7 +2,8 @@
 setlocal enabledelayedexpansion
 
 cd /d "%~dp0"
-set LOGFILE=%~dp0error.log
+set COMPILE_LOG=%~dp0compile-errors.log
+set DOCKER_LOG=%~dp0docker-compose.log
 
 where docker >nul 2>&1
 if %errorlevel% neq 0 (
@@ -50,9 +51,9 @@ if %errorlevel% equ 0 (
     for /f %%i in ('%DC% ps -q') do set HAS_CONTAINERS=1
     if defined HAS_CONTAINERS (
         echo  Encontrados containers. Derrubando antes de subir novamente...
-        %DC% down --remove-orphans 2> "%LOGFILE%"
+        %DC% down --remove-orphans 2> "%DOCKER_LOG%"
         if !errorlevel! neq 0 (
-            echo [ERRO] Falha ao derrubar containers. Detalhes em error.log
+            echo [ERRO] Falha ao derrubar containers. Detalhes em docker-compose.log
             exit /b 1
         )
         docker network rm olimpio_default >nul 2>&1
@@ -61,10 +62,17 @@ if %errorlevel% equ 0 (
 )
 
 echo ============================================
+echo  Limpando logs anteriores...
+echo ============================================
+
+if exist "%COMPILE_LOG%" del "%COMPILE_LOG%"
+if exist "%DOCKER_LOG%" del "%DOCKER_LOG%"
+del "%COMPILE_LOG%.%.mvn" >nul 2>&1
+
+echo ============================================
 echo  Verificando compilacao dos microsservicos...
 echo ============================================
 
-if exist "%LOGFILE%" del "%LOGFILE%"
 set COMPILE_ERRORS=0
 for %%s in (aluno asaas basico central comercial curriculo educacao estoque financeiro fiserv login notificacoes professor relatorios schedule) do (
     call :do_compile %%s
@@ -73,7 +81,7 @@ for %%s in (aluno asaas basico central comercial curriculo educacao estoque fina
 if "!COMPILE_ERRORS!" neq "0" (
     echo.
     echo [ERRO] Nem todos os microsservicos compilaram.
-    echo   Detalhes em error.log
+    echo   Detalhes em: %COMPILE_LOG%
     exit /b 1
 )
 
@@ -88,18 +96,20 @@ goto start_fg_with_progress
 
 :do_compile
 set SVC=%~1
+set SVC_LOG=%COMPILE_LOG%.%SVC%.mvn
 if not exist "microservices\%SVC%\pom.xml" goto :eof
-mvn -B -f "microservices\%SVC%\pom.xml" compile -DskipTests > "%LOGFILE%.mvn" 2>&1
+
+mvn -B -f "microservices\%SVC%\pom.xml" compile -DskipTests > "%SVC_LOG%" 2>&1
+
 if !errorlevel! neq 0 (
-    echo ======================================== >> "%LOGFILE%"
-    echo  ERRO: %SVC% >> "%LOGFILE%"
-    echo ======================================== >> "%LOGFILE%"
-    type "%LOGFILE%.mvn" >> "%LOGFILE%"
-    del "%LOGFILE%.mvn" >nul 2>&1
-    echo   [ERRO] %SVC%
+    echo ======================================== >> "%COMPILE_LOG%"
+    echo  ERRO: %SVC% >> "%COMPILE_LOG%"
+    echo ======================================== >> "%COMPILE_LOG%"
+    type "%SVC_LOG%" >> "%COMPILE_LOG%"
+    echo   [ERRO] %SVC% (Log em: %COMPILE_LOG%.%SVC%.mvn)
     set COMPILE_ERRORS=1
 ) else (
-    del "%LOGFILE%.mvn" >nul 2>&1
+    del "%SVC_LOG%" >nul 2>&1
     echo   [OK] %SVC%
 )
 goto :eof
@@ -109,9 +119,12 @@ echo.
 echo Iniciando containers em background com monitoramento de saude...
 echo.
 
-%DC% up --build -d 2> "%LOGFILE%"
+%DC% up --build -d 2> "%DOCKER_LOG%"
 if %errorlevel% neq 0 (
-    echo [ERRO] Falha ao subir containers. Detalhes em error.log
+    echo [ERRO] Falha ao subir containers. Detalhes em: %DOCKER_LOG%
+    echo.
+    echo Ultimas linhas do log:
+    powershell -Command "Get-Content '%DOCKER_LOG%' -Tail 20" 2>nul
     exit /b 1
 )
 
@@ -119,7 +132,7 @@ echo.
 echo Containers iniciados. Aguardando servicos ficarem saudaveis...
 echo.
 
-set SERVICES=login:8090 basico:8081 notificacoes:8082 central:8083 comercial:8084 educacao:8085 estoque:8086 financeiro:8087 relatorios:8088 schedule:8089 professor:8091 aluno:8092 asaas:8094 curriculo:8095 fiserv:8096 gateway:8080 web-react:3000
+set SERVICES=login:8090 basico:8081 notificacoes:8082 central:8083 comercial:8084 educacao:8085 estoque:8086 financeiro:8087 relatorios:8088 schedule:8089 professor:8091 aluno:8092 asaas:8094 curriculo:8095 fiserv:8097 gateway:8080 web:3000
 set TOTAL=0
 for %%s in (%SERVICES%) do set /a TOTAL+=1
 
@@ -131,43 +144,58 @@ set WAITED=0
 :wait_loop
 set CHECKED=0
 set HEALTHY=0
+set FAIL_LIST=
 for %%s in (%SERVICES%) do (
     for /f "tokens=1,2 delims=:" %%a in ("%%s") do (
         call :check_health %%a %%b
     )
 )
 
-if !HEALTHY! equ !TOTAL! (
-    echo.
-    echo ============================================
-    echo  [SUCESSO] Todos os %TOTAL% servicos estao saudaveis!
-    echo ============================================
-    goto show_endpoints
-)
-
-if !WAITED! geq !MAX_WAIT! (
-    echo.
-    echo ============================================
-    echo  [AVISO] Tempo maximo atingido (%MAX_WAIT% seg).
-    echo  Alguns servicos podem ainda estar iniciando.
-    echo ============================================
-    goto show_endpoints
-)
+if !HEALTHY! equ !TOTAL! goto bg_all_healthy
+if !WAITED! geq !MAX_WAIT! goto bg_timeout
 
 set /a WAITED+=5
-echo [AGUARDANDO] %HEALTHY!/%TOTAL! servicos saudaveis... (%WAITED!s/%MAX_WAIT!s)
+echo [AGUARDANDO] !HEALTHY!/!TOTAL! servicos saudaveis... !WAITED!s/!MAX_WAIT!s
+if defined FAIL_LIST echo   Aguardando: !FAIL_LIST!
 timeout /t 5 /nobreak >nul
 goto wait_loop
+
+:bg_all_healthy
+echo.
+echo ============================================
+echo  [SUCESSO] Todos os %TOTAL% servicos estao saudaveis!
+echo ============================================
+goto show_endpoints
+
+:bg_timeout
+echo.
+echo ============================================
+echo  [AVISO] Tempo maximo atingido %MAX_WAIT% seg.
+echo  Servicos operacionais: !HEALTHY!/%TOTAL%
+echo  Servicos com problema: !FAIL_LIST!
+echo.
+echo  Verifique os logs com: docker compose logs -f [servico]
+echo ============================================
+goto show_endpoints
 
 :check_health
 set SVC_NAME=%1
 set SVC_PORT=%2
-curl -sf http://localhost:%SVC_PORT%/q/health >nul 2>&1
+
+set HEALTH_PATH=/q/health
+if "%SVC_PORT%"=="3000" set HEALTH_PATH=/
+
+curl -sL -f http://localhost:%SVC_PORT%%HEALTH_PATH% >nul 2>&1
 if !errorlevel! equ 0 (
     set /a CHECKED+=1
     set /a HEALTHY+=1
 ) else (
     set /a CHECKED+=1
+    if defined FAIL_LIST (
+        set "FAIL_LIST=!FAIL_LIST!, %SVC_NAME%:%SVC_PORT%"
+    ) else (
+        set "FAIL_LIST=%SVC_NAME%:%SVC_PORT%"
+    )
 )
 goto :eof
 
@@ -189,10 +217,14 @@ echo   estoque:      http://localhost:8086
 echo   financeiro:   http://localhost:8087
 echo   login:        http://localhost:8090
 echo   notificacoes: http://localhost:8082
-echo   fiserv:       http://localhost:8096
+echo   fiserv:       http://localhost:8097
 echo   professor:    http://localhost:8091
 echo   relatorios:   http://localhost:8088
 echo   schedule:     http://localhost:8089
+echo.
+echo Logs:
+echo   Compilacao:   %COMPILE_LOG%
+echo   Docker:       %DOCKER_LOG%
 echo.
 echo Use "%DC% logs -f [servico]" para acompanhar logs.
 echo Use "stop-all.bat" para parar.
@@ -205,12 +237,13 @@ echo Pressione Ctrl+C para parar.
 echo.
 
 echo Iniciando monitoramento de saude em janela separada...
-start "Health Monitor" cmd /k "%~dp0\health-monitor.bat"
+start "Health Monitor" cmd /k "%~dp0health-monitor.bat"
 
-%DC% up --build
+%DC% up --build 2> "%DOCKER_LOG%"
 if %errorlevel% neq 0 (
     echo.
     echo [ERRO] Falha ao subir containers.
+    echo   Detalhes em: %DOCKER_LOG%
     exit /b 1
 )
 

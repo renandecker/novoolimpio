@@ -4,6 +4,8 @@ import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 import java.time.LocalTime;
 import java.util.Date;
@@ -19,8 +21,10 @@ public class HorarioPeriodo extends PanacheEntity {
     @Column(name = "id_turno")
     public Long turnoEducacaoId;  // referencia a TurnoEducacao (id, cross-service)
     @Column(name = "dt_inicio")
+    @Temporal(TemporalType.DATE)
     public Date dataInicio;
     @Column(name = "dt_fim")
+    @Temporal(TemporalType.DATE)
     public Date dataFim;
     @Column(name = "hora_inicio")
     public LocalTime horaInicio;

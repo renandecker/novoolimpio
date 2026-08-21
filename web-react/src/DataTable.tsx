@@ -186,6 +186,18 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
     const totalElements = q.data?.totalElements ?? 0;
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);
 
+    const cols: DataTableColumn[] =
+        columns && columns.length > 0
+            ? columns
+            : items.length > 0
+                ? deriveColumns(items[0])
+                : [];
+
+    const mainLimit = maxMainColumns ?? MAX_MAIN_COLUMNS;
+    const mainCols = cols.slice(0, mainLimit);
+    const subCols = cols.slice(mainLimit);
+    const expandable = subCols.length > 0;
+
     // Fetch perfil module permissions from bas_perfil_modulo
     const [perfilModuloPermissions, setPerfilModuloPermissions] = useState<PerfilModuloPermissions | null>(null);
     const [perfilModuloLoading, setPerfilModuloLoading] = useState(false);
@@ -194,7 +206,7 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
         const carregarPermissoes = async () => {
             setPerfilModuloLoading(true);
             try {
-                const response = await api.get<PerfilModuloPermissions>(`/api/perfil-modulo/permissoes?caminho=${path}`);
+                const response = await api.get<PerfilModuloPermissions>(`/api/permissao/permissoes?caminho=${path}`);
                 setPerfilModuloPermissions(response.data);
             } catch (error) {
                 console.error('Erro ao carregar permissões do perfil-modulo:', error);
@@ -227,23 +239,8 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
             .finally(() => setExecuting(null));
     };
 
-    const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem) => ReactNode }> = [];
-    if (canCreate) {
-        actionColumns.push({
-            key: 'novo',
-            label: 'Novo',
-            render: (item) => (
-                <button
-                    className="btn-action btnstop"
-                    title="Novo"
-                    onClick={() => setModal({mode: 'create'})}
-                >
-                    +
-                </button>
-            ),
-        });
-    }
-    if (canUpdate) {
+const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem) => ReactNode }> = [];
+  if (canUpdate) {
         actionColumns.push({
             key: 'editar',
             label: 'Editar',
@@ -273,53 +270,24 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
             ),
         });
     }
-    if (canRelatorio) {
-        actionColumns.push({
-            key: 'exportar',
-            label: 'Exportar',
-            render: (item) => (
-                <div className="row-actions-export">
-                    <button
-                        className="btn-action btn-yellow"
-                        title="Exportar"
-                        onClick={() => exportarDados(item)}
-                    >
-                        <i className="fa fa-download"/> Exportar
-                    </button>
-                    <button
-                        className="btn-action btn-yellow"
-                        title="Exportar PDF"
-                        onClick={() => exportarPDF(item)}
-                    >
-                        <i className="fa fa-file-pdf-o"/> PDF
-                    </button>
-                    <button
-                        className="btn-action btn-yellow"
-                        title="Exportar Excel"
-                        onClick={() => exportarExcel(item)}
-                    >
-                        <i className="fa fa-file-excel-o"/> Excel
-                    </button>
-                </div>
-            ),
-        });
-    }
+if (canRelatorio) {
+    actionColumns.push({
+      key: 'exportar',
+      label: 'Exportar',
+      render: (item) => (
+        <div className="row-actions-export">
+          <button
+            className="btn-action btn-yellow"
+            title="Exportar Excel"
+            onClick={() => exportarExcel(item)}
+          >
+            <i className="fa fa-file-excel-o"/> Excel
+          </button>
+        </div>
+      ),
+    });
+  }
 
-    if (canDelete) {
-        actionColumns.push({
-            key: 'excluir',
-            label: 'Excluir',
-            render: (item) => (
-                <button
-                    className="btn-action btn-danger"
-                    title="Excluir"
-                    onClick={() => setModal({mode: 'delete', item})}
-                >
-                    ✕
-                </button>
-            ),
-        });
-    }
     const headerCount = (expandable ? 1 : 0) + 1 + cols.length + actionColumns.length;
 
     const apiErrorMessage = (error: unknown) =>

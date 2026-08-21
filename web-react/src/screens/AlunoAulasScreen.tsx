@@ -47,7 +47,8 @@ export default function AlunoAulasScreen() {
                         <th>Turma</th>
                         <th>Aula</th>
                         <th>Descrição</th>
-                        <th>Data</th>
+                        <th>Data da Aula</th>
+                        <th>Data Assistida</th>
                         <th>Situação</th>
                     </tr>
                     </thead>
@@ -55,12 +56,13 @@ export default function AlunoAulasScreen() {
                     {aulas.map(a => (
                         <tr key={a.id}>
                             <td>{a.componente || 'N/A'}</td>
-                            <td>{a.turma || 'N/A'}</td>
+                            <td>{a.turma ? `Turma ${a.turma}` : 'N/A'}</td>
                             <td>{a.nome || `Aula ${a.id}`}</td>
                             <td>{a.descricao || '-'}</td>
+                            <td>{formatarData(a.dataAula)}</td>
                             <td>{formatarData(a.dataAssistida)}</td>
                             <td>
-                                {a.dataAssistida ? 'Assistida' : 'Não registrada'}
+                                {a.dataAssistida ? 'Assistida' : 'Não assistida'}
                             </td>
                         </tr>
                     ))}

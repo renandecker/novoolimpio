@@ -1,7 +1,11 @@
 package br.com.sol7.olimpio.aluno.controller;
 
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.AlunoPerfilResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.AvaliacaoAlunoItemResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.AvaliacaoDetalheResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.AvaliacaoRespostaRequest;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.BoletimResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.ChamadaAulaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.DashboardResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.FinanceiroResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.FrequenciaResponse;
@@ -15,6 +19,7 @@ import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -72,6 +77,33 @@ public class AlunoController {
     @Path("/financeiro")
     public Uni<FinanceiroResponse> financeiro(@Context ContainerRequestContext ctx) {
         return service.financeiro(username(ctx));
+    }
+
+    @GET
+    @Path("/chamadas")
+    public Uni<List<ChamadaAulaResponse>> chamadas(@Context ContainerRequestContext ctx) {
+        return service.chamadas(username(ctx));
+    }
+
+    @GET
+    @Path("/avaliacoes")
+    public Uni<List<AvaliacaoAlunoItemResponse>> avaliacoes(@Context ContainerRequestContext ctx) {
+        return service.avaliacoes(username(ctx));
+    }
+
+    @GET
+    @Path("/avaliacoes/{id}")
+    public Uni<AvaliacaoDetalheResponse> avaliacaoDetalhe(@Context ContainerRequestContext ctx,
+                                                          @PathParam("id") Long id) {
+        return service.avaliacaoDetalhe(username(ctx), id);
+    }
+
+    @POST
+    @Path("/avaliacoes/{id}/responder")
+    public Uni<Void> responderAvaliacao(@Context ContainerRequestContext ctx,
+                                        @PathParam("id") Long id,
+                                        List<AvaliacaoRespostaRequest> respostas) {
+        return service.responder(username(ctx), id, respostas);
     }
 
     // Endpoints de gestão do aluno (administrativo): dados por pessoaId, usados pelas modais da

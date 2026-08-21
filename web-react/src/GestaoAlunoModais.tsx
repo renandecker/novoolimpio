@@ -275,6 +275,36 @@ interface TabelaColuna {
     render?: (row: Record<string, unknown>) => ReactNode;
 }
 
+interface AccordionPanelItem {
+    key: string;
+    title: ReactNode;
+    content: ReactNode;
+}
+
+function Accordion({panels}: { panels: AccordionPanelItem[] }) {
+    const [activeKey, setActiveKey] = useState<string | null>(null);
+    return (
+        <div className="accordion">
+            {panels.map((panel) => {
+                const open = panel.key === activeKey;
+                return (
+                    <div key={panel.key} className="accordion-item">
+                        <button
+                            type="button"
+                            className={open ? 'accordion-header accordion-header-active' : 'accordion-header'}
+                            onClick={() => setActiveKey(open ? null : panel.key)}
+                        >
+                            <span className="accordion-toggle-icon">{open ? '▾' : '▸'}</span>
+                            <span className="accordion-title">{panel.title}</span>
+                        </button>
+                        {open && <div className="accordion-content">{panel.content}</div>}
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
+
 function TabelaDados({colunas, linhas, vazio}: { colunas: TabelaColuna[]; linhas: Record<string, unknown>[]; vazio: string }) {
     return (
         <table className="lote-table">
@@ -314,10 +344,12 @@ interface TabelaDadosPaginadaProps {
 }
 
 function TabelaDadosPaginada({colunas, linhas, vazio, pageSize = 10}: TabelaDadosPaginadaProps) {
-    const [page, setPage] = useState(0);
+    const [pageState, setPageState] = useState(0);
     const [size, setSize] = useState(pageSize);
 
     const totalPages = Math.max(1, Math.ceil(linhas.length / size));
+    const page = Math.min(pageState, totalPages - 1);
+    const setPage = setPageState;
     const start = page * size;
     const end = start + size;
     const paginaLinhas = linhas.slice(start, end);
@@ -352,15 +384,21 @@ function TabelaDadosPaginada({colunas, linhas, vazio, pageSize = 10}: TabelaDado
                 <tfoot>
                 <tr>
                     <td colSpan={colunas.length} className="data-table-paginator">
+                        <button onClick={() => setPage(0)} disabled={page === 0}>
+                            Primeira
+                        </button>
                         <button onClick={() => setPage((current) => Math.max(0, current - 1))} disabled={page === 0}>
                             Anterior
                         </button>
                         <span>
-                Página {page + 1} de {totalPages}
+                (Pag. {page + 1}/{totalPages} - {linhas.length} registros)
               </span>
                         <button onClick={() => setPage((current) => Math.min(totalPages - 1, current + 1))}
                                 disabled={page >= totalPages - 1}>
                             Próxima
+                        </button>
+                        <button onClick={() => setPage(totalPages - 1)} disabled={page >= totalPages - 1}>
+                            Última
                         </button>
                         <label>
                             Registros por página
@@ -378,7 +416,6 @@ function TabelaDadosPaginada({colunas, linhas, vazio, pageSize = 10}: TabelaDado
                                 ))}
                             </select>
                         </label>
-                        <span>Total: {linhas.length}</span>
                     </td>
                 </tr>
                 </tfoot>
@@ -757,30 +794,15 @@ function GrausDeNotas({boletim}: { boletim: Boletim }) {
             {boletim.graus.map((grau) => (
                 <div key={grau.id} className="master-detail" style={{marginBottom: '0.5rem'}}>
                     <strong>{grau.descricao}</strong>
-                    <table className="lote-table">
-                        <thead>
-                        <tr>
-                            <th>Nota</th>
-                            <th>Peso</th>
-                            <th>Nota obtida</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {grau.notas.length === 0 ? (
-                            <tr>
-                                <td colSpan={3}>Sem notas lançadas.</td>
-                            </tr>
-                        ) : (
-                            grau.notas.map((nota) => (
-                                <tr key={nota.id}>
-                                    <td>{nota.nome}</td>
-                                    <td>{nota.peso ?? '—'}</td>
-                                    <td>{nota.nota ?? '—'}</td>
-                                </tr>
-                            ))
-                        )}
-                        </tbody>
-                    </table>
+                    <TabelaDadosPaginada
+                        vazio="Sem notas lançadas."
+                        colunas={[
+                            {key: 'nome', label: 'Nota'},
+                            {key: 'peso', label: 'Peso'},
+                            {key: 'nota', label: 'Nota obtida'},
+                        ]}
+                        linhas={grau.notas as unknown as Record<string, unknown>[]}
+                    />
                 </div>
             ))}
         </div>
@@ -801,33 +823,39 @@ export function NotasModal({pessoaId, onClose}: GestaoModalProps) {
             {boletins.length === 0 ? (
                 <p className="master-detail-empty">Nenhuma matrícula encontrada.</p>
             ) : (
-                boletins.map((boletim) => (
-                    <div key={boletim.matricula.id} className="master-detail" style={{marginBottom: '1rem'}}>
-                        <div className="form-grid">
-                            <label className="form-field">
-                                <span className="form-label">Curso</span>
-                                <input className="form-input" value={boletim.matricula.curso} readOnly/>
-                            </label>
-                            <label className="form-field">
-                                <span className="form-label">Componente</span>
-                                <input className="form-input" value={boletim.matricula.componente} readOnly/>
-                            </label>
-                            <label className="form-field">
-                                <span className="form-label">Turma</span>
-                                <input className="form-input" value={boletim.matricula.turma ?? '—'} readOnly/>
-                            </label>
-                            <label className="form-field">
-                                <span className="form-label">Média</span>
-                                <input className="form-input" value={boletim.media ?? '—'} readOnly/>
-                            </label>
-                            <label className="form-field">
-                                <span className="form-label">Situação</span>
-                                <input className="form-input" value={boletim.status} readOnly/>
-                            </label>
-                        </div>
-                        <GrausDeNotas boletim={boletim}/>
-                    </div>
-                ))
+                <Accordion
+                    panels={boletins.map((boletim) => ({
+                        key: String(boletim.matricula.id),
+                        title: `${boletim.matricula.curso} - ${boletim.matricula.componente} - Turma ${boletim.matricula.turma ?? '—'} (${boletim.status})`,
+                        content: (
+                            <>
+                                <div className="form-grid">
+                                    <label className="form-field">
+                                        <span className="form-label">Curso</span>
+                                        <input className="form-input" value={boletim.matricula.curso} readOnly/>
+                                    </label>
+                                    <label className="form-field">
+                                        <span className="form-label">Componente</span>
+                                        <input className="form-input" value={boletim.matricula.componente} readOnly/>
+                                    </label>
+                                    <label className="form-field">
+                                        <span className="form-label">Turma</span>
+                                        <input className="form-input" value={boletim.matricula.turma ?? '—'} readOnly/>
+                                    </label>
+                                    <label className="form-field">
+                                        <span className="form-label">Média</span>
+                                        <input className="form-input" value={boletim.media ?? '—'} readOnly/>
+                                    </label>
+                                    <label className="form-field">
+                                        <span className="form-label">Situação</span>
+                                        <input className="form-input" value={boletim.status} readOnly/>
+                                    </label>
+                                </div>
+                                <GrausDeNotas boletim={boletim}/>
+                            </>
+                        ),
+                    }))}
+                />
             )}
         </ModalFrame>
     );
@@ -857,71 +885,66 @@ export function PresencasModal({pessoaId, onClose}: GestaoModalProps) {
     const frequencias = q.data ?? [];
     return (
         <ModalFrame titulo="Presenças" onClose={onClose}>
-            <Tabs
-                tabs={[
-                    {
-                        key: 'matricula',
-                        label: 'Matrícula',
-                        content: frequencias.length === 0 ? (
-                            <p className="master-detail-empty">Nenhuma matrícula encontrada.</p>
-                        ) : (
-                            frequencias.map((frequencia) => (
-                                <div key={frequencia.matricula.id} className="master-detail"
-                                     style={{marginBottom: '1rem'}}>
-                                    <div className="form-grid">
-                                        <label className="form-field">
-                                            <span className="form-label">Curso</span>
-                                            <input className="form-input" value={frequencia.matricula.curso} readOnly/>
-                                        </label>
-                                        <label className="form-field">
-                                            <span className="form-label">Componente</span>
-                                            <input className="form-input" value={frequencia.matricula.componente}
-                                                   readOnly/>
-                                        </label>
-                                        <label className="form-field">
-                                            <span className="form-label">Turma</span>
-                                            <input className="form-input" value={frequencia.matricula.turma ?? '—'}
-                                                   readOnly/>
-                                        </label>
-                                        <label className="form-field">
-                                            <span className="form-label">Frequência</span>
-                                            <input className="form-input"
-                                                   value={frequencia.frequenciaPerc == null ? '—' : `${frequencia.frequenciaPerc}%`}
-                                                   readOnly/>
-                                        </label>
-                                        <label className="form-field">
-                                            <span className="form-label">Presentes</span>
-                                            <input className="form-input" value={frequencia.presentes} readOnly/>
-                                        </label>
-                                        <label className="form-field">
-                                            <span className="form-label">Ausentes</span>
-                                            <input className="form-input" value={frequencia.ausentes} readOnly/>
-                                        </label>
-                                    </div>
-                                    <TabelaDadosPaginada
-                                        vazio="Nenhuma ocorrência de presença."
-                                        colunas={[
-                                            {
-                                                key: 'data',
-                                                label: 'Data',
-                                                render: (linha) => fmtData(linha.data as string | null)
-                                            },
-                                            {
-                                                key: 'presenca',
-                                                label: 'Presença',
-                                                render: (linha) => PRESENCA_COR[String(linha.presenca ?? '')] ?? String(linha.presenca ?? '')
-                                            },
-                                            {key: 'componente', label: 'Componente'},
-                                        ]}
-                                        linhas={frequencia.ocorrencias as unknown as Record<string, unknown>[]}
-                                    />
+            <Accordion
+                panels={[
+                    ...frequencias.map((frequencia) => ({
+                        key: String(frequencia.matricula.id),
+                        title: `${frequencia.matricula.curso} - ${frequencia.matricula.componente} - Turma ${frequencia.matricula.turma ?? '—'} (${frequencia.frequenciaPerc == null ? '—' : `${frequencia.frequenciaPerc}%`})`,
+                        content: (
+                            <>
+                                <div className="form-grid">
+                                    <label className="form-field">
+                                        <span className="form-label">Curso</span>
+                                        <input className="form-input" value={frequencia.matricula.curso} readOnly/>
+                                    </label>
+                                    <label className="form-field">
+                                        <span className="form-label">Componente</span>
+                                        <input className="form-input" value={frequencia.matricula.componente}
+                                               readOnly/>
+                                    </label>
+                                    <label className="form-field">
+                                        <span className="form-label">Turma</span>
+                                        <input className="form-input" value={frequencia.matricula.turma ?? '—'}
+                                               readOnly/>
+                                    </label>
+                                    <label className="form-field">
+                                        <span className="form-label">Frequência</span>
+                                        <input className="form-input"
+                                               value={frequencia.frequenciaPerc == null ? '—' : `${frequencia.frequenciaPerc}%`}
+                                               readOnly/>
+                                    </label>
+                                    <label className="form-field">
+                                        <span className="form-label">Presentes</span>
+                                        <input className="form-input" value={frequencia.presentes} readOnly/>
+                                    </label>
+                                    <label className="form-field">
+                                        <span className="form-label">Ausentes</span>
+                                        <input className="form-input" value={frequencia.ausentes} readOnly/>
+                                    </label>
                                 </div>
-                            ))
+                                <TabelaDadosPaginada
+                                    vazio="Nenhuma ocorrência de presença."
+                                    colunas={[
+                                        {
+                                            key: 'data',
+                                            label: 'Data',
+                                            render: (linha) => fmtData(linha.data as string | null)
+                                        },
+                                        {
+                                            key: 'presenca',
+                                            label: 'Presença',
+                                            render: (linha) => PRESENCA_COR[String(linha.presenca ?? '')] ?? String(linha.presenca ?? '')
+                                        },
+                                        {key: 'componente', label: 'Componente'},
+                                    ]}
+                                    linhas={frequencia.ocorrencias as unknown as Record<string, unknown>[]}
+                                />
+                            </>
                         ),
-                    },
+                    })),
                     {
                         key: 'trocaTurma',
-                        label: 'Troca Turma',
+                        title: 'Troca Turma',
                         content: <p className="master-detail-empty">Nenhuma troca de turma registrada.</p>,
                     },
                 ]}

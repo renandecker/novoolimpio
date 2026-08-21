@@ -4,6 +4,8 @@ import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 import java.util.Date;
 
@@ -14,6 +16,7 @@ public class Desistente extends PanacheEntity {
     @Column(name = "descricao", columnDefinition = "text")
     public String descricao;
     @Column(name = "data_criacao")
+    @Temporal(TemporalType.DATE)
     public Date dataCriacao;
     @Column(name = "id_pessoa_notificou")
     public Long pessoaFuncionarioId;  // referencia a Pessoa (id, cross-service)

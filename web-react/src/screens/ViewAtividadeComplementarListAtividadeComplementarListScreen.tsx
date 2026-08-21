@@ -1,5 +1,5 @@
 import {PermissionGate} from '../permissions';
-import {DataTable} from '../DataTable';
+import {DataTable, type DataTableColumn} from '../DataTable';
 import type {ApiItem} from '../types';
 
 const formatDate = (value: unknown): string => {

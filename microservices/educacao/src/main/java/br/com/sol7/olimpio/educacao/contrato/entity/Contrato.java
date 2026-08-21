@@ -4,6 +4,8 @@ import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -41,6 +43,7 @@ public class Contrato extends PanacheEntity {
     @Column(name = "id_responsavel")
     public Long responsavelId;  // referencia a Pessoa (id, cross-service)
     @Column(name = "data_conclusao")
+    @Temporal(TemporalType.DATE)
     public Date dataConclusao;
     @Column(name = "local")
     public String local;
@@ -61,10 +64,13 @@ public class Contrato extends PanacheEntity {
     @Column(name = "fl_pdf")
     public Boolean pdf;
     @Column(name = "data")
+    @Temporal(TemporalType.DATE)
     public Date data;
     @Column(name = "data_reparcelamento")
+    @Temporal(TemporalType.DATE)
     public Date dataReparcelamento;
     @Column(name = "data_cancelamento")
+    @Temporal(TemporalType.DATE)
     public Date dataCancelamento;
     @Column(name = "qtde_reparcelamento")
     public Integer qtdeReparcelamento;

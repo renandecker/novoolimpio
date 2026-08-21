@@ -242,6 +242,9 @@ export default function Sidebar() {
                                         <Link className="sidebar-item sidebar-subitem" to="/aluno/frequencia"><span
                                             className="sidebar-icon">📅</span><span
                                             className="sidebar-label">Frequência</span></Link>
+                                        <Link className="sidebar-item sidebar-subitem" to="/aluno/financeiro"><span
+                                            className="sidebar-icon">💰</span><span
+                                            className="sidebar-label">Financeiro</span></Link>
                                         <Link className="sidebar-item sidebar-subitem" to="/aluno/aulas"><span
                                             className="sidebar-icon">📚</span><span className="sidebar-label">Registro de Aulas</span></Link>
                                         <Link className="sidebar-item sidebar-subitem" to="/aluno/avaliacoes"><span

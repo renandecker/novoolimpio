@@ -1,9 +1,15 @@
 package br.com.sol7.olimpio.aluno.service;
 
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.AlunoPerfilResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.AvaliacaoAlunoItemResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.AvaliacaoDetalheResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.AvaliacaoOpcaoResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.AvaliacaoPerguntaResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.AvaliacaoRespostaRequest;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.AvaliacaoResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.BoletimResumoResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.BoletimResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.ChamadaAulaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.ContratoFinanceiroResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.DashboardResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.EmailCobrancaResponse;
@@ -224,6 +230,91 @@ public class AlunoService {
                     List<MatriculaResponse> matriculas = rows.stream().map(this::toMatricula).toList();
                     return sequencial(matriculas.stream().map(this::frequenciaDeMatricula).toList());
                 });
+    }
+
+    public Uni<List<ChamadaAulaResponse>> chamadas(String username) {
+        return repository.pessoaIdPorUsername(username)
+                .onItem().ifNull().failWith(() -> new NotFoundException("Aluno não encontrado"))
+                .onItem().transformToUni(pessoaId -> repository.chamadasPorPessoa(pessoaId)
+                        .map(rows -> rows.stream().map(this::toChamadaAula).toList()));
+    }
+
+    public Uni<List<AvaliacaoAlunoItemResponse>> avaliacoes(String username) {
+        return repository.pessoaIdPorUsername(username)
+                .onItem().ifNull().failWith(() -> new NotFoundException("Aluno não encontrado"))
+                .onItem().transformToUni(pessoaId -> repository.avaliacoesPorPessoa(pessoaId)
+                        .map(rows -> rows.stream().map(this::toAvaliacaoItem).toList()));
+    }
+
+    public Uni<AvaliacaoDetalheResponse> avaliacaoDetalhe(String username, Long avaliacaoId) {
+        return repository.pessoaIdPorUsername(username)
+                .onItem().ifNull().failWith(() -> new NotFoundException("Aluno não encontrado"))
+                .onItem().transformToUni(pessoaId -> repository.avaliacaoPertenceAoAluno(avaliacaoId, pessoaId)
+                        .chain(pertence -> {
+                            if (!pertence) return Uni.createFrom().failure(new NotFoundException("Avaliação não encontrada"));
+                            return repository.avaliacaoPorId(avaliacaoId)
+                                    .onItem().ifNull().failWith(() -> new NotFoundException("Avaliação não encontrada"))
+                                    .chain(avaliacao -> repository.perguntasDaAvaliacao(avaliacaoId, pessoaId)
+                                            .map(rows -> toAvaliacaoDetalhe(avaliacao, rows)));
+                        }));
+    }
+
+    public Uni<Void> responder(String username, Long avaliacaoId, List<AvaliacaoRespostaRequest> respostas) {
+        List<AvaliacaoRespostaRequest> lista = respostas == null ? List.of() : respostas;
+        return repository.pessoaIdPorUsername(username)
+                .onItem().ifNull().failWith(() -> new NotFoundException("Aluno não encontrado"))
+                .onItem().transformToUni(pessoaId -> repository.avaliacaoPertenceAoAluno(avaliacaoId, pessoaId)
+                        .chain(pertence -> {
+                            if (!pertence) return Uni.createFrom().failure(new NotFoundException("Avaliação não encontrada"));
+                            return repository.removerRespostas(avaliacaoId, pessoaId)
+                                    .chain(() -> sequencial(lista.stream()
+                                            .map(r -> repository.inserirResposta(pessoaId, avaliacaoId,
+                                                    r.perguntaId(), r.respostaId(), r.respostaTexto()))
+                                            .toList()))
+                                    .replaceWithVoid();
+                        }));
+    }
+
+    private ChamadaAulaResponse toChamadaAula(Object[] row) {
+        LocalDateTime assistida = asLocalDateTimeOrNull(row[6]);
+        return new ChamadaAulaResponse(asLong(row[0]), asString(row[1]), asString(row[2]),
+                asString(row[3]), asInt(row[4]), asLocalDate(row[5]), assistida);
+    }
+
+    private AvaliacaoAlunoItemResponse toAvaliacaoItem(Object[] row) {
+        return new AvaliacaoAlunoItemResponse(asLong(row[0]), asString(row[1]), asString(row[2]),
+                asString(row[3]), asInt(row[4]), asLocalDate(row[5]), asLocalDate(row[6]),
+                asBoolean(row[7]), asBoolean(row[8]));
+    }
+
+    private AvaliacaoDetalheResponse toAvaliacaoDetalhe(Object[] avaliacao, List<Object[]> rows) {
+        Map<Long, List<Object[]>> porPergunta = new LinkedHashMap<>();
+        for (Object[] row : rows) {
+            porPergunta.computeIfAbsent(asLong(row[0]), id -> new ArrayList<>()).add(row);
+        }
+        List<AvaliacaoPerguntaResponse> perguntas = new ArrayList<>();
+        for (Map.Entry<Long, List<Object[]>> entry : porPergunta.entrySet()) {
+            Object[] primeira = entry.getValue().get(0);
+            Long escolhida = asLong(primeira[5]);
+            String texto = primeira[6] == null ? null : asString(primeira[6]);
+            List<AvaliacaoOpcaoResponse> opcoes = entry.getValue().stream()
+                    .filter(r -> r[3] != null)
+                    .map(r -> new AvaliacaoOpcaoResponse(asLong(r[3]), asString(r[4])))
+                    .toList();
+            perguntas.add(new AvaliacaoPerguntaResponse(entry.getKey(), asString(primeira[1]),
+                    asString(primeira[2]), opcoes, escolhida, texto));
+        }
+        return new AvaliacaoDetalheResponse(asLong(avaliacao[0]), asString(avaliacao[1]),
+                asString(avaliacao[2]), asBoolean(avaliacao[3]), perguntas);
+    }
+
+    private LocalDateTime asLocalDateTimeOrNull(Object o) {
+        if (o == null) return null;
+        try {
+            return asLocalDateTime(o);
+        } catch (RuntimeException ignored) {
+            return null;
+        }
     }
 
     private ResumoFinanceiroResponse toResumo(Object row) {

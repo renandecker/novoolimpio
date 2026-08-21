@@ -4,6 +4,8 @@ import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -13,6 +15,7 @@ import java.util.Date;
 public class ValorCurso extends PanacheEntity {
 
     @Column(name = "data")
+    @Temporal(TemporalType.DATE)
     public Date data;
     @Column(name = "dias_spc")
     public int diasSpc;

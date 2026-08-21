@@ -4,6 +4,8 @@ import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 import java.util.Date;
 
@@ -24,8 +26,10 @@ public class ChamadaAssinadaImpressa extends PanacheEntity {
     @Column(name = "ativo")
     public boolean ativo;
     @Column(name = "inicio")
+    @Temporal(TemporalType.DATE)
     public Date inicio;
     @Column(name = "fim")
+    @Temporal(TemporalType.DATE)
     public Date fim;
     @Column(name = "pendente")
     public boolean pendente;

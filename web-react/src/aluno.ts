@@ -115,6 +115,9 @@ export const alunoApi = {
     financeiro: () => api.get<Financeiro>('/api/aluno/financeiro').then(r => r.data),
     chamadas: () => api.get<AulaAluno[]>('/api/aluno/chamadas').then(r => r.data),
     avaliacoes: () => api.get<AvaliacaoAluno[]>('/api/aluno/avaliacoes').then(r => r.data),
+    avaliacaoDetalhe: (id: number) => api.get<AvaliacaoDetalhe>(`/api/aluno/avaliacoes/${id}`).then(r => r.data),
+    responderAvaliacao: (id: number, respostas: AvaliacaoRespostaEnvio[]) =>
+        api.post<void>(`/api/aluno/avaliacoes/${id}/responder`, respostas).then(r => r.data),
 };
 
 export type ResumoFinanceiro = {
@@ -201,30 +204,47 @@ export type AulaAluno = {
     nome: string;
     descricao: string;
     componente: string;
-    turma: string;
-    dataAssistida?: string;
-};
-
-export type AvaliacaoPergunta = {
-    id: number;
-    nome: string;
-    descricao: string;
-};
-
-export type AvaliacaoResposta = {
-    id: number;
-    id_avaliacao_pergunta: number;
-    resposta: string;
-    nota: number | null;
-    conceito: string | null;
+    turma: number | null;
+    dataAula?: string | null;
+    dataAssistida?: string | null;
 };
 
 export type AvaliacaoAluno = {
     id: number;
-    id_avaliacao: number;
-    id_avaliacao_pergunta: number;
-    descricao_pergunta: string;
-    resposta?: string;
-    nota?: number;
-    conceito?: string;
+    nome: string;
+    descricao: string;
+    componente: string;
+    turma: number | null;
+    dataInicial: string | null;
+    dataFinal: string | null;
+    ativa: boolean;
+    respondida: boolean;
+};
+
+export type AvaliacaoOpcao = {
+    id: number;
+    resposta: string;
+};
+
+export type AvaliacaoPerguntaDetalhe = {
+    id: number;
+    pergunta: string;
+    tipo: string;
+    opcoes: AvaliacaoOpcao[];
+    respostaEscolhidaId: number | null;
+    respostaTexto: string | null;
+};
+
+export type AvaliacaoDetalhe = {
+    id: number;
+    nome: string;
+    descricao: string;
+    ativa: boolean;
+    perguntas: AvaliacaoPerguntaDetalhe[];
+};
+
+export type AvaliacaoRespostaEnvio = {
+    perguntaId: number;
+    respostaId: number | null;
+    respostaTexto: string | null;
 };

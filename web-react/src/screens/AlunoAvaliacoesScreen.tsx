@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
-import {alunoApi, AvaliacaoAluno, AvaliacaoPergunta, formatarNota} from '../aluno';
+import {alunoApi, AvaliacaoAluno, formatarData} from '../aluno';
 import '../AlunoPortal.css';
 
 export default function AlunoAvaliacoesScreen() {
@@ -32,12 +32,10 @@ export default function AlunoAvaliacoesScreen() {
         <div className="aluno-portal-error" role="alert">{error}</div>
     </main>;
 
-    const totalAvaliacoes = avaliacoes.length;
-
     return (
         <main className="aluno-portal">
             <h1>Avaliações do Aluno</h1>
-            <p className="aluno-portal-msg">Total de avaliações: {totalAvaliacoes}</p>
+            <p className="aluno-portal-msg">Total de avaliações: {avaliacoes.length}</p>
 
             {avaliacoes.length === 0 && <p className="aluno-portal-msg">Nenhuma avaliação encontrada.</p>}
 
@@ -46,33 +44,26 @@ export default function AlunoAvaliacoesScreen() {
                     <section className="aluno-portal-item" key={a.id}>
                         <div className="aluno-portal-item-cabecalho">
                             <div>
-                                <h2>{a.descricao_pergunta || `Pergunta ${a.id_avaliacao_pergunta}`}</h2>
+                                <h2>{a.nome || `Avaliação ${a.id}`}</h2>
                                 <p className="aluno-portal-item-meta">
-                                    {a.id_avaliacao ? 'Avaliação ' + a.id_avaliacao : ''}
+                                    {[a.componente, a.turma ? 'Turma ' + a.turma : '', a.descricao]
+                                        .filter(Boolean).join(' • ')}
                                 </p>
                             </div>
+                            <span className={`aluno-portal-situacao ${a.respondida ? 'ok' : a.ativa ? 'pendente' : 'fechada'}`}>
+                                {a.respondida ? 'Respondida' : a.ativa ? 'Disponível' : 'Fechada'}
+                            </span>
                         </div>
 
                         <div className="aluno-portal-item-dados">
-                            {a.conceito !== undefined && a.conceito !== null ? (
-                                <p><strong>Conceito:</strong> {a.conceito}</p>
-                            ) : null}
-
-                            {a.nota !== undefined && a.nota !== null ? (
-                                <p><strong>Nota:</strong> {formatarNota(a.nota)}</p>
-                            ) : null}
-
-                            {a.resposta !== undefined && a.resposta !== null ? (
-                                <p>
-                                    <minhaResposta>{a.resposta}</minhaResposta>
-                                </p>
-                            ) : (
-                                <p>Sua resposta: <em> ainda não respondida</em></p>
-                            )}
+                            <p><strong>Início:</strong> {formatarData(a.dataInicial)}</p>
+                            <p><strong>Fim:</strong> {formatarData(a.dataFinal)}</p>
                         </div>
 
                         <div className="aluno-portal-item-acoes">
-                            <Link to={`/aluno/avaliacao/${a.id}`}>Responder</Link>
+                            {(a.ativa || a.respondida) && (
+                                <Link to={`/aluno/avaliacao/${a.id}`}>{a.respondida ? 'Ver respostas' : 'Responder'}</Link>
+                            )}
                         </div>
                     </section>
                 ))}

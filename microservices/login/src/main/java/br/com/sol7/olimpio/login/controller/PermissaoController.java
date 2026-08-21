@@ -8,6 +8,7 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
@@ -39,7 +40,7 @@ public class PermissaoController {
     }
 
     /**
-     * Permissões de uma tela/outcome específico. Colunas: READ (listagem),
+     * Permissões de uma tela/outcome específico como Set&lt;String&gt;. Colunas: READ (listagem),
      * CREATE (Novo), UPDATE (Editar), DELETE (Excluir), EXECUTE (ações customizadas).
      */
     @GET
@@ -49,6 +50,30 @@ public class PermissaoController {
         String normalized = normalizar(outcome);
         return resolveByUsername(currentUsername(context))
                 .map(map -> map.getOrDefault(normalized, Set.of("READ")));
+    }
+
+    /**
+     * Permissões de bas_perfil_modulo por caminho/outcome. Retorna {novo, editar, remover, relatorio}
+     * usadas pelo DataTable para controlar visibilidade de colunas de ação.
+     */
+    @GET
+    @Path("/permissoes")
+    public Uni<Map<String, Boolean>> permissoes(@Context ContainerRequestContext context,
+                                                @jakarta.ws.rs.QueryParam("caminho") String caminho) {
+        if (caminho == null || caminho.isBlank()) {
+            return Uni.createFrom().item(Map.of("novo", false, "editar", false, "remover", false, "relatorio", false));
+        }
+        String normalized = normalizar(caminho);
+        return resolveByUsername(currentUsername(context))
+                .map(map -> {
+                    Set<String> perms = map.getOrDefault(normalized, Set.of());
+                    return Map.of(
+                            "novo", perms.contains("CREATE"),
+                            "editar", perms.contains("UPDATE"),
+                            "remover", perms.contains("DELETE"),
+                            "relatorio", perms.contains("EXECUTE")
+                    );
+                });
     }
 
     private String currentUsername(ContainerRequestContext context) {
