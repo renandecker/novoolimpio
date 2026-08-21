@@ -360,6 +360,7 @@ import ViewRelatoriosColunasGraficoListScreen from './screens/ViewRelatoriosColu
 import ViewRelatoriosColunasMapaListScreen from './screens/ViewRelatoriosColunasMapaListScreen';
 import ViewRelatoriosColunasOrganogramaListScreen from './screens/ViewRelatoriosColunasOrganogramaListScreen';
 import ViewRelatoriosColunasTabelaListScreen from './screens/ViewRelatoriosColunasTabelaListScreen';
+import ViewRelatoriosDocumentosListScreen from './screens/ViewRelatoriosDocumentosListScreen';
 import ViewRelatoriosExtratorListScreen from './screens/ViewRelatoriosExtratorListScreen';
 import ViewRelatoriosFormDashboardListScreen from './screens/ViewRelatoriosFormDashboardListScreen';
 import ViewRelatoriosFormGraficoListScreen from './screens/ViewRelatoriosFormGraficoListScreen';
@@ -892,6 +893,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/relatorios/colunasMapa" element={<ViewRelatoriosColunasMapaListScreen/>}/>
     <Route path="/view/relatorios/colunasOrganograma" element={<ViewRelatoriosColunasOrganogramaListScreen/>}/>
     <Route path="/view/relatorios/colunasTabela" element={<ViewRelatoriosColunasTabelaListScreen/>}/>
+    <Route path="/view/relatorios/documentos" element={<ViewRelatoriosDocumentosListScreen/>}/>
     <Route path="/view/relatorios/extrator" element={<ViewRelatoriosExtratorListScreen/>}/>
     <Route path="/view/relatorios/formDashboard" element={<ViewRelatoriosFormDashboardListScreen/>}/>
     <Route path="/view/relatorios/formGrafico" element={<ViewRelatoriosFormGraficoListScreen/>}/>

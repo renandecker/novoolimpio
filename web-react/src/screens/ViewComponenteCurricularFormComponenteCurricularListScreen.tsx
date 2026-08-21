@@ -18,7 +18,7 @@ import type {ApiItem} from '../types';
 import {useApi} from '../api';
 
 const COMPONENTE_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID'},
+    {key: 'id', label: 'ID do Componente Curricular'},
     {key: 'descricao', label: 'Nome'},
     {key: 'sucinto', label: 'Sucinto'},
     {key: 'ementa', label: 'Ementa'},
@@ -29,19 +29,19 @@ const COMPONENTE_COLUMNS: DataTableColumn[] = [
 ];
 
 const HABILIDADE_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID'},
+    {key: 'id', label: 'ID da Habilidade/Competência'},
     {key: 'componenteCurricularId', label: 'Componente'},
     {key: 'habilidadeCompetencia', label: 'Habilidade/Competência'},
 ];
 
 const BASE_TEC_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID'},
+    {key: 'id', label: 'ID da Base Tecnológica'},
     {key: 'nome', label: 'Nome'},
     {key: 'descricao', label: 'Descrição'},
 ];
 
 const CRONOGRAMA_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID'},
+    {key: 'id', label: 'ID do Cronograma'},
     {key: 'numeroAula', label: 'Nº Aula'},
     {key: 'assunto', label: 'Assunto'},
     {key: 'descricao', label: 'Descrição'},
@@ -49,7 +49,7 @@ const CRONOGRAMA_COLUMNS: DataTableColumn[] = [
 ];
 
 const REF_BIBLIO_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID'},
+    {key: 'id', label: 'ID da Referência Bibliográfica'},
     {key: 'autor', label: 'Autor'},
     {key: 'titulo', label: 'Título'},
     {key: 'volume', label: 'Volume'},

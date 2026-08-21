@@ -4,6 +4,7 @@ import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {api} from '../api';
 import {abrirRelatorio, type RelatorioAberto} from '../relatorios';
 import {usePermissions} from '../permissions';
+import {ExportButton} from '../ExportButton';
 
 const reportTypes = ['TABELA', 'GRAFICO', 'MAPA'] as
 const ;
@@ -140,6 +141,14 @@ export default function ReportViewScreen() {
                     <h2>Relatório</h2>
                     {data.tipo === 'TABELA' && dataPage && (
                         <div className="report-result">
+                            <div className="report-export-actions">
+                                <ExportButton
+                                    reportId={reportId}
+                                    reportType="TABELA"
+                                    data={dataPage}
+                                    onSuccess={() => {}}
+                                />
+                            </div>
                             {dataPage.colunas.length === 0 ?
                                 <p>Este relatório ainda não possui colunas configuradas.</p> : (
                                     <>

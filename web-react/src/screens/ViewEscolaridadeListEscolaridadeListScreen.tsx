@@ -2,7 +2,7 @@ import {PermissionGate} from '../permissions';
 import {DataTable, type DataTableColumn} from '../DataTable';
 
 const COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'Id'},
+    {key: 'id', label: 'ID da Escolaridade'},
     {key: 'descricao', label: 'Descrição'},
     {key: 'ordem', label: 'Ordem'},
 ];

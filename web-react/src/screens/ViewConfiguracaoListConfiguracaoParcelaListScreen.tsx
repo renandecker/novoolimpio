@@ -14,7 +14,7 @@ import {
 } from '../masterDetailSources';
 
 const CONFIGURACAO_PARCELA_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'Id'},
+    {key: 'id', label: 'ID da Configuração de Parcela'},
     {key: 'unidade_descricao', label: 'Unidade'},
 ];
 

@@ -4,14 +4,14 @@ import {Wizard, useWizardData} from '../Wizard';
 import {useApi} from '../api';
 
 const CANCELAMENTO_REGRA_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID'},
+    {key: 'id', label: 'ID da Regra de Cancelamento'},
     {key: 'nome', label: 'Nome'},
     {key: 'tipo', label: 'Tipo'},
     {key: 'descricao', label: 'Descrição'},
 ];
 
 const CANCELAMENTO_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID'},
+    {key: 'id', label: 'ID do Cancelamento'},
     {key: 'contratoId', label: 'Contrato'},
     {key: 'aluno', label: 'Aluno'},
     {key: 'curso', label: 'Curso'},

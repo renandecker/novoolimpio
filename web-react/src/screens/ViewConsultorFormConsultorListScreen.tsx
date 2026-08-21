@@ -18,7 +18,7 @@ import type {ApiItem} from '../types';
 import {useApi} from '../api';
 
 const CONSULTOR_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID'},
+    {key: 'id', label: 'ID do Consultor'},
     {key: 'usuarioId', label: 'Consultor/Usuário'},
 ];
 

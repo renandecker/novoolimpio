@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 
 import java.util.Date;
 
@@ -26,4 +27,23 @@ public class Empresa extends PanacheEntity {
 
     @Column(name = "fl_ativo")
     public Boolean flAtivo;
+
+    // Transient fields for pessoa enrichment (not persisted)
+    @Transient
+    public String pessoaNome;
+
+    @Transient
+    public String pessoaNomeFantasia;
+
+    @Transient
+    public String pessoaRazaoSocial;
+
+    @Transient
+    public String pessoaCnpj;
+
+    @Transient
+    public String pessoaTelefone;
+
+    @Transient
+    public String pessoaEmail;
 }

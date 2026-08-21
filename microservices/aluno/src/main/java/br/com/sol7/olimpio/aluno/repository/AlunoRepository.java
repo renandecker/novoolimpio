@@ -488,9 +488,10 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
         String sql = """
         INSERT INTO edc_avaliacao_aluno (id_pessoa, id_avaliacao, id_avaliacao_pergunta,
         id_avaliacao_resposta, resposta, salvo)
-        VALUES (?1, ?2, ?3, ?4, ?5, 1)
+        VALUES (?1, ?2, ?3, NULLIF(?4, 0), NULLIF(?5, ''), 1)
         """;
-        return nativeUpdate(sql, pessoaId, avaliacaoId, perguntaId, respostaId, respostaTexto).replaceWithVoid();
+        return nativeUpdate(sql, pessoaId, avaliacaoId, perguntaId,
+                respostaId == null ? 0L : respostaId, respostaTexto == null ? "" : respostaTexto).replaceWithVoid();
     }
 
     private Long asLong(Object o) {

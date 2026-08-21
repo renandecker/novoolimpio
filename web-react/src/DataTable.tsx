@@ -44,6 +44,7 @@ interface DataTableProps {
     colorColumns?: string[];
     maxMainColumns?: number;
     preview?: (values: Record<string, unknown>) => ReactNode;
+    hideCreate?: boolean;
 }
 
 const toTitle = (value: string) =>
@@ -169,7 +170,7 @@ type ModalState =
     | { mode: 'delete'; item: ApiItem }
     | null;
 
-export function DataTable({path, columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview}: DataTableProps) {
+export function DataTable({path, columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false}: DataTableProps) {
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(PAGE_SIZES[0]);
     const [modal, setModal] = useState<ModalState>(null);
@@ -217,7 +218,7 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
         carregarPermissoes();
     }, [path]);
 
-    const canCreate = can('CREATE', screenOutcome) || (perfilModuloPermissions?.novo ?? false);
+    const canCreate = !hideCreate && (can('CREATE', screenOutcome) || (perfilModuloPermissions?.novo ?? false));
     const canUpdate = can('UPDATE', screenOutcome) || (perfilModuloPermissions?.editar ?? false);
     const canDelete = can('DELETE', screenOutcome) || (perfilModuloPermissions?.remover ?? false);
     const canRelatorio = can('EXECUTE', screenOutcome) || (perfilModuloPermissions?.relatorio ?? false);
@@ -277,7 +278,21 @@ if (canRelatorio) {
       render: (item) => (
         <div className="row-actions-export">
           <button
-            className="btn-action btn-yellow"
+            className="btn-action btnyellow"
+            title="Exportar PDF"
+            onClick={() => exportarPDF(item)}
+          >
+            <i className="fa fa-file-pdf-o"/> PDF
+          </button>
+          <button
+            className="btn-action btnyellow"
+            title="Exportar DOCX"
+            onClick={() => exportarDOCX(item)}
+          >
+            <i className="fa fa-file-word-o"/> DOCX
+          </button>
+          <button
+            className="btn-action btnyellow"
             title="Exportar Excel"
             onClick={() => exportarExcel(item)}
           >
@@ -310,15 +325,46 @@ if (canRelatorio) {
         URL.revokeObjectURL(url);
     };
 
+    const [exportModal, setExportModal] = useState<{ item: ApiItem; tipo: 'PDF' | 'DOCX' | 'EXCEL' } | null>(null);
+
     const exportarPDF = (item: ApiItem) => {
-        // Exportar para PDF - abre tela de relatório ou gera PDF
-        window.open(`/api/relatorios/relatorio/disponiveis/TABELA/${item.id}`, '_blank');
+        if (feature === 'listTabela') {
+            setExportModal({ item, tipo: 'PDF' });
+        } else {
+            window.open(`/api/relatorios/relatorio/disponiveis/TABELA/${item.id}`, '_blank');
+        }
+    };
+
+    const exportarDOCX = (item: ApiItem) => {
+        if (feature === 'listTabela') {
+            setExportModal({ item, tipo: 'DOCX' });
+        }
     };
 
     const exportarExcel = (item: ApiItem) => {
-        // Exportar para Excel - baixa arquivo Excel
         window.open(`/api/relatorios/relatorio/disponiveis/GRAFICO/${item.id}`, '_blank');
     };
+
+    const executarExportacao = async (item: ApiItem, tipo: 'PDF' | 'DOCX' | 'EXCEL', templateId?: number) => {
+        try {
+            const response = await api.post<{ fileName: string; contentType: string; base64Data: string }>(
+                `/api/relatorios/documentos/exportar/tabela/${item.id}`,
+                { tipoExportacao: tipo, templateId, parametros: {} }
+            );
+            const { fileName, contentType, base64Data } = response.data;
+            const blob = new Blob([Uint8Array.from(atob(base64Data), c => c.charCodeAt(0))], { type: contentType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            setNotice(`Erro ao exportar: ${apiErrorMessage(error)}`);
+        }
+    };
+
+    const fecharExportModal = () => setExportModal(null);
 
     const saveCreate = (values: Record<string, unknown>) => {
         q.create.mutate(
@@ -506,6 +552,15 @@ if (canRelatorio) {
                         </div>
                     </div>
                 </div>
+            )}
+            {exportModal && (
+                <ExportModal
+                    item={exportModal.item}
+                    tipo={exportModal.tipo}
+                    onClose={fecharExportModal}
+                    onExport={executarExportacao}
+                    entityTitle={entityTitle}
+                />
             )}
         </div>
     );
@@ -733,5 +788,81 @@ function ComboSelect({
                 );
             })}
         </select>
+    );
+}
+
+interface ExportModalProps {
+    item: ApiItem;
+    tipo: 'PDF' | 'DOCX' | 'EXCEL';
+    onClose: () => void;
+    onExport: (item: ApiItem, tipo: 'PDF' | 'DOCX' | 'EXCEL', templateId?: number) => Promise<void>;
+    entityTitle: string;
+}
+
+function ExportModal({ item, tipo, onClose, onExport, entityTitle }: ExportModalProps) {
+    const [templates, setTemplates] = useState<Array<{id: number, nome: string}>>([]);
+    const [templateId, setTemplateId] = useState<number | undefined>(undefined);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (tipo === 'DOCX' || tipo === 'PDF') {
+            api.get<Array<{id: number, nome: string}>>(`/api/relatorios/documentos/opcoes`, {
+                params: { tipoRelatorio: 'TABELA', relatorioId: item.id }
+            }).then(response => {
+                setTemplates(response.data.templates || []);
+                if (response.data.templates?.length > 0) {
+                    setTemplateId(response.data.templates[0].id);
+                }
+            }).catch(() => setTemplates([]));
+        }
+    }, [item.id, tipo]);
+
+    const handleExport = async () => {
+        setLoading(true);
+        await onExport(item, tipo, templateId);
+        setLoading(false);
+        onClose();
+    };
+
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal form-modal" onClick={(event) => event.stopPropagation()}>
+                <div className="div_form">
+                    <div className="form-title">Exportar {tipo}</div>
+                    <div className="table_form">
+                        {tipo === 'DOCX' || tipo === 'PDF' ? (
+                            <>
+                                <p>Selecione o template para gerar o documento {tipo}:</p>
+                                <div className="form-field">
+                                    <label className="form-label">Template</label>
+                                    <select
+                                        className="form-input form-select"
+                                        value={templateId ?? ''}
+                                        onChange={(e) => setTemplateId(e.target.value ? Number(e.target.value) : undefined)}
+                                        disabled={templates.length === 0 || loading}
+                                    >
+                                        <option value="">-- Selecione um template --</option>
+                                        {templates.map(t => (
+                                            <option key={t.id} value={t.id}>{t.nome}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {templates.length === 0 && (
+                                    <p className="form-empty">Nenhum template disponível. Configure um template DOCX na tela de gestão de templates.</p>
+                                )}
+                            </>
+                        ) : (
+                            <p>Clique em Exportar para baixar o arquivo Excel.</p>
+                        )}
+                        <div className="modal-actions form-footer">
+                            <button type="button" className="btn-form-back" onClick={onClose}>Cancelar</button>
+                            <button type="button" className="btn-form-save" onClick={handleExport} disabled={loading || (tipo !== 'EXCEL' && !templateId)}>
+                                {loading ? 'Gerando...' : `Exportar ${tipo}`}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }

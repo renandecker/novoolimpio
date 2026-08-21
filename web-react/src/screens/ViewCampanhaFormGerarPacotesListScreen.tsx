@@ -4,7 +4,7 @@ import {Wizard, useWizardData} from '../Wizard';
 import {useApi} from '../api';
 
 const ACAO_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID'},
+    {key: 'id', label: 'ID da Ação de Campanha'},
     {key: 'descricao', label: 'Descrição'},
     {key: 'tipoAcaoId', label: 'Tipo Ação'},
     {key: 'responsavelId', label: 'Responsável'},
@@ -159,7 +159,7 @@ export default function ViewCampanhaFormGerarPacotesListScreen() {
                                     content: (
                                         <div>
                                             <DataTable path="/api/comercial/prospecto" columns={[
-                                                {key: 'id', label: 'ID'},
+                                                {key: 'id', label: 'ID do Prospecto'},
                                                 {key: 'pessoaId', label: 'Pessoa'},
                                                 {key: 'nota', label: 'Nota'},
                                                 {key: 'dataCadastro', label: 'Data Cadastro'},

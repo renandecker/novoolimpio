@@ -10,7 +10,7 @@ interface EtapaNap {
 }
 
 const NAP_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'Id'},
+    {key: 'id', label: 'ID da Ligação NAP'},
     {key: 'usuarioId', label: 'Usuário ligou'},
     {key: 'dataInicial', label: 'Data início'},
     {key: 'dataFinal', label: 'Data fim'},

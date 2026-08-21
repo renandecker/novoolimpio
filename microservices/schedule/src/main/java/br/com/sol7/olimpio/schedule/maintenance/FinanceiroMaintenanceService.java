@@ -6,9 +6,12 @@ import io.vertx.mutiny.sqlclient.Row;
 import io.vertx.mutiny.sqlclient.Tuple;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.jboss.logging.Logger;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Rotinas do dominio "financeiro" migradas de SchedulingService (FormaPagamentoService,
@@ -18,8 +21,13 @@ import java.util.List;
 @ApplicationScoped
 public class FinanceiroMaintenanceService {
 
+    private static final Logger LOG = Logger.getLogger(FinanceiroMaintenanceService.class);
+
     @Inject
     Pool pool;
+
+    @Inject
+    EmailService emailService;
 
     // Migrado de FormaPagamentoService.verificarCotaAuto()
     private static final String SQL_VERIFICAR_COTA_DIARIO =
@@ -43,7 +51,8 @@ public class FinanceiroMaintenanceService {
 
     // Migrado de SchedulingService.fechamentoCaixaAbertos()
     private static final String SQL_BUSCAR_CAIXAS_ABERTOS =
-            "SELECT id, id_unidade FROM fin_caixa WHERE data_fechamento IS NULL";
+            "SELECT c.id, c.id_unidade, c.id_usuario, c.id_caixa_unidade " +
+                    "FROM fin_caixa c WHERE c.data_fechamento IS NULL";
     private static final String SQL_SOMAR_ENTRADAS =
             "SELECT COALESCE(SUM(m.valor), 0) AS total FROM fin_movimentacao m " +
                     "JOIN fin_movimento mv ON mv.id = m.id_movimento " +
@@ -59,19 +68,39 @@ public class FinanceiroMaintenanceService {
     private static final String SQL_FECHAR_CAIXA =
             "UPDATE fin_caixa SET data_fechamento = now() WHERE id = $1";
 
+    // Busca ConfiguracaoCaixa do responsavel (usuario + unidade) - email, etc.
+    private static final String SQL_BUSCAR_CONFIG_CAIXA =
+            "SELECT id, email FROM fin_configuracao_caixa WHERE id_usuario = $1 AND id_unidade = $2 ORDER BY id DESC LIMIT 1";
+
+    // Busca Layout da unidade (via id_tema) para tema_email e imagem_email
+    private static final String SQL_BUSCAR_LAYOUT_UNIDADE =
+            "SELECT l.tema_email, l.imagem_email, l.url " +
+                    "FROM bas_unidade u JOIN bas_layout l ON l.id = u.id_tema WHERE u.id = $1";
+
     public record FechamentoCaixaResumo(Long caixaId, Long unidadeId, BigDecimal entradas,
                                         BigDecimal saidas, BigDecimal sangria) {
     }
 
-    private record CaixaAberto(Long id, Long unidadeId) {
+    private record CaixaAberto(Long id, Long unidadeId, Long usuarioId, Integer caixaUnidade) {
+    }
+
+    private record ConfigCaixaEmail(String email) {
+    }
+
+    private record LayoutInfo(String temaEmail, String imagemEmail, String url) {
     }
 
     public Uni<List<FechamentoCaixaResumo>> fechamentoCaixaAbertos() {
         return pool.query(SQL_BUSCAR_CAIXAS_ABERTOS).execute()
                 .map(rows -> {
-                    List<CaixaAberto> caixas = new java.util.ArrayList<>();
+                    List<CaixaAberto> caixas = new ArrayList<>();
                     for (Row row : rows) {
-                        caixas.add(new CaixaAberto(row.getLong("id"), row.getLong("id_unidade")));
+                        caixas.add(new CaixaAberto(
+                                row.getLong("id"),
+                                row.getLong("id_unidade"),
+                                row.getLong("id_usuario"),
+                                row.getInteger("id_caixa_unidade")
+                        ));
                     }
                     return caixas;
                 })
@@ -90,11 +119,151 @@ public class FinanceiroMaintenanceService {
                 .map(rows -> rows.iterator().next().getBigDecimal("total"));
 
         return Uni.combine().all().unis(entradas, saidas, sangria).asTuple()
-                .chain(t -> pool.preparedQuery(SQL_FECHAR_CAIXA).execute(Tuple.of(caixa.id()))
-                        .replaceWith(new FechamentoCaixaResumo(caixa.id(), caixa.unidadeId(), t.getItem1(), t.getItem2(), t.getItem3())));
-        // Nota: o envio do e-mail de resumo (RotinaEnvioEmailController no legado) nao foi
-        // portado - quem chamar este metodo recebe os valores calculados e decide o que fazer
-        // (log, e-mail, etc). Ver RELATORIO_SCHEDULE.md.
+                .chain(t -> {
+                    BigDecimal e = t.getItem1();
+                    BigDecimal s = t.getItem2();
+                    BigDecimal sg = t.getItem3();
+                    return pool.preparedQuery(SQL_FECHAR_CAIXA).execute(Tuple.of(caixa.id()))
+                            .chain(v -> buscarConfigECaixaEmail(caixa)
+                                    .chain(configEmail -> buscarLayoutUnidade(caixa.unidadeId())
+                                            .chain(layout -> enviarEmailFechamento(caixa, e, s, sg, configEmail, layout))
+                                            .replaceWith(new FechamentoCaixaResumo(caixa.id(), caixa.unidadeId(), e, s, sg))));
+                });
+    }
+
+    private Uni<ConfigCaixaEmail> buscarConfigECaixaEmail(CaixaAberto caixa) {
+        return pool.preparedQuery(SQL_BUSCAR_CONFIG_CAIXA).execute(Tuple.of(caixa.usuarioId(), caixa.unidadeId()))
+                .map(rows -> {
+                    if (rows.iterator().hasNext()) {
+                        Row row = rows.iterator().next();
+                        String email = row.getString("email");
+                        return new ConfigCaixaEmail(email);
+                    }
+                    return new ConfigCaixaEmail(null);
+                });
+    }
+
+    private Uni<LayoutInfo> buscarLayoutUnidade(Long unidadeId) {
+        return pool.preparedQuery(SQL_BUSCAR_LAYOUT_UNIDADE).execute(Tuple.of(unidadeId))
+                .map(rows -> {
+                    if (rows.iterator().hasNext()) {
+                        Row row = rows.iterator().next();
+                        return new LayoutInfo(
+                                row.getString("tema_email"),
+                                row.getString("imagem_email"),
+                                row.getString("url")
+                        );
+                    }
+                    return new LayoutInfo(null, null, null);
+                });
+    }
+
+    private Uni<Void> enviarEmailFechamento(CaixaAberto caixa, BigDecimal entradas, BigDecimal saidas, BigDecimal sangria,
+                                            ConfigCaixaEmail configCaixa, LayoutInfo layout) {
+        // Buscar e-mail da unidade, sucinto e nome do usuario
+        String sqlUnidadeUsuario = "SELECT u.email, u.sucinto, us.login, pf.nome " +
+                "FROM bas_unidade u " +
+                "LEFT JOIN bas_usuario us ON us.id = $2 " +
+                "LEFT JOIN bas_pessoa p ON p.id = us.id_pessoa " +
+                "LEFT JOIN bas_pessoa_fisica pf ON pf.id_pessoa = p.id " +
+                "WHERE u.id = $1";
+        return pool.preparedQuery(sqlUnidadeUsuario).execute(Tuple.of(caixa.unidadeId(), caixa.usuarioId()))
+                .map(rows -> {
+                    String emailUnidade = null;
+                    String sucinto = null;
+                    String login = null;
+                    String nomePessoa = null;
+                    if (rows.iterator().hasNext()) {
+                        Row row = rows.iterator().next();
+                        emailUnidade = row.getString("email");
+                        sucinto = row.getString("sucinto");
+                        login = row.getString("login");
+                        nomePessoa = row.getString("nome");
+                    }
+                    // Define destinatario: configuracaoCaixa.email > unidade.email
+                    String destinatario = (configCaixa.email() != null && !configCaixa.email().isBlank())
+                            ? configCaixa.email() : emailUnidade;
+
+                    // Nome do funcionario: pessoa fisica nome > login
+                    String nomeFuncionario = (nomePessoa != null && !nomePessoa.isBlank()) ? nomePessoa : login;
+                    if (nomeFuncionario == null) {
+                        nomeFuncionario = "Usuario " + caixa.usuarioId();
+                    }
+
+                    String assunto = "Fechamento de Caixa Automático (" + (sucinto != null && !sucinto.isBlank() ? sucinto : "Unidade " + caixa.unidadeId()) + ")";
+                    String corpoHtml = montarHtmlEmailFechamento(caixa.caixaUnidade(), nomeFuncionario,
+                            entradas, saidas, sangria, layout, sucinto);
+
+                    return new EmailSendData(destinatario, assunto, corpoHtml);
+                })
+                .chain(data -> {
+                    if (data.destinatario() == null || data.destinatario().isBlank()) {
+                        LOG.warnf("Caixa %d (unidade %d): nenhum e-mail de destino encontrado (configCaixa nem unidade) - e-mail nao enviado",
+                                caixa.id(), caixa.unidadeId());
+                        return Uni.createFrom().voidItem();
+                    }
+                    return emailService.enviarEmailFechamentoCaixa(data.destinatario(), data.assunto(), data.corpoHtml());
+                });
+    }
+
+    private String montarHtmlEmailFechamento(Integer caixaUnidade, String nomeFuncionario,
+                                             BigDecimal entradas, BigDecimal saidas, BigDecimal sangria,
+                                             LayoutInfo layout, String unidadeSucinto) {
+        // This method builds the HTML using the same structure as legacy CaixaService.textoEmailCaixa()
+        String temaEmail = (layout.temaEmail() != null && !layout.temaEmail().isBlank()) ? layout.temaEmail() : "007bff";
+        String imagemEmail = (layout.imagemEmail() != null && !layout.imagemEmail().isBlank())
+                ? "<img width=\"30\" src=\"" + layout.imagemEmail() + "\" alt=\"\">" : "";
+        String url = (layout.url() != null && !layout.url().isBlank()) ? layout.url() : "#";
+
+        String unidadeNome = (unidadeSucinto != null && !unidadeSucinto.isBlank()) ? unidadeSucinto : "Unidade " + caixaUnidade;
+
+        String fmtEntradas = entradas.setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",");
+        String fmtSaidas = saidas.setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",");
+        String fmtSangria = sangria.setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",");
+
+        String mensagem = "Este caixa foi fechado automaticamente, pois o usuario " + nomeFuncionario + " não fechou.";
+
+        return "<table width=\"500\" border=\"1\" cellpadding=\"1\" cellspacing=\"1\" align=\"center\" style=\"background-color: #F0F0F0; border-collapse: collapse; border-color: #F0F0F0;\">" +
+                "<tbody><tr style=\"background-color: #" + temaEmail + ";\"><td><p style=\"text-align: center; margin: 0;\"><span style=\"font-size: larger;\">" +
+                " " + imagemEmail + "</span></p></td></tr><tr><td><p>&nbsp;</p>" +
+                "<p style=\"margin: 5px;\">" + mensagem +
+                "</td></tr>" +
+                "<br/>" +
+                "<tr>" +
+                "<td style = \" padding-left: 8px;\">" +
+                "Nome Funcionario: " + nomeFuncionario +
+                "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td style = \" padding-left: 8px;\">" +
+                "Nome Unidade: " + unidadeNome +
+                "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td style = \" padding-left: 8px;\">" +
+                "Total Entradas: R$ " + fmtEntradas +
+                "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td style = \" padding-left: 8px;\">" +
+                "Total Saidas: R$ " + fmtSaidas +
+                "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<td style = \" padding-left: 8px;\">" +
+                "Total Sangria: R$ " + fmtSangria +
+                "</td>" +
+                "</tr>" +
+                "<br/>" +
+                "<br/>" +
+                "<tr>" +
+                "<td style = \" padding-left: 8px; font-size: 15px; font-weight: bold;\">" +
+                "Numero caixa: " + caixaUnidade +
+                "</td><tr><td style = \"text-align: center;\" >" +
+                "<a href=\"" + url + "\">Acesse a plataforma clicando aqui.</a></p><p>&nbsp;</p></td></tr></tbody></table>";
+    }
+
+    private record EmailSendData(String destinatario, String assunto, String corpoHtml) {
     }
 
     // Migrado de CobrancaService.atualizaCobrancas() - processava em lote/paralelo

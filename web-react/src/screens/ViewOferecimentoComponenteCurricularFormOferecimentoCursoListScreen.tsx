@@ -18,7 +18,7 @@ const OFERECIMENTO_CURSO_COLUMNS: DataTableColumn[] = [
 ];
 
 const DIAS_AULA_CURSO_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID'},
+    {key: 'id', label: 'ID da Ocorrência'},
     {key: 'data', label: 'Data'},
     {key: 'componenteCurricularId', label: 'Componente Curricular'},
     {key: 'salaId', label: 'Sala'},

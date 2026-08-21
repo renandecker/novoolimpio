@@ -692,7 +692,7 @@ export function ContratanteModal({pessoaId, onClose}: GestaoModalProps) {
 }
 
 const NAP_COLUNAS: TabelaColuna[] = [
-    {key: 'id', label: 'Id'},
+    {key: 'id', label: 'ID da Ligação NAP'},
     {key: 'dataInicial', label: 'Data', render: (linha) => fmtDataHora(linha.dataInicial as string | null)},
     {key: 'telefone', label: 'Telefone'},
     {key: 'resultado', label: 'Resultado'},
@@ -701,7 +701,7 @@ const NAP_COLUNAS: TabelaColuna[] = [
 ];
 
 const NAP_EMAIL_COLUNAS: TabelaColuna[] = [
-    {key: 'id', label: 'Id'},
+    {key: 'id', label: 'ID do Email NAP'},
     {key: 'data', label: 'Data', render: (linha) => fmtDataHora(linha.data as string | null)},
     {key: 'email', label: 'E-mail'},
     {key: 'assunto', label: 'Assunto'},
@@ -739,7 +739,7 @@ export function HistoricoNapModal({pessoaId, onClose}: GestaoModalProps) {
 }
 
 const COBRANCA_COLUNAS: TabelaColuna[] = [
-    {key: 'id', label: 'Id'},
+    {key: 'id', label: 'ID da Ligação de Cobrança'},
     {key: 'dataInicial', label: 'Data', render: (linha) => fmtDataHora(linha.dataInicial as string | null)},
     {key: 'telefone', label: 'Telefone'},
     {key: 'resultado', label: 'Resultado'},
@@ -749,7 +749,7 @@ const COBRANCA_COLUNAS: TabelaColuna[] = [
 ];
 
 const COBRANCA_EMAIL_COLUNAS: TabelaColuna[] = [
-    {key: 'id', label: 'Id'},
+    {key: 'id', label: 'ID do Email de Cobrança'},
     {key: 'data', label: 'Data', render: (linha) => fmtDataHora(linha.data as string | null)},
     {key: 'email', label: 'E-mail'},
     {key: 'assunto', label: 'Assunto'},
@@ -967,7 +967,7 @@ export function HistoricoAlunoModal({pessoaId, onClose}: GestaoModalProps) {
             <TabelaDadosPaginada
                 vazio="Nenhum registro no histórico do aluno."
                 colunas={[
-                    {key: 'id', label: 'Id'},
+                    {key: 'id', label: 'ID do Registro Histórico'},
                     {
                         key: 'dataRegistro',
                         label: 'Data',

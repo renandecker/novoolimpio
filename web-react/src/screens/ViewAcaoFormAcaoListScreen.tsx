@@ -16,7 +16,7 @@ const CAMPO_COLUMNS = [
 ];
 
 const UNIDADE_COLUMNS = [
-    {key: 'id', label: 'Id'},
+    {key: 'id', label: 'ID da Unidade'},
     {key: 'sucinto', label: 'Sucinto'},
     {key: 'razaoSocial', label: 'Razão Social'},
     {key: 'nomeFantasia', label: 'Nome Fantasia'},

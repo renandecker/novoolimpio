@@ -832,6 +832,24 @@
     cursor: default;
 }
 
+.row-actions-export {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.btn-action.btnyellow {
+    width: auto;
+    min-width: 28px;
+    padding: 0 8px;
+    gap: 4px;
+    border-color: rgba(0, 0, 0, 0.0980392) rgba(0, 0, 0, 0.0980392) rgba(0, 0, 0, 0.247059);
+}
+
+.btn-action.btnyellow:hover:not(:disabled) {
+    border-color: rgba(0, 0, 0, 0.0980392) rgba(0, 0, 0, 0.0980392) rgba(0, 0, 0, 0.247059);
+}
+
 .btn-danger {
     color: #ffffff;
     background-repeat: repeat-x;

@@ -18,7 +18,7 @@ import type {ApiItem} from '../types';
 import {useApi} from '../api';
 
 const MAPA_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID'},
+    {key: 'id', label: 'ID do Mapa'},
     {key: 'nome', label: 'Nome'},
     {key: 'estruturaId', label: 'Estrutura'},
     {key: 'dimensaoId', label: 'Dimensão'},
@@ -40,7 +40,7 @@ const REGRA_COLUMNS: DataTableColumn[] = [
 ];
 
 const FILTRO_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID'},
+    {key: 'id', label: 'ID do Filtro'},
     {key: 'nome', label: 'Nome'},
     {key: 'estruturaId', label: 'Estrutura'},
     {key: 'dimensaoId', label: 'Dimensão'},

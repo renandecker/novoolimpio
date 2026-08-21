@@ -12,7 +12,7 @@ const formatDate = (value: unknown): string => {
 };
 
 const COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'Id'},
+    {key: 'id', label: 'ID do Currículo'},
     {key: 'curso', label: 'Curso'},
     {key: 'sucinto', label: 'Sucinto'},
     {key: 'tipoCurso', label: 'Tipo Curso'},

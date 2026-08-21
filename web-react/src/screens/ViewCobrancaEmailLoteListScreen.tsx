@@ -4,7 +4,7 @@ import {Wizard, useWizardData} from '../Wizard';
 import {useApi} from '../api';
 
 const MODELO_EMAIL_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID'},
+    {key: 'id', label: 'ID do Modelo de Email'},
     {key: 'descricao', label: 'Descrição'},
     {key: 'assunto', label: 'Assunto'},
 ];

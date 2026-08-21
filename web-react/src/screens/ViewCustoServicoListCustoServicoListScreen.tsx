@@ -22,7 +22,7 @@ const renderTipo = (key: string) => (item: ApiItem) => {
 const renderValor = (key: string) => (item: ApiItem) => `R$ ${Number(asRecord(item)[key] ?? 0).toFixed(2)}`;
 
 const COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'Id'},
+    {key: 'id', label: 'ID do Custo de Serviço'},
     {key: 'valor_email', label: 'Valor Email', render: renderValor('valor_email')},
     {key: 'tipo_email', label: 'Tipo Serviço Email', render: renderTipo('tipo_email')},
     {key: 'valor_ligacao', label: 'Valor Ligação', render: renderValor('valor_ligacao')},

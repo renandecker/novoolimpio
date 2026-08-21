@@ -4,7 +4,7 @@ import {DataTable} from '../DataTable';
 export default function AsaasParcelasListScreen() {
     return <PermissionGate permission="READ">
         <main><h1>Parcelas Asaas</h1><DataTable path="/api/asaas/parcelas" module="asaas"
-                                                columns={[{key: 'id', label: 'Id'}, {
+                                                columns={[{key: 'id', label: 'ID da Parcela Asaas'}, {
                                                     key: 'asaasId',
                                                     label: 'Id Asaas'
                                                 }, {key: 'status', label: 'Status'}, {

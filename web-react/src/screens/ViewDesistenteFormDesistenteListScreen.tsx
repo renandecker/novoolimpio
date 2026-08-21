@@ -3,7 +3,7 @@ import {DataTable, type DataTableColumn} from '../DataTable';
 import {useApi} from '../api';
 
 const DESISTENTE_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID'},
+    {key: 'id', label: 'ID do Desistente'},
     {key: 'matriculaId', label: 'Matrícula'},
     {key: 'motivoId', label: 'Motivo'},
     {key: 'data', label: 'Data'},
