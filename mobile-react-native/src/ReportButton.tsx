@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {Modal, Pressable, StyleSheet, Text, View} from 'react-native';
 import {useQuery} from '@tanstack/react-query';
 import {listarRelatoriosDisponiveis, type RelatorioDisponivel} from './relatorios';
+import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from './theme';
 
 const TIPO_ROTA: Record<string, string> = {
     TABELA: 'view/relatorios/listTabela',
@@ -39,7 +40,7 @@ export function ReportButton({navigateTo}: { navigateTo: (key: string) => void }
 
             <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
                 <Pressable style={styles.overlay} onPress={() => setOpen(false)}>
-                    <Pressable style={styles.dropdown} onPress={(e) => e.stopPropagation()}>
+                    <View style={styles.dropdown}>
                         <Text style={styles.dropdownTitle}>Relatórios</Text>
                         {list.isLoading && items.length === 0 ? (
                             <Text style={styles.empty}>Carregando...</Text>
@@ -47,14 +48,13 @@ export function ReportButton({navigateTo}: { navigateTo: (key: string) => void }
                             <Text style={styles.empty}>Nenhum relatório disponível.</Text>
                         ) : (
                             items.map((item) => (
-                                <Pressable key={`${item.tipo}-${item.id}`} style={styles.item}
-                                           onPress={() => handleItemPress(item)}>
+                                <Pressable key={`${item.tipo}-${item.id}`} style={styles.item} onPress={() => handleItemPress(item)}>
                                     <Text style={styles.itemTipo}>{TIPO_LABEL[item.tipo] ?? item.tipo}</Text>
                                     <Text style={styles.itemNome}>{item.nome}</Text>
                                 </Pressable>
                             ))
                         )}
-                    </Pressable>
+                    </View>
                 </Pressable>
             </Modal>
         </>
@@ -62,33 +62,59 @@ export function ReportButton({navigateTo}: { navigateTo: (key: string) => void }
 }
 
 const styles = StyleSheet.create({
-    iconButton: {marginRight: 8, padding: 6},
-    icon: {fontSize: 18},
-    overlay: {flex: 1, backgroundColor: 'rgba(29, 32, 37, 0.4)', paddingTop: 60, paddingHorizontal: 16},
+    iconButton: {
+        marginRight: Spacing.sm,
+        padding: Spacing.xs,
+    },
+    icon: {
+        fontSize: Typography.sizes.xxxl,
+    },
+    overlay: {
+        flex: 1,
+        backgroundColor: Colors.modalOverlay,
+        paddingTop: Layout.headerHeight + Spacing.md,
+        paddingHorizontal: Spacing.lg,
+        justifyContent: 'flex-start',
+    },
     dropdown: {
-        backgroundColor: '#ffffff',
-        borderRadius: 14,
-        padding: 12,
+        backgroundColor: Colors.dropdownBg,
+        borderRadius: BorderRadius.xxl,
+        padding: Spacing.md,
         maxHeight: '70%',
-        shadowColor: '#1d2025',
-        shadowOffset: {width: 0, height: 8},
-        shadowOpacity: 0.2,
-        shadowRadius: 16,
-        elevation: 8,
+        ...Shadows.large,
         borderWidth: 1,
-        borderColor: 'rgba(194, 170, 60, 0.15)',
+        borderColor: Colors.dropdownBorder,
     },
     dropdownTitle: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: '#1d2025',
-        marginBottom: 8,
-        paddingBottom: 8,
+        fontSize: Typography.sizes.xl,
+        fontWeight: Typography.weights.semibold,
+        color: Colors.textPrimary,
+        marginBottom: Spacing.sm,
+        paddingBottom: Spacing.sm,
         borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0'
+        borderBottomColor: Colors.dropdownHeaderBorder,
     },
-    empty: {color: '#888', fontSize: 13, paddingVertical: 8, textAlign: 'center'},
-    item: {paddingVertical: 12, borderBottomWidth: 1, borderColor: '#f0f0f0'},
-    itemTipo: {fontSize: 10, fontWeight: '600', color: '#265a88', textTransform: 'uppercase', letterSpacing: 0.5},
-    itemNome: {fontSize: 14, color: '#1d2025', marginTop: 2},
+    empty: {
+        color: Colors.textLight,
+        fontSize: Typography.sizes.base,
+        paddingVertical: Spacing.lg,
+        textAlign: 'center',
+    },
+    item: {
+        paddingVertical: Spacing.md,
+        borderBottomWidth: 1,
+        borderColor: Colors.borderLight,
+    },
+    itemTipo: {
+        fontSize: Typography.sizes.xs,
+        fontWeight: Typography.weights.semibold,
+        color: Colors.primary,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    itemNome: {
+        fontSize: Typography.sizes.lg,
+        color: Colors.textPrimary,
+        marginTop: Spacing.xs,
+    },
 });

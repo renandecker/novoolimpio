@@ -9,6 +9,7 @@ import {
     View,
 } from 'react-native';
 import {useAuth} from './auth';
+import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from './theme';
 
 export default function LoginScreen() {
     const {signIn, ready} = useAuth();
@@ -33,7 +34,7 @@ export default function LoginScreen() {
     if (!ready) {
         return (
             <View style={styles.center}>
-                <ActivityIndicator/>
+                <ActivityIndicator color={Colors.gold} size="large"/>
             </View>
         );
     }
@@ -55,7 +56,7 @@ export default function LoginScreen() {
                     <TextInput
                         style={styles.input}
                         placeholder="Digite seu usuário"
-                        placeholderTextColor="#9a9a9a"
+                        placeholderTextColor={Colors.textPlaceholder}
                         autoCapitalize="none"
                         autoCorrect={false}
                         value={username}
@@ -65,13 +66,13 @@ export default function LoginScreen() {
                     <TextInput
                         style={styles.input}
                         placeholder="Digite sua senha"
-                        placeholderTextColor="#9a9a9a"
+                        placeholderTextColor={Colors.textPlaceholder}
                         secureTextEntry
                         value={password}
                         onChangeText={setPassword}
                     />
                     <Pressable
-                        style={({pressed}) => [styles.button, pressed && styles.buttonPressed]}
+                        style={({pressed}) => [styles.button, pressed && styles.buttonPressed, busy && styles.buttonDisabled]}
                         onPress={submit}
                         disabled={busy}
                     >
@@ -105,149 +106,139 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
     page: {
         flex: 1,
-        backgroundColor: '#1a1d22',
+        backgroundColor: Colors.headerEnd,
     },
     center: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#1a1d22',
+        backgroundColor: Colors.headerEnd,
     },
     topbar: {
-        height: 100,
+        height: Layout.headerHeight + Spacing.lg,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#24272e',
+        backgroundColor: Colors.headerMid,
         borderBottomWidth: 3,
-        borderBottomColor: '#c2aa3c',
-        shadowColor: '#000',
-        shadowOffset: {width: 0, height: 4},
-        shadowOpacity: 0.8,
-        shadowRadius: 15,
-        elevation: 8,
+        borderBottomColor: Colors.gold,
+        ...Shadows.medium,
     },
     topbarText: {
-        color: '#e8d27a',
-        fontSize: 22,
-        fontWeight: '700',
+        color: Colors.textGold,
+        fontSize: Typography.sizes.xxxl,
+        fontWeight: Typography.weights.bold,
         letterSpacing: 1,
+        fontFamily: Typography.fontFamilySerif,
     },
     scrollContent: {
         flexGrow: 1,
         justifyContent: 'center',
-        padding: 24,
+        padding: Spacing.xl,
     },
     box: {
-        backgroundColor: '#f1f1f1',
-        borderRadius: 10,
-        paddingHorizontal: 8,
-        paddingBottom: 20,
-        shadowColor: '#323232',
-        shadowOffset: {width: 4, height: 4},
-        shadowOpacity: 0.8,
-        shadowRadius: 15,
-        elevation: 12,
+        backgroundColor: Colors.bgPrimary,
+        borderRadius: BorderRadius.xxl,
+        paddingHorizontal: Spacing.sm,
+        paddingBottom: Spacing.xl,
+        ...Shadows.large,
     },
     logo: {
-        marginTop: 10,
-        marginBottom: 6,
+        marginTop: Spacing.md,
+        marginBottom: Spacing.sm,
         alignItems: 'center',
-        gap: 4,
+        gap: Spacing.xs,
     },
     logoBadge: {
         width: 62,
         height: 62,
         borderRadius: 31,
-        backgroundColor: '#24272e',
+        backgroundColor: Colors.headerMid,
         borderWidth: 3,
-        borderColor: '#c2aa3c',
+        borderColor: Colors.gold,
         alignItems: 'center',
         justifyContent: 'center',
     },
     logoBadgeText: {
-        color: '#e8d27a',
+        color: Colors.textGold,
         fontSize: 30,
-        fontWeight: '700',
-        fontFamily: 'serif',
+        fontWeight: Typography.weights.bold,
+        fontFamily: Typography.fontFamilySerif,
     },
     logoText: {
-        color: '#616161',
-        fontSize: 20,
-        fontWeight: '700',
+        color: Colors.textMuted,
+        fontSize: Typography.sizes.title,
+        fontWeight: Typography.weights.bold,
         letterSpacing: 1,
     },
     label: {
-        color: '#616161',
-        fontWeight: '700',
-        fontSize: 15,
-        marginTop: 8,
-        marginBottom: 2,
-        marginLeft: 12,
+        color: Colors.textMuted,
+        fontWeight: Typography.weights.bold,
+        fontSize: Typography.sizes.lg,
+        marginTop: Spacing.md,
+        marginBottom: Spacing.xs,
+        marginLeft: Spacing.md,
     },
     input: {
         width: '90%',
         alignSelf: 'center',
-        padding: 10,
-        fontSize: 15,
-        color: '#2b2b2b',
-        backgroundColor: '#ffffff',
+        padding: Spacing.md,
+        fontSize: Typography.sizes.lg,
+        color: Colors.textPrimary,
+        backgroundColor: Colors.bgSecondary,
         borderWidth: 1,
-        borderColor: '#c9c9c9',
-        borderRadius: 4,
-        shadowColor: '#323232',
-        shadowOffset: {width: 1, height: 2},
-        shadowOpacity: 0.4,
-        shadowRadius: 10,
-        elevation: 2,
+        borderColor: Colors.borderMedium,
+        borderRadius: BorderRadius.md,
+        ...Shadows.small,
     },
     button: {
-        marginTop: 20,
+        marginTop: Spacing.xl,
         width: '90%',
         alignSelf: 'center',
-        padding: 8,
-        borderRadius: 4,
-        backgroundColor: '#2a5a88',
+        paddingVertical: Spacing.md,
+        borderRadius: BorderRadius.md,
+        backgroundColor: Colors.primary,
         alignItems: 'center',
+        ...Shadows.small,
     },
     buttonPressed: {
-        backgroundColor: '#1c3d5e',
+        backgroundColor: Colors.primaryDark,
+    },
+    buttonDisabled: {
+        backgroundColor: Colors.borderLight,
     },
     buttonText: {
-        color: '#ffffff',
-        fontSize: 20,
-        fontWeight: '700',
-        textShadowColor: '#555',
-        textShadowOffset: {width: -1, height: -1},
-        textShadowRadius: 0,
+        color: Colors.textWhite,
+        fontSize: Typography.sizes.xl,
+        fontWeight: Typography.weights.bold,
     },
     errorBox: {
-        marginTop: 12,
+        marginTop: Spacing.md,
         marginHorizontal: '5%',
-        padding: 8,
-        backgroundColor: '#fdecea',
+        padding: Spacing.md,
+        backgroundColor: Colors.errorBg,
         borderWidth: 1,
-        borderColor: '#f5c6cb',
-        borderRadius: 4,
+        borderColor: Colors.errorBorder,
+        borderRadius: BorderRadius.md,
     },
     errorText: {
-        color: '#a61b29',
-        fontSize: 13,
+        color: Colors.error,
+        fontSize: Typography.sizes.base,
         textAlign: 'center',
     },
     toggle: {
-        marginTop: 12,
+        marginTop: Spacing.md,
         alignItems: 'center',
-        padding: 4,
+        padding: Spacing.xs,
     },
     toggleText: {
-        color: '#2a5a88',
-        fontSize: 13,
+        color: Colors.primary,
+        fontSize: Typography.sizes.base,
         textDecorationLine: 'underline',
     },
     bottombar: {
-        height: 40,
+        height: Layout.footerHeight + Spacing.sm,
         backgroundColor: '#121417',
         borderTopWidth: 3,
-        borderTopColor: '#c2aa3c',
+        borderTopColor: Colors.gold,
     },
 });

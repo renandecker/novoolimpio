@@ -16,8 +16,10 @@ import {moduleIcon} from './moduleIcons';
 import {can} from './permissions';
 import {ReportButton} from './ReportButton';
 import {FavoritosButton} from './FavoritosButton';
+import {listarFavoritos} from './favoritos';
 import type {Modulo} from './types';
 import type {FavoritoDisponivel} from './favoritos';
+import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from './theme';
 
 export type ParamList = { home: undefined; [route: string]: undefined | object };
 
@@ -43,6 +45,8 @@ export default function HomeScreen({navigation}: NativeStackScreenProps<ParamLis
         retry: false,
     });
 
+    const unread = bellCount.data ?? 0;
+
     useEffect(() => {
         const unsubscribe = subscribeNotificacoesStream(() => {
             queryClient.invalidateQueries({queryKey: ['notificacoes', 'nao-lidas']});
@@ -54,17 +58,18 @@ export default function HomeScreen({navigation}: NativeStackScreenProps<ParamLis
     const handleRefresh = useCallback(async () => {
         setRefreshing(true);
         try {
-            await listarFavoritos();
+            const data = await listarFavoritos();
+            setFavoritos(data);
         } finally {
             setRefreshing(false);
         }
-    }, [listarFavoritos]);
+    }, []);
 
     useEffect(() => {
         if (ready) {
-            listarFavoritos();
+            listarFavoritos().then(setFavoritos);
         }
-    }, [ready, listarFavoritos]);
+    }, [ready]);
 
     const routeNames = navigation.getState().routeNames;
     const modulePermissions = session?.modulePermissions ?? {};
@@ -117,6 +122,25 @@ export default function HomeScreen({navigation}: NativeStackScreenProps<ParamLis
         });
     }, [query, flatItems]);
 
+    const renderMenuItem = ({item}: {item: FlatItem | FavoritoDisponivel}) => {
+        const isFav = 'outcome' in item;
+        const key = isFav ? normalizeOutcome(item.outcome) : item.key;
+        const label = isFav ? item.nome : item.label;
+        const icon = isFav ? moduleIcon(item.nome, item.icon) : item.icon;
+        const parent = isFav ? null : item.parent;
+
+        return (
+            <Pressable style={styles.menuItem} onPress={() => navigateTo(key)}>
+                <View style={styles.menuIconContainer}>
+                    <Text style={styles.menuIcon}>{icon}</Text>
+                </View>
+                <Text style={styles.menuText}>
+                    {parent ? `${parent} › ${label}` : label}
+                </Text>
+            </Pressable>
+        );
+    };
+
     return (
         <View style={styles.page}>
             <View style={styles.header}>
@@ -149,33 +173,28 @@ export default function HomeScreen({navigation}: NativeStackScreenProps<ParamLis
 
             <TextInput
                 style={styles.searchInput}
-                placeholder="Buscar menu ou tela..."
-                placeholderTextColor="#9a9a9a"
+                placeholder="Buscar favoritos..."
+                placeholderTextColor={Colors.textPlaceholder}
                 value={search}
                 onChangeText={setSearch}
             />
 
             {loading ? (
                 <View style={styles.center}>
-                    <ActivityIndicator/>
+                    <ActivityIndicator color={Colors.primary} size="large"/>
                 </View>
             ) : searchResults ? (
                 searchResults.length === 0 ? (
-                    <Text style={styles.empty}>Nenhum item encontrado.</Text>
+                    <Text style={styles.empty}>Nenhum favorito encontrado.</Text>
                 ) : (
                     <FlatList
                         data={searchResults}
                         keyExtractor={(item, index) => `${item.key}-${index}`}
                         refreshing={refreshing}
                         onRefresh={handleRefresh}
-                        renderItem={({item}) => (
-                            <Pressable style={styles.menuItem} onPress={() => navigateTo(item.key)}>
-                                <Text style={styles.menuIcon}>{item.icon}</Text>
-                                <Text style={styles.menuText}>
-                                    {item.parent ? `${item.parent} › ${item.label}` : item.label}
-                                </Text>
-                            </Pressable>
-                        )}
+                        renderItem={renderMenuItem}
+                        contentContainerStyle={styles.listContent}
+                        ItemSeparatorComponent={styles.separator}
                     />
                 )
             ) : (
@@ -184,12 +203,9 @@ export default function HomeScreen({navigation}: NativeStackScreenProps<ParamLis
                     keyExtractor={(item) => item.outcome}
                     refreshing={refreshing}
                     onRefresh={handleRefresh}
-                    renderItem={({item}) => (
-                        <Pressable style={styles.menuItem} onPress={() => navigateTo(normalizeOutcome(item.outcome))}>
-                            <Text style={styles.menuIcon}>{moduleIcon(item.nome, item.icon)}</Text>
-                            <Text style={styles.menuText}>{item.nome}</Text>
-                        </Pressable>
-                    )}
+                    renderItem={renderMenuItem}
+                    contentContainerStyle={styles.listContent}
+                    ItemSeparatorComponent={styles.separator}
                 />
             )}
         </View>
@@ -197,56 +213,127 @@ export default function HomeScreen({navigation}: NativeStackScreenProps<ParamLis
 }
 
 const styles = StyleSheet.create({
-    page: {flex: 1, padding: 16},
-    center: {flex: 1, justifyContent: 'center', alignItems: 'center'},
+    page: {
+        flex: 1,
+        backgroundColor: Colors.bgPrimary,
+        padding: Spacing.lg,
+    },
+    center: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 12,
-        paddingBottom: 12,
+        marginBottom: Spacing.md,
+        paddingBottom: Spacing.md,
         borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
+        borderBottomColor: Colors.borderMedium,
     },
-    title: {fontSize: 24, fontWeight: 'bold', color: '#2b2b2b'},
-    subtitle: {fontSize: 13, color: '#888', marginTop: 2},
-    headerActions: {flexDirection: 'row', alignItems: 'center'},
-    bellButton: {marginRight: 8, padding: 6},
-    iconButton: {marginRight: 8, padding: 6},
-    bellIcon: {fontSize: 18},
+    title: {
+        fontSize: Typography.sizes.heading,
+        fontWeight: Typography.weights.bold,
+        color: Colors.textPrimary,
+    },
+    subtitle: {
+        fontSize: Typography.sizes.sm,
+        color: Colors.textLight,
+        marginTop: Spacing.xs,
+    },
+    headerActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    bellButton: {
+        marginRight: Spacing.sm,
+        padding: Spacing.xs,
+    },
+    iconButton: {
+        marginRight: Spacing.sm,
+        padding: Spacing.xs,
+    },
+    bellIcon: {
+        fontSize: Typography.sizes.xxxl,
+    },
     bellBadge: {
         position: 'absolute',
         top: 0,
         right: 0,
-        backgroundColor: '#a61b29',
-        borderRadius: 8,
+        backgroundColor: Colors.badgeBg,
+        borderRadius: BorderRadius.round,
         minWidth: 16,
         height: 16,
         paddingHorizontal: 3,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    bellBadgeText: {color: '#ffffff', fontSize: 9, fontWeight: '700'},
-    signOutButton: {backgroundColor: '#fdecea', borderRadius: 4, paddingHorizontal: 14, paddingVertical: 8},
-    signOutText: {color: '#a61b29', fontSize: 14, fontWeight: '700'},
+    bellBadgeText: {
+        color: Colors.badgeText,
+        fontSize: Typography.sizes.xs,
+        fontWeight: Typography.weights.bold,
+    },
+    signOutButton: {
+        backgroundColor: Colors.errorBg,
+        borderRadius: BorderRadius.md,
+        paddingHorizontal: Spacing.lg,
+        paddingVertical: Spacing.sm,
+        borderWidth: 1,
+        borderColor: Colors.errorBorder,
+    },
+    signOutText: {
+        color: Colors.error,
+        fontSize: Typography.sizes.base,
+        fontWeight: Typography.weights.bold,
+    },
     searchInput: {
         borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 6,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        fontSize: 14,
-        color: '#2b2b2b',
-        marginBottom: 10,
+        borderColor: Colors.searchBorder,
+        borderRadius: BorderRadius.lg,
+        paddingHorizontal: Spacing.lg,
+        paddingVertical: Spacing.md,
+        fontSize: Typography.sizes.lg,
+        color: Colors.textPrimary,
+        marginBottom: Spacing.md,
+        backgroundColor: Colors.bgSecondary,
     },
-    empty: {textAlign: 'center', color: '#888', marginTop: 32},
+    empty: {
+        textAlign: 'center',
+        color: Colors.textLight,
+        marginTop: Spacing.xxxl,
+        fontSize: Typography.sizes.base,
+    },
     menuItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 14,
-        paddingHorizontal: 12,
-        borderBottomWidth: 1,
-        borderColor: '#eee',
-        borderRadius: 4,
+        paddingVertical: Spacing.lg,
+        paddingHorizontal: Spacing.md,
+        backgroundColor: Colors.bgSecondary,
+        borderRadius: BorderRadius.lg,
+        ...Shadows.small,
+    },
+    menuIconContainer: {
+        width: 36,
+        height: 36,
+        borderRadius: BorderRadius.md,
+        backgroundColor: Colors.goldBg,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: Spacing.md,
+    },
+    menuIcon: {
+        fontSize: Typography.sizes.xxxl,
+    },
+    menuText: {
+        fontSize: Typography.sizes.lg,
+        color: Colors.textPrimary,
+        flex: 1,
+    },
+    listContent: {
+        paddingBottom: Spacing.xxxl,
+    },
+    separator: {
+        height: Spacing.sm,
     },
 });

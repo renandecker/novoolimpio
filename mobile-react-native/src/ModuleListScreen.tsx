@@ -17,6 +17,7 @@ import {executeAction} from './actions';
 import {can} from './permissions';
 import {useAuth} from './auth';
 import type {ApiItem} from './types';
+import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from './theme';
 
 const PREFERRED_LABELS = ['nome', 'descricao', 'razao_social', 'nome_fantasia', 'username', 'titulo', 'rotulo', 'sigla', 'sobrenome', 'login', 'uf', 'tema'];
 
@@ -63,10 +64,10 @@ type ModalState =
     | null;
 
 export function ModuleList({
-                               path,
-                               title,
-                               params,
-                           }: {
+                                path,
+                                title,
+                                params,
+                            }: {
     path: string;
     title?: string;
     params?: Record<string, string | number | boolean | undefined>;
@@ -85,8 +86,6 @@ export function ModuleList({
     const outcome = feature && resource ? `view/${feature}/${resource}` : '';
     const entityTitle = toTitle(resource.replace(/^(form|list|colunas)/i, '') || resource);
 
-    // Espelha o pedido de remover o prefixo "List " dos títulos das telas: o nome do recurso
-    // (ex.: "listAcao") não deve aparecer como "List Acao" para o usuário.
     const screenTitle = title ?? (resource ? entityTitle : toTitle(feature) || 'Lista');
 
     const canCreate = can(session, 'CREATE', outcome);
@@ -98,7 +97,6 @@ export function ModuleList({
     const items = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);
-
 
     const runAction = (action: string, item: ApiItem) => {
         setRunningAction(action);
@@ -141,7 +139,7 @@ export function ModuleList({
     if (q.isLoading) {
         return (
             <View style={styles.center}>
-                <ActivityIndicator/>
+                <ActivityIndicator color={Colors.primary} size="large"/>
             </View>
         );
     }
@@ -275,13 +273,13 @@ export function ModuleList({
 }
 
 function RecordModal({
-                         title,
-                         fields,
-                         initial,
-                         submitLabel,
-                         onCancel,
-                         onSubmit,
-                     }: {
+                          title,
+                          fields,
+                          initial,
+                          submitLabel,
+                          onCancel,
+                          onSubmit,
+                      }: {
     title: string;
     fields: string[];
     initial: Record<string, unknown>;
@@ -335,165 +333,279 @@ function RecordModal({
 }
 
 const styles = StyleSheet.create({
-    page: {flex: 1, padding: 16},
-    center: {flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24},
-    header: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12},
-    title: {fontSize: 22, fontWeight: 'bold', color: '#1d2025'},
+    page: {
+        flex: 1,
+        backgroundColor: Colors.bgPrimary,
+        padding: Spacing.lg,
+    },
+    center: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: Spacing.xl,
+        backgroundColor: Colors.bgPrimary,
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: Spacing.md,
+    },
+    title: {
+        fontSize: Typography.sizes.xxxl,
+        fontWeight: Typography.weights.bold,
+        color: Colors.textPrimary,
+    },
     primaryButton: {
-        backgroundColor: '#2a5a88',
-        borderRadius: 8,
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        shadowColor: '#2a5a88',
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 3
+        backgroundColor: Colors.primary,
+        borderRadius: BorderRadius.lg,
+        paddingHorizontal: Spacing.xl,
+        paddingVertical: Spacing.md,
+        ...Shadows.gold,
     },
-    primaryButtonText: {color: '#ffffff', fontSize: 15, fontWeight: '600'},
+    primaryButtonText: {
+        color: Colors.textWhite,
+        fontSize: Typography.sizes.lg,
+        fontWeight: Typography.weights.semibold,
+    },
     notice: {
-        backgroundColor: '#fff8e1',
+        backgroundColor: Colors.warningBg,
         borderWidth: 1,
-        borderColor: '#f0e0a0',
-        borderRadius: 8,
-        padding: 10,
-        marginBottom: 8,
-        color: '#7a5c00'
+        borderColor: Colors.goldBg,
+        borderRadius: BorderRadius.lg,
+        padding: Spacing.md,
+        marginBottom: Spacing.md,
+        color: Colors.goldText,
     },
-    empty: {textAlign: 'center', color: '#888', marginTop: 24, fontSize: 14},
-    row: {paddingVertical: 12, borderBottomWidth: 1, borderColor: '#f0f0f0'},
-    rowMain: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'},
-    rowText: {fontSize: 16, color: '#1d2025', flexShrink: 1, marginRight: 8},
-    rowId: {fontSize: 12, color: '#999'},
-    rowActions: {flexDirection: 'row', flexWrap: 'wrap', marginTop: 6},
+    empty: {
+        textAlign: 'center',
+        color: Colors.textLight,
+        marginTop: Spacing.xl,
+        fontSize: Typography.sizes.lg,
+    },
+    row: {
+        paddingVertical: Spacing.md,
+        borderBottomWidth: 1,
+        borderColor: Colors.borderLight,
+    },
+    rowMain: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    rowText: {
+        fontSize: Typography.sizes.lg,
+        color: Colors.textPrimary,
+        flexShrink: 1,
+        marginRight: Spacing.md,
+    },
+    rowId: {
+        fontSize: Typography.sizes.sm,
+        color: Colors.textLight,
+    },
+    rowActions: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: Spacing.xs,
+    },
     rowButton: {
-        backgroundColor: 'rgba(51, 122, 183, 0.08)',
-        borderRadius: 6,
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        marginRight: 6,
-        marginTop: 4
+        backgroundColor: Colors.primary + '15',
+        borderRadius: BorderRadius.md,
+        paddingHorizontal: Spacing.md,
+        paddingVertical: Spacing.xs,
+        marginRight: Spacing.xs,
+        marginTop: Spacing.xs,
     },
-    dangerButton: {backgroundColor: '#fff0f0'},
-    rowButtonText: {color: '#265a88', fontSize: 13, fontWeight: '600'},
-    errorText: {color: '#a61b29', fontSize: 15, fontWeight: '600', textAlign: 'center'},
-    errorDetail: {color: '#888', fontSize: 13, marginTop: 6, textAlign: 'center'},
+    dangerButton: {
+        backgroundColor: Colors.errorBg,
+    },
+    rowButtonText: {
+        color: Colors.primary,
+        fontSize: Typography.sizes.base,
+        fontWeight: Typography.weights.semibold,
+    },
+    errorText: {
+        color: Colors.error,
+        fontSize: Typography.sizes.lg,
+        fontWeight: Typography.weights.semibold,
+        textAlign: 'center',
+    },
+    errorDetail: {
+        color: Colors.textLight,
+        fontSize: Typography.sizes.base,
+        marginTop: Spacing.xs,
+        textAlign: 'center',
+    },
     paginator: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 10,
-        paddingTop: 10,
+        marginTop: Spacing.md,
+        paddingTop: Spacing.md,
         borderTopWidth: 1,
-        borderColor: '#f0f0f0'
+        borderColor: Colors.borderLight,
     },
     pageButton: {
-        backgroundColor: 'rgba(51, 122, 183, 0.08)',
-        borderRadius: 6,
-        paddingHorizontal: 14,
-        paddingVertical: 8
+        backgroundColor: Colors.primary + '15',
+        borderRadius: BorderRadius.md,
+        paddingHorizontal: Spacing.md,
+        paddingVertical: Spacing.xs,
     },
-    pageButtonDisabled: {opacity: 0.4},
-    pageButtonText: {color: '#265a88', fontSize: 13, fontWeight: '600'},
-    pageInfo: {fontSize: 12, color: '#666', flexShrink: 1, textAlign: 'center', marginHorizontal: 6},
-    sizeSelector: {alignSelf: 'flex-end', marginTop: 8},
-    sizeSelectorText: {color: '#265a88', fontSize: 13, fontWeight: '600'},
+    pageButtonDisabled: {
+        opacity: 0.4,
+    },
+    pageButtonText: {
+        color: Colors.primary,
+        fontSize: Typography.sizes.base,
+        fontWeight: Typography.weights.semibold,
+    },
+    pageInfo: {
+        fontSize: Typography.sizes.sm,
+        color: Colors.textMuted,
+        flexShrink: 1,
+        textAlign: 'center',
+        marginHorizontal: Spacing.sm,
+    },
+    sizeSelector: {
+        alignSelf: 'flex-end',
+        marginTop: Spacing.md,
+    },
+    sizeSelectorText: {
+        color: Colors.primary,
+        fontSize: Typography.sizes.base,
+        fontWeight: Typography.weights.semibold,
+    },
     sizeOptionsBox: {
-        backgroundColor: '#ffffff',
-        borderRadius: 12,
-        padding: 8,
-        marginHorizontal: 40,
-        shadowColor: '#1d2025',
-        shadowOffset: {width: 0, height: 4},
-        shadowOpacity: 0.15,
-        shadowRadius: 12,
-        elevation: 6,
+        backgroundColor: Colors.bgSecondary,
+        borderRadius: BorderRadius.xl,
+        padding: Spacing.md,
+        marginHorizontal: Spacing.xxxl,
+        ...Shadows.medium,
     },
-    sizeOption: {paddingVertical: 12, paddingHorizontal: 14, borderRadius: 6},
-    sizeOptionText: {fontSize: 15, color: '#1d2025'},
-    sizeOptionTextActive: {color: '#265a88', fontWeight: '600'},
+    sizeOption: {
+        paddingVertical: Spacing.md,
+        paddingHorizontal: Spacing.md,
+        borderRadius: BorderRadius.md,
+    },
+    sizeOptionText: {
+        fontSize: Typography.sizes.lg,
+        color: Colors.textPrimary,
+    },
+    sizeOptionTextActive: {
+        color: Colors.primary,
+        fontWeight: Typography.weights.semibold,
+    },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(29, 32, 37, 0.55)',
+        backgroundColor: Colors.modalOverlay,
         justifyContent: 'center',
-        padding: 16
+        padding: Spacing.lg,
     },
     modalBox: {
-        backgroundColor: '#ffffff',
-        borderRadius: 16,
+        backgroundColor: Colors.bgSecondary,
+        borderRadius: BorderRadius.xxl,
         maxHeight: '85%',
-        shadowColor: '#1d2025',
-        shadowOffset: {width: 0, height: 12},
-        shadowOpacity: 0.25,
-        shadowRadius: 24,
-        elevation: 12,
+        ...Shadows.modal,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(194, 170, 60, 0.15)',
+        borderColor: Colors.borderGold,
     },
-    recordModalContainer: {flex: 1, backgroundColor: '#ffffff', borderRadius: 16},
+    recordModalContainer: {
+        flex: 1,
+        backgroundColor: Colors.bgSecondary,
+        borderRadius: BorderRadius.xxl,
+    },
     modalHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingVertical: 16,
-        backgroundColor: '#2f333b',
+        paddingHorizontal: Spacing.xl,
+        paddingVertical: Spacing.md,
+        backgroundColor: Colors.headerStart,
         borderBottomWidth: 3,
-        borderBottomColor: '#c2aa3c',
+        borderBottomColor: Colors.gold,
     },
     modalTitle: {
-        fontSize: 17,
-        fontWeight: '600',
-        color: '#ffffff',
+        fontSize: Typography.sizes.xl,
+        fontWeight: Typography.weights.semibold,
+        color: Colors.textWhite,
         letterSpacing: 0.3,
     },
     closeBtn: {
         width: 36,
         height: 36,
-        borderRadius: 10,
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: BorderRadius.lg,
+        backgroundColor: Colors.modalCloseBg,
         alignItems: 'center',
         justifyContent: 'center',
     },
     closeBtnText: {
-        color: '#e8d27a',
-        fontSize: 18,
-        fontWeight: '500',
+        color: Colors.modalCloseColor,
+        fontSize: Typography.sizes.xxxl,
+        fontWeight: Typography.weights.medium,
     },
-    modalScroll: {flexGrow: 0, paddingHorizontal: 20, paddingVertical: 16},
-    modalEmpty: {color: '#888', marginBottom: 12, fontSize: 14, textAlign: 'center'},
-    field: {marginBottom: 14},
-    fieldLabel: {fontSize: 13, fontWeight: '600', color: '#4a4a4a', marginBottom: 4},
+    modalScroll: {
+        flexGrow: 0,
+        paddingHorizontal: Spacing.xl,
+        paddingVertical: Spacing.md,
+    },
+    modalEmpty: {
+        color: Colors.textLight,
+        marginBottom: Spacing.md,
+        fontSize: Typography.sizes.lg,
+        textAlign: 'center',
+    },
+    field: {
+        marginBottom: Spacing.md,
+    },
+    fieldLabel: {
+        fontSize: Typography.sizes.base,
+        fontWeight: Typography.weights.semibold,
+        color: Colors.textSecondary,
+        marginBottom: Spacing.xs,
+    },
     fieldInput: {
         borderWidth: 1,
-        borderColor: '#d3d3d3',
-        borderRadius: 8,
-        padding: 12,
-        fontSize: 15,
-        color: '#1d2025',
-        backgroundColor: '#ffffff'
+        borderColor: Colors.formInputBorder,
+        borderRadius: BorderRadius.lg,
+        padding: Spacing.md,
+        fontSize: Typography.sizes.lg,
+        color: Colors.textPrimary,
+        backgroundColor: Colors.bgSecondary,
     },
     modalActions: {
         flexDirection: 'row',
         justifyContent: 'flex-end',
-        marginTop: 16,
-        paddingTop: 12,
+        marginTop: Spacing.md,
+        paddingTop: Spacing.md,
         borderTopWidth: 1,
-        borderTopColor: '#f0f0f0',
-        paddingHorizontal: 16,
-        paddingBottom: 16
+        borderTopColor: Colors.borderLight,
+        paddingHorizontal: Spacing.md,
+        paddingBottom: Spacing.md,
     },
-    modalButton: {borderRadius: 8, paddingHorizontal: 20, paddingVertical: 10, marginLeft: 10},
-    cancelButton: {backgroundColor: '#f5f5f5', borderWidth: 1, borderColor: '#e0e0e0'},
-    cancelButtonText: {color: '#4a4a4a', fontSize: 15, fontWeight: '600'},
+    modalButton: {
+        borderRadius: BorderRadius.lg,
+        paddingHorizontal: Spacing.xl,
+        paddingVertical: Spacing.md,
+        marginLeft: Spacing.md,
+    },
+    cancelButton: {
+        backgroundColor: Colors.bgPrimary,
+        borderWidth: 1,
+        borderColor: Colors.borderMedium,
+    },
+    cancelButtonText: {
+        color: Colors.textSecondary,
+        fontSize: Typography.sizes.lg,
+        fontWeight: Typography.weights.semibold,
+    },
     saveButton: {
-        backgroundColor: '#2a5a88',
-        shadowColor: '#2a5a88',
-        shadowOffset: {width: 0, height: 4},
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 4
+        backgroundColor: Colors.primary,
+        ...Shadows.gold,
     },
-    modalButtonText: {color: '#ffffff', fontSize: 15, fontWeight: '600'},
+    modalButtonText: {
+        color: Colors.textWhite,
+        fontSize: Typography.sizes.lg,
+        fontWeight: Typography.weights.semibold,
+    },
 });

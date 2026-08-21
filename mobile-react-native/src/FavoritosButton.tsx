@@ -4,6 +4,7 @@ import {useQuery} from '@tanstack/react-query';
 import {listarFavoritos} from './favoritos';
 import {moduleIcon} from './moduleIcons';
 import {api} from './api';
+import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from './theme';
 
 const normalizeOutcome = (value: string) => value.replace(/(\.xhtml)+$/i, '').replace(/^\/+|\/+$/g, '') || 'default';
 
@@ -50,7 +51,7 @@ export function FavoritosButton({navigateTo}: { navigateTo: (key: string) => voi
 
             <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
                 <Pressable style={styles.overlay} onPress={() => setOpen(false)}>
-                    <Pressable style={styles.dropdown} onPress={(e) => e.stopPropagation()}>
+                    <View style={styles.dropdown}>
                         <View style={styles.dropdownHeader}>
                             <Text style={styles.dropdownTitle}>Favoritos</Text>
                             <Pressable onPress={() => {
@@ -66,22 +67,23 @@ export function FavoritosButton({navigateTo}: { navigateTo: (key: string) => voi
                             <Text style={styles.empty}>Nenhum favorito cadastrado.</Text>
                         ) : (
                             items.map((item, index) => (
-                                <TouchableWithoutFeedback key={`${item.outcome}-${index}`} style={styles.item}
-                                                          onPress={() => handleItemPress(item.outcome)}>
-                                    <View style={styles.itemContent}>
-                                        <Text style={styles.itemIcon}>{moduleIcon(item.nome, item.icon)}</Text>
+                                <TouchableWithoutFeedback key={`${item.outcome}-${index}`} onPress={() => handleItemPress(item.outcome)}>
+                                    <View style={styles.item}>
+                                        <View style={styles.itemIconContainer}>
+                                            <Text style={styles.itemIcon}>{moduleIcon(item.nome, item.icon)}</Text>
+                                        </View>
                                         <Text style={styles.itemNome}>{item.nome}</Text>
+                                        <Pressable style={styles.removeButton} onPress={(e) => {
+                                            e.stopPropagation();
+                                            handleRemoveFavorite(item.outcome);
+                                        }}>
+                                            <Text style={styles.removeIcon}>✕</Text>
+                                        </Pressable>
                                     </View>
-                                    <Pressable style={styles.removeButton} onPress={(e) => {
-                                        e.stopPropagation();
-                                        handleRemoveFavorite(item.outcome);
-                                    }}>
-                                        <Text style={styles.removeIcon}>✕</Text>
-                                    </Pressable>
                                 </TouchableWithoutFeedback>
                             ))
                         )}
-                    </Pressable>
+                    </View>
                 </Pressable>
             </Modal>
         </>
@@ -89,45 +91,89 @@ export function FavoritosButton({navigateTo}: { navigateTo: (key: string) => voi
 }
 
 const styles = StyleSheet.create({
-    iconButton: {marginRight: 8, padding: 6},
-    icon: {fontSize: 18},
-    overlay: {flex: 1, backgroundColor: 'rgba(29, 32, 37, 0.4)', paddingTop: 60, paddingHorizontal: 16},
+    iconButton: {
+        marginRight: Spacing.sm,
+        padding: Spacing.xs,
+    },
+    icon: {
+        fontSize: Typography.sizes.xxxl,
+    },
+    overlay: {
+        flex: 1,
+        backgroundColor: Colors.modalOverlay,
+        paddingTop: Layout.headerHeight + Spacing.md,
+        paddingHorizontal: Spacing.lg,
+        justifyContent: 'flex-start',
+    },
     dropdown: {
-        backgroundColor: '#ffffff',
-        borderRadius: 14,
-        padding: 12,
+        backgroundColor: Colors.dropdownBg,
+        borderRadius: BorderRadius.xxl,
+        padding: Spacing.md,
         maxHeight: '70%',
-        shadowColor: '#1d2025',
-        shadowOffset: {width: 0, height: 8},
-        shadowOpacity: 0.2,
-        shadowRadius: 16,
-        elevation: 8,
+        ...Shadows.large,
         borderWidth: 1,
-        borderColor: 'rgba(194, 170, 60, 0.15)',
+        borderColor: Colors.dropdownBorder,
     },
     dropdownHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 8,
-        paddingBottom: 8,
+        marginBottom: Spacing.sm,
+        paddingBottom: Spacing.sm,
         borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0'
+        borderBottomColor: Colors.dropdownHeaderBorder,
     },
-    dropdownTitle: {fontSize: 15, fontWeight: '600', color: '#1d2025'},
-    manageLink: {fontSize: 12, color: '#265a88', fontWeight: '500'},
-    empty: {color: '#888', fontSize: 13, paddingVertical: 8, textAlign: 'center'},
+    dropdownTitle: {
+        fontSize: Typography.sizes.xl,
+        fontWeight: Typography.weights.semibold,
+        color: Colors.textPrimary,
+    },
+    manageLink: {
+        fontSize: Typography.sizes.sm,
+        color: Colors.primary,
+        fontWeight: Typography.weights.medium,
+    },
+    empty: {
+        color: Colors.textLight,
+        fontSize: Typography.sizes.base,
+        paddingVertical: Spacing.lg,
+        textAlign: 'center',
+    },
     item: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
-        paddingVertical: 12,
+        justifyContent: 'space-between',
+        paddingVertical: Spacing.md,
         borderBottomWidth: 1,
-        borderColor: '#f0f0f0'
+        borderColor: Colors.borderLight,
     },
-    itemIcon: {fontSize: 18, width: 26, textAlign: 'center'},
-    itemNome: {fontSize: 14, color: '#1d2025'},
-    itemContent: {flexDirection: 'row', alignItems: 'center', gap: 10},
-    removeButton: {position: 'absolute', right: 8, top: 8},
-    removeIcon: {fontSize: 12, color: '#e74c3c'},
+    itemIconContainer: {
+        width: 32,
+        height: 32,
+        borderRadius: BorderRadius.md,
+        backgroundColor: Colors.goldBg,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: Spacing.md,
+    },
+    itemIcon: {
+        fontSize: Typography.sizes.xxxl,
+    },
+    itemNome: {
+        fontSize: Typography.sizes.lg,
+        color: Colors.textPrimary,
+        flex: 1,
+    },
+    itemContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    removeButton: {
+        padding: Spacing.xs,
+    },
+    removeIcon: {
+        fontSize: Typography.sizes.sm,
+        color: Colors.error,
+    },
 });

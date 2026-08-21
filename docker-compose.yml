@@ -37,13 +37,16 @@ x-service-env: &service-env
   DATABASE_PASSWORD: postgres
   JWT_SECRET: ${JWT_SECRET:-troque-esta-chave-em-producao-olimpio}
   QUARKUS_HTTP_CORS_ORIGINS: "*"
+  # Connection pool limits (Agroal) - total across 14 services ~168 connections < 300 max_connections
+  QUARKUS_DATASOURCE_MAX_SIZE: "12"
+  QUARKUS_DATASOURCE_MIN_SIZE: "2"
 
 services:
   postgres:
     image: postgres:16-alpine
     container_name: olimpio-postgres
     restart: unless-stopped
-    command: postgres -c max_wal_size=2GB -c checkpoint_timeout=15min
+    command: postgres -c max_wal_size=2GB -c checkpoint_timeout=15min -c max_connections=300
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -157,6 +160,12 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
     - "8081:8081"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8081/q/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -176,6 +185,12 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
     - "8082:8082"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8082/q/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -193,6 +208,12 @@ services:
       DATABASE_URL: postgresql://postgres:5432/olimpio
     ports:
     - "8083:8083"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8083/q/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -208,6 +229,12 @@ services:
       DATABASE_URL: postgresql://postgres:5432/olimpio
     ports:
     - "8084:8084"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8084/q/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -224,6 +251,12 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
     - "8085:8085"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8085/q/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -241,6 +274,12 @@ services:
       DATABASE_URL: postgresql://postgres:5432/olimpio
     ports:
     - "8086:8086"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8086/q/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -257,6 +296,12 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
     - "8087:8087"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8087/q/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -274,6 +319,12 @@ services:
       DATABASE_URL: postgresql://postgres:5432/olimpio
     ports:
     - "8088:8088"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8088/q/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -290,6 +341,12 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
     - "8089:8089"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8089/q/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -306,8 +363,16 @@ services:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
       PROFESSOR_AULA_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
+      QUARKUS_DATASOURCE_PROFESSOR_MAX_SIZE: "12"
+      QUARKUS_DATASOURCE_PROFESSOR_MIN_SIZE: "2"
     ports:
     - "8091:8091"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8091/q/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -322,6 +387,8 @@ services:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
       LOGIN_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
+      QUARKUS_DATASOURCE_LOGIN_MAX_SIZE: "12"
+      QUARKUS_DATASOURCE_LOGIN_MIN_SIZE: "2"
     ports:
     - "8090:8090"
     healthcheck:
@@ -342,8 +409,16 @@ services:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
       ALUNO_AULA_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
+      QUARKUS_DATASOURCE_ALUNO_MAX_SIZE: "12"
+      QUARKUS_DATASOURCE_ALUNO_MIN_SIZE: "2"
     ports:
     - "8092:8092"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8092/q/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -358,8 +433,16 @@ services:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
       CURRICULO_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
+      QUARKUS_DATASOURCE_CURRICULO_MAX_SIZE: "12"
+      QUARKUS_DATASOURCE_CURRICULO_MIN_SIZE: "2"
     ports:
     - "8095:8095"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8095/q/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -378,8 +461,16 @@ services:
       ASAAS_API_KEY: $$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjE1MjVlNjliLTRhMDItNDkzZC1hMTI0LTcyYjgzNjVmMDNhNDo6JGFhY2hfYmM0OGJjMTQtZDk1OC00MDVmLWEyYmUtODQxN2U1YTY4MTFk
       ASAAS_BASE_URL: ${ASAAS_BASE_URL:-https://api-sandbox.asaas.com}
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      QUARKUS_DATASOURCE_ASAAS_MAX_SIZE: "12"
+      QUARKUS_DATASOURCE_ASAAS_MIN_SIZE: "2"
     ports:
     - "8094:8094"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8094/q/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -399,6 +490,12 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
     - "8097:8096"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8096/q/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
     depends_on:
       restore:
         condition: service_completed_successfully
@@ -416,21 +513,36 @@ services:
     ports:
     - "8080:8080"
     depends_on:
-    - aluno
-    - asaas
-    - basico
-    - central
-    - comercial
-    - curriculo
-    - educacao
-    - estoque
-    - financeiro
-    - login
-    - notificacoes
-    - fiserv
-    - professor
-    - relatorios
-    - schedule
+      aluno:
+        condition: service_healthy
+      asaas:
+        condition: service_healthy
+      basico:
+        condition: service_healthy
+      central:
+        condition: service_healthy
+      comercial:
+        condition: service_healthy
+      curriculo:
+        condition: service_healthy
+      educacao:
+        condition: service_healthy
+      estoque:
+        condition: service_healthy
+      financeiro:
+        condition: service_healthy
+      login:
+        condition: service_healthy
+      notificacoes:
+        condition: service_healthy
+      fiserv:
+        condition: service_healthy
+      professor:
+        condition: service_healthy
+      relatorios:
+        condition: service_healthy
+      schedule:
+        condition: service_healthy
 
   web-react:
     build:
