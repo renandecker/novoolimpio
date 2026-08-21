@@ -8,11 +8,17 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
 
 @ApplicationScoped
-public interface DocumentTemplateRepository extends PanacheRepository<DocumentTemplate> {
+public class DocumentTemplateRepository implements PanacheRepository<DocumentTemplate> {
 
-    Uni<List<DocumentTemplate>> findByTipoRelatorioAndRelatorioId(String tipoRelatorio, Long relatorioId);
+    public Uni<List<DocumentTemplate>> findByTipoRelatorioAndRelatorioId(String tipoRelatorio, Long relatorioId) {
+        return find("tipoRelatorio = ?1 and relatorioId = ?2", tipoRelatorio, relatorioId).list();
+    }
 
-    Uni<List<DocumentTemplate>> findByAtivoTrue();
+    public Uni<List<DocumentTemplate>> findByAtivoTrue() {
+        return find("ativo = true").list();
+    }
 
-    Uni<Long> deleteByRelatorioId(Long relatorioId);
+    public Uni<Long> deleteByRelatorioId(Long relatorioId) {
+        return delete("relatorioId = ?1", relatorioId);
+    }
 }

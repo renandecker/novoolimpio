@@ -47,7 +47,7 @@ public class EmpresaService {
         if (empresas.isEmpty()) {
             return Uni.createFrom().item(List.of());
         }
-        List<Long> pessoaIds = empresas.stream().map(Empresa::getPessoaId).distinct().toList();
+        List<Long> pessoaIds = empresas.stream().map(e -> e.pessoaId).distinct().toList();
         String sql = """
                 SELECT p.id,
                        pf.nome,
@@ -65,12 +65,13 @@ public class EmpresaService {
                 .chain(session -> session.createNativeQuery(sql).getResultList())
                 .map(rows -> {
                     Map<Long, Object[]> pessoaMap = new java.util.HashMap<>();
-                    for (Object[] row : rows) {
+                    for (Object rowObj : rows) {
+                        Object[] row = (Object[]) rowObj;
                         Long id = ((Number) row[0]).longValue();
                         pessoaMap.put(id, row);
                     }
                     for (Empresa e : empresas) {
-                        Object[] data = pessoaMap.get(e.getPessoaId());
+                        Object[] data = pessoaMap.get(e.pessoaId);
                         if (data != null) {
                             e.pessoaNome = data[1] != null ? data[1].toString() : null;
                             e.pessoaNomeFantasia = data[2] != null ? data[2].toString() : null;
