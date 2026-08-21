@@ -67,12 +67,6 @@
             <artifactId>quarkus-rest-client-reactive-jackson</artifactId>
         </dependency>
 
-        <!-- Migracao de banco (V1__base.sql / V2__pagamento_fiserv.sql) -->
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-flyway</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>

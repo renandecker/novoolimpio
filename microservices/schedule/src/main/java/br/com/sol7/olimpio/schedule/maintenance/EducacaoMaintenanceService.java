@@ -11,7 +11,10 @@ import org.jboss.logging.Logger;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import br.com.sol7.olimpio.educacao.oferecimentocomponentecurricular.repository.OferecimentoComponenteCurricularRepository;
 import java.util.List;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Rotinas do dominio "educacao" migradas de SchedulingService (TaxaCursoService,
@@ -85,11 +88,43 @@ public class EducacaoMaintenanceService {
     }
 
     // ---------------------------------------------------------------------------
-    // Replicacao de oferecimento (permanece no servico dono da regra)
+    // Replicacao de oferecimento automatico (migracao de SchedulingService.replicarOferecimentoAuto)
     // ---------------------------------------------------------------------------
+    // Logica:
+    // 1. Busca o SQL de replicacao configurado em bas_config (chave SQL_REPLICAR_OFERECIMENTOS)
+    // 2. Verifica disciplina
+    // 3. Lista os ids dos oferecimentos elegiveis para replicacao
+    // 4. Para cada id, chama replicarOferecimento
+    // 5. Verifica chamada assinada
+    // 6. Repete enquanto houver offering(s) para replicar (recursivo com salvaguarda de iteracao)
 
     public Uni<Void> replicarOferecimentoAutomatico() {
-        return Uni.createFrom().voidItem();
+        return replicarOferecimentoAutomatico(0);
+    }
+
+    private Uni<Void> replicarOferecimentoAutomatico(int iteracao) {
+        if (iteracao >= 50) {
+            return Uni.createFrom().voidItem();
+        }
+        return repository.verificarDisciplina()
+                .chain(v -> repository.verificarchamadaAssinada())
+                .chain(v -> repository.buscarSqlConfigReplicacao())
+                .chain(sql -> repository.listarIdsParaReplicacao(
+                        sql == null || sql.isBlank() ? OferecimentoComponenteCurricularRepository.SQL_REPLICAR_OFERECIMENTOS_PADRAO : sql))
+                .chain(ids -> {
+                    if (ids == null || ids.isEmpty()) {
+                        return Uni.createFrom().voidItem();
+                    }
+Uni<Integer> acc = Uni.createFrom().item(0);
+                    for (Long id : ids) {
+                        acc = acc.chain(t -> ofreimentoComponenteCurricularService.replicarOferecimento(id)
+                                .onFailure().recoverWithItem(0)
+                                .map(n -> t + n));
+                    }
+                    return acc.chain(t -> replicarOferecimentoAutomatico(iteracao + 1));
+                })
+                .invoke(() -> LOG.infof("replicarOferecimentoAutomatico - iteracao %d concluida", iteracao))
+                .replaceWithVoid();
     }
 
     // ---------------------------------------------------------------------------

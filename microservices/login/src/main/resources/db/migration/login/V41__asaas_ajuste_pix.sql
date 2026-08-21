@@ -1,5 +1,5 @@
 --
--- V3__ajuste_pix.sql
+-- V41__asaas_ajuste_pix.sql
 --
 -- Contexto: a collection Fiserv fornecida (fiserv_dev_postman_collection.json) NAO contem
 -- nenhum endpoint de PIX (busca por "pix" no arquivo inteiro retorna zero ocorrencias - e a
@@ -28,6 +28,7 @@
 -- nada que ja exista (fin_asaas, cron jobs legados, etc. continuam funcionando com id_asaas
 -- intacto).
 --
+
 
 -- =================================================================================================
 -- fin_parcela_pix: valor da cobranca + identificador generico do PSP + rastreabilidade

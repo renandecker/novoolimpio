@@ -10,6 +10,7 @@
 -- AsaasStatusParcela / AsaasTipoPagamento (string).
 --
 
+
 CREATE TABLE IF NOT EXISTS public.fin_asaas_parcela (
     id bigint NOT NULL,
     billing_type character varying(20),

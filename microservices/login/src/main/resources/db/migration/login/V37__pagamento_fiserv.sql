@@ -1,5 +1,5 @@
 --
--- V2__pagamento_fiserv.sql
+-- V37__pagamento_fiserv.sql
 --
 -- Objetivo: dar suporte ao microsservico olimpio-fiserv, que integra com a
 -- Fiserv Commerce Hub / Payments Gateway (IPP) para pagamentos com cartao (a vista e
