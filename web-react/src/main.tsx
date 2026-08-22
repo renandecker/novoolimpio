@@ -212,6 +212,7 @@ import ViewGestaoAlunoColunasParcelaAlterarListScreen from './screens/ViewGestao
 import ViewGestaoAlunoGestaoAlunoListScreen from './screens/ViewGestaoAlunoGestaoAlunoListScreen';
 import ViewGestaoAlunoListHistoricoAlunoListScreen from './screens/ViewGestaoAlunoListHistoricoAlunoListScreen';
 import ViewGestaoProfessorGestaoProfessorListScreen from './screens/ViewGestaoProfessorGestaoProfessorListScreen';
+import ViewCriarPerguntaScreen from './screens/ViewCriarPerguntaScreen';
 import ViewGrauFormGrauListScreen from './screens/ViewGrauFormGrauListScreen';
 import ViewGrauListGrauListScreen from './screens/ViewGrauListGrauListScreen';
 import ViewGrupoColunasListScreen from './screens/ViewGrupoColunasListScreen';
@@ -743,6 +744,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/gestaoAluno/gestaoAluno" element={<ViewGestaoAlunoGestaoAlunoListScreen/>}/>
     <Route path="/view/gestaoAluno/listHistoricoAluno" element={<ViewGestaoAlunoListHistoricoAlunoListScreen/>}/>
     <Route path="/view/gestaoProfessor/gestaoProfessor" element={<ViewGestaoProfessorGestaoProfessorListScreen/>}/>
+    <Route path="/view/avaliacao/criar" element={<ViewCriarPerguntaScreen/>}/>
     <Route path="/view/genero/listGenero" element={<ViewGeneroListGeneroListScreen/>}/>
     <Route path="/view/grau/formGrau" element={<ViewGrauFormGrauListScreen/>}/>
     <Route path="/view/grau/listGrau" element={<ViewGrauListGrauListScreen/>}/>

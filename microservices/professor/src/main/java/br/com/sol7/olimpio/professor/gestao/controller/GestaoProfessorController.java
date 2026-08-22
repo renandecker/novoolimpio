@@ -25,6 +25,12 @@ public class GestaoProfessorController {
     }
 
     @GET
+    @Path("/identidade")
+    public Uni<IdentidadeDto> identidade(@QueryParam("username") String username) {
+        return service.identidade(username);
+    }
+
+    @GET
     @Path("/turmas/{id}/caderno")
     public Uni<CadernoDto> buscarCaderno(@PathParam("id") Long id) {
         return service.buscarCaderno(id);

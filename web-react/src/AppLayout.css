@@ -1166,6 +1166,26 @@
     box-shadow: 0 0 0 3px rgba(51, 122, 183, 0.15);
 }
 
+.form-fieldset {
+    grid-column: 1 / -1;
+    margin: 8px 0 0;
+    padding: 14px 18px 18px;
+    border: 1px solid #d3d3d3;
+    border-radius: 6px;
+}
+
+.form-fieldset legend {
+    padding: 0 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-fieldset legend small {
+    font-weight: 400;
+    color: #777;
+}
+
 .form-erro {
     margin: 10px 0 0;
     padding: 10px 14px;

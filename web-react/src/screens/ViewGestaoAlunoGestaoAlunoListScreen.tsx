@@ -43,8 +43,38 @@ const ACTIONS = [
     {key: 'notas', label: 'Notas', className: 'btnblack'},
     {key: 'presencas', label: 'Presenças', className: 'btnbrown'},
     {key: 'historicoAluno', label: 'Histórico aluno', className: 'btnpink'},
-] as
-const ;
+] as const;
+
+// Espelha as chamadas <p:fileDownload> do botão amarelo "Relatórios" em gestaoAluno.xhtml
+// (olimpio_extracted): cada item POSTa no endpoint que gera o PDF do documento.
+const DOCUMENTOS = {
+    contrato: {
+        url: '/api/educacao/gestao-aluno/gerar-contrato',
+        arquivo: (id: number) => `contrato-${id}.pdf`,
+    },
+    promissoria: {
+        url: '/api/educacao/gestao-aluno/gerar-promissoria',
+        arquivo: (id: number) => `promissoria-${id}.pdf`,
+    },
+    cancelamentoContratual: {
+        url: '/api/financeiro/gerar-carne/gerar-via-documento-cancelamento-contratual',
+        arquivo: (id: number) => `cancelamento-${id}.pdf`,
+    },
+    historicoEscolar: {
+        url: '/api/financeiro/gerar-carne/imprimir-historico',
+        arquivo: (id: number) => `historico-escolar-${id}.pdf`,
+    },
+    certificado: {
+        url: '/api/educacao/gerar-certificado/gerar-certificado',
+        arquivo: (id: number) => `certificado-${id}.pdf`,
+    },
+    boletim: {
+        url: '/api/financeiro/gerar-carne/imprimir-boletim-teste',
+        arquivo: (id: number) => `boletim-escolar-${id}.pdf`,
+    },
+} as const;
+
+type DocumentoKey = keyof typeof DOCUMENTOS;
 
 type ActionKey = (typeof ACTIONS)[number]['key'];
 
@@ -105,6 +135,60 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
     const abrirPlaceholder = (titulo: string, texto: string) => setPlaceholder({titulo, texto});
 
+    // Documento em geração (chave do item do menu) — desabilita o item enquanto o PDF é gerado.
+    const [gerandoDoc, setGerandoDoc] = useState<string | null>(null);
+
+    // Espelha <p:fileDownload value="#{controller.metodo(entity)}"/>: POST no endpoint de geração
+    // e baixa o PDF retornado (string base64 ou {fileName, contentType, base64Data}).
+    const gerarDocumento = async (key: DocumentoKey | string, contratoId: number) => {
+        const doc = DOCUMENTOS[key as DocumentoKey];
+        if (!doc || gerandoDoc) return;
+        setGerandoDoc(String(key));
+        try {
+            const response = await api.post<string | {
+                fileName?: string;
+                contentType?: string;
+                base64Data?: string
+            }>(doc.url, null, {
+                params: key === 'certificado' ? {contratos: contratoId} : {ccId: contratoId},
+            });
+            const data = response.data;
+            let fileName = doc.arquivo(contratoId);
+            let contentType = 'application/pdf';
+            let base64: string | undefined;
+            if (typeof data === 'string' && data.length > 0) {
+                base64 = data;
+            } else if (data && typeof data === 'object') {
+                base64 = data.base64Data;
+                if (data.fileName) fileName = data.fileName;
+                if (data.contentType) contentType = data.contentType;
+            }
+            if (!base64) {
+                abrirPlaceholder(
+                    'Documento indisponível',
+                    'A geração deste documento ainda não está disponível no servidor.',
+                );
+                return;
+            }
+            const rawBase64 = base64.includes(',') ? base64.slice(base64.indexOf(',') + 1) : base64;
+            const blob = new Blob([Uint8Array.from(atob(rawBase64), (c) => c.charCodeAt(0))], {type: contentType});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            const msg =
+                (error as { response?: { data?: { error?: string } } })?.response?.data?.error
+                ?? (error as Error)?.message
+                ?? 'erro desconhecido';
+            abrirPlaceholder('Erro ao gerar documento', `Não foi possível gerar o documento: ${msg}`);
+        } finally {
+            setGerandoDoc(null);
+        }
+    };
+
     const q = useModulePaged('/api/view/contrato/colunasContrato', page, size);
     const all = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
@@ -147,7 +231,17 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                         items.flatMap((item) => {
                             const rowKey = String(item.id);
                             const isOpen = Boolean(expanded[rowKey]);
-                            const ativo = asRecord(item).ativo !== false;
+                            const rec = asRecord(item);
+                            const ativo = rec.ativo !== false;
+                            const contratoId = Number(item.id);
+
+                            // Regras espelhadas de gestaoAluno.xhtml:
+                            // - Troca Turma: rendered="#{entity.trocaTurma eq true}"
+                            // - Cancelamento (2ª via): rendered="#{entity.ativo eq false}"
+                            // - Histórico Escolar: disabled="#{entity.dataConclusao eq null}"
+                            // - Certificado: rendered="#{entity.dataConclusao ne null}"
+                            const temTrocaTurma = rec.troca_turma === true;
+                            const temConclusao = Boolean(rec.data_conclusao);
 
                             // Relatórios: <p:menuButton icon="ui-icon-document" styleClass="btnyellow"> em gestaoAluno.xhtml.
                             const relatoriosItems: RowMenuItem[] = [
@@ -155,68 +249,76 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                                     key: 'contrato',
                                     label: 'Contrato',
                                     className: 'btnstop',
-                                    onSelect: () => abrirPlaceholder('Contrato', 'Imprimir contrato do aluno.')
+                                    disabled: gerandoDoc === 'contrato',
+                                    onSelect: () => gerarDocumento('contrato', contratoId),
                                 },
                                 {
                                     key: 'promissoria',
                                     label: 'Promissória',
                                     className: 'btnsky',
-                                    onSelect: () => abrirPlaceholder('Promissória', 'Imprimir promissória do contrato.')
+                                    disabled: gerandoDoc === 'promissoria',
+                                    onSelect: () => gerarDocumento('promissoria', contratoId),
                                 },
                                 {
                                     key: 'reparcelamentoImpr',
                                     label: 'Reparcelamento',
                                     className: 'btngreen',
-                                    onSelect: () => abrirPlaceholder('Reparcelamento', 'Imprimir segunda via de reparcelamento.')
+                                    onSelect: () => abrirPlaceholder(
+                                        'Reparcelamento',
+                                        'Imprimir segunda via de reparcelamento: gere o reparcelamento antes de imprimir.',
+                                    ),
                                 },
                                 {
                                     key: 'precancelamentos',
                                     label: 'Pré cancelamentos',
                                     className: 'btnorange',
-                                    onSelect: () => abrirPlaceholder('Pré cancelamentos', 'Pré cancelamentos criados no contrato.')
+                                    onSelect: () => abrirPlaceholder('Pré cancelamentos', 'Pré cancelamentos criados no contrato.'),
                                 },
-                                {
+                                ...(temTrocaTurma ? [{
                                     key: 'trocaTurma',
                                     label: 'Troca Turma',
                                     className: 'btnblue',
-                                    onSelect: () => abrirPlaceholder('Troca Turma', 'Gerar segunda via troca de turma.')
-                                },
-                                {
+                                    onSelect: () => abrirPlaceholder('Troca Turma', 'Gerar segunda via troca de turma.'),
+                                }] : []),
+                                ...(ativo ? [] : [{
                                     key: 'cancelamentoImpr',
                                     label: 'Cancelamento',
                                     className: 'btnred',
-                                    disabled: ativo,
-                                    onSelect: () => abrirPlaceholder('Cancelamento', 'Imprimir segunda via documento de cancelamento.')
-                                },
+                                    disabled: gerandoDoc === 'cancelamentoContratual',
+                                    onSelect: () => gerarDocumento('cancelamentoContratual', contratoId),
+                                }]),
                                 {
                                     key: 'historicoEscolar',
                                     label: 'Histórico Escolar',
                                     className: 'btngrey',
-                                    onSelect: () => abrirPlaceholder('Histórico Escolar', 'Gerar histórico escolar do aluno.')
+                                    disabled: !temConclusao || gerandoDoc === 'historicoEscolar',
+                                    onSelect: () => gerarDocumento('historicoEscolar', contratoId),
                                 },
+                                ...(temConclusao ? [{
+                                    key: 'certificado',
+                                    label: 'Certificado',
+                                    className: 'btnpurple',
+                                    disabled: gerandoDoc === 'certificado',
+                                    onSelect: () => gerarDocumento('certificado', contratoId),
+                                }] : []),
                                 {
                                     key: 'boletim',
-                                    label: 'Imprimir boletim',
+                                    label: 'Boletim Escolar',
                                     className: 'btnpink',
-                                    onSelect: () => abrirPlaceholder('Boletim', 'Imprimir boletim do aluno.')
-                                },
-                                {
-                                    key: 'certificado',
-                                    label: 'Imprimir certificado',
-                                    className: 'btnpurple',
-                                    onSelect: () => abrirPlaceholder('Certificado', 'Imprimir certificado do aluno.')
+                                    disabled: gerandoDoc === 'boletim',
+                                    onSelect: () => gerarDocumento('boletim', contratoId),
                                 },
                                 {
                                     key: 'presencasContrato',
                                     label: 'Presenças',
                                     className: 'btnbrown',
-                                    onSelect: () => abrirPlaceholder('Presenças', 'Ver presenças deste contrato.')
+                                    onSelect: () => abrirPlaceholder('Presenças', 'Ver presenças deste contrato.'),
                                 },
                                 {
                                     key: 'notasContrato',
                                     label: 'Notas',
                                     className: 'btnblack',
-                                    onSelect: () => abrirPlaceholder('Notas', 'Ver notas deste contrato.')
+                                    onSelect: () => abrirPlaceholder('Notas', 'Ver notas deste contrato.'),
                                 },
                             ];
 

@@ -1,6 +1,20 @@
 -- Notificacoas - regras de status de matricula e turma
 -- Regras adicionais para notificacao sobre alteracoes de status
 
+CREATE TABLE IF NOT EXISTS not_notificacao_regra (
+    id BIGSERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE,
+    descricao VARCHAR(255),
+    tipo_regra VARCHAR(50) NOT NULL,
+    canal VARCHAR(30) NOT NULL,
+    destinatario VARCHAR(50) NOT NULL,
+    destinatario_professor BOOLEAN NOT NULL DEFAULT FALSE,
+    valor_limite DOUBLE PRECISION,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Regras para Matricula
 INSERT INTO not_notificacao_regra (nome, descricao, tipo_regra, canal, destinatario, valor_limite, ativo) VALUES
     ('Matricula Gerada', 'Notificar quando nova matricula e criada', 'matricula_gerada', 'EMAIL', 'DONO_ALUNO', 0.0, TRUE),
@@ -32,5 +46,5 @@ INSERT INTO not_notificacao_regra (nome, descricao, tipo_regra, canal, destinata
 
     ('Responsavel - Turma Lota', 'Notificar responsavel da unidade quando turma e lotada', 'turma_lotada', 'EMAIL', 'RESPONSABLE_UNIDADE', 0.0, TRUE),
 
-    ('Status Offering Mudanca', 'Notificacao quando status do offering muda para sistema', 'turma_lotada', 'SISTEMA', 'DONO_ALUNO', 0.0, TRUE);
+    ('Status Offering Mudanca', 'Notificacao quando status do offering muda para sistema', 'turma_lotada', 'SISTEMA', 'DONO_ALUNO', 0.0, TRUE)
 ON CONFLICT (nome) DO NOTHING;

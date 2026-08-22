@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import {PermissionGate} from '../permissions';
 import {DataTable} from '../DataTable';
+import {BooleanField} from '../BooleanField';
 import {MasterDetail} from '../MasterDetail';
 import {Tabs} from '../Tabs';
 import type {TabItem} from '../Tabs';
@@ -17,7 +18,29 @@ import {
 } from '../masterDetailSources';
 import type {ApiItem} from '../types';
 
+interface DocumentoUploadProps {
+    label: string;
+    obrigatorio?: boolean;
+}
+
+function DocumentoUpload({label, obrigatorio = false}: DocumentoUploadProps) {
+    return (
+        <>
+            <span className="form-label" style={{fontWeight: 'bold'}}>
+                {label} {obrigatorio ? '*' : ''}
+            </span>
+            <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+                <input type="file" accept="image/*,application/pdf" className="form-input" style={{flex: 1}}/>
+                <button type="button" className="btn-action btnyellow" title="Visualizar documento">👁</button>
+            </div>
+        </>
+    );
+}
+
 export default function ViewUsuarioFormUsuarioListScreen() {
+    const [ativo, setAtivo] = useState(true);
+    const [relatorio, setRelatorio] = useState(false);
+    const [mensalista, setMensalista] = useState<'M' | 'H'>('M');
     const [perfis, setPerfis] = useState<ApiItem[]>([]);
     const [agendas, setAgendas] = useState<ApiItem[]>([]);
     const [turnos, setTurnos] = useState<ApiItem[]>([]);
@@ -45,7 +68,7 @@ export default function ViewUsuarioFormUsuarioListScreen() {
                         <input className="form-input" type="email" placeholder="E-mail" style={{gridColumn: 'span 3'}}/>
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Nome Social *</span>
+                        <span className="form-label">Nome Social</span>
                         <input className="form-input" placeholder="Nome social" style={{gridColumn: 'span 3'}}/>
                     </label>
                     <label className="form-field">
@@ -61,7 +84,40 @@ export default function ViewUsuarioFormUsuarioListScreen() {
                         <input className="form-input" placeholder="Nome da mãe" style={{gridColumn: 'span 3'}}/>
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Gênero</span>
+                        <span className="form-label">Telefone Residencial *</span>
+                        <input className="form-input" placeholder="(99) 9999-9999"/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Celular *</span>
+                        <input className="form-input" placeholder="(99) 99999-9999"/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Nome Referência *</span>
+                        <input className="form-input" placeholder="Nome da referência" style={{gridColumn: 'span 3'}}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Telefone Referência</span>
+                        <input className="form-input" placeholder="(99) 9999-9999"/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Celular Referência</span>
+                        <input className="form-input" placeholder="(99) 99999-9999"/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Nome Referência 2</span>
+                        <input className="form-input" placeholder="Nome da referência 2"
+                               style={{gridColumn: 'span 3'}}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Telefone Referência 2</span>
+                        <input className="form-input" placeholder="(99) 9999-9999"/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Celular Referência 2</span>
+                        <input className="form-input" placeholder="(99) 99999-9999"/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Sexo *</span>
                         <select className="form-input form-select">
                             <option value="">-- Selecione --</option>
                             <option value="M">Masculino</option>
@@ -104,26 +160,6 @@ export default function ViewUsuarioFormUsuarioListScreen() {
                             <option value="7">Pós-Graduação</option>
                         </select>
                     </label>
-                    <label className="form-field">
-                        <span className="form-label">Telefone Residencial *</span>
-                        <input className="form-input" placeholder="(99) 9999-9999"/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Celular *</span>
-                        <input className="form-input" placeholder="(99) 99999-9999"/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Nome Referência *</span>
-                        <input className="form-input" placeholder="Nome da referência" style={{gridColumn: 'span 3'}}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Telefone Referência *</span>
-                        <input className="form-input" placeholder="(99) 9999-9999"/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Celular Referência *</span>
-                        <input className="form-input" placeholder="(99) 99999-9999"/>
-                    </label>
                 </div>
             ),
         },
@@ -154,7 +190,7 @@ export default function ViewUsuarioFormUsuarioListScreen() {
                         <input className="form-input" placeholder="Logradouro" style={{gridColumn: 'span 3'}}/>
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Número *</span>
+                        <span className="form-label">Número</span>
                         <input className="form-input" type="number" placeholder="Número"/>
                     </label>
                     <label className="form-field">
@@ -169,48 +205,69 @@ export default function ViewUsuarioFormUsuarioListScreen() {
             key: 'documentos',
             label: 'Documentos',
             content: (
-                <div className="form-grid">
-                    <label className="form-field">
-                        <span className="form-label">CTPS *</span>
-                        <input className="form-input" placeholder="Carteira de Trabalho"/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Série *</span>
-                        <input className="form-input" placeholder="Série"/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">PIS *</span>
-                        <input className="form-input" placeholder="999.9999.999-9"/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Data Emissão RG</span>
-                        <input className="form-input" type="date"/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Órgão Emissor</span>
-                        <input className="form-input" placeholder="Órgão Emissor"/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Título Eleitor</span>
-                        <input className="form-input" placeholder="Título de Eleitor"/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Zona</span>
-                        <input className="form-input" placeholder="Zona"/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Seção</span>
-                        <input className="form-input" placeholder="Seção"/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Carteira Reservista</span>
-                        <input className="form-input" placeholder="Carteira de Reservista"/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Filhos Menores 14</span>
-                        <input className="form-input" type="number" placeholder="Quantidade"/>
-                    </label>
-                </div>
+                <>
+                    <div className="form-grid">
+                        <label className="form-field">
+                            <span className="form-label">CTPS *</span>
+                            <input className="form-input" placeholder="Carteira de Trabalho"/>
+                        </label>
+                        <label className="form-field">
+                            <span className="form-label">Série *</span>
+                            <input className="form-input" placeholder="Série"/>
+                        </label>
+                        <label className="form-field">
+                            <span className="form-label">PIS *</span>
+                            <input className="form-input" placeholder="999.9999.999-9"/>
+                        </label>
+                        <label className="form-field">
+                            <span className="form-label">Data Emissão RG</span>
+                            <input className="form-input" type="date"/>
+                        </label>
+                        <label className="form-field">
+                            <span className="form-label">Órgão Emissor</span>
+                            <input className="form-input" placeholder="Órgão Emissor"/>
+                        </label>
+                        <label className="form-field">
+                            <span className="form-label">Título Eleitor</span>
+                            <input className="form-input" placeholder="Título de Eleitor"/>
+                        </label>
+                        <label className="form-field">
+                            <span className="form-label">Zona</span>
+                            <input className="form-input" placeholder="Zona"/>
+                        </label>
+                        <label className="form-field">
+                            <span className="form-label">Seção</span>
+                            <input className="form-input" placeholder="Seção"/>
+                        </label>
+                        <label className="form-field">
+                            <span className="form-label">Carteira Reservista</span>
+                            <input className="form-input" placeholder="Carteira de Reservista"/>
+                        </label>
+                        <label className="form-field">
+                            <span className="form-label">Qtd. Filhos Menores de 14</span>
+                            <input className="form-input" type="number" placeholder="Quantidade"/>
+                        </label>
+                    </div>
+                    <fieldset className="form-fieldset">
+                        <legend>Documentos Digitalizados
+                            <small> (campos com * são obrigatórios)</small>
+                        </legend>
+                        <div className="form-grid">
+                            <DocumentoUpload label="Foto 3x4" obrigatorio/>
+                            <DocumentoUpload label="Carteira de Trabalho - Pág. 1" obrigatorio/>
+                            <DocumentoUpload label="Carteira de Trabalho - Pág. 2" obrigatorio/>
+                            <DocumentoUpload label="Contrato de Trabalho" obrigatorio/>
+                            <DocumentoUpload label="Comprovante de Residência" obrigatorio/>
+                            <DocumentoUpload label="CPF" obrigatorio/>
+                            <DocumentoUpload label="RG - Frente"/>
+                            <DocumentoUpload label="RG - Verso"/>
+                            <DocumentoUpload label="Título Eleitoral"/>
+                            <DocumentoUpload label="Carteira de Reservista"/>
+                            <DocumentoUpload label="Certidão de Nascimento dos Filhos Menores" obrigatorio/>
+                            <DocumentoUpload label="Carteira de Vacinação dos Filhos Menores" obrigatorio/>
+                        </div>
+                    </fieldset>
+                </>
             ),
         },
         {
@@ -218,13 +275,10 @@ export default function ViewUsuarioFormUsuarioListScreen() {
             label: 'Trabalho',
             content: (
                 <div className="form-grid">
-                    <label className="form-field">
-                        <span className="form-label">Ativo</span>
-                        <select className="form-input form-select">
-                            <option value="true">Sim</option>
-                            <option value="false">Não</option>
-                        </select>
-                    </label>
+                    <div className="form-field">
+                        <span className="form-label">Usuário Ativo</span>
+                        <BooleanField value={ativo} onChange={setAtivo}/>
+                    </div>
                     <label className="form-field">
                         <span className="form-label">Função *</span>
                         <select className="form-input form-select" style={{gridColumn: 'span 3'}}>
@@ -235,19 +289,38 @@ export default function ViewUsuarioFormUsuarioListScreen() {
                         <span className="form-label">Data Admissão</span>
                         <input className="form-input" type="date"/>
                     </label>
-                    <label className="form-field">
-                        <span className="form-label">Mensalista</span>
-                        <select className="form-input form-select">
-                            <option value="true">Mensalista</option>
-                            <option value="false">Horista</option>
-                        </select>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Modelo de Turno</span>
-                        <select className="form-input form-select" style={{gridColumn: 'span 3'}}>
-                            <option value="">-- Selecione --</option>
-                        </select>
-                    </label>
+                    <div className="form-field">
+                        <span className="form-label">Vínculo</span>
+                        <div style={{display: 'flex', gap: '16px', alignItems: 'center'}}>
+                            <label style={{display: 'flex', gap: '4px', alignItems: 'center'}}>
+                                <input type="radio" name="vinculo" checked={mensalista === 'M'}
+                                       onChange={() => setMensalista('M')}/>
+                                Mensalista
+                            </label>
+                            <label style={{display: 'flex', gap: '4px', alignItems: 'center'}}>
+                                <input type="radio" name="vinculo" checked={mensalista === 'H'}
+                                       onChange={() => setMensalista('H')}/>
+                                Horista
+                            </label>
+                        </div>
+                    </div>
+                    {mensalista === 'M' && (
+                        <div className="form-field" style={{gridColumn: 'span 4'}}>
+                            <MasterDetail
+                                label="Turnos de Trabalho"
+                                source={TURNO_TRABALHO_SOURCE}
+                                valueKey="id"
+                                searchKeys={TURNO_TRABALHO_SEARCH}
+                                columns={TURNO_TRABALHO_COLUMNS}
+                                items={turnos}
+                                onChange={setTurnos}
+                            />
+                        </div>
+                    )}
+                    <div className="form-field">
+                        <span className="form-label">Relatório</span>
+                        <BooleanField value={relatorio} onChange={setRelatorio}/>
+                    </div>
                     <label className="form-field">
                         <span className="form-label">Observação</span>
                         <textarea className="form-input" placeholder="Observações" rows={3}
@@ -310,21 +383,6 @@ export default function ViewUsuarioFormUsuarioListScreen() {
                         },
                     ]}
                     initial="unidades"
-                />
-            ),
-        },
-        {
-            key: 'turnos',
-            label: 'Turnos',
-            content: (
-                <MasterDetail
-                    label="Turno de Trabalho"
-                    source={TURNO_TRABALHO_SOURCE}
-                    valueKey="id"
-                    searchKeys={TURNO_TRABALHO_SEARCH}
-                    columns={TURNO_TRABALHO_COLUMNS}
-                    items={turnos}
-                    onChange={setTurnos}
                 />
             ),
         },

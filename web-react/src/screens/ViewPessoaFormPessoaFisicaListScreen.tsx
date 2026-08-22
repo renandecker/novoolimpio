@@ -2,12 +2,14 @@ import {useState} from 'react';
 import {PermissionGate} from '../permissions';
 import {Tabs} from '../Tabs';
 import type {TabItem} from '../Tabs';
+import {BooleanField} from '../BooleanField';
 import {MasterDetail} from '../MasterDetail';
 import type {ApiItem} from '../types';
 import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../masterDetailSources';
 
 export default function ViewPessoaFormPessoaFisicaListScreen() {
     const [unidades, setUnidades] = useState<ApiItem[]>([]);
+    const [curriculo, setCurriculo] = useState(false);
 
     const tabs: TabItem[] = [
         {
@@ -169,6 +171,10 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                         <input className="form-input" placeholder="plus.google.com/usuario"
                                style={{gridColumn: 'span 3'}}/>
                     </label>
+                    <label className="form-field">
+                        <span className="form-label">Telegram</span>
+                        <input className="form-input" placeholder="@usuario" style={{gridColumn: 'span 3'}}/>
+                    </label>
                 </div>
             ),
         },
@@ -230,6 +236,10 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
             label: 'Outros',
             content: (
                 <div className="form-grid">
+                    <div className="form-field">
+                        <span className="form-label">Currículo / Banco de Talentos</span>
+                        <BooleanField value={curriculo} onChange={setCurriculo}/>
+                    </div>
                     <label className="form-field">
                         <span className="form-label">Observação</span>
                         <textarea className="form-input" placeholder="Observações" rows={5}

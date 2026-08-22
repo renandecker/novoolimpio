@@ -174,8 +174,9 @@ export default function ViewGestaoProfessorGestaoProfessorListScreen() {
 function GestaoTab() {
     const {session} = useAuth();
     const isAdmin = session?.hierarquia === 'ADMIN';
+    const professorLogadoId = session?.professorId;
 
-    const [professor, setProfessor] = useState<AutoCompleteOption | null>(null);
+    const [professorSelecionado, setProfessorSelecionado] = useState<AutoCompleteOption | null>(null);
     const [turmas, setTurmas] = useState<Turma[]>([]);
     const [carregandoTurmas, setCarregandoTurmas] = useState(false);
     const [erro, setErro] = useState('');
@@ -227,7 +228,7 @@ function GestaoTab() {
             const {data} = await api.get<Turma[]>(professorId === null ? '/api/professor/gestao-professor/turmas' : '/api/professor/gestao-professor/turmas', {params: professorId !== null ? {professorId} : undefined});
             setTurmas(data);
             if (data.length === 0) {
-                notificar(isAdmin ? 'sucesso' : 'erro', isAdmin ? 'Todas as turmas listadas.' : 'Nenhuma turma encontrada para este professor.');
+                notificar(isAdmin ? 'sucesso' : 'erro', isAdmin ? 'Todas as turmas listadas.' : 'Nenhuma turma encontrada para o professor.');
             } else {
                 notificar(isAdmin ? 'sucesso' : 'sucesso', isAdmin ? `${data.length} turma(s) encontrada(s).` : `${data.length} turma(s) encontrada(s).`);
             }
@@ -507,29 +508,29 @@ function GestaoTab() {
     return (
         <div>
             <div className="gp-procurar">
-                <AutoComplete
-                    id="gp-professor"
-                    label="Professor:"
-                    placeholder="Digite ao menos 3 caracteres..."
-                    value={professor}
-                    onChange={setProfessor}
-                    fetchOptions={fetchProfessores}
-                />
-                <button
-                    className="gp-btn gp-btn-procurar"
-                    onClick={() => {
-                        if (isAdmin) {
-                            buscarTurmas(null);
-                        } else if (professor) {
-                            buscarTurmas(professor.id);
-                        } else {
-                            notificar('erro', 'Selecione um professor.');
-                        }
-                    }}
-                    disabled={carregandoTurmas || (!isAdmin && !professor)}
-                >
-                    {carregandoTurmas ? 'Buscando...' : 'Buscar'}
-                </button>
+<AutoComplete
+        id="gp-professor"
+        label="Professor:"
+        placeholder="Digite ao menos 3 caracteres..."
+        value={professorSelecionado}
+        onChange={setProfessorSelecionado}
+        fetchOptions={fetchProfessores}
+    />
+    <button
+        className="gp-btn gp-btn-procurar"
+        onClick={() => {
+            if (isAdmin) {
+                buscarTurmas(null);
+            } else if (professorSelecionado) {
+                buscarTurmas(professorSelecionado.id);
+            } else {
+                notificar('erro', 'Selecione um professor.');
+            }
+        }}
+        disabled={carregandoTurmas || (!isAdmin && !professorSelecionado)}
+    >
+        {carregandoTurmas ? 'Buscando...' : 'Buscar'}
+    </button>
             </div>
             <Aviso tipo={erro ? 'erro' : aviso.tipo} texto={erro || aviso.texto}/>
 
@@ -602,61 +603,64 @@ function GestaoTab() {
             {painel === 'caderno' && caderno && (
                 <Painel titulo="Caderno de Chamada" colapsado={false} onToggle={() => undefined}>
                     <InfoTurma turma={caderno.turma}/>
-                    <div className="gp-controls">
-                        <div className="gp-control-group">
-                            <span className="gp-control-label">Alunos</span>
-                            <label>
-                                <input type="radio" checked={tipoLista === '0'}
-                                       onChange={() => setTipoLista('0')}/> Todos
-                            </label>
-                            <label>
-                                <input type="radio" checked={tipoLista === '1'}
-                                       onChange={() => setTipoLista('1')}/> Ativos
-                            </label>
-                            <label>
-                                <input type="radio" checked={tipoLista === '2'}
-                                       onChange={() => setTipoLista('2')}/> Inativos
-                            </label>
+                    <div className="gp-caderno-conteudo">
+                        <div className="gp-caderno-lateral">
+                            <div className="gp-legend">
+                                {Object.entries(PRESENCAS).map(([k, v]) => (
+                                    <span key={k} className="gp-legenda-item">
+                                        <span className="gp-dot-legenda" style={{background: v.cor}}/>
+                                        {v.titulo}
+                                    </span>
+                                ))}
+                            </div>
                         </div>
-                        <div className="gp-control-group">
-                            <label htmlFor="gp-dias" className="gp-control-label">
-                                Dias exibir
-                            </label>
-                            <input
-                                id="gp-dias"
-                                type="number"
-                                min={0}
-                                max={caderno.ocorrencias.length}
-                                value={qtdDias}
-                                onChange={(e) => {
-                                    const v = Number(e.target.value);
-                                    setQtdDias(Number.isNaN(v) ? 0 : Math.max(0, Math.min(caderno.ocorrencias.length, v)));
-                                }}
-                                title={`Máximo de aulas ${caderno.ocorrencias.length}`}
-                            />
-                        </div>
-                        <div className="gp-control-group">
-                            <label>
+                        <div className="gp-caderno-principal">
+                            <div className="gp-control-group gp-filtros">
+                                <span className="gp-control-label">Alunos</span>
+                                <label>
+                                    <input type="radio" checked={tipoLista === '0'}
+                                           onChange={() => setTipoLista('0')}/> Todos
+                                </label>
+                                <label>
+                                    <input type="radio" checked={tipoLista === '1'}
+                                           onChange={() => setTipoLista('1')}/> Ativos
+                                </label>
+                                <label>
+                                    <input type="radio" checked={tipoLista === '2'}
+                                           onChange={() => setTipoLista('2')}/> Inativos
+                                </label>
+                            </div>
+                            <div className="gp-control-group">
+                                <label htmlFor="gp-dias" className="gp-control-label">
+                                    Dias exibir
+                                </label>
                                 <input
-                                    type="checkbox"
-                                    checked={todasChamadas}
+                                    id="gp-dias"
+                                    type="number"
+                                    min={0}
+                                    max={caderno.ocorrencias.length}
+                                    value={qtdDias}
                                     onChange={(e) => {
-                                        setTodasChamadas(e.target.checked);
-                                        if (e.target.checked) setQtdDias(caderno.ocorrencias.length);
+                                        const v = Number(e.target.value);
+                                        setQtdDias(Number.isNaN(v) ? 0 : Math.max(0, Math.min(caderno.ocorrencias.length, v)));
                                     }}
-                                />{' '}
-                                Todas datas
-                            </label>
+                                    title={`Máximo de aulas ${caderno.ocorrencias.length}`}
+                                />
+                            </div>
+                            <div className="gp-control-group">
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        checked={todasChamadas}
+                                        onChange={(e) => {
+                                            setTodasChamadas(e.target.checked);
+                                            if (e.target.checked) setQtdDias(caderno.ocorrencias.length);
+                                        }}
+                                    />{' '}
+                                    Todas datas
+                                </label>
+                            </div>
                         </div>
-                    </div>
-
-                    <div className="gp-legend">
-                        {Object.entries(PRESENCAS).map(([k, v]) => (
-                            <span key={k} className="gp-legenda-item">
-                <span className="gp-dot" style={{background: v.cor}}/>
-                                {v.titulo}
-              </span>
-                        ))}
                     </div>
 
                     <div className="gp-table-wrap gp-scroll">
@@ -683,7 +687,7 @@ function GestaoTab() {
                                             <td key={col.id} className="gp-col-data">
                                                 {p && desc && (
                                                     <button
-                                                        className="gp-dot-btn"
+                                                        className="gp-presenca-btn"
                                                         title={`${desc.titulo} - ${col.data}`}
                                                         disabled={bloqueado}
                                                         style={{background: desc.cor}}
@@ -718,8 +722,8 @@ function GestaoTab() {
 
             {painel === 'notas' && notas && (
                 <Painel titulo="Notas" colapsado={false} onToggle={() => undefined}>
-                    <div className="gp-notas-topo">
-                        <InfoTurma turma={notas.turma}/>
+<div className="gp-notas-topo">
+<InfoTurma turma={notas.turma}/>
                         <div className="gp-media">
                             <div>
                                 <b>Média aprovação sem exame: </b>
@@ -849,7 +853,7 @@ function GestaoTab() {
                 <Painel titulo="Registrar de aula" colapsado={false} onToggle={() => undefined}>
                     <InfoTurma turma={turmaSelecionada}/>
                     <div className="gp-registros">
-                        {registrosEdit.map((r, idx) => (
+                        {registrosEdit.length > 0 && registrosEdit.map((r, idx) => (
                             <div key={`${r.ocorrenciaId}-${idx}`} className="gp-registro">
                                 <div className="gp-registro-data">{r.data}</div>
                                 <textarea
@@ -1029,8 +1033,8 @@ function GestaoTab() {
                                             <td>
                                                 {(anexosDaAula[aula.id] ?? []).map((anexo) => (
                                                     <span key={anexo.id} className="gp-anexo-chip">
-                              {anexo.tipo}: {anexo.nome}
-                            </span>
+                                                        {anexo.tipo}: {anexo.nome}
+                                                    </span>
                                                 ))}
                                                 {(anexosDaAula[aula.id] ?? []).length === 0 &&
                                                 <span className="gp-vazio">—</span>}

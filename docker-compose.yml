@@ -120,8 +120,8 @@ services:
       psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0031__remove_biblioteca_livros.sql
       psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0033__menu_aluno_aulas_avaliacoes.sql
       psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0034__menu_aluno_fix.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0043__create_notificacao_regra.sql
       psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0044__create_notificacao_regra_status.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0045__rel_document_template.sql
       echo "[restore] Restore concluido."
 
   # Broker Kafka (KRaft). O schedule publica os triggers de rotina e o basico
