@@ -66,15 +66,14 @@ echo "============================================"
 MICROSERVICES="aluno asaas basico central comercial curriculo educacao estoque financeiro fiserv login notificacoes professor relatorios schedule"
 COMPILE_ERRORS=0
 > "$LOGFILE"
+
 for svc in $MICROSERVICES; do
     if [ -d "microservices/$svc" ] && [ -f "microservices/$svc/pom.xml" ]; then
-        MVN_OUT=$(mvn -B -f "microservices/$svc/pom.xml" compile -DskipTests 2>&1)
-        if [ $? -ne 0 ]; then
-            echo "" >> "$LOGFILE"
-            echo "========================================" >> "$LOGFILE"
-            echo " ERRO: $svc" >> "$LOGFILE"
-            echo "========================================" >> "$LOGFILE"
-            echo "$MVN_OUT" >> "$LOGFILE"
+        echo "========================================" >> "$LOGFILE"
+        echo " COMPILANDO: $svc" >> "$LOGFILE"
+        echo "========================================" >> "$LOGFILE"
+        
+        if ! mvn -B -f "microservices/$svc/pom.xml" compile -DskipTests >> "$LOGFILE" 2>&1; then
             echo "  [ERRO] $svc - compilacao falhou. Detalhes em error.log"
             COMPILE_ERRORS=1
         else

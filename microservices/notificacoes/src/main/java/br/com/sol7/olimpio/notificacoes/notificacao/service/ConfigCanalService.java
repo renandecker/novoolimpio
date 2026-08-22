@@ -50,7 +50,7 @@ public class ConfigCanalService {
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
         return repository.findAll(Sort.by("id").descending()).page(Page.of(p, s)).list()
                 .onItem().transformToUni(items -> repository.count()
-                        .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
+                        .map(count -> new PagedResponse<ConfigCanalResponse>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
 
     public Uni<ConfigCanalResponse> find(Long id) {

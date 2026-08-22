@@ -41,7 +41,7 @@ public class NotificacaoService {
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
         return repository.findAll(io.quarkus.panache.common.Sort.by("id").descending()).page(Page.of(p, s)).list()
                 .onItem().transformToUni(items -> repository.count()
-                        .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
+                        .map(count -> new PagedResponse<NotificacaoResponse>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
 
     public Uni<PagedResponse<NotificacaoResponse>> minhas(String username, int page, int size) {
@@ -49,7 +49,7 @@ public class NotificacaoService {
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 20;
         return repository.find("username = ?1 order by createdAt desc", username).page(Page.of(p, s)).list()
                 .onItem().transformToUni(items -> repository.count("username = ?1", username)
-                        .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
+                        .map(count -> new PagedResponse<NotificacaoResponse>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
 
     public Uni<Long> naoLidas(String username) {

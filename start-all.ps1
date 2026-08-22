@@ -6,8 +6,7 @@
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $batFile = Join-Path $scriptDir "start-all.bat"
 
-if ($args.Count -gt 0 -and $args[0] -eq "-d") {
-    Start-Process cmd.exe -ArgumentList "/c `"$batFile`" -d" -NoNewWindow -Wait
-} else {
-    Start-Process cmd.exe -ArgumentList "/c `"$batFile`"" -NoNewWindow -Wait
-}
+$arguments = @("/c", "`"$batFile`"") + $args
+
+$process = Start-Process cmd.exe -ArgumentList $arguments -NoNewWindow -Wait -PassThru
+exit $process.ExitCode

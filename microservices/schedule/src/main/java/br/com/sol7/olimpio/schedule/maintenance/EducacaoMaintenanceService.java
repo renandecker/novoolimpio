@@ -11,7 +11,8 @@ import org.jboss.logging.Logger;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import br.com.sol7.olimpio.educacao.oferecimentocomponentecurricular.repository.OferecimentoComponenteCurricularRepository;
+import br.com.sol7.olimpio.schedule.educacao.oferecimentocomponentecurricular.repository.OferecimentoComponenteCurricularRepository;
+import br.com.sol7.olimpio.schedule.educacao.oferecimentocomponentecurricular.service.OferecimentoComponenteCurricularService;
 import java.util.List;
 import java.util.Calendar;
 import java.util.Date;
@@ -27,12 +28,18 @@ public class EducacaoMaintenanceService {
 
     private static final Logger LOG = Logger.getLogger(EducacaoMaintenanceService.class);
 
-    @Inject
+@Inject
     Pool pool;
 
-    // ---------------------------------------------------------------------------
-    // CotaTaxoCurso
-    // ---------------------------------------------------------------------------
+@Inject
+    OferecimentoComponenteCurricularRepository repository;
+
+    @Inject
+    OferecimentoComponenteCurricularService ofreimentoComponenteCurricularService;
+
+// ---------------------------------------------------------------------------
+// CotaTaxoCurso
+// ---------------------------------------------------------------------------
 
     private static final String[] SQL_VERIFICAR_COTA_TAXA_CURSO = {
             "UPDATE edc_taxa_curso taxa SET data_controle_cota = now(), valor_controle_cota = valor_cota " +

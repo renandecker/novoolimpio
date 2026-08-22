@@ -67,7 +67,6 @@ echo ============================================
 
 if exist "%COMPILE_LOG%" del "%COMPILE_LOG%"
 if exist "%DOCKER_LOG%" del "%DOCKER_LOG%"
-del "%COMPILE_LOG%.%.mvn" >nul 2>&1
 
 echo ============================================
 echo  Verificando compilacao dos microsservicos...
@@ -96,20 +95,14 @@ goto start_fg_with_progress
 
 :do_compile
 set SVC=%~1
-set SVC_LOG=%COMPILE_LOG%.%SVC%.mvn
 if not exist "microservices\%SVC%\pom.xml" goto :eof
 
-mvn -B -f "microservices\%SVC%\pom.xml" compile -DskipTests > "%SVC_LOG%" 2>&1
+mvn -B -f "microservices\%SVC%\pom.xml" compile -DskipTests >> "%COMPILE_LOG%" 2>&1
 
 if !errorlevel! neq 0 (
-    echo ======================================== >> "%COMPILE_LOG%"
-    echo  ERRO: %SVC% >> "%COMPILE_LOG%"
-    echo ======================================== >> "%COMPILE_LOG%"
-    type "%SVC_LOG%" >> "%COMPILE_LOG%"
-    echo   [ERRO] %SVC% (Log em: %COMPILE_LOG%.%SVC%.mvn)
+    echo   [ERRO] %SVC% (Detalhes no arquivo unico: %COMPILE_LOG%)
     set COMPILE_ERRORS=1
 ) else (
-    del "%SVC_LOG%" >nul 2>&1
     echo   [OK] %SVC%
 )
 goto :eof

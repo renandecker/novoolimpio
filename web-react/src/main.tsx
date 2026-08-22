@@ -12,6 +12,7 @@ import ViewAcaoColunasAcaoListScreen from './screens/ViewAcaoColunasAcaoListScre
 import ViewAcaoColunasAcaoCampoListScreen from './screens/ViewAcaoColunasAcaoCampoListScreen';
 import ViewAcaoFormAcaoListScreen from './screens/ViewAcaoFormAcaoListScreen';
 import ViewAcaoListAcaoListScreen from './screens/ViewAcaoListAcaoListScreen';
+import ViewRegraNotificacaoListRegraListScreen from './screens/ViewRegraNotificacaoListRegraListScreen';
 import ViewAgendaCalendarioAgendaListScreen from './screens/ViewAgendaCalendarioAgendaListScreen';
 import ViewAgendaColunasListScreen from './screens/ViewAgendaColunasListScreen';
 import ViewAgendaColunasUsuarioAgendaListScreen from './screens/ViewAgendaColunasUsuarioAgendaListScreen';
@@ -538,6 +539,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/acao/colunasAcaoCampo" element={<ViewAcaoColunasAcaoCampoListScreen/>}/>
     <Route path="/view/acao/formAcao" element={<ViewAcaoFormAcaoListScreen/>}/>
     <Route path="/view/acao/listAcao" element={<ViewAcaoListAcaoListScreen/>}/>
+    <Route path="/regras/notificacao/list" element={<ViewRegraNotificacaoListRegraListScreen/>}/>
     <Route path="/view/agenda/calendarioAgenda" element={<ViewAgendaCalendarioAgendaListScreen/>}/>
     <Route path="/view/agenda/colunas" element={<ViewAgendaColunasListScreen/>}/>
     <Route path="/view/agenda/colunasUsuarioAgenda" element={<ViewAgendaColunasUsuarioAgendaListScreen/>}/>
