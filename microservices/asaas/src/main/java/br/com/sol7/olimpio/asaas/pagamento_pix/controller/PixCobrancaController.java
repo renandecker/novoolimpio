@@ -15,6 +15,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.util.Map;
+
 /**
  * Cobrancas PIX de parcelas (fluxo movido do fiserv, rota antiga
  * /api/pagamento/pix). Gera a cobranca no Asaas (PixProviderClient), persiste em
@@ -39,9 +41,27 @@ public class PixCobrancaController {
         return service.consultar(id);
     }
 
+    @GET
+    @Path("/parcela/{idParcela}")
+    public Uni<ParcelaPixResponse> consultarPorParcela(@PathParam("idParcela") Long idParcela) {
+        return service.consultarPorParcela(idParcela);
+    }
+
     @POST
     @Path("/{id}/atualizar-status")
     public Uni<ParcelaPixResponse> atualizarStatus(@PathParam("id") Long id) {
         return service.atualizarStatus(id);
+    }
+
+    @POST
+    @Path("/enviar-email")
+    public Uni<Map<String, String>> enviarEmail(Map<String, Object> request) {
+        Long idParcela = ((Number) request.get("idParcela")).longValue();
+        Long idPessoa = ((Number) request.get("idPessoa")).longValue();
+        String qrcode = (String) request.get("qrcode");
+        String chave = (String) request.get("chave");
+        return service.enviarEmailPix(idParcela, idPessoa, qrcode, chave)
+                .map(v -> Map.of("status", "enviado"))
+                .onFailure().recoverWithItem(err -> Map.of("error", err.getMessage()));
     }
 }

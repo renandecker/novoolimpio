@@ -2,6 +2,7 @@ import {useEffect, useRef, useState} from 'react';
 import {useNavigate, Link} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
 import {listarFavoritos, type FavoritoDisponivel} from './favoritos';
+import {normalizeOutcome} from './permissions';
 
 const StarIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -16,8 +17,6 @@ const SearchIcon = () => (
         <line x1="21" y1="21" x2="16.65" y2="16.65"/>
     </svg>
 );
-
-const normalizeOutcome = (outcome: string) => outcome.replace(/(\.xhtml)+$/i, '').replace(/\/$/, '') || '/default';
 
 const PAGE_SIZE = 10;
 const MIN_SEARCH = 3;

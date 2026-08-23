@@ -55,7 +55,7 @@
     background-image: none;
     background-color: #ffffff;
     color: #333;
-    border: 1px solid #bbb;
+    border: 1px solid #337ab7;
     width: 30px;
     height: 30px;
     padding: 0;
@@ -64,11 +64,25 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    margin: 0 2px;
 }
 
 .gp-btn-acoes:hover:not(:disabled) {
     background-color: #eef4fb;
     border-color: #337ab7;
+}
+
+.gp-btn-acoes:not(:disabled):active {
+    background-color: #d6e4f0;
+    border-color: #265a88;
+}
+
+.gp-btn-acoes:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #e0e0e0;
+    color: #999;
 }
 
 .gp-btn-salvar {
@@ -165,11 +179,50 @@
     display: inline-block;
     padding: 2px 8px;
     border-radius: 3px;
-    background-color: #e8f0e8;
-    color: #2e7d32;
     font-size: 12px;
     font-weight: bold;
     white-space: nowrap;
+}
+
+.gp-status-em-andamento {
+    background-color: #e8f0e8;
+    color: #2e7d32;
+}
+
+.gp-status-finalizada {
+    background-color: #d0e0f0;
+    color: #2e7d32;
+}
+
+.gp-status-cancelada {
+    background-color: #f5e0e0;
+    color: #a61b29;
+}
+
+.gp-status-concluida {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.gp-status-em-progresso {
+    background-color: #fff3e0;
+    color: #f57c00;
+}
+
+.gp-status-vencida {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.gp-status-agendada {
+    background-color: #e3f2fd;
+    color: #1565c0;
+}
+
+.gp-status {
+    &:hover {
+        opacity: 0.9;
+    }
 }
 
 .gp-acoes {

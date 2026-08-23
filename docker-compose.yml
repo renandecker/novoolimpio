@@ -122,6 +122,8 @@ services:
       psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0034__menu_aluno_fix.sql
       psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0044__create_notificacao_regra_status.sql
       psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0045__rel_document_template.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0046__criar_acesso_alunos_contrato.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/flyway/V0020__update_bas_modulo_outcome_react_routes.sql
       echo "[restore] Restore concluido."
 
   # Broker Kafka (KRaft). O schedule publica os triggers de rotina e o basico
@@ -459,12 +461,13 @@ services:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
       ASAAS_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
-      QUARKUS_DATASOURCE_ASAAS_REACTIVE_URL: postgresql://postgres:5432/olimpio  # <-- Adicionar esta linha
+      QUARKUS_DATASOURCE_ASAAS_REACTIVE_URL: postgresql://postgres:5432/olimpio
       ASAAS_API_KEY: $$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjE1MjVlNjliLTRhMDItNDkzZC1hMTI0LTcyYjgzNjVmMDNhNDo6JGFhY2hfYmM0OGJjMTQtZDk1OC00MDVmLWEyYmUtODQxN2U1YTY4MTFk
       ASAAS_BASE_URL: ${ASAAS_BASE_URL:-https://api-sandbox.asaas.com}
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       QUARKUS_DATASOURCE_ASAAS_MAX_SIZE: "12"
       QUARKUS_DATASOURCE_ASAAS_MIN_SIZE: "2"
+      QUARKUS_MAILER_FROM: "noreply@olimpio.com"
     ports:
     - "8094:8094"
     healthcheck:

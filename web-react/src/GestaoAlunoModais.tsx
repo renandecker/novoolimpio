@@ -1,8 +1,9 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import type {ReactNode} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {api} from './api';
 import {PAGE_SIZES} from './DataTable';
+import type {Parcela} from './aluno';
 
 export interface PessoaDados {
     id: number;
@@ -463,6 +464,9 @@ const PARCELA_COLUNAS: TabelaColuna[] = [
             return situacaoCor ? <span style={{color: situacaoCor, fontWeight: 'bold'}}>{situacao}</span> : situacao;
         }
     },
+    {key: 'acoes', label: 'Ações', render: (linha) => (
+        <span data-parcela-id={String(linha.id ?? '')} data-id-parcela-pix={String(linha.idParcelaPix ?? '')} data-valor={String(linha.valor ?? '')} data-vencimento={String(linha.dataVencimento ?? '')} data-contrato-id={String(linha.contratoId ?? '')} data-descricao={String(linha.descricao ?? '')} className="parcela-acoes"/>
+    )},
 ];
 
 const PARCELA_MATRICULA_COLUNAS: TabelaColuna[] = [
@@ -482,9 +486,12 @@ const PARCELA_MATRICULA_COLUNAS: TabelaColuna[] = [
             if (dataPagamento) {
                 return <span style={{color: '#0000FF', cursor: 'pointer'}}>Pago</span>;
             }
-            return situacaoCor ? <span style={{color: situacaoCor, fontWeight: 'bold'}}>{situacao}</span> : situacao;
+return situacaoCor ? <span style={{color: situacaoCor, fontWeight: 'bold'}}>{situacao}</span> : situacao;
         }
     },
+    {key: 'acoes', label: 'Ações', render: (linha) => (
+        <span data-parcela-id={String(linha.id ?? '')} data-id-parcela-pix={String(linha.idParcelaPix ?? '')} data-valor={String(linha.valor ?? '')} data-vencimento={String(linha.dataVencimento ?? '')} data-contrato-id={String(linha.contratoId ?? '')} data-descricao={String(linha.descricao ?? '')} className="parcela-acoes"/>
+    )},
 ];
 
 const PRODUTO_COLUNAS: TabelaColuna[] = [
@@ -495,7 +502,7 @@ const PRODUTO_COLUNAS: TabelaColuna[] = [
     {key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null)},
     {key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null)},
     {key: 'valorPago', label: 'Valor pago', render: (linha) => fmtMoeda(linha.valorPago as number | null)},
-    {
+{
         key: 'situacao', label: 'Situação', render: (linha) => {
             const situacao = String(linha.situacao ?? '');
             const situacaoCor = String(linha.situacaoCor ?? '');
@@ -506,7 +513,8 @@ const PRODUTO_COLUNAS: TabelaColuna[] = [
             return situacaoCor ? <span style={{color: situacaoCor, fontWeight: 'bold'}}>{situacao}</span> : situacao;
         }
     },
-];
+    {key: 'acoes', label: 'Ações', render: (linha) => <span data-parcela-id={String(linha.id ?? '')} data-id-parcela-pix={String(linha.idParcelaPix ?? '')} data-valor={String(linha.valor ?? '')} data-vencimento={String(linha.dataVencimento ?? '')} data-contrato-id={String(linha.contratoId ?? '')} data-descricao={String(linha.descricao ?? '')} className="parcela-acoes"/>,
+}];
 
 const CANCELADA_COLUNAS: TabelaColuna[] = [
     {key: 'id', label: 'Parcela'},
@@ -531,6 +539,52 @@ export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
         mensagem={apiError(q.error)}/></ModalFrame>;
     const {resumo, contratos, parcelasMes, parcelasMatricula, parcelasProdutos, parcelasCanceladas} = q.data;
     const todasParcelas = [...parcelasMes, ...parcelasMatricula, ...parcelasProdutos, ...parcelasCanceladas];
+
+    const [pixModalOpen, setPixModalOpen] = useState(false);
+    const [selectedParcela, setSelectedParcela] = useState<Parcela | null>(null);
+
+    const handlePixClick = (parcela: Parcela) => {
+        if (parcela.dataPagamento) return; // Não mostrar botão para parcelas pagas
+        setSelectedParcela(parcela);
+        setPixModalOpen(true);
+    };
+
+    const closePixModal = () => {
+        setPixModalOpen(false);
+        setSelectedParcela(null);
+    };
+
+    // Helper to create parcela action buttons
+    const renderAcoes = (linha: Record<string, unknown>) => {
+        const id = Number(linha.id);
+        const idParcelaPix = linha.idParcelaPix ? Number(linha.idParcelaPix) : null;
+        const dataPagamento = linha.dataPagamento as string | null;
+        if (dataPagamento) return null; // Não mostrar botão para parcelas pagas
+
+        const parcela: Parcela = {
+            id,
+            idParcelaPix,
+            valor: linha.valor as number | null,
+            dataVencimento: linha.dataVencimento as string | null,
+            contratoId: linha.contratoId as number | null,
+            descricao: linha.descricao as string,
+            pessoaId,
+        };
+
+        const temPix = Boolean(idParcelaPix);
+        return (
+            <button
+                type="button"
+                className={temPix ? 'btnyellow' : 'btnblue'}
+                style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}
+                onClick={() => handlePixClick(parcela)}
+                title={temPix ? 'Ver PIX gerado / Enviar por e-mail' : 'Gerar QR Code PIX'}
+            >
+                {temPix ? '📱 PIX' : '📱 Gerar PIX'}
+            </button>
+        );
+    };
+
     return (
         <ModalFrame titulo="Situação Financeira" onClose={onClose}>
             <Tabs
@@ -596,7 +650,25 @@ export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
                         content: (
                             <TabelaDadosPaginada
                                 vazio="Nenhuma parcela para o mês corrente."
-                                colunas={PARCELA_COLUNAS}
+                                colunas={[
+                                    {key: 'id', label: 'Parcela'},
+                                    {key: 'contratoId', label: 'Contrato'},
+                                    {key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null)},
+                                    {key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null)},
+                                    {key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null)},
+                                    {
+                                        key: 'situacao', label: 'Situação', render: (linha) => {
+                                            const situacao = String(linha.situacao ?? '');
+                                            const situacaoCor = String(linha.situacaoCor ?? '');
+                                            const dataPagamento = linha.dataPagamento as string | null;
+                                            if (dataPagamento) {
+                                                return <span style={{color: '#0000FF', cursor: 'pointer'}}>Pago</span>;
+                                            }
+                                            return situacaoCor ? <span style={{color: situacaoCor, fontWeight: 'bold'}}>{situacao}</span> : situacao;
+                                        }
+                                    },
+                                    {key: 'acoes', label: 'Ações', render: renderAcoes},
+                                ]}
                                 linhas={parcelasMes as unknown as Record<string, unknown>[]}
                             />
                         ),
@@ -607,7 +679,25 @@ export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
                         content: (
                             <TabelaDadosPaginada
                                 vazio="Nenhuma parcela encontrada."
-                                colunas={PARCELA_COLUNAS}
+                                colunas={[
+                                    {key: 'id', label: 'Parcela'},
+                                    {key: 'contratoId', label: 'Contrato'},
+                                    {key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null)},
+                                    {key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null)},
+                                    {key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null)},
+                                    {
+                                        key: 'situacao', label: 'Situação', render: (linha) => {
+                                            const situacao = String(linha.situacao ?? '');
+                                            const situacaoCor = String(linha.situacaoCor ?? '');
+                                            const dataPagamento = linha.dataPagamento as string | null;
+                                            if (dataPagamento) {
+                                                return <span style={{color: '#0000FF', cursor: 'pointer'}}>Pago</span>;
+                                            }
+                                            return situacaoCor ? <span style={{color: situacaoCor, fontWeight: 'bold'}}>{situacao}</span> : situacao;
+                                        }
+                                    },
+                                    {key: 'acoes', label: 'Ações', render: renderAcoes},
+                                ]}
                                 linhas={todasParcelas as unknown as Record<string, unknown>[]}
                             />
                         ),
@@ -618,7 +708,28 @@ export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
                         content: (
                             <TabelaDadosPaginada
                                 vazio="Nenhuma parcela de matrícula encontrada."
-                                colunas={PARCELA_MATRICULA_COLUNAS}
+                                colunas={[
+                                    {key: 'id', label: 'Parcela'},
+                                    {key: 'contratoId', label: 'Contrato'},
+                                    {key: 'parcela', label: 'Nº'},
+                                    {key: 'descricao', label: 'Descrição'},
+                                    {key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null)},
+                                    {key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null)},
+                                    {key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null)},
+                                    {key: 'valorPago', label: 'Valor pago', render: (linha) => fmtMoeda(linha.valorPago as number | null)},
+                                    {
+                                        key: 'situacao', label: 'Situação', render: (linha) => {
+                                            const situacao = String(linha.situacao ?? '');
+                                            const situacaoCor = String(linha.situacaoCor ?? '');
+                                            const dataPagamento = linha.dataPagamento as string | null;
+                                            if (dataPagamento) {
+                                                return <span style={{color: '#0000FF', cursor: 'pointer'}}>Pago</span>;
+                                            }
+                                            return situacaoCor ? <span style={{color: situacaoCor, fontWeight: 'bold'}}>{situacao}</span> : situacao;
+                                        }
+                                    },
+                                    {key: 'acoes', label: 'Ações', render: renderAcoes},
+                                ]}
                                 linhas={parcelasMatricula as unknown as Record<string, unknown>[]}
                             />
                         ),
@@ -629,7 +740,27 @@ export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
                         content: (
                             <TabelaDadosPaginada
                                 vazio="Nenhuma parcela de produto encontrada."
-                                colunas={PRODUTO_COLUNAS}
+                                colunas={[
+                                    {key: 'id', label: 'Parcela'},
+                                    {key: 'contratoId', label: 'Contrato'},
+                                    {key: 'descricao', label: 'Descrição'},
+                                    {key: 'dataVencimento', label: 'Vencimento', render: (linha) => fmtData(linha.dataVencimento as string | null)},
+                                    {key: 'dataPagamento', label: 'Pagamento', render: (linha) => fmtData(linha.dataPagamento as string | null)},
+                                    {key: 'valor', label: 'Valor', render: (linha) => fmtMoeda(linha.valor as number | null)},
+                                    {key: 'valorPago', label: 'Valor pago', render: (linha) => fmtMoeda(linha.valorPago as number | null)},
+                                    {
+                                        key: 'situacao', label: 'Situação', render: (linha) => {
+                                            const situacao = String(linha.situacao ?? '');
+                                            const situacaoCor = String(linha.situacaoCor ?? '');
+                                            const dataPagamento = linha.dataPagamento as string | null;
+                                            if (dataPagamento) {
+                                                return <span style={{color: '#0000FF', cursor: 'pointer'}}>Pago</span>;
+                                            }
+                                            return situacaoCor ? <span style={{color: situacaoCor, fontWeight: 'bold'}}>{situacao}</span> : situacao;
+                                        }
+                                    },
+                                    {key: 'acoes', label: 'Ações', render: renderAcoes},
+                                ]}
                                 linhas={parcelasProdutos as unknown as Record<string, unknown>[]}
                             />
                         ),
@@ -646,6 +777,11 @@ export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
                         ),
                     },
                 ]}
+            />
+            <PixQrCodeModal
+                isOpen={pixModalOpen}
+                onClose={closePixModal}
+                parcela={selectedParcela}
             />
         </ModalFrame>
     );
@@ -981,3 +1117,208 @@ export function HistoricoAlunoModal({pessoaId, onClose}: GestaoModalProps) {
         </ModalFrame>
     );
 }
+
+interface PixQrCodeModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    parcela: {
+        id: number;
+        idParcelaPix: number | null;
+        valor: number | null;
+        dataVencimento: string | null;
+        contratoId: number | null;
+        descricao: string;
+        pessoaId: number;
+    } | null;
+}
+
+function PixQrCodeModal({isOpen, onClose, parcela}: PixQrCodeModalProps) {
+    if (!isOpen || !parcela) return null;
+    const [pixData, setPixData] = useState<{qrcode: string; chave: string; situacao: string} | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [sendingEmail, setSendingEmail] = useState(false);
+    const [emailSent, setEmailSent] = useState(false);
+
+    // Fetch existing PIX data when modal opens and parcela has idParcelaPix
+    useEffect(() => {
+        if (parcela?.idParcelaPix) {
+            fetchPixData();
+        }
+    }, [parcela?.idParcelaPix]);
+
+    const fetchPixData = async () => {
+        if (!parcela) return;
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await api.get<{qrcode: string; chave: string; situacao: string}>(
+                `/api/asaas/pix/parcela/${parcela.id}`
+            );
+            setPixData(response.data);
+        } catch (err) {
+            const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error
+                ?? (err as Error)?.message
+                ?? 'Erro ao buscar PIX';
+            setError(msg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const gerarPix = async () => {
+        if (!parcela) return;
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await api.post<{qrcode: string; chave: string; situacao: string}>(
+                '/api/asaas/pix',
+                {
+                    idParcela: parcela.id,
+                    idPessoa: parcela.pessoaId,
+                    valor: parcela.valor,
+                    dataVencimento: parcela.dataVencimento,
+                }
+            );
+            setPixData(response.data);
+        } catch (err) {
+            const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error
+                ?? (err as Error)?.message
+                ?? 'Erro ao gerar PIX';
+            setError(msg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const enviarEmail = async () => {
+        if (!pixData || !parcela) return;
+        setSendingEmail(true);
+        setEmailSent(false);
+        try {
+            await api.post('/api/asaas/pix/enviar-email', {
+                idParcela: parcela.id,
+                idPessoa: parcela.pessoaId,
+                qrcode: pixData.qrcode,
+                chave: pixData.chave,
+            });
+            setEmailSent(true);
+        } catch (err) {
+            const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error
+                ?? (err as Error)?.message
+                ?? 'Erro ao enviar e-mail';
+            setError(msg);
+        } finally {
+            setSendingEmail(false);
+        }
+    };
+
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal form-modal" style={{maxWidth: '600px'}} onClick={(e) => e.stopPropagation()}>
+                <h2>PIX - {parcela.descricao || `Parcela ${parcela.id}`}</h2>
+                <div style={{padding: '1rem'}}>
+                    {loading && <p className="master-detail-empty">Gerando QR Code PIX...</p>}
+                    {error && <p className="form-erro">{error}</p>}
+                    {emailSent && <p style={{color: 'green'}}>E-mail enviado com sucesso!</p>}
+
+                    {pixData && !loading && (
+                        <div style={{display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center'}}>
+                            <div>
+                                <strong>QR Code PIX</strong>
+                                <div style={{marginTop: '0.5rem', textAlign: 'center'}}>
+                                    {pixData.qrcode && (
+                                        <img
+                                            src={`data:image/png;base64,${pixData.qrcode}`}
+                                            alt="QR Code PIX"
+                                            style={{maxWidth: '250px', maxHeight: '250px'}}
+                                        />
+                                    )}
+                                    {!pixData.qrcode && <p style={{color: '#666'}}>QR Code não disponível</p>}
+                                </div>
+                            </div>
+                            <div style={{width: '100%', maxWidth: '400px'}}>
+                                <strong>Código PIX (Copia e Cola)</strong>
+                                <textarea
+                                    readOnly
+                                    rows={4}
+                                    style={{width: '100%', fontFamily: 'monospace', fontSize: '0.85rem', marginTop: '0.5rem'}}
+                                    value={pixData.chave || ''}
+                                />
+                                <button
+                                    type="button"
+                                    className="btn-form-save"
+                                    style={{marginTop: '0.5rem'}}
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(pixData.chave || '');
+                                        alert('Código PIX copiado para a área de transferência!');
+                                    }}
+                                >
+                                    Copiar Código PIX
+                                </button>
+                            </div>
+                            <div style={{display: 'flex', gap: '0.5rem', marginTop: '1rem'}}>
+                                {parcela.idParcelaPix ? (
+                                    <button
+                                        type="button"
+                                        className="btnyellow"
+                                        disabled={sendingEmail}
+                                        onClick={enviarEmail}
+                                    >
+                                        {sendingEmail ? 'Enviando...' : 'Enviar por E-mail'}
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        className="btnblue"
+                                        disabled={loading}
+                                        onClick={gerarPix}
+                                    >
+                                        {loading ? 'Gerando...' : 'Gerar PIX'}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {!pixData && !loading && !parcela.idParcelaPix && (
+                        <div style={{textAlign: 'center', padding: '2rem'}}>
+                            <p>Esta parcela ainda não possui um QR Code PIX gerado.</p>
+                            <button
+                                type="button"
+                                className="btnblue"
+                                disabled={loading}
+                                onClick={gerarPix}
+                                style={{marginTop: '1rem'}}
+                            >
+                                {loading ? 'Gerando...' : 'Gerar QR Code PIX'}
+                            </button>
+                        </div>
+                    )}
+
+                    {!pixData && !loading && parcela.idParcelaPix && (
+                        <div style={{textAlign: 'center', padding: '2rem'}}>
+                            <p>Esta parcela já possui PIX gerado. Clique em "Enviar por E-mail" para reenviar.</p>
+                            <button
+                                type="button"
+                                className="btnyellow"
+                                disabled={sendingEmail}
+                                onClick={enviarEmail}
+                                style={{marginTop: '1rem'}}
+                            >
+                                {sendingEmail ? 'Enviando...' : 'Enviar por E-mail'}
+                            </button>
+                        </div>
+                    )}
+                </div>
+                <div className="modal-actions form-footer">
+                    <button type="button" className="btn-form-back" onClick={onClose}>
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export { PixQrCodeModal };

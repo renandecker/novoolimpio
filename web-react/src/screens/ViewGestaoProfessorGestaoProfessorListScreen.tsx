@@ -560,10 +560,10 @@ function GestaoTab() {
                                 <td>{t.grupo}</td>
                                 <td>{t.curso}</td>
                                 <td>{t.componenteCurricular}</td>
-                                <td>
-                                    <span
-                                        className={`gp-status ${legacyClassName(t.status) ?? ''}`.trim()}>{t.status}</span>
-                                </td>
+<td>
+    <span
+        className={`gp-status gp-status-${t.status.toLowerCase().replace(/ /g, '-')} ${legacyClassName(t.status) ?? ''}`.trim()}>{t.status}</span>
+</td>
                                 <td className="gp-acoes">
                                     {(t.status === 'EM_ANDAMENTO' || t.status === 'FINALIZADA') && (
                                         <>

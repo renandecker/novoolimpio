@@ -247,7 +247,8 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
             "p.fl_cancelamento, " +
             "p.fl_original, " +
             "(p.id_venda IS NOT NULL)AS venda_produto, " +
-            "(p.id_multa_livro IS NOT NULL)AS multa_livro " +
+            "(p.id_multa_livro IS NOT NULL)AS multa_livro, " +
+            "p.id_parcela_pix " +
             "FROM fin_parcela p " +
             "WHERE p.id_pessoa = ?1 AND " + condicao + " " +
             "ORDER BY p.data_vencimento ASC NULLS LAST, p.id ASC";

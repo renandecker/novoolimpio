@@ -1,53 +1,98 @@
 import {useEffect, useState} from 'react';
 import {alunoApi, ContratoFinanceiro, Financeiro, formatarData, formatarMoeda, Parcela} from '../aluno';
+import {PixQrCodeModal} from '../GestaoAlunoModais';
 import '../AlunoPortal.css';
 
-function ParcelasTabela({parcelas, titulo}: { parcelas: Parcela[]; titulo: string }) {
+function ParcelasTabela({parcelas, titulo, pessoaId}: { parcelas: Parcela[]; titulo: string; pessoaId: number }) {
     if (parcelas.length === 0) return null;
+    const [pixModalOpen, setPixModalOpen] = useState(false);
+    const [selectedParcela, setSelectedParcela] = useState<Parcela | null>(null);
+
+    const handlePixClick = (parcela: Parcela) => {
+        if (parcela.dataPagamento) return;
+        setSelectedParcela(parcela);
+        setPixModalOpen(true);
+    };
+
+    const closePixModal = () => {
+        setPixModalOpen(false);
+        setSelectedParcela(null);
+    };
+
     return (
-        <section className="aluno-portal-item">
-            <h2>{titulo}</h2>
-            <table className="aluno-portal-tabela">
-                <thead>
-                <tr>
-                    <th>Descrição</th>
-                    <th>Parcela</th>
-                    <th>Vencimento</th>
-                    <th>Valor</th>
-                    <th>Valor pago</th>
-                    <th>Situação</th>
-                </tr>
-                </thead>
-                <tbody>
-                {parcelas.map(p => (
-                    <tr key={`${p.contratoId ?? ''}-${p.id ?? p.parcelaSequencia ?? ''}`}>
-                        <td>
-                            <span style={{color: p.descricaoCor, fontWeight: 'bold'}}>{p.descricao}</span>
-                        </td>
-                        <td>{p.parcelaSequencia ?? p.parcela ?? '-'}</td>
-                        <td>{formatarData(p.dataVencimento)}</td>
-                        <td>{formatarMoeda(p.valor)}</td>
-                        <td>{formatarMoeda(p.valorPago)}</td>
-                        <td>
-                <span className="aluno-portal-status" style={{backgroundColor: p.situacaoCor}}>
-                  {p.situacao}
-                </span>
-                        </td>
+        <>
+            <section className="aluno-portal-item">
+                <h2>{titulo}</h2>
+                <table className="aluno-portal-tabela">
+                    <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th>Parcela</th>
+                        <th>Vencimento</th>
+                        <th>Valor</th>
+                        <th>Valor pago</th>
+                        <th>Situação</th>
+                        <th>Ações</th>
                     </tr>
-                ))}
-                </tbody>
-            </table>
-        </section>
+                    </thead>
+                    <tbody>
+                    {parcelas.map(p => (
+                        <tr key={`${p.contratoId ?? ''}-${p.id ?? p.parcelaSequencia ?? ''}`}>
+                            <td>
+                                <span style={{color: p.descricaoCor, fontWeight: 'bold'}}>{p.descricao}</span>
+                            </td>
+                            <td>{p.parcelaSequencia ?? p.parcela ?? '-'}</td>
+                            <td>{formatarData(p.dataVencimento)}</td>
+                            <td>{formatarMoeda(p.valor)}</td>
+                            <td>{formatarMoeda(p.valorPago)}</td>
+                            <td>
+                    <span className="aluno-portal-status" style={{backgroundColor: p.situacaoCor}}>
+                      {p.situacao}
+                    </span>
+                            </td>
+                            <td>
+                                {!p.dataPagamento && (
+                                    <button
+                                        type="button"
+                                        className={p.idParcelaPix ? 'btnyellow' : 'btnblue'}
+                                        style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}
+                                        onClick={() => handlePixClick(p)}
+                                        title={p.idParcelaPix ? 'Ver PIX gerado / Enviar por e-mail' : 'Gerar QR Code PIX'}
+                                    >
+                                        {p.idParcelaPix ? '📱 PIX' : '📱 Gerar PIX'}
+                                    </button>
+                                )}
+                            </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </section>
+            <PixQrCodeModal
+                isOpen={pixModalOpen}
+                onClose={closePixModal}
+                parcela={selectedParcela ? {...selectedParcela, pessoaId} : null}
+            />
+        </>
     );
 }
 
 export default function AlunoFinanceiroScreen() {
     const [financeiro, setFinanceiro] = useState<Financeiro | null>(null);
+    const [pessoaId, setPessoaId] = useState<number | null>(null);
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(true);
 
     useEffect(() => {
         let active = true;
+        // Fetch pessoaId from perfil
+        alunoApi.perfil()
+            .then(perfil => {
+                if (active) setPessoaId(Number(perfil.id ?? 0));
+            })
+            .catch(() => {
+                // ignore
+            });
         alunoApi
             .financeiro()
             .then(data => {
@@ -147,12 +192,12 @@ export default function AlunoFinanceiroScreen() {
                 </section>
             )}
 
-            {financeiro && (
+            {financeiro && pessoaId && (
                 <>
-                    <ParcelasTabela titulo="Parcelas deste mês / em atraso" parcelas={financeiro.parcelasMes}/>
-                    <ParcelasTabela titulo="Matrícula" parcelas={financeiro.parcelasMatricula}/>
-                    <ParcelasTabela titulo="Produtos" parcelas={financeiro.parcelasProdutos}/>
-                    <ParcelasTabela titulo="Canceladas" parcelas={financeiro.parcelasCanceladas}/>
+                    <ParcelasTabela titulo="Parcelas deste mês / em atraso" parcelas={financeiro.parcelasMes} pessoaId={pessoaId}/>
+                    <ParcelasTabela titulo="Matrícula" parcelas={financeiro.parcelasMatricula} pessoaId={pessoaId}/>
+                    <ParcelasTabela titulo="Produtos" parcelas={financeiro.parcelasProdutos} pessoaId={pessoaId}/>
+                    <ParcelasTabela titulo="Canceladas" parcelas={financeiro.parcelasCanceladas} pessoaId={pessoaId}/>
                 </>
             )}
 

@@ -7,6 +7,12 @@ type Session = { accessToken: string; expiresAt: number; username: string; permi
 type SessionCore =
     Pick<Session, 'accessToken' | 'expiresAt' | 'username' | 'permissions'>
     & { modulePermissions?: ModulePermissions; nome?: string; email?: string; cpf?: string; foto?: string; defaultOutcome?: string; hierarquia?: string };
+
+const normalizeDefaultOutcome = (outcome?: string): string | undefined => {
+    if (!outcome) return undefined;
+    const normalized = outcome.replace(/\.xhtml$/i, '').replace(/^\/+|\/+$/g, '');
+    return normalized ? `/${normalized}` : '/default';
+};
 type Auth = { session: Session | null; signIn: (username: string, password: string, bootstrap?: boolean) => Promise<void>; signOut: () => Promise<void>; refreshSession: (next: SessionCore) => void };
 export type
 {
@@ -49,7 +55,11 @@ export function AuthProvider({children}: { children: ReactNode }) {
         const saved = localStorage.getItem(KEY);
         if (!saved) return null;
         const parsed = JSON.parse(saved) as Session;
-        return parsed.expiresAt * 1000 > Date.now() ? parsed : null;
+        if (parsed.expiresAt * 1000 <= Date.now()) return null;
+        return {
+            ...parsed,
+            defaultOutcome: normalizeDefaultOutcome(parsed.defaultOutcome)
+        };
     });
     useEffect(() => {
         if (!session) return;
@@ -67,6 +77,7 @@ export function AuthProvider({children}: { children: ReactNode }) {
                 username,
                 password
             });
+            data.defaultOutcome = normalizeDefaultOutcome(data.defaultOutcome);
             data.modules = await fetchModules(data.accessToken);
             localStorage.setItem(KEY, JSON.stringify(data));
             setSession(data);

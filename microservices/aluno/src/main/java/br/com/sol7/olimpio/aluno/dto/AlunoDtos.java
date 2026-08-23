@@ -69,7 +69,8 @@ public final class AlunoDtos {
             BigDecimal valor, BigDecimal valorPago, String tipoPagamento,
             Boolean reparcela, Boolean cancelamento, Boolean original,
             boolean vendaProduto, boolean multaLivro,
-            String descricao, String descricaoCor, String situacao, String situacaoCor) {
+            String descricao, String descricaoCor, String situacao, String situacaoCor,
+            Long idParcelaPix) {
     }
 
     public record ContratoFinanceiroResponse(

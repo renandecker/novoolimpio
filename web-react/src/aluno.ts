@@ -151,6 +151,7 @@ export type Parcela = {
     descricaoCor: string;
     situacao: string;
     situacaoCor: string;
+    idParcelaPix: number | null;
 };
 
 export type ContratoFinanceiro = {

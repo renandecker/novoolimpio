@@ -4,7 +4,6 @@ import {useQuery} from '@tanstack/react-query';
 import {api} from '../api';
 import {PermissionGate} from '../permissions';
 import {AutoComplete, type AutoCompleteOption} from '../AutoComplete';
-import {Wizard, useWizardData} from '../Wizard';
 import './OferecimentoCurso.css';
 
 type Opcao = {id: number; label: string};
@@ -30,6 +29,7 @@ interface CurriculoRow {
     sucinto?: string;
     sigla?: string;
     qtd_maxima_alunos?: number;
+    periodo?: number;
 }
 
 interface SalaRow {
@@ -43,11 +43,6 @@ interface SalaRow {
 interface DiaSemanaRow {
     id: number;
     nome?: string;
-}
-
-interface RefOptionRow {
-    id: number;
-    label: string;
 }
 
 interface TurnoRow {
@@ -121,12 +116,15 @@ interface TurmaItem {
     cargaHoraria: number;
     turmaId?: number;
     ocorrencias: OcorrenciaItem[];
+    professorId?: number;
 }
 
 interface DataInvalidaItem {
     data: string;
     motivo: string;
 }
+
+type TabKey = 'tabGrupo' | 'tabDiaAula' | 'tabProfessor';
 
 interface OferecimentoCursoData {
     novoGrupo: boolean;
@@ -148,9 +146,7 @@ interface OferecimentoCursoData {
     novoDiaTurno: number | null;
     novoDiaTempoAula: number | null;
     professores: Record<string, number>;
-    diaSemanaProfessorFiltro: number | null;
-    turnoProfessorFiltro: number | null;
-    tempoAulaProfessorFiltro: number | null;
+    criterio: {qtd_turma_abertas?: number; data_inicio?: string; data_fim?: string; periodo?: number} | null;
 }
 
 const initialData: OferecimentoCursoData = {
@@ -173,9 +169,7 @@ const initialData: OferecimentoCursoData = {
     novoDiaTurno: null,
     novoDiaTempoAula: null,
     professores: {},
-    diaSemanaProfessorFiltro: null,
-    turnoProfessorFiltro: null,
-    tempoAulaProfessorFiltro: null,
+    criterio: null,
 };
 
 const DIA_SEMANA_JS_PARA_ID = [1, 2, 3, 4, 5, 6, 7];
@@ -218,19 +212,19 @@ const toOptions = (rows: Array<Record<string, unknown>> | undefined, labelKeys: 
         return {id: Number(row.id), label: label || `#${row.id}`};
     });
 
+const TABS: {key: TabKey; label: string}[] = [
+    {key: 'tabGrupo', label: 'Grupo / Curso'},
+    {key: 'tabDiaAula', label: 'Dias de Aula'},
+    {key: 'tabProfessor', label: 'Professores'},
+];
+
 export default function ViewOferecimentoComponenteCurricularFormOferecimentoCursoListScreen() {
     const {id} = useParams<{id?: string}>();
     const navigate = useNavigate();
     const emEdicao = !!id;
 
-    const {data, updateField, updateFields} = useWizardData<OferecimentoCursoData>(initialData, {
-        initialData: {
-            diaSemanaProfessorFiltro: null,
-            turnoProfessorFiltro: null,
-            tempoAulaProfessorFiltro: null,
-        }
-    });
-
+    const [data, setData] = useState<OferecimentoCursoData>(initialData);
+    const [activeTab, setActiveTab] = useState<TabKey>('tabGrupo');
     const [turmas, setTurmas] = useState<TurmaItem[]>([]);
     const [cursosDaUnidade, setCursosDaUnidade] = useState<Opcao[]>([]);
     const [salasDaUnidade, setSalasDaUnidade] = useState<Opcao[]>([]);
@@ -243,7 +237,16 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
     const [mensagem, setMensagem] = useState<string | null>(null);
     const [erro, setErro] = useState<string | null>(null);
     const [salvando, setSalvando] = useState(false);
+    const [bloquearProximo, setBloquearProximo] = useState(false);
     const hidratadoRef = useRef(false);
+
+    const updateField = useCallback(<K extends keyof OferecimentoCursoData>(key: K, value: OferecimentoCursoData[K]) => {
+        setData(prev => ({...prev, [key]: value}));
+    }, []);
+
+    const updateFields = useCallback((fields: Partial<OferecimentoCursoData>) => {
+        setData(prev => ({...prev, ...fields}));
+    }, []);
 
     const unidadesQuery = useQuery({
         queryKey: ['ofc-unidades'],
@@ -287,7 +290,7 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
 
     const unidades = useMemo(
         () => toOptions(unidadesQuery.data as unknown as Array<Record<string, unknown>>, ['sucinto', 'nome_fantasia', 'razao_social'])
-            .filter((opcao) => (unidadesQuery.data ?? []).find((u) => u.id === opçãoFilterGuard(opcao.id))?.fl_ativo !== false),
+            .filter((opcao) => (unidadesQuery.data ?? []).find((u) => u.id === opcao.id)?.fl_ativo !== false),
         [unidadesQuery.data],
     );
 
@@ -361,7 +364,7 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
                 const curso = detalhe.curso;
                 const ofs = detalhe.oferecimentos ?? [];
                 const primeiro = ofs[0] ?? {};
-                updateFields({
+                setData({
                     novoGrupo: false,
                     grupoId: curso.id,
                     grupoNome: curso.nome ?? '',
@@ -375,10 +378,13 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
                     vagas: primeiro.vagas ?? 0,
                     qtdeSequencia: primeiro.qtdeSequencia ?? 0,
                     dataInicio: isoDate(primeiro.dataInicio),
+                    diasAula: [],
+                    novoDiaDiaSemana: null,
+                    novoDiaTurno: null,
+                    novoDiaTempoAula: null,
                     professores: Object.fromEntries(ofs.map((o) => [String(o.componenteCurricularId), o.professorId ?? 0])),
-                    diaSemanaProfessorFiltro: null,
-                    turnoProfessorFiltro: null,
-                    tempoAulaProfessorFiltro: null,
+                    responsaveis: [],
+                    criterio: null,
                 });
                 setTurmas(ofs.map((o) => ({
                     componenteCurricularId: o.componenteCurricularId ?? 0,
@@ -386,12 +392,36 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
                     cargaHoraria: (componentesQuery.data ?? []).find((c) => c.id === o.componenteCurricularId)?.cargaHoraria ?? 0,
                     turmaId: o.id,
                     ocorrencias: [],
+                    professorId: o.professorId ?? undefined,
                 })));
             } catch {
                 setErro('Não foi possível carregar o oferecimento para edição.');
             }
         })();
-    }, [emEdicao, id, updateFields, componentesQuery.data]);
+    }, [emEdicao, id, componentesQuery.data]);
+
+    const buscarCriterios = useCallback(async () => {
+        if (!data.unidadeId || !data.curriculoId) {
+            setData(prev => ({...prev, criterio: null}));
+            return;
+        }
+        try {
+            const {data: criterios} = await api.get<Array<{qtd_turma_abertas?: number; data_inicio?: string; data_fim?: string; periodo?: number}>>('/api/educacao/criterio', {params: {unidadeId: data.unidadeId, curriculoId: data.curriculoId}});
+            if (criterios && criterios.length > 0) {
+                setData(prev => ({...prev, criterio: criterios[0]}));
+            } else {
+                setData(prev => ({...prev, criterio: null}));
+            }
+        } catch {
+            setData(prev => ({...prev, criterio: null}));
+        }
+    }, [data.unidadeId, data.curriculoId]);
+
+    useEffect(() => {
+        if (data.unidadeId && data.curriculoId) {
+            buscarCriterios();
+        }
+    }, [data.unidadeId, data.curriculoId, buscarCriterios]);
 
     const minutosTurno = useCallback((turnoEducacaoId: number): number => {
         const turno = (turnosQuery.data ?? []).find((t) => t.id === turnoEducacaoId);
@@ -526,7 +556,8 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
     };
 
     const definirProfessor = (componenteId: number, professorId: number) => {
-        updateFields({professores: {...data.professores, [String(componenteId)]: professorId}});
+        setData(prev => ({...prev, professores: {...prev.professores, [String(componenteId)]: professorId}}));
+        setTurmas(prev => prev.map(t => t.componenteCurricularId === componenteId ? {...t, professorId} : t));
     };
 
     const fetchUsuarioResponsavel = async (query: string): Promise<AutoCompleteOption[]> => {
@@ -535,35 +566,14 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
         return toOptions(rows, ['nome', 'login']);
     };
 
-const fetchProfessor = async (query: string, diaSemanaId?: number, turnoId?: number, tempoAulaId?: number): Promise<AutoCompleteOption[]> => {
+    const fetchProfessor = async (query: string, diaSemanaId?: number, turnoId?: number, tempoAulaId?: number): Promise<AutoCompleteOption[]> => {
         if (query.length < 3) return [];
-        const {data: rows} = await api.get<Array<{id: number; nome: string}>>('/api/professor/professor/auto-complete-professor', {params: {query}});
+        const params: Record<string, string | number> = {query};
+        if (diaSemanaId) params.diaSemanaId = diaSemanaId;
+        if (turnoId) params.turnoId = turnoId;
+        if (tempoAulaId) params.tempoAulaId = tempoAulaId;
+        const {data: rows} = await api.get<Array<{id: number; nome: string}>>('/api/professor/professor/auto-complete-professor', {params});
         let filtered = (rows ?? []).map((p) => ({id: Number(p.id), label: p.nome || `#${p.id}`}));
-        // Filter by dia da semana if provided
-        if (diaSemanaId !== undefined && diaSemanaId !== null) {
-            const diasSemana = (diasSemanaQuery.data ?? []);
-            const diaSelecionado = diasSemana.find((d) => d.id === diaSemanaId);
-            if (diaSelecionado) {
-                // Here we would ideally check edc_professor_dia_semana, but we'll keep all professors
-                // and add a compatibility indicator in the UI
-            }
-        }
-        // Filter by turno if provided
-        if (turnoId !== undefined && turnoId !== null) {
-            const turnos = (turnosQuery.data ?? []);
-            const turnoSelecionado = turnos.find((t) => t.id === turnoId);
-            if (turnoSelecionado) {
-                // Same - would check edc_professor_turno
-            }
-        }
-        // Filter by tempo aula if provided
-        if (tempoAulaId !== undefined && tempoAulaId !== null) {
-            const temposAula = (temposAulaQuery.data ?? []);
-            const tempoSelecionado = temposAula.find((t) => t.id === tempoAulaId);
-            if (tempoSelecionado) {
-                // Would check compatibility
-            }
-        }
         return filtered;
     };
 
@@ -581,24 +591,36 @@ const fetchProfessor = async (query: string, diaSemanaId?: number, turnoId?: num
         }
     };
 
-    const validateStep1 = (current: OferecimentoCursoData) => {
-        if (!current.unidadeId) return 'Selecione a unidade';
-        if (!current.curriculoId) return 'Selecione o curso';
-        if (current.novoGrupo) {
-            if (!current.grupoNome?.trim()) return 'Informe o nome do grupo';
-        } else if (!current.grupoId) {
-            return 'Selecione o grupo';
+    const validateTab = (targetTab: TabKey): boolean => {
+        if (targetTab === 'tabDiaAula') {
+            if (!data.unidadeId) { setMensagem('Selecione a unidade'); return false; }
+            if (!data.curriculoId) { setMensagem('Selecione o curso'); return false; }
+            if (data.novoGrupo) {
+                if (!data.grupoNome?.trim()) { setMensagem('Informe o nome do grupo'); return false; }
+            } else if (!data.grupoId) { setMensagem('Selecione o grupo'); return false; }
         }
+        if (targetTab === 'tabProfessor') {
+            if (data.vagas <= 0) { setMensagem('O número de vagas não pode ser 0.'); return false; }
+            if (data.diasAula.length === 0) { setMensagem('Marque pelo menos um Dia da Semana.'); return false; }
+            if (!data.dataInicio) { setMensagem('Informe uma data para criar os dias de aula.'); return false; }
+            const semAulas = turmas.every((t) => t.ocorrencias.length === 0);
+            if (semAulas) { setMensagem('Defina os dias de aula'); return false; }
+        }
+        setMensagem(null);
         return true;
     };
 
-    const validateStep2 = (current: OferecimentoCursoData) => {
-        if (current.diasAula.length === 0) return 'Marque pelo menos um Dia da Semana.';
-        if (!current.dataInicio) return 'Informe uma data para criar os dias de aula.';
-        if ((current.vagas ?? 0) <= 0) return 'O número de vagas não pode ser 0.';
-        const semAulas = turmas.every((t) => t.ocorrencias.length === 0);
-        if (semAulas) return 'Defina os dias de aula';
-        return true;
+    const handleTabChange = (newTab: TabKey) => {
+        const tabOrder: TabKey[] = ['tabGrupo', 'tabDiaAula', 'tabProfessor'];
+        const currentIndex = tabOrder.indexOf(activeTab);
+        const newIndex = tabOrder.indexOf(newTab);
+        
+        if (newIndex > currentIndex) {
+            for (let i = currentIndex + 1; i <= newIndex; i++) {
+                if (!validateTab(tabOrder[i])) return;
+            }
+        }
+        setActiveTab(newTab);
     };
 
     const resolverDiaAulaIds = async (): Promise<number[]> => {
@@ -687,8 +709,8 @@ const fetchProfessor = async (query: string, diaSemanaId?: number, turnoId?: num
 
     const voltarLista = () => navigate('/view/oferecimentoComponenteCurricular/listOferecimentoCurso');
 
-    const renderEtapaCurso = () => (
-        <section className="step-content">
+    const renderTabGrupo = () => (
+        <section className="tab-content">
             <p className="step-description">
                 {emEdicao
                     ? 'Edite os dados do oferecimento do curso.'
@@ -837,6 +859,26 @@ const fetchProfessor = async (query: string, diaSemanaId?: number, turnoId?: num
                 </div>
             )}
 
+            {data.curriculoId && (
+                <div className="field-row">
+                    <div className="field-group">
+                        <label>Critério de Curso</label>
+                        <div className="ofc-hint">
+                            {data.criterio ? (
+                                <>
+                                    Turmas máximas abertas: {data.criterio.qtd_turma_abertas ?? 'Não definido'}<br />
+                                    Período: {data.criterio.periodo ?? 'Não definido'}<br />
+                                    {data.criterio.data_inicio && `Início válido a partir de: ${brDate(data.criterio.data_inicio)}`}<br />
+                                    {data.criterio.data_fim && `Término até: ${brDate(data.criterio.data_fim)}`}
+                                </>
+                            ) : (
+                                'Nenhum critério específico definido para esta unidade/curso.'
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="field-row">
                 <AutoComplete
                     id="ofc-responsavel"
@@ -870,11 +912,11 @@ const fetchProfessor = async (query: string, diaSemanaId?: number, turnoId?: num
         </section>
     );
 
-    const renderEtapaDiasAula = () => {
+    const renderTabDiaAula = () => {
         const salaSelecionada = salasDetalhe.find((s) => s.id === data.salaId);
         const curriculoSelecionado = curriculosDetalhe.find((c) => c.id === data.curriculoId);
         return (
-            <section className="step-content">
+            <section className="tab-content">
                 <p className="step-description">
                     Defina sala, vagas, data inicial e os dias de aula (dia da semana, turno e tempo).
                     As aulas são geradas automaticamente por componente curricular.
@@ -1131,10 +1173,14 @@ const fetchProfessor = async (query: string, diaSemanaId?: number, turnoId?: num
         );
     };
 
-    const renderEtapaProfessor = () => {
-        const fetchProfessorFiltrado = useCallback((query: string) => fetchProfessor(query, data.diaSemanaProfessorFiltro, data.turnoProfessorFiltro, data.tempoAulaProfessorFiltro), [data.diaSemanaProfessorFiltro, data.turnoProfessorFiltro, data.tempoAulaProfessorFiltro, fetchProfessor]);
+    const renderTabProfessor = () => {
+        const fetchProfessorFiltrado = useCallback((query: string) => {
+            const firstDiaAula = data.diasAula[0];
+            return fetchProfessor(query, firstDiaAula?.diaSemanaId, firstDiaAula?.turnoEducacaoId, firstDiaAula?.tempoAulaId);
+        }, [data.diasAula, fetchProfessor]);
+
         return (
-            <section className="step-content">
+            <section className="tab-content">
                 <p className="step-description">Selecione os professores de cada Componente Curricular.</p>
                 {turmas.length === 0 ? (
                     <p className="ofc-aviso">Nenhum componente curricular disponível. Volte e selecione o curso.</p>
@@ -1147,36 +1193,29 @@ const fetchProfessor = async (query: string, diaSemanaId?: number, turnoId?: num
                         </tr>
                         </thead>
                         <tbody>
-                        {turmas.map((turma) => {
-                            const professorId = data.professores[String(turma.componenteCurricularId)] ?? 0;
-                            const professorLabel = professorId > 0 ? (
-                                // Try to find professor name from available data
-                                '' // Professor ID stored, name would need backend lookup
-                            ) : null;
-                            return (
-                                <tr key={turma.componenteCurricularId}>
-                                    <td>{turma.descricao}</td>
-                                    <td>
-                                        <AutoComplete
-                                            id={`ofc-professor-${turma.componenteCurricularId}`}
-                                            placeholder="Digite para buscar o professor..."
-                                            value={(() => {
-                                                const pid = data.professores[String(turma.componenteCurricularId)];
-                                                return pid ? {id: pid, label: ''} : null;
-                                            })()}
-                                            onChange={(opt) => definirProfessor(turma.componenteCurricularId, opt?.id ?? 0)}
-                                            fetchOptions={fetchProfessorFiltrado}
-                                            minChars={3}
-                                        />
-                                        {professorLabel !== null && (
-                                            <span className="ofc-professor-chip">
-                                                {professorLabel}
-                                            </span>
-                                        )}
-                                    </td>
-                                </tr>
-                            );
-                        })}
+                        {turmas.map((turma) => (
+                            <tr key={turma.componenteCurricularId}>
+                                <td>{turma.descricao}</td>
+                                <td>
+                                    <AutoComplete
+                                        id={`ofc-professor-${turma.componenteCurricularId}`}
+                                        placeholder="Digite para buscar o professor..."
+                                        value={(() => {
+                                            const pid = data.professores[String(turma.componenteCurricularId)];
+                                            return pid ? {id: pid, label: ''} : null;
+                                        })()}
+                                        onChange={(opt) => definirProfessor(turma.componenteCurricularId, opt?.id ?? 0)}
+                                        fetchOptions={fetchProfessorFiltrado}
+                                        minChars={3}
+                                    />
+                                    {data.professores[String(turma.componenteCurricularId)] && (
+                                        <span className="ofc-professor-chip">
+                                            Professor ID: {data.professores[String(turma.componenteCurricularId)]}
+                                        </span>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
                         </tbody>
                     </table>
                 )}
@@ -1199,34 +1238,68 @@ const fetchProfessor = async (query: string, diaSemanaId?: number, turnoId?: num
 
                 <div className="div_form">
                     <div className="form-title">{emEdicao ? `Editar Oferecimento de Curso${data.grupoNome ? ` — ${data.grupoNome}` : ''}` : 'Novo Oferecimento de Curso'}</div>
-                    <div className="table_form">
-                        <Wizard
-                            initialData={data}
-                            onDataChange={updateFields}
-                            steps={[
-                                {
-                                    key: 'oferecimento',
-                                    label: 'Curso',
-                                    content: renderEtapaCurso(),
-                                    validate: validateStep1,
-                                },
-                                {
-                                    key: 'diasAula',
-                                    label: 'Dias Aula',
-                                    content: renderEtapaDiasAula(),
-                                    validate: validateStep2,
-                                },
-                                {
-                                    key: 'professor',
-                                    label: 'Professor',
-                                    nextLabel: salvando ? 'Salvando...' : 'Salvar',
-                                    nextDisabled: salvando,
-                                    content: renderEtapaProfessor(),
-                                    validate: () => true,
-                                },
-                            ]}
-                            onComplete={() => void salvar()}
-                        />
+                    
+                    <div className="ofc-tabs">
+                        <nav className="ofc-tabs-nav" role="tablist" aria-label="Abas do oferecimento de curso">
+                            {TABS.map((tab) => (
+                                <button
+                                    key={tab.key}
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={activeTab === tab.key}
+                                    aria-controls={`panel-${tab.key}`}
+                                    id={`tab-${tab.key}`}
+                                    className={`ofc-tab ${activeTab === tab.key ? 'ofc-tab-active' : ''} ${tab.key !== activeTab && TABS.findIndex(t => t.key === activeTab) > TABS.findIndex(t => t.key === tab.key) ? 'ofc-tab-disabled' : ''}`}
+                                    onClick={() => handleTabChange(tab.key)}
+                                    disabled={bloquearProximo || salvando}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </nav>
+                        
+                        <div className="ofc-tabs-panels">
+                            <div role="tabpanel" id="panel-tabGrupo" aria-labelledby="tab-tabGrupo" hidden={activeTab !== 'tabGrupo'}>
+                                {renderTabGrupo()}
+                            </div>
+                            <div role="tabpanel" id="panel-tabDiaAula" aria-labelledby="tab-tabDiaAula" hidden={activeTab !== 'tabDiaAula'}>
+                                {renderTabDiaAula()}
+                            </div>
+                            <div role="tabpanel" id="panel-tabProfessor" aria-labelledby="tab-tabProfessor" hidden={activeTab !== 'tabProfessor'}>
+                                {renderTabProfessor()}
+                            </div>
+                        </div>
+
+                        <div className="ofc-tabs-actions">
+                            <button
+                                type="button"
+                                className="btn-form-back"
+                                onClick={() => {
+                                    const tabOrder: TabKey[] = ['tabGrupo', 'tabDiaAula', 'tabProfessor'];
+                                    const currentIndex = tabOrder.indexOf(activeTab);
+                                    if (currentIndex > 0) setActiveTab(tabOrder[currentIndex - 1]);
+                                }}
+                                disabled={activeTab === 'tabGrupo' || salvando}
+                            >
+                                Anterior
+                            </button>
+                            <button
+                                type="button"
+                                className="btn-form-save"
+                                onClick={() => {
+                                    const tabOrder: TabKey[] = ['tabGrupo', 'tabDiaAula', 'tabProfessor'];
+                                    const currentIndex = tabOrder.indexOf(activeTab);
+                                    if (currentIndex < tabOrder.length - 1) {
+                                        handleTabChange(tabOrder[currentIndex + 1]);
+                                    } else {
+                                        void salvar();
+                                    }
+                                }}
+                                disabled={salvando}
+                            >
+                                {salvando ? 'Salvando...' : activeTab === 'tabProfessor' ? 'Salvar' : 'Próximo'}
+                            </button>
+                        </div>
                     </div>
                 </div>
 

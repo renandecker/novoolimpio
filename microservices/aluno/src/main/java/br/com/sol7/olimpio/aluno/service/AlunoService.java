@@ -401,7 +401,8 @@ public class AlunoService {
                 asLocalDate(r[7]), asLocalDate(r[8]), asLocalDate(r[9]),
                 asBigDecimal(r[10]), asBigDecimal(r[11]), asString(r[12]),
                 reparcela, cancelamento, original,
-                vendaProduto, multaLivro, descricao, descricaoCor, situacao, situacaoCor);
+                vendaProduto, multaLivro, descricao, descricaoCor, situacao, situacaoCor,
+                asLong(r[18]));
     }
 
     private boolean asBoolean(Object o) {

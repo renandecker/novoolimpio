@@ -1,6 +1,7 @@
 import {useMemo, useState} from 'react';
 import {Link, useLocation} from 'react-router-dom';
 import {useAuth} from './auth';
+import {normalizeOutcome} from './permissions';
 import './Sidebar.css';
 
 type Modulo = { id: number; antecessorId: number | null; rotulo: string; descricao: string; icone: string; ajuda: string; outcome: string; ordem: number };
@@ -11,8 +12,6 @@ const normalizeName = (value: string) =>
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9]/g, '');
-
-const normalizeOutcome = (outcome: string) => outcome.replace(/(\.xhtml)+$/i, '').replace(/\/$/, '') || '/default';
 
 const SearchIcon = () => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">

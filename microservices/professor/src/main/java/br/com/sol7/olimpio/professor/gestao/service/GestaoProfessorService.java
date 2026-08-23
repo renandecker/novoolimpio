@@ -5,16 +5,23 @@ import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 import org.hibernate.reactive.mutiny.Mutiny;
 
 import java.math.BigDecimal;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import javax.sql.DataSource;
 
 @ApplicationScoped
 @WithTransaction
 public class GestaoProfessorService {
+
+    @Inject
+    @io.quarkus.agroal.DataSource("aula")
+    DataSource aulaDataSource;
 
     private static final SimpleDateFormat DIA = new SimpleDateFormat("dd/MM/yyyy");
 
@@ -179,6 +186,31 @@ public class GestaoProfessorService {
     public Uni<List<PendenciaDto>> listarPendencias(Long pessoaId) {
         return nativeQuery(SQL_PENDENCIAS, pessoaId).map(rows -> rows.stream().map(r ->
                 new PendenciaDto(toStr(r[0]), toStr(r[1]), toLong(r[2]))).toList());
+    }
+
+    public Uni<IdentidadeDto> identidade(String username) {
+        String sql = """
+            SELECT p.id
+            FROM edc_professor p
+            INNER JOIN bas_usuario u ON u.id_pessoa = p.id_pessoa
+            INNER JOIN bas_login l ON l.id_usuario = u.id
+            WHERE lower(l.username) = lower(?1) AND p.fl_ativo = true
+            LIMIT 1
+            """;
+        return Uni.createFrom().completionStage(() -> java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+            try (var conn = aulaDataSource.getConnection();
+                 var stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, username);
+                try (var rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return new IdentidadeDto(true, rs.getLong(1));
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            return new IdentidadeDto(false, null);
+        }));
     }
 
     public Uni<Void> salvarChamada(SalvarChamadaRequest request) {
@@ -351,7 +383,7 @@ public class GestaoProfessorService {
         if (value == null) {
             return "";
         }
-        if (value instanceof Date date){
+        if (value instanceof java.util.Date date){
             return DIA.format(date);
         }
         return String.valueOf(value);
