@@ -1,6 +1,5 @@
 import {useState} from 'react';
 import {PermissionGate} from '../permissions';
-import {DataTable} from '../DataTable';
 import {BooleanField} from '../BooleanField';
 import {MasterDetail} from '../MasterDetail';
 import {Tabs} from '../Tabs';
@@ -396,9 +395,15 @@ export default function ViewUsuarioFormUsuarioListScreen() {
                     <div className="form-title">Usuário</div>
                     <div className="table_form">
                         <Tabs tabs={tabs} initial="pessoal"/>
+                        <div className="form-buttons">
+                            <button type="button" className="btnblue" title="Salvar registro">Gravar</button>
+                            <button type="button" className="btnstop" title="Salvar e continuar editando">
+                                Salvar e Continuar
+                            </button>
+                            <button type="button" className="btnyellow" title="Voltar para a lista">Voltar</button>
+                        </div>
                     </div>
                 </div>
-                <DataTable path="/api/view/usuario/formUsuario"/>
             </main>
         </PermissionGate>
     );

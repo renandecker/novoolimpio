@@ -258,6 +258,13 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                     <div className="form-title">Pessoa Física</div>
                     <div className="table_form">
                         <Tabs tabs={tabs} initial="identificacao"/>
+                        <div className="form-buttons">
+                            <button type="button" className="btnblue" title="Salvar registro">Gravar</button>
+                            <button type="button" className="btnstop" title="Salvar e continuar editando">
+                                Salvar e Continuar
+                            </button>
+                            <button type="button" className="btnyellow" title="Voltar para a lista">Voltar</button>
+                        </div>
                     </div>
                 </div>
             </main>

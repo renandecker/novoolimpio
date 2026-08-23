@@ -45,7 +45,7 @@ const PERFIL_SOURCE = '/api/aluno/perfil/listPerfil';
 const PERFIL_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'descricao', label: 'Descrição'}];
 const PERFIL_SEARCH = ['descricao'];
 
-const UNIDADE_SOURCE = '/api/educacao/unidade/listUnidade';
+const UNIDADE_SOURCE = '/api/view/unidade/listUnidade';
 const UNIDADE_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'sucinto', label: 'Sucinto'}, {key: 'razaoSocial', label: 'Razão Social'}, {key: 'nomeFantasia', label: 'Nome Fantasia'}];
 const UNIDADE_SEARCH = ['sucinto', 'razaoSocial', 'nomeFantasia'];
 

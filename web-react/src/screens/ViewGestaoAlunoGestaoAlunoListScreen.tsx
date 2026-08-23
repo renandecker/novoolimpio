@@ -149,7 +149,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                 fileName?: string;
                 contentType?: string;
                 base64Data?: string
-            }>(doc.url, null, {
+            }>(doc.url, {}, {
                 params: key === 'certificado' ? {contratos: contratoId} : {ccId: contratoId},
             });
             const data = response.data;
@@ -591,29 +591,29 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
 
                 {activeAction && aluno && (
                     <>
-                        {activeAction.key === 'situacao' && (
-                            <SituacaoFinanceiraModal pessoaId={aluno.id} onClose={() => setOpenAction(null)}/>
-                        )}
+{activeAction.key === 'situacao' && (
+                                    <SituacaoFinanceiraModal key={aluno.id} pessoaId={aluno.id} onClose={() => setOpenAction(null)}/>
+                                )}
                         {activeAction.key === 'pessoais' && (
-                            <DadosPessoaisModal pessoaId={aluno.id} onClose={() => setOpenAction(null)}/>
+                            <DadosPessoaisModal key={aluno.id} pessoaId={aluno.id} onClose={() => setOpenAction(null)}/>
                         )}
                         {activeAction.key === 'contratante' && (
-                            <ContratanteModal pessoaId={aluno.id} onClose={() => setOpenAction(null)}/>
+                            <ContratanteModal key={aluno.id} pessoaId={aluno.id} onClose={() => setOpenAction(null)}/>
                         )}
                         {activeAction.key === 'historicoNap' && (
-                            <HistoricoNapModal pessoaId={aluno.id} onClose={() => setOpenAction(null)}/>
+                            <HistoricoNapModal key={aluno.id} pessoaId={aluno.id} onClose={() => setOpenAction(null)}/>
                         )}
                         {activeAction.key === 'historicoCobranca' && (
-                            <HistoricoCobrancaModal pessoaId={aluno.id} onClose={() => setOpenAction(null)}/>
+                            <HistoricoCobrancaModal key={aluno.id} pessoaId={aluno.id} onClose={() => setOpenAction(null)}/>
                         )}
                         {activeAction.key === 'notas' && (
-                            <NotasModal pessoaId={aluno.id} onClose={() => setOpenAction(null)}/>
+                            <NotasModal key={aluno.id} pessoaId={aluno.id} onClose={() => setOpenAction(null)}/>
                         )}
                         {activeAction.key === 'presencas' && (
-                            <PresencasModal pessoaId={aluno.id} onClose={() => setOpenAction(null)}/>
+                            <PresencasModal key={aluno.id} pessoaId={aluno.id} onClose={() => setOpenAction(null)}/>
                         )}
                         {activeAction.key === 'historicoAluno' && (
-                            <HistoricoAlunoModal pessoaId={aluno.id} onClose={() => setOpenAction(null)}/>
+                            <HistoricoAlunoModal key={aluno.id} pessoaId={aluno.id} onClose={() => setOpenAction(null)}/>
                         )}
                     </>
                 )}

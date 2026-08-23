@@ -12,7 +12,9 @@ export default function ViewPessoaListPessoaFisicaListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <h1>Pessoa Fisica</h1>
-                <DataTable path="/api/view/pessoa/listPessoaFisica" columns={COLUMNS} maxMainColumns={COLUMNS.length}/>
+                <DataTable path="/api/view/pessoa/listPessoaFisica" columns={COLUMNS} maxMainColumns={COLUMNS.length}
+                           editNavigateTo="/view/pessoa/formPessoaFisica"
+                           createNavigateTo="/view/pessoa/formPessoaFisica"/>
             </main>
         </PermissionGate>
     );

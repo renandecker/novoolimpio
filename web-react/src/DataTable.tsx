@@ -1,5 +1,6 @@
 import {useState, useEffect} from 'react';
 import type {ReactNode} from 'react';
+import {useNavigate} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
 import type {ApiItem} from './types';
 import {api} from './api';
@@ -45,6 +46,10 @@ interface DataTableProps {
     maxMainColumns?: number;
     preview?: (values: Record<string, unknown>) => ReactNode;
     hideCreate?: boolean;
+    /** Rota do formulário para navegar ao clicar em Editar (fluxo legado lista -> formulário). */
+    editNavigateTo?: string;
+    /** Rota do formulário para navegar ao clicar em Novo. */
+    createNavigateTo?: string;
 }
 
 const toTitle = (value: string) =>
@@ -170,7 +175,8 @@ type ModalState =
     | { mode: 'delete'; item: ApiItem }
     | null;
 
-export function DataTable({path, columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false}: DataTableProps) {
+export function DataTable({path, columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, editNavigateTo, createNavigateTo}: DataTableProps) {
+    const navigate = useNavigate();
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(PAGE_SIZES[0]);
     const [modal, setModal] = useState<ModalState>(null);
@@ -249,7 +255,9 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
                 <button
                     className="btn-action btngreen"
                     title="Editar"
-                    onClick={() => setModal({mode: 'edit', item, cols: editableColumns(item, cols)})}
+                    onClick={() => editNavigateTo
+                        ? navigate(`${editNavigateTo}?id=${item.id}`)
+                        : setModal({mode: 'edit', item, cols: editableColumns(item, cols)})}
                 >
                     ✎
                 </button>
@@ -391,7 +399,10 @@ if (canRelatorio) {
         <div className="data-table">
             <div className="data-table-toolbar">
                 {canCreate &&
-                <button className="btn-primary btnstop" onClick={() => setModal({mode: 'create'})}>Novo</button>}
+                <button className="btn-primary btnstop"
+                        onClick={() => createNavigateTo ? navigate(createNavigateTo) : setModal({mode: 'create'})}>
+                    Novo
+                </button>}
                 {notice && <span className="data-table-notice">{notice}</span>}
             </div>
             {q.isError ? (

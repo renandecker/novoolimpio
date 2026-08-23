@@ -16,7 +16,9 @@ export default function ViewUsuarioListUsuarioListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <h1>Usuario</h1>
-                <DataTable path="/api/view/usuario/listUsuario" columns={COLUMNS} maxMainColumns={COLUMNS.length}/>
+                <DataTable path="/api/view/usuario/listUsuario" columns={COLUMNS} maxMainColumns={COLUMNS.length}
+                           editNavigateTo="/view/usuario/formUsuario"
+                           createNavigateTo="/view/usuario/formUsuario"/>
             </main>
         </PermissionGate>
     );

@@ -13,7 +13,9 @@ export default function ViewPessoaListPessoaJuridicaListScreen() {
             <main>
                 <h1>Pessoa Juridica</h1>
                 <DataTable path="/api/view/pessoa/listPessoaJuridica" columns={COLUMNS}
-                           maxMainColumns={COLUMNS.length}/>
+                           maxMainColumns={COLUMNS.length}
+                           editNavigateTo="/view/pessoa/formPessoaJuridica"
+                           createNavigateTo="/view/pessoa/formPessoaJuridica"/>
             </main>
         </PermissionGate>
     );
