@@ -372,6 +372,31 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
         return nativeList(sql, pessoaId);
     }
 
+    public Uni<List<Object[]>> trocasTurmaPorPessoa(Long pessoaId) {
+        String sql = """
+        SELECT tt.id,
+                tt.data,
+                COALESCE(u.username, '') AS usuario_nome,
+                COALESCE(c.nome, '') AS curso,
+                COALESCE(cc.descricao, '') AS componente,
+                COALESCE(un.nome_fantasia, '') AS unidade,
+                COALESCE(of_antes.sequencia, 0) AS turma_antes,
+                COALESCE(of_depois.sequencia, 0) AS turma_depois
+        FROM edc_troca_turma tt
+        JOIN edc_matricula m ON m.id = tt.id_matricula
+        JOIN edc_contrato ct ON ct.id = m.id_contrato
+        JOIN edc_curso c ON c.id = ct.id_curso
+        LEFT JOIN bas_usuario u ON u.id = tt.id_usuario
+        LEFT JOIN edc_oferecimento_componente_curricular of_antes ON of_antes.id = tt.id_oferecimento_componente_curricular_antes
+        LEFT JOIN edc_oferecimento_componente_curricular of_depois ON of_depois.id = tt.id_oferecimento_componente_curricular_depois
+        LEFT JOIN edc_componente_curricular cc ON cc.id = of_antes.id_componente_curricular
+        LEFT JOIN bas_unidade un ON un.id = ct.id_unidade
+        WHERE ct.id_pessoa = ?1
+        ORDER BY tt.data DESC NULLS LAST, tt.id DESC
+        """;
+        return nativeList(sql, pessoaId);
+    }
+
     // Registro de aulas (edc_aula/edc_aula_aluno - legado V1_4_584__aulas.sql):
     // aulas das turmas (oferecimentos) em que o aluno possui matricula ativa.
 

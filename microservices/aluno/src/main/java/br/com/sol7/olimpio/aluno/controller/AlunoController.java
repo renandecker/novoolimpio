@@ -14,6 +14,7 @@ import br.com.sol7.olimpio.aluno.dto.AlunoDtos.HistoricoCobrancaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.HistoricoNapResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.MatriculaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.PessoaDadosResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.TrocaTurmaResponse;
 import br.com.sol7.olimpio.aluno.service.AlunoService;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
@@ -155,6 +156,12 @@ public class AlunoController {
     @Path("/gestao/{pessoaId}/historico-aluno")
     public Uni<List<HistoricoAlunoResponse>> gestaoHistoricoAluno(@PathParam("pessoaId") Long pessoaId) {
         return service.historicoAluno(pessoaId);
+    }
+
+    @GET
+    @Path("/gestao/{pessoaId}/trocas-turma")
+    public Uni<List<TrocaTurmaResponse>> gestaoTrocasTurma(@PathParam("pessoaId") Long pessoaId) {
+        return service.trocasTurmaPorPessoa(pessoaId);
     }
 
     private String username(ContainerRequestContext ctx) {

@@ -213,6 +213,7 @@ public class CaixaService {
 
     // Migrado de CaixaController.relatorioMov / totalRelatorio
     // Calcula totais do caixa por forma de pagamento
+    @SuppressWarnings("deprecation")
     public Uni<CaixaTotais> calcularTotaisCaixa(Long caixaId) {
         return Uni.combine().all().unis(
                 movimentacaoRepository.totalPorFormaPagamento(caixaId, "DINHEIRO"),

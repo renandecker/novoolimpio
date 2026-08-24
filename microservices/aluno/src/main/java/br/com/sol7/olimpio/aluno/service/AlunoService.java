@@ -22,6 +22,7 @@ import br.com.sol7.olimpio.aluno.dto.AlunoDtos.HistoricoAlunoResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.HistoricoCobrancaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.HistoricoNapResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.LigacaoCobrancaResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.TrocaTurmaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.LigacaoNapResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.MatriculaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.OcorrenciaPresencaResponse;
@@ -173,13 +174,13 @@ public class AlunoService {
                 repository.parcelasMatriculaPorPessoa(pessoaId),
                 repository.parcelasProdutosPorPessoa(pessoaId),
                 repository.parcelasCanceladasPorPessoa(pessoaId))
-                .combinedWith(r -> new FinanceiroResponse(
-                        toResumo(r.get(0)),
-                        ((List<?>) r.get(1)).stream().map(row -> toContratoFinanceiro((Object[]) row)).toList(),
-                        ((List<?>) r.get(2)).stream().map(row -> toParcela((Object[]) row)).toList(),
-                        ((List<?>) r.get(3)).stream().map(row -> toParcela((Object[]) row)).toList(),
-                        ((List<?>) r.get(4)).stream().map(row -> toParcela((Object[]) row)).toList(),
-                        ((List<?>) r.get(5)).stream().map(row -> toParcela((Object[]) row)).toList()));
+                .asTuple().map(t -> new FinanceiroResponse(
+                        toResumo(t.getItem1()),
+                        ((List<?>) t.getItem2()).stream().map(row -> toContratoFinanceiro((Object[]) row)).toList(),
+                        ((List<?>) t.getItem3()).stream().map(row -> toParcela((Object[]) row)).toList(),
+                        ((List<?>) t.getItem4()).stream().map(row -> toParcela((Object[]) row)).toList(),
+                        ((List<?>) t.getItem5()).stream().map(row -> toParcela((Object[]) row)).toList(),
+                        ((List<?>) t.getItem6()).stream().map(row -> toParcela((Object[]) row)).toList()));
     }
 
     public Uni<PessoaDadosResponse> pessoaDados(Long pessoaId) {
@@ -197,23 +198,28 @@ public class AlunoService {
         return Uni.combine().all().unis(
                 repository.historicoNapLigacaoPorPessoa(pessoaId),
                 repository.historicoNapEmailPorPessoa(pessoaId))
-                .combinedWith(r -> new HistoricoNapResponse(
-                        ((List<?>) r.get(0)).stream().map(row -> toLigacaoNap((Object[]) row)).toList(),
-                        ((List<?>) r.get(1)).stream().map(row -> toEmailNap((Object[]) row)).toList()));
+                .asTuple().map(t -> new HistoricoNapResponse(
+                        ((List<?>) t.getItem1()).stream().map(row -> toLigacaoNap((Object[]) row)).toList(),
+                        ((List<?>) t.getItem2()).stream().map(row -> toEmailNap((Object[]) row)).toList()));
     }
 
     public Uni<HistoricoCobrancaResponse> historicoCobranca(Long pessoaId) {
         return Uni.combine().all().unis(
                 repository.historicoCobrancaLigacaoPorPessoa(pessoaId),
                 repository.historicoCobrancaEmailPorPessoa(pessoaId))
-                .combinedWith(r -> new HistoricoCobrancaResponse(
-                        ((List<?>) r.get(0)).stream().map(row -> toLigacaoCobranca((Object[]) row)).toList(),
-                        ((List<?>) r.get(1)).stream().map(row -> toEmailCobranca((Object[]) row)).toList()));
+                .asTuple().map(t -> new HistoricoCobrancaResponse(
+                        ((List<?>) t.getItem1()).stream().map(row -> toLigacaoCobranca((Object[]) row)).toList(),
+                        ((List<?>) t.getItem2()).stream().map(row -> toEmailCobranca((Object[]) row)).toList()));
     }
 
     public Uni<List<HistoricoAlunoResponse>> historicoAluno(Long pessoaId) {
         return repository.historicoAlunoPorPessoa(pessoaId)
                 .map(rows -> rows.stream().map(this::toHistoricoAluno).toList());
+    }
+
+    public Uni<List<TrocaTurmaResponse>> trocasTurmaPorPessoa(Long pessoaId) {
+        return repository.trocasTurmaPorPessoa(pessoaId)
+                .map(rows -> rows.stream().map(this::toTrocaTurma).toList());
     }
 
     public Uni<List<BoletimResponse>> boletimCompletoPorPessoa(Long pessoaId) {
@@ -513,6 +519,18 @@ public class AlunoService {
     private HistoricoAlunoResponse toHistoricoAluno(Object[] r) {
         return new HistoricoAlunoResponse(asLong(r[0]), asLocalDateTime(r[1]), asString(r[2]),
                 asLong(r[3]), asString(r[4]));
+    }
+
+    private TrocaTurmaResponse toTrocaTurma(Object[] r) {
+        return new TrocaTurmaResponse(
+                asLong(r[0]),
+                asLocalDateTime(r[1]),
+                asString(r[2]),
+                asString(r[3]),
+                asString(r[4]),
+                asString(r[5]),
+                asInt(r[6]),
+                asInt(r[7]));
     }
 
     private MatriculaResponse toMatricula(Object[] row) {

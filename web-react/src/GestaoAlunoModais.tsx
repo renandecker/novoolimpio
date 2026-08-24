@@ -16,6 +16,17 @@ export interface PessoaDados {
     celular: string;
 }
 
+export interface TrocaTurma {
+    id: number;
+    data: string;
+    usuarioNome: string;
+    curso: string;
+    componente: string;
+    unidade: string;
+    turmaAntes: number | null;
+    turmaDepois: number | null;
+}
+
 export interface ResumoFinanceiro {
     situacao: string;
     diasAtraso: number;
@@ -534,14 +545,14 @@ export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
         queryKey: ['gestao-aluno', 'financeiro', pessoaId],
         queryFn: async () => (await api.get<Financeiro>(`/api/aluno/gestao/${pessoaId}/financeiro`)).data,
     });
+    const [pixModalOpen, setPixModalOpen] = useState(false);
+    const [selectedParcela, setSelectedParcela] = useState<Parcela | null>(null);
+
     if (q.isLoading) return <ModalFrame titulo="Situação Financeira" onClose={onClose}><Carregando/></ModalFrame>;
     if (q.isError || !q.data) return <ModalFrame titulo="Situação Financeira" onClose={onClose}><Erro
         mensagem={apiError(q.error)}/></ModalFrame>;
     const {resumo, contratos, parcelasMes, parcelasMatricula, parcelasProdutos, parcelasCanceladas} = q.data;
     const todasParcelas = [...parcelasMes, ...parcelasMatricula, ...parcelasProdutos, ...parcelasCanceladas];
-
-    const [pixModalOpen, setPixModalOpen] = useState(false);
-    const [selectedParcela, setSelectedParcela] = useState<Parcela | null>(null);
 
     const handlePixClick = (parcela: Parcela) => {
         if (parcela.dataPagamento) return; // Não mostrar botão para parcelas pagas
@@ -1015,10 +1026,17 @@ export function PresencasModal({pessoaId, onClose}: GestaoModalProps) {
         queryKey: ['gestao-aluno', 'frequencias', pessoaId],
         queryFn: async () => (await api.get<Frequencia[]>(`/api/aluno/gestao/${pessoaId}/frequencias`)).data,
     });
-    if (q.isLoading) return <ModalFrame titulo="Presenças" onClose={onClose}><Carregando/></ModalFrame>;
+    const qTroca = useQuery({
+        queryKey: ['gestao-aluno', 'trocas-turma', pessoaId],
+        queryFn: async () => (await api.get<TrocaTurma[]>(`/api/aluno/gestao/${pessoaId}/trocas-turma`)).data,
+    });
+    if (q.isLoading || qTroca.isLoading) return <ModalFrame titulo="Presenças" onClose={onClose}><Carregando/></ModalFrame>;
     if (q.isError) return <ModalFrame titulo="Presenças" onClose={onClose}><Erro
         mensagem={apiError(q.error)}/></ModalFrame>;
+    if (qTroca.isError) return <ModalFrame titulo="Presenças" onClose={onClose}><Erro
+        mensagem={apiError(qTroca.error)}/></ModalFrame>;
     const frequencias = q.data ?? [];
+    const trocasTurma = qTroca.data ?? [];
     return (
         <ModalFrame titulo="Presenças" onClose={onClose}>
             <Accordion
@@ -1081,7 +1099,35 @@ export function PresencasModal({pessoaId, onClose}: GestaoModalProps) {
                     {
                         key: 'trocaTurma',
                         title: 'Troca Turma',
-                        content: <p className="master-detail-empty">Nenhuma troca de turma registrada.</p>,
+                        content: trocasTurma.length === 0 ? (
+                            <p className="master-detail-empty">Nenhuma troca de turma registrada.</p>
+                        ) : (
+                            <TabelaDadosPaginada
+                                vazio="Nenhuma troca de turma registrada."
+                                colunas={[
+                                    {
+                                        key: 'data',
+                                        label: 'Data',
+                                        render: (linha) => fmtDataHora(linha.data as string | null)
+                                    },
+                                    {key: 'usuarioNome', label: 'Usuário'},
+                                    {key: 'curso', label: 'Curso'},
+                                    {key: 'componente', label: 'Componente'},
+                                    {key: 'unidade', label: 'Unidade'},
+                                    {
+                                        key: 'turmaAntes',
+                                        label: 'Turma Anterior',
+                                        render: (linha) => linha.turmaAntes ?? '—'
+                                    },
+                                    {
+                                        key: 'turmaDepois',
+                                        label: 'Turma Nova',
+                                        render: (linha) => linha.turmaDepois ?? '—'
+                                    },
+                                ]}
+                                linhas={trocasTurma as unknown as Record<string, unknown>[]}
+                            />
+                        ),
                     },
                 ]}
             />
@@ -1133,12 +1179,13 @@ interface PixQrCodeModalProps {
 }
 
 function PixQrCodeModal({isOpen, onClose, parcela}: PixQrCodeModalProps) {
-    if (!isOpen || !parcela) return null;
     const [pixData, setPixData] = useState<{qrcode: string; chave: string; situacao: string} | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [sendingEmail, setSendingEmail] = useState(false);
     const [emailSent, setEmailSent] = useState(false);
+
+    if (!isOpen || !parcela) return null;
 
     // Fetch existing PIX data when modal opens and parcela has idParcelaPix
     useEffect(() => {

@@ -15,7 +15,7 @@ if /i not "%OLIMPIO_FROM_TEMP%"=="1" (
     copy /y "%~f0" "%TEMP%\olimpio-start-all.bat" >nul 2>&1
     if exist "%TEMP%\olimpio-start-all.bat" (
         endlocal & set "OLIMPIO_FROM_TEMP=1"
-        cmd /c ""%TEMP%\olimpio-start-all.bat" %*"
+        cmd /c "%TEMP%\olimpio-start-all.bat" %*
         set RC=%errorlevel%
         exit /b %RC%
     )
@@ -175,7 +175,7 @@ if %errorlevel% neq 0 (
     echo [ERRO] Falha ao subir containers. Detalhes em: %DOCKER_LOG%
     echo.
     echo Ultimas linhas do log:
-    powershell -NoProfile -Command "Get-Content -LiteralPath '%DOCKER_LOG%' -Tail 20" 2>nul
+    powershell -NoProfile -Command "Get-Content -LiteralPath \"%DOCKER_LOG%\" -Tail 20" 2>nul
     exit /b 1
 )
 
@@ -234,7 +234,7 @@ set SVC_PORT=%2
 set HEALTH_PATH=/q/health
 if "%SVC_PORT%"=="3000" set HEALTH_PATH=/
 
-curl -sL -f http://localhost:%SVC_PORT%%HEALTH_PATH% >nul 2>&1
+curl -sL -f "http://localhost:%SVC_PORT%%HEALTH_PATH%" >nul 2>&1
 if !errorlevel! equ 0 (
     set /a HEALTHY+=1
 ) else (
@@ -283,11 +283,11 @@ echo Pressione Ctrl+C para parar.
 echo.
 
 echo Iniciando monitoramento de saude em janela separada...
-copy /y "%OLIMPIO_WORKDIR%health-monitor.bat" "%TEMP%\olimpio-health-monitor.bat" >nul 2>&1
+copy /y "%OLIMPIO_WORKDIR%\health-monitor.bat" "%TEMP%\olimpio-health-monitor.bat" >nul 2>&1
 if exist "%TEMP%\olimpio-health-monitor.bat" (
     start "Health Monitor" cmd /k ""%TEMP%\olimpio-health-monitor.bat""
 ) else (
-    start "Health Monitor" cmd /k ""%OLIMPIO_WORKDIR%health-monitor.bat""
+    start "Health Monitor" cmd /k ""%OLIMPIO_WORKDIR%\health-monitor.bat""
 )
 
 %DC% up --build 2> "%DOCKER_LOG%"

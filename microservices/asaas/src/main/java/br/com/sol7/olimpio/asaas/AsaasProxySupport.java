@@ -22,6 +22,7 @@ public class AsaasProxySupport {
     @Inject
     ObjectMapper mapper;
 
+    @SuppressWarnings("unchecked")
     public PagedResponse<Map<String, Object>> toPaged(JsonNode asaasResponse, int page, int size) {
         List<Map<String, Object>> content = new ArrayList<>();
         JsonNode data = asaasResponse != null ? asaasResponse.get("data") : null;

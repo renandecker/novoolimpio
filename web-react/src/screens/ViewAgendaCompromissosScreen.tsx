@@ -200,7 +200,7 @@ export default function ViewAgendaCompromissosScreen() {
     const [showChangeStatus, setShowChangeStatus] = useState(false);
     const [showCloseCompromisso, setShowCloseCompromisso] = useState(false);
     const [showNextStatus, setShowNextStatus] = useState(false);
-    const [formData, setFormData] = useState<Partial<Compromisso>>({});
+    const [formData, setFormData] = useState<Partial<Compromisso> & {resultadoSelecionado?: {id: number; label: string} | null; testemunhaSelecionada?: {id: number; label: string} | null}>({resultadoSelecionado: null, testemunhaSelecionada: null});
     const [isEditing, setIsEditing] = useState(false);
     const [formHorarios, setFormHorarios] = useState<Horario[]>([]);
     const [formTipoHorario, setFormTipoHorario] = useState<'unidade' | 'pessoa'>('unidade');
@@ -208,7 +208,6 @@ export default function ViewAgendaCompromissosScreen() {
     const [nextStatusAtendente, setNextStatusAtendente] = useState<{id: number; login: string; nome: string} | null>(null);
     const [nextStatusTestemunhas, setNextStatusTestemunhas] = useState<Array<{id: number; login: string; nome: string}>>([]);
     const [nextStatusObservacao, setNextStatusObservacao] = useState('');
-    const [formData, setFormData] = useState<Partial<Compromisso> & {resultadoSelecionado?: {id: number; label: string} | null; testemunhaSelecionada?: {id: number; label: string} | null}>({resultadoSelecionado: null, testemunhaSelecionada: null});
 
     const usuariosQuery = useQuery({
         queryKey: ['usuarios-options'],

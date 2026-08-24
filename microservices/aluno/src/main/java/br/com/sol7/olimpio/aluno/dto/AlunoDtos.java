@@ -149,4 +149,10 @@ public final class AlunoDtos {
 
     public record AvaliacaoRespostaRequest(Long perguntaId, Long respostaId, String respostaTexto) {
     }
+
+    public record TrocaTurmaResponse(
+            Long id, LocalDateTime data, String usuarioNome,
+            String curso, String componente, String unidade,
+            Integer turmaAntes, Integer turmaDepois) {
+    }
 }
