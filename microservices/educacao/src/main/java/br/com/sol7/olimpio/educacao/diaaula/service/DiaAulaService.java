@@ -111,11 +111,12 @@ public class DiaAulaService {
         }));
     }
 
+    // Consultas serializadas: consultas concorrentes na mesma sessao reativa causam
+    // "Illegal pop() with non-matching JdbcValuesSourceProcessingState".
     private Uni<Refs> loadRefs() {
-        return Uni.combine().all()
-                .unis(turnoEducacaoRepository.listAll(), tempoAulaRepository.listAll())
-                .asTuple()
-                .map(tuple -> new Refs(tuple.getItem1(), tuple.getItem2()));
+        return turnoEducacaoRepository.listAll()
+                .flatMap(turnos -> tempoAulaRepository.listAll()
+                        .map(tempos -> new Refs(turnos, tempos)));
     }
 
     private record Refs(List<TurnoEducacao> turnos, List<TempoAula> tempos) {

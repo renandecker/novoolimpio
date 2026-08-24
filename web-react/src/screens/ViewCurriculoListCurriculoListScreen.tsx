@@ -27,8 +27,10 @@ export default function ViewCurriculoListCurriculoListScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>Curriculo</h1>
-                <DataTable path="/api/educacao/curriculo" columns={COLUMNS} maxMainColumns={COLUMNS.length}/>
+                <h1>Currículo do Curso</h1>
+                <DataTable path="/api/educacao/curriculo" columns={COLUMNS} maxMainColumns={COLUMNS.length}
+                           editNavigateTo="/view/curriculo/formCurriculo"
+                           createNavigateTo="/view/curriculo/formCurriculo"/>
             </main>
         </PermissionGate>
     );

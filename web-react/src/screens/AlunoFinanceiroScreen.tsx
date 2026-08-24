@@ -51,7 +51,7 @@ function ParcelasTabela({parcelas, titulo, pessoaId}: { parcelas: Parcela[]; tit
                     </span>
                             </td>
                             <td>
-                                {!p.dataPagamento && (
+                                {!p.dataPagamento && p.situacao !== 'Cancelado' && (
                                     <button
                                         type="button"
                                         className={p.idParcelaPix ? 'btnyellow' : 'btnblue'}

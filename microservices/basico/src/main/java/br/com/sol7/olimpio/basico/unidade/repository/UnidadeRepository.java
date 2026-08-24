@@ -14,7 +14,7 @@ public class UnidadeRepository implements PanacheRepository<Unidade> {
     // Migrado de UnidadeRepository.autoCompleteComUnidades (legado) - HQL original:
     // select distinct  u from Curriculo usu inner join usu.unidades u  where (lower(u.sucinto) like '%' || ?1 || '%' OR lower(u.nomeFantasia) like '%' || ?1 || '%'  OR lower(u.CNPJ) like '%' || ?1 || '%' OR lower(u.razaoSocial) like '%' || ?1 || '%' OR str(u.id) = ?1)  and u in (?2) order by u.sucinto
     public static final String SQL_AUTO_COMPLETE_COM_UNIDADES =
-            "SELECT DISTINCT u.* FROM edc_curriculo usu INNER JOIN edc_curriculo_unidade usu_u_jt ON usu_u_jt.id_curriculo = usu.id INNER JOIN bas_unidade u ON u.id = usu_u_jt.id_unidade WHERE (lower(u.sucinto) like '%' || ?1 || '%' OR lower(u.nome_fantasia) like '%' || ?1 || '%' OR lower(u.c_n_p_j) like '%' || ?1 || '%' OR lower(u.razao_social) like '%' || ?1 || '%' OR CAST(u.id AS text) = ?1) and u in (?2) ORDER BY u.sucinto";
+            "SELECT DISTINCT u.* FROM edc_curriculo usu INNER JOIN edc_curriculo_unidade usu_u_jt ON usu_u_jt.id_curriculo = usu.id INNER JOIN bas_unidade u ON u.id = usu_u_jt.id_unidade WHERE (lower(u.sucinto) like '%' || ?1 || '%' OR lower(u.nome_fantasia) like '%' || ?1 || '%' OR lower(u.cnpj) like '%' || ?1 || '%' OR lower(u.razao_social) like '%' || ?1 || '%' OR CAST(u.id AS text) = ?1) and u in (?2) ORDER BY u.sucinto";
 
     public Uni<java.util.List<Unidade>> autoCompleteComUnidades(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
@@ -28,7 +28,7 @@ public class UnidadeRepository implements PanacheRepository<Unidade> {
     // Migrado de UnidadeRepository.autoCompleteComUsuario (legado) - HQL original:
     // select distinct  u from Usuario usu inner join usu.unidades u where usu = ?2 and (lower(u.sucinto) like '%' || ?1 || '%' OR lower(u.nomeFantasia) like '%' || ?1 || '%'  OR lower(u.CNPJ) like '%' || ?1 || '%' OR lower(u.razaoSocial) like '%' || ?1 || '%' OR str(u.id) = ?1) order by u.sucinto
     public static final String SQL_AUTO_COMPLETE_COM_USUARIO =
-            "SELECT DISTINCT u.* FROM bas_usuario usu INNER JOIN bas_usuario_unidade usu_u_jt ON usu_u_jt.id_usuario = usu.id INNER JOIN bas_unidade u ON u.id = usu_u_jt.id_unidade WHERE usu.id = ?2 and (lower(u.sucinto) like '%' || ?1 || '%' OR lower(u.nome_fantasia) like '%' || ?1 || '%' OR lower(u.c_n_p_j) like '%' || ?1 || '%' OR lower(u.razao_social) like '%' || ?1 || '%' OR CAST(u.id AS text) = ?1) ORDER BY u.sucinto LIMIT 10";
+            "SELECT DISTINCT u.* FROM bas_usuario usu INNER JOIN bas_usuario_unidade usu_u_jt ON usu_u_jt.id_usuario = usu.id INNER JOIN bas_unidade u ON u.id = usu_u_jt.id_unidade WHERE usu.id = ?2 and (lower(u.sucinto) like '%' || ?1 || '%' OR lower(u.nome_fantasia) like '%' || ?1 || '%' OR lower(u.cnpj) like '%' || ?1 || '%' OR lower(u.razao_social) like '%' || ?1 || '%' OR CAST(u.id AS text) = ?1) ORDER BY u.sucinto LIMIT 10";
 
     public Uni<java.util.List<Unidade>> autoCompleteComUsuario(String query, Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
@@ -42,7 +42,7 @@ public class UnidadeRepository implements PanacheRepository<Unidade> {
     // Migrado de UnidadeRepository.autoComplete (legado) - HQL original:
     // select u from Unidade u where lower(u.sucinto) like '%' || ?1 || '%' OR lower(u.nomeFantasia) like '%' || ?1 || '%' OR lower(u.CNPJ) like '%' || ?1 || '%'  OR lower(u.razaoSocial) like '%' || ?1 || '%' OR str(u.id) = ?1 order by u.sucinto
     public static final String SQL_AUTO_COMPLETE =
-            "SELECT u.* FROM bas_unidade u WHERE lower(u.sucinto) like '%' || ?1 || '%' OR lower(u.nome_fantasia) like '%' || ?1 || '%' OR lower(u.c_n_p_j) like '%' || ?1 || '%' OR lower(u.razao_social) like '%' || ?1 || '%' OR CAST(u.id AS text) = ?1 ORDER BY u.sucinto LIMIT 10";
+            "SELECT u.* FROM bas_unidade u WHERE lower(u.sucinto) like '%' || ?1 || '%' OR lower(u.nome_fantasia) like '%' || ?1 || '%' OR lower(u.cnpj) like '%' || ?1 || '%' OR lower(u.razao_social) like '%' || ?1 || '%' OR CAST(u.id AS text) = ?1 ORDER BY u.sucinto LIMIT 10";
 
     public Uni<java.util.List<Unidade>> autoComplete(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()

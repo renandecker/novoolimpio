@@ -1,6 +1,6 @@
 import {useRef, useState, useEffect} from 'react';
 import {api} from '../api';
-import {PermissionGate} from '../permissions';
+import {PermissionGate, usePermissions} from '../permissions';
 import {useAuth} from '../auth';
 import {Tabs} from '../Tabs';
 import {AutoComplete, type AutoCompleteOption} from '../AutoComplete';
@@ -14,6 +14,7 @@ type Turma = {
     curso: string;
     componenteCurricular: string;
     status: string;
+    oferecimentoId?: number;
 };
 
 type Ocorrencia = { id: number; data: string; ativo: boolean };
@@ -565,27 +566,31 @@ function GestaoTab() {
         className={`gp-status gp-status-${t.status.toLowerCase().replace(/ /g, '-')} ${legacyClassName(t.status) ?? ''}`.trim()}>{t.status}</span>
 </td>
                                 <td className="gp-acoes">
-                                    {(t.status === 'EM_ANDAMENTO' || t.status === 'FINALIZADA') && (
-                                        <>
-                                            <button className="gp-btn gp-btn-acoes" title="Caderno chamada"
-                                                    onClick={() => abrirCaderno(t)}>
-                                                📖
-                                            </button>
-                                            <button className="gp-btn gp-btn-acoes" title="Notas"
-                                                    onClick={() => abrirNotas(t)}>
-                                                ✏️
-                                            </button>
-                                            <button className="gp-btn gp-btn-acoes" title="Registros de aula"
-                                                    onClick={() => abrirRegistro(t)}>
-                                                📄
-                                            </button>
-                                            <button className="gp-btn gp-btn-acoes" title="Aulas"
-                                                    onClick={() => abrirAula(t)}>
-                                                🎬
-                                            </button>
-                                        </>
-                                    )}
-                                </td>
+                                {(t.status === 'EM_ANDAMENTO' || t.status === 'FINALIZADA') && (
+                                    <>
+                                        <button className="gp-btn gp-btn-acoes btnstop" title="Caderno chamada"
+                                                onClick={() => abrirCaderno(t)}>
+                                            📖
+                                        </button>
+                                        <button className="gp-btn gp-btn-acoes btngreen" title="Notas"
+                                                onClick={() => abrirNotas(t)}>
+                                            ✏️
+                                        </button>
+                                        <button className="gp-btn gp-btn-acoes btnblack" title="Registros de aula"
+                                                onClick={() => abrirRegistro(t)}>
+                                            📄
+                                        </button>
+                                        <button className="gp-btn gp-btn-acoes" title="Aulas"
+                                                onClick={() => abrirAula(t)}>
+                                            🎬
+                                        </button>
+                                    </>
+                                )}
+                                <button className="gp-btn gp-btn-acoes btnyellow" title="Informações"
+                                        onClick={() => alert('Informações - não implementado')}>
+                                    ℹ️
+                                </button>
+                            </td>
                             </tr>
                         ))}
                         {turmas.length === 0 && (

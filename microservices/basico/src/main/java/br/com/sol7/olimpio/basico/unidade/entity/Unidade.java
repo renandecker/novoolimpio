@@ -13,7 +13,7 @@ public class Unidade extends PanacheEntity {
     public String razaoSocial;
     @Column(name = "nome_fantasia")
     public String nomeFantasia;
-    @Column(name = "c_n_p_j")
+    @Column(name = "cnpj")
     public String CNPJ;
     @Column(name = "inscricao_estadual")
     public String inscricaoEstadual;
@@ -39,7 +39,7 @@ public class Unidade extends PanacheEntity {
     public String pontoReferencia;
     @Column(name = "sucinto")
     public String sucinto;
-    @Column(name = "diretor_ensino")
+    @Column(name = "diretorensino")
     public String diretorEnsino;
     @Column(name = "coordenador")
     public String coordenador;

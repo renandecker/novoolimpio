@@ -1,9 +1,10 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {PermissionGate} from '../permissions';
 import {DataTable, type DataTableColumn} from '../DataTable';
 import {MasterDetail} from '../MasterDetail';
 import {Tabs} from '../Tabs';
 import {Wizard} from '../Wizard';
+import {api} from '../api';
 import {
     UNIDADE_SOURCE,
     UNIDADE_COLUMNS,
@@ -17,6 +18,26 @@ import type {ApiItem} from '../types';
 const TURMA_COLUMNS: DataTableColumn[] = [
     {key: 'nome', label: 'Nome'},
 ];
+
+interface NotasResponse {
+    turma: {id: number; nome: string};
+    avaliacoes: Array<{id: number; nome: string; data: string; peso: number}>;
+    alunos: Array<{
+        id: number;
+        nome: string;
+        notas: Array<{avaliacaoId: number; valor: number | null}>;
+    }>;
+}
+
+interface PresencasResponse {
+    turma: {id: number; nome: string};
+    aulas: Array<{id: number; data: string; tema: string}>;
+    alunos: Array<{
+        id: number;
+        nome: string;
+        presencas: Array<{aulaId: number; status: string}>;
+    }>;
+}
 
 const MATRICULA_COLUMNS: DataTableColumn[] = [
     {key: 'contratoId', label: 'Contrato'},
@@ -44,25 +65,115 @@ const PROFESSOR_COLUMNS: DataTableColumn[] = [
 ];
 
 /** <p:dialog id="dialogo" header="Finalizando Turma"><p:tabView> — plain tabs, not a wizard. */
-function FinalizarTurmaModal({onClose}: { onClose: () => void }) {
+function FinalizarTurmaModal({turma, onClose}: { turma: ApiItem | null; onClose: () => void }) {
+    const [notas, setNotas] = useState<NotasResponse | null>(null);
+    const [presencas, setPresencas] = useState<PresencasResponse | null>(null);
+    const [loadingNotas, setLoadingNotas] = useState(false);
+    const [loadingPresencas, setLoadingPresencas] = useState(false);
+    const [activeTab, setActiveTab] = useState<'matriculas' | 'notas' | 'presencas'>('matriculas');
+
+    useEffect(() => {
+        if (!turma) return;
+        const fetchNotas = async () => {
+            setLoadingNotas(true);
+            try {
+                const {data} = await api.get<NotasResponse>(`/api/educacao/turma/${turma.id}/notas`);
+                setNotas(data);
+            } catch {
+                setNotas(null);
+            } finally {
+                setLoadingNotas(false);
+            }
+        };
+        const fetchPresencas = async () => {
+            setLoadingPresencas(true);
+            try {
+                const {data} = await api.get<PresencasResponse>(`/api/educacao/turma/${turma.id}/presencas`);
+                setPresencas(data);
+            } catch {
+                setPresencas(null);
+            } finally {
+                setLoadingPresencas(false);
+            }
+        };
+        if (activeTab === 'notas') fetchNotas();
+        if (activeTab === 'presencas') fetchPresencas();
+    }, [turma, activeTab]);
+
+    const renderNotas = () => {
+        if (loadingNotas) return <p className="master-detail-empty">Carregando notas...</p>;
+        if (!notas) return <p className="master-detail-empty">Erro ao carregar notas.</p>;
+        if (!notas.alunos?.length) return <p className="master-detail-empty">Nenhuma nota lançada.</p>;
+        return (
+            <div style={{overflowX: 'auto'}}>
+                <table className="aluno-portal-tabela">
+                    <thead>
+                    <tr>
+                        <th>Aluno</th>
+                        {notas.avaliacoes.map(a => <th key={a.id}>{a.nome}</th>)}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {notas.alunos.map(aluno => (
+                        <tr key={aluno.id}>
+                            <td><strong>{aluno.nome}</strong></td>
+                            {notas.avaliacoes.map(ava => {
+                                const nota = aluno.notas.find(n => n.avaliacaoId === ava.id);
+                                return <td key={ava.id}>{nota?.valor ?? '-'}</td>;
+                            })}
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+    };
+
+    const renderPresencas = () => {
+        if (loadingPresencas) return <p className="master-detail-empty">Carregando presenças...</p>;
+        if (!presencas) return <p className="master-detail-empty">Erro ao carregar presenças.</p>;
+        if (!presencas.alunos?.length) return <p className="master-detail-empty">Nenhuma presença registrada.</p>;
+        return (
+            <div style={{overflowX: 'auto'}}>
+                <table className="aluno-portal-tabela">
+                    <thead>
+                    <tr>
+                        <th>Aluno</th>
+                        {presencas.aulas.map(a => <th key={a.id} title={a.tema}>{formatarData(a.data)}</th>)}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {presencas.alunos.map(aluno => (
+                        <tr key={aluno.id}>
+                            <td><strong>{aluno.nome}</strong></td>
+                            {presencas.aulas.map(aula => {
+                                const p = aluno.presencas.find(pr => pr.aulaId === aula.id);
+                                return <td key={aula.id}>{p?.status ?? '-'}</td>;
+                            })}
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+    };
+
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal form-modal" onClick={(event) => event.stopPropagation()}>
-                <h2>Finalizando Turma</h2>
+                <h2>Finalizando Turma: {turma?.nome ?? ''}</h2>
                 <Tabs
                     tabs={[
                         {
                             key: 'matriculas',
                             label: 'Matrículas',
-                            content: <DataTable path="/api/educacao/matricula" columns={MATRICULA_COLUMNS}/>,
+                            content: <DataTable path="/api/educacao/matricula" columns={MATRICULA_COLUMNS} params={{turmaId: turma?.id}} />,
                         },
-                        {key: 'notas', label: 'Notas', content: <p className="master-detail-empty">Notas da turma.</p>},
-                        {
-                            key: 'presencas',
-                            label: 'Presenças',
-                            content: <p className="master-detail-empty">Presenças da turma.</p>
-                        },
+                        {key: 'notas', label: 'Notas', content: renderNotas()},
+                        {key: 'presencas', label: 'Presenças', content: renderPresencas()},
                     ]}
+                    activeKey={activeTab}
+                    onChange={setActiveTab}
                 />
                 <div className="modal-actions form-footer">
                     <button type="button" className="btn-form-back" onClick={onClose}>Fechar</button>
@@ -70,6 +181,13 @@ function FinalizarTurmaModal({onClose}: { onClose: () => void }) {
             </div>
         </div>
     );
+}
+
+function formatarData(valor: string | null | undefined): string {
+    if (!valor) return '-';
+    const [ano, mes, dia] = valor.split('T')[0].split('-');
+    if (!ano || !mes || !dia) return valor;
+    return `${dia}/${mes}/${ano}`;
 }
 
 /** <p:dialog id="dialogProrrogando" widgetVar="prorrogando"><p:wizard> — Dias Aula / Comparativo Aula / Professor. */

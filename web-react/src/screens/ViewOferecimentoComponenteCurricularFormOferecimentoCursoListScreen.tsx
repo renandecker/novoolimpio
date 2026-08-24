@@ -986,21 +986,32 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
                 <div className="field-row">
                     <div className="field-group">
                         <label htmlFor="ofc-sala">Sala</label>
-                        <select
-                            id="ofc-sala"
-                            className="form-input form-select"
-                            value={data.salaId ?? ''}
-                            onChange={(e) => {
-                                const salaId = Number(e.target.value) || null;
-                                updateField('salaId', salaId);
-                                if (salaId) popularVagasPorSala(salaId);
-                            }}
-                        >
-                            <option value="">Selecione</option>
-                            {salasDaUnidade.map((s) => (
-                                <option key={s.id} value={s.id}>{s.label}</option>
-                            ))}
-                        </select>
+                        <div style={{display: 'flex', gap: '8px', alignItems: 'flex-end'}}>
+                            <select
+                                id="ofc-sala"
+                                className="form-input form-select"
+                                style={{flex: 1}}
+                                value={data.salaId ?? ''}
+                                onChange={(e) => {
+                                    const salaId = Number(e.target.value) || null;
+                                    updateField('salaId', salaId);
+                                    if (salaId) popularVagasPorSala(salaId);
+                                }}
+                            >
+                                <option value="">Selecione</option>
+                                {salasDaUnidade.map((s) => (
+                                    <option key={s.id} value={s.id}>{s.label}</option>
+                                ))}
+                            </select>
+                            <button
+                                type="button"
+                                className="btn-secondary ofc-btn-yellow"
+                                title="Disponibilidade da Sala"
+                                onClick={() => alert('Disponibilidade da Sala - não implementado')}
+                            >
+                                Disponibilidade
+                            </button>
+                        </div>
                         {salaSelecionada && (
                             <small className="ofc-hint">
                                 Capacidade: {salaSelecionada.qtd_alunos ?? 0} alunos
@@ -1242,6 +1253,23 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
 
         return (
             <section className="tab-content">
+                <div className="field-row" style={{marginBottom: '16px', justifyContent: 'flex-end'}}>
+                    <button
+                        type="button"
+                        className="btn-secondary ofc-btn-yellow"
+                        title="Disponibilidade dos Professores"
+                        onClick={() => alert('Disponibilidade dos Professores - não implementado')}
+                    >
+                        Disponibilidade
+                    </button>
+                    <button
+                        type="button"
+                        className="btn-primary"
+                        onClick={() => alert('Novo Professor - não implementado')}
+                    >
+                        Professor
+                    </button>
+                </div>
                 <p className="step-description">Selecione os professores de cada Componente Curricular.</p>
                 {turmas.length === 0 ? (
                     <p className="ofc-aviso">Nenhum componente curricular disponível. Volte e selecione o curso.</p>

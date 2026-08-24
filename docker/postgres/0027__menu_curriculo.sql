@@ -14,26 +14,41 @@
 
 -- 1) Modulo raiz "Curriculo" (grupo do menu).
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
-SELECT nextval('public.bas_modulo_id_seq'), NULL, 'Currículo', 'Vagas, empresas e entrevistas do modulo de Curriculo', '🎯', '/curriculo/vagas', 'Gestao de vagas, empresas parceiras e entrevistas.', 310
+SELECT nextval('public.bas_modulo_id_seq'), NULL, 'Currículo', 'Vagas, empresas e entrevistas do modulo de Curriculo', '🎯', '/curriculo/vaga', 'Gestao de vagas, empresas parceiras e entrevistas.', 310
 WHERE NOT EXISTS (
     SELECT 1 FROM public.bas_modulo WHERE lower(rotulo) = 'currículo' AND id_modulo IS NULL
 );
 
--- 2) Telas filhas: Vagas, Empresas, Entrevistas.
+-- 2) Telas filhas: Vagas, Empresas, Entrevistas, Currículo Trabalho, Campos, Configuração.
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
-SELECT nextval('public.bas_modulo_id_seq'), pai.id, 'Vagas', 'Vagas cadastradas', '📋', '/curriculo/vagas', 'Lista e cadastro de vagas (cur_vaga).', 1
+SELECT nextval('public.bas_modulo_id_seq'), pai.id, 'Vagas', 'Vagas cadastradas', '📋', '/curriculo/vaga', 'Lista e cadastro de vagas (cur_vaga).', 1
 FROM public.bas_modulo pai WHERE lower(pai.rotulo) = 'currículo' AND pai.id_modulo IS NULL
-  AND NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE outcome = '/curriculo/vagas' AND id_modulo IS NOT NULL);
+  AND NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE outcome = '/curriculo/vaga' AND id_modulo IS NOT NULL);
 
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
-SELECT nextval('public.bas_modulo_id_seq'), pai.id, 'Empresas', 'Empresas parceiras', '🏢', '/curriculo/empresas', 'Lista e cadastro de empresas (cur_empresa).', 2
+SELECT nextval('public.bas_modulo_id_seq'), pai.id, 'Empresas', 'Empresas parceiras', '🏢', '/curriculo/empresa', 'Lista e cadastro de empresas (cur_empresa).', 2
 FROM public.bas_modulo pai WHERE lower(pai.rotulo) = 'currículo' AND pai.id_modulo IS NULL
-  AND NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE outcome = '/curriculo/empresas');
+  AND NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE outcome = '/curriculo/empresa');
 
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
-SELECT nextval('public.bas_modulo_id_seq'), pai.id, 'Entrevistas', 'Entrevistas agendadas entre aluno e empresa', '🗣️', '/curriculo/entrevistas', 'Acompanhamento de entrevistas (cur_entrevista_vaga_empresa).', 3
+SELECT nextval('public.bas_modulo_id_seq'), pai.id, 'Entrevistas', 'Entrevistas agendadas entre aluno e empresa', '🗣️', '/curriculo/entrevista', 'Acompanhamento de entrevistas (cur_entrevista_vaga_empresa).', 3
 FROM public.bas_modulo pai WHERE lower(pai.rotulo) = 'currículo' AND pai.id_modulo IS NULL
-  AND NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE outcome = '/curriculo/entrevistas');
+  AND NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE outcome = '/curriculo/entrevista');
+
+INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
+SELECT nextval('public.bas_modulo_id_seq'), pai.id, 'Currículo Trabalho', 'Currículos de trabalho dos candidatos', '📄', '/curriculo/curriculo-trabalho', 'Lista de currículos de trabalho (cur_curriculo_trabalho).', 4
+FROM public.bas_modulo pai WHERE lower(pai.rotulo) = 'currículo' AND pai.id_modulo IS NULL
+  AND NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE outcome = '/curriculo/curriculo-trabalho');
+
+INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
+SELECT nextval('public.bas_modulo_id_seq'), pai.id, 'Campos do Currículo', 'Campos configuráveis do currículo', '🧩', '/curriculo/curriculo-campo', 'Configuração de campos do currículo (cur_curriculo_campo).', 5
+FROM public.bas_modulo pai WHERE lower(pai.rotulo) = 'currículo' AND pai.id_modulo IS NULL
+  AND NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE outcome = '/curriculo/curriculo-campo');
+
+INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
+SELECT nextval('public.bas_modulo_id_seq'), pai.id, 'Configuração', 'Configurações do módulo curriculo', '⚙️', '/curriculo/configuracao', 'Configurações gerais (cur_configuracao_empresa).', 6
+FROM public.bas_modulo pai WHERE lower(pai.rotulo) = 'currículo' AND pai.id_modulo IS NULL
+  AND NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE outcome = '/curriculo/configuracao');
 
 -- 3) Concede ao perfil Administrador (qualquer descricao, hierarquia ADMIN) acesso
 --    integral aos novos modulos. Nao e estritamente necessario para o admin ver o
@@ -43,7 +58,10 @@ FROM public.bas_modulo pai WHERE lower(pai.rotulo) = 'currículo' AND pai.id_mod
 INSERT INTO public.bas_perfil_modulo (id_perfil, id_modulo, novo, editar, remover, relatorio, id)
 SELECT p.id, m.id, TRUE, TRUE, TRUE, TRUE, nextval('public.bas_perfil_modulo_id_seq')
 FROM public.bas_perfil p
-JOIN public.bas_modulo m ON m.outcome IN ('/curriculo/vagas', '/curriculo/empresas', '/curriculo/entrevistas')
+JOIN public.bas_modulo m ON m.outcome IN (
+    '/curriculo/vaga', '/curriculo/empresa', '/curriculo/entrevista',
+    '/curriculo/curriculo-trabalho', '/curriculo/curriculo-campo', '/curriculo/configuracao'
+)
 WHERE upper(trim(p.hierarquia)) = 'ADMIN'
   AND NOT EXISTS (
       SELECT 1 FROM public.bas_perfil_modulo pm
