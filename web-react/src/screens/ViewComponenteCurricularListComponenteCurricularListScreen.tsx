@@ -22,6 +22,8 @@ export default function ViewComponenteCurricularListComponenteCurricularListScre
                     path="/api/view/componenteCurricular/listComponenteCurricular"
                     columns={COLUMNS}
                     maxMainColumns={COLUMNS.length}
+                    editNavigateTo="/view/componenteCurricular/formComponenteCurricular"
+                    createNavigateTo="/view/componenteCurricular/formComponenteCurricular"
                 />
             </main>
         </PermissionGate>

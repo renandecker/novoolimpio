@@ -1,21 +1,28 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
+import {useNavigate, useSearchParams} from 'react-router-dom';
 import {PermissionGate} from '../permissions';
 import {BooleanField} from '../BooleanField';
 import {MasterDetail} from '../MasterDetail';
 import {Tabs} from '../Tabs';
 import type {TabItem} from '../Tabs';
 import {
-    PERFIL_SOURCE,
-    PERFIL_COLUMNS,
-    PERFIL_SEARCH,
     AGENDA_SOURCE,
     AGENDA_COLUMNS,
     AGENDA_SEARCH,
+    PERFIL_SOURCE,
+    PERFIL_COLUMNS,
+    PERFIL_SEARCH,
     TURNO_TRABALHO_SOURCE,
     TURNO_TRABALHO_COLUMNS,
     TURNO_TRABALHO_SEARCH,
+    UNIDADE_SOURCE,
+    UNIDADE_COLUMNS,
+    UNIDADE_SEARCH,
 } from '../masterDetailSources';
 import type {ApiItem} from '../types';
+import {api} from '../api';
+import {EnderecoCampos} from '../EnderecoForm';
+import type {Endereco} from '../EnderecoForm';
 
 interface DocumentoUploadProps {
     label: string;
@@ -36,13 +43,226 @@ function DocumentoUpload({label, obrigatorio = false}: DocumentoUploadProps) {
     );
 }
 
+interface FormState {
+    cpf: string;
+    rg: string;
+    nome: string;
+    email: string;
+    nomeSocial: string;
+    dataNascimento: string;
+    generoId: string;
+    etniaId: string;
+    estadoCivilId: string;
+    escolaridadeId: string;
+    nomePai: string;
+    nomeMae: string;
+    telefoneResidencial: string;
+    celular: string;
+    nomeReferencia: string;
+    telefoneReferencia: string;
+    celularReferencia: string;
+    nomeReferencia2: string;
+    telefoneReferencia2: string;
+    celularReferencia2: string;
+}
+
+const FORM_VAZIO: FormState = {
+    cpf: '',
+    rg: '',
+    nome: '',
+    email: '',
+    nomeSocial: '',
+    dataNascimento: '',
+    generoId: '',
+    etniaId: '',
+    estadoCivilId: '',
+    escolaridadeId: '',
+    nomePai: '',
+    nomeMae: '',
+    telefoneResidencial: '',
+    celular: '',
+    nomeReferencia: '',
+    telefoneReferencia: '',
+    celularReferencia: '',
+    nomeReferencia2: '',
+    telefoneReferencia2: '',
+    celularReferencia2: '',
+};
+
+const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
+const num = (v: string): number | null => (v !== '' && !isNaN(Number(v)) ? Number(v) : null);
+
+const toDateInput = (v: unknown): string => {
+    if (!v) return '';
+    const d = new Date(v as string);
+    if (isNaN(d.getTime())) return String(v).slice(0, 10);
+    const ano = d.getFullYear();
+    const mes = String(d.getMonth() + 1).padStart(2, '0');
+    const dia = String(d.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
+};
+
+const semId = (obj: Record<string, unknown> | null): Record<string, unknown> => {
+    const copia = {...(obj ?? {})};
+    delete copia.id;
+    return copia;
+};
+
 export default function ViewUsuarioFormUsuarioListScreen() {
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const idParam = searchParams.get('id');
+
     const [ativo, setAtivo] = useState(true);
     const [relatorio, setRelatorio] = useState(false);
     const [mensalista, setMensalista] = useState<'M' | 'H'>('M');
     const [perfis, setPerfis] = useState<ApiItem[]>([]);
     const [agendas, setAgendas] = useState<ApiItem[]>([]);
+    const [unidadesAcesso, setUnidadesAcesso] = useState<ApiItem[]>([]);
     const [turnos, setTurnos] = useState<ApiItem[]>([]);
+    const [enderecos, setEnderecos] = useState<Endereco[]>([]);
+    const [salvando, setSalvando] = useState(false);
+
+    const [usuarioId, setUsuarioId] = useState<number | undefined>();
+    const [usuarioOriginal, setUsuarioOriginal] = useState<Record<string, unknown> | null>(null);
+    const [pfId, setPfId] = useState<number | undefined>();
+    const [pessoaId, setPessoaId] = useState<number | undefined>();
+    const [pfOriginal, setPfOriginal] = useState<Record<string, unknown> | null>(null);
+    const [pessoaOriginal, setPessoaOriginal] = useState<Record<string, unknown> | null>(null);
+    const [form, setForm] = useState<FormState>(FORM_VAZIO);
+
+    useEffect(() => {
+        if (!idParam) return;
+        let ativoReq = true;
+        (async () => {
+            try {
+                const usu = (await api.get<Record<string, unknown>>(`/api/basico/usuario/${idParam}`)).data;
+                let pes: Record<string, unknown> | null = null;
+                let pf: Record<string, unknown> | null = null;
+                if (usu.pessoaId) {
+                    pes = (await api.get<Record<string, unknown>>(`/api/basico/pessoa/${usu.pessoaId}`)).data;
+                    if (pes?.id) {
+                        pf = (await api.get<Record<string, unknown>>(`/api/basico/pessoa-fisica/por-pessoa/${pes.id}`)).data;
+                    }
+                }
+                if (!ativoReq) return;
+                setUsuarioId(usu.id as number);
+                setUsuarioOriginal(usu);
+                setAtivo(usu.ativo !== false);
+                setPessoaId(pes?.id as number | undefined);
+                setPessoaOriginal(pes);
+                setPfId(pf?.id as number | undefined);
+                setPfOriginal(pf);
+                setForm({
+                    cpf: str(pf?.cpf),
+                    rg: str(pf?.rg),
+                    nome: str(pf?.nome),
+                    email: str(pes?.email),
+                    nomeSocial: str(pf?.nomeSocial),
+                    dataNascimento: toDateInput(pf?.dataNascimento),
+                    generoId: pf?.generoId !== null && pf?.generoId !== undefined ? String(pf.generoId) : '',
+                    etniaId: pf?.etniaId !== null && pf?.etniaId !== undefined ? String(pf.etniaId) : '',
+                    estadoCivilId: pf?.estadoCivilId !== null && pf?.estadoCivilId !== undefined ? String(pf.estadoCivilId) : '',
+                    escolaridadeId: pf?.escolaridadeId !== null && pf?.escolaridadeId !== undefined ? String(pf.escolaridadeId) : '',
+                    nomePai: str(pf?.nomePai),
+                    nomeMae: str(pf?.nomeMae),
+                    telefoneResidencial: str(pes?.telefone),
+                    celular: str(pes?.celular),
+                    nomeReferencia: str(pf?.nomeReferencia),
+                    telefoneReferencia: str(pf?.telefoneReferencia),
+                    celularReferencia: str(pf?.celularReferencia),
+                    nomeReferencia2: str(pf?.nomeReferencia2),
+                    telefoneReferencia2: str(pf?.telefoneReferencia2),
+                    celularReferencia2: str(pf?.celularReferencia2),
+                });
+            } catch (erro) {
+                console.error('Erro ao carregar usuário:', erro);
+                alert('Erro ao carregar registro.');
+            }
+        })();
+        return () => {
+            ativoReq = false;
+        };
+    }, [idParam]);
+
+    const set = (campo: keyof FormState, valor: string) => setForm((prev) => ({...prev, [campo]: valor}));
+
+    const voltar = () => navigate('/view/usuario/listUsuario');
+
+    const salvar = async (voltarDepois: boolean) => {
+        if (!form.nome.trim()) {
+            alert('Informe o Nome.');
+            return;
+        }
+        setSalvando(true);
+        try {
+            if (usuarioId) {
+                await api.put(`/api/basico/usuario/${usuarioId}`, {...semId(usuarioOriginal), ativo});
+            }
+            const enderecoPrincipal = enderecos[0];
+            if (pfId || !pessoaId) {
+                const pfBody: Record<string, unknown> = {
+                    ...semId(pfOriginal),
+                    nome: form.nome,
+                    cpf: form.cpf || null,
+                    rg: form.rg || null,
+                    nomeSocial: form.nomeSocial || null,
+                    dataNascimento: form.dataNascimento || null,
+                    generoId: num(form.generoId),
+                    etniaId: num(form.etniaId),
+                    estadoCivilId: num(form.estadoCivilId),
+                    escolaridadeId: num(form.escolaridadeId),
+                    nomeReferencia: form.nomeReferencia || null,
+                    telefoneReferencia: form.telefoneReferencia || null,
+                    celularReferencia: form.celularReferencia || null,
+                    nomeReferencia2: form.nomeReferencia2 || null,
+                    telefoneReferencia2: form.telefoneReferencia2 || null,
+                    celularReferencia2: form.celularReferencia2 || null,
+                    nomePai: form.nomePai || null,
+                    nomeMae: form.nomeMae || null,
+                };
+                const respostaPf = pfId
+                    ? await api.put(`/api/basico/pessoa-fisica/${pfId}`, pfBody)
+                    : await api.post('/api/basico/pessoa-fisica', pfBody);
+                const novoPfId = (respostaPf.data as Record<string, unknown>)?.id ?? pfId;
+
+                const pessoaBody: Record<string, unknown> = {
+                    ...semId(pessoaOriginal),
+                    email: form.email || null,
+                    telefone: form.telefoneResidencial || null,
+                    celular: form.celular || null,
+                    numero: enderecoPrincipal?.numero || null,
+                    complemento: enderecoPrincipal?.complemento || null,
+                };
+                let novoPesId = pessoaId;
+                if (pessoaId) {
+                    await api.put(`/api/basico/pessoa/${pessoaId}`, pessoaBody);
+                } else {
+                    novoPesId = ((await api.post('/api/basico/pessoa', pessoaBody)).data as Record<string, unknown>)?.id as number | undefined;
+                }
+                if (!pfId && novoPesId && novoPfId) {
+                    await api.put(`/api/basico/pessoa-fisica/${novoPfId}`, {...pfBody, pessoaId: novoPesId});
+                }
+            } else if (pessoaId) {
+                await api.put(`/api/basico/pessoa/${pessoaId}`, {
+                    ...semId(pessoaOriginal),
+                    email: form.email || null,
+                    telefone: form.telefoneResidencial || null,
+                    celular: form.celular || null,
+                });
+            }
+            if (voltarDepois) {
+                voltar();
+            } else {
+                alert('Registro salvo com sucesso.');
+            }
+        } catch (erro) {
+            console.error('Erro ao salvar:', erro);
+            alert('Erro ao salvar registro.');
+        } finally {
+            setSalvando(false);
+        }
+    };
 
     const tabs: TabItem[] = [
         {
@@ -52,81 +272,101 @@ export default function ViewUsuarioFormUsuarioListScreen() {
                 <div className="form-grid">
                     <label className="form-field">
                         <span className="form-label">CPF *</span>
-                        <input className="form-input" placeholder="999.999.999-99"/>
+                        <input className="form-input" placeholder="999.999.999-99" value={form.cpf}
+                               onChange={(e) => set('cpf', e.target.value)}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">RG *</span>
-                        <input className="form-input" placeholder="RG"/>
+                        <input className="form-input" placeholder="RG" value={form.rg}
+                               onChange={(e) => set('rg', e.target.value)}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Nome *</span>
-                        <input className="form-input" placeholder="Nome completo" style={{gridColumn: 'span 3'}}/>
+                        <input className="form-input" placeholder="Nome completo" style={{gridColumn: 'span 3'}}
+                               value={form.nome} onChange={(e) => set('nome', e.target.value)}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">E-mail *</span>
-                        <input className="form-input" type="email" placeholder="E-mail" style={{gridColumn: 'span 3'}}/>
+                        <input className="form-input" type="email" placeholder="E-mail"
+                               style={{gridColumn: 'span 3'}} value={form.email}
+                               onChange={(e) => set('email', e.target.value)}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Nome Social</span>
-                        <input className="form-input" placeholder="Nome social" style={{gridColumn: 'span 3'}}/>
+                        <input className="form-input" placeholder="Nome social" style={{gridColumn: 'span 3'}}
+                               value={form.nomeSocial} onChange={(e) => set('nomeSocial', e.target.value)}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Data Nascimento *</span>
-                        <input className="form-input" type="date"/>
+                        <input className="form-input" type="date" value={form.dataNascimento}
+                               onChange={(e) => set('dataNascimento', e.target.value)}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Nome do Pai</span>
-                        <input className="form-input" placeholder="Nome do pai" style={{gridColumn: 'span 3'}}/>
+                        <input className="form-input" placeholder="Nome do pai" style={{gridColumn: 'span 3'}}
+                               value={form.nomePai} onChange={(e) => set('nomePai', e.target.value)}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Nome da Mãe *</span>
-                        <input className="form-input" placeholder="Nome da mãe" style={{gridColumn: 'span 3'}}/>
+                        <input className="form-input" placeholder="Nome da mãe" style={{gridColumn: 'span 3'}}
+                               value={form.nomeMae} onChange={(e) => set('nomeMae', e.target.value)}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Telefone Residencial *</span>
-                        <input className="form-input" placeholder="(99) 9999-9999"/>
+                        <input className="form-input" placeholder="(99) 9999-9999"
+                               value={form.telefoneResidencial} onChange={(e) => set('telefoneResidencial', e.target.value)}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Celular *</span>
-                        <input className="form-input" placeholder="(99) 99999-9999"/>
+                        <input className="form-input" placeholder="(99) 99999-9999" value={form.celular}
+                               onChange={(e) => set('celular', e.target.value)}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Nome Referência *</span>
-                        <input className="form-input" placeholder="Nome da referência" style={{gridColumn: 'span 3'}}/>
+                        <input className="form-input" placeholder="Nome da referência"
+                               style={{gridColumn: 'span 3'}} value={form.nomeReferencia}
+                               onChange={(e) => set('nomeReferencia', e.target.value)}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Telefone Referência</span>
-                        <input className="form-input" placeholder="(99) 9999-9999"/>
+                        <input className="form-input" placeholder="(99) 9999-9999"
+                               value={form.telefoneReferencia} onChange={(e) => set('telefoneReferencia', e.target.value)}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Celular Referência</span>
-                        <input className="form-input" placeholder="(99) 99999-9999"/>
+                        <input className="form-input" placeholder="(99) 99999-9999"
+                               value={form.celularReferencia} onChange={(e) => set('celularReferencia', e.target.value)}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Nome Referência 2</span>
                         <input className="form-input" placeholder="Nome da referência 2"
-                               style={{gridColumn: 'span 3'}}/>
+                               style={{gridColumn: 'span 3'}} value={form.nomeReferencia2}
+                               onChange={(e) => set('nomeReferencia2', e.target.value)}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Telefone Referência 2</span>
-                        <input className="form-input" placeholder="(99) 9999-9999"/>
+                        <input className="form-input" placeholder="(99) 9999-9999"
+                               value={form.telefoneReferencia2} onChange={(e) => set('telefoneReferencia2', e.target.value)}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Celular Referência 2</span>
-                        <input className="form-input" placeholder="(99) 99999-9999"/>
+                        <input className="form-input" placeholder="(99) 99999-9999"
+                               value={form.celularReferencia2} onChange={(e) => set('celularReferencia2', e.target.value)}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Sexo *</span>
-                        <select className="form-input form-select">
+                        <select className="form-input form-select" value={form.generoId}
+                                onChange={(e) => set('generoId', e.target.value)}>
                             <option value="">-- Selecione --</option>
-                            <option value="M">Masculino</option>
-                            <option value="F">Feminino</option>
-                            <option value="O">Outro</option>
+                            <option value="1">Masculino</option>
+                            <option value="2">Feminino</option>
+                            <option value="3">Outro</option>
                         </select>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Etnia</span>
-                        <select className="form-input form-select">
+                        <select className="form-input form-select" value={form.etniaId}
+                                onChange={(e) => set('etniaId', e.target.value)}>
                             <option value="">-- Selecione --</option>
                             <option value="1">Branca</option>
                             <option value="2">Preta</option>
@@ -137,7 +377,8 @@ export default function ViewUsuarioFormUsuarioListScreen() {
                     </label>
                     <label className="form-field">
                         <span className="form-label">Estado Civil *</span>
-                        <select className="form-input form-select">
+                        <select className="form-input form-select" value={form.estadoCivilId}
+                                onChange={(e) => set('estadoCivilId', e.target.value)}>
                             <option value="">-- Selecione --</option>
                             <option value="1">Solteiro(a)</option>
                             <option value="2">Casado(a)</option>
@@ -148,7 +389,8 @@ export default function ViewUsuarioFormUsuarioListScreen() {
                     </label>
                     <label className="form-field">
                         <span className="form-label">Escolaridade *</span>
-                        <select className="form-input form-select">
+                        <select className="form-input form-select" value={form.escolaridadeId}
+                                onChange={(e) => set('escolaridadeId', e.target.value)}>
                             <option value="">-- Selecione --</option>
                             <option value="1">Ensino Fundamental Incompleto</option>
                             <option value="2">Ensino Fundamental Completo</option>
@@ -167,36 +409,7 @@ export default function ViewUsuarioFormUsuarioListScreen() {
             label: 'Endereço',
             content: (
                 <div className="form-grid">
-                    <label className="form-field">
-                        <span className="form-label">CEP</span>
-                        <div style={{display: 'flex', gap: '8px', width: '100%'}}>
-                            <input className="form-input" placeholder="99.999-999" style={{width: '120px'}}/>
-                            <button type="button" className="btnyellow">Busca</button>
-                            <button type="button" className="btngreen">Ajuste</button>
-                            <button type="button" className="btnstop">Novo</button>
-                        </div>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Cidade</span>
-                        <input className="form-input" placeholder="Cidade" style={{gridColumn: 'span 3'}}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Bairro</span>
-                        <input className="form-input" placeholder="Bairro" style={{gridColumn: 'span 3'}}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Logradouro</span>
-                        <input className="form-input" placeholder="Logradouro" style={{gridColumn: 'span 3'}}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Número</span>
-                        <input className="form-input" type="number" placeholder="Número"/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Complemento</span>
-                        <textarea className="form-input" placeholder="Complemento" rows={3}
-                                  style={{gridColumn: 'span 3', minHeight: '80px'}}/>
-                    </label>
+                    <EnderecoCampos value={enderecos} onChange={setEnderecos}/>
                 </div>
             ),
         },
@@ -340,13 +553,12 @@ export default function ViewUsuarioFormUsuarioListScreen() {
                             content: (
                                 <MasterDetail
                                     label="Unidade"
-                                    source={"/api/view/unidade/list"}
+                                    source={UNIDADE_SOURCE}
                                     valueKey="id"
-                                    searchKeys={["nome", "sucinto"]}
-                                    columns={[{key: "sucinto", label: "Unidade"}]}
-                                    items={[]}
-                                    onChange={() => {
-                                    }}
+                                    searchKeys={UNIDADE_SEARCH}
+                                    columns={UNIDADE_COLUMNS}
+                                    items={unidadesAcesso}
+                                    onChange={setUnidadesAcesso}
                                 />
                             ),
                         },
@@ -392,15 +604,20 @@ export default function ViewUsuarioFormUsuarioListScreen() {
             <main>
                 <h1>Cadastro de Usuário</h1>
                 <div className="div_form">
-                    <div className="form-title">Usuário</div>
+                    <div className="form-title">{usuarioId ? `Usuário #${usuarioId}` : 'Usuário'}</div>
                     <div className="table_form">
                         <Tabs tabs={tabs} initial="pessoal"/>
                         <div className="form-buttons">
-                            <button type="button" className="btnblue" title="Salvar registro">Gravar</button>
-                            <button type="button" className="btnstop" title="Salvar e continuar editando">
+                            <button type="button" className="btnblue" title="Salvar registro"
+                                    disabled={salvando} onClick={() => void salvar(true)}>Gravar
+                            </button>
+                            <button type="button" className="btnstop" title="Salvar e continuar editando"
+                                    disabled={salvando} onClick={() => void salvar(false)}>
                                 Salvar e Continuar
                             </button>
-                            <button type="button" className="btnyellow" title="Voltar para a lista">Voltar</button>
+                            <button type="button" className="btnyellow" title="Voltar para a lista"
+                                    onClick={voltar}>Voltar
+                            </button>
                         </div>
                     </div>
                 </div>

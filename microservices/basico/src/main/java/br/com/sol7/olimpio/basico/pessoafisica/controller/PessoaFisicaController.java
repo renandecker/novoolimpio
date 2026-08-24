@@ -37,6 +37,12 @@ public class PessoaFisicaController {
         return service.find(id);
     }
 
+    @GET
+    @Path("/por-pessoa/{pessoaId}")
+    public Uni<PessoaFisicaResponse> findByPessoaId(@PathParam("pessoaId") Long pessoaId) {
+        return service.findByPessoaId(pessoaId);
+    }
+
     @POST
     public Uni<Response> create(@Valid PessoaFisicaRequest r) {
         return service.create(r).map(item -> Response.status(Response.Status.CREATED).entity(item).build());

@@ -44,6 +44,10 @@ public class PessoaFisicaService {
                 .map(this::toResponse);
     }
 
+    public Uni<PessoaFisicaResponse> findByPessoaId(Long pessoaId) {
+        return repository.find("pessoaId", pessoaId).firstResult().map(pf -> pf == null ? null : toResponse(pf));
+    }
+
     public Uni<PessoaFisicaResponse> create(PessoaFisicaRequest r) {
         var e = new PessoaFisica();
         apply(e, r);

@@ -77,7 +77,9 @@ export function AuthProvider({children}: { children: ReactNode }) {
                 username,
                 password
             });
+            console.log('[Auth] signIn response: ' + JSON.stringify({ defaultOutcome: data.defaultOutcome, permissions: data.permissions, username: data.username, defaultOutcomeType: typeof data.defaultOutcome }));
             data.defaultOutcome = normalizeDefaultOutcome(data.defaultOutcome);
+            console.log('[Auth] normalized defaultOutcome: ' + JSON.stringify(data.defaultOutcome));
             data.modules = await fetchModules(data.accessToken);
             localStorage.setItem(KEY, JSON.stringify(data));
             setSession(data);
@@ -95,7 +97,12 @@ export function AuthProvider({children}: { children: ReactNode }) {
         refreshSession(next) {
             setSession(prev => {
                 const merged = prev ? {...prev, ...next} : null;
-                if (merged) localStorage.setItem(KEY, JSON.stringify(merged)); else localStorage.removeItem(KEY);
+                if (merged) {
+                    merged.defaultOutcome = normalizeDefaultOutcome(merged.defaultOutcome);
+                    localStorage.setItem(KEY, JSON.stringify(merged));
+                } else {
+                    localStorage.removeItem(KEY);
+                }
                 return merged;
             });
         },

@@ -31,7 +31,7 @@ export function Tabs<T extends string = string>({tabs, initial}: TabsProps<T>) {
                     </button>
                 ))}
             </nav>
-            <div className="tab-content">{current?.content}</div>
+            <div className="tab-content" key={current?.key}>{current?.content}</div>
         </div>
     );
 }

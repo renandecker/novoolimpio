@@ -19,6 +19,7 @@ interface WizardProps {
     onComplete?: (data: any) => void;
     initialData?: any;
     onDataChange?: (data: any) => void;
+    onCancel?: () => void;
 }
 
 interface FlowEvent {
@@ -97,7 +98,10 @@ export function Wizard({
     };
 
     const goBack = async () => {
-        if (index === 0) return;
+        if (index === 0) {
+            onCancel?.();
+            return;
+        }
         const newIndex = index - 1;
         setIndex(newIndex);
         await prepareStep(newIndex);

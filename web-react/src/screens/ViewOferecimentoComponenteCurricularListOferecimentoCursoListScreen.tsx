@@ -12,7 +12,12 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
         <PermissionGate permission="READ">
             <main>
                 <h1>Oferecimento Curso</h1>
-                <DataTable path="/api/educacao/oferecimento-curso" columns={COLUMNS}/>
+                <DataTable
+                    path="/api/educacao/oferecimento-curso"
+                    columns={COLUMNS}
+                    editNavigateTo="/view/oferecimentoComponenteCurricular/formOferecimentoCurso"
+                    createNavigateTo="/view/oferecimentoComponenteCurricular/formOferecimentoCurso"
+                />
             </main>
         </PermissionGate>
     );

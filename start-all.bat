@@ -1,9 +1,37 @@
 @echo off
 setlocal enabledelayedexpansion
 
-cd /d "%~dp0"
-set COMPILE_LOG=%~dp0compile-errors.log
-set DOCKER_LOG=%~dp0docker-compose.log
+rem ================================================================
+rem Reexecuta a partir de uma copia em %TEMP%.
+rem A pasta do projeto fica dentro do OneDrive e o sincronizador
+rem trava a leitura do proprio .bat durante os saltos (goto/call),
+rem o que causa "nao e possivel localizar o rotulo em lote" e logs
+rem corrompidos. Rodando fora do OneDrive isso nao acontece.
+rem A pasta real do projeto e gravada num arquivo marcador em %TEMP%.
+rem ================================================================
+set "MARKER=%TEMP%\olimpio-workdir.txt"
+if /i not "%OLIMPIO_FROM_TEMP%"=="1" (
+    > "%MARKER%" echo(%~dp0
+    copy /y "%~f0" "%TEMP%\olimpio-start-all.bat" >nul 2>&1
+    if exist "%TEMP%\olimpio-start-all.bat" (
+        endlocal & set "OLIMPIO_FROM_TEMP=1"
+        cmd /c ""%TEMP%\olimpio-start-all.bat" %*"
+        set RC=%errorlevel%
+        exit /b %RC%
+    )
+    echo [AVISO] Nao foi possivel copiar para TEMP. Executando da pasta original...
+)
+
+set "OLIMPIO_WORKDIR="
+if exist "%MARKER%" set /p OLIMPIO_WORKDIR=<"%MARKER%"
+if not defined OLIMPIO_WORKDIR set "OLIMPIO_WORKDIR=%~dp0"
+cd /d "%OLIMPIO_WORKDIR%"
+if %errorlevel% neq 0 (
+    echo [ERRO] Nao foi possivel entrar na pasta do projeto: %OLIMPIO_WORKDIR%
+    exit /b 1
+)
+set COMPILE_LOG=%OLIMPIO_WORKDIR%compile-errors.log
+set DOCKER_LOG=%OLIMPIO_WORKDIR%docker-compose.log
 
 where docker >nul 2>&1
 if %errorlevel% neq 0 (
@@ -11,18 +39,34 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
+where mvn >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [ERRO] Maven ^(mvn^) nao encontrado no PATH.
+    exit /b 1
+)
+
 echo Verificando se o Docker Desktop esta pronto...
+docker info >nul 2>&1
+if %errorlevel% neq 0 (
+    if exist "%ProgramFiles%\Docker\Docker\Docker Desktop.exe" (
+        echo   Daemon do Docker parado. Iniciando Docker Desktop...
+        start "" "%ProgramFiles%\Docker\Docker\Docker Desktop.exe"
+    ) else (
+        echo   [AVISO] Docker Desktop nao encontrado em %ProgramFiles%. Aguardando o daemon mesmo assim...
+    )
+)
+
 set ATTEMPT=0
 :check_docker
 docker info >nul 2>&1
 if %errorlevel% equ 0 goto docker_ok
 set /a ATTEMPT+=1
-if !ATTEMPT! geq 30 (
+if !ATTEMPT! geq 90 (
     echo.
-    echo [ERRO] Docker Desktop nao respondeu apos 60 segundos.
+    echo [ERRO] Docker Desktop nao respondeu apos 180 segundos.
     exit /b 1
 )
-echo   Aguardando Docker Desktop iniciar... (!ATTEMPT!/30)
+echo   Aguardando Docker Desktop iniciar... (!ATTEMPT!/90)
 timeout /t 2 /nobreak >nul
 goto check_docker
 
@@ -30,11 +74,11 @@ goto check_docker
 echo Docker Desktop pronto.
 
 docker compose version >nul 2>&1
-if %errorlevel% equ 0 (
+if !errorlevel! equ 0 (
     set DC=docker compose
 ) else (
     docker-compose version >nul 2>&1
-    if %errorlevel% equ 0 (
+    if !errorlevel! equ 0 (
         set DC=docker-compose
     ) else (
         echo [ERRO] docker compose nao encontrado.
@@ -46,6 +90,7 @@ echo ============================================
 echo  Verificando servicos ja em execucao...
 echo ============================================
 
+set HAS_CONTAINERS=
 %DC% ps -q >nul 2>&1
 if %errorlevel% equ 0 (
     for /f %%i in ('%DC% ps -q') do set HAS_CONTAINERS=1
@@ -65,26 +110,53 @@ echo ============================================
 echo  Limpando logs anteriores...
 echo ============================================
 
-if exist "%COMPILE_LOG%" del "%COMPILE_LOG%"
-if exist "%DOCKER_LOG%" del "%DOCKER_LOG%"
+rem break> trunca sem apagar/recriar o arquivo (mais seguro com OneDrive).
+break> "%COMPILE_LOG%" 2>nul
+break> "%DOCKER_LOG%" 2>nul
 
 echo ============================================
 echo  Verificando compilacao dos microsservicos...
 echo ============================================
 
-set COMPILE_ERRORS=0
-for %%s in (aluno asaas basico central comercial curriculo educacao estoque financeiro fiserv login notificacoes professor relatorios schedule) do (
-    call :do_compile %%s
+set SVC_LIST=aluno asaas basico central comercial curriculo educacao estoque financeiro fiserv login notificacoes professor relatorios schedule
+
+set EXPECTED=0
+for %%s in (%SVC_LIST%) do (
+    if exist "microservices\%%s\pom.xml" set /a EXPECTED+=1
 )
+
+if !EXPECTED! equ 0 (
+    echo [ERRO] Nenhum pom.xml encontrado em microservices\.
+    echo   Pasta do projeto: %OLIMPIO_WORKDIR%
+    exit /b 1
+)
+
+set COMPILE_ERRORS=0
+set OK_COUNT=0
+for %%s in (%SVC_LIST%) do (
+    if exist "microservices\%%s\pom.xml" (
+        rem call e obrigatorio: mvn e um .cmd e sem call o contexto do script quebra.
+        call mvn -B -f "microservices\%%s\pom.xml" compile -DskipTests >> "%COMPILE_LOG%" 2>&1
+        if !errorlevel! equ 0 (
+            echo   [OK] %%s
+            set /a OK_COUNT+=1
+        ) else (
+            echo   [ERRO] %%s ^(Detalhes no arquivo unico: %COMPILE_LOG%^)
+            set COMPILE_ERRORS=1
+        )
+    )
+)
+
+if !OK_COUNT! neq !EXPECTED! set COMPILE_ERRORS=1
 
 if "!COMPILE_ERRORS!" neq "0" (
     echo.
-    echo [ERRO] Nem todos os microsservicos compilaram.
+    echo [ERRO] Nem todos os microsservicos compilaram ^(!OK_COUNT!/!EXPECTED! ok^).
     echo   Detalhes em: %COMPILE_LOG%
     exit /b 1
 )
 
-echo Todos os microsservicos compilaram com sucesso.
+echo Todos os !EXPECTED! microsservicos compilaram com sucesso.
 
 echo ============================================
 echo  Subindo containers com acompanhamento em tempo real...
@@ -92,20 +164,6 @@ echo ============================================
 
 if "%1"=="-d" goto start_bg_with_progress
 goto start_fg_with_progress
-
-:do_compile
-set SVC=%~1
-if not exist "microservices\%SVC%\pom.xml" goto :eof
-
-mvn -B -f "microservices\%SVC%\pom.xml" compile -DskipTests >> "%COMPILE_LOG%" 2>&1
-
-if !errorlevel! neq 0 (
-    echo   [ERRO] %SVC% (Detalhes no arquivo unico: %COMPILE_LOG%)
-    set COMPILE_ERRORS=1
-) else (
-    echo   [OK] %SVC%
-)
-goto :eof
 
 :start_bg_with_progress
 echo.
@@ -117,7 +175,7 @@ if %errorlevel% neq 0 (
     echo [ERRO] Falha ao subir containers. Detalhes em: %DOCKER_LOG%
     echo.
     echo Ultimas linhas do log:
-    powershell -Command "Get-Content '%DOCKER_LOG%' -Tail 20" 2>nul
+    powershell -NoProfile -Command "Get-Content -LiteralPath '%DOCKER_LOG%' -Tail 20" 2>nul
     exit /b 1
 )
 
@@ -129,13 +187,11 @@ set SERVICES=login:8090 basico:8081 notificacoes:8082 central:8083 comercial:808
 set TOTAL=0
 for %%s in (%SERVICES%) do set /a TOTAL+=1
 
-set CHECKED=0
 set HEALTHY=0
-set MAX_WAIT=180
+set MAX_WAIT=300
 set WAITED=0
 
 :wait_loop
-set CHECKED=0
 set HEALTHY=0
 set FAIL_LIST=
 for %%s in (%SERVICES%) do (
@@ -180,10 +236,8 @@ if "%SVC_PORT%"=="3000" set HEALTH_PATH=/
 
 curl -sL -f http://localhost:%SVC_PORT%%HEALTH_PATH% >nul 2>&1
 if !errorlevel! equ 0 (
-    set /a CHECKED+=1
     set /a HEALTHY+=1
 ) else (
-    set /a CHECKED+=1
     if defined FAIL_LIST (
         set "FAIL_LIST=!FAIL_LIST!, %SVC_NAME%:%SVC_PORT%"
     ) else (
@@ -212,7 +266,6 @@ echo   login:        http://localhost:8090
 echo   notificacoes: http://localhost:8082
 echo   fiserv:       http://localhost:8097
 echo   professor:    http://localhost:8091
-echo   relatorios:   http://localhost:8088
 echo   schedule:     http://localhost:8089
 echo.
 echo Logs:
@@ -230,7 +283,12 @@ echo Pressione Ctrl+C para parar.
 echo.
 
 echo Iniciando monitoramento de saude em janela separada...
-start "Health Monitor" cmd /k "%~dp0health-monitor.bat"
+copy /y "%OLIMPIO_WORKDIR%health-monitor.bat" "%TEMP%\olimpio-health-monitor.bat" >nul 2>&1
+if exist "%TEMP%\olimpio-health-monitor.bat" (
+    start "Health Monitor" cmd /k ""%TEMP%\olimpio-health-monitor.bat""
+) else (
+    start "Health Monitor" cmd /k ""%OLIMPIO_WORKDIR%health-monitor.bat""
+)
 
 %DC% up --build 2> "%DOCKER_LOG%"
 if %errorlevel% neq 0 (

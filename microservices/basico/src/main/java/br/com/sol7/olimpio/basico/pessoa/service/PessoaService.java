@@ -72,13 +72,10 @@ public class PessoaService {
         e.logradouroId = r.logradouroId();
         e.dataCadastro = r.dataCadastro();
         e.dataAlteracao = r.dataAlteracao();
-        e.pessoaFisicaId = r.pessoaFisicaId();
-        e.pessoaJuridicaId = r.pessoaJuridicaId();
-        e.professorId = r.professorId();
     }
 
     private PessoaResponse toResponse(Pessoa e) {
-        return new PessoaResponse(e.id, e.numero, e.complemento, e.email, e.telefone, e.celular, e.foto, e.observacao, e.comunicado, e.logradouroId, e.dataCadastro, e.dataAlteracao, e.pessoaFisicaId, e.pessoaJuridicaId, e.professorId);
+        return new PessoaResponse(e.id, e.numero, e.complemento, e.email, e.telefone, e.celular, e.foto, e.observacao, e.comunicado, e.logradouroId, e.dataCadastro, e.dataAlteracao);
     }
 
 

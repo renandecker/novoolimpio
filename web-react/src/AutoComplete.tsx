@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState, useCallback} from 'react';
 import './AutoComplete.css';
 
 export interface AutoCompleteOption {
@@ -13,20 +13,24 @@ interface AutoCompleteProps {
     value: AutoCompleteOption | null;
     onChange: (option: AutoCompleteOption | null) => void;
     fetchOptions: (query: string) => Promise<AutoCompleteOption[]>;
+    fetchById?: (id: number) => Promise<AutoCompleteOption | null>;
     minChars?: number;
     disabled?: boolean;
+    minDropdownResults?: number;
 }
 
 export function AutoComplete({
-                                 id,
-                                 label,
-                                 placeholder,
-                                 value,
-                                 onChange,
-                                 fetchOptions,
-                                 minChars = 3,
-                                 disabled = false,
-                             }: AutoCompleteProps) {
+                                  id,
+                                  label,
+                                  placeholder,
+                                  value,
+                                  onChange,
+                                  fetchOptions,
+                                  fetchById,
+                                  minChars = 3,
+                                  disabled = false,
+                                  minDropdownResults = 10,
+                              }: AutoCompleteProps) {
     const [text, setText] = useState(value?.label ?? '');
     const [options, setOptions] = useState<AutoCompleteOption[]>([]);
     const [open, setOpen] = useState(false);
@@ -35,9 +39,20 @@ export function AutoComplete({
     const rootRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const timerRef = useRef<number | null>(null);
+    const fetchByIdRef = useRef(fetchById);
+    fetchByIdRef.current = fetchById;
 
     useEffect(() => {
-        setText(value?.label ?? '');
+        if (value?.id && !value?.label && fetchByIdRef.current) {
+            setCarregando(true);
+            fetchByIdRef.current(value.id)
+                .then((opt) => {
+                    if (opt) setText(opt.label);
+                })
+                .finally(() => setCarregando(false));
+        } else {
+            setText(value?.label ?? '');
+        }
     }, [value]);
 
     useEffect(() => {
@@ -56,7 +71,7 @@ export function AutoComplete({
         [],
     );
 
-    function pesquisar(termo: string) {
+    const pesquisar = useCallback((termo: string) => {
         if (timerRef.current !== null) window.clearTimeout(timerRef.current);
         const termoLimpo = termo.trim();
         if (termoLimpo.length < minChars) {
@@ -78,7 +93,29 @@ export function AutoComplete({
                 })
                 .finally(() => setCarregando(false));
         }, 300);
-    }
+    }, [fetchOptions, minChars]);
+
+    const abrirDropdown = useCallback(() => {
+        if (disabled) return;
+        if (text.trim().length >= minChars) {
+            pesquisar(text);
+        } else {
+            setCarregando(true);
+            fetchOptions('')
+                .then((resultado) => {
+                    const limited = resultado.slice(0, minDropdownResults);
+                    setOptions(limited);
+                    setOpen(true);
+                    setHighlighted(limited.length > 0 ? 0 : -1);
+                })
+                .catch(() => {
+                    setOptions([]);
+                    setOpen(false);
+                })
+                .finally(() => setCarregando(false));
+        }
+        inputRef.current?.focus();
+    }, [disabled, minChars, minDropdownResults, pesquisar, fetchOptions, text]);
 
     function selecionar(option: AutoCompleteOption) {
         onChange(option);
@@ -100,6 +137,7 @@ export function AutoComplete({
         if (event.key === 'ArrowDown') {
             event.preventDefault();
             if (options.length > 0) setHighlighted((atual) => (atual + 1) % options.length);
+            else abrirDropdown();
         } else if (event.key === 'ArrowUp') {
             event.preventDefault();
             if (options.length > 0) setHighlighted((atual) => (atual - 1 + options.length) % options.length);
@@ -144,10 +182,7 @@ export function AutoComplete({
                     className="autocomplete-btn autocomplete-btn-dropdown"
                     title="Listar"
                     disabled={disabled}
-                    onClick={() => {
-                        if (text.trim().length >= minChars) pesquisar(text);
-                        inputRef.current?.focus();
-                    }}
+                    onClick={abrirDropdown}
                 >
                     ▾
                 </button>

@@ -18,6 +18,7 @@ import ViewAgendaColunasListScreen from './screens/ViewAgendaColunasListScreen';
 import ViewAgendaColunasUsuarioAgendaListScreen from './screens/ViewAgendaColunasUsuarioAgendaListScreen';
 import ViewAgendaFormAgendaListScreen from './screens/ViewAgendaFormAgendaListScreen';
 import ViewAgendaListAgendaListScreen from './screens/ViewAgendaListAgendaListScreen';
+import ViewAgendaCompromissosScreen from './screens/ViewAgendaCompromissosScreen';
 import ViewAlterarSenhaAlterarSenhaListScreen from './screens/ViewAlterarSenhaAlterarSenhaListScreen';
 import ViewApresentacaoListApresentacaoListScreen from './screens/ViewApresentacaoListApresentacaoListScreen';
 import ViewArquivoProconListArquivoProconListScreen from './screens/ViewArquivoProconListArquivoProconListScreen';
@@ -126,10 +127,6 @@ import ViewContaCorrenteListContaCorrenteListScreen from './screens/ViewContaCor
 import ViewContratoColunasContratoListScreen from './screens/ViewContratoColunasContratoListScreen';
 import ViewContratoFormContratoListScreen from './screens/ViewContratoFormContratoListScreen';
 import ViewContratoListContratoListScreen from './screens/ViewContratoListContratoListScreen';
-import ViewContratoSituacaoFormContratoSituacaoListScreen
-    from './screens/ViewContratoSituacaoFormContratoSituacaoListScreen';
-import ViewContratoSituacaoListContratoSituacaoListScreen
-    from './screens/ViewContratoSituacaoListContratoSituacaoListScreen';
 import ViewCoordenadorColunasAdminListScreen from './screens/ViewCoordenadorColunasAdminListScreen';
 import ViewCoordenadorColunasOperadorListScreen from './screens/ViewCoordenadorColunasOperadorListScreen';
 import ViewCoordenadorListCoordenadorListScreen from './screens/ViewCoordenadorListCoordenadorListScreen';
@@ -138,12 +135,6 @@ import ViewCorListCoresListScreen from './screens/ViewCorListCoresListScreen';
 import ViewCpfalunosFormCpfalunosListScreen from './screens/ViewCpfalunosFormCpfalunosListScreen';
 import ViewCpfalunosListCpfalunosListScreen from './screens/ViewCpfalunosListCpfalunosListScreen';
 import ViewCriterioListCriterioListScreen from './screens/ViewCriterioListCriterioListScreen';
-import ViewCronogramaComponenteCurricularColunasCronogramaComponenteCurricularListScreen
-    from './screens/ViewCronogramaComponenteCurricularColunasCronogramaComponenteCurricularListScreen';
-import ViewCronogramaComponenteCurricularFormCronogramaComponenteCurricularListScreen
-    from './screens/ViewCronogramaComponenteCurricularFormCronogramaComponenteCurricularListScreen';
-import ViewCronogramaComponenteCurricularListCronogramaComponenteCurricularListScreen
-    from './screens/ViewCronogramaComponenteCurricularListCronogramaComponenteCurricularListScreen';
 import ViewCurriculoColunasListScreen from './screens/ViewCurriculoColunasListScreen';
 import ViewCurriculoColunasMatrizCurricularListScreen from './screens/ViewCurriculoColunasMatrizCurricularListScreen';
 import ViewCurriculoColunasRequisitoMatrizListScreen from './screens/ViewCurriculoColunasRequisitoMatrizListScreen';
@@ -218,10 +209,6 @@ import ViewGrauListGrauListScreen from './screens/ViewGrauListGrauListScreen';
 import ViewGrupoColunasListScreen from './screens/ViewGrupoColunasListScreen';
 import ViewGrupoFormGrupoListScreen from './screens/ViewGrupoFormGrupoListScreen';
 import ViewGrupoListGrupoListScreen from './screens/ViewGrupoListGrupoListScreen';
-import ViewGrupoComponenteCurricularFormGrupoComponenteCurricularListScreen
-    from './screens/ViewGrupoComponenteCurricularFormGrupoComponenteCurricularListScreen';
-import ViewGrupoComponenteCurricularListGrupoComponenteCurricularListScreen
-    from './screens/ViewGrupoComponenteCurricularListGrupoComponenteCurricularListScreen';
 import ViewHorarioFormHorarioListScreen from './screens/ViewHorarioFormHorarioListScreen';
 import ViewHorarioListHorarioListScreen from './screens/ViewHorarioListHorarioListScreen';
 import ViewHorarioPeriodoFormHorarioPeriodoListScreen from './screens/ViewHorarioPeriodoFormHorarioPeriodoListScreen';
@@ -242,6 +229,7 @@ import ViewMatriculaColunasContratoListScreen from './screens/ViewMatriculaColun
 import ViewMatriculaColunasPessoaListScreen from './screens/ViewMatriculaColunasPessoaListScreen';
 import ViewMatriculaFormMatriculaListScreen from './screens/ViewMatriculaFormMatriculaListScreen';
 import ViewMatriculaFormRematriculaListScreen from './screens/ViewMatriculaFormRematriculaListScreen';
+import ViewMatriculaWizardScreen from './screens/ViewMatriculaWizardScreen';
 import ViewMatriculaListMatriculaListScreen from './screens/ViewMatriculaListMatriculaListScreen';
 import ViewMatriculaListRematriculaListScreen from './screens/ViewMatriculaListRematriculaListScreen';
 import ViewMatriculaMatriculaListScreen from './screens/ViewMatriculaMatriculaListScreen';
@@ -437,10 +425,6 @@ import ViewTipoCursoFormTipoCursoListScreen from './screens/ViewTipoCursoFormTip
 import ViewTipoCursoListTipoCursoListScreen from './screens/ViewTipoCursoListTipoCursoListScreen';
 import ViewTipoHistoricoFormTipoHistoricoListScreen from './screens/ViewTipoHistoricoFormTipoHistoricoListScreen';
 import ViewTipoHistoricoListTipoHistoricoListScreen from './screens/ViewTipoHistoricoListTipoHistoricoListScreen';
-import ViewTipoMatrizCurricularFormTipoMatrizCurricularListScreen
-    from './screens/ViewTipoMatrizCurricularFormTipoMatrizCurricularListScreen';
-import ViewTipoMatrizCurricularListTipoMatrizCurricularListScreen
-    from './screens/ViewTipoMatrizCurricularListTipoMatrizCurricularListScreen';
 import ViewTipoPagamentoColunasTipoPagamentoListScreen from './screens/ViewTipoPagamentoColunasTipoPagamentoListScreen';
 import ViewTipoPagamentoFormTipoPagamentoListScreen from './screens/ViewTipoPagamentoFormTipoPagamentoListScreen';
 import ViewTipoPagamentoListTipoPagamentoListScreen from './screens/ViewTipoPagamentoListTipoPagamentoListScreen';
@@ -519,7 +503,7 @@ const q = new QueryClient();
 createRoot(document.getElementById('root')!).render(<QueryClientProvider
     client={q}><AuthProvider><PermissionBridge><BrowserRouter><Routes><Route path="/login"
                                                                              element={<LoginScreen/>}/><Route
-    element={<ProtectedRoute/>}><Route path='*' element={<p>Selecione uma tela.</p>}/><Route path="/default" element={
+    element={<ProtectedRoute/>}><Route path="/default" element={
     <DefaultListScreen/>}/><Route path="/auditoria" element={<AuditoriaScreen/>}/><Route path="/view/tema/listTemas"
                                                                                          element={
                                                                                              <ViewTemaListTemasListScreen/>}/>
@@ -546,6 +530,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/agenda/colunasUsuarioAgenda" element={<ViewAgendaColunasUsuarioAgendaListScreen/>}/>
     <Route path="/view/agenda/formAgenda" element={<ViewAgendaFormAgendaListScreen/>}/>
     <Route path="/view/agenda/listAgenda" element={<ViewAgendaListAgendaListScreen/>}/>
+    <Route path="/view/agenda/compromissos" element={<ViewAgendaCompromissosScreen/>}/>
     <Route path="/view/alterarSenha/alterarSenha" element={<ViewAlterarSenhaAlterarSenhaListScreen/>}/>
     <Route path="/view/apresentacao/listApresentacao" element={<ViewApresentacaoListApresentacaoListScreen/>}/>
     <Route path="/view/arquivoProcon/listArquivoProcon" element={<ViewArquivoProconListArquivoProconListScreen/>}/>
@@ -659,10 +644,6 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/contrato/colunasContrato" element={<ViewContratoColunasContratoListScreen/>}/>
     <Route path="/view/contrato/formContrato" element={<ViewContratoFormContratoListScreen/>}/>
     <Route path="/view/contrato/listContrato" element={<ViewContratoListContratoListScreen/>}/>
-    <Route path="/view/contratoSituacao/formContratoSituacao"
-           element={<ViewContratoSituacaoFormContratoSituacaoListScreen/>}/>
-    <Route path="/view/contratoSituacao/listContratoSituacao"
-           element={<ViewContratoSituacaoListContratoSituacaoListScreen/>}/>
     <Route path="/view/coordenador/colunasAdmin" element={<ViewCoordenadorColunasAdminListScreen/>}/>
     <Route path="/view/coordenador/colunasOperador" element={<ViewCoordenadorColunasOperadorListScreen/>}/>
     <Route path="/view/coordenador/listCoordenador" element={<ViewCoordenadorListCoordenadorListScreen/>}/>
@@ -671,12 +652,6 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/cpfalunos/formCpfalunos" element={<ViewCpfalunosFormCpfalunosListScreen/>}/>
     <Route path="/view/cpfalunos/listCpfalunos" element={<ViewCpfalunosListCpfalunosListScreen/>}/>
     <Route path="/view/criterio/listCriterio" element={<ViewCriterioListCriterioListScreen/>}/>
-    <Route path="/view/cronogramaComponenteCurricular/colunasCronogramaComponenteCurricular"
-           element={<ViewCronogramaComponenteCurricularColunasCronogramaComponenteCurricularListScreen/>}/>
-    <Route path="/view/cronogramaComponenteCurricular/formCronogramaComponenteCurricular"
-           element={<ViewCronogramaComponenteCurricularFormCronogramaComponenteCurricularListScreen/>}/>
-    <Route path="/view/cronogramaComponenteCurricular/listCronogramaComponenteCurricular"
-           element={<ViewCronogramaComponenteCurricularListCronogramaComponenteCurricularListScreen/>}/>
     <Route path="/view/curriculo/colunas" element={<ViewCurriculoColunasListScreen/>}/>
     <Route path="/view/curriculo/colunasMatrizCurricular" element={<ViewCurriculoColunasMatrizCurricularListScreen/>}/>
     <Route path="/view/curriculo/colunasRequisitoMatriz" element={<ViewCurriculoColunasRequisitoMatrizListScreen/>}/>
@@ -751,10 +726,6 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/grupo/colunas" element={<ViewGrupoColunasListScreen/>}/>
     <Route path="/view/grupo/formGrupo" element={<ViewGrupoFormGrupoListScreen/>}/>
     <Route path="/view/grupo/listGrupo" element={<ViewGrupoListGrupoListScreen/>}/>
-    <Route path="/view/grupoComponenteCurricular/formGrupoComponenteCurricular"
-           element={<ViewGrupoComponenteCurricularFormGrupoComponenteCurricularListScreen/>}/>
-    <Route path="/view/grupoComponenteCurricular/listGrupoComponenteCurricular"
-           element={<ViewGrupoComponenteCurricularListGrupoComponenteCurricularListScreen/>}/>
     <Route path="/view/horario/formHorario" element={<ViewHorarioFormHorarioListScreen/>}/>
     <Route path="/view/horario/listHorario" element={<ViewHorarioListHorarioListScreen/>}/>
     <Route path="/view/horarioPeriodo/formHorarioPeriodo" element={<ViewHorarioPeriodoFormHorarioPeriodoListScreen/>}/>
@@ -775,6 +746,8 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/matricula/colunasPessoa" element={<ViewMatriculaColunasPessoaListScreen/>}/>
     <Route path="/view/matricula/formMatricula" element={<ViewMatriculaFormMatriculaListScreen/>}/>
     <Route path="/view/matricula/formRematricula" element={<ViewMatriculaFormRematriculaListScreen/>}/>
+    <Route path="/view/matricula/wizard" element={<ViewMatriculaWizardScreen/>}/>
+    <Route path="/view/matricula/wizard/:id" element={<ViewMatriculaWizardScreen/>}/>
     <Route path="/view/matricula/listMatricula" element={<ViewMatriculaListMatriculaListScreen/>}/>
     <Route path="/view/matricula/listRematricula" element={<ViewMatriculaListRematriculaListScreen/>}/>
     <Route path="/view/matricula/matricula" element={<ViewMatriculaMatriculaListScreen/>}/>
@@ -972,10 +945,6 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/tipoCurso/listTipoCurso" element={<ViewTipoCursoListTipoCursoListScreen/>}/>
     <Route path="/view/tipoHistorico/formTipoHistorico" element={<ViewTipoHistoricoFormTipoHistoricoListScreen/>}/>
     <Route path="/view/tipoHistorico/listTipoHistorico" element={<ViewTipoHistoricoListTipoHistoricoListScreen/>}/>
-    <Route path="/view/tipoMatrizCurricular/formTipoMatrizCurricular"
-           element={<ViewTipoMatrizCurricularFormTipoMatrizCurricularListScreen/>}/>
-    <Route path="/view/tipoMatrizCurricular/listTipoMatrizCurricular"
-           element={<ViewTipoMatrizCurricularListTipoMatrizCurricularListScreen/>}/>
     <Route path="/view/tipoPagamento/colunasTipoPagamento"
            element={<ViewTipoPagamentoColunasTipoPagamentoListScreen/>}/>
     <Route path="/view/tipoPagamento/formTipoPagamento" element={<ViewTipoPagamentoFormTipoPagamentoListScreen/>}/>
@@ -1036,4 +1005,4 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/curriculo/curriculo-trabalho" element={<CurriculoTrabalhoListScreen/>}/>
     <Route path="/curriculo/curriculo-campo" element={<CurriculoCampoListScreen/>}/>
     <Route path="/curriculo/configuracao" element={
-        <CurriculoConfiguracaoListScreen/>}/></Route></Routes></BrowserRouter></PermissionBridge></AuthProvider></QueryClientProvider>);
+        <CurriculoConfiguracaoListScreen/>}/><Route path='*' element={<p>Selecione uma tela.</p>}/></Route></Routes></BrowserRouter></PermissionBridge></AuthProvider></QueryClientProvider>);

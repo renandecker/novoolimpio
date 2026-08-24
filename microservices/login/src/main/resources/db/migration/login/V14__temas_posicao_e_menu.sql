@@ -34,14 +34,14 @@ ON CONFLICT (tema) DO NOTHING;
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
 SELECT nextval('public.bas_modulo_id_seq'),
        (SELECT m.id FROM public.bas_modulo m WHERE m.rotulo = 'Configurações' AND m.id_modulo = 25 LIMIT 1),
-       'Ícones Disponíveis', 'Lista de ícones disponíveis no sistema', '✨', '/view/icones/listIcones', NULL, 100
+       'Ícones Disponíveis', 'Lista de ícones disponíveis no sistema', '✨', '/view/icones/listIcones', 'Exibe a lista de ícones disponíveis para uso nas telas e componentes do sistema.', 100
 WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE rotulo = 'Ícones Disponíveis');
 
 -- 5) Modulo "Temas" dentro de Administração > Configurações.
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
 SELECT nextval('public.bas_modulo_id_seq'),
        (SELECT m.id FROM public.bas_modulo m WHERE m.rotulo = 'Configurações' AND m.id_modulo = 25 LIMIT 1),
-       'Temas', 'Cadastro de temas (cores e layout) do sistema', '🎨', '/view/tema/listTemas', NULL, 100
+       'Temas', 'Cadastro de temas (cores e layout) do sistema', '🎨', '/view/tema/listTemas', 'Cadastro e gerenciamento de temas (cores e layout) do sistema.', 100
 WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE rotulo = 'Temas');
 
 -- 6) Concede ao perfil Administrador acesso aos novos modulos.

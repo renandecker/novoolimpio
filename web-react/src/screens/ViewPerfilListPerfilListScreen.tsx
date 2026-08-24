@@ -3,6 +3,6 @@ import {DataTable} from '../DataTable';
 
 export default function ViewPerfilListPerfilListScreen() {
     return <PermissionGate permission="READ">
-        <main><h1>Perfil</h1><DataTable path="/api/view/perfil/listPerfil"/></main>
+        <main><h1>Perfil</h1><DataTable path="/api/basico/perfil"/></main>
     </PermissionGate>
 }

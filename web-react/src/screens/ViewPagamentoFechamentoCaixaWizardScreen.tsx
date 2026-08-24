@@ -164,6 +164,37 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
     const fetchParcela = fetchAutoComplete('/api/financeiro/parcela/buscar', 'id', 'descricao');
     const fetchMovimento = fetchAutoComplete('/api/view/movimento/listMovimento', 'id', 'descricaocompleta');
     const fetchCategoriaFinanceira = fetchAutoComplete('/api/view/tipoMovimento/listTipoMovimento', 'id', 'descricao');
+    const fetchBandeira = fetchAutoComplete('/api/view/bandeira/listBandeira', 'id', 'descricao');
+
+    // AutoComplete fetchById functions (for loading label when value has ID but no label)
+    const fetchUsuarioById = async (id: number) => {
+        const {data} = await api.get(`/api/view/usuario/${id}`);
+        return {id: data.id, label: data.nome};
+    };
+    const fetchUnidadeById = async (id: number) => {
+        const {data} = await api.get(`/api/view/unidade/${id}`);
+        return {id: data.id, label: data.sucinto};
+    };
+    const fetchImpressoraById = async (id: number) => {
+        const {data} = await api.get(`/api/view/impressora/${id}`);
+        return {id: data.id, label: data.descricao};
+    };
+    const fetchParcelaById = async (id: number) => {
+        const {data} = await api.get(`/api/financeiro/parcela/${id}`);
+        return {id: data.id, label: data.descricao};
+    };
+    const fetchMovimentoById = async (id: number) => {
+        const {data} = await api.get(`/api/view/movimento/${id}`);
+        return {id: data.id, label: data.descricaocompleta};
+    };
+    const fetchCategoriaFinanceiraById = async (id: number) => {
+        const {data} = await api.get(`/api/view/tipoMovimento/${id}`);
+        return {id: data.id, label: data.descricao};
+    };
+    const fetchBandeiraById = async (id: number) => {
+        const {data} = await api.get(`/api/view/bandeira/${id}`);
+        return {id: data.id, label: data.descricao};
+    };
 
     // Load caixa when usuario/unidade change
     useEffect(() => {
@@ -457,6 +488,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                             value={data.usuarioId ? {id: Number(data.usuarioId), label: ''} : null}
                                             onChange={(opt) => updateField('usuarioId', opt ? String(opt.id) : '')}
                                             fetchOptions={fetchUsuario}
+                                            fetchById={fetchUsuarioById}
                                             minChars={2}
                                         />
                                         <AutoComplete
@@ -466,6 +498,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                             value={data.unidadeId ? {id: Number(data.unidadeId), label: ''} : null}
                                             onChange={(opt) => updateField('unidadeId', opt ? String(opt.id) : '')}
                                             fetchOptions={fetchUnidade}
+                                            fetchById={fetchUnidadeById}
                                             minChars={2}
                                         />
                                     </div>
@@ -503,6 +536,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                                     } : null}
                                                     onChange={(opt) => updateField('impressoraId', opt ? String(opt.id) : '')}
                                                     fetchOptions={fetchImpressora}
+                                                    fetchById={fetchImpressoraById}
                                                     minChars={2}
                                                 />
                                                 <div className="field-group">
@@ -571,6 +605,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                                     } : null}
                                                     onChange={(opt) => updateField('parcelaId', opt ? String(opt.id) : '')}
                                                     fetchOptions={fetchParcela}
+                                                    fetchById={fetchParcelaById}
                                                     minChars={2}
                                                 />
                                                 <div className="field-group">
@@ -708,24 +743,25 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                                                    })}/>
                                                         </div>
                                                     )}
-                                                    {f.tipoPagamento === 'CARTAO' && (
-                                                        <div className="forma-detalhe">
-                                                            <AutoComplete
-                                                                label="Bandeira"
-                                                                placeholder="Buscar bandeira..."
-                                                                value={f.cartao?.bandeiraId ? {
-                                                                    id: f.cartao.bandeiraId,
-                                                                    label: ''
-                                                                } : null}
-                                                                onChange={(opt) => updateFormaPagamento(idx, {
-                                                                    cartao: {
-                                                                        ...f.cartao,
-                                                                        bandeiraId: opt ? opt.id : 0
-                                                                    }
-                                                                })}
-                                                                fetchOptions={fetchAutoComplete('/api/view/bandeira/listBandeira', 'id', 'descricao')}
-                                                                minChars={2}
-                                                            />
+{f.tipoPagamento === 'CARTAO' && (
+                                                            <div className="forma-detalhe">
+                                                                <AutoComplete
+                                                                    label="Bandeira"
+                                                                    placeholder="Buscar bandeira..."
+                                                                    value={f.cartao?.bandeiraId ? {
+                                                                        id: f.cartao.bandeiraId,
+                                                                        label: ''
+                                                                    } : null}
+                                                                    onChange={(opt) => updateFormaPagamento(idx, {
+                                                                        cartao: {
+                                                                            ...f.cartao,
+                                                                            bandeiraId: opt ? opt.id : 0
+                                                                        }
+                                                                    })}
+                                                                    fetchOptions={fetchBandeira}
+                                                                    fetchById={fetchBandeiraById}
+                                                                    minChars={2}
+                                                                />
                                                             <select value={f.cartao?.tipoPagamentoCartao || ''}
                                                                     onChange={(e) => updateFormaPagamento(idx, {
                                                                         cartao: {
@@ -879,6 +915,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                                     } : null}
                                                     onChange={(opt) => updateField('movimentoId', opt ? String(opt.id) : '')}
                                                     fetchOptions={fetchMovimento}
+                                                    fetchById={fetchMovimentoById}
                                                     minChars={2}
                                                 />
                                                 <div className="field-group">

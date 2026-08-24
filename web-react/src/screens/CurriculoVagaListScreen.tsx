@@ -41,7 +41,7 @@ interface VagaFormData {
     grupos: ApiItem[];
 }
 
-const PERFIL_SOURCE = '/api/aluno/perfil/listPerfil';
+const PERFIL_SOURCE = '/api/view/perfil/listPerfil';
 const PERFIL_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'descricao', label: 'Descrição'}];
 const PERFIL_SEARCH = ['descricao'];
 
@@ -53,23 +53,23 @@ const EMPRESA_SOURCE = '/api/curriculo/empresa/refs?id_pessoa=0'; // will use re
 const EMPRESA_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'label', label: 'Empresa'}];
 const EMPRESA_SEARCH = ['label'];
 
-const USUARIO_SOURCE = '/api/aluno/usuario/listUsuario';
+const USUARIO_SOURCE = '/api/view/usuario/listUsuario';
 const USUARIO_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'login', label: 'Login'}, {key: 'nome', label: 'Nome'}];
 const USUARIO_SEARCH = ['login', 'nome'];
 
-const OFERECIMENTO_SOURCE = '/api/educacao/oferecimento-componente/listOferecimentoComponenteCurricular';
+const OFERECIMENTO_SOURCE = '/api/educacao/oferecimento-componente-curricular';
 const OFERECIMENTO_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'descricao', label: 'Descrição'}];
 const OFERECIMENTO_SEARCH = ['descricao'];
 
-const COMPONENTE_SOURCE = '/api/educacao/componenteCurricular/listComponenteCurricular';
+const COMPONENTE_SOURCE = '/api/educacao/componente-curricular';
 const COMPONENTE_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'descricao', label: 'Descrição'}, {key: 'sucinto', label: 'Sucinto'}];
 const COMPONENTE_SEARCH = ['descricao', 'sucinto'];
 
-const CURRICULO_SOURCE = '/api/educacao/curriculo/listCurriculo';
+const CURRICULO_SOURCE = '/api/educacao/curriculo';
 const CURRICULO_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'sucinto', label: 'Sucinto'}, {key: 'descricao', label: 'Descrição'}];
 const CURRICULO_SEARCH = ['sucinto', 'descricao'];
 
-const GRUPO_SOURCE = '/api/educacao/grupo/listGrupo';
+const GRUPO_SOURCE = '/api/educacao/grupo';
 const GRUPO_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'nome', label: 'Nome'}];
 const GRUPO_SEARCH = ['nome'];
 

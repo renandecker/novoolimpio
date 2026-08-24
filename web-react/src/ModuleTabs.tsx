@@ -23,6 +23,8 @@ export interface ModuleTabItem {
     columns?: DataTableColumn[];
     empty?: string;
     maxMainColumns?: number;
+    editNavigateTo?: string;
+    createNavigateTo?: string;
     masterDetail?: ModuleTabMasterDetail;
 }
 
@@ -48,7 +50,14 @@ export function ModuleTabs({tabs, initial}: { tabs: ModuleTabItem[]; initial?: s
         content: tab.masterDetail ? (
             <MasterDetailTab config={tab.masterDetail}/>
         ) : tab.path ? (
-            <DataTable path={tab.path} params={tab.params} columns={tab.columns} maxMainColumns={tab.maxMainColumns}/>
+            <DataTable
+                path={tab.path}
+                params={tab.params}
+                columns={tab.columns}
+                maxMainColumns={tab.maxMainColumns}
+                editNavigateTo={tab.editNavigateTo}
+                createNavigateTo={tab.createNavigateTo}
+            />
         ) : (
             <p className="master-detail-empty">{tab.empty ?? 'Sem conteúdo nesta aba.'}</p>
         ),

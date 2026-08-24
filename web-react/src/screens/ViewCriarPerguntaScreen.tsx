@@ -1,9 +1,9 @@
-import {useRef, useState, useEffect} from 'react';
+import {useState} from 'react';
 import {api} from '../api';
 import {PermissionGate} from '../permissions';
 import {useAuth} from '../auth';
 import {Tabs} from '../Tabs';
-import {AutoComplete, type AutoCompleteOption} from '../AutoComplete';
+import {AutoComplete} from '../AutoComplete';
 
 type RespostaTipo = 'SELECAO' | 'ESCOLHA' | 'TEXTO' | 'ARQUIVO';
 
@@ -19,15 +19,6 @@ type AvaliacaoPergunta = {
     anexos: { id: number; nome: string; anexo: string; tipo: string }[];
 };
 
-type AvaliacaoPerguntaForm = {
-    pergunta: string;
-    tipo: RespostaTipo;
-    opcoes: OpcaoResposta[];
-    respostaTexto: string;
-    respostaEscolhidaId: number | null;
-    anexos: { id: number; nome: string; anexo: string; tipo: string }[];
-};
-
 const tiposOpcoes: Record<RespostaTipo, string> = {
     SELECAO: 'Seleção Múltipla',
     ESCOLHA: 'Escolha Única',
@@ -35,32 +26,26 @@ const tiposOpcoes: Record<RespostaTipo, string> = {
     ARQUIVO: 'Arquivo',
 };
 
-function Painel({
-    titulo,
-    colapsado,
-    onToggle,
-    children,
-}: {
-    titulo: string;
-    colapsado: boolean;
-    onToggle: () => void;
-    children: React.ReactNode;
-}) {
-    return (
-        <div className="gp-panel">
-            <div className="gp-panel-header" onClick={onToggle}>
-                <span className="gp-panel-titulo">{titulo}</span>
-                <span className="gp-panel-setinha">{colapsado ? '▸' : '▾'}</span>
-            </div>
-            {!colapsado && <div className="gp-panel-body">{children}</div>}
-        </div>
-    );
+function Aviso({tipo, texto}: { tipo: 'erro' | 'sucesso'; texto: string }) {
+    if (!texto) return null;
+    return <div className={`gp-aviso gp-aviso-${tipo}`}>{texto}</div>;
 }
 
 export default function ViewCriarPerguntaScreen() {
-    const {session} = useAuth();
-    const isAdmin = session?.hierarquia === 'ADMIN';
+    return (
+        <main className="gestao-professor">
+            <h1>Criar Pergunta</h1>
+            <Tabs
+                tabs={[
+                    {key: 'criar', label: 'Criar Pergunta', content: <CriarPergunta/>},
+                    {key: 'listar', label: 'Listar Perguntas', content: <ListarPerguntas/>},
+                ]}
+            />
+        </main>
+    );
+}
 
+function CriarPergunta() {
     const [pergunta, setPergunta] = useState('');
     const [tipo, setTipo] = useState<RespostaTipo>('TEXTO');
     const [opcoes, setOpcoes] = useState<OpcaoResposta[]>([]);
@@ -68,29 +53,24 @@ export default function ViewCriarPerguntaScreen() {
     const [respostaEscolhidaId, setRespostaEscolhidaId] = useState<number | null>(null);
     const [anexos, setAnexos] = useState<{ id: number; nome: string; anexo: string; tipo: string }[]>([]);
     const [salvando, setSalvando] = useState(false);
+    const [opcaoNova, setOpcaoNova] = useState('');
+    const [aviso, setAviso] = useState<{ tipo: 'erro' | 'sucesso'; texto: string }>({tipo: 'sucesso', texto: ''});
 
-    const [opcaoNova, setOpcaoNova] = useState({nome: ''});
-
-    const alternarTipo = (novoTipo: RespostaTipo) => {
-        setTipo(novoTipo);
-        if (novoTipo !== 'TEXTO' && novoTipo !== 'ARQUIVO') {
-            setRespostaEscolhidaId(novoTipo === 'ESCOLHA' ? null : respostaEscolhidaId);
-        }
-    };
+    const notificar = (t: 'erro' | 'sucesso', texto: string) => setAviso({tipo: t, texto});
 
     const adicionarOpcao = () => {
-        if (opcaoNova.nome.trim()) {
-            setOpcoes([...opcoes, { id: Date.now(), nome: opcaoNova.nome }]);
-            setOpcaoNova({nome: ''});
-        }
+        if (!opcaoNova.trim()) return;
+        setOpcoes([...opcoes, {id: Date.now(), nome: opcaoNova.trim()}]);
+        setOpcaoNova('');
     };
 
     const removerOpcao = (id: number) => {
         setOpcoes(opcoes.filter((o) => o.id !== id));
+        if (respostaEscolhidaId === id) setRespostaEscolhidaId(null);
     };
 
     const adicionarAnexo = () => {
-        setAnexos([...anexos, { id: Date.now(), nome: '', anexo: '', tipo: 'PDF' }]);
+        setAnexos([...anexos, {id: Date.now(), nome: '', anexo: '', tipo: 'PDF'}]);
     };
 
     const removerAnexo = (id: number) => {
@@ -108,7 +88,7 @@ export default function ViewCriarPerguntaScreen() {
                 respostaEscolhidaId,
                 anexos,
             };
-            const {data} = await api.post<AvaliacaoPergunta>('/api/professor/avaliacao-pergunta', payload);
+            await api.post<AvaliacaoPergunta>('/api/professor/avaliacao-pergunta', payload);
             notificar('sucesso', 'Pergunta salva com sucesso.');
             limparFormulario();
         } catch (e) {
@@ -128,21 +108,9 @@ export default function ViewCriarPerguntaScreen() {
     }
 
     return (
-        <main className="gestao-professor">
-            <h1>Criar Pergunta</h1>
-            <Tabs
-                tabs={[
-                    {key: 'criar', label: 'Criar Pergunta', content: <CriarPergunta/>},
-                    {key: 'listar', label: 'Listar Perguntas', content: <ListarPerguntas/>},
-                ]}
-            />
-        </main>
-    );
-}
-
-function CriarPergunta() {
-    return (
         <div>
+            <Aviso tipo={aviso.tipo} texto={aviso.texto}/>
+
             <div className="gp-procurar">
                 <AutoComplete
                     id="gp-pergunta"
@@ -179,11 +147,20 @@ function CriarPergunta() {
                 </div>
             </div>
 
-            {tipo === 'SELECAO' || tipo === 'ESCOLHA'} && (
+            {(tipo === 'SELECAO' || tipo === 'ESCOLHA') && (
                 <div className="gp-control-group">
                     <span className="gp-control-label">Opções de Resposta</span>
                     {opcoes.map((opcao, idx) => (
                         <div key={idx} className="gp-opcao-linha">
+                            {tipo === 'ESCOLHA' && (
+                                <input
+                                    type="radio"
+                                    name="gp-resposta-correta"
+                                    checked={respostaEscolhidaId === opcao.id}
+                                    onChange={() => setRespostaEscolhidaId(opcao.id)}
+                                    title="Marcar como resposta correta"
+                                />
+                            )}
                             <input
                                 type="text"
                                 value={opcao.nome}
@@ -204,17 +181,28 @@ function CriarPergunta() {
                             </button>
                         </div>
                     ))}
-                    <button
-                        className="gp-btn gp-btn-acoes"
-                        onClick={() => setOpcaoNova({nome: ''})}
-                        title="Adicionar opção"
-                    >
-                        ➕
-                    </button>
+                    <div className="gp-opcao-linha">
+                        <input
+                            type="text"
+                            value={opcaoNova}
+                            onChange={(e) => setOpcaoNova(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') adicionarOpcao();
+                            }}
+                            placeholder="Nova opção"
+                        />
+                        <button
+                            className="gp-btn gp-btn-acoes"
+                            onClick={adicionarOpcao}
+                            title="Adicionar opção"
+                        >
+                            ➕
+                        </button>
+                    </div>
                 </div>
-            )
+            )}
 
-            {tipo === 'TEXTO'} && (
+            {tipo === 'TEXTO' && (
                 <div className="gp-control-group">
                     <span className="gp-control-label">Resposta Texto</span>
                     <textarea
@@ -224,16 +212,16 @@ function CriarPergunta() {
                         placeholder="Digite a resposta (opcional)"
                     />
                 </div>
-            )
+            )}
 
-            {tipo === 'ESCOLHA'} && respostaEscolhidaId !== null && (
+            {tipo === 'ESCOLHA' && respostaEscolhidaId !== null && (
                 <div className="gp-control-group">
                     <span className="gp-control-label">Resposta Escolhida</span>
                     <p>ID da resposta escolhida: {respostaEscolhidaId}</p>
                 </div>
-            )
+            )}
 
-            {tipo === 'ARQUIVO'} && (
+            {tipo === 'ARQUIVO' && (
                 <div className="gp-control-group">
                     <span className="gp-control-label">Anexos</span>
                     <button className="gp-btn gp-btn-acoes" onClick={adicionarAnexo} title="Adicionar anexo">
@@ -252,7 +240,7 @@ function CriarPergunta() {
                         </div>
                     ))}
                 </div>
-            )
+            )}
 
             <div className="gp-rodape">
                 <PermissionGate permission="CREATE">
@@ -271,6 +259,7 @@ function ListarPerguntas() {
 
     const [perguntas, setPerguntas] = useState<AvaliacaoPergunta[]>([]);
     const [carregando, setCarregando] = useState(false);
+    const [aviso, setAviso] = useState<{ tipo: 'erro' | 'sucesso'; texto: string }>({tipo: 'sucesso', texto: ''});
 
     const carregarPerguntas = async () => {
         setCarregando(true);
@@ -281,7 +270,7 @@ function ListarPerguntas() {
             );
             setPerguntas(data);
         } catch (e) {
-            notificar('erro', 'Erro ao carregar perguntas.');
+            setAviso({tipo: 'erro', texto: 'Erro ao carregar perguntas.'});
         } finally {
             setCarregando(false);
         }
@@ -297,7 +286,7 @@ function ListarPerguntas() {
                 {carregando ? 'Carregando...' : 'Carregar Perguntas'}
             </button>
 
-            <Aviso tipo={''} texto={''}/>
+            <Aviso tipo={aviso.tipo} texto={aviso.texto}/>
 
             {perguntas.length > 0 && (
                 <table className="gp-table">

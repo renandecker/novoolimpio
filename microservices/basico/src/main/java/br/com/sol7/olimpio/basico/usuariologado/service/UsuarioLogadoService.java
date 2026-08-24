@@ -27,7 +27,7 @@ public class UsuarioLogadoService {
             SELECT DISTINCT ON(outcome) nome,icon,outcome
 
     FROM(
-            SELECT fu.nome, fu.icon, m.outcome, 0AS prioridade
+            SELECT fu.nome, fu.icon, m.outcome, 0 AS prioridade
                     FROM bas_favorito_usuario fu
                             INNER JOIN bas_usuario u ON u.id=fu.id_usuario
                             INNER JOIN bas_modulo m ON m.id=fu.id_modulo

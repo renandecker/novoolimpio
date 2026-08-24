@@ -364,6 +364,62 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
                 const curso = detalhe.curso;
                 const ofs = detalhe.oferecimentos ?? [];
                 const primeiro = ofs[0] ?? {};
+
+                // Load diasAula from oferecimentos
+                const diasAulaSet = new Set<string>();
+                ofs.forEach((o) => {
+                    if (o.diaSemanaId && o.turnoEducacaoId && o.tempoAulaId) {
+                        diasAulaSet.add(`${o.diaSemanaId}-${o.turnoEducacaoId}-${o.tempoAulaId}`);
+                    }
+                });
+                const diasAulaLoaded = Array.from(diasAulaSet).map((key) => {
+                    const [diaSemanaId, turnoEducacaoId, tempoAulaId] = key.split('-').map(Number);
+                    return {diaSemanaId, turnoEducacaoId, tempoAulaId};
+                });
+
+                // Load ocorrencias for each turma
+                let ocorrenciasPorTurma: Record<number, OcorrenciaItem[]> = {};
+                try {
+                    const {data: ocorrenciasData} = await api.get<OcorrenciaItem[]>('/api/educacao/ocorrencia-componente-curricular', {params: {grupoId: curso.id}});
+                    if (ocorrenciasData) {
+                        ocorrenciasPorTurma = ocorrenciasData.reduce((acc, occ) => {
+                            const compId = occ.componenteCurricularId;
+                            if (!acc[compId]) acc[compId] = [];
+                            acc[compId].push({
+                                key: occ.key ?? `${compId}-${occ.data}`,
+                                componenteCurricularId: compId,
+                                data: occ.data,
+                                diaAulaIndex: occ.diaAulaIndex ?? 0,
+                                aulaPresencial: occ.aulaPresencial ?? true,
+                            });
+                            return acc;
+                        }, {} as Record<number, OcorrenciaItem[]>);
+                    }
+                } catch {}
+
+                // Populate salas and cursos for the unidade
+                if (curso.unidadeId) {
+                    try {
+                        const idsCursos = await api.get<number[]>('/api/educacao/curriculo/buscar-cursos-da-unidade', {params: {unidadeId: curso.unidadeId}});
+                        const todosCursos = curriculosQuery.data ?? [];
+                        setCurriculosDetalhe(todosCursos.filter((c) => idsCursos.data.includes(c.id)));
+                        setCursosDaUnidade(toOptions(
+                            todosCursos.filter((c) => idsCursos.data.includes(c.id)) as unknown as Array<Record<string, unknown>>,
+                            ['descricao', 'sucinto', 'sigla'],
+                        ));
+                    } catch {}
+                    try {
+                        const idsSalas = await api.get<number[]>('/api/educacao/sala/buscar-salas-da-unidade', {params: {unidadeId: curso.unidadeId}});
+                        const todasSalas = salasQuery.data ?? [];
+                        const filtradas = todasSalas.filter((s) => idsSalas.data.includes(s.id));
+                        setSalasDetalhe(filtradas);
+                        setSalasDaUnidade(toOptions(
+                            filtradas.map((s) => ({...s, label: s.numero ? `Sala ${s.numero}` : s.sucinto || s.descricao || `#${s.id}`})) as unknown as Array<Record<string, unknown>>,
+                            ['label'],
+                        ));
+                    } catch {}
+                }
+
                 setData({
                     novoGrupo: false,
                     grupoId: curso.id,
@@ -378,7 +434,7 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
                     vagas: primeiro.vagas ?? 0,
                     qtdeSequencia: primeiro.qtdeSequencia ?? 0,
                     dataInicio: isoDate(primeiro.dataInicio),
-                    diasAula: [],
+                    diasAula: diasAulaLoaded,
                     novoDiaDiaSemana: null,
                     novoDiaTurno: null,
                     novoDiaTempoAula: null,
@@ -391,14 +447,14 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
                     descricao: o.componenteCurricular_descricao ?? `#${o.componenteCurricularId}`,
                     cargaHoraria: (componentesQuery.data ?? []).find((c) => c.id === o.componenteCurricularId)?.cargaHoraria ?? 0,
                     turmaId: o.id,
-                    ocorrencias: [],
+                    ocorrencias: ocorrenciasPorTurma[o.componenteCurricularId ?? 0] ?? [],
                     professorId: o.professorId ?? undefined,
                 })));
             } catch {
                 setErro('Não foi possível carregar o oferecimento para edição.');
             }
         })();
-    }, [emEdicao, id, componentesQuery.data]);
+    }, [emEdicao, id, componentesQuery.data, curriculosQuery.data, salasQuery.data]);
 
     const buscarCriterios = useCallback(async () => {
         if (!data.unidadeId || !data.curriculoId) {
@@ -575,6 +631,11 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
         const {data: rows} = await api.get<Array<{id: number; nome: string}>>('/api/professor/professor/auto-complete-professor', {params});
         let filtered = (rows ?? []).map((p) => ({id: Number(p.id), label: p.nome || `#${p.id}`}));
         return filtered;
+    };
+
+    const fetchProfessorById = async (id: number): Promise<AutoCompleteOption | null> => {
+        const {data} = await api.get(`/api/professor/professor/${id}`);
+        return {id: data.id, label: data.nome};
     };
 
     const consultarOferecimentos = async () => {
@@ -1206,6 +1267,7 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
                                         })()}
                                         onChange={(opt) => definirProfessor(turma.componenteCurricularId, opt?.id ?? 0)}
                                         fetchOptions={fetchProfessorFiltrado}
+                                        fetchById={fetchProfessorById}
                                         minChars={3}
                                     />
                                     {data.professores[String(turma.componenteCurricularId)] && (
@@ -1277,9 +1339,13 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
                                 onClick={() => {
                                     const tabOrder: TabKey[] = ['tabGrupo', 'tabDiaAula', 'tabProfessor'];
                                     const currentIndex = tabOrder.indexOf(activeTab);
-                                    if (currentIndex > 0) setActiveTab(tabOrder[currentIndex - 1]);
+                                    if (currentIndex > 0) {
+                                        setActiveTab(tabOrder[currentIndex - 1]);
+                                    } else {
+                                        voltarLista();
+                                    }
                                 }}
-                                disabled={activeTab === 'tabGrupo' || salvando}
+                                disabled={salvando}
                             >
                                 Anterior
                             </button>

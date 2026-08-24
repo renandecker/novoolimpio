@@ -5,7 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "bas_pessoa_fisica")
@@ -34,7 +34,7 @@ public class PessoaFisica extends PanacheEntity {
     @Column(name = "celular_referencia2")
     public String celularReferencia2;
     @Column(name = "data_emissao_rg")
-    public Date dataEmissaoRg;
+    public LocalDate dataEmissaoRg;
     @Column(name = "orgao_emissor_rg")
     public String orgaoEmissorRg;
     @Column(name = "id_cidade_origem")
@@ -44,7 +44,7 @@ public class PessoaFisica extends PanacheEntity {
     @Column(name = "nome_mae")
     public String nomeMae;
     @Column(name = "data_nascimento")
-    public Date dataNascimento;
+    public LocalDate dataNascimento;
     @Column(name = "id_genero")
     public Long generoId;  // referencia a Genero (id, cross-service)
     @Column(name = "id_etnia")

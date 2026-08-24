@@ -92,9 +92,46 @@ function menuIcon(rotulo: string, icone?: string): string {
     return '📁';
 }
 
+const HIDDEN_ROTULOS = new Set([
+    'gestaodecontrato',
+    'gestaodecurriculo',
+    'situacaocontrato',
+    'tipodematrizcurricular',
+    'grupocomponentecurricular',
+    'cronogramacomponentecurricular',
+]);
+const HIDDEN_OUTCOMES = [
+    '/view/contratoSituacao',
+    '/view/tipoMatrizCurricular',
+    '/view/grupoComponenteCurricular',
+    '/view/cronogramaComponenteCurricular',
+];
+function isHiddenModulo(m: Modulo): boolean {
+    if (HIDDEN_ROTULOS.has(normalizeName(m.rotulo))) return true;
+    const out = (m.outcome || '').toLowerCase();
+    return HIDDEN_OUTCOMES.some(p => out.startsWith(p.toLowerCase()));
+}
+
 export default function Sidebar() {
     const {session} = useAuth();
-    const modulos = (session?.modules ?? []) as Modulo[];
+    const rawModulos = (session?.modules ?? []) as Modulo[];
+    // Filtra módulos ocultos e também filhos de módulos ocultos (recursivo)
+    const modulos = useMemo(() => {
+        const hiddenIds = new Set<number>();
+        for (const m of rawModulos) if (isHiddenModulo(m)) hiddenIds.add(m.id);
+        // propaga para descendentes
+        let changed = true;
+        while (changed) {
+            changed = false;
+            for (const m of rawModulos) {
+                if (!hiddenIds.has(m.id) && m.antecessorId != null && hiddenIds.has(m.antecessorId)) {
+                    hiddenIds.add(m.id);
+                    changed = true;
+                }
+            }
+        }
+        return rawModulos.filter(m => !hiddenIds.has(m.id));
+    }, [rawModulos]);
     const defaultPath = session?.defaultOutcome || '/default';
     const [portalOpen, setPortalOpen] = useState(true);
     const [search, setSearch] = useState('');

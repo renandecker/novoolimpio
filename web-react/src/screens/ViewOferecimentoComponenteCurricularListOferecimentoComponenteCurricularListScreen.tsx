@@ -51,6 +51,8 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
                             path: '/api/view/oferecimentoComponenteCurricular/listOferecimentoComponenteCurricular',
                             columns: OFERECIMENTO_COLUMNS,
                             maxMainColumns: OFERECIMENTO_COLUMNS.length,
+                            editNavigateTo: '/view/oferecimentoComponenteCurricular/formOferecimentoComponenteCurricular',
+                            createNavigateTo: '/view/oferecimentoComponenteCurricular/formOferecimentoComponenteCurricular',
                         },
                         {key: 'disponibilidade', label: 'Disponibilidade', empty: 'Conteúdo de Disponibilidade.'},
                         {

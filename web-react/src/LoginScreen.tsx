@@ -2,7 +2,23 @@ import {FormEvent, useState} from 'react';
 import {Navigate, useLocation} from 'react-router-dom';
 import {api} from './api';
 import {useAuth} from './auth';
+import {normalizeOutcome} from './permissions';
 import './LoginScreen.css';
+
+function ensureLeadingSlash(path: string): string {
+    return path.startsWith('/') ? path : `/${path}`;
+}
+
+function getValidDefaultPath(session: { defaultOutcome?: string; modules?: Array<{ outcome: string }> } | null): string {
+    if (!session) return '/default';
+    const fromSession = session.defaultOutcome;
+    const modules = session.modules ?? [];
+    const firstModuleOutcome = modules.length > 0 ? normalizeOutcome(modules[0].outcome) : null;
+    const path = fromSession || firstModuleOutcome || '/default';
+    const finalPath = ensureLeadingSlash(path);
+    console.log('[LoginScreen] getValidDefaultPath: ' + JSON.stringify({ fromSession, firstModuleOutcome, path, finalPath, modulesCount: modules.length, firstModuleRaw: modules[0]?.outcome }));
+    return finalPath;
+}
 
 export default function LoginScreen() {
     const {session, signIn} = useAuth();
@@ -17,8 +33,11 @@ export default function LoginScreen() {
     const [busy, setBusy] = useState(false);
 
     if (session) {
-        return <Navigate to={(location.state as { from?: string } | null)?.from || session.defaultOutcome || '/default'}
-                         replace/>;
+        console.log('[LoginScreen] session: ' + JSON.stringify({ defaultOutcome: session.defaultOutcome, modulesCount: session.modules?.length, locationPath: location.pathname, locationState: location.state }));
+        const defaultPath = getValidDefaultPath(session);
+        const target = (location.state as { from?: string } | null)?.from || defaultPath;
+        console.log('[LoginScreen] navigating to: ' + JSON.stringify({ target, fromState: (location.state as any)?.from }));
+        return <Navigate to={target} replace/>;
     }
 
     async function submit(event: FormEvent) {

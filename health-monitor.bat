@@ -1,14 +1,21 @@
 @echo off
 setlocal enabledelayedexpansion
 
-cd /d "%~dp0"
+rem Se rodado via copia em TEMP (start-all.bat), usa a pasta do projeto.
+set "OLIMPIO_WORKDIR="
+if exist "%TEMP%\olimpio-workdir.txt" set /p OLIMPIO_WORKDIR=<"%TEMP%\olimpio-workdir.txt"
+if defined OLIMPIO_WORKDIR (
+    cd /d "%OLIMPIO_WORKDIR%"
+) else (
+    cd /d "%~dp0"
+)
 
 set SERVICES=login:8090 basico:8081 notificacoes:8082 central:8083 comercial:8084 educacao:8085 estoque:8086 financeiro:8087 relatorios:8088 schedule:8089 professor:8091 aluno:8092 asaas:8094 curriculo:8095 fiserv:8097 gateway:8080 web:3000
 
 set TOTAL=0
 for %%s in (%SERVICES%) do set /a TOTAL+=1
 
-set MAX_WAIT=180
+set MAX_WAIT=300
 set WAITED=0
 
 echo ============================================
