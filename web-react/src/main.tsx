@@ -1004,6 +1004,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/asaas/clientes" element={<AsaasClientesListScreen/>}/>
     <Route path="/asaas/parcelas" element={<AsaasParcelasListScreen/>}/>
     <Route path="/curriculo/vaga" element={<CurriculoVagaListScreen/>}/>
+    <Route path="/curriculo/vagas" element={<CurriculoVagaListScreen/>}/>
     <Route path="/curriculo/empresa" element={<CurriculoEmpresaListScreen/>}/>
     <Route path="/curriculo/empresa-unidade" element={<CurriculoEmpresaUnidadeListScreen/>}/>
     <Route path="/curriculo/entrevista" element={<CurriculoEntrevistaListScreen/>}/>

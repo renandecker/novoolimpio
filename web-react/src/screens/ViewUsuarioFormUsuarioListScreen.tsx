@@ -25,6 +25,24 @@ import {useQuery} from '@tanstack/react-query';
 import {EnderecoCampos} from '../EnderecoForm';
 import type {Endereco} from '../EnderecoForm';
 
+interface Logradouro {
+    id: number;
+    descricao: string;
+    cep: string;
+    id_bairro: number;
+}
+
+interface Bairro {
+    id: number;
+    descricao: string;
+    cidadeId: number;
+}
+
+interface Cidade {
+    id: number;
+    nome: string;
+}
+
 interface DocumentoUploadProps {
     label: string;
     obrigatorio?: boolean;
@@ -189,6 +207,62 @@ export default function ViewUsuarioFormUsuarioListScreen() {
                     telefoneReferencia2: str(pf?.telefoneReferencia2),
                     celularReferencia2: str(pf?.celularReferencia2),
                 });
+
+                // Carregar endereço da pessoa
+                if (pes) {
+                    const enderecosCarregados: Endereco[] = [];
+                    const cep = str(pes.cep);
+                    const complemento = str(pes.complemento);
+                    const numero = str(pes.numero);
+                    const idLogradouro = (pes.id_logradouro ?? pes.logradouroId) as number | null | undefined;
+
+                    if (idLogradouro) {
+                        try {
+                            const logradouro = (await api.get<Logradouro>(`/api/basico/logradouro/${idLogradouro}`)).data;
+                            let bairroDescricao = '';
+                            let cidadeDescricao = '';
+                            if (logradouro.id_bairro) {
+                                const bairro = (await api.get<Bairro>(`/api/basico/bairro/${logradouro.id_bairro}`)).data;
+                                bairroDescricao = bairro.descricao;
+                                if (bairro.cidadeId) {
+                                    const cidade = (await api.get<Cidade>(`/api/basico/cidade/${bairro.cidadeId}`)).data;
+                                    cidadeDescricao = cidade.nome;
+                                }
+                            }
+                            enderecosCarregados.push({
+                                id: idLogradouro,
+                                cep: logradouro.cep || cep,
+                                logradouro: logradouro.descricao,
+                                bairro: bairroDescricao,
+                                cidade: cidadeDescricao,
+                                numero,
+                                complemento,
+                            });
+                        } catch {
+                            // Se falhar ao buscar logradouro/bairro/cidade, usa apenas dados da pessoa
+                            if (cep || numero || complemento) {
+                                enderecosCarregados.push({
+                                    cep,
+                                    cidade: '',
+                                    bairro: '',
+                                    logradouro: '',
+                                    numero,
+                                    complemento,
+                                });
+                            }
+                        }
+                    } else if (cep || numero || complemento) {
+                        enderecosCarregados.push({
+                            cep,
+                            cidade: '',
+                            bairro: '',
+                            logradouro: '',
+                            numero,
+                            complemento,
+                        });
+                    }
+                    setEnderecos(enderecosCarregados);
+                }
 
                 const usuarioIdNum = usu.id as number;
                 const [unidadesIds, agendasIds, perfisIds] = await Promise.all([

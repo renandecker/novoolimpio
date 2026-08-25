@@ -23,9 +23,18 @@ COMMENT ON COLUMN public.fin_bancos.chave           IS 'Nome da chave: base-url,
 COMMENT ON COLUMN public.fin_bancos.valor           IS 'Valor da configuracao (texto livre)';
 
 -- Menu: Configuracao Financeira (dentro do modulo basico > Configuracoes)
-INSERT INTO bas_modulo (id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem, fl_ativo)
-SELECT nextval('bas_modulo_id_modulo_seq'),
-       'Configuracao Financeira',
+-- Adiciona coluna fl_ativo se nao existir no bas_modulo
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'bas_modulo' AND column_name = 'fl_ativo') THEN
+        ALTER TABLE bas_modulo ADD COLUMN fl_ativo boolean DEFAULT true;
+    END IF;
+END $$;
+
+INSERT INTO bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem, fl_ativo)
+SELECT nextval('bas_modulo_id_seq'),
+       (SELECT id FROM bas_modulo WHERE lower(rotulo) = 'configurações' AND id_modulo = 25 LIMIT 1),
+       'Configuração Financeira',
        'Credenciais Fiserv e Asaas por unidade',
        'account_balance',
        'view/configuracaoFinanceira/listConfiguracaoFinanceira',

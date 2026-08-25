@@ -152,8 +152,14 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoComp
                 setGrupos(grps ?? []);
                 setSalas(sls ?? []);
                 setDiaAulas(das ?? []);
-                try { setDiasSemana(await api.get('/api/view/dia-semana')); } catch { setDiasSemana([]); }
-                try { setProfessores(await api.get('/api/professor/professor')); } catch { setProfessores([]); }
+                try {
+                    const res = await api.get('/api/view/diaSemana/listDiaSemana');
+                    setDiasSemana(Array.isArray(res) ? res : (res?.data || []));
+                } catch { setDiasSemana([]); }
+                try {
+                    const res = await api.get('/api/professor/professor');
+                    setProfessores(Array.isArray(res) ? res : (res?.data || []));
+                } catch { setProfessores([]); }
 
                 if (idEdicao) {
                     try {

@@ -500,6 +500,8 @@ import ViewTemaListTemasListScreen from './src/screens/ViewTemaListTemasListScre
 import AlunoDashboardScreen from './src/screens/AlunoDashboardScreen';
 import AlunoBoletimScreen from './src/screens/AlunoBoletimScreen';
 import AlunoFrequenciaScreen from './src/screens/AlunoFrequenciaScreen';
+import AlunoAulasScreen from './src/screens/AlunoAulasScreen';
+import AlunoFinanceiroScreen from './src/screens/AlunoFinanceiroScreen';
 import MeusDadosScreen from './src/screens/MeusDadosScreen';
 import ViewNotificacaoListNotificacaoListScreen from './src/screens/ViewNotificacaoListNotificacaoListScreen';
 import ViewCategoriaEstoqueListCategoriaListScreen from './src/screens/ViewCategoriaEstoqueListCategoriaListScreen';
@@ -520,6 +522,8 @@ function AppRoutes() {
         <Stack.Screen name='aluno/dashboard' component={AlunoDashboardScreen} options={{title: 'Portal do Aluno'}}/>
         <Stack.Screen name='aluno/boletim' component={AlunoBoletimScreen} options={{title: 'Boletim'}}/>
         <Stack.Screen name='aluno/frequencia' component={AlunoFrequenciaScreen} options={{title: 'Frequência'}}/>
+        <Stack.Screen name='aluno/aulas' component={AlunoAulasScreen} options={{title: 'Minhas Aulas'}}/>
+        <Stack.Screen name='aluno/financeiro' component={AlunoFinanceiroScreen} options={{title: 'Financeiro'}}/>
         <Stack.Screen name='meus-dados' component={MeusDadosScreen} options={{title: 'Meus dados'}}/>
         <Stack.Screen name='view/notificacao/listNotificacao' component={ViewNotificacaoListNotificacaoListScreen}
                       options={{title: 'Notificações'}}/>

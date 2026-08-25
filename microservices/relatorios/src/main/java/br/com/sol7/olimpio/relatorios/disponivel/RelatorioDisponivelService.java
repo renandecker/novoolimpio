@@ -27,9 +27,9 @@ public class RelatorioDisponivelService {
                     "LEFT JOIN rel_tabela_perfil relperfil ON (relperfil.id_tabela = rel.id AND per.id_perfil = relperfil.id_perfil) " +
                     "LEFT JOIN rel_tabela_unidade relunidade ON (relunidade.id_tabela = rel.id AND uni.id_unidade = relunidade.id_unidade) " +
                     "LEFT JOIN rel_tabela_usuario relusuario ON (relusuario.id_tabela = rel.id AND usu.id = relusuario.id_usuario) " +
-                    "WHERE (rel.fl_todos_perfis = false AND relperfil.id_perfil = per.id_perfil) " +
-                    "   OR (rel.fl_todos_unidades = false AND relunidade.id_unidade = uni.id_unidade) " +
-                    "   OR (rel.fl_todos_usuarios = false AND relusuario.id_usuario = usu.id) " +
+                    "WHERE (rel.fl_todos_perfis = true OR (rel.fl_todos_perfis = false AND relperfil.id_perfil = per.id_perfil)) " +
+                    "   AND (rel.fl_todos_unidades = true OR (rel.fl_todos_unidades = false AND relunidade.id_unidade = uni.id_unidade)) " +
+                    "   AND (rel.fl_todos_usuarios = true OR (rel.fl_todos_usuarios = false AND relusuario.id_usuario = usu.id)) " +
                     "   OR usu.hierarquia = 'ADMIN' " +
                     "ORDER BY rel.nome";
 
@@ -41,9 +41,9 @@ public class RelatorioDisponivelService {
                     "LEFT JOIN rel_grafico_perfil relperfil ON (relperfil.id_grafico = rel.id AND per.id_perfil = relperfil.id_perfil) " +
                     "LEFT JOIN rel_grafico_unidade relunidade ON (relunidade.id_grafico = rel.id AND uni.id_unidade = relunidade.id_unidade) " +
                     "LEFT JOIN rel_grafico_usuario relusuario ON (relusuario.id_grafico = rel.id AND usu.id = relusuario.id_usuario) " +
-                    "WHERE (rel.fl_todos_perfis = false AND relperfil.id_perfil = per.id_perfil) " +
-                    "   OR (rel.fl_todos_unidades = false AND relunidade.id_unidade = uni.id_unidade) " +
-                    "   OR (rel.fl_todos_usuarios = false AND relusuario.id_usuario = usu.id) " +
+                    "WHERE (rel.fl_todos_perfis = true OR (rel.fl_todos_perfis = false AND relperfil.id_perfil = per.id_perfil)) " +
+                    "   AND (rel.fl_todos_unidades = true OR (rel.fl_todos_unidades = false AND relunidade.id_unidade = uni.id_unidade)) " +
+                    "   AND (rel.fl_todos_usuarios = true OR (rel.fl_todos_usuarios = false AND relusuario.id_usuario = usu.id)) " +
                     "   OR usu.hierarquia = 'ADMIN' " +
                     "ORDER BY rel.nome";
 
@@ -55,9 +55,9 @@ public class RelatorioDisponivelService {
                     "LEFT JOIN rel_mapa_perfil relperfil ON (relperfil.id_mapa = rel.id AND per.id_perfil = relperfil.id_perfil) " +
                     "LEFT JOIN rel_mapa_unidade relunidade ON (relunidade.id_mapa = rel.id AND uni.id_unidade = relunidade.id_unidade) " +
                     "LEFT JOIN rel_mapa_usuario relusuario ON (relusuario.id_mapa = rel.id AND usu.id = relusuario.id_usuario) " +
-                    "WHERE (rel.fl_todos_perfis = false AND relperfil.id_perfil = per.id_perfil) " +
-                    "   OR (rel.fl_todos_unidades = false AND relunidade.id_unidade = uni.id_unidade) " +
-                    "   OR (rel.fl_todos_usuarios = false AND relusuario.id_usuario = usu.id) " +
+                    "WHERE (rel.fl_todos_perfis = true OR (rel.fl_todos_perfis = false AND relperfil.id_perfil = per.id_perfil)) " +
+                    "   AND (rel.fl_todos_unidades = true OR (rel.fl_todos_unidades = false AND relunidade.id_unidade = uni.id_unidade)) " +
+                    "   AND (rel.fl_todos_usuarios = true OR (rel.fl_todos_usuarios = false AND relusuario.id_usuario = usu.id)) " +
                     "   OR usu.hierarquia = 'ADMIN' " +
                     "ORDER BY rel.nome";
 

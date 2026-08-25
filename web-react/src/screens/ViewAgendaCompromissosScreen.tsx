@@ -1014,9 +1014,9 @@ export default function ViewAgendaCompromissosScreen() {
 
                                         <p:column style="width:40px;">
                                             <p:commandButton id="btn_rem" immediate="true" styleClass="btnred" icon="ui-icon-minus"
-                                             update":inputResultados:resultadosPanel"
+                                             update="inputResultados:resultadosPanel"
                                              actionListener="#{compromissoController.remove(entity)}"
-                                             process":inputResultados:resultadosPanel" ajax="false"/>
+                                             process="inputResultados:resultadosPanel" ajax="false"/>
                                         </p:column>
                                     </p:dataTable>
                                 </p:outputPanel>
@@ -1165,9 +1165,9 @@ export default function ViewAgendaCompromissosScreen() {
 
                                         <p:column style="width:40px;">
                                             <p:commandButton id="btn_rem" immediate="true" styleClass="btnred" icon="ui-icon-minus"
-                                             update":inputResultados:resultadosPanel"
+                                             update="inputResultados:resultadosPanel"
                                              actionListener="#{compromissoController.remove(entity)}"
-                                             process":inputResultados:resultadosPanel" ajax="false"/>
+                                             process="inputResultados:resultadosPanel" ajax="false"/>
                                         </p:column>
                                     </p:dataTable>
                                 </p:outputPanel>
@@ -1183,7 +1183,7 @@ export default function ViewAgendaCompromissosScreen() {
                                         icon="ui-icon-arrowthick-1-w" value="#{msg['button.back']}" ajax="false"
                                         action="/default"/>
                                 </f:facet>
-                            </h:panelGrid>
+                            </p:panelGrid>
                         </h:form>
                     </Modal>
                 )}
@@ -1228,9 +1228,6 @@ export default function ViewAgendaCompromissosScreen() {
                                     Avançar para Próximo Status
                                 </button>
                             </div>
-                        </div>
-                    </Modal>
-                )}
             </main>
         </PermissionGate>
     );

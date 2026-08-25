@@ -7,8 +7,8 @@ import {MasterDetail} from '../MasterDetail';
 import type {ApiItem} from '../types';
 import {api} from '../api';
 import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../masterDetailSources';
-import {EnderecoCampos} from '../EnderecoForm';
-import type {Endereco} from '../EnderecoForm';
+import {buscarCep, formatCep} from '../EnderecoForm';
+import {useQuery} from '@tanstack/react-query';
 
 interface FormState {
     cnpj: string;
@@ -21,6 +21,12 @@ interface FormState {
     telefone: string;
     celular: string;
     observacao: string;
+    cep: string;
+    cidade: string;
+    bairro: string;
+    logradouro: string;
+    numero: string;
+    complemento: string;
 }
 
 const FORM_VAZIO: FormState = {
@@ -34,6 +40,12 @@ const FORM_VAZIO: FormState = {
     telefone: '',
     celular: '',
     observacao: '',
+    cep: '',
+    cidade: '',
+    bairro: '',
+    logradouro: '',
+    numero: '',
+    complemento: '',
 };
 
 const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
@@ -54,9 +66,14 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
     const [pessoaId, setPessoaId] = useState<number | undefined>();
     const [pjOriginal, setPjOriginal] = useState<Record<string, unknown> | null>(null);
     const [pessoaOriginal, setPessoaOriginal] = useState<Record<string, unknown> | null>(null);
-    const [unidades, setUnidades] = useState<ApiItem[]>([]);
-    const [enderecos, setEnderecos] = useState<Endereco[]>([]);
+    const [buscandoCep, setBuscandoCep] = useState(false);
+    const [avisoCep, setAvisoCep] = useState('');
     const [salvando, setSalvando] = useState(false);
+
+    const {data: allUnidades = []} = useQuery({
+        queryKey: [UNIDADE_SOURCE],
+        queryFn: async () => (await api.get<ApiItem[]>(UNIDADE_SOURCE)).data,
+    });
 
     useEffect(() => {
         if (!idParam) return;
@@ -73,6 +90,30 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
                 setPjOriginal(pj);
                 setPessoaId(pes?.id as number | undefined);
                 setPessoaOriginal(pes);
+
+                let logradouroDesc = '';
+                let bairroDesc = '';
+                let cidadeDesc = '';
+                const idLogradouro = (pes?.id_logradouro ?? pes?.logradouroId) as number | null | undefined;
+                if (idLogradouro) {
+                    try {
+                        const logRes = (await api.get<Record<string, unknown>>(`/api/basico/logradouro/${idLogradouro}`)).data;
+                        logradouroDesc = str(logRes.descricao);
+                        const idBairro = logRes.id_bairro as number | null | undefined;
+                        if (idBairro) {
+                            const bairroRes = (await api.get<Record<string, unknown>>(`/api/basico/bairro/${idBairro}`)).data;
+                            bairroDesc = str(bairroRes.descricao);
+                            const idCidade = bairroRes.cidadeId as number | null | undefined;
+                            if (idCidade) {
+                                const cidadeRes = (await api.get<Record<string, unknown>>(`/api/basico/cidade/${idCidade}`)).data;
+                                cidadeDesc = str(cidadeRes.nome);
+                            }
+                        }
+                    } catch {
+                        // ignore
+                    }
+                }
+
                 setForm({
                     cnpj: str(pj.cnpj),
                     razaoSocial: str(pj.razaoSocial),
@@ -84,7 +125,33 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
                     telefone: str(pes?.telefone),
                     celular: str(pes?.celular),
                     observacao: str(pes?.observacao),
+                    cep: str(pes?.cep),
+                    cidade: cidadeDesc,
+                    bairro: bairroDesc,
+                    logradouro: logradouroDesc,
+                    numero: str(pes?.numero),
+                    complemento: str(pes?.complemento),
                 });
+
+                if (pes?.id) {
+                    try {
+                        const unidadesIds = (await api.get<number[]>(`/api/basico/pessoa/buscar-unidades-disponiveis`, {params: {pessoaId: pes.id}})).data;
+                        if (unidadesIds && unidadesIds.length > 0) {
+                            const unidadesSet = new Set(unidadesIds.map(String));
+                            setUnidades(allUnidades.filter(u => unidadesSet.has(String((u as Record<string, unknown>).id))));
+                        }
+                    } catch {
+                        try {
+                            const unidadesIds = (await api.get<number[]>(`/api/basico/pessoa/buscar-unidades`, {params: {entityId: pes.id}})).data;
+                            if (unidadesIds && unidadesIds.length > 0) {
+                                const unidadesSet = new Set(unidadesIds.map(String));
+                                setUnidades(allUnidades.filter(u => unidadesSet.has(String((u as Record<string, unknown>).id))));
+                            }
+                        } catch {
+                            // ignore
+                        }
+                    }
+                }
             } catch (erro) {
                 console.error('Erro ao carregar pessoa jurídica:', erro);
                 alert('Erro ao carregar registro.');
@@ -93,11 +160,29 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
         return () => {
             ativo = false;
         };
-    }, [idParam]);
+    }, [idParam, allUnidades]);
 
     const set = (campo: keyof FormState, valor: string) => setForm((prev) => ({...prev, [campo]: valor}));
 
     const voltar = () => navigate('/view/pessoa/listPessoaJuridica');
+
+    const handleBuscarCep = async () => {
+        setAvisoCep('');
+        setBuscandoCep(true);
+        const dados = await buscarCep(form.cep);
+        setBuscandoCep(false);
+        if (dados) {
+            setForm((prev) => ({
+                ...prev,
+                cep: dados.cep ?? prev.cep,
+                cidade: dados.cidade ?? prev.cidade,
+                bairro: dados.bairro ?? prev.bairro,
+                logradouro: dados.logradouro ?? prev.logradouro,
+            }));
+        } else {
+            setAvisoCep('CEP não encontrado.');
+        }
+    };
 
     const salvar = async (voltarDepois: boolean) => {
         if (!form.razaoSocial.trim() || !form.cnpj.trim()) {
@@ -106,7 +191,6 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
         }
         setSalvando(true);
         try {
-            const enderecoPrincipal = enderecos[0];
             const pjBody: Record<string, unknown> = {
                 ...semId(pjOriginal),
                 cnpj: form.cnpj,
@@ -127,8 +211,9 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
                 telefone: form.telefone || null,
                 celular: form.celular || null,
                 observacao: form.observacao || null,
-                numero: enderecoPrincipal?.numero || null,
-                complemento: enderecoPrincipal?.complemento || null,
+                cep: form.cep || null,
+                numero: form.numero || null,
+                complemento: form.complemento || null,
             };
             let novoPesId = pessoaId;
             if (pessoaId) {
@@ -236,7 +321,81 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
             label: 'Endereço',
             content: (
                 <div className="form-grid">
-                    <EnderecoCampos value={enderecos} onChange={setEnderecos}/>
+                    <label className="form-field">
+                        <span className="form-label">CEP</span>
+                        <div style={{display: 'flex', gap: '8px', width: '100%'}}>
+                            <input
+                                className="form-input"
+                                placeholder="99.999-999"
+                                style={{width: '120px'}}
+                                maxLength={9}
+                                value={form.cep}
+                                onChange={(e) => {
+                                    setAvisoCep('');
+                                    set('cep', formatCep(e.target.value));
+                                }}
+                            />
+                            <button
+                                type="button"
+                                className="btnyellow"
+                                disabled={buscandoCep || form.cep.replace(/\D/g, '').length !== 8}
+                                onClick={handleBuscarCep}
+                            >
+                                {buscandoCep ? 'Buscando...' : 'Busca'}
+                            </button>
+                        </div>
+                        {avisoCep && <small style={{color: '#c0392b'}}>{avisoCep}</small>}
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Cidade</span>
+                        <input
+                            className="form-input"
+                            placeholder="Cidade"
+                            style={{gridColumn: 'span 3'}}
+                            value={form.cidade}
+                            onChange={(e) => set('cidade', e.target.value)}
+                        />
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Bairro</span>
+                        <input
+                            className="form-input"
+                            placeholder="Bairro"
+                            style={{gridColumn: 'span 3'}}
+                            value={form.bairro}
+                            onChange={(e) => set('bairro', e.target.value)}
+                        />
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Logradouro</span>
+                        <input
+                            className="form-input"
+                            placeholder="Logradouro"
+                            style={{gridColumn: 'span 3'}}
+                            value={form.logradouro}
+                            onChange={(e) => set('logradouro', e.target.value)}
+                        />
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Número</span>
+                        <input
+                            className="form-input"
+                            placeholder="Número"
+                            value={form.numero}
+                            onChange={(e) => set('numero', e.target.value)}
+                        />
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Complemento</span>
+                        <textarea
+                            className="form-input"
+                            placeholder="Complemento"
+                            rows={3}
+                            style={{gridColumn: 'span 3', minHeight: '80px'}}
+                            value={form.complemento}
+                            onChange={(e) => set('complemento', e.target.value)}
+                        />
+                    </label>
                 </div>
             ),
         },

@@ -17,8 +17,8 @@ const PermissionsContext = createContext<PermissionsValue>({
     can: () => false,
 });
 
-export const normalizeOutcome = (value: string) =>
-    value.replace(/\.xhtml$/i, '').replace(/^\/+|\/+$/g, '');
+export const normalizeOutcome = (value?: string | null) =>
+    (value ?? '').replace(/\.xhtml$/i, '').replace(/^\/+|\/+$/g, '');
 
 export const useCurrentOutcome = () => {
     const {pathname} = useLocation();

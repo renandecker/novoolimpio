@@ -1,5 +1,9 @@
+import {useState} from 'react';
 import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
+import {MasterDetail} from '../MasterDetail';
+import {Tabs} from '../Tabs';
+import {Wizard, useWizardData} from '../Wizard';
+import {DataTable, type DataTableColumn} from '../DataTable';
 import {
     PERFIL_SOURCE,
     PERFIL_COLUMNS,
@@ -11,54 +15,133 @@ import {
     USUARIO_COLUMNS,
     USUARIO_SEARCH
 } from '../masterDetailSources';
+import type {ApiItem} from '../types';
+import {useApi} from '../api';
+
+const DASHBOARD_COLUMNS: DataTableColumn[] = [
+    {key: 'id', label: 'ID'},
+    {key: 'nome', label: 'Nome'},
+    {key: 'descricao', label: 'Descrição'},
+];
+
+interface DashboardFormData {
+    entity: {
+        id?: number;
+        nome?: string;
+        descricao?: string;
+    };
+    usuarios: ApiItem[];
+    unidades: ApiItem[];
+    perfis: ApiItem[];
+    filtros: any[];
+}
 
 export default function ViewRelatoriosFormDashboardListScreen() {
+    const [usuarios, setUsuarios] = useState<ApiItem[]>([]);
+    const [unidades, setUnidades] = useState<ApiItem[]>([]);
+    const [perfis, setPerfis] = useState<ApiItem[]>([]);
+    const {data, updateFields} = useWizardData<DashboardFormData>({
+        entity: {},
+        usuarios: [],
+        unidades: [],
+        perfis: [],
+        filtros: [],
+    });
+
+    const {post: saveDashboard} = useApi('/api/relatorios/dashboard');
+
+    const handleComplete = async (formData: DashboardFormData) => {
+        try {
+            await saveDashboard({
+                ...formData.entity,
+                usuarios: formData.usuarios,
+                unidades: formData.unidades,
+                perfis: formData.perfis,
+                filtros: formData.filtros,
+            });
+            alert('Dashboard salvo com sucesso!');
+        } catch (error) {
+            console.error('Erro ao salvar dashboard:', error);
+            alert('Erro ao salvar dashboard');
+        }
+    };
+
     return (
         <PermissionGate permission="READ">
             <main>
                 <h1>Form Dashboard</h1>
-                <ModuleTabs
-                    tabs={[
-                        {key: 'definicao', label: 'Definição', path: '/api/view/relatorios/formDashboard'},
-                        {key: 'tabela', label: 'Tabela', empty: 'Conteúdo de Tabela.'},
-                        {key: 'grafico', label: 'Gráfico', empty: 'Conteúdo de Gráfico.'},
-                        {key: 'mapa', label: 'Mapa', empty: 'Conteúdo de Mapa.'},
-                        {
-                            key: 'usuario',
-                            label: 'Usuario',
-                            masterDetail: {
-                                label: 'Usuario',
-                                source: USUARIO_SOURCE,
-                                valueKey: 'id',
-                                searchKeys: USUARIO_SEARCH,
-                                columns: USUARIO_COLUMNS
-                            }
-                        },
-                        {
-                            key: 'unidade',
-                            label: 'Unidade',
-                            masterDetail: {
-                                label: 'Unidade',
-                                source: UNIDADE_SOURCE,
-                                valueKey: 'id',
-                                searchKeys: UNIDADE_SEARCH,
-                                columns: UNIDADE_COLUMNS
-                            }
-                        },
-                        {
-                            key: 'perfil',
-                            label: 'Perfil',
-                            masterDetail: {
-                                label: 'Perfil',
-                                source: PERFIL_SOURCE,
-                                valueKey: 'id',
-                                searchKeys: PERFIL_SEARCH,
-                                columns: PERFIL_COLUMNS
-                            }
-                        },
-                        {key: 'filtros', label: 'Filtros', empty: 'Conteúdo de Filtros.'},
-                    ]}
-                />
+                <div className="div_form">
+                    <div className="form-title">Cadastro / Edição de Relatório de Dashboard</div>
+                    <div className="table_form">
+                        <Wizard
+                            initialData={data}
+                            onDataChange={updateFields}
+                            steps={[
+                                {
+                                    key: 'definicao',
+                                    label: 'Definição',
+                                    content: (
+                                        <div>
+                                            <DataTable path="/api/relatorios/dashboard" columns={DASHBOARD_COLUMNS}/>
+                                        </div>
+                                    ),
+                                    validate: async (d) => (d.entity.nome && d.entity.nome.length >= 3) || 'Nome deve ter pelo menos 3 caracteres',
+                                },
+                                {
+                                    key: 'permissao',
+                                    label: 'Permissão',
+                                    content: (
+                                        <div>
+                                            <div style={{marginBottom: '20px'}}>
+                                                <h3>Usuários</h3>
+                                                <MasterDetail
+                                                    label="Usuário"
+                                                    source={USUARIO_SOURCE}
+                                                    valueKey="id"
+                                                    searchKeys={USUARIO_SEARCH}
+                                                    columns={USUARIO_COLUMNS}
+                                                    items={usuarios}
+                                                    onChange={setUsuarios}
+                                                />
+                                            </div>
+                                            <div style={{marginBottom: '20px'}}>
+                                                <h3>Unidades</h3>
+                                                <MasterDetail
+                                                    label="Unidade"
+                                                    source={UNIDADE_SOURCE}
+                                                    valueKey="id"
+                                                    searchKeys={UNIDADE_SEARCH}
+                                                    columns={UNIDADE_COLUMNS}
+                                                    items={unidades}
+                                                    onChange={setUnidades}
+                                                />
+                                            </div>
+                                            <div style={{marginBottom: '20px'}}>
+                                                <h3>Perfis</h3>
+                                                <MasterDetail
+                                                    label="Perfil"
+                                                    source={PERFIL_SOURCE}
+                                                    valueKey="id"
+                                                    searchKeys={PERFIL_SEARCH}
+                                                    columns={PERFIL_COLUMNS}
+                                                    items={perfis}
+                                                    onChange={setPerfis}
+                                                />
+                                            </div>
+                                        </div>
+                                    ),
+                                },
+                                {
+                                    key: 'filtros',
+                                    label: 'Filtros',
+                                    content: <p className="master-detail-empty">Filtros do relatório de dashboard.</p>,
+                                    nextLabel: 'Concluir',
+                                },
+                            ]}
+                            onComplete={handleComplete}
+                        />
+                    </div>
+                </div>
             </main>
         </PermissionGate>
     );

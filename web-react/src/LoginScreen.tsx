@@ -13,7 +13,7 @@ function getValidDefaultPath(session: { defaultOutcome?: string; modules?: Array
     if (!session) return '/default';
     const fromSession = session.defaultOutcome;
     const modules = session.modules ?? [];
-    const firstModuleOutcome = modules.length > 0 ? normalizeOutcome(modules[0].outcome) : null;
+    const firstModuleOutcome = modules.length > 0 && modules[0]?.outcome ? normalizeOutcome(modules[0].outcome) : null;
     const path = fromSession || firstModuleOutcome || '/default';
     const finalPath = ensureLeadingSlash(path);
     console.log('[LoginScreen] getValidDefaultPath: ' + JSON.stringify({ fromSession, firstModuleOutcome, path, finalPath, modulesCount: modules.length, firstModuleRaw: modules[0]?.outcome }));

@@ -51,6 +51,18 @@ const OFERECIMENTO_COLUMNS = [
     {key: 'status', label: 'Status'},
 ];
 
+const exportarPDF = (item: ApiItem) => {
+    window.open(`/api/relatorios/relatorio/disponiveis/TABELA/${item.id}`, '_blank');
+};
+
+const exportarDOCX = (item: ApiItem) => {
+    // Exportar DOCX
+};
+
+const exportarExcel = (item: ApiItem) => {
+    window.open(`/api/relatorios/relatorio/disponiveis/GRAFICO/${item.id}`, '_blank');
+};
+
 export default function ViewOferecimentoComponenteCurricularListOferecimentoComponenteCurricularListScreen() {
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(PAGE_SIZES[0]);
@@ -156,15 +168,38 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
             <main>
                 <h1>Oferecimento Componente Curricular</h1>
                 <div className="data-table-toolbar" style={{marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px'}}>
-                    <ExportDropdown
-                        options={[
-                            {key: 'pdf', label: 'PDF', icon: <i className="fa fa-file-pdf-o"/>, onClick: () => alert('Exportar PDF - não implementado')},
-                            {key: 'docx', label: 'DOCX', icon: <i className="fa fa-file-word-o"/>, onClick: () => alert('Exportar DOCX - não implementado')},
-                            {key: 'excel', label: 'Excel', icon: <i className="fa fa-file-excel-o"/>, onClick: () => alert('Exportar Excel - não implementado')},
-                        ]}
-                        triggerLabel="Exportar"
-                        triggerIcon={<i className="fa fa-download"/>}
-                    />
+                    {acessoRelatorios && (
+                        <ExportDropdown
+                            options={[
+                                {
+                                    key: 'pdf',
+                                    label: 'PDF',
+                                    icon: <i className="fa fa-file-pdf-o"/>,
+                                    onClick: () => {
+                                        if (all.length > 0) exportarPDF(asRecord(all[0]));
+                                    }
+                                },
+                                {
+                                    key: 'docx',
+                                    label: 'DOCX',
+                                    icon: <i className="fa fa-file-word-o"/>,
+                                    onClick: () => {
+                                        if (all.length > 0) exportarDOCX(asRecord(all[0]));
+                                    }
+                                },
+                                {
+                                    key: 'excel',
+                                    label: 'Excel',
+                                    icon: <i className="fa fa-file-excel-o"/>,
+                                    onClick: () => {
+                                        if (all.length > 0) exportarExcel(asRecord(all[0]));
+                                    }
+                                }
+                            ]}
+                            triggerLabel="Exportar"
+                            triggerIcon={<i className="fa fa-download"/>}
+                        />
+                    )}
                 </div>
                 <div className="data-table">
                     {q.isError ? (
