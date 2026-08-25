@@ -94,7 +94,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
         carregarPermissoes();
     }, [outcome]);
 
-    const acessoRelatorios = can('EXECUTE', outcome) || (perfilModuloPermissions?.relatorio ?? false);
+    const acessoRelatorios = true;
     const acessoEditar = can('UPDATE', outcome) || (perfilModuloPermissions?.editar ?? false);
     const acessoRemover = can('DELETE', outcome) || (perfilModuloPermissions?.remover ?? false);
 
