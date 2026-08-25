@@ -7,10 +7,17 @@ import {DataTable, type DataTableColumn} from '../DataTable';
 import {Tabs} from '../Tabs';
 import {Modal} from '../Modal';
 import {AutoComplete} from '../AutoComplete';
-import {Modal} from '../Modal';
 import {format} from 'date-fns';
 import '../Disponibilidade.css';
 import './ViewAgendaCompromissosScreen.css';
+
+function test() {
+    var i = $('.ui-row-toggler.ui-icon-circle-triangle-s').length;
+    if (i == 1) {
+        return;
+    }
+    $('.ui-row-toggler.ui-icon-circle-triangle-s').trigger('click');
+}
 
 interface Compromisso {
     id: number;
@@ -360,6 +367,19 @@ export default function ViewAgendaCompromissosScreen() {
         }
     }, [fetchCompromissoDetails]);
 
+    const handleDateSelect = useCallback((date: string, startTime: string, endTime: string) => {
+        if (!selectedAgendaId) return;
+        setFormData({
+            ativo: true,
+            data: date,
+            agenda: agendasQuery.data?.find(a => a.id === selectedAgendaId),
+        });
+        setFormTipoHorario('unidade');
+        setIsEditing(false);
+        loadHorarios(selectedAgendaId, date, 'unidade');
+        setShowForm(true);
+    }, [selectedAgendaId, agendasQuery.data, loadHorarios]);
+
     const handleRowClick = useCallback((compromisso: Compromisso) => {
         fetchCompromissoDetails(compromisso.id);
     }, [fetchCompromissoDetails]);
@@ -422,6 +442,42 @@ export default function ViewAgendaCompromissosScreen() {
             <main className="agenda-compromissos-screen">
                 <div className="screen-header">
                     <h1>Agenda de Compromissos</h1>
+                    <div className="agenda-selector">
+                        <label htmlFor="agenda">Agenda *</label>
+                        <AutoComplete
+                            id="agenda"
+                            value={selectedAgendaId ? agendasQuery.data?.find(a => a.id === selectedAgendaId) : null}
+                            onChange={(e: any) => {
+                                const agenda = e.target?.option?.id ? agendasQuery.data?.find((a: any) => a.id === Number(e.target.value)) : null;
+                                setSelectedAgendaId(agenda?.id || '');
+                                if (agenda && formData.data) {
+                                    loadHorarios(agenda.id, formData.data, formTipoHorario);
+                                } else {
+                                    setFormHorarios([]);
+                                }
+                                setFormData(prev => ({...prev, agenda}));
+                            }}
+                            options={agendasQuery.data || []}
+                            getOptionLabel={(a) => a.descricao}
+                            getOptionValue={(a) => a.id}
+                            required
+                            placeholder="Selecione a agenda"
+                        />
+                        <div className="legenda-blue" style={{marginLeft: '10px', fontSize: '12px'}}>
+                            Feriado
+                        </div>
+                        <div style={{marginLeft: '10px'}}>
+                            {selectedAgendaId && agendasQuery.data?.find(a => a.id === selectedAgendaId)?.status && agendasQuery.data.find(a => a.id === selectedAgendaId).status.length > 0 && (
+                                <div>
+                                    {agendasQuery.data.find(a => a.id === selectedAgendaId).status.map((s, i) => (
+                                        <span key={i} style={{display: 'inline-block', width: 'auto', marginRight: '5px', fontSize: '11px', borderRadius: '3px', padding: '2px 6px', color: '#fff', backgroundColor: s.cor}}>
+                                            {s.descricao}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
                     <div className="header-actions">
                         <select
                             className="view-mode-select"
@@ -449,22 +505,6 @@ export default function ViewAgendaCompromissosScreen() {
                             {unidadesQuery.data?.map(u => (
                                 <option key={u.id} value={u.id}>
                                     {u.sucinto} - {u.nomeFantasia}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="filter-group">
-                        <label>Agenda</label>
-                        <select
-                            value={selectedAgendaId}
-                            onChange={(e) => setSelectedAgendaId(Number(e.target.value) || '')}
-                            disabled={agendasQuery.isLoading}
-                        >
-                            <option value="">Todas</option>
-                            {agendasQuery.data?.map(a => (
-                                <option key={a.id} value={a.id}>
-                                    {a.descricao} {a.tipoAgenda && `(${a.tipoAgenda.descricao})`}
                                 </option>
                             ))}
                         </select>
@@ -505,6 +545,7 @@ export default function ViewAgendaCompromissosScreen() {
                                 error={eventosQuery.isError ? 'Erro ao carregar a agenda.' : null}
                                 legend={LEGENDA}
                                 onEventClick={handleEventClick}
+                                onDateSelect={handleDateSelect}
                             />
                         ) : (
                             <div className="empty-state">
@@ -585,61 +626,163 @@ export default function ViewAgendaCompromissosScreen() {
                         onClose={() => setShowDetails(false)}
                         size="lg"
                     >
-                        <div className="details-content">
-                            <div className="detail-grid">
-                                <div className="detail-item"><label>ID</label><span>{selectedCompromisso.id}</span></div>
-                                <div className="detail-item"><label>Descrição</label><span>{selectedCompromisso.descricao}</span></div>
-                                <div className="detail-item"><label>Agenda</label><span>{selectedCompromisso.agenda?.descricao}</span></div>
-                                <div className="detail-item"><label>Data</label><span>{formatDateBR(selectedCompromisso.data)}</span></div>
-                                <div className="detail-item"><label>Horário</label><span>{selectedCompromisso.horario?.hora}</span></div>
-                                <div className="detail-item"><label>Pessoa</label><span>{getPessoaNome(selectedCompromisso.pessoa)}</span></div>
-                                <div className="detail-item"><label>Tipo Compromisso</label><span>{selectedCompromisso.tipoCompromisso?.descricao}</span></div>
-                                <div className="detail-item"><label>Status</label><span><span className={`status-badge ${selectedCompromisso.statusCompromisso?.cor}`}>{selectedCompromisso.statusCompromisso?.descricao}</span></span></div>
-                                <div className="detail-item"><label>Agendado por</label><span>{selectedCompromisso.usuario?.login}</span></div>
-                                <div className="detail-item"><label>Atendente</label><span>{selectedCompromisso.atendente?.login}</span></div>
-                                <div className="detail-item"><label>Finalizado por</label><span>{selectedCompromisso.usuarioFinalizou?.login}</span></div>
-                                <div className="detail-item full-width"><label>Observação</label><span>{selectedCompromisso.observacao || '-'}</span></div>
-                            </div>
+                        <h:form id="formCompromissoAgenda">
+                            <p:growl autoUpdate="true" showDetail="true" sticky="true" life="50000" edisplay="true" globalOnly="true"
+                                     escape="false"/>
 
-                            {selectedCompromisso.compromissoStatusUsuarios && selectedCompromisso.compromissoStatusUsuarios.length > 0 && (
-                                <div className="detail-section">
-                                    <h4>Histórico de Alterações de Status</h4>
-                                    <table className="history-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Usuário</th>
-                                                <th>Pessoa</th>
-                                                <th>Data</th>
-                                                <th>Status Anterior</th>
-                                                <th>Status Próximo</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {selectedCompromisso.compromissoStatusUsuarios.map((h, i) => (
-                                                <tr key={i}>
-                                                    <td>{h.usuario?.pessoaFisica?.nome}</td>
-                                                    <td>{h.pessoa?.pessoaFisica?.nome}</td>
-                                                    <td>{formatDateBR(h.data)}</td>
-                                                    <td><span className={`status-badge ${h.statusCompromissoAnterior.cor}`}>{h.statusCompromissoAnterior.descricao}</span></td>
-                                                    <td><span className={`status-badge ${h.statusCompromissoProximo.cor}`}>{h.statusCompromissoProximo.descricao}</span></td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
+                            <pe:blockUI target="mainForm" widgetVar="blockUIdetalheCompromisso">
+                                <h:panelGrid styleClass="semBorda" style="vertical-align: top" columns="2">
+                                    Carregando detalhes compromisso, aguarde...
+                                    <h:graphicImage value="/resources/images/ajaxloading.gif"/>
+                                </h:panelGrid>
+                            </pe:blockUI>
 
-                            {selectedCompromisso.resultados && selectedCompromisso.resultados.length > 0 && (
-                                <div className="detail-section">
-                                    <h4>Resultados</h4>
-                                    <ul>
-                                        {selectedCompromisso.resultados.map((r, i) => (
-                                            <li key={i}>{r.descricao}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-                        </div>
+                            <p:dataTable var="comp" rendered="#{calendarioAgendaController.tipoEvento eq false}"
+                                         rowsPerPageTemplate="10,15" rows="10"
+                                         value="#{calendarioAgendaController.compromissos}" emptyMessage="" paginator="true"
+                                         paginatorPosition="bottom"
+                                         paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+
+                                <p:ajax event="rowToggle" listener="#{calendarioAgendaController.buscarDetalhes}"
+                                        update="detalhesCompromiso"
+                                        onstart="test();PF('blockUIdetalheCompromisso').block();"
+                                        oncomplete="PF('blockUIdetalheCompromisso').unblock();"/>
+
+                                <p:column exportable="false" style="width:5%">
+                                    <p:rowToggler/>
+                                </p:column>
+
+                                <p:column style="width:10%" headerText="#{msg['entity.id']}">
+                                    <h:outputText value="#{comp.id}"/>
+                                </p:column>
+
+                                <p:column style="width: 15%" headerText="#{msg['entity.visitante']}">
+                                    <h:outputText value="#{comp.descricao}"/>
+                                </p:column>
+
+                                <p:column style="width: 10%" headerText="#{msg['entity.horario']}">
+                                    <h:outputText value="#{comp.horario.hora}"/>
+                                </p:column>
+
+                                <p:column style="width: 15%" headerText="#{msg['entity.usuario']}">
+                                    <h:outputText value="#{comp.usuario.login}"/>
+                                </p:column>
+
+                                <p:column style="width: 15%" headerText="#{msg['entity.atendente']}">
+                                    <h:outputText value="#{comp.atendente.login}"/>
+                                </p:column>
+
+                                <p:column style="width: 15%" headerText="Finalizou">
+                                    <h:outputText value="#{comp.usuarioFinalizou.login}"/>
+                                </p:column>
+
+                                <p:column style="width:200px; text-align: right;" exportable="false">
+                                    <p:commandButton id="chartBtnobservacao" type="button" style="float: right; z-index:100"
+                                                     title="#{msg['entity.observacao']}"
+                                                     styleClass="btnyellow" icon="ui-icon-help"
+                                     rendered="#{comp.observacao ne null and comp.observacao ne ''}"/>
+                                    <p:overlayPanel id="chartPanelobservacao" for="chartBtnobservacao" hideEffect="fade">
+                                        <p:scrollPanel mode="native" style="width:200px;height:200px">
+                                            <h:outputText style="white-space:normal !important" escape="false"
+                                                          value="#{comp.observacao}"/>
+                                        </p:scrollPanel>
+                                    </p:overlayPanel>
+
+                                    <p:commandButton icon="ui-icon-search" title="#{msg['button.compromisso.view']}"
+                                     rendered="#{compromissoController.verificaResultados(comp)}"
+                                     actionListener="#{compromissoController.setEntity(comp)}"
+                                     styleClass="btnyellow"
+                                     oncomplete="PF('detailView2').show();" update=":poolForm:detailView2">
+                                        <f:setPropertyActionListener value="#{calendarioAgendaController.agenda}"
+                                                     target="#{compromissoController.agenda}"/>
+                                    </p:commandButton>
+
+                                    <p:commandButton icon="ui-icon-newwin" title="#{msg['button.compromisso.prospecto']}"
+                                     actionListener="#{compromissoController.carregarProspectoParaVisualizacao(comp)}"
+                                     rendered="#{comp.ativo eq true and comp.prospecto ne null}"
+                                     styleClass="btnstop"
+                                     oncomplete="PF('detailProspecto').show();" update=":poolForm:detailProspecto">
+                                        <f:setPropertyActionListener value="#{calendarioAgendaController.agenda}"
+                                                     target="#{compromissoController.agenda}"/>
+                                    </p:commandButton>
+
+                                    <p:commandButton icon="ui-icon-transferthick-e-w" styleClass="btnorange"
+                                     rendered="#{comp.ativo eq true and calendarioAgendaController.usuarioAgenda.alterar}"
+                                     title="Troca de Stratus Compromisso" onsuccess="PF('trocaStatus').show();"
+                                     update=":formtrocaStatus" style="margin-left: 5px;">
+                                        <f:setPropertyActionListener value="#{comp}" target="#{compromissoController.entity}"/>
+                                        <f:setPropertyActionListener value="#{comp.statusCompromisso}"
+                                                     target="#{compromissoController.statusCompromisso}"/>
+                                        <f:setPropertyActionListener value="#{calendarioAgendaController.agenda}"
+                                                     target="#{compromissoController.agenda}"/>
+                                    </p:commandButton>
+
+                                    <p:commandButton
+                                        title="Mudar #{comp.statusCompromisso.descricao} para #{comp.statusCompromisso.proxStatusCompromisso.descricao}"
+                                        update=":formproximoStatus" oncomplete="PF('proximoStatus').show();"
+                                        icon="ui-icon-transfer-2-e"
+                                        action="#{compromissoController.obterCompromissoSchedule(comp)}"
+                                        rendered="#{comp.ativo eq true and calendarioAgendaController.usuarioAgenda.atender and
+                                              comp.statusCompromisso.proxStatusCompromisso ne null}" styleClass="btngreen">
+                                        <f:setPropertyActionListener value="#{calendarioAgendaController.agenda}"
+                                                     target="#{compromissoController.agenda}"/>
+                                    </p:commandButton>
+
+                                    <p:commandButton update=":formfecharCompromisso" oncomplete="PF('fecharCopromisso').show();"
+                                                     icon="ui-icon-close"
+                                     rendered="#{comp.id eq calendarioAgendaController.usuarioAgenda.usuario.id and calendarioAgendaController.usuarioAgenda.fechar and comp.ativo eq true }">
+                                        <f:setPropertyActionListener value="#{comp}" target="#{compromissoController.entity}"
+                                         styleClass="btnblack"/>
+                                        <f:setPropertyActionListener value="#{calendarioAgendaController.agenda}"
+                                                     target="#{compromissoController.agenda}"/>
+                                    </p:commandButton>
+                                </p:column>
+
+                                <p:rowExpansion>
+                                    <p:dataTable id="detalhesCompromiso" var="detalhesCompromiso"
+                                                 value="#{calendarioAgendaController.compromissoPessoaStatuses}"
+                                                 emptyMessage="#{msg['global.nenhumRegistro']}">
+                                        <p:column style="width: 20%" headerText="#{msg['entity.usuario']} alterou">
+                                            <h:outputText value="#{detalhesCompromiso.usuario.pessoaFisica.nome}"/>
+                                        </p:column>
+
+                                        <p:column style="width: 15%"
+                                              headerText="#{msg['entity.descricao']}  #{msg['entity.pessoa']}">
+                                            <h:outputText value="#{detalhesCompromiso.statusCompromissoAnterior.descricaoPessoa}"/>
+                                        </p:column>
+
+                                        <p:column style="width: 20%" headerText="#{msg['entity.usuario']} destino">
+                                            <h:outputText value="#{detalhesCompromiso.pessoa.pessoaFisica.nome}"/>
+                                        </p:column>
+
+                                        <p:column style="width: 15%" headerText="#{msg['entity.data']}">
+                                            <h:outputText value="#{detalhesCompromiso.data}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy" locale="pt" timeZone="America/Sao_Paulo"/>
+                                            </h:outputText>
+                                        </p:column>
+
+                                        <p:column style="width: 15%" headerText="#{msg['entity.statusAnterior']}">
+                                            <h:outputText value="#{detalhesCompromiso.statusCompromissoAnterior.descricao}"
+                                                          styleClass="#{detalhesCompromiso.statusCompromissoAnterior.cor}"/>
+                                        </p:column>
+
+                                        <p:column style="width: 15%" headerText="#{msg['entity.statusSeguinte']} anterior">
+                                            <h:outputText value="#{detalhesCompromiso.statusCompromissoProximo.descricao}"
+                                                          styleClass="#{detalhesCompromiso.statusCompromissoProximo.cor}"/>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:rowExpansion>
+                            </p:dataTable>
+
+                            <p:panel style="text-align: center;border: none"
+                                     rendered="#{calendarioAgendaController.tipoEvento eq true}">
+                                <p:outputLabel value="Feriado: #{calendarioAgendaController.descricaoCompromisso}"/>
+                                <br/>
+                                <br/>
+                                <p:commandButton value="OK" onclick="PF('telaCompromissoDialogo').hide();" immediate="true"
+                                                 type="button"/>
+                            </p:panel>
+                        </h:form>
                     </Modal>
                 )}
 
@@ -780,27 +923,117 @@ export default function ViewAgendaCompromissosScreen() {
                         onClose={() => setShowChangeStatus(false)}
                         size="md"
                     >
-                        <div className="modal-content">
-                            <p>Alterar status de <strong>{selectedCompromisso.statusCompromisso?.descricao}</strong> para:</p>
-                            <select
-                                value={formData.statusCompromisso?.id || ''}
-                                onChange={(e) => {
-                                    const status = selectedCompromisso.statusCompromisso?.statusModulos?.find(sm => sm.modulo.id === Number(e.target.value));
-                                    setFormData(prev => ({...prev, statusCompromisso: statusModuloToStatus(status)}));
-                                }}
-                            >
-                                <option value="">Selecione</option>
-                                {selectedCompromisso.statusCompromisso?.statusModulos?.map(sm => (
-                                    <option key={sm.modulo.id} value={sm.modulo.id}>{sm.modulo.rotulo}</option>
-                                ))}
-                            </select>
-                            <div className="modal-actions">
-                                <button className="btn btn-secondary" onClick={() => setShowChangeStatus(false)}>Cancelar</button>
-                                <button className="btn btn-warning" onClick={() => changeStatusMutation.mutate({compromissoId: selectedCompromisso.id!, statusId: formData.statusCompromisso!.id})} disabled={changeStatusMutation.isPending || !formData.statusCompromisso?.id}>
-                                    Confirmar Troca
-                                </button>
-                            </div>
-                        </div>
+                        <h:form id="formtrocaStatus">
+                            <p:growl autoUpdate="true" showDetail="true" sticky="true" life="50000" edisplay="true" globalOnly="true"
+                                     escape="false"/>
+
+                            <p:outputLabel
+                                    value="#{msg['alterstatus.compromisso.compromisso']} #{compromissoController.entity.id} ?"
+                                    rendered="#{compromissoController.entity.statusCompromisso.alguem eq true}"/>
+                            <br/>
+                            <p:outputLabel
+                                    value="#{msg['alterstatus.compromisso.compromisso']} #{compromissoController.entity.id} ?"
+                                    rendered="#{compromissoController.entity.statusCompromisso.alguem eq false}"/>
+
+                            <p:separator style="width: 99%"
+                                         rendered="#{compromissoController.entity.statusCompromisso.alguem eq true}"/>
+
+                            <h:panelGrid columns="5">
+                                <c:forEach var="imageName" items="#{compromissoController.entity.statusCompromisso.statusModulos}">
+                                    <p:commandButton value="#{imageName.modulo.rotulo}" icon="#{imageName.modulo.icone}"
+                                     ajax="false"
+                                     action="#{compromissoController.acessoUrl(imageName.modulo.outcome)}"
+                                     styleClass="#{imageName.cor}"/>
+
+                                </c:forEach>
+                            </h:panelGrid>
+                            <br/>
+                            <p:outputLabel for="atendente" value="#{compromissoController.entity.statusCompromisso.descricaoPessoa}"
+                                           style="margin-right: 2px"
+                                           rendered="#{compromissoController.entity.statusCompromisso.alguem eq true}"/>
+                            <p:autoComplete id="atendente" required="true"
+                                            rendered="#{compromissoController.entity.statusCompromisso.alguem eq true}"
+                                            scrollHeight="300" forceSelection="true"
+                                            completeMethod="#{compromissoController.autoCompleteComUnidadeDiaSemana}"
+                                            value="#{compromissoController.entity.atendente}" var="entity"
+                                            itemValue="#{entity}" itemLabel="#{entity.login}" converter="#{usuarioConverter}"
+                                            dropdown="true"/>
+                            <br/><br/><br/>
+
+                            <p:dataList value="#{compromissoController.entity.compromissoStatusUsuarios}" var="comStaUsu"
+                                        rendered="#{compromissoController.entity.statusCompromisso.alguem eq true and compromissoController.entity.compromissoStatusUsuarios.size() ne 0}"
+                                        type="ordered">
+                                <f:facet name="header">
+                                    Testemunhas
+                                </f:facet>
+                                <p:autoComplete required="true" scrollHeight="300" forceSelection="true"
+                                                completeMethod="#{compromissoController.autoCompleteComUnidadeDiaSemana}"
+                                                value="#{comStaUsu.usuario}" var="entity" dropdown="true"
+                                                itemValue="#{entity}" itemLabel="#{entity.login}" converter="#{usuario}"/>
+                            </p:dataList>
+
+                            <br/>
+                            <br/>
+                            <br/>
+
+                            <p:panelGrid columns="1" styleClass="div_form" style="width: 30%;"
+                                         rendered="#{compromissoController.apresentarLancamento(compromissoController.entity.statusCompromisso)}">
+                                <f:facet name="header">
+                                    <p:outputLabel/>
+                                </f:facet>
+
+                                <h:panelGrid columns="2" styleClass="table_form">
+                                    <p:outputLabel for="inputObservacao" value="#{msg['entity.observacao']}"/>
+                                    <p:inputTextarea id="inputObservacao" value="#{compromissoController.entity.observacao}"
+                                     rows="3" cols="65"/>
+                                </h:panelGrid>
+
+                                <h:panelGrid id="resultados_fields" columns="3" styleClass="table_form">
+                                    <p:outputLabel value="#{msg['entity.resultado']}"/>
+                                    <p:selectOneMenu id="inputResultado" styleClass="inputLarge"
+                                     value="#{compromissoController.resultadoSelecionado}"
+                                     converter="#{resultadoConverter}">
+                                        <f:selectItem itemLabel="Selecione" itemValue=""/>
+                                        <f:selectItems var="entity" itemValue="#{entity}" itemLabel="#{entity.descricao}"
+                                                     value="#{compromissoController.listaResultadosDisponiveis}"/>
+                                    </p:selectOneMenu>
+
+                                    <p:commandButton id="btn_add" icon="ui-icon-plus"
+                                     update="resultadosPanel resultados_fields :mainForm"
+                                     process="resultados_fields" action="#{compromissoController.reinit}">
+                                        <p:collector value="#{compromissoController.resultadoSelecionado}"
+                                     addTo="#{compromissoController.listaResultados}" unique="true"/>
+                                    </p:commandButton>
+                                </h:panelGrid>
+
+                                <p:outputPanel id="resultadosPanel">
+                                    <p:dataTable value="#{compromissoController.listaResultados}" var="entity"
+                                                 emptyMessage="#{msg['global.nenhumRegistroSelecionado']}">
+
+                                        <ui:include src="#{resultadoController.colunas}"/>
+
+                                        <p:column style="width:40px;">
+                                            <p:commandButton id="btn_rem" immediate="true" styleClass="btnred" icon="ui-icon-minus"
+                                             update":inputResultados:resultadosPanel"
+                                             actionListener="#{compromissoController.remove(entity)}"
+                                             process":inputResultados:resultadosPanel" ajax="false"/>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:outputPanel>
+
+                                <f:facet name="footer">
+                                    <p:commandButton
+                                        rendered="#{compromissoController.venda() eq false and not empty compromissoController.listaResultados}"
+                                        id="finalizar" icon="ui-icon-check"
+                                        action="#{compromissoController.finalizarCompromisso}"
+                                        value="#{msg['button.finalizarAtendimento']}" ajax="false"/>
+                                    <p:commandButton
+                                        rendered="#{compromissoController.venda() eq false and not empty compromissoController.listaResultados}"
+                                        icon="ui-icon-arrowthick-1-w" value="#{msg['button.back']}" ajax="false"
+                                        action="/default"/>
+                                </f:facet>
+                            </p:panelGrid>
+                        </h:form>
                     </Modal>
                 )}
 
@@ -811,16 +1044,27 @@ export default function ViewAgendaCompromissosScreen() {
                         onClose={() => setShowCloseCompromisso(false)}
                         size="md"
                     >
-                        <div className="modal-content">
-                            <p>Tem certeza que deseja fechar o compromisso <strong>#{selectedCompromisso.id} - {selectedCompromisso.descricao}</strong>?</p>
-                            <p className="warning">Esta ação não pode ser desfeita. O compromisso será marcado como inativo.</p>
-                            <div className="modal-actions">
-                                <button className="btn btn-secondary" onClick={() => setShowCloseCompromisso(false)}>Cancelar</button>
-                                <button className="btn btn-danger" onClick={() => closeCompromissoMutation.mutate(selectedCompromisso.id!)} disabled={closeCompromissoMutation.isPending}>
-                                    Sim, Fechar Compromisso
-                                </button>
-                            </div>
-                        </div>
+                        <h:form id="formfecharCompromisso">
+                            <p:growl autoUpdate="true" showDetail="true" sticky="true" life="50000" edisplay="true" globalOnly="true"
+                                     escape="false"/>
+
+                            <p:outputLabel value="#{msg['close.compromisso.compromisso']} #{compromissoController.entity.id} ?"/>
+                            <br/>
+                            <br/>
+                            <p:panelGrid columns="2" styleClass="semBorda2" style="width: 99%">
+                                <f:facet name="header">
+                                    <p:commandButton value="#{msg['button.dialog.yes']}" styleClass="btnblue"
+                                     onsuccess="PF('fecharCopromisso').hide();" ajax="true"
+                                     update=":formCompromissoAgenda"
+                                     actionListener="#{compromissoController.fecharAgenda(compromissoController.entity)}">
+                                        <f:setPropertyActionListener value="#{true}"
+                                                     target="#{calendarioAgendaController.alterado}"/>
+                                    </p:commandButton>
+                                    <p:commandButton value="#{msg['button.dialog.no']}" onclick="PF('fecharCopromisso').hide();"
+                                     styleClass="btnred" type="button"/>
+                                </f:facet>
+                            </p:panelGrid>
+                        </h:form>
                     </Modal>
                 )}
 
@@ -831,66 +1075,118 @@ export default function ViewAgendaCompromissosScreen() {
                         onClose={() => setShowNextStatus(false)}
                         size="lg"
                     >
-                        <div className="next-status-wizard">
-                            <div className="wizard-header">
-                                <p>Status atual: <strong>{selectedCompromisso.statusCompromisso?.descricao}</strong></p>
-                                <p>Próximo status: <strong>{selectedCompromisso.statusCompromisso?.proxStatusCompromisso?.descricao}</strong></p>
-                                {selectedCompromisso.statusCompromisso?.alguem && (
-                                    <p className="requires-attendant">⚠ Este status requer atendente e testemunhas</p>
-                                )}
-                                {selectedCompromisso.statusCompromisso?.proxStatusCompromisso && (
-                                    <p className="requires-resultados">⚠ É necessário adicionar pelo menos um resultado para avançar</p>
-                                )}
-                            </div>
+                        <h:form id="formproximoStatus">
+                            <p:growl autoUpdate="true" showDetail="true" sticky="true" life="50000" edisplay="true" globalOnly="true"
+                                     escape="false"/>
 
-                            <div className="wizard-section">
-                                <h4>Observação</h4>
-                                <textarea
-                                    value={nextStatusObservacao}
-                                    onChange={(e) => setNextStatusObservacao(e.target.value)}
-                                    rows={3}
-                                    placeholder="Observação para a mudança de status..."
-                                />
-                            </div>
+                            <p:outputLabel value="#{msg['confirm.compromisso.compromisso']} #{compromissoController.entity.id} ?"
+                                           rendered="#{compromissoController.entity.statusCompromisso.alguem eq true}"/>
+                            <br/>
+                            <p:outputLabel
+                                    value="#{msg['alterstatus.compromisso.compromisso']} #{compromissoController.entity.id} ?"
+                                    rendered="#{compromissoController.entity.statusCompromisso.alguem eq false}"/>
 
-                            <div className="wizard-section">
-                                <h4>Resultados {selectedCompromisso.statusCompromisso?.proxStatusCompromisso ? '(obrigatório)' : ''}</h4>
-                                <div className="resultados-manager">
-                                    <div className="add-resultado">
-                                        <AutoComplete
-                                            value={formData.resultadoSelecionado}
-                                            onChange={(opt) => setFormData(prev => ({...prev, resultadoSelecionado: opt}))}
-                                            fetchOptions={async (query) => {
-                                                const resultados = selectedCompromisso.agenda?.resultados || [];
-                                                if (!query) return resultados.slice(0, 20).map(r => ({id: r.id, label: r.descricao}));
-                                                return resultados.filter(r => r.descricao.toLowerCase().includes(query.toLowerCase())).slice(0, 20).map(r => ({id: r.id, label: r.descricao}));
-                                            }}
-                                            fetchById={async (id) => {
-                                                const r = selectedCompromisso.agenda?.resultados?.find(r => r.id === id);
-                                                return r ? {id: r.id, label: r.descricao} : null;
-                                            }}
-                                            minChars={0}
-                                            placeholder="Adicionar resultado..."
-                                        />
-                                        <button type="button" className="btn btn-sm btn-primary" onClick={() => {
-                                            if (formData.resultadoSelecionado && !nextStatusResultados.find(r => r.id === formData.resultadoSelecionado?.id)) {
-                                                setNextStatusResultados([...nextStatusResultados, {id: formData.resultadoSelecionado.id, descricao: formData.resultadoSelecionado.label}]);
-                                                setFormData(prev => ({...prev, resultadoSelecionado: null}));
-                                            }
-                                        }} disabled={!formData.resultadoSelecionado}>
-                                            +
-                                        </button>
-                                    </div>
-                                    <ul className="resultados-list">
-                                        {nextStatusResultados.map((r, i) => (
-                                            <li key={i}>
-                                                {r.descricao}
-                                                <button type="button" className="btn-remove" onClick={() => setNextStatusResultados(nextStatusResultados.filter((_, idx) => idx !== i))}>×</button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
+                            <p:separator style="width: 99%"
+                                         rendered="#{compromissoController.entity.statusCompromisso.alguem eq true}"/>
+
+                            <h:panelGrid columns="5">
+                                <c:forEach var="imageName" items="#{compromissoController.entity.statusCompromisso.statusModulos}">
+                                    <p:commandButton value="#{imageName.modulo.rotulo}" icon="#{imageName.modulo.icone}"
+                                     ajax="false"
+                                     action="#{compromissoController.acessoUrl(imageName.modulo.outcome)}"
+                                     styleClass="#{imageName.cor}"/>
+
+                                </c:forEach>
+                            </h:panelGrid>
+                            <br/>
+                            <p:outputLabel for="atendente" value="#{compromissoController.entity.statusCompromisso.descricaoPessoa}"
+                                           style="margin-right: 2px"
+                                           rendered="#{compromissoController.entity.statusCompromisso.alguem eq true}"/>
+                            <p:autoComplete id="atendente" required="true"
+                                            rendered="#{compromissoController.entity.statusCompromisso.alguem eq true}"
+                                            scrollHeight="300" forceSelection="true"
+                                            completeMethod="#{compromissoController.autoCompleteComUnidadeDiaSemana}"
+                                            value="#{compromissoController.entity.atendente}" var="entity"
+                                            itemValue="#{entity}" itemLabel="#{entity.login}" converter="#{usuarioConverter}"
+                                            dropdown="true"/>
+                            <br/><br/><br/>
+
+                            <p:dataList value="#{compromissoController.entity.compromissoStatusUsuarios}" var="comStaUsu"
+                                        rendered="#{compromissoController.entity.statusCompromisso.alguem eq true and compromissoController.entity.compromissoStatusUsuarios.size() ne 0}"
+                                        type="ordered">
+                                <f:facet name="header">
+                                    Testemunhas
+                                </f:facet>
+                                <p:autoComplete required="true" scrollHeight="300" forceSelection="true"
+                                                completeMethod="#{compromissoController.autoCompleteComUnidadeDiaSemana}"
+                                                value="#{comStaUsu.usuario}" var="entity" dropdown="true"
+                                                itemValue="#{entity}" itemLabel="#{entity.login}" converter="#{usuario}"/>
+                            </p:dataList>
+
+                            <br/>
+                            <br/>
+                            <br/>
+
+                            <p:panelGrid columns="1" styleClass="div_form" style="width: 30%;"
+                                         rendered="#{compromissoController.apresentarLancamento(compromissoController.entity.statusCompromisso)}">
+                                <f:facet name="header">
+                                    <p:outputLabel/>
+                                </f:facet>
+
+                                <h:panelGrid columns="2" styleClass="table_form">
+                                    <p:outputLabel for="inputObservacao" value="#{msg['entity.observacao']}"/>
+                                    <p:inputTextarea id="inputObservacao" value="#{compromissoController.entity.observacao}"
+                                     rows="3" cols="65"/>
+                                </h:panelGrid>
+
+                                <h:panelGrid id="resultados_fields" columns="3" styleClass="table_form">
+                                    <p:outputLabel value="#{msg['entity.resultado']}"/>
+                                    <p:selectOneMenu id="inputResultado" styleClass="inputLarge"
+                                     value="#{compromissoController.resultadoSelecionado}"
+                                     converter="#{resultadoConverter}">
+                                        <f:selectItem itemLabel="Selecione" itemValue=""/>
+                                        <f:selectItems var="entity" itemValue="#{entity}" itemLabel="#{entity.descricao}"
+                                                     value="#{compromissoController.listaResultadosDisponiveis}"/>
+                                    </p:selectOneMenu>
+
+                                    <p:commandButton id="btn_add" icon="ui-icon-plus"
+                                     update="resultadosPanel resultados_fields :mainForm"
+                                     process="resultados_fields" action="#{compromissoController.reinit}">
+                                        <p:collector value="#{compromissoController.resultadoSelecionado}"
+                                     addTo="#{compromissoController.listaResultados}" unique="true"/>
+                                    </p:commandButton>
+                                </h:panelGrid>
+
+                                <p:outputPanel id="resultadosPanel">
+                                    <p:dataTable value="#{compromissoController.listaResultados}" var="entity"
+                                 emptyMessage="#{msg['global.nenhumRegistroSelecionado']}">
+
+                                        <ui:include src="#{resultadoController.colunas}"/>
+
+                                        <p:column style="width:40px;">
+                                            <p:commandButton id="btn_rem" immediate="true" styleClass="btnred" icon="ui-icon-minus"
+                                             update":inputResultados:resultadosPanel"
+                                             actionListener="#{compromissoController.remove(entity)}"
+                                             process":inputResultados:resultadosPanel" ajax="false"/>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:outputPanel>
+
+                                <f:facet name="footer">
+                                    <p:commandButton
+                                        rendered="#{compromissoController.venda() eq false and not empty compromissoController.listaResultados}"
+                                        id="finalizar" icon="ui-icon-check"
+                                        action="#{compromissoController.finalizarCompromisso}"
+                                        value="#{msg['button.finalizarAtendimento']}" ajax="false"/>
+                                    <p:commandButton
+                                        rendered="#{compromissoController.venda() eq false and not empty compromissoController.listaResultados}"
+                                        icon="ui-icon-arrowthick-1-w" value="#{msg['button.back']}" ajax="false"
+                                        action="/default"/>
+                                </f:facet>
+                            </h:panelGrid>
+                        </h:form>
+                    </Modal>
+                )}
 
                             {selectedCompromisso.statusCompromisso?.alguem && (
                                 <div className="wizard-section">
@@ -909,44 +1205,6 @@ export default function ViewAgendaCompromissosScreen() {
                                         minChars={2}
                                         placeholder="Buscar atendente..."
                                     />
-                                </div>
-                            )}
-
-                            {selectedCompromisso.statusCompromisso?.alguem && selectedCompromisso.statusCompromisso.qtdeUsuario > 0 && (
-                                <div className="wizard-section">
-                                    <h4>Testemunhas (mínimo {selectedCompromisso.statusCompromisso.qtdeUsuario})</h4>
-                                    <div className="testemunhas-manager">
-                                        <AutoComplete
-                                            value={formData.testemunhaSelecionada}
-                                            onChange={(opt) => setFormData(prev => ({...prev, testemunhaSelecionada: opt}))}
-                                            fetchOptions={async (query) => {
-                                                if (!query) return usuariosOptions.slice(0, 20).map(u => ({id: u.id, label: u.login}));
-                                                return usuariosOptions.filter(u => u.login.toLowerCase().includes(query.toLowerCase())).slice(0, 20).map(u => ({id: u.id, label: u.login}));
-                                            }}
-                                            fetchById={async (id) => {
-                                                const u = usuariosOptions.find(u => u.id === id);
-                                                return u ? {id: u.id, label: u.login} : null;
-                                            }}
-                                            minChars={2}
-                                            placeholder="Adicionar testemunha..."
-                                        />
-                                        <button type="button" className="btn btn-sm btn-primary" onClick={() => {
-                                            if (formData.testemunhaSelecionada && !nextStatusTestemunhas.find(t => t.id === formData.testemunhaSelecionada?.id)) {
-                                                setNextStatusTestemunhas([...nextStatusTestemunhas, {id: formData.testemunhaSelecionada.id, login: formData.testemunhaSelecionada.label, nome: ''}]);
-                                                setFormData(prev => ({...prev, testemunhaSelecionada: null}));
-                                            }
-                                        }} disabled={!formData.testemunhaSelecionada}>
-                                            +
-                                        </button>
-                                        <ul className="testemunhas-list">
-                                            {nextStatusTestemunhas.map((t, i) => (
-                                                <li key={i}>
-                                                    {t.login}
-                                                    <button type="button" className="btn-remove" onClick={() => setNextStatusTestemunhas(nextStatusTestemunhas.filter((_, idx) => idx !== i))}>×</button>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
                                 </div>
                             )}
 

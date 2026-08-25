@@ -102,4 +102,11 @@ public class BairroController {
         return service.autoCompleteComCidadeEstadoComCep(query, cidadeId, estadoId, cep);
     }
 
+
+    @GET
+    @Path("/opcoes")
+    public Uni<List<BairroResponse>> opcoes(@QueryParam("query") String query, @QueryParam("cidadeId") Long cidadeId) {
+        return service.autoCompleteOpcoes(query == null ? "" : query, cidadeId);
+    }
+
 }

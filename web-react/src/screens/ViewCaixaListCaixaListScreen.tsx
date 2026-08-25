@@ -1,9 +1,10 @@
 import {useState} from 'react';
-import {PermissionGate} from '../permissions';
+import {PermissionGate, useCurrentOutcome} from '../permissions';
 import {api} from '../api';
 import {useModulePaged} from '../useModulePaged';
 import type {ApiItem} from '../types';
 import {legacyClassName} from '../DataTable';
+import {ExportDropdown} from '../ExportDropdown';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -113,10 +114,19 @@ export default function ViewCaixaListCaixaListScreen() {
         return '📦';
     };
 
+    const exportOptions = [
+        {key: 'pdf', label: 'PDF', icon: <i className="fa fa-file-pdf-o"/>, onClick: () => alert('Exportar PDF - não implementado')},
+        {key: 'docx', label: 'DOCX', icon: <i className="fa fa-file-word-o"/>, onClick: () => alert('Exportar DOCX - não implementado')},
+        {key: 'excel', label: 'Excel', icon: <i className="fa fa-file-excel-o"/>, onClick: () => alert('Exportar Excel - não implementado')},
+    ];
+
     return (
         <PermissionGate permission="READ">
             <main>
                 <h1>Caixa</h1>
+                <div className="data-table-toolbar" style={{marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px'}}>
+                    <ExportDropdown options={exportOptions} triggerLabel="Exportar" triggerIcon={<i className="fa fa-download"/>}/>
+                </div>
                 <div className="data-table">
                     {q.isError ? (
                         <p>Erro ao carregar os caixas.</p>

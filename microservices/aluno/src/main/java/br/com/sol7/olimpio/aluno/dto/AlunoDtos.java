@@ -22,6 +22,15 @@ public final class AlunoDtos {
             Integer qtdeFalta, Integer qtdeAulaAtrasado, String professor) {
     }
 
+    // Matrículas de um contrato para a subtabela "detalhesAluno" de gestaoAluno.xhtml:
+    // colunas descritivas do oferecimento + flags usadas pelos menus condicionais.
+    public record MatriculaContratoResponse(
+            Long id, Long turma, LocalDate dataInicio, LocalDate dataFim,
+            String grupo, String componenteCurricular, Integer cargaHoraria,
+            String unidade, String professor, String statusTurma, String statusMatricula,
+            LocalDate dataCancelamento, Boolean trocaTurma) {
+    }
+
     public record AvaliacaoResponse(Integer ordem, BigDecimal nota, String conceito) {
     }
 

@@ -11,6 +11,7 @@ import java.util.List;
 
 import br.com.sol7.olimpio.basico.logradouro.dto.LogradouroRequest;
 import br.com.sol7.olimpio.basico.logradouro.dto.LogradouroResponse;
+import br.com.sol7.olimpio.basico.logradouro.dto.TrocaLogradourosRequest;
 import br.com.sol7.olimpio.basico.logradouro.service.LogradouroService;
 
 @Path("/api/basico/logradouro")
@@ -128,6 +129,21 @@ public class LogradouroController {
     @Path("/auto-complete-logradouro-troca")
     public Uni<List<Long>> autoCompleteLogradouroTroca(@QueryParam("query") String query) {
         return service.autoCompleteLogradouroTroca(query);
+    }
+
+
+    @GET
+    @Path("/auto-complete-logradouro-troca-opcoes")
+    public Uni<List<LogradouroResponse>> autoCompleteLogradouroTrocaOpcoes(@QueryParam("query") String query,
+                                                                           @QueryParam("excluirId") Long excluirId) {
+        return service.autoCompleteLogradouroTrocaOpcoes(query, excluirId);
+    }
+
+
+    @POST
+    @Path("/trocar-logradouros")
+    public Uni<Void> trocarLogradouros(TrocaLogradourosRequest r) {
+        return service.trocarLogradouros(r == null ? null : r.destinoId(), r == null ? null : r.origemIds());
     }
 
 

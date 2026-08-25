@@ -35,6 +35,16 @@ export interface ComboSource {
     labelKey?: string;
 }
 
+export interface DataTableRowAction {
+    key: string;
+    title: string;
+    className?: string;
+    icon?: ReactNode;
+    /** Permissão necessária para exibir a ação; quando omitida, sempre exibe. */
+    permission?: 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'EXECUTE';
+    onClick: (item: ApiItem) => void | Promise<void>;
+}
+
 interface DataTableProps {
     path: string;
     columns?: DataTableColumn[];
@@ -50,6 +60,8 @@ interface DataTableProps {
     editNavigateTo?: string;
     /** Rota do formulário para navegar ao clicar em Novo. */
     createNavigateTo?: string;
+    /** Ações extras por linha (ex.: Atualizar/Troca do listLogradouro.xhtml). */
+    extraRowActions?: DataTableRowAction[];
 }
 
 const toTitle = (value: string) =>
@@ -175,7 +187,7 @@ type ModalState =
     | { mode: 'delete'; item: ApiItem }
     | null;
 
-export function DataTable({path, columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, editNavigateTo, createNavigateTo}: DataTableProps) {
+export function DataTable({path, columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, editNavigateTo, createNavigateTo, extraRowActions}: DataTableProps) {
     const navigate = useNavigate();
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(PAGE_SIZES[0]);
@@ -247,6 +259,21 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
     };
 
 const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem) => ReactNode }> = [];
+    if (canRelatorio) {
+        actionColumns.push({
+            key: 'ver',
+            label: 'Ver',
+            render: (item) => (
+                <button
+                    className="btn-action btnyellow"
+                    title="Ver"
+                    onClick={() => setViewModalItem(item)}
+                >
+                    <i className="fa fa-info-circle"/>
+                </button>
+            ),
+        });
+    }
   if (canUpdate) {
         actionColumns.push({
             key: 'editar',
@@ -260,6 +287,26 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
                         : setModal({mode: 'edit', item, cols: editableColumns(item, cols)})}
                 >
                     ✎
+                </button>
+            ),
+        });
+    }
+    for (const extra of extraRowActions ?? []) {
+        if (extra.permission && !can(extra.permission, screenOutcome)) continue;
+        actionColumns.push({
+            key: extra.key,
+            label: extra.title,
+            render: (item) => (
+                <button
+                    type="button"
+                    className={`btn-action ${extra.className ?? 'btnstop'}`}
+                    title={extra.title}
+                    onClick={async () => {
+                        await extra.onClick(item);
+                        q.refetch();
+                    }}
+                >
+                    {extra.icon ?? '⚙'}
                 </button>
             ),
         });
@@ -279,37 +326,6 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
             ),
         });
     }
-if (canRelatorio) {
-    actionColumns.push({
-      key: 'exportar',
-      label: 'Exportar',
-      render: (item) => (
-        <div className="row-actions-export">
-          <button
-            className="btn-action btnyellow"
-            title="Exportar PDF"
-            onClick={() => exportarPDF(item)}
-          >
-            <i className="fa fa-file-pdf-o"/> PDF
-          </button>
-          <button
-            className="btn-action btnyellow"
-            title="Exportar DOCX"
-            onClick={() => exportarDOCX(item)}
-          >
-            <i className="fa fa-file-word-o"/> DOCX
-          </button>
-          <button
-            className="btn-action btnyellow"
-            title="Exportar Excel"
-            onClick={() => exportarExcel(item)}
-          >
-            <i className="fa fa-file-excel-o"/> Excel
-          </button>
-        </div>
-      ),
-    });
-  }
 
     const headerCount = (expandable ? 1 : 0) + 1 + cols.length + actionColumns.length;
 
@@ -333,6 +349,7 @@ if (canRelatorio) {
         URL.revokeObjectURL(url);
     };
 
+    const [viewModalItem, setViewModalItem] = useState<ApiItem | null>(null);
     const [exportModal, setExportModal] = useState<{ item: ApiItem; tipo: 'PDF' | 'DOCX' | 'EXCEL' } | null>(null);
 
     const exportarPDF = (item: ApiItem) => {
@@ -377,7 +394,14 @@ if (canRelatorio) {
     const saveCreate = (values: Record<string, unknown>) => {
         q.create.mutate(
             {nome: 'Novo registro', ...values} as unknown as ApiItem,
-            {onError: (error) => setNotice(`Erro ao criar: ${apiErrorMessage(error)}`)},
+            {
+                onSuccess: () => {
+                    if (path.includes('Layout') || path.includes('tema')) {
+                        window.dispatchEvent(new CustomEvent('olimpio-tema-updated'));
+                    }
+                },
+                onError: (error) => setNotice(`Erro ao criar: ${apiErrorMessage(error)}`)
+            },
         );
         closeModal();
     };
@@ -385,7 +409,14 @@ if (canRelatorio) {
     const saveEdit = (item: ApiItem, values: Record<string, unknown>) => {
         q.update.mutate(
             {id: item.id, body: {nome: item.nome ?? 'Registro', ...values} as unknown as ApiItem},
-            {onError: (error) => setNotice(`Erro ao salvar: ${apiErrorMessage(error)}`)},
+            {
+                onSuccess: () => {
+                    if (path.includes('Layout') || path.includes('tema')) {
+                        window.dispatchEvent(new CustomEvent('olimpio-tema-updated'));
+                    }
+                },
+                onError: (error) => setNotice(`Erro ao salvar: ${apiErrorMessage(error)}`)
+            },
         );
         closeModal();
     };
@@ -403,6 +434,43 @@ if (canRelatorio) {
                         onClick={() => createNavigateTo ? navigate(createNavigateTo) : setModal({mode: 'create'})}>
                     Novo
                 </button>}
+                {canRelatorio && (
+                    <div className="export-toolbar-group" style={{display: 'inline-block', marginLeft: '10px', verticalAlign: 'middle'}}>
+                        <button
+                            type="button"
+                            className="btn-action btnyellow"
+                            style={{padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', marginRight: '5px'}}
+                            title="Exportar PDF"
+                            onClick={() => {
+                                if (items.length > 0) exportarPDF(items[0]);
+                            }}
+                        >
+                            <i className="fa fa-file-pdf-o"/> PDF
+                        </button>
+                        <button
+                            type="button"
+                            className="btn-action btnyellow"
+                            style={{padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', marginRight: '5px'}}
+                            title="Exportar DOCX"
+                            onClick={() => {
+                                if (items.length > 0) exportarDOCX(items[0]);
+                            }}
+                        >
+                            <i className="fa fa-file-word-o"/> DOCX
+                        </button>
+                        <button
+                            type="button"
+                            className="btn-action btnyellow"
+                            style={{padding: '6px 12px', borderRadius: '4px', cursor: 'pointer'}}
+                            title="Exportar Excel"
+                            onClick={() => {
+                                if (items.length > 0) exportarExcel(items[0]);
+                            }}
+                        >
+                            <i className="fa fa-file-excel-o"/> Excel
+                        </button>
+                    </div>
+                )}
                 {notice && <span className="data-table-notice">{notice}</span>}
             </div>
             {q.isError ? (
@@ -572,6 +640,27 @@ if (canRelatorio) {
                     onExport={executarExportacao}
                     entityTitle={entityTitle}
                 />
+            )}
+            {viewModalItem && (
+                <div className="modal-overlay" onClick={() => setViewModalItem(null)}>
+                    <div className="modal form-modal" onClick={e => e.stopPropagation()}>
+                        <div className="div_form">
+                            <div className="form-title">Informações do Registro #{viewModalItem.id}</div>
+                            <div className="table_form">
+                                <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '16px', maxHeight: '60vh', overflowY: 'auto'}}>
+                                    {Object.entries(asRecord(viewModalItem)).map(([k, v]) => (
+                                        <div key={k} style={{wordBreak: 'break-all'}}>
+                                            <strong>{toTitle(k)}:</strong> {v === null || v === undefined ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v)}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="form-footer" style={{marginTop: '16px'}}>
+                                    <button type="button" className="btn-form-back" onClick={() => setViewModalItem(null)}>Fechar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
@@ -817,7 +906,7 @@ function ExportModal({ item, tipo, onClose, onExport, entityTitle }: ExportModal
 
     useEffect(() => {
         if (tipo === 'DOCX' || tipo === 'PDF') {
-            api.get<Array<{id: number, nome: string}>>(`/api/relatorios/documentos/opcoes`, {
+            api.get<{ templates?: Array<{id: number, nome: string}> }>(`/api/relatorios/documentos/opcoes`, {
                 params: { tipoRelatorio: 'TABELA', relatorioId: item.id }
             }).then(response => {
                 setTemplates(response.data.templates || []);

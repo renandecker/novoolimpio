@@ -12,6 +12,9 @@ import {
     COMPONENTE_SOURCE,
     COMPONENTE_COLUMNS,
     COMPONENTE_SEARCH,
+    ATIVIDADE_COMPLEMENTAR_SOURCE,
+    ATIVIDADE_COMPLEMENTAR_COLUMNS,
+    ATIVIDADE_COMPLEMENTAR_SEARCH,
 } from '../masterDetailSources';
 import type {ApiItem} from '../types';
 import {api, useApi} from '../api';
@@ -65,11 +68,19 @@ interface CurriculoData {
         templateCertificado?: string;
         templateBoletim?: string;
         templatePromissoria?: string;
+        ead?: boolean;
+        habilitarAulaComplementar?: boolean;
+        limiteAulaComplementar?: boolean;
+        qtdeAulaComplementar?: number;
+        aulaComplementarCriacao?: boolean;
+        aulaComplementarExistente?: boolean;
+        ordemAulaComplemnetar?: number;
     };
     matrizCurricular: ApiItem[];
     requisitos: RequisitoItem[];
     unidades: ApiItem[];
     materialEscolar: MaterialEscolarItem[];
+    atividadesComplementares: ApiItem[];
 }
 
 const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
@@ -137,6 +148,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
     const [unidades, setUnidades] = useState<ApiItem[]>([]);
     const [materialEscolar, setMaterialEscolar] = useState<MaterialEscolarItem[]>([]);
     const [requisitos, setRequisitos] = useState<RequisitoItem[]>([]);
+    const [atividadesComplementares, setAtividadesComplementares] = useState<ApiItem[]>([]);
 
     const {data, updateField, updateFields} = useWizardData<CurriculoData>({
         entity: {},
@@ -144,6 +156,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
         requisitos: [],
         unidades: [],
         materialEscolar: [],
+        atividadesComplementares: [],
     });
 
     const dataRef = useRef(data);
@@ -189,6 +202,11 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                 obrigatorio: m.obrigatorio !== false,
                             })));
                         } catch { setMaterialEscolar([]); }
+
+                        try {
+                            const {data: ativs} = await api.get<any[]>('/api/educacao/curriculo-atividade-complementar', {params: {curriculoId: idEdicao}});
+                            setAtividadesComplementares(Array.isArray(ativs) ? ativs : []);
+                        } catch { setAtividadesComplementares([]); }
 
                         try {
                             const {data: reqs} = await api.get<any[]>('/api/educacao/requisito-matriz', {params: {curriculoId: idEdicao}});
@@ -332,6 +350,18 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                     await api.post('/api/educacao/curriculo-unidade', {curriculoId: id, unidadeId: item.id});
                 }
             } catch (e) { console.warn('Falha ao sincronizar unidades:', e); }
+
+            try {
+                const {data: atuaisAtividades} = await api.get<any[]>('/api/educacao/curriculo-atividade-complementar', {params: {curriculoId: id}});
+                for (const a of atuaisAtividades ?? []) {
+                    if (!formData.atividadesComplementares.some((at) => Number(at.id) === Number(a.atividadeComplementarId ?? a.id))) {
+                        await api.delete('/api/educacao/curriculo-atividade-complementar', {params: {curriculoId: id, atividadeComplementarId: a.atividadeComplementarId}}).catch(() => undefined);
+                    }
+                }
+                for (const item of formData.atividadesComplementares) {
+                    await api.post('/api/educacao/curriculo-atividade-complementar', {curriculoId: id, atividadeComplementarId: item.id});
+                }
+            } catch (e) { console.warn('Falha ao sincronizar atividades complementares:', e); }
 
             try {
                 for (const item of materialEscolar) {
@@ -542,6 +572,111 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                         </select>
                     </label>
                 </div>
+            ),
+        },
+        {
+            key: 'aula',
+            label: 'Aula',
+            content: (
+                <>
+                    <div className="form-grid">
+                        <div className="form-field">
+                            <span className="form-label">Habilitar Ensino EAD</span>
+                            <BooleanField value={!!data.entity.ead}
+                                          onChange={(v) => updateField('entity', {...data.entity, ead: v})}/>
+                        </div>
+                        <div className="form-field">
+                            <span className="form-label">Habilitar Aula Complementar</span>
+                            <BooleanField value={!!data.entity.habilitarAulaComplementar}
+                                          onChange={(v) => updateField('entity', {
+                                              ...data.entity,
+                                              habilitarAulaComplementar: v,
+                                          })}/>
+                        </div>
+                    </div>
+                    {data.entity.habilitarAulaComplementar && (
+                        <fieldset className="form-fieldset">
+                            <legend>Aulas Complementares</legend>
+                            <div className="form-grid">
+                                <div className="form-field">
+                                    <span className="form-label">Limitar Aula Complementar</span>
+                                    <BooleanField value={!!data.entity.limiteAulaComplementar}
+                                                  onChange={(v) => updateField('entity', {
+                                                      ...data.entity,
+                                                      limiteAulaComplementar: v,
+                                                  })}/>
+                                </div>
+                                {data.entity.limiteAulaComplementar && (
+                                    <label className="form-field">
+                                        <span className="form-label">Qtd. Aula Complementar</span>
+                                        <input className="form-input" type="number" min={0}
+                                               value={data.entity.qtdeAulaComplementar ?? ''}
+                                               onChange={(e) => updateField('entity', {
+                                                   ...data.entity,
+                                                   qtdeAulaComplementar: e.target.value === '' ? undefined : Number(e.target.value),
+                                               })}/>
+                                    </label>
+                                )}
+                                <div className="form-field">
+                                    <span className="form-label">Habilitar Aula Complementar na Criação</span>
+                                    <BooleanField value={!!data.entity.aulaComplementarCriacao}
+                                                  onChange={(v) => updateField('entity', {
+                                                      ...data.entity,
+                                                      aulaComplementarCriacao: v,
+                                                  })}/>
+                                </div>
+                                <div className="form-field">
+                                    <span className="form-label">Habilitar Aula Complementar Existente</span>
+                                    <BooleanField value={!!data.entity.aulaComplementarExistente}
+                                                  onChange={(v) => updateField('entity', {
+                                                      ...data.entity,
+                                                      aulaComplementarExistente: v,
+                                                  })}/>
+                                </div>
+                                {data.entity.aulaComplementarCriacao && data.entity.aulaComplementarExistente && (
+                                    <div className="form-field">
+                                        <span className="form-label">Ordem de Busca da Aula Complementar</span>
+                                        <div style={{display: 'flex', gap: '16px', alignItems: 'center'}}>
+                                            <label style={{display: 'flex', gap: '4px', alignItems: 'center'}}>
+                                                <input type="radio" name="ordemAulaComplemnetar"
+                                                       checked={data.entity.ordemAulaComplemnetar === 0}
+                                                       onChange={() => updateField('entity', {
+                                                           ...data.entity,
+                                                           ordemAulaComplemnetar: 0,
+                                                       })}/>
+                                                Existente / Criação
+                                            </label>
+                                            <label style={{display: 'flex', gap: '4px', alignItems: 'center'}}>
+                                                <input type="radio" name="ordemAulaComplemnetar"
+                                                       checked={data.entity.ordemAulaComplemnetar === 1}
+                                                       onChange={() => updateField('entity', {
+                                                           ...data.entity,
+                                                           ordemAulaComplemnetar: 1,
+                                                       })}/>
+                                                Criação / Existente
+                                            </label>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </fieldset>
+                    )}
+                    <fieldset className="form-fieldset">
+                        <legend>Atividades Complementares</legend>
+                        <MasterDetail
+                            label="Atividade Complementar"
+                            source={ATIVIDADE_COMPLEMENTAR_SOURCE}
+                            valueKey="id"
+                            searchKeys={ATIVIDADE_COMPLEMENTAR_SEARCH}
+                            columns={ATIVIDADE_COMPLEMENTAR_COLUMNS}
+                            items={atividadesComplementares}
+                            onChange={(novos) => {
+                                setAtividadesComplementares(novos);
+                                updateField('atividadesComplementares', novos);
+                            }}
+                        />
+                    </fieldset>
+                </>
             ),
         },
         {
@@ -828,7 +963,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                 </fieldset>
             ),
         },
-    ], [data, matriz, unidades, materialEscolar, requisitos, cursos, novoMaterialProduto, novoMaterialQuantidade, novoMaterialValor, novoMaterialObrigatorio, novoRequisitoDescricao, novoRequisitoComponenteId, novoRequisitoTipo, novoRequisitoCarga, novoRequisitoMedia, adicionarMaterial, removerMaterial, adicionarRequisito, removerRequisito, updateField]);
+    ], [data, matriz, unidades, materialEscolar, requisitos, atividadesComplementares, cursos, novoMaterialProduto, novoMaterialQuantidade, novoMaterialValor, novoMaterialObrigatorio, novoRequisitoDescricao, novoRequisitoComponenteId, novoRequisitoTipo, novoRequisitoCarga, novoRequisitoMedia, adicionarMaterial, removerMaterial, adicionarRequisito, removerRequisito, updateField]);
 
     if (carregando) {
         return (

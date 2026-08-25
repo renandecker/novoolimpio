@@ -53,22 +53,83 @@ public class ViewService {
             Map.entry("marca/listMarca", "est_marca"),
             Map.entry("mensagemMeta/listMensagemMeta", "cen_mensagem_meta"),
             Map.entry("chamadaAssinada/listChamadaAssinada", "edc_chamada_assinada_impressa"),
-            Map.entry("unidade/listUnidade", "bas_unidade"));
+            Map.entry("unidade/listUnidade", "bas_unidade"),
+            Map.entry("configuracaoFinanceira/listConfiguracaoFinanceira", "fin_bancos"),
+            Map.entry("configuracaoFinanceira/formConfiguracaoFinanceira", "fin_bancos"));
+
+    // Consultas com JOIN para telas que exibem colunas de relacionamentos aninhados
+    // (ex.: logradouro -> bairro -> cidade -> estado), como no listLogradouro.xhtml legado.
+    private static final String LOGRADOURO_SELECT =
+            "SELECT l.id, l.descricao, l.cep, l.tipo_logradouro AS tipo, l.complemento, "
+                    + "l.latitude, l.longitude, b.descricao AS bairro_descricao, c.nome AS cidade_descricao, "
+                    + "e.nome AS estado_descricao, e.uf AS estado_uf "
+                    + "FROM bas_logradouro l "
+                    + "LEFT JOIN bas_bairro b ON b.id = l.id_bairro "
+                    + "LEFT JOIN bas_cidade c ON c.id = b.id_cidade "
+                    + "LEFT JOIN bas_estado e ON e.id = c.id_estado";
+    private static final List<String> LOGRADOURO_COLUMNS = List.of(
+            "id", "descricao", "cep", "tipo", "complemento", "latitude", "longitude",
+            "bairro_descricao", "cidade_descricao", "estado_descricao", "estado_uf");
+
+    private record CuratedSelect(String selectSql, List<String> columns) {
+    }
+
+    private static final Map<String, CuratedSelect> CURATED_SELECTS = Map.of(
+            "logradouro/listLogradouro", new CuratedSelect(LOGRADOURO_SELECT, LOGRADOURO_COLUMNS),
+            "logradouro/formLogradouro", new CuratedSelect(LOGRADOURO_SELECT, LOGRADOURO_COLUMNS));
 
     public Uni<PagedResponse<Map<String, Object>>> paged(String feature, String resource, int page, int size) {
         int p = Math.max(0, page);
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
+        CuratedSelect curated = CURATED_SELECTS.get(feature + "/" + resource);
+        if (curated != null) {
+            return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                    .chain(session -> doPagedCurated(session, curated, p, s));
+        }
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> doPaged(session, feature, resource, p, s));
     }
 
     public Uni<List<Map<String, Object>>> list(String feature, String resource) {
+        CuratedSelect curated = CURATED_SELECTS.get(feature + "/" + resource);
+        if (curated != null) {
+            return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                    .chain(session -> session.createNativeQuery(
+                                    "SELECT * FROM (" + curated.selectSql() + ") sub ORDER BY id")
+                            .getResultList())
+                    .map(raw -> toMaps(curated.columns(), raw));
+        }
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> resolveTable(session, feature, resource))
                 .onItem().ifNull().failWith(() -> new NotFoundException(
                         "Tabela nao encontrada para /api/view/" + feature + "/" + resource))
                 .flatMap(table -> io.quarkus.hibernate.reactive.panache.Panache.getSession()
                         .chain(session -> listRows(session, table)));
+    }
+
+    private Uni<PagedResponse<Map<String, Object>>> doPagedCurated(Mutiny.Session session, CuratedSelect curated,
+                                                                   int p, int s) {
+        String selectSql = "SELECT * FROM (" + curated.selectSql() + ") sub ORDER BY id LIMIT :limit OFFSET :offset";
+        String countSql = "SELECT count(*) FROM (" + curated.selectSql() + ") sub";
+        Uni<Long> total = session.createNativeQuery(countSql).getSingleResult()
+                .map(r -> ((Number) r).longValue());
+        Uni<List<Map<String, Object>>> rows = session.createNativeQuery(selectSql)
+                .setParameter("limit", s)
+                .setParameter("offset", (long) p * s)
+                .getResultList()
+                .map(raw -> toMaps(curated.columns(), raw));
+        return total.flatMap(count -> rows.map(content -> new PagedResponse<>(content, count, p, s)));
+    }
+
+    private static List<Map<String, Object>> toMaps(List<String> cols, List<?> rawList) {
+        List<Map<String, Object>> out = new ArrayList<>();
+        for (Object rowObj : rawList) {
+            Object[] arr = (Object[]) rowObj;
+            Map<String, Object> m = new LinkedHashMap<>();
+            for (int i = 0; i < cols.size() && i < arr.length; i++) m.put(cols.get(i), arr[i]);
+            out.add(m);
+        }
+        return out;
     }
 
     public Uni<Map<String, List<Map<String, Object>>>> refs(String feature, String resource) {

@@ -7,8 +7,8 @@
 .sidebar {
     width: 260px;
     min-height: 100vh;
-    background: linear-gradient(180deg, #1a1d22 0%, #24272e 100%);
-    border-right: 1px solid #3a3f4a;
+    background: linear-gradient(180deg, var(--cor-primaria, #1a1d22) 0%, var(--cor-barra, #24272e) 100%);
+    border-right: 1px solid var(--cor-borda, #3a3f4a);
     display: flex;
     flex-direction: column;
     position: fixed;
@@ -31,16 +31,16 @@
     align-items: center;
     gap: 10px;
     padding: 16px;
-    border-bottom: 1px solid #3a3f4a;
+    border-bottom: 1px solid var(--cor-borda, #3a3f4a);
 }
 
 .sidebar-logo {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: linear-gradient(180deg, #2f333b 0%, #1a1d22 100%);
-    border: 2px solid #c2aa3c;
-    color: #e8d27a;
+    background: linear-gradient(180deg, var(--cor-primaria, #2f333b) 0%, #1a1d22 100%);
+    border: 2px solid var(--cor-borda, #c2aa3c);
+    color: var(--cor-secundaria, #e8d27a);
     font-size: 18px;
     font-weight: bold;
     display: flex;

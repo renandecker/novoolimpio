@@ -170,4 +170,82 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
                         .getResultList());
     }
 
+
+    // Migrado do formAgenda.xhtml: listas Resultados e Status (inputMestreDetalheAutoComplete) e
+    // dialogPessoa (usuarios desta agenda). Tabelas de associacao sem entidade mapeada neste microsservico.
+    private static final String SQL_LISTAR_AGENDA_RESULTADOS =
+            "SELECT id_resultado FROM bas_agenda_resultado WHERE id_agenda = ?1 ORDER BY id_resultado";
+    private static final String SQL_LIMPAR_AGENDA_RESULTADOS =
+            "DELETE FROM bas_agenda_resultado WHERE id_agenda = ?1";
+    private static final String SQL_INSERIR_AGENDA_RESULTADO =
+            "INSERT INTO bas_agenda_resultado (id_agenda, id_resultado) VALUES (?1, ?2)";
+
+    private static final String SQL_LISTAR_AGENDA_STATUS =
+            "SELECT id_status FROM bas_agenda_status WHERE id_agenda = ?1 ORDER BY id_status";
+    private static final String SQL_LIMPAR_AGENDA_STATUS =
+            "DELETE FROM bas_agenda_status WHERE id_agenda = ?1";
+    private static final String SQL_INSERIR_AGENDA_STATUS =
+            "INSERT INTO bas_agenda_status (id_agenda, id_status) VALUES (?1, ?2)";
+
+    private static final String SQL_LISTAR_AGENDA_USUARIOS =
+            "SELECT id_usuario FROM bas_usuario_agenda WHERE id_agenda = ?1 ORDER BY id_usuario";
+    private static final String SQL_LIMPAR_AGENDA_USUARIOS =
+            "DELETE FROM bas_usuario_agenda WHERE id_agenda = ?1";
+    private static final String SQL_INSERIR_AGENDA_USUARIO =
+            "INSERT INTO bas_usuario_agenda (id_usuario, id_agenda, atender, iniciar, fechar, alterar, agendar) VALUES (?1, ?2, false, false, false, false, false)";
+
+    public Uni<java.util.List<Long>> listarResultadosIds(Long agendaId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_LISTAR_AGENDA_RESULTADOS, Long.class)
+                        .setParameter(1, agendaId)
+                        .getResultList());
+    }
+
+    public Uni<Void> substituirResultados(Long agendaId, java.util.List<Long> resultados) {
+        return substituirFilhos(SQL_LIMPAR_AGENDA_RESULTADOS, SQL_INSERIR_AGENDA_RESULTADO, agendaId, resultados);
+    }
+
+    public Uni<java.util.List<Long>> listarStatusIds(Long agendaId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_LISTAR_AGENDA_STATUS, Long.class)
+                        .setParameter(1, agendaId)
+                        .getResultList());
+    }
+
+    public Uni<Void> substituirStatus(Long agendaId, java.util.List<Long> statuses) {
+        return substituirFilhos(SQL_LIMPAR_AGENDA_STATUS, SQL_INSERIR_AGENDA_STATUS, agendaId, statuses);
+    }
+
+    public Uni<java.util.List<Long>> listarUsuariosIds(Long agendaId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_LISTAR_AGENDA_USUARIOS, Long.class)
+                        .setParameter(1, agendaId)
+                        .getResultList());
+    }
+
+    // Migrado de UsuarioService.salvarPerfilUsuario (legado): apaga as ligacoes da agenda e reinsere os usuarios marcados.
+    public Uni<Void> substituirUsuarios(Long agendaId, java.util.List<Long> usuarios) {
+        return substituirFilhos(SQL_LIMPAR_AGENDA_USUARIOS, SQL_INSERIR_AGENDA_USUARIO, agendaId, usuarios);
+    }
+
+    private Uni<Void> substituirFilhos(String sqlLimpar, String sqlInserir, Long agendaId, java.util.List<Long> filhos) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(sqlLimpar)
+                        .setParameter(1, agendaId)
+                        .executeUpdate()
+                        .chain(ignored -> {
+                            Uni<Void> insercoes = Uni.createFrom().voidItem();
+                            for (Long filho : filhos) {
+                                final Long filhoId = filho;
+                                insercoes = insercoes.onItem().transformToUni(v ->
+                                        session.createNativeQuery(sqlInserir)
+                                                .setParameter(1, agendaId)
+                                                .setParameter(2, filhoId)
+                                                .executeUpdate()
+                                                .map(i -> (Void) null));
+                            }
+                            return insercoes;
+                        }));
+    }
+
 }

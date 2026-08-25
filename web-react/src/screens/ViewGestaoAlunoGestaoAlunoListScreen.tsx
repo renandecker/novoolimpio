@@ -1,7 +1,8 @@
 import {useEffect, useState} from 'react';
+import {useQuery} from '@tanstack/react-query';
 import {api} from '../api';
 import {PermissionGate, usePermissions, useCurrentOutcome} from '../permissions';
-import {DataTable, PAGE_SIZES} from '../DataTable';
+import {PAGE_SIZES} from '../DataTable';
 import {useModulePaged} from '../useModulePaged';
 import {AutoComplete, type AutoCompleteOption} from '../AutoComplete';
 import {CancelamentoModal} from '../CancelamentoModal';
@@ -88,6 +89,237 @@ const renderValue = (item: ApiItem, key: string) => {
     return String(value);
 };
 
+// Espelha a subtabela "detalhesAluno" (<p:rowExpansion>) de gestaoAluno.xhtml: matrículas do
+// contrato com colunas descritivas do oferecimento + menus de ação por permissão.
+interface MatriculaContrato {
+    id: number;
+    turma: number | null;
+    dataInicio: string | null;
+    dataFim: string | null;
+    grupo: string;
+    componenteCurricular: string;
+    cargaHoraria: number | null;
+    unidade: string;
+    professor: string;
+    statusTurma: string;
+    statusMatricula: string;
+    dataCancelamento: string | null;
+    trocaTurma: boolean;
+}
+
+const fmtDataMatricula = (value?: string | null) =>
+    value ? new Date(value).toLocaleDateString('pt-BR') : '';
+
+// Espelha turmaController.styleClass(matricula): classe de cor do status da matrícula.
+const STATUS_MATRICULA_CLASS: Record<string, string> = {
+    APROVADO: 'statusEM_ANDAMENTO',
+    REPROVADO: 'statusPENDENTE',
+    PENDENTE: 'statusLOTADA',
+    CURSANDO: 'statusLIBERADA',
+};
+
+const statusTurmaClass = (status: string) => (status ? `status${status}` : '');
+
+const MATRICULA_COLUMNS = [
+    {key: 'id', label: 'Matrícula', width: '5%', render: (m: MatriculaContrato) => String(m.id)},
+    {key: 'turma', label: 'Turma', width: '5%', render: (m: MatriculaContrato) => String(m.turma ?? '')},
+    {key: 'dataInicio', label: 'Data Início', width: '60px', render: (m: MatriculaContrato) => fmtDataMatricula(m.dataInicio)},
+    {key: 'dataFim', label: 'Data Fim', width: '60px', render: (m: MatriculaContrato) => fmtDataMatricula(m.dataFim)},
+    {key: 'grupo', label: 'Grupo', width: '10%', render: (m: MatriculaContrato) => m.grupo},
+    {key: 'componente', label: 'Componente Curricular', width: '20%', render: (m: MatriculaContrato) => m.componenteCurricular},
+    {key: 'cargaHoraria', label: 'Carga Horária', width: '5%', align: 'center', render: (m: MatriculaContrato) => String(m.cargaHoraria ?? '')},
+    {key: 'unidade', label: 'Unidade', width: '12%', render: (m: MatriculaContrato) => m.unidade},
+    {key: 'professor', label: 'Professor', width: '15%', render: (m: MatriculaContrato) => m.professor},
+] as const;
+
+function MatriculasTable({contratoId, acessoTudo, acessoRelatorios, acessoNovo, acessoEditar, acessoRemover}: {
+    contratoId: number;
+    acessoTudo: boolean;
+    acessoRelatorios: boolean;
+    acessoNovo: boolean;
+    acessoEditar: boolean;
+    acessoRemover: boolean;
+}) {
+    const [placeholder, setPlaceholder] = useState<{ titulo: string; texto: string } | null>(null);
+    const [cancelando, setCancelando] = useState(false);
+
+    const q = useQuery({
+        queryKey: ['matriculas-contrato', contratoId],
+        queryFn: async () => (await api.get<MatriculaContrato[]>(
+            '/api/aluno/gestao/matriculas-por-contrato',
+            {params: {contratoId}},
+        )).data,
+        enabled: Number.isFinite(contratoId),
+    });
+
+    const items = q.data ?? [];
+    const showActionsColumn = acessoTudo || acessoRelatorios || acessoNovo || acessoEditar || acessoRemover;
+    const colSpan = MATRICULA_COLUMNS.length + 2 + (showActionsColumn ? 1 : 0);
+
+    const abrirPlaceholder = (titulo: string, texto: string) => setPlaceholder({titulo, texto});
+
+    // Espelha os <p:menuButton> por linha da matrícula em gestaoAluno.xhtml (acessoTudo,
+    // acessoRelatorios, acessoNovo, acessoEditar, acessoRemover), com as mesmas cores.
+    const acoesDaMatricula = (m: MatriculaContrato) => {
+        const cancelada = m.statusMatricula === 'CANCELADO';
+        return (
+            <>
+                {acessoTudo && (
+                    <RowMenu icon={<i className="fa fa-check"/>} className="btnblue" title="Permissão total"
+                             items={[{
+                                 key: 'alunosTurma',
+                                 label: 'Alunos da turma',
+                                 className: 'btnbrown',
+                                 onSelect: () => abrirPlaceholder(
+                                     'Alunos da turma',
+                                     `Alunos sobre os oferecimentos da matrícula #${m.id} (turma ${m.turma ?? '—'}).`),
+                             }]}/>
+                )}
+                {acessoRelatorios && (
+                    <RowMenu icon={<i className="fa fa-file-text-o"/>} className="btnyellow" title="Relatórios"
+                             items={[
+                                 {
+                                     key: 'informacoes',
+                                     label: 'Informações',
+                                     className: 'btnyellow',
+                                     onSelect: () => abrirPlaceholder('Informações', `Mais informações da turma ${m.turma ?? '—'}.`),
+                                 },
+                                 {
+                                     key: 'preCancelamentos',
+                                     label: 'Pré cancelamentos',
+                                     className: 'btnorange',
+                                     onSelect: () => abrirPlaceholder('Pré cancelamentos', 'Pré cancelamentos criados na matrícula.'),
+                                 },
+                                 {
+                                     key: 'presencas',
+                                     label: 'Presenças',
+                                     className: 'btnbrown',
+                                     onSelect: () => abrirPlaceholder('Presenças', `Presenças da matrícula #${m.id}.`),
+                                 },
+                                 {
+                                     key: 'notas',
+                                     label: 'Notas',
+                                     className: 'btnblack',
+                                     onSelect: () => abrirPlaceholder('Notas', `Notas da matrícula #${m.id}.`),
+                                 },
+                                 ...(m.dataCancelamento ? [{
+                                     key: 'cancelamentoMatricula',
+                                     label: 'Cancelamento matricula',
+                                     className: 'btnred',
+                                     disabled: true,
+                                     onSelect: () => abrirPlaceholder('Cancelamento matricula', 'Segunda via do documento de cancelamento.'),
+                                 }] : []),
+                                 ...((m.trocaTurma && !cancelada) ? [{
+                                     key: 'trocaTurmaSegunda',
+                                     label: 'Troca turma',
+                                     className: 'btnblue',
+                                     disabled: false,
+                                     onSelect: () => abrirPlaceholder('Troca turma', 'Segunda via troca de turma.'),
+                                 }] : []),
+                             ]}/>
+                )}
+                {acessoNovo && !cancelada && (
+                    <RowMenu icon={<i className="fa fa-plus-circle"/>} className="btnstop" title="Novo"
+                             items={[{
+                                 key: 'trocaComponente',
+                                 label: 'Troca Componente',
+                                 className: 'btngreen',
+                                 onSelect: () => abrirPlaceholder('Trocar aluno de Componente', 'Trocar o aluno de componente curricular.'),
+                             }]}/>
+                )}
+                {acessoEditar && !cancelada && (
+                    <RowMenu icon={<i className="fa fa-pencil"/>} className="btngreen" title="Editar"
+                             items={[{
+                                 key: 'trocaTurma',
+                                 label: 'Troca Turma',
+                                 className: 'btnblue',
+                                 onSelect: () => abrirPlaceholder('Trocar aluno de turma', 'Trocar o aluno de turma.'),
+                             }]}/>
+                )}
+                {acessoRemover && (
+                    <RowMenu icon={<i className="fa fa-trash"/>} className="btnred" title="Remover"
+                             items={[{
+                                 key: 'cancelamento',
+                                 label: 'Cancelamento',
+                                 className: 'btnred',
+                                 onSelect: () => setCancelando(true),
+                             }]}/>
+                )}
+            </>
+        );
+    };
+
+    return (
+        <div className="data-table">
+            {q.isError ? (
+                <p>Erro ao carregar as matrículas.</p>
+            ) : (
+                <table>
+                    <thead>
+                    <tr>
+                        {MATRICULA_COLUMNS.map((column) => (
+                            <th key={column.key} style={{width: column.width}}>{column.label}</th>
+                        ))}
+                        <th style={{width: '6%', textAlign: 'center'}}>Status Turma</th>
+                        <th style={{width: '6%', textAlign: 'center'}}>Status Matrícula</th>
+                        {showActionsColumn && <th className="col-actions">Ações</th>}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {q.isLoading && items.length === 0 ? (
+                        <tr>
+                            <td colSpan={colSpan}>Carregando...</td>
+                        </tr>
+                    ) : items.length === 0 ? (
+                        <tr>
+                            <td colSpan={colSpan}>Nenhum registro encontrado.</td>
+                        </tr>
+                    ) : (
+                        items.map((m) => (
+                            <tr key={m.id}>
+                                {MATRICULA_COLUMNS.map((column) => (
+                                    <td key={column.key}
+                                        style={column.key === 'cargaHoraria' ? {textAlign: 'center'} : {whiteSpace: 'normal'}}>
+                                        {column.render(m)}
+                                    </td>
+                                ))}
+                                <td style={{textAlign: 'center'}}>
+                                    <span className={statusTurmaClass(m.statusTurma)}
+                                          style={{fontWeight: 'bold'}}>{m.statusTurma}</span>
+                                </td>
+                                <td style={{textAlign: 'center'}}>
+                                    <span className={STATUS_MATRICULA_CLASS[m.statusMatricula] ?? 'statusCANCELADA'}
+                                          style={{fontWeight: 'bold'}}>{m.statusMatricula}</span>
+                                </td>
+                                {showActionsColumn && (
+                                    <td className="col-actions">
+                                        <div className="row-actions-menu">{acoesDaMatricula(m)}</div>
+                                    </td>
+                                )}
+                            </tr>
+                        ))
+                    )}
+                    </tbody>
+                </table>
+            )}
+            {cancelando && <CancelamentoModal onClose={() => setCancelando(false)}/>}
+            {placeholder && (
+                <div className="modal-overlay" onClick={() => setPlaceholder(null)}>
+                    <div className="modal form-modal" onClick={(event) => event.stopPropagation()}>
+                        <h2>{placeholder.titulo}</h2>
+                        <p className="master-detail-empty">{placeholder.texto}</p>
+                        <div className="modal-actions form-footer">
+                            <button type="button" className="btn-form-back" onClick={() => setPlaceholder(null)}>
+                                Fechar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
 function ContractsTable({searchedIds, onBuscarContratos}: {
     searchedIds: number[] | null;
     onBuscarContratos: (pessoaId: number, pessoaNome: string) => void;
@@ -131,7 +363,9 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
     const acessoNovo = can('CREATE', outcome) || (perfilModuloPermissions?.novo ?? false);
     const acessoEditar = can('UPDATE', outcome) || (perfilModuloPermissions?.editar ?? false);
     const acessoRemover = can('DELETE', outcome) || (perfilModuloPermissions?.remover ?? false);
-    const showActionsColumn = acessoRelatorios || acessoNovo || acessoEditar || acessoRemover;
+    // Espelha BaseController.getAcessoTudo: todas as permissões simultâneas.
+    const acessoTudo = acessoRelatorios && acessoNovo && acessoEditar && acessoRemover;
+    const showActionsColumn = acessoTudo || acessoRelatorios || acessoNovo || acessoEditar || acessoRemover;
 
     const abrirPlaceholder = (titulo: string, texto: string) => setPlaceholder({titulo, texto});
 
@@ -431,7 +665,14 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                                 row,
                                 <tr key={`${rowKey}-detail`} className="row-detail">
                                     <td colSpan={colSpan}>
-                                        <DataTable path="/api/view/matricula/colunasMatricula"/>
+                                        <MatriculasTable
+                                            contratoId={contratoId}
+                                            acessoTudo={acessoTudo}
+                                            acessoRelatorios={acessoRelatorios}
+                                            acessoNovo={acessoNovo}
+                                            acessoEditar={acessoEditar}
+                                            acessoRemover={acessoRemover}
+                                        />
                                     </td>
                                 </tr>,
                             ];

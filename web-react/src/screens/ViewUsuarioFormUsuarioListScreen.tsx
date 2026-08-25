@@ -21,6 +21,7 @@ import {
 } from '../masterDetailSources';
 import type {ApiItem} from '../types';
 import {api} from '../api';
+import {useQuery} from '@tanstack/react-query';
 import {EnderecoCampos} from '../EnderecoForm';
 import type {Endereco} from '../EnderecoForm';
 
@@ -131,6 +132,19 @@ export default function ViewUsuarioFormUsuarioListScreen() {
     const [pessoaOriginal, setPessoaOriginal] = useState<Record<string, unknown> | null>(null);
     const [form, setForm] = useState<FormState>(FORM_VAZIO);
 
+    const {data: allUnidades = []} = useQuery({
+        queryKey: [UNIDADE_SOURCE],
+        queryFn: async () => (await api.get<ApiItem[]>(UNIDADE_SOURCE)).data,
+    });
+    const {data: allPerfis = []} = useQuery({
+        queryKey: [PERFIL_SOURCE],
+        queryFn: async () => (await api.get<ApiItem[]>(PERFIL_SOURCE)).data,
+    });
+    const {data: allAgendas = []} = useQuery({
+        queryKey: [AGENDA_SOURCE],
+        queryFn: async () => (await api.get<ApiItem[]>(AGENDA_SOURCE)).data,
+    });
+
     useEffect(() => {
         if (!idParam) return;
         let ativoReq = true;
@@ -175,6 +189,24 @@ export default function ViewUsuarioFormUsuarioListScreen() {
                     telefoneReferencia2: str(pf?.telefoneReferencia2),
                     celularReferencia2: str(pf?.celularReferencia2),
                 });
+
+                const usuarioIdNum = usu.id as number;
+                const [unidadesIds, agendasIds, perfisIds] = await Promise.all([
+                    api.get<number[]>(`/api/basico/usuario/buscar-unidades-disponiveis`, {params: {usuarioId: usuarioIdNum}}).then(r => r.data),
+                    api.get<number[]>(`/api/basico/usuario/buscar-agendas-disponiveis`, {params: {usuarioId: usuarioIdNum}}).then(r => r.data),
+                    api.get<number[]>(`/api/basico/usuario/buscar-usuario-seu-perfil`, {params: {entityId: usuarioIdNum}}).then(r => r.data),
+                ]);
+
+                const unidadesSet = new Set(unidadesIds.map(String));
+                const agendasSet = new Set(agendasIds.map(String));
+                const perfisSet = new Set(perfisIds.map(String));
+
+                setUnidadesAcesso(allUnidades.filter(u => unidadesSet.has(String((u as Record<string, unknown>).id))));
+                setAgendas(allAgendas.filter(a => agendasSet.has(String((a as Record<string, unknown>).id))));
+                setPerfis(allPerfis.filter(p => perfisSet.has(String((p as Record<string, unknown>).id))));
+
+                const turnosResp = await api.get<Record<string, unknown>[]>(`/api/basico/usuario/buscar-usuario-com-turnos`, {params: {entityId: usuarioIdNum}});
+                // TODO: Backend endpoint only returns user ID, not turnos. Need backend fix to return associated turnos.
             } catch (erro) {
                 console.error('Erro ao carregar usuário:', erro);
                 alert('Erro ao carregar registro.');
@@ -183,7 +215,7 @@ export default function ViewUsuarioFormUsuarioListScreen() {
         return () => {
             ativoReq = false;
         };
-    }, [idParam]);
+    }, [idParam, allUnidades, allPerfis, allAgendas]);
 
     const set = (campo: keyof FormState, valor: string) => setForm((prev) => ({...prev, [campo]: valor}));
 

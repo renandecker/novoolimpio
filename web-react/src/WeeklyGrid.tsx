@@ -20,6 +20,7 @@ interface WeeklyGridProps {
     maxTime?: string;
     dayLabels?: string[];
     onEventClick?: (event: ScheduleEventData) => void;
+    onDateSelect?: (date: string, startTime: string, endTime: string) => void;
 }
 
 const ROW_H = 30;
@@ -96,7 +97,7 @@ function computeBounds(
     return {lo, hi};
 }
 
-export function WeeklyGrid({events, startDate, minTime, maxTime, dayLabels, onEventClick}: WeeklyGridProps) {
+export function WeeklyGrid({events, startDate, minTime, maxTime, dayLabels, onEventClick, onDateSelect}: WeeklyGridProps) {
     const days = Array.from({length: 7}, (_, i) => addDays(parseDate(startDate), i));
     const bounds = computeBounds(events, minTime, maxTime);
     const rows = Math.round((bounds.hi - bounds.lo) / SLOT);
@@ -149,11 +150,31 @@ export function WeeklyGrid({events, startDate, minTime, maxTime, dayLabels, onEv
 
                 {days.map((d, i) => {
                     const dayEvents = timedEvents.filter((e) => sameDay(parseEventTime(e.start), d));
+                    const dayIso = toIsoDate(d);
                     return (
                         <div key={`b${i}`} className="wg-col" style={{height: bodyHeight}}>
-                            {Array.from({length: rows}, (_, r) => (
-                                <div key={r} className="wg-row" style={{height: ROW_H}}/>
-                            ))}
+                            {Array.from({length: rows}, (_, r) => {
+                                const slotStart = bounds.lo + r * SLOT;
+                                const slotEnd = slotStart + SLOT;
+                                const startTime = `${String(Math.floor(slotStart / 60)).padStart(2, '0')}:${String(slotStart % 60).padStart(2, '0')}`;
+                                const endTime = `${String(Math.floor(slotEnd / 60)).padStart(2, '0')}:${String(slotEnd % 60).padStart(2, '0')}`;
+                                const hasEvent = dayEvents.some(e => {
+                                    const s = parseEventTime(e.start);
+                                    const en = parseEventTime(e.end);
+                                    if (!s || !en) return false;
+                                    const smin = s.getHours() * 60 + s.getMinutes();
+                                    const emin = en.getHours() * 60 + en.getMinutes();
+                                    return smin < slotEnd && emin > slotStart;
+                                });
+                                return (
+                                    <div
+                                        key={r}
+                                        className={`wg-row${hasEvent ? ' wg-row-has-event' : ''}`}
+                                        style={{height: ROW_H}}
+                                        onClick={() => !hasEvent && onDateSelect?.(dayIso, startTime, endTime)}
+                                    />
+                                );
+                            })}
                             {dayEvents.map((e, j) => {
                                 const s = parseEventTime(e.start);
                                 const en = parseEventTime(e.end);
@@ -195,21 +216,23 @@ interface ScheduleWeekViewProps {
     error?: string | null;
     legend?: LegendaItem[];
     onEventClick?: (event: ScheduleEventData) => void;
+    onDateSelect?: (date: string, startTime: string, endTime: string) => void;
     minTime?: string;
     maxTime?: string;
 }
 
 export function ScheduleWeekView({
-                                     startDate,
-                                     onWeekChange,
-                                     events,
-                                     loading,
-                                     error,
-                                     legend,
-                                     onEventClick,
-                                     minTime,
-                                     maxTime,
-                                 }: ScheduleWeekViewProps) {
+                                      startDate,
+                                      onWeekChange,
+                                      events,
+                                      loading,
+                                      error,
+                                      legend,
+                                      onEventClick,
+                                      onDateSelect,
+                                      minTime,
+                                      maxTime,
+                                  }: ScheduleWeekViewProps) {
     const fim = toIsoDate(addDays(parseDate(startDate), 6));
     return (
         <div className="disp-semana">
@@ -248,7 +271,7 @@ export function ScheduleWeekView({
             {loading && <div className="disp-carregando">Carregando agenda...</div>}
             {error && <div className="disp-erro">{error}</div>}
             <WeeklyGrid startDate={startDate} events={events} minTime={minTime} maxTime={maxTime}
-                        onEventClick={onEventClick}/>
+                        onEventClick={onEventClick} onDateSelect={onDateSelect}/>
         </div>
     );
 }

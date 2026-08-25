@@ -229,4 +229,33 @@ public class AgendaService {
         return repository.autoCompleteEstrategicoDoUsuario(usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
+
+    // Migrado do formAgenda.xhtml: listas Resultados e Status (inputMestreDetalheAutoComplete).
+    public Uni<List<Long>> listarResultados(Long agendaId) {
+        return repository.listarResultadosIds(agendaId);
+    }
+
+    public Uni<Void> substituirResultados(Long agendaId, List<Long> resultados) {
+        return repository.substituirResultados(agendaId, resultados == null ? List.of() : resultados);
+    }
+
+    public Uni<List<Long>> listarStatus(Long agendaId) {
+        return repository.listarStatusIds(agendaId);
+    }
+
+    public Uni<Void> substituirStatus(Long agendaId, List<Long> statuses) {
+        return repository.substituirStatus(agendaId, statuses == null ? List.of() : statuses);
+    }
+
+
+    // Migrado de AgendaController.carregarUsuarios/salvarPerfilUsuario (listAgenda.xhtml dialogPessoa):
+    // usuarios marcados para a agenda.
+    public Uni<List<Long>> listarUsuarios(Long agendaId) {
+        return repository.listarUsuariosIds(agendaId);
+    }
+
+    public Uni<Void> substituirUsuarios(Long agendaId, List<Long> usuarios) {
+        return repository.substituirUsuarios(agendaId, usuarios == null ? List.of() : usuarios);
+    }
+
 }

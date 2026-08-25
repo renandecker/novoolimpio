@@ -88,6 +88,15 @@ public class LogradouroRepository implements PanacheRepository<Logradouro> {
     public static final String SQL_BUSCA_LOGRADOURO_SEM_LOGRADOURO =
             "SELECT DISTINCT c.* FROM bas_logradouro c WHERE c.descricao is null and c.cep is not null";
 
+    // Migrado de LogradouroController.trocarLogradouros (legado) - reatribui pessoas/unidades
+    // ao logradouro de destino antes de remover os logradouros substituidos.
+    public static final String SQL_TROCAR_PESSOA =
+            "UPDATE bas_pessoa SET id_logradouro = :destino WHERE id_logradouro = :origem";
+    public static final String SQL_TROCAR_UNIDADE =
+            "UPDATE bas_unidade SET id_logradouro = :destino WHERE id_logradouro = :origem";
+    public static final String SQL_REMOVER_LOGRADOURO =
+            "DELETE FROM bas_logradouro WHERE id = :origem";
+
     public Uni<java.util.List<Logradouro>> buscaLogradouroSemLogradouro() {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_BUSCA_LOGRADOURO_SEM_LOGRADOURO, Logradouro.class)

@@ -4,6 +4,7 @@ import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import DefaultListScreen from './screens/DefaultListScreen';
 import {AuthProvider} from './auth';
+import {ThemeProvider} from './ThemeContext';
 import LoginScreen from './LoginScreen';
 import ProtectedRoute from './ProtectedRoute';
 import PermissionBridge from './PermissionBridge';
@@ -134,6 +135,7 @@ import ViewCorFormCoresListScreen from './screens/ViewCorFormCoresListScreen';
 import ViewCorListCoresListScreen from './screens/ViewCorListCoresListScreen';
 import ViewCpfalunosFormCpfalunosListScreen from './screens/ViewCpfalunosFormCpfalunosListScreen';
 import ViewCpfalunosListCpfalunosListScreen from './screens/ViewCpfalunosListCpfalunosListScreen';
+import ViewCriterioListCriterioFormScreen from './screens/ViewCriterioListCriterioFormScreen';
 import ViewCriterioListCriterioListScreen from './screens/ViewCriterioListCriterioListScreen';
 import ViewCurriculoColunasListScreen from './screens/ViewCurriculoColunasListScreen';
 import ViewCurriculoColunasMatrizCurricularListScreen from './screens/ViewCurriculoColunasMatrizCurricularListScreen';
@@ -498,10 +500,12 @@ import CurriculoTrabalhoListScreen from './screens/CurriculoTrabalhoListScreen';
 import CurriculoCampoListScreen from './screens/CurriculoCampoListScreen';
 import CurriculoConfiguracaoListScreen from './screens/CurriculoConfiguracaoListScreen';
 import AuditoriaScreen from './screens/AuditoriaScreen';
+import ViewConfiguracaoFinanceiraListConfiguracaoFinanceiraListScreen from './screens/ViewConfiguracaoFinanceiraListConfiguracaoFinanceiraListScreen';
+import ViewConfiguracaoFinanceiraFormConfiguracaoFinanceiraListScreen from './screens/ViewConfiguracaoFinanceiraFormConfiguracaoFinanceiraListScreen';
 
 const q = new QueryClient();
 createRoot(document.getElementById('root')!).render(<QueryClientProvider
-    client={q}><AuthProvider><PermissionBridge><BrowserRouter><Routes><Route path="/login"
+    client={q}><AuthProvider><ThemeProvider><PermissionBridge><BrowserRouter><Routes><Route path="/login"
                                                                              element={<LoginScreen/>}/><Route
     element={<ProtectedRoute/>}><Route path="/default" element={
     <DefaultListScreen/>}/><Route path="/auditoria" element={<AuditoriaScreen/>}/><Route path="/view/tema/listTemas"
@@ -652,6 +656,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/cpfalunos/formCpfalunos" element={<ViewCpfalunosFormCpfalunosListScreen/>}/>
     <Route path="/view/cpfalunos/listCpfalunos" element={<ViewCpfalunosListCpfalunosListScreen/>}/>
     <Route path="/view/criterio/listCriterio" element={<ViewCriterioListCriterioListScreen/>}/>
+    <Route path="/view/criterio/formCriterio" element={<ViewCriterioListCriterioFormScreen/>}/>
     <Route path="/view/curriculo/colunas" element={<ViewCurriculoColunasListScreen/>}/>
     <Route path="/view/curriculo/colunasMatrizCurricular" element={<ViewCurriculoColunasMatrizCurricularListScreen/>}/>
     <Route path="/view/curriculo/colunasRequisitoMatriz" element={<ViewCurriculoColunasRequisitoMatrizListScreen/>}/>
@@ -1005,4 +1010,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/curriculo/curriculo-trabalho" element={<CurriculoTrabalhoListScreen/>}/>
     <Route path="/curriculo/curriculo-campo" element={<CurriculoCampoListScreen/>}/>
     <Route path="/curriculo/configuracao" element={
-        <CurriculoConfiguracaoListScreen/>}/><Route path='*' element={<p>Selecione uma tela.</p>}/></Route></Routes></BrowserRouter></PermissionBridge></AuthProvider></QueryClientProvider>);
+        <CurriculoConfiguracaoListScreen/>}/>
+    <Route path="/view/configuracaoFinanceira/listConfiguracaoFinanceira" element={<ViewConfiguracaoFinanceiraListConfiguracaoFinanceiraListScreen/>}/>
+    <Route path="/view/configuracaoFinanceira/formConfiguracaoFinanceira" element={<ViewConfiguracaoFinanceiraFormConfiguracaoFinanceiraListScreen/>}/>
+    <Route path='*' element={<p>Selecione uma tela.</p>}/></Route></Routes></BrowserRouter></PermissionBridge></ThemeProvider></AuthProvider></QueryClientProvider>);

@@ -88,4 +88,11 @@ public class CidadeController {
         return service.autoCompleteComEstadoComCep(query, estadoId, cep);
     }
 
+
+    @GET
+    @Path("/opcoes")
+    public Uni<List<CidadeResponse>> opcoes(@QueryParam("query") String query, @QueryParam("estadoId") Long estadoId) {
+        return service.autoCompleteOpcoes(query == null ? "" : query, estadoId);
+    }
+
 }

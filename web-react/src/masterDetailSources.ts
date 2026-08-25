@@ -152,3 +152,12 @@ export const REFERENCIA_BIBLIOGRAFICA_COLUMNS: MasterDetailColumn[] = [
     {key: 'volume', label: 'Volume'},
 ];
 export const REFERENCIA_BIBLIOGRAFICA_SEARCH = ['autor', 'titulo'];
+
+export const ATIVIDADE_COMPLEMENTAR_SOURCE = '/api/educacao/atividade-complementar';
+export const ATIVIDADE_COMPLEMENTAR_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'ID da Atividade Complementar'},
+    {key: 'descricao', label: 'Descrição'},
+    {key: 'cargaHoraria', label: 'Carga Horária'},
+    {key: 'tipoAtividade', label: 'Tipo Atividade'},
+];
+export const ATIVIDADE_COMPLEMENTAR_SEARCH = ['descricao'];

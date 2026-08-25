@@ -7,6 +7,8 @@ import type {ApiItem} from './types';
 export interface MasterDetailColumn {
     key: string;
     label: string;
+    /** Renderizacao customizada da celula (ex.: booleanos como Sim/Nao). */
+    render?: (item: ApiItem) => ReactNode;
 }
 
 interface MasterDetailProps {
@@ -207,7 +209,7 @@ export function MasterDetail({
                         items.map((item, index) => (
                             <tr key={`${String(asRecord(item)[valueKey])}-${index}`}>
                                 {detailCols.map((col) => (
-                                    <td key={col.key}>{renderValue(item, col.key)}</td>
+                                    <td key={col.key}>{col.render ? col.render(item) : renderValue(item, col.key)}</td>
                                 ))}
                                 {actionColumns.map((col) => (
                                     <td key={col.key} className="col-actions">{col.render(item)}</td>

@@ -4,6 +4,7 @@ import {PermissionGate} from '../permissions';
 import {useAuth} from '../auth';
 import {Tabs} from '../Tabs';
 import {AutoComplete} from '../AutoComplete';
+import {ExportDropdown} from '../ExportDropdown';
 
 type RespostaTipo = 'SELECAO' | 'ESCOLHA' | 'TEXTO' | 'ARQUIVO';
 
@@ -261,6 +262,12 @@ function ListarPerguntas() {
     const [carregando, setCarregando] = useState(false);
     const [aviso, setAviso] = useState<{ tipo: 'erro' | 'sucesso'; texto: string }>({tipo: 'sucesso', texto: ''});
 
+    const exportOptions = [
+        {key: 'pdf', label: 'PDF', icon: <i className="fa fa-file-pdf-o"/>, onClick: () => alert('Exportar PDF - não implementado')},
+        {key: 'docx', label: 'DOCX', icon: <i className="fa fa-file-word-o"/>, onClick: () => alert('Exportar DOCX - não implementado')},
+        {key: 'excel', label: 'Excel', icon: <i className="fa fa-file-excel-o"/>, onClick: () => alert('Exportar Excel - não implementado')},
+    ];
+
     const carregarPerguntas = async () => {
         setCarregando(true);
         try {
@@ -278,13 +285,16 @@ function ListarPerguntas() {
 
     return (
         <div>
-            <button
-                className="gp-btn gp-btn-procurar"
-                onClick={carregarPerguntas}
-                disabled={carregando}
-            >
-                {carregando ? 'Carregando...' : 'Carregar Perguntas'}
-            </button>
+            <div className="data-table-toolbar" style={{marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px'}}>
+                <button
+                    className="gp-btn gp-btn-procurar"
+                    onClick={carregarPerguntas}
+                    disabled={carregando}
+                >
+                    {carregando ? 'Carregando...' : 'Carregar Perguntas'}
+                </button>
+                <ExportDropdown options={exportOptions} triggerLabel="Exportar" triggerIcon={<i className="fa fa-download"/>}/>
+            </div>
 
             <Aviso tipo={aviso.tipo} texto={aviso.texto}/>
 

@@ -162,4 +162,15 @@ public class BairroService {
         return repository.autoCompleteComCidadeEstadoComCep(query.toLowerCase(), cidadeId, estadoId, cep).map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
+
+    // Opcoes ricas (id + descricao + cidadeId) para os autocompletes da tela de logradouro.
+    public Uni<List<BairroResponse>> autoCompleteOpcoes(String query, Long cidadeId) {
+        if (cidadeId != null) {
+            return repository.autoCompleteComCidade(query.toLowerCase(), cidadeId)
+                    .map(list -> list.stream().map(this::toResponse).toList());
+        }
+        return repository.autoComplete(query.toLowerCase())
+                .map(list -> list.stream().map(this::toResponse).toList());
+    }
+
 }

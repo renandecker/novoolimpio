@@ -122,7 +122,7 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoComp
 
     const [data, setData] = useState<OferecimentoCCData>({
         entity: {},
-        novoGrupo: false,
+        novoGrupo: true,
         novoGrupoNome: '',
         diasAulaSelecionados: [],
         ocorrencias: [],

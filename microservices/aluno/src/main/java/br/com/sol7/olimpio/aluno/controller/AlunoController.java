@@ -12,6 +12,7 @@ import br.com.sol7.olimpio.aluno.dto.AlunoDtos.FrequenciaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.HistoricoAlunoResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.HistoricoCobrancaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.HistoricoNapResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.MatriculaContratoResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.MatriculaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.PessoaDadosResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.TrocaTurmaResponse;
@@ -24,6 +25,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -162,6 +164,13 @@ public class AlunoController {
     @Path("/gestao/{pessoaId}/trocas-turma")
     public Uni<List<TrocaTurmaResponse>> gestaoTrocasTurma(@PathParam("pessoaId") Long pessoaId) {
         return service.trocasTurmaPorPessoa(pessoaId);
+    }
+
+    // Subtabela de matrículas do contrato (rowExpansion "detalhesAluno" de gestaoAluno.xhtml).
+    @GET
+    @Path("/gestao/matriculas-por-contrato")
+    public Uni<List<MatriculaContratoResponse>> gestaoMatriculasPorContrato(@QueryParam("contratoId") Long contratoId) {
+        return service.matriculasPorContrato(contratoId);
     }
 
     private String username(ContainerRequestContext ctx) {

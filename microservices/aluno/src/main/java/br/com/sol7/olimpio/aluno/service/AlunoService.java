@@ -24,6 +24,7 @@ import br.com.sol7.olimpio.aluno.dto.AlunoDtos.HistoricoNapResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.LigacaoCobrancaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.TrocaTurmaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.LigacaoNapResponse;
+import br.com.sol7.olimpio.aluno.dto.AlunoDtos.MatriculaContratoResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.MatriculaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.OcorrenciaPresencaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.ParcelaResponse;
@@ -220,6 +221,13 @@ public class AlunoService {
     public Uni<List<TrocaTurmaResponse>> trocasTurmaPorPessoa(Long pessoaId) {
         return repository.trocasTurmaPorPessoa(pessoaId)
                 .map(rows -> rows.stream().map(this::toTrocaTurma).toList());
+    }
+
+    // Espelha gestaoAlunoController.buscarMatriculas (rowExpansion "detalhesAluno" de
+    // gestaoAluno.xhtml): matriculas do contrato com colunas descritivas.
+    public Uni<List<MatriculaContratoResponse>> matriculasPorContrato(Long contratoId) {
+        return repository.matriculasPorContrato(contratoId)
+                .map(rows -> rows.stream().map(this::toMatriculaContrato).toList());
     }
 
     public Uni<List<BoletimResponse>> boletimCompletoPorPessoa(Long pessoaId) {
@@ -538,6 +546,22 @@ public class AlunoService {
                 asInt(row[4]), asString(row[5]), asInt(row[6]), asString(row[7]), asLocalDate(row[8]),
                 asBigDecimal(row[9]), asBigDecimal(row[10]), asInt(row[11]), asInt(row[12]), asInt(row[13]),
                 asInt(row[14]), asInt(row[15]), asInt(row[16]), asString(row[17]));
+    }
+
+    private MatriculaContratoResponse toMatriculaContrato(Object[] r) {
+        return new MatriculaContratoResponse(
+                asLong(r[0]), asLong(r[1]), asLocalDateOrNull(r[2]), asLocalDateOrNull(r[3]),
+                asString(r[4]), asString(r[5]), asInt(r[6]), asString(r[7]), asString(r[8]),
+                asString(r[9]), asString(r[10]), asLocalDateOrNull(r[11]), asBoolean(r[12]));
+    }
+
+    private LocalDate asLocalDateOrNull(Object o) {
+        if (o == null) return null;
+        try {
+            return asLocalDate(o);
+        } catch (RuntimeException ignored) {
+            return null;
+        }
     }
 
     private GrauResponse toGrau(GrauData grau) {

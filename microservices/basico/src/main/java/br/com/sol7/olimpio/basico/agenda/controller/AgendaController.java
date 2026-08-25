@@ -134,4 +134,44 @@ public class AgendaController {
         return service.autoCompleteEstrategicoDoUsuario(usuarioId);
     }
 
+
+    // Migrado do formAgenda.xhtml: listas Resultados e Status (inputMestreDetalheAutoComplete).
+    @GET
+    @Path("/{id}/resultados")
+    public Uni<List<Long>> listarResultados(@PathParam("id") Long id) {
+        return service.listarResultados(id);
+    }
+
+    @PUT
+    @Path("/{id}/resultados")
+    public Uni<Void> substituirResultados(@PathParam("id") Long id, List<Long> resultados) {
+        return service.substituirResultados(id, resultados);
+    }
+
+    @GET
+    @Path("/{id}/status")
+    public Uni<List<Long>> listarStatus(@PathParam("id") Long id) {
+        return service.listarStatus(id);
+    }
+
+    @PUT
+    @Path("/{id}/status")
+    public Uni<Void> substituirStatus(@PathParam("id") Long id, List<Long> statuses) {
+        return service.substituirStatus(id, statuses);
+    }
+
+
+    // Migrado de AgendaController.carregarUsuarios/salvarPerfilUsuario (listAgenda.xhtml dialogPessoa).
+    @GET
+    @Path("/{id}/usuarios")
+    public Uni<List<Long>> listarUsuarios(@PathParam("id") Long id) {
+        return service.listarUsuarios(id);
+    }
+
+    @PUT
+    @Path("/{id}/usuarios")
+    public Uni<Void> substituirUsuarios(@PathParam("id") Long id, List<Long> usuarios) {
+        return service.substituirUsuarios(id, usuarios);
+    }
+
 }

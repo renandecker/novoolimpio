@@ -1,5 +1,5 @@
 -- Flyway Migration: Update bas_modulo outcome column from .xhtml to new React routes
--- Version: V0020__update_bas_modulo_outcome_react_routes.sql
+-- Version: 0049__update_bas_modulo_outcome_react_routes.sql
 -- Description: Replace .xhtml paths in outcome column with new React route paths (without .xhtml)
 -- This migration maps legacy PrimeFaces .xhtml paths to new React Router paths
 

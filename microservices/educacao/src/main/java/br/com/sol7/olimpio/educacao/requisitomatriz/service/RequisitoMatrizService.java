@@ -29,7 +29,7 @@ public class RequisitoMatrizService {
         return matrizIdsDoCurriculo(curriculoId).flatMap(ids -> {
             if (ids.isEmpty()) return Uni.createFrom().item(List.<RequisitoMatrizResponse>of());
             // Consultas serializadas: primeiro a matriz, depois os requisitos.
-            return repository.find("matrizCurricularId in ?1", ids).list()
+            return repository.find("matrizCurricularId in ?1", List.copyOf(ids.keySet())).list()
                     .map(requisitos -> {
                         Map<Long, Long> componentePorMatriz = new HashMap<>();
                         for (var m : ids.entrySet()) componentePorMatriz.put(m.getKey(), m.getValue());

@@ -3,6 +3,7 @@ import {useQuery} from '@tanstack/react-query';
 import {api} from '../api';
 import {PermissionGate} from '../permissions';
 import {Tabs, type TabItem} from '../Tabs';
+import {ExportDropdown} from '../ExportDropdown';
 
 interface UnidadeRow {
     id: number;
@@ -161,6 +162,12 @@ function SolicitacoesTab({unidadeId}: { unidadeId: string }) {
 
     const itens = (data ?? []).filter(item => !unidadeId || String(item.unidadeId) === unidadeId);
 
+    const exportOptions = [
+        {key: 'pdf', label: 'PDF', icon: <i className="fa fa-file-pdf-o"/>, onClick: () => alert('Exportar PDF - não implementado')},
+        {key: 'docx', label: 'DOCX', icon: <i className="fa fa-file-word-o"/>, onClick: () => alert('Exportar DOCX - não implementado')},
+        {key: 'excel', label: 'Excel', icon: <i className="fa fa-file-excel-o"/>, onClick: () => alert('Exportar Excel - não implementado')},
+    ];
+
     if (!unidadeId) return <p className="disp-aviso">Selecione uma unidade para visualizar as solicitações.</p>;
     if (isLoading) return <p>Carregando...</p>;
     if (itens.length === 0) return <p>Nenhuma solicitação encontrada.</p>;
@@ -173,6 +180,9 @@ function SolicitacoesTab({unidadeId}: { unidadeId: string }) {
                 <span className="legenda-red">Falta</span>
                 <span className="legenda-black">Reservado</span>
                 <span className="legenda-purple">Aprovado não entregue</span>
+            </div>
+            <div className="data-table-toolbar" style={{marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px'}}>
+                <ExportDropdown options={exportOptions} triggerLabel="Exportar" triggerIcon={<i className="fa fa-download"/>}/>
             </div>
             <table className="data-table">
                 <thead>

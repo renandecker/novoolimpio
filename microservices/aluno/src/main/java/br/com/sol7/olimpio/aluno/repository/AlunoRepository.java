@@ -112,6 +112,37 @@ public class AlunoRepository {
         return nativeList(sql, pessoaId);
     }
 
+    // Matriculas de um contrato com as colunas descritivas da subtabela "detalhesAluno"
+    // (gestaoAluno.xhtml p:rowExpansion): turma, datas, grupo, componente, carga horaria,
+    // unidade, professor, status da turma e status da matricula.
+    public Uni<List<Object[]>> matriculasPorContrato(Long contratoId) {
+        String sql = """
+        SELECT m.id,
+               of.id AS turma,
+               of.data_inicio,
+               of.data_fim,
+               COALESCE(gr.nome, '') AS grupo,
+               COALESCE(cc.descricao, '') AS componente,
+               cc.carga_horaria,
+               COALESCE(un.sucinto, '') AS unidade,
+               COALESCE(f.nome, '') AS professor,
+               COALESCE(of.status, '') AS status_turma,
+               COALESCE(m.status, '') AS status_matricula,
+               m.data_cancelamento,
+               COALESCE(m.troca_turma, false) AS troca_turma
+        FROM edc_matricula m
+        LEFT JOIN edc_oferecimento_componente_curricular of ON of.id = m.id_oferecimento_componente_curricular
+        LEFT JOIN edc_grupo gr ON gr.id = of.id_grupo
+        LEFT JOIN edc_componente_curricular cc ON cc.id = of.id_componente_curricular
+        LEFT JOIN bas_unidade un ON un.id = of.id_unidade
+        LEFT JOIN bas_pessoa pprof ON pprof.id = of.id_professor
+        LEFT JOIN bas_pessoa_fisica f ON f.id_pessoa = pprof.id
+        WHERE m.id_contrato = ?1
+        ORDER BY of.data_inicio NULLS LAST, m.id
+        """;
+        return nativeList(sql, contratoId);
+    }
+
     public Uni<List<Object[]>> notasGrauPorMatricula(Long matriculaId) {
         String sql = """
         SELECT COALESCE (g.id, 0)AS grau_id,

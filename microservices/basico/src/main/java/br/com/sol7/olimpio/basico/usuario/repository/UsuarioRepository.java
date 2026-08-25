@@ -440,7 +440,7 @@ public class UsuarioRepository implements PanacheRepository<Usuario> {
     // Migrado de UsuarioRepository.buscarUnidadesDisponiveis (legado) - HQL original:
     // select uni from Usuario u inner join u.unidades uni where u = ?1 and uni.ativo = true and u.ativo = true order by uni.sucinto
     public static final String SQL_BUSCAR_UNIDADES_DISPONIVEIS =
-            "SELECT uni.* FROM bas_usuario u INNER JOIN bas_usuario_unidade u_uni_jt ON u_uni_jt.id_usuario = u.id INNER JOIN bas_unidade uni ON uni.id = u_uni_jt.id_unidade WHERE u.id = ?1 and uni.fl_ativo = true and u.fl_ativo = true ORDER BY uni.sucinto";
+            "SELECT uni.id, uni.razao_social, uni.nome_fantasia, uni.cnpj, uni.inscricao_estadual, uni.id_logradouro, uni.email, uni.numero, uni.area, uni.email_rh, uni.id_tipo_unidade, uni.id_regiao, uni.id_responsavel, uni.id_tema, uni.ponto_referencia, uni.sucinto, uni.diretorensino, uni.coordenador, uni.cep, uni.registro, uni.fl_ativo FROM bas_usuario u INNER JOIN bas_usuario_unidade u_uni_jt ON u_uni_jt.id_usuario = u.id INNER JOIN bas_unidade uni ON uni.id = u_uni_jt.id_unidade WHERE u.id = ?1 and uni.fl_ativo = true and u.fl_ativo = true ORDER BY uni.sucinto";
 
     public Uni<java.util.List<Unidade>> buscarUnidadesDisponiveis(Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
@@ -453,7 +453,7 @@ public class UsuarioRepository implements PanacheRepository<Usuario> {
     // Migrado de UsuarioRepository.buscarUnidadesDisponiveisRede (legado) - HQL original:
     // select uni from Rede r inner join r.unidades uni where r.usuario = ?1 and uni.ativo = true order by uni.sucinto
     public static final String SQL_BUSCAR_UNIDADES_DISPONIVEIS_REDE =
-            "SELECT uni.* FROM bas_rede r INNER JOIN bas_rede_unidade r_uni_jt ON r_uni_jt.id_rede = r.id INNER JOIN bas_unidade uni ON uni.id = r_uni_jt.id_unidade WHERE r.id_usuario = ?1 and uni.fl_ativo = true ORDER BY uni.sucinto";
+            "SELECT uni.id, uni.razao_social, uni.nome_fantasia, uni.cnpj, uni.inscricao_estadual, uni.id_logradouro, uni.email, uni.numero, uni.area, uni.email_rh, uni.id_tipo_unidade, uni.id_regiao, uni.id_responsavel, uni.id_tema, uni.ponto_referencia, uni.sucinto, uni.diretorensino, uni.coordenador, uni.cep, uni.registro, uni.fl_ativo FROM bas_rede r INNER JOIN bas_rede_unidade r_uni_jt ON r_uni_jt.id_rede = r.id INNER JOIN bas_unidade uni ON uni.id = r_uni_jt.id_unidade WHERE r.id_usuario = ?1 and uni.fl_ativo = true ORDER BY uni.sucinto";
 
     public Uni<java.util.List<Unidade>> buscarUnidadesDisponiveisRede(Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()

@@ -33,4 +33,7 @@ public class Criterio extends PanacheEntity {
     public Date dataFim;
     @Column(name = "tipo_matricula")
     public String tipoMatricula;  // era TipoMatricula (enum/embeddable) no legado
+
+    @Column(name = "horas_atividade_complementar")
+    public Integer horasAtividadeComplementar = 0;
 }

@@ -138,4 +138,15 @@ public class CidadeService {
         return repository.autoCompleteComEstadoComCep(query.toLowerCase(), estadoId, cep).map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
+
+    // Opcoes ricas (id + nome + estadoId) para os autocompletes da tela de logradouro.
+    public Uni<List<CidadeResponse>> autoCompleteOpcoes(String query, Long estadoId) {
+        if (estadoId != null) {
+            return repository.autoCompleteComEstado(query.toLowerCase(), estadoId)
+                    .map(list -> list.stream().map(this::toResponse).toList());
+        }
+        return repository.autoComplete(query.toLowerCase())
+                .map(list -> list.stream().map(this::toResponse).toList());
+    }
+
 }

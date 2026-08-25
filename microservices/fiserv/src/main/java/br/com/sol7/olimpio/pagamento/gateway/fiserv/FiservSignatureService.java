@@ -25,12 +25,16 @@ public class FiservSignatureService {
     FiservProperties properties;
 
     public FiservAuthHeaders headersFor(String jsonBody) {
+        return headersFor(jsonBody, properties.apiKey(), properties.apiSecret());
+    }
+
+    public FiservAuthHeaders headersFor(String jsonBody, String apiKey, String apiSecret) {
         String clientRequestId = UUID.randomUUID().toString();
         long timestamp = System.currentTimeMillis();
         String body = jsonBody == null ? "" : jsonBody;
-        String rawSignature = properties.apiKey() + clientRequestId + timestamp + body;
-        String signature = sign(rawSignature, properties.apiSecret());
-        return new FiservAuthHeaders(properties.apiKey(), clientRequestId, String.valueOf(timestamp), signature);
+        String rawSignature = apiKey + clientRequestId + timestamp + body;
+        String signature = sign(rawSignature, apiSecret);
+        return new FiservAuthHeaders(apiKey, clientRequestId, String.valueOf(timestamp), signature);
     }
 
     private String sign(String message, String secret) {

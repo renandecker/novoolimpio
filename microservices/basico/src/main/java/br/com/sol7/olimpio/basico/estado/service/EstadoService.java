@@ -80,4 +80,10 @@ public class EstadoService {
         return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
     }
 
+
+    // Opcoes ricas (id + nome + uf) para os autocompletes da tela de logradouro.
+    public Uni<List<EstadoResponse>> autoCompleteOpcoes(String query) {
+        return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(this::toResponse).toList());
+    }
+
 }

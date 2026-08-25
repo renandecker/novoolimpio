@@ -60,4 +60,11 @@ public class EstadoController {
         return service.autoComplete(query);
     }
 
+
+    @GET
+    @Path("/opcoes")
+    public Uni<List<EstadoResponse>> opcoes(@QueryParam("query") String query) {
+        return service.autoCompleteOpcoes(query == null ? "" : query);
+    }
+
 }

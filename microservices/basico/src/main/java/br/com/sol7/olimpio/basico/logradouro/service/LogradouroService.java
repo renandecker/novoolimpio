@@ -6,6 +6,7 @@ import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
@@ -289,6 +290,63 @@ public class LogradouroService {
             return Uni.createFrom().item(java.util.List.of());
         }
         return repository.autoComplete(query.toLowerCase().trim()).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+
+    // Opcoes ricas (id + descricao) para o autocomplete do dialogo "Troca e remocao logradouro",
+    // excluindo o proprio logradouro de destino.
+    public Uni<List<LogradouroResponse>> autoCompleteLogradouroTrocaOpcoes(String query, Long excluirId) {
+        if (query == null || query.isBlank()) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        return repository.autoComplete(query.toLowerCase().trim())
+                .map(list -> list.stream()
+                        .filter(item -> excluirId == null || !excluirId.equals(item.id))
+                        .map(this::toResponse)
+                        .toList());
+    }
+
+
+    // Migrado de LogradouroController.trocarLogradouros (src/main/java/br/com/sol7/olimpio/control/controllers/basico/LogradouroController.java)
+    // Logica original:
+    // for (Logradouro lll : listaLogradouro) {
+    //     hibernateService.executeUpdateSQL("UPDATE bas_pessoa set id_logradouro = " + getEntity().getId() + " where id_logradouro=" + lll.getId());
+    //     hibernateService.executeUpdateSQL("UPDATE bas_unidade set id_logradouro = " + getEntity().getId() + " where id_logradouro=" + lll.getId());
+    // }
+    // logradouroService.deleteAll(listaLogradouro);
+    public Uni<Void> trocarLogradouros(Long destinoId, List<Long> origemIds) {
+        if (destinoId == null || origemIds == null || origemIds.isEmpty()) {
+            return Uni.createFrom().failure(new BadRequestException(
+                    "Informe o logradouro de destino e ao menos um logradouro para trocar"));
+        }
+        List<Long> origens = origemIds.stream()
+                .filter(id -> id != null && !destinoId.equals(id))
+                .distinct()
+                .toList();
+        if (origens.isEmpty()) {
+            return Uni.createFrom().failure(new BadRequestException("Nenhum logradouro valido para trocar"));
+        }
+        Uni<Void> cadeia = Uni.createFrom().voidItem();
+        for (Long origemId : origens) {
+            final long origem = origemId;
+            cadeia = cadeia.onItem().transformToUni(ignored ->
+                    io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                            .chain(session -> session.createNativeQuery(LogradouroRepository.SQL_TROCAR_PESSOA)
+                                    .setParameter("destino", destinoId)
+                                    .setParameter("origem", origem)
+                                    .executeUpdate())
+                            .chain(r -> io.quarkus.hibernate.reactive.panache.Panache.getSession())
+                            .chain(session -> session.createNativeQuery(LogradouroRepository.SQL_TROCAR_UNIDADE)
+                                    .setParameter("destino", destinoId)
+                                    .setParameter("origem", origem)
+                                    .executeUpdate())
+                            .chain(r -> io.quarkus.hibernate.reactive.panache.Panache.getSession())
+                            .chain(session -> session.createNativeQuery(LogradouroRepository.SQL_REMOVER_LOGRADOURO)
+                                    .setParameter("origem", origem)
+                                    .executeUpdate())
+                            .replaceWithVoid());
+        }
+        return cadeia;
     }
 
 
