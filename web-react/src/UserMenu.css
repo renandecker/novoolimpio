@@ -192,7 +192,8 @@
 
 .action-favorites:hover .action-icon,
 .action-password:hover .action-icon,
-.action-data:hover .action-icon {
+.action-data:hover .action-icon,
+.action-photo:hover .action-icon {
     color: #337ab7;
 }
 

@@ -4,12 +4,35 @@
     box-sizing: border-box;
 }
 
+:root {
+    --cor-primaria: #2f333b;
+    --cor-secundaria: #3baae3;
+    --cor-barra: #24272e;
+    --cor-fundo: #f1f1f1;
+    --cor-texto: #ffffff;
+    --cor-texto-selecionado: #ffffff;
+    --cor-texto-nao-selecionado: #cccccc;
+    --cor-borda: #c2aa3c;
+    --cor-destaque: #3baae3;
+    --cor-email: #052B4E;
+    --espessura-borda: 3px;
+    --cor-borda-primaria: #c2aa3c;
+    --cor-borda-secundaria: #3baae3;
+    --imagem-fundo: none;
+    --banner-cabecalho: none;
+    --banner-rodape: none;
+}
+
 .app-layout {
     min-height: 100vh;
     display: flex;
     font-family: 'Segoe UI', Arial, sans-serif;
     background-color: var(--cor-fundo, #f1f1f1);
     color: var(--cor-texto, #222222);
+    background-image: var(--imagem-fundo, none);
+    background-repeat: repeat;
+    background-size: cover;
+    background-position: center;
 }
 
 .app-main {
@@ -26,13 +49,15 @@
     height: 65px;
     width: 100%;
     background-repeat: repeat-x;
-    background-image: linear-gradient(180deg, var(--cor-barra, #24272e) 0%, var(--cor-primaria, #2f333b) 100%);
+    background-image: var(--banner-cabecalho, none), linear-gradient(180deg, var(--cor-barra, #24272e) 0%, var(--cor-primaria, #2f333b) 100%);
     box-shadow: 4px 4px 15px rgba(50, 50, 50, 0.8);
-    border-bottom: 3px solid var(--cor-borda, #c2aa3c);
+    border-bottom: var(--espessura-borda, 3px) solid var(--cor-borda-primaria, #c2aa3c);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 16px;
+    background-size: cover, auto;
+    background-position: center, center;
 }
 
 .app-header-left {
@@ -359,9 +384,11 @@
     width: 100%;
     height: 35px;
     background-repeat: repeat-x;
-    background-image: linear-gradient(180deg, #1d2025 0%, #121417 100%);
+    background-image: var(--banner-rodape, none), linear-gradient(180deg, #1d2025 0%, #121417 100%);
     box-shadow: 0 -4px 15px rgba(50, 50, 50, 0.8);
-    border-top: 3px solid #c2aa3c;
+    border-top: var(--espessura-borda, 3px) solid var(--cor-borda-primaria, #c2aa3c);
+    background-size: cover;
+    background-position: center;
 }
 
 .data-table {
@@ -601,6 +628,95 @@
 
 .data-table-paginator span {
     margin: 0 8px;
+}
+
+/* ---- Caixa Fluxo - Totals and Actions (subtable) ---- */
+.caixa-totals-actions {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.caixa-totals {
+    margin-bottom: 16px;
+    overflow-x: auto;
+}
+
+.totals-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.totals-table th,
+.totals-table td {
+    border: 1px solid #e0e0e0;
+    padding: 6px 8px;
+    text-align: center;
+}
+
+.totals-table th {
+    background-color: #f5f5f5;
+    color: #333;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.totals-table td {
+    background-color: #fafafa;
+}
+
+.caixa-actions-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.caixa-actions-bar button {
+    min-width: 160px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.caixa-actions-bar button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Page header styles for title + export alignment */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background-color: #ffffff;
+    border: 1px solid #d3d3d3;
+    border-radius: 4px;
+    box-shadow: 1px 2px 6px rgba(50, 50, 50, 0.15);
+    padding: 10px 16px;
+    margin-bottom: 16px;
+}
+
+.page-header-breadcrumb {
+    flex: 1;
+    min-width: 0;
+}
+
+.breadcrumb-current {
+    font-weight: bold;
+    color: #333;
+    text-decoration: underline;
+    font-size: 18px;
+}
+
+.page-header-actions {
+    flex-shrink: 0;
 }
 
 /* TabView estilo PrimeFaces tema azul (ui-tabs / ui-tabs-nav / ui-state-*) */
@@ -1165,7 +1281,7 @@
     color: #333;
     font-size: 12px;
     font-weight: bold;
-    text-align: right;
+    text-align: left;
 }
 
 /* Inputs estilo PrimeFaces (inputText/inputSelect do tema azul) */

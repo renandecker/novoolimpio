@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {
     ActivityIndicator,
+    Alert,
     Image,
     FlatList,
     ScrollView,
@@ -8,6 +9,7 @@ import {
     Text,
     View,
     TouchableWithoutFeedback,
+    TouchableOpacity,
     useNavigation
 } from 'react-native';
 import {useAuth} from '../auth';
@@ -16,6 +18,7 @@ import {listarFavoritos} from '../favoritos';
 import {moduleIcon} from '../moduleIcons';
 import {api} from '../api';
 import {useRoute} from '@react-navigation/native';
+import {PhotoUploadModal} from '../PhotoUploadModal';
 
 type MeusDados = {
     username: string;
@@ -42,12 +45,23 @@ type MeusDados = {
 };
 
 export default function MeusDadosScreen({navigation}: { navigation: any }) {
-    const {session} = useAuth();
+    const {session, refreshSession} = useAuth();
     const {navigate} = useNavigation();
     const {params} = useRoute();
     const [dados, setDados] = useState<MeusDados>({});
     const [favoritos, setFavoritos] = useState([]);
     const [busy, setBusy] = useState(true);
+    const [photoModalVisible, setPhotoModalVisible] = useState(false);
+
+    const handlePhotoUpdate = (fotoUrl: string) => {
+        setDados(prev => ({...prev, foto: fotoUrl}));
+        if (session) {
+            refreshSession({
+                ...session,
+                foto: fotoUrl,
+            });
+        }
+    };
 
     const favoritosQuery = useQuery({
         queryKey: ['favoritos', 'usuarioLogado'],
@@ -179,6 +193,9 @@ export default function MeusDadosScreen({navigation}: { navigation: any }) {
                             <Text style={styles.avatarText}>{inicial}</Text>
                         </View>
                     )}
+                    <TouchableOpacity style={styles.editPhotoBtn} onPress={() => setPhotoModalVisible(true)}>
+                        <Text style={styles.editPhotoBtnText}>✎</Text>
+                    </TouchableOpacity>
                 </View>
 
                 <Text style={styles.nome}>{nomeExibido}</Text>
@@ -194,6 +211,13 @@ export default function MeusDadosScreen({navigation}: { navigation: any }) {
                 </View>
             </View>
         </ScrollView>
+        <PhotoUploadModal
+            visible={photoModalVisible}
+            onClose={() => setPhotoModalVisible(false)}
+            onPhotoUpdate={handlePhotoUpdate}
+            currentFoto={dados.foto}
+            username={session?.username}
+        />
     );
 }
 
@@ -210,7 +234,7 @@ const styles = StyleSheet.create({
         padding: 20,
         alignItems: 'center'
     },
-    photoWrap: {marginBottom: 12},
+    photoWrap: {marginBottom: 12, position: 'relative'},
     photo: {width: 88, height: 88, borderRadius: 44},
     avatar: {
         width: 88,
@@ -221,6 +245,24 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     avatarText: {color: '#ffffff', fontSize: 32, fontWeight: '700'},
+    editPhotoBtn: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        backgroundColor: '#2a5a88',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: '#fff',
+    },
+    editPhotoBtnText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
     nome: {fontSize: 18, fontWeight: '700', color: '#2b2b2b'},
     social: {fontSize: 13, color: '#888', marginTop: 2},
     grid: {width: '100%', marginTop: 16},

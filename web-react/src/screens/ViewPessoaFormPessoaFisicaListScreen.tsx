@@ -1,90 +1,45 @@
 import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {PermissionGate} from '../permissions';
-import {Tabs} from '../Tabs';
-import type {TabItem} from '../Tabs';
-import {BooleanField} from '../BooleanField';
-import {MasterDetail} from '../MasterDetail';
+import {FormLayout, FormTabConfig} from '../FormLayout';
 import type {ApiItem} from '../types';
 import {api} from '../api';
 import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../masterDetailSources';
-import {buscarCep, formatCep} from '../EnderecoForm';
+import {EnderecoCampos} from '../EnderecoForm';
+import type {Endereco} from '../EnderecoForm';
 import {useQuery} from '@tanstack/react-query';
 
-interface FormState {
-    cpf: string;
-    rg: string;
-    nome: string;
-    email: string;
-    nomeSocial: string;
-    dataNascimento: string;
-    cidadeOrigem: string;
-    generoId: string;
-    etniaId: string;
-    estadoCivilId: string;
-    escolaridadeId: string;
-    nomeReferencia: string;
-    telefoneReferencia: string;
-    celularReferencia: string;
-    nomeReferencia2: string;
-    telefoneReferencia2: string;
-    celularReferencia2: string;
-    nomePai: string;
-    nomeMae: string;
-    telefoneResidencial: string;
-    telefoneComercial: string;
-    celular: string;
-    facebook: string;
-    twitter: string;
-    googlePlus: string;
-    telegram: string;
-    observacao: string;
-    cep: string;
-    cidade: string;
-    bairro: string;
-    logradouro: string;
-    numero: string;
-    complemento: string;
-}
+const GENEROS = [
+    {value: '1', label: 'Masculino'},
+    {value: '2', label: 'Feminino'},
+    {value: '3', label: 'Outro'},
+];
 
-const FORM_VAZIO: FormState = {
-    cpf: '',
-    rg: '',
-    nome: '',
-    email: '',
-    nomeSocial: '',
-    dataNascimento: '',
-    cidadeOrigem: '',
-    generoId: '',
-    etniaId: '',
-    estadoCivilId: '',
-    escolaridadeId: '',
-    nomeReferencia: '',
-    telefoneReferencia: '',
-    celularReferencia: '',
-    nomeReferencia2: '',
-    telefoneReferencia2: '',
-    celularReferencia2: '',
-    nomePai: '',
-    nomeMae: '',
-    telefoneResidencial: '',
-    telefoneComercial: '',
-    celular: '',
-    facebook: '',
-    twitter: '',
-    googlePlus: '',
-    telegram: '',
-    observacao: '',
-    cep: '',
-    cidade: '',
-    bairro: '',
-    logradouro: '',
-    numero: '',
-    complemento: '',
-};
+const ETNIAS = [
+    {value: '1', label: 'Branca'},
+    {value: '2', label: 'Preta'},
+    {value: '3', label: 'Parda'},
+    {value: '4', label: 'Amarela'},
+    {value: '5', label: 'Indígena'},
+];
 
-const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
-const num = (v: string): number | null => (v !== '' && !isNaN(Number(v)) ? Number(v) : null);
+const ESTADOS_CIVIS = [
+    {value: '1', label: 'Solteiro(a)'},
+    {value: '2', label: 'Casado(a)'},
+    {value: '3', label: 'Divorciado(a)'},
+    {value: '4', label: 'Viúvo(a)'},
+    {value: '5', label: 'União Estável'},
+];
+
+const ESCOLARIDADES = [
+    {value: '1', label: 'Ensino Fundamental Incompleto'},
+    {value: '2', label: 'Ensino Fundamental Completo'},
+    {value: '3', label: 'Ensino Médio Incompleto'},
+    {value: '4', label: 'Ensino Médio Completo'},
+    {value: '5', label: 'Superior Incompleto'},
+    {value: '6', label: 'Superior Completo'},
+    {value: '7', label: 'Pós-Graduação'},
+];
 
 const toDateInput = (v: unknown): string => {
     if (!v) return '';
@@ -102,21 +57,81 @@ const semId = (obj: Record<string, unknown> | null): Record<string, unknown> => 
     return copia;
 };
 
+const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
+const num = (v: string): number | null => (v !== '' && !isNaN(Number(v)) ? Number(v) : null);
+
+    const tabs: FormTabConfig[] = [
+    {
+        key: 'identificacao',
+        label: 'Identificação',
+        fields: [
+            {name: 'cpf', label: 'CPF', type: 'mask', mask: '999.999.999-99', required: true},
+            {name: 'rg', label: 'RG', required: true},
+            {name: 'nome', label: 'Nome', required: true, span: 3},
+            {name: 'email', label: 'E-mail', type: 'email', required: true, span: 3},
+        ],
+    },
+    {
+        key: 'informacoesBasicas',
+        label: 'Informações Básicas',
+        fields: [
+            {name: 'nomeSocial', label: 'Nome Social', span: 3},
+            {name: 'dataNascimento', label: 'Data Nascimento', type: 'date', required: true},
+            {name: 'cidadeOrigem', label: 'Cidade Origem', required: true, span: 3},
+            {name: 'generoId', label: 'Gênero', type: 'select', options: GENEROS},
+            {name: 'etniaId', label: 'Etnia', type: 'select', options: ETNIAS},
+            {name: 'estadoCivilId', label: 'Estado Civil', type: 'select', options: ESTADOS_CIVIS, required: true},
+            {name: 'escolaridadeId', label: 'Escolaridade', type: 'select', options: ESCOLARIDADES, required: true},
+        ],
+    },
+    {
+        key: 'referencias',
+        label: 'Referências',
+        fields: [
+            {name: 'nomeReferencia', label: 'Nome Referência', required: true, span: 3},
+            {name: 'telefoneReferencia', label: 'Telefone Referência', type: 'mask', mask: '(99) 9999-9999', required: true},
+            {name: 'celularReferencia', label: 'Celular Referência', type: 'mask', mask: '(99) 99999-9999', required: true},
+            {name: 'nomeReferencia2', label: 'Nome Referência 2', span: 3},
+            {name: 'telefoneReferencia2', label: 'Telefone Referência 2', type: 'mask', mask: '(99) 9999-9999'},
+            {name: 'celularReferencia2', label: 'Celular Referência 2', type: 'mask', mask: '(99) 99999-9999'},
+            {name: 'nomePai', label: 'Nome do Pai', span: 3},
+            {name: 'nomeMae', label: 'Nome da Mãe', required: true, span: 3},
+        ],
+    },
+    {
+        key: 'contato',
+        label: 'Contato',
+        fields: [
+            {name: 'telefoneResidencial', label: 'Telefone Residencial', type: 'mask', mask: '(99) 9999-9999'},
+            {name: 'telefoneComercial', label: 'Telefone Comercial', type: 'mask', mask: '(99) 9999-9999'},
+            {name: 'celular', label: 'Celular', type: 'mask', mask: '(99) 99999-9999'},
+            {name: 'facebook', label: 'Facebook', span: 3},
+            {name: 'twitter', label: 'Twitter', span: 3},
+            {name: 'googlePlus', label: 'Google+', span: 3},
+            {name: 'telegram', label: 'Telegram', span: 3},
+            {name: 'observacao', label: 'Observação', type: 'textarea', span: 4},
+        ],
+    },
+    {
+        key: 'endereco',
+        label: 'Endereço',
+        content: <EnderecoCampos value={enderecos} onChange={setEnderecos}/>,
+    },
+    ];
+
 export default function ViewPessoaFormPessoaFisicaListScreen() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const idParam = searchParams.get('id');
 
-    const [form, setForm] = useState<FormState>(FORM_VAZIO);
     const [pfId, setPfId] = useState<number | undefined>();
     const [pessoaId, setPessoaId] = useState<number | undefined>();
     const [pfOriginal, setPfOriginal] = useState<Record<string, unknown> | null>(null);
     const [pessoaOriginal, setPessoaOriginal] = useState<Record<string, unknown> | null>(null);
     const [unidades, setUnidades] = useState<ApiItem[]>([]);
-    const [curriculo, setCurriculo] = useState(false);
-    const [buscandoCep, setBuscandoCep] = useState(false);
-    const [avisoCep, setAvisoCep] = useState('');
+    const [enderecos, setEnderecos] = useState<Endereco[]>([]);
     const [salvando, setSalvando] = useState(false);
+    const [error, setError] = useState<string | undefined>();
 
     const {data: allUnidades = []} = useQuery({
         queryKey: [UNIDADE_SOURCE],
@@ -139,30 +154,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                 setPessoaId(pes?.id as number | undefined);
                 setPessoaOriginal(pes);
 
-                let logradouroDesc = '';
-                let bairroDesc = '';
-                let cidadeDesc = '';
-                const idLogradouro = (pes?.id_logradouro ?? pes?.logradouroId) as number | null | undefined;
-                if (idLogradouro) {
-                    try {
-                        const logRes = (await api.get<Record<string, unknown>>(`/api/basico/logradouro/${idLogradouro}`)).data;
-                        logradouroDesc = str(logRes.descricao);
-                        const idBairro = logRes.id_bairro as number | null | undefined;
-                        if (idBairro) {
-                            const bairroRes = (await api.get<Record<string, unknown>>(`/api/basico/bairro/${idBairro}`)).data;
-                            bairroDesc = str(bairroRes.descricao);
-                            const idCidade = bairroRes.cidadeId as number | null | undefined;
-                            if (idCidade) {
-                                const cidadeRes = (await api.get<Record<string, unknown>>(`/api/basico/cidade/${idCidade}`)).data;
-                                cidadeDesc = str(cidadeRes.nome);
-                            }
-                        }
-                    } catch {
-                        // ignore
-                    }
-                }
-
-                setForm({
+                setInitialValues({
                     cpf: str(pf.cpf),
                     rg: str(pf.rg),
                     nome: str(pf.nome),
@@ -190,13 +182,47 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                     googlePlus: str(pf.googlePlus),
                     telegram: str(pf.telegram),
                     observacao: str(pes?.observacao),
-                    cep: str(pes?.cep),
-                    cidade: cidadeDesc,
-                    bairro: bairroDesc,
-                    logradouro: logradouroDesc,
-                    numero: str(pes?.numero),
-                    complemento: str(pes?.complemento),
                 });
+
+                if (pes) {
+                    const enderecosCarregados: Endereco[] = [];
+                    const cep = str(pes.cep);
+                    const complemento = str(pes.complemento);
+                    const numero = str(pes.numero);
+                    const idLogradouro = (pes.id_logradouro ?? pes.logradouroId) as number | null | undefined;
+
+                    if (idLogradouro) {
+                        try {
+                            const logRes = (await api.get<Record<string, unknown>>(`/api/basico/logradouro/${idLogradouro}`)).data;
+                            let bairroDesc = '';
+                            let cidadeDesc = '';
+                            if (logRes.id_bairro) {
+                                const bairroRes = (await api.get<Record<string, unknown>>(`/api/basico/bairro/${logRes.id_bairro}`)).data;
+                                bairroDesc = str(bairroRes.descricao);
+                                if (bairroRes.cidadeId) {
+                                    const cidadeRes = (await api.get<Record<string, unknown>>(`/api/basico/cidade/${bairroRes.cidadeId}`)).data;
+                                    cidadeDesc = str(cidadeRes.nome);
+                                }
+                            }
+                            enderecosCarregados.push({
+                                id: idLogradouro,
+                                cep: str(logRes.cep) || cep,
+                                logradouro: str(logRes.descricao),
+                                bairro: bairroDesc,
+                                cidade: cidadeDesc,
+                                numero,
+                                complemento,
+                            });
+                        } catch {
+                            if (cep || numero || complemento) {
+                                enderecosCarregados.push({cep, cidade: '', bairro: '', logradouro: '', numero, complemento});
+                            }
+                        }
+                    } else if (cep || numero || complemento) {
+                        enderecosCarregados.push({cep, cidade: '', bairro: '', logradouro: '', numero, complemento});
+                    }
+                    setEnderecos(enderecosCarregados);
+                }
 
                 if (pes?.id) {
                     try {
@@ -207,7 +233,6 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                         }
                     } catch {
                         try {
-                            // Tenta endpoint alternativo por ID de entidade se houver
                             const unidadesIds = (await api.get<number[]>(`/api/basico/pessoa/buscar-unidades`, {params: {entityId: pes.id}})).data;
                             if (unidadesIds && unidadesIds.length > 0) {
                                 const unidadesSet = new Set(unidadesIds.map(String));
@@ -228,59 +253,44 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
         };
     }, [idParam, allUnidades]);
 
-    const set = (campo: keyof FormState, valor: string) => setForm((prev) => ({...prev, [campo]: valor}));
+    const [initialValues, setInitialValues] = useState<Record<string, unknown>>({});
 
     const voltar = () => navigate('/view/pessoa/listPessoaFisica');
 
-    const handleBuscarCep = async () => {
-        setAvisoCep('');
-        setBuscandoCep(true);
-        const dados = await buscarCep(form.cep);
-        setBuscandoCep(false);
-        if (dados) {
-            setForm((prev) => ({
-                ...prev,
-                cep: dados.cep ?? prev.cep,
-                cidade: dados.cidade ?? prev.cidade,
-                bairro: dados.bairro ?? prev.bairro,
-                logradouro: dados.logradouro ?? prev.logradouro,
-            }));
-        } else {
-            setAvisoCep('CEP não encontrado.');
-        }
-    };
-
     const salvar = async (voltarDepois: boolean) => {
-        if (!form.nome.trim() || !form.cpf.trim()) {
-            alert('Informe pelo menos Nome e CPF.');
+        const vals = initialValues;
+        if (!vals.nome || !vals.cpf) {
+            setError('Informe pelo menos Nome e CPF.');
             return;
         }
         setSalvando(true);
+        setError(undefined);
         try {
+            const enderecoPrincipal = enderecos[0];
             const pfBody: Record<string, unknown> = {
                 ...semId(pfOriginal),
-                nome: form.nome,
-                cpf: form.cpf,
-                rg: form.rg,
-                nomeSocial: form.nomeSocial || null,
-                dataNascimento: form.dataNascimento || null,
-                cidadeOrigem: form.cidadeOrigem || null,
-                generoId: num(form.generoId),
-                etniaId: num(form.etniaId),
-                estadoCivilId: num(form.estadoCivilId),
-                escolaridadeId: num(form.escolaridadeId),
-                nomeReferencia: form.nomeReferencia || null,
-                telefoneReferencia: form.telefoneReferencia || null,
-                celularReferencia: form.celularReferencia || null,
-                nomeReferencia2: form.nomeReferencia2 || null,
-                telefoneReferencia2: form.telefoneReferencia2 || null,
-                celularReferencia2: form.celularReferencia2 || null,
-                nomePai: form.nomePai || null,
-                nomeMae: form.nomeMae || null,
-                telefoneComercial: form.telefoneComercial || null,
-                facebook: form.facebook || null,
-                twitter: form.twitter || null,
-                googlePlus: form.googlePlus || null,
+                nome: vals.nome,
+                cpf: vals.cpf,
+                rg: vals.rg,
+                nomeSocial: vals.nomeSocial || null,
+                dataNascimento: vals.dataNascimento || null,
+                cidadeOrigem: vals.cidadeOrigem || null,
+                generoId: num(vals.generoId as string),
+                etniaId: num(vals.etniaId as string),
+                estadoCivilId: num(vals.estadoCivilId as string),
+                escolaridadeId: num(vals.escolaridadeId as string),
+                nomeReferencia: vals.nomeReferencia || null,
+                telefoneReferencia: vals.telefoneReferencia || null,
+                celularReferencia: vals.celularReferencia || null,
+                nomeReferencia2: vals.nomeReferencia2 || null,
+                telefoneReferencia2: vals.telefoneReferencia2 || null,
+                celularReferencia2: vals.celularReferencia2 || null,
+                nomePai: vals.nomePai || null,
+                nomeMae: vals.nomeMae || null,
+                telefoneComercial: vals.telefoneComercial || null,
+                facebook: vals.facebook || null,
+                twitter: vals.twitter || null,
+                googlePlus: vals.googlePlus || null,
             };
             delete pfBody.telegram;
             const respostaPf = pfId
@@ -290,13 +300,13 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
             const pessoaBody: Record<string, unknown> = {
                 ...semId(pessoaOriginal),
-                email: form.email || null,
-                telefone: form.telefoneResidencial || null,
-                celular: form.celular || null,
-                observacao: form.observacao || null,
-                cep: form.cep || null,
-                numero: form.numero || null,
-                complemento: form.complemento || null,
+                email: vals.email || null,
+                telefone: vals.telefoneResidencial || null,
+                celular: vals.celular || null,
+                observacao: vals.observacao || null,
+                cep: enderecoPrincipal?.cep || null,
+                numero: enderecoPrincipal?.numero || null,
+                complemento: enderecoPrincipal?.complemento || null,
             };
             let novoPesId = pessoaId;
             if (pessoaId) {
@@ -314,347 +324,29 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
             }
         } catch (erro) {
             console.error('Erro ao salvar:', erro);
-            alert('Erro ao salvar registro.');
+            setError('Erro ao salvar registro.');
         } finally {
             setSalvando(false);
         }
     };
 
-    const tabs: TabItem[] = [
-        {
-            key: 'identificacao',
-            label: 'Identificação',
-            content: (
-                <div className="form-grid">
-                    <label className="form-field">
-                        <span className="form-label">CPF *</span>
-                        <input className="form-input" placeholder="999.999.999-99" value={form.cpf}
-                               onChange={(e) => set('cpf', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">RG *</span>
-                        <input className="form-input" placeholder="RG" value={form.rg}
-                               onChange={(e) => set('rg', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Nome *</span>
-                        <input className="form-input" placeholder="Nome completo" style={{gridColumn: 'span 3'}}
-                               value={form.nome} onChange={(e) => set('nome', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">E-mail *</span>
-                        <input className="form-input" type="email" placeholder="E-mail"
-                               style={{gridColumn: 'span 3'}} value={form.email}
-                               onChange={(e) => set('email', e.target.value)}/>
-                    </label>
-                </div>
-            ),
-        },
-        {
-            key: 'informacoesBasicas',
-            label: 'Informações Básicas',
-            content: (
-                <div className="form-grid">
-                    <label className="form-field">
-                        <span className="form-label">Nome Social *</span>
-                        <input className="form-input" placeholder="Nome social" style={{gridColumn: 'span 3'}}
-                               value={form.nomeSocial} onChange={(e) => set('nomeSocial', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Data Nascimento *</span>
-                        <input className="form-input" type="date" value={form.dataNascimento}
-                               onChange={(e) => set('dataNascimento', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Cidade Origem *</span>
-                        <input className="form-input" placeholder="Cidade de origem" style={{gridColumn: 'span 3'}}
-                               value={form.cidadeOrigem} onChange={(e) => set('cidadeOrigem', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Gênero</span>
-                        <select className="form-input form-select" value={form.generoId}
-                                onChange={(e) => set('generoId', e.target.value)}>
-                            <option value="">-- Selecione --</option>
-                            <option value="1">Masculino</option>
-                            <option value="2">Feminino</option>
-                            <option value="3">Outro</option>
-                        </select>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Etnia</span>
-                        <select className="form-input form-select" value={form.etniaId}
-                                onChange={(e) => set('etniaId', e.target.value)}>
-                            <option value="">-- Selecione --</option>
-                            <option value="1">Branca</option>
-                            <option value="2">Preta</option>
-                            <option value="3">Parda</option>
-                            <option value="4">Amarela</option>
-                            <option value="5">Indígena</option>
-                        </select>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Estado Civil *</span>
-                        <select className="form-input form-select" value={form.estadoCivilId}
-                                onChange={(e) => set('estadoCivilId', e.target.value)}>
-                            <option value="">-- Selecione --</option>
-                            <option value="1">Solteiro(a)</option>
-                            <option value="2">Casado(a)</option>
-                            <option value="3">Divorciado(a)</option>
-                            <option value="4">Viúvo(a)</option>
-                            <option value="5">União Estável</option>
-                        </select>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Escolaridade *</span>
-                        <select className="form-input form-select" value={form.escolaridadeId}
-                                onChange={(e) => set('escolaridadeId', e.target.value)}>
-                            <option value="">-- Selecione --</option>
-                            <option value="1">Ensino Fundamental Incompleto</option>
-                            <option value="2">Ensino Fundamental Completo</option>
-                            <option value="3">Ensino Médio Incompleto</option>
-                            <option value="4">Ensino Médio Completo</option>
-                            <option value="5">Superior Incompleto</option>
-                            <option value="6">Superior Completo</option>
-                            <option value="7">Pós-Graduação</option>
-                        </select>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Nome Referência *</span>
-                        <input className="form-input" placeholder="Nome da referência"
-                               style={{gridColumn: 'span 3'}} value={form.nomeReferencia}
-                               onChange={(e) => set('nomeReferencia', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Telefone Referência *</span>
-                        <input className="form-input" placeholder="(99) 9999-9999"
-                               value={form.telefoneReferencia} onChange={(e) => set('telefoneReferencia', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Celular Referência *</span>
-                        <input className="form-input" placeholder="(99) 99999-9999"
-                               value={form.celularReferencia} onChange={(e) => set('celularReferencia', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Nome Referência 2</span>
-                        <input className="form-input" placeholder="Nome da referência 2"
-                               style={{gridColumn: 'span 3'}} value={form.nomeReferencia2}
-                               onChange={(e) => set('nomeReferencia2', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Telefone Referência 2</span>
-                        <input className="form-input" placeholder="(99) 9999-9999"
-                               value={form.telefoneReferencia2} onChange={(e) => set('telefoneReferencia2', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Celular Referência 2</span>
-                        <input className="form-input" placeholder="(99) 99999-9999"
-                               value={form.celularReferencia2} onChange={(e) => set('celularReferencia2', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Nome do Pai</span>
-                        <input className="form-input" placeholder="Nome do pai" style={{gridColumn: 'span 3'}}
-                               value={form.nomePai} onChange={(e) => set('nomePai', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Nome da Mãe *</span>
-                        <input className="form-input" placeholder="Nome da mãe" style={{gridColumn: 'span 3'}}
-                               value={form.nomeMae} onChange={(e) => set('nomeMae', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Foto</span>
-                        <div style={{gridColumn: 'span 3', display: 'flex', gap: '8px', alignItems: 'center'}}>
-                            <input type="file" accept="image/*" className="form-input" style={{flex: 1}}/>
-                            <button type="button" className="btnblue">Capturar Foto</button>
-                        </div>
-                    </label>
-                </div>
-            ),
-        },
-        {
-            key: 'contatos',
-            label: 'Contatos',
-            content: (
-                <div className="form-grid">
-                    <label className="form-field">
-                        <span className="form-label">Telefone Residencial *</span>
-                        <input className="form-input" placeholder="(99) 9999-9999"
-                               value={form.telefoneResidencial} onChange={(e) => set('telefoneResidencial', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Telefone Comercial</span>
-                        <input className="form-input" placeholder="(99) 9999-9999"
-                               value={form.telefoneComercial} onChange={(e) => set('telefoneComercial', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Celular *</span>
-                        <input className="form-input" placeholder="(99) 99999-9999" value={form.celular}
-                               onChange={(e) => set('celular', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Facebook</span>
-                        <input className="form-input" placeholder="facebook.com/usuario"
-                               style={{gridColumn: 'span 3'}} value={form.facebook}
-                               onChange={(e) => set('facebook', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Twitter</span>
-                        <input className="form-input" placeholder="@usuario" style={{gridColumn: 'span 3'}}
-                               value={form.twitter} onChange={(e) => set('twitter', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Google+</span>
-                        <input className="form-input" placeholder="plus.google.com/usuario"
-                               style={{gridColumn: 'span 3'}} value={form.googlePlus}
-                               onChange={(e) => set('googlePlus', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Telegram</span>
-                        <input className="form-input" placeholder="@usuario" style={{gridColumn: 'span 3'}}
-                               value={form.telegram} onChange={(e) => set('telegram', e.target.value)}/>
-                    </label>
-                </div>
-            ),
-        },
-        {
-            key: 'endereco',
-            label: 'Endereço',
-            content: (
-                <div className="form-grid">
-                    <label className="form-field">
-                        <span className="form-label">CEP</span>
-                        <div style={{display: 'flex', gap: '8px', width: '100%'}}>
-                            <input
-                                className="form-input"
-                                placeholder="99.999-999"
-                                style={{width: '120px'}}
-                                maxLength={9}
-                                value={form.cep}
-                                onChange={(e) => {
-                                    setAvisoCep('');
-                                    set('cep', formatCep(e.target.value));
-                                }}
-                            />
-                            <button
-                                type="button"
-                                className="btnyellow"
-                                disabled={buscandoCep || form.cep.replace(/\D/g, '').length !== 8}
-                                onClick={handleBuscarCep}
-                            >
-                                {buscandoCep ? 'Buscando...' : 'Busca'}
-                            </button>
-                        </div>
-                        {avisoCep && <small style={{color: '#c0392b'}}>{avisoCep}</small>}
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Cidade</span>
-                        <input
-                            className="form-input"
-                            placeholder="Cidade"
-                            style={{gridColumn: 'span 3'}}
-                            value={form.cidade}
-                            onChange={(e) => set('cidade', e.target.value)}
-                        />
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Bairro</span>
-                        <input
-                            className="form-input"
-                            placeholder="Bairro"
-                            style={{gridColumn: 'span 3'}}
-                            value={form.bairro}
-                            onChange={(e) => set('bairro', e.target.value)}
-                        />
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Logradouro</span>
-                        <input
-                            className="form-input"
-                            placeholder="Logradouro"
-                            style={{gridColumn: 'span 3'}}
-                            value={form.logradouro}
-                            onChange={(e) => set('logradouro', e.target.value)}
-                        />
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Número</span>
-                        <input
-                            className="form-input"
-                            placeholder="Número"
-                            value={form.numero}
-                            onChange={(e) => set('numero', e.target.value)}
-                        />
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Complemento</span>
-                        <textarea
-                            className="form-input"
-                            placeholder="Complemento"
-                            rows={3}
-                            style={{gridColumn: 'span 3', minHeight: '80px'}}
-                            value={form.complemento}
-                            onChange={(e) => set('complemento', e.target.value)}
-                        />
-                    </label>
-                </div>
-            ),
-        },
-        {
-            key: 'unidades',
-            label: 'Unidades',
-            content: (
-                <MasterDetail
-                    label="Unidade"
-                    source={UNIDADE_SOURCE}
-                    valueKey="id"
-                    searchKeys={UNIDADE_SEARCH}
-                    columns={UNIDADE_COLUMNS}
-                    items={unidades}
-                    onChange={setUnidades}
-                />
-            ),
-        },
-        {
-            key: 'outros',
-            label: 'Outros',
-            content: (
-                <div className="form-grid">
-                    <div className="form-field">
-                        <span className="form-label">Currículo / Banco de Talentos</span>
-                        <BooleanField value={curriculo} onChange={setCurriculo}/>
-                    </div>
-                    <label className="form-field">
-                        <span className="form-label">Observação</span>
-                        <textarea className="form-input" placeholder="Observações" rows={5}
-                                  style={{gridColumn: 'span 3', minHeight: '100px'}} value={form.observacao}
-                                  onChange={(e) => set('observacao', e.target.value)}/>
-                    </label>
-                </div>
-            ),
-        },
-    ];
-
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>Cadastro de Pessoa Física</h1>
-                <div className="div_form">
-                    <div className="form-title">{pfId ? `Pessoa Física #${pfId}` : 'Pessoa Física'}</div>
-                    <div className="table_form">
-                        <Tabs tabs={tabs} initial="identificacao"/>
-                        <div className="form-buttons">
-                            <button type="button" className="btnblue" title="Salvar registro"
-                                    disabled={salvando} onClick={() => void salvar(true)}>Gravar
-                            </button>
-                            <button type="button" className="btnstop" title="Salvar e continuar editando"
-                                    disabled={salvando} onClick={() => void salvar(false)}>
-                                Salvar e Continuar
-                            </button>
-                            <button type="button" className="btnyellow" title="Voltar para a lista"
-                                    onClick={voltar}>Voltar
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <FormLayout
+                    title="Pessoa Física"
+                    tabs={tabs}
+                    initialValues={initialValues}
+                    onSubmit={(vals) => {
+                        setInitialValues(vals);
+                        salvar(false);
+                    }}
+                    onCancel={voltar}
+                    submitLabel="Salvar"
+                    cancelLabel="Voltar"
+                    saving={salvando}
+                    error={error}
+                />
             </main>
         </PermissionGate>
     );

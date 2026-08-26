@@ -1,9 +1,10 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {PermissionGate} from '../permissions';
 import {MasterDetail} from '../MasterDetail';
 import {Tabs} from '../Tabs';
 import {Wizard, useWizardData} from '../Wizard';
 import {DataTable, type DataTableColumn} from '../DataTable';
+import {AutoComplete} from '../AutoComplete';
 import {
     PERFIL_SOURCE,
     PERFIL_COLUMNS,
@@ -13,15 +14,44 @@ import {
     UNIDADE_SEARCH,
     USUARIO_SOURCE,
     USUARIO_COLUMNS,
-    USUARIO_SEARCH
+    USUARIO_SEARCH,
+    TABELA_SOURCE,
+    TABELA_COLUMNS,
+    TABELA_SEARCH,
+    GRAFICO_SOURCE,
+    GRAFICO_COLUMNS,
+    GRAFICO_SEARCH,
+    MAPA_SOURCE,
+    MAPA_COLUMNS,
+    MAPA_SEARCH,
+    PAINEL_PAINEL_SOURCE,
+    PAINEL_PAINEL_COLUMNS,
+    PAINEL_PAINEL_SEARCH,
 } from '../masterDetailSources';
 import type {ApiItem} from '../types';
 import {useApi} from '../api';
+import {FormLayout, FormTabConfig} from '../FormLayout';
 
-const DASHBOARD_COLUMNS: DataTableColumn[] = [
+const TABELA_COLS: DataTableColumn[] = [
     {key: 'id', label: 'ID'},
     {key: 'nome', label: 'Nome'},
-    {key: 'descricao', label: 'Descrição'},
+];
+
+const GRAFICO_COLS: DataTableColumn[] = [
+    {key: 'id', label: 'ID'},
+    {key: 'nome', label: 'Nome'},
+    {key: 'tipo', label: 'Tipo'},
+];
+
+const MAPA_COLS: DataTableColumn[] = [
+    {key: 'id', label: 'ID'},
+    {key: 'nome', label: 'Nome'},
+];
+
+const PAINEL_COLUMNS: DataTableColumn[] = [
+    {key: 'relatorioNome', label: 'Relatório', width: '60%'},
+    {key: 'tipo', label: 'Tipo', width: '20%'},
+    {key: 'ordem', label: 'Ordem', width: '50px'},
 ];
 
 interface DashboardFormData {
@@ -30,6 +60,10 @@ interface DashboardFormData {
         nome?: string;
         descricao?: string;
     };
+    tabelas: any[];
+    graficos: any[];
+    mapas: any[];
+    painelPainels: any[];
     usuarios: ApiItem[];
     unidades: ApiItem[];
     perfis: ApiItem[];
@@ -40,8 +74,19 @@ export default function ViewRelatoriosFormDashboardListScreen() {
     const [usuarios, setUsuarios] = useState<ApiItem[]>([]);
     const [unidades, setUnidades] = useState<ApiItem[]>([]);
     const [perfis, setPerfis] = useState<ApiItem[]>([]);
+    const [tabelas, setTabelas] = useState<any[]>([]);
+    const [graficos, setGraficos] = useState<any[]>([]);
+    const [mapas, setMapas] = useState<any[]>([]);
+    const [painelPainels, setPainelPainels] = useState<any[]>([]);
+    const [filtros, setFiltros] = useState<any[]>([]);
+    const [filtroSelecionados, setFiltroSelecionados] = useState<any[]>([]);
+
     const {data, updateFields} = useWizardData<DashboardFormData>({
         entity: {},
+        tabelas: [],
+        graficos: [],
+        mapas: [],
+        painelPainels: [],
         usuarios: [],
         unidades: [],
         perfis: [],
@@ -49,6 +94,77 @@ export default function ViewRelatoriosFormDashboardListScreen() {
     });
 
     const {post: saveDashboard} = useApi('/api/relatorios/dashboard');
+    const {get: loadTabelas} = useApi('/api/relatorios/tabela');
+    const {get: loadGraficos} = useApi('/api/relatorios/grafico');
+    const {get: loadMapas} = useApi('/api/relatorios/mapa');
+    const {get: loadFiltros} = useApi('/api/relatorios/filtro');
+    const {post: saveFiltro} = useApi('/api/relatorios/filtro');
+    const {delete: deleteFiltro} = useApi('/api/relatorios/filtro');
+    const {post: savePainel} = useApi('/api/relatorios/painel-painel');
+    const {delete: deletePainel} = useApi('/api/relatorios/painel-painel');
+
+    const [entity, setEntity] = useState({nome: '', descricao: ''});
+
+    const addTabela = (item: ApiItem) => {
+        if (!tabelas.find(t => t.id === item.id)) {
+            setTabelas([...tabelas, item]);
+            updateFields({tabelas: [...tabelas, item]});
+        }
+    };
+
+    const removeTabela = (item: any) => {
+        setTabelas(tabelas.filter(t => t.id !== item.id));
+        updateFields({tabelas: tabelas.filter(t => t.id !== item.id)});
+    };
+
+    const addGrafico = (item: ApiItem) => {
+        if (!graficos.find(g => g.id === item.id)) {
+            setGraficos([...graficos, item]);
+            updateFields({graficos: [...graficos, item]});
+        }
+    };
+
+    const removeGrafico = (item: any) => {
+        setGraficos(graficos.filter(g => g.id !== item.id));
+        updateFields({graficos: graficos.filter(g => g.id !== item.id)});
+    };
+
+    const addMapa = (item: ApiItem) => {
+        if (!mapas.find(m => m.id === item.id)) {
+            setMapas([...mapas, item]);
+            updateFields({mapas: [...mapas, item]});
+        }
+    };
+
+    const removeMapa = (item: any) => {
+        setMapas(mapas.filter(m => m.id !== item.id));
+        updateFields({mapas: mapas.filter(m => m.id !== item.id)});
+    };
+
+    const addPainel = async (painel: {tabelaId?: number; graficoId?: number; mapaId?: number; ordem: number}) => {
+        try {
+            const resp = await savePainel({
+                painelId: data.entity.id,
+                ...painel,
+            });
+            setPainelPainels([...painelPainels, resp.data]);
+            updateFields({painelPainels: [...painelPainels, resp.data]});
+        } catch (error) {
+            console.error('Erro ao adicionar painel:', error);
+            alert('Erro ao adicionar painel');
+        }
+    };
+
+    const removePainel = async (painel: any) => {
+        try {
+            await deletePainel(painel.id);
+            setPainelPainels(painelPainels.filter(p => p.id !== painel.id));
+            updateFields({painelPainels: painelPainels.filter(p => p.id !== painel.id)});
+        } catch (error) {
+            console.error('Erro ao remover painel:', error);
+            alert('Erro ao remover painel');
+        }
+    };
 
     const handleComplete = async (formData: DashboardFormData) => {
         try {
@@ -57,6 +173,10 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                 usuarios: formData.usuarios,
                 unidades: formData.unidades,
                 perfis: formData.perfis,
+                tabelas: formData.tabelas,
+                graficos: formData.graficos,
+                mapas: formData.mapas,
+                painelPainels: formData.painelPainels,
                 filtros: formData.filtros,
             });
             alert('Dashboard salvo com sucesso!');
@@ -69,7 +189,6 @@ export default function ViewRelatoriosFormDashboardListScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>Form Dashboard</h1>
                 <div className="div_form">
                     <div className="form-title">Cadastro / Edição de Relatório de Dashboard</div>
                     <div className="table_form">
@@ -82,7 +201,132 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                     label: 'Definição',
                                     content: (
                                         <div>
-                                            <DataTable path="/api/relatorios/dashboard" columns={DASHBOARD_COLUMNS}/>
+                                            <FormLayout
+                                                title="Configuração"
+                                                tabs={[
+                                                    {
+                                                        key: 'principal',
+                                                        label: 'Principal',
+                                                        fields: [
+                                                            {name: 'nome', label: 'Nome', required: true, span: 4},
+                                                            {name: 'descricao', label: 'Descrição', type: 'textarea', span: 4},
+                                                        ],
+                                                    },
+                                                ]}
+                                                initialValues={data.entity}
+                                                onSubmit={(vals) => setEntity({...data.entity, ...vals})}
+                                                onCancel={() => {}}
+                                                submitLabel=""
+                                                cancelLabel=""
+                                            />
+                                            <div style={{marginTop: '20px'}}>
+                                                <Tabs tabs={[
+                                                    {
+                                                        key: 'tabela',
+                                                        label: 'Tabela',
+                                                        content: (
+                                                            <div>
+                                                                <AutoComplete
+                                                                    label="Adicionar Tabela"
+                                                                    source={TABELA_SOURCE}
+                                                                    searchKeys={TABELA_SEARCH}
+                                                                    columns={TABELA_COLUMNS}
+                                                                    onSelect={addTabela}
+                                                                />
+                                                                <DataTable
+                                                                    data={tabelas}
+                                                                    columns={TABELA_COLS}
+                                                                    actions={[
+                                                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnblue', onClick: removeTabela},
+                                                                    ]}
+                                                                />
+                                                            </div>
+                                                        ),
+                                                    },
+                                                    {
+                                                        key: 'grafico',
+                                                        label: 'Gráfico',
+                                                        content: (
+                                                            <div>
+                                                                <AutoComplete
+                                                                    label="Adicionar Gráfico"
+                                                                    source={GRAFICO_SOURCE}
+                                                                    searchKeys={GRAFICO_SEARCH}
+                                                                    columns={GRAFICO_COLUMNS}
+                                                                    onSelect={addGrafico}
+                                                                />
+                                                                <DataTable
+                                                                    data={graficos}
+                                                                    columns={GRAFICO_COLS}
+                                                                    actions={[
+                                                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnblue', onClick: removeGrafico},
+                                                                    ]}
+                                                                />
+                                                            </div>
+                                                        ),
+                                                    },
+                                                    {
+                                                        key: 'mapa',
+                                                        label: 'Mapa',
+                                                        content: (
+                                                            <div>
+                                                                <AutoComplete
+                                                                    label="Adicionar Mapa"
+                                                                    source={MAPA_SOURCE}
+                                                                    searchKeys={MAPA_SEARCH}
+                                                                    columns={MAPA_COLUMNS}
+                                                                    onSelect={addMapa}
+                                                                />
+                                                                <DataTable
+                                                                    data={mapas}
+                                                                    columns={MAPA_COLS}
+                                                                    actions={[
+                                                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnblue', onClick: removeMapa},
+                                                                    ]}
+                                                                />
+                                                            </div>
+                                                        ),
+                                                    },
+                                                ]} />
+                                            </div>
+                                            <div style={{marginTop: '20px'}}>
+                                                <h4>Painéis do Dashboard</h4>
+                                                <div style={{display: 'flex', gap: '10px', marginBottom: '10px', flexWrap: 'wrap'}}>
+                                                    <AutoComplete
+                                                        label="Tabela"
+                                                        source={TABELA_SOURCE}
+                                                        searchKeys={TABELA_SEARCH}
+                                                        columns={TABELA_COLUMNS}
+                                                        style={{flex: 1, minWidth: '200px'}}
+                                                        onSelect={(item) => addPainel({tabelaId: item.id, ordem: painelPainels.length + 1})}
+                                                    />
+                                                    <AutoComplete
+                                                        label="Gráfico"
+                                                        source={GRAFICO_SOURCE}
+                                                        searchKeys={GRAFICO_SEARCH}
+                                                        columns={GRAFICO_COLUMNS}
+                                                        style={{flex: 1, minWidth: '200px'}}
+                                                        onSelect={(item) => addPainel({graficoId: item.id, ordem: painelPainels.length + 1})}
+                                                    />
+                                                    <AutoComplete
+                                                        label="Mapa"
+                                                        source={MAPA_SOURCE}
+                                                        searchKeys={MAPA_SEARCH}
+                                                        columns={MAPA_COLUMNS}
+                                                        style={{flex: 1, minWidth: '200px'}}
+                                                        onSelect={(item) => addPainel({mapaId: item.id, ordem: painelPainels.length + 1})}
+                                                    />
+                                                </div>
+                                                <DataTable
+                                                    data={painelPainels}
+                                                    columns={PAINEL_COLUMNS}
+                                                    actions={[
+                                                        {key: 'up', label: 'Subir', icon: 'arrow-up', className: 'btnblack', onClick: () => {}},
+                                                        {key: 'down', label: 'Descer', icon: 'arrow-down', className: 'btnbrown', onClick: () => {}},
+                                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnred', onClick: removePainel},
+                                                    ]}
+                                                />
+                                            </div>
                                         </div>
                                     ),
                                     validate: async (d) => (d.entity.nome && d.entity.nome.length >= 3) || 'Nome deve ter pelo menos 3 caracteres',
@@ -134,7 +378,22 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                 {
                                     key: 'filtros',
                                     label: 'Filtros',
-                                    content: <p className="master-detail-empty">Filtros do relatório de dashboard.</p>,
+                                    content: (
+                                        <div>
+                                            <DataTable
+                                                data={filtros}
+                                                columns={[
+                                                    {key: 'id', label: 'ID'},
+                                                    {key: 'nome', label: 'Nome'},
+                                                    {key: 'estruturaNome', label: 'Estrutura'},
+                                                    {key: 'dimensaoNome', label: 'Dimensão'},
+                                                ]}
+                                                selectionMode="multiple"
+                                                selectedItems={filtroSelecionados}
+                                                onSelectionChange={setFiltroSelecionados}
+                                            />
+                                        </div>
+                                    ),
                                     nextLabel: 'Concluir',
                                 },
                             ]}

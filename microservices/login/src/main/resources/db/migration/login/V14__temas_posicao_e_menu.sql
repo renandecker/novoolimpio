@@ -6,28 +6,44 @@
 -- 1) Colunas de posicao em bas_temas.
 ALTER TABLE public.bas_temas
     ADD COLUMN IF NOT EXISTS posicao_logo text,
-    ADD COLUMN IF NOT EXISTS login_posicao text;
+    ADD COLUMN IF NOT EXISTS login_posicao text,
+    ADD COLUMN IF NOT EXISTS cor_texto_selecionado text,
+    ADD COLUMN IF NOT EXISTS cor_texto_nao_selecionado text,
+    ADD COLUMN IF NOT EXISTS espessura_borda text,
+    ADD COLUMN IF NOT EXISTS cor_borda_primaria text,
+    ADD COLUMN IF NOT EXISTS cor_borda_secundaria text,
+    ADD COLUMN IF NOT EXISTS imagem_fundo text,
+    ADD COLUMN IF NOT EXISTS banner_cabecalho text,
+    ADD COLUMN IF NOT EXISTS banner_rodape text;
 
 -- 2) Preenche posicao padrao nos temas ja cadastrados (V3).
 UPDATE public.bas_temas
 SET posicao_logo = COALESCE(posicao_logo, 'left'),
-    login_posicao = COALESCE(login_posicao, 'center')
-WHERE posicao_logo IS NULL OR login_posicao IS NULL;
+    login_posicao = COALESCE(login_posicao, 'center'),
+    cor_texto_selecionado = COALESCE(cor_texto_selecionado, '#ffffff'),
+    cor_texto_nao_selecionado = COALESCE(cor_texto_nao_selecionado, '#cccccc'),
+    espessura_borda = COALESCE(espessura_borda, '3px'),
+    cor_borda_primaria = COALESCE(cor_borda_primaria, '#c2aa3c'),
+    cor_borda_secundaria = COALESCE(cor_borda_secundaria, '#3baae3'),
+    imagem_fundo = COALESCE(imagem_fundo, ''),
+    banner_cabecalho = COALESCE(banner_cabecalho, ''),
+    banner_rodape = COALESCE(banner_rodape, '')
+WHERE posicao_logo IS NULL OR login_posicao IS NULL OR cor_texto_selecionado IS NULL OR cor_texto_nao_selecionado IS NULL OR espessura_borda IS NULL OR cor_borda_primaria IS NULL OR cor_borda_secundaria IS NULL OR imagem_fundo IS NULL OR banner_cabecalho IS NULL OR banner_rodape IS NULL;
 
 -- 3) Novos temas ate ~30 registros (org.primefaces.themes + cores/posicoes).
 INSERT INTO public.bas_temas
-    (tema, titulo, folder_css, cor_primaria, cor_secundaria, cor_barra, cor_fundo, cor_texto, cor_borda, cor_destaque, cor_email, posicao_logo, login_posicao, fl_default, ativo)
+    (tema, titulo, folder_css, cor_primaria, cor_secundaria, cor_barra, cor_fundo, cor_texto, cor_texto_selecionado, cor_texto_nao_selecionado, cor_borda, cor_destaque, cor_email, espessura_borda, cor_borda_primaria, cor_borda_secundaria, imagem_fundo, banner_cabecalho, banner_rodape, posicao_logo, login_posicao, fl_default, ativo)
 VALUES
-    ('dot-luv',          'Dot Luv',          'primefaces-dot-luv',          '#0b3e61', '#1e62a0', '#0b3e61', '#2b3644', '#f6f6f6', '#404c59', '#1e62a0', '#0b3e61', 'left',   'center', false, true),
-    ('glass-x',          'Glass X',          'primefaces-glass-x',          '#2469a7', '#2f2f2f', '#2469a7', '#f2f2f2', '#222222', '#a8a8a8', '#2f2f2f', '#2469a7', 'left',   'center', false, true),
-    ('home',             'Home',             'primefaces-home',             '#2e6da4', '#61a8cf', '#2e6da4', '#ffffff', '#333333', '#aecbe0', '#61a8cf', '#2e6da4', 'left',   'center', false, true),
-    ('humanity',         'Humanity',         'primefaces-humanity',         '#cb842e', '#e0a34b', '#cb842e', '#ffffff', '#333333', '#d6c4a6', '#e0a34b', '#cb842e', 'left',   'center', false, true),
-    ('midnight',         'Midnight',         'primefaces-midnight',         '#2e3f43', '#435e64', '#2e3f43', '#323f42', '#dddddd', '#4a5a5e', '#435e64', '#2e3f43', 'left',   'center', false, true),
-    ('pepper-grinder',   'Pepper Grinder',   'primefaces-pepper-grinder',   '#65532e', '#8a6b32', '#65532e', '#ffffff', '#453821', '#b8a980', '#8a6b32', '#65532e', 'left',   'center', false, true),
-    ('rocket',           'Rocket',           'primefaces-rocket',           '#4d4d4d', '#6eb1f7', '#4d4d4d', '#ffffff', '#333333', '#999999', '#6eb1f7', '#4d4d4d', 'left',   'center', false, true),
-    ('sam',              'Sam',              'primefaces-sam',              '#3a6ea5', '#6ca6d6', '#3a6ea5', '#ffffff', '#333333', '#a7bfd4', '#6ca6d6', '#3a6ea5', 'left',   'center', false, true),
-    ('smoothness',       'Smoothness',       'primefaces-smoothness',       '#222222', '#6699cc', '#222222', '#ffffff', '#222222', '#aaaaaa', '#6699cc', '#222222', 'left',   'center', false, true),
-    ('ui-lightness',     'UI Lightness',     'primefaces-ui-lightness',     '#f6a828', '#0078ae', '#f6a828', '#f4f4f4', '#333333', '#aaaaaa', '#0078ae', '#f6a828', 'left',   'center', false, true)
+    ('dot-luv',          'Dot Luv',          'primefaces-dot-luv',          '#0b3e61', '#1e62a0', '#0b3e61', '#2b3644', '#f6f6f6', '#ffffff', '#cccccc', '#404c59', '#1e62a0', '#0b3e61', '3px', '#c2aa3c', '#3baae3', '', '', '', 'left',   'center', false, true),
+    ('glass-x',          'Glass X',          'primefaces-glass-x',          '#2469a7', '#2f2f2f', '#2469a7', '#f2f2f2', '#222222', '#ffffff', '#cccccc', '#a8a8a8', '#2f2f2f', '#2469a7', '3px', '#c2aa3c', '#3baae3', '', '', '', 'left',   'center', false, true),
+    ('home',             'Home',             'primefaces-home',             '#2e6da4', '#61a8cf', '#2e6da4', '#ffffff', '#333333', '#ffffff', '#cccccc', '#aecbe0', '#61a8cf', '#2e6da4', '3px', '#c2aa3c', '#3baae3', '', '', '', 'left',   'center', false, true),
+    ('humanity',         'Humanity',         'primefaces-humanity',         '#cb842e', '#e0a34b', '#cb842e', '#ffffff', '#333333', '#ffffff', '#cccccc', '#d6c4a6', '#e0a34b', '#cb842e', '3px', '#c2aa3c', '#3baae3', '', '', '', 'left',   'center', false, true),
+    ('midnight',         'Midnight',         'primefaces-midnight',         '#2e3f43', '#435e64', '#2e3f43', '#323f42', '#dddddd', '#ffffff', '#cccccc', '#4a5a5e', '#435e64', '#2e3f43', '3px', '#c2aa3c', '#3baae3', '', '', '', 'left',   'center', false, true),
+    ('pepper-grinder',   'Pepper Grinder',   'primefaces-pepper-grinder',   '#65532e', '#8a6b32', '#65532e', '#ffffff', '#453821', '#ffffff', '#cccccc', '#b8a980', '#8a6b32', '#65532e', '3px', '#c2aa3c', '#3baae3', '', '', '', 'left',   'center', false, true),
+    ('rocket',           'Rocket',           'primefaces-rocket',           '#4d4d4d', '#6eb1f7', '#4d4d4d', '#ffffff', '#333333', '#ffffff', '#cccccc', '#999999', '#6eb1f7', '#4d4d4d', '3px', '#c2aa3c', '#3baae3', '', '', '', 'left',   'center', false, true),
+    ('sam',              'Sam',              'primefaces-sam',              '#3a6ea5', '#6ca6d6', '#3a6ea5', '#ffffff', '#333333', '#ffffff', '#cccccc', '#a7bfd4', '#6ca6d6', '#3a6ea5', '3px', '#c2aa3c', '#3baae3', '', '', '', 'left',   'center', false, true),
+    ('smoothness',       'Smoothness',       'primefaces-smoothness',       '#222222', '#6699cc', '#222222', '#ffffff', '#222222', '#ffffff', '#cccccc', '#aaaaaa', '#6699cc', '#222222', '3px', '#c2aa3c', '#3baae3', '', '', '', 'left',   'center', false, true),
+    ('ui-lightness',     'UI Lightness',     'primefaces-ui-lightness',     '#f6a828', '#0078ae', '#f6a828', '#f4f4f4', '#333333', '#ffffff', '#cccccc', '#aaaaaa', '#0078ae', '#f6a828', '3px', '#c2aa3c', '#3baae3', '', '', '', 'left',   'center', false, true)
 ON CONFLICT (tema) DO NOTHING;
 
 -- 4) Modulo "Ícones Disponíveis" dentro de Administração > Configurações.

@@ -12,7 +12,7 @@ const StarIcon = () => (
 const KeyIcon = () => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
         <path
-            d="M12 1L3 6v12l9 7 9-7V6l-9-5zM12 7c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 1.8c-.66 0-1.2.54-1.2 1.2 0 .66.54 1.2 1.2 1.2.66 0 1.2-.54 1.2-1.2 0-.66-.54-1.2-1.2-1.2zM12 2C7.58 2 4 5.58 4 10c0 2.28 1.18 4.37 3 5.53V14c0-2.76 2.24-5 5-5h2V6.41C11.93 6.13 12.94 6 12 6c-4.42 0-8 3.58-8 8 0 1.86.61 3.58 1.66 4.93.15.2.33.38.51.54L8 20.5V22c0 .55.45 1 1 1h2c.28 0 .5-.22.5-.5v-3.36l2.3-2.3c2.65-.93 4.5-3.5 4.5-6.64C19 8.58 15.42 2 12 2zm0 2c.34 0 .67.06 1 .17V6c0 1.66-1.34 3-3 3s-3-1.34-3-3S8.34 4 12 4z"/>
+            d="M12 1L3 6v12l9 7 9-7V6l9-5zM12 7c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 1.8c-.66 0-1.2.54-1.2 1.2 0 .66.54 1.2 1.2 1.2.66 0 1.2-.54 1.2-1.2 0-.66-.54-1.2-1.2-1.2zM12 2C7.58 2 4 5.58 4 10c0 2.28 1.18 4.37 3 5.53V14c0-2.76 2.24-5 5-5h2V6.41C11.93 6.13 12.94 6 12 6c-4.42 0-8 3.58-8 8 0 1.86.61 3.58 1.66 4.93.15.2.33.38.51.54L8 20.5V22c0 .55.45 1 1 1h2c.28 0 .5-.22.5-.5v-3.36l2.3-2.3c2.65-.93 4.5-3.5 4.5-6.64C19 8.58 15.42 2 12 2zm0 2c.34 0 .67.06 1 .17V6c0 1.66-1.34 3-3 3s-3-1.34-3-3S8.34 4 12 4z"/>
     </svg>
 );
 const UserIcon = () => (
@@ -57,9 +57,9 @@ export function UserMenu() {
 
     if (!session) return null;
 
-    const displayName = session.nome || session.username || 'Usuário';
-    const displayEmail = session.email || 'Não informado';
-    const displayCpf = session.cpf || 'Não informado';
+    const displayName = session.nome || session.username || 'Usuario';
+    const displayEmail = session.email || 'Nao informado';
+    const displayCpf = session.cpf || 'Nao informado';
     const avatarInitial = (session.nome || session.username || '?').charAt(0).toUpperCase();
     const hasFoto = !!session.foto;
 

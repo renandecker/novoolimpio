@@ -39,12 +39,17 @@ export const Colors = {
   textWhite: '#ffffff',
   textGold: '#e8d27a',
   textLink: '#265a88',
+  textSelected: '#ffffff',
+  textUnselected: '#cccccc',
 
   // Borders
   borderLight: '#e0e0e0',
   borderMedium: '#d3d3d3',
   borderDark: '#cccccc',
   borderGold: 'rgba(194, 170, 60, 0.15)',
+  borderPrimary: '#c2aa3c',
+  borderSecondary: '#3baae3',
+  borderWidth: '3px',
 
   // Status
   success: '#2e7d32',
@@ -182,6 +187,28 @@ export const Colors = {
   // Report item tipo
   reportTipoBg: '#f0e9c9',
   reportTipoColor: '#8a7420',
+
+  // Theme customization properties (synced with web-react ThemeContext)
+  theme: {
+    corPrimaria: '#2f333b',
+    corSecundaria: '#3baae3',
+    corBarra: '#24272e',
+    corFundo: '#f1f1f1',
+    corTexto: '#ffffff',
+    corTextoSelecionado: '#ffffff',
+    corTextoNaoSelecionado: '#cccccc',
+    corBorda: '#c2aa3c',
+    corDestaque: '#3baae3',
+    corEmail: '#052B4E',
+    espessuraBorda: '3px',
+    corBordaPrimaria: '#c2aa3c',
+    corBordaSecundaria: '#3baae3',
+    posicaoLogo: 'left',
+    loginPosicao: 'center',
+    imagemFundo: '',
+    bannerCabecalho: '',
+    bannerRodape: '',
+  },
 };
 
 export const Spacing = {

@@ -119,3 +119,88 @@ export const TURNO_TRABALHO_COLUMNS: MasterDetailColumn[] = [
     {key: 'diaSemana', label: 'Dia Semana'},
 ];
 export const TURNO_TRABALHO_SEARCH = ['descricao'];
+
+export const ESTRUTURA_SOURCE = '/api/relatorios/estrutura';
+export const ESTRUTURA_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'Id'},
+    {key: 'nome', label: 'Nome'},
+    {key: 'descricao', label: 'Descrição'},
+];
+export const ESTRUTURA_SEARCH = ['nome', 'descricao'];
+
+export const DIMENSAO_SOURCE = '/api/relatorios/dimensao';
+export const DIMENSAO_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'Id'},
+    {key: 'nomeVisualizacao', label: 'Nome Visualização'},
+    {key: 'nome', label: 'Nome'},
+    {key: 'tipo', label: 'Tipo'},
+    {key: 'tipoInfo', label: 'Tipo Info'},
+];
+export const DIMENSAO_SEARCH = ['nomeVisualizacao', 'nome'];
+
+export const MEDIDA_SOURCE = '/api/relatorios/medida';
+export const MEDIDA_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'Id'},
+    {key: 'nomeVisualizacao', label: 'Nome Visualização'},
+    {key: 'nome', label: 'Nome'},
+    {key: 'tipo', label: 'Tipo'},
+    {key: 'tipoInfo', label: 'Tipo Info'},
+];
+export const MEDIDA_SEARCH = ['nomeVisualizacao', 'nome'];
+
+export const GEOREFERENCIA_SOURCE = '/api/relatorios/georeferencia';
+export const GEOREFERENCIA_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'Id'},
+    {key: 'nomeVisualizacao', label: 'Nome Visualização'},
+    {key: 'nome', label: 'Nome'},
+];
+export const GEOREFERENCIA_SEARCH = ['nomeVisualizacao', 'nome'];
+
+export const FILTRO_SOURCE = '/api/relatorios/filtro';
+export const FILTRO_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'Id'},
+    {key: 'nome', label: 'Nome'},
+    {key: 'estruturaNome', label: 'Estrutura'},
+    {key: 'dimensaoNome', label: 'Dimensão'},
+];
+export const FILTRO_SEARCH = ['nome'];
+
+export const TABELA_SOURCE = '/api/relatorios/tabela';
+export const TABELA_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'Id'},
+    {key: 'nome', label: 'Nome'},
+];
+export const TABELA_SEARCH = ['nome'];
+
+export const GRAFICO_SOURCE = '/api/relatorios/grafico';
+export const GRAFICO_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'Id'},
+    {key: 'nome', label: 'Nome'},
+    {key: 'tipo', label: 'Tipo'},
+];
+export const GRAFICO_SEARCH = ['nome'];
+
+export const MAPA_SOURCE = '/api/relatorios/mapa';
+export const MAPA_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'Id'},
+    {key: 'nome', label: 'Nome'},
+];
+export const MAPA_SEARCH = ['nome'];
+
+export const ORGANOGRAMA_TOPICO_SOURCE = '/api/relatorios/organograma-topico';
+export const ORGANOGRAMA_TOPICO_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'Id'},
+    {key: 'relatorioNome', label: 'Relatório'},
+    {key: 'tipo', label: 'Tipo'},
+    {key: 'ordem', label: 'Ordem'},
+];
+export const ORGANOGRAMA_TOPICO_SEARCH = ['relatorioNome'];
+
+export const PAINEL_PAINEL_SOURCE = '/api/relatorios/painel-painel';
+export const PAINEL_PAINEL_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'Id'},
+    {key: 'relatorioNome', label: 'Relatório'},
+    {key: 'tipo', label: 'Tipo'},
+    {key: 'ordem', label: 'Ordem'},
+];
+export const PAINEL_PAINEL_SEARCH = ['relatorioNome'];

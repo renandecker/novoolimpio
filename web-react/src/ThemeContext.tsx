@@ -11,11 +11,19 @@ export type TemaConfig = {
     corBarra?: string;
     corFundo?: string;
     corTexto?: string;
+    corTextoSelecionado?: string;
+    corTextoNaoSelecionado?: string;
     corBorda?: string;
     corDestaque?: string;
     corEmail?: string;
+    espessuraBorda?: string;
+    corBordaPrimaria?: string;
+    corBordaSecundaria?: string;
     posicaoLogo?: string;
     loginPosicao?: string;
+    imagemFundo?: string;
+    bannerCabecalho?: string;
+    bannerRodape?: string;
 };
 
 type ThemeContextType = {
@@ -31,10 +39,19 @@ const DEFAULT_THEME: TemaConfig = {
     corBarra: '#24272e',
     corFundo: '#f1f1f1',
     corTexto: '#ffffff',
+    corTextoSelecionado: '#ffffff',
+    corTextoNaoSelecionado: '#cccccc',
     corBorda: '#c2aa3c',
     corDestaque: '#3baae3',
+    corEmail: '#052B4E',
+    espessuraBorda: '3px',
+    corBordaPrimaria: '#c2aa3c',
+    corBordaSecundaria: '#3baae3',
     posicaoLogo: 'left',
     loginPosicao: 'center',
+    imagemFundo: '',
+    bannerCabecalho: '',
+    bannerRodape: '',
 };
 
 export function ThemeProvider({children}: { children: ReactNode }) {
@@ -105,8 +122,17 @@ export function ThemeProvider({children}: { children: ReactNode }) {
         if (t.corBarra) root.style.setProperty('--cor-barra', t.corBarra);
         if (t.corFundo) root.style.setProperty('--cor-fundo', t.corFundo);
         if (t.corTexto) root.style.setProperty('--cor-texto', t.corTexto);
+        if (t.corTextoSelecionado) root.style.setProperty('--cor-texto-selecionado', t.corTextoSelecionado);
+        if (t.corTextoNaoSelecionado) root.style.setProperty('--cor-texto-nao-selecionado', t.corTextoNaoSelecionado);
         if (t.corBorda) root.style.setProperty('--cor-borda', t.corBorda);
         if (t.corDestaque) root.style.setProperty('--cor-destaque', t.corDestaque);
+        if (t.corEmail) root.style.setProperty('--cor-email', t.corEmail);
+        if (t.espessuraBorda) root.style.setProperty('--espessura-borda', t.espessuraBorda);
+        if (t.corBordaPrimaria) root.style.setProperty('--cor-borda-primaria', t.corBordaPrimaria);
+        if (t.corBordaSecundaria) root.style.setProperty('--cor-borda-secundaria', t.corBordaSecundaria);
+        if (t.imagemFundo) root.style.setProperty('--imagem-fundo', `url(${t.imagemFundo})`);
+        if (t.bannerCabecalho) root.style.setProperty('--banner-cabecalho', `url(${t.bannerCabecalho})`);
+        if (t.bannerRodape) root.style.setProperty('--banner-rodape', `url(${t.bannerRodape})`);
     };
 
     const value = useMemo(() => ({

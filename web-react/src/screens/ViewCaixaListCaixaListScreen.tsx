@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useMemo} from 'react';
 import {PermissionGate, useCurrentOutcome} from '../permissions';
 import {api} from '../api';
 import {useModulePaged} from '../useModulePaged';
@@ -120,12 +120,51 @@ export default function ViewCaixaListCaixaListScreen() {
         {key: 'excel', label: 'Excel', icon: <i className="fa fa-file-excel-o"/>, onClick: () => alert('Exportar Excel - não implementado')},
     ];
 
+    const calculateTotals = (movs: Movimentacao[]) => {
+        const totals = {
+            totalDinheiro: 0,
+            totalCheque: 0,
+            totalCartao: 0,
+            totalBoleto: 0,
+            totalTransferencia: 0,
+            totalDeposito: 0,
+            totalSangria: 0,
+            totalValor: 0,
+            totalDesconto: 0,
+            totalJurosMulta: 0,
+            totalValorPagar: 0,
+        };
+        movs.forEach(mov => {
+            const forma = mov.formaPagamento?.toUpperCase() || '';
+            const valor = Number(mov.valor) || 0;
+            const desconto = Number(mov.desconto) || 0;
+            const multaJuros = Number(mov.multaJuros) || 0;
+            const total = Number(mov.total) || 0;
+            totals.totalValor += valor;
+            totals.totalDesconto += desconto;
+            totals.totalJurosMulta += multaJuros;
+            totals.totalValorPagar += total;
+            if (forma.includes('DINHEIRO')) totals.totalDinheiro += total;
+            else if (forma.includes('CHEQUE')) totals.totalCheque += total;
+            else if (forma.includes('CARTÃO') || forma.includes('CARTAO')) totals.totalCartao += total;
+            else if (forma.includes('BOLETO')) totals.totalBoleto += total;
+            else if (forma.includes('TRANSFER') || forma.includes('PIX')) totals.totalTransferencia += total;
+            else if (forma.includes('DEPÓSITO') || forma.includes('DEPOSITO')) totals.totalDeposito += total;
+            if (mov.tipoMovimento === 'SANGRIA' || mov.tipoMovimento === '3') totals.totalSangria += total;
+        });
+        return totals;
+    };
+
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>Caixa</h1>
-                <div className="data-table-toolbar" style={{marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px'}}>
-                    <ExportDropdown options={exportOptions} triggerLabel="Exportar" triggerIcon={<i className="fa fa-download"/>}/>
+                <div className="page-header">
+                    <div className="page-header-breadcrumb">
+                        <span className="breadcrumb-current">Gerência Fluxo Caixa</span>
+                    </div>
+                    <div className="page-header-actions">
+                        <ExportDropdown options={exportOptions} triggerLabel="Exportar" triggerIcon={<i className="fa fa-download"/>} triggerClassName="btnyellow"/>
+                    </div>
                 </div>
                 <div className="data-table">
                     {q.isError ? (
@@ -234,44 +273,121 @@ export default function ViewCaixaListCaixaListScreen() {
                                                         ) : movs.length === 0 ? (
                                                             <p className="master-detail-empty">Nenhuma movimentação encontrada.</p>
                                                         ) : (
-                                                            <table className="master-detail-table">
-                                                                <thead>
-                                                                <tr>
-                                                                    <th>Tipo</th>
-                                                                    <th>ID</th>
-                                                                    <th>Contrato</th>
-                                                                    <th>Aluno</th>
-                                                                    <th>Parcela</th>
-                                                                    <th>Data Movimento</th>
-                                                                    <th>Vencimento</th>
-                                                                    <th>Forma Pagamento</th>
-                                                                    <th>Valor</th>
-                                                                    <th>Desconto</th>
-                                                                    <th>Juros/Multa</th>
-                                                                    <th>Troco</th>
-                                                                    <th>Total</th>
-                                                                </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                {movs.map((mov) => (
-                                                                    <tr key={mov.id}>
-                                                                        <td>{renderMovimentacaoIcon(mov.tipoMovimento)}</td>
-                                                                        <td>{mov.id}</td>
-                                                                        <td>{mov.contratoId}</td>
-                                                                        <td>{mov.aluno}</td>
-                                                                        <td>{mov.parcelaSequencia}</td>
-                                                                        <td>{formatDateTime(mov.dataMovimento)}</td>
-                                                                        <td>{formatDateTime(mov.vencimento)}</td>
-                                                                        <td>{mov.formaPagamento}</td>
-                                                                        <td>{formatCurrency(mov.valor)}</td>
-                                                                        <td>{formatCurrency(mov.desconto)}</td>
-                                                                        <td>{formatCurrency(mov.multaJuros)}</td>
-                                                                        <td>{formatCurrency(mov.troco)}</td>
-                                                                        <td>{formatCurrency(mov.total)}</td>
+                                                            <>
+                                                                <table className="master-detail-table">
+                                                                    <thead>
+                                                                    <tr>
+                                                                        <th>Tipo</th>
+                                                                        <th>ID</th>
+                                                                        <th>Contrato</th>
+                                                                        <th>Aluno</th>
+                                                                        <th>Parcela</th>
+                                                                        <th>Data Movimento</th>
+                                                                        <th>Vencimento</th>
+                                                                        <th>Forma Pagamento</th>
+                                                                        <th>Valor</th>
+                                                                        <th>Desconto</th>
+                                                                        <th>Juros/Multa</th>
+                                                                        <th>Troco</th>
+                                                                        <th>Total</th>
                                                                     </tr>
-                                                                ))}
-                                                                </tbody>
-                                                            </table>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                    {movs.map((mov) => (
+                                                                        <tr key={mov.id}>
+                                                                            <td>{renderMovimentacaoIcon(mov.tipoMovimento)}</td>
+                                                                            <td>{mov.id}</td>
+                                                                            <td>{mov.contratoId}</td>
+                                                                            <td>{mov.aluno}</td>
+                                                                            <td>{mov.parcelaSequencia}</td>
+                                                                            <td>{formatDateTime(mov.dataMovimento)}</td>
+                                                                            <td>{formatDateTime(mov.vencimento)}</td>
+                                                                            <td>{mov.formaPagamento}</td>
+                                                                            <td>{formatCurrency(mov.valor)}</td>
+                                                                            <td>{formatCurrency(mov.desconto)}</td>
+                                                                            <td>{formatCurrency(mov.multaJuros)}</td>
+                                                                            <td>{formatCurrency(mov.troco)}</td>
+                                                                            <td>{formatCurrency(mov.total)}</td>
+                                                                        </tr>
+                                                                    ))}
+                                                                    </tbody>
+                                                                </table>
+                                                                <div className="caixa-totals-actions">
+                                                                    <div className="caixa-totals">
+                                                                        {(() => {
+                                                                            const totals = calculateTotals(movs);
+                                                                            const fundoCaixa = Number(caixaRow.fundoCaixa) || 0;
+                                                                            const totalDinheiroCaixa = totals.totalDinheiro + fundoCaixa;
+                                                                            const canSangria = (totalDinheiroCaixa - fundoCaixa) > 0;
+                                                                            return (
+                                                                                <table className="totals-table">
+                                                                                    <thead>
+                                                                                    <tr>
+                                                                                        <th>Fundo Caixa</th>
+                                                                                        <th>Total Dinheiro</th>
+                                                                                        <th>Total Cheque</th>
+                                                                                        <th>Total Cartão</th>
+                                                                                        <th>Total Boleto</th>
+                                                                                        <th>Total Transferência</th>
+                                                                                        <th>Total Depósito</th>
+                                                                                        <th>Total Sangria</th>
+                                                                                        <th>Valor</th>
+                                                                                        <th>Desconto</th>
+                                                                                        <th>Juros/Multa</th>
+                                                                                        <th>Valor Total</th>
+                                                                                        <th>Valor Total Caixa</th>
+                                                                                    </tr>
+                                                                                    </thead>
+                                                                                    <tbody>
+                                                                                    <tr>
+                                                                                        <td>{formatCurrency(fundoCaixa)}</td>
+                                                                                        <td>{formatCurrency(totals.totalDinheiro)}</td>
+                                                                                        <td>{formatCurrency(totals.totalCheque)}</td>
+                                                                                        <td>{formatCurrency(totals.totalCartao)}</td>
+                                                                                        <td>{formatCurrency(totals.totalBoleto)}</td>
+                                                                                        <td>{formatCurrency(totals.totalTransferencia)}</td>
+                                                                                        <td>{formatCurrency(totals.totalDeposito)}</td>
+                                                                                        <td>{formatCurrency(totals.totalSangria)}</td>
+                                                                                        <td>{formatCurrency(totals.totalValor)}</td>
+                                                                                        <td>{formatCurrency(totals.totalDesconto)}</td>
+                                                                                        <td>{formatCurrency(totals.totalJurosMulta)}</td>
+                                                                                        <td>{formatCurrency(totals.totalValorPagar)}</td>
+                                                                                        <td>{formatCurrency(totalDinheiroCaixa)}</td>
+                                                                                    </tr>
+                                                                                    </tbody>
+                                                                                </table>
+                                                                            );
+                                                                        })()}
+                                                                    </div>
+                                                                    <div className="caixa-actions-bar">
+                                                                        <button
+                                                                            type="button"
+                                                                            className="btnstop"
+                                                                            style={{width: '200px'}}
+                                                                            disabled={!((calculateTotals(movs).totalDinheiro + Number(caixaRow.fundoCaixa || 0)) - Number(caixaRow.fundoCaixa || 0) > 0)}
+                                                                            onClick={() => alert('Realizar Sangria - não implementado')}
+                                                                        >
+                                                                            Realizar Sangria
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            className="btnred"
+                                                                            style={{width: '200px', marginLeft: 'auto'}}
+                                                                            onClick={() => alert('Fechar Caixa - não implementado')}
+                                                                        >
+                                                                            Fechar Caixa
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            className="btnyellow"
+                                                                            style={{width: '200px'}}
+                                                                            onClick={() => setExpandedRows(prev => ({...prev, [caixaId]: false}))}
+                                                                        >
+                                                                            Voltar Caixa
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </>
                                                         )}
                                                     </div>
                                                 </td>

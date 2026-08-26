@@ -529,7 +529,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/acao/formAcao" element={<ViewAcaoFormAcaoListScreen/>}/>
     <Route path="/view/acao/listAcao" element={<ViewAcaoListAcaoListScreen/>}/>
     <Route path="/regras/notificacao/list" element={<ViewRegraNotificacaoListRegraListScreen/>}/>
-    <Route path="/view/agenda/calendarioAgenda" element={<ViewAgendaCalendarioAgendaListScreen/>}/>
+    <Route path="/view/agenda/calendarioAgenda" element={<ViewAgendaCompromissosScreen/>}/>
     <Route path="/view/agenda/colunas" element={<ViewAgendaColunasListScreen/>}/>
     <Route path="/view/agenda/colunasUsuarioAgenda" element={<ViewAgendaColunasUsuarioAgendaListScreen/>}/>
     <Route path="/view/agenda/formAgenda" element={<ViewAgendaFormAgendaListScreen/>}/>
@@ -1014,4 +1014,4 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
         <CurriculoConfiguracaoListScreen/>}/>
     <Route path="/view/configuracaoFinanceira/listConfiguracaoFinanceira" element={<ViewConfiguracaoFinanceiraListConfiguracaoFinanceiraListScreen/>}/>
     <Route path="/view/configuracaoFinanceira/formConfiguracaoFinanceira" element={<ViewConfiguracaoFinanceiraFormConfiguracaoFinanceiraListScreen/>}/>
-    <Route path='*' element={<p>Selecione uma tela.</p>}/></Route></Routes></BrowserRouter></PermissionBridge></ThemeProvider></AuthProvider></QueryClientProvider>);
+    <Route path='*' element={<p>Selecione uma tela.</p>}/></Route><Route path="/login" element={<LoginScreen/>}/></Routes></BrowserRouter></PermissionBridge></ThemeProvider></AuthProvider></QueryClientProvider>);

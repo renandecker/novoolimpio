@@ -1,115 +1,59 @@
 import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {PermissionGate} from '../permissions';
-import {BooleanField} from '../BooleanField';
+import {FormLayout, FormTabConfig} from '../FormLayout';
 import {MasterDetail} from '../MasterDetail';
-import {Tabs} from '../Tabs';
-import type {TabItem} from '../Tabs';
+import type {ApiItem} from '../types';
+import {api} from '../api';
+import {EnderecoCampos} from '../EnderecoForm';
+import type {Endereco} from '../EnderecoForm';
 import {
-    AGENDA_SOURCE,
-    AGENDA_COLUMNS,
-    AGENDA_SEARCH,
     PERFIL_SOURCE,
     PERFIL_COLUMNS,
     PERFIL_SEARCH,
-    TURNO_TRABALHO_SOURCE,
-    TURNO_TRABALHO_COLUMNS,
-    TURNO_TRABALHO_SEARCH,
     UNIDADE_SOURCE,
     UNIDADE_COLUMNS,
     UNIDADE_SEARCH,
+    AGENDA_SOURCE,
+    AGENDA_COLUMNS,
+    AGENDA_SEARCH,
+    TURNO_TRABALHO_SOURCE,
+    TURNO_TRABALHO_COLUMNS,
+    TURNO_TRABALHO_SEARCH,
 } from '../masterDetailSources';
-import type {ApiItem} from '../types';
-import {api} from '../api';
 import {useQuery} from '@tanstack/react-query';
-import {EnderecoCampos} from '../EnderecoForm';
-import type {Endereco} from '../EnderecoForm';
 
-interface Logradouro {
-    id: number;
-    descricao: string;
-    cep: string;
-    id_bairro: number;
-}
+const GENEROS = [
+    {value: '1', label: 'Masculino'},
+    {value: '2', label: 'Feminino'},
+    {value: '3', label: 'Outro'},
+];
 
-interface Bairro {
-    id: number;
-    descricao: string;
-    cidadeId: number;
-}
+const ETNIAS = [
+    {value: '1', label: 'Branca'},
+    {value: '2', label: 'Preta'},
+    {value: '3', label: 'Parda'},
+    {value: '4', label: 'Amarela'},
+    {value: '5', label: 'Indígena'},
+];
 
-interface Cidade {
-    id: number;
-    nome: string;
-}
+const ESTADOS_CIVIS = [
+    {value: '1', label: 'Solteiro(a)'},
+    {value: '2', label: 'Casado(a)'},
+    {value: '3', label: 'Divorciado(a)'},
+    {value: '4', label: 'Viúvo(a)'},
+    {value: '5', label: 'União Estável'},
+];
 
-interface DocumentoUploadProps {
-    label: string;
-    obrigatorio?: boolean;
-}
-
-function DocumentoUpload({label, obrigatorio = false}: DocumentoUploadProps) {
-    return (
-        <>
-            <span className="form-label" style={{fontWeight: 'bold'}}>
-                {label} {obrigatorio ? '*' : ''}
-            </span>
-            <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
-                <input type="file" accept="image/*,application/pdf" className="form-input" style={{flex: 1}}/>
-                <button type="button" className="btn-action btnyellow" title="Visualizar documento">👁</button>
-            </div>
-        </>
-    );
-}
-
-interface FormState {
-    cpf: string;
-    rg: string;
-    nome: string;
-    email: string;
-    nomeSocial: string;
-    dataNascimento: string;
-    generoId: string;
-    etniaId: string;
-    estadoCivilId: string;
-    escolaridadeId: string;
-    nomePai: string;
-    nomeMae: string;
-    telefoneResidencial: string;
-    celular: string;
-    nomeReferencia: string;
-    telefoneReferencia: string;
-    celularReferencia: string;
-    nomeReferencia2: string;
-    telefoneReferencia2: string;
-    celularReferencia2: string;
-}
-
-const FORM_VAZIO: FormState = {
-    cpf: '',
-    rg: '',
-    nome: '',
-    email: '',
-    nomeSocial: '',
-    dataNascimento: '',
-    generoId: '',
-    etniaId: '',
-    estadoCivilId: '',
-    escolaridadeId: '',
-    nomePai: '',
-    nomeMae: '',
-    telefoneResidencial: '',
-    celular: '',
-    nomeReferencia: '',
-    telefoneReferencia: '',
-    celularReferencia: '',
-    nomeReferencia2: '',
-    telefoneReferencia2: '',
-    celularReferencia2: '',
-};
-
-const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
-const num = (v: string): number | null => (v !== '' && !isNaN(Number(v)) ? Number(v) : null);
+const ESCOLARIDADES = [
+    {value: '1', label: 'Ensino Fundamental Incompleto'},
+    {value: '2', label: 'Ensino Fundamental Completo'},
+    {value: '3', label: 'Ensino Médio Incompleto'},
+    {value: '4', label: 'Ensino Médio Completo'},
+    {value: '5', label: 'Superior Incompleto'},
+    {value: '6', label: 'Superior Completo'},
+    {value: '7', label: 'Pós-Graduação'},
+];
 
 const toDateInput = (v: unknown): string => {
     if (!v) return '';
@@ -127,6 +71,46 @@ const semId = (obj: Record<string, unknown> | null): Record<string, unknown> => 
     return copia;
 };
 
+const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
+const num = (v: string): number | null => (v !== '' && !isNaN(Number(v)) ? Number(v) : null);
+
+const usuarioTabs: FormTabConfig[] = [
+    {
+        key: 'dadosPessoais',
+        label: 'Dados Pessoais',
+        fields: [
+            {name: 'login', label: 'Login', required: true},
+            {name: 'senha', label: 'Senha', type: 'mask', mask: '****'},
+            {name: 'cpf', label: 'CPF', type: 'mask', mask: '999.999.999-99', required: true},
+            {name: 'rg', label: 'RG', required: true},
+            {name: 'nome', label: 'Nome', required: true, span: 3},
+            {name: 'email', label: 'E-mail', type: 'email', required: true, span: 3},
+            {name: 'nomeSocial', label: 'Nome Social', span: 3},
+            {name: 'dataNascimento', label: 'Data Nascimento', type: 'date', required: true},
+            {name: 'generoId', label: 'Gênero', type: 'select', options: GENEROS},
+            {name: 'etniaId', label: 'Etnia', type: 'select', options: ETNIAS},
+            {name: 'estadoCivilId', label: 'Estado Civil', type: 'select', options: ESTADOS_CIVIS, required: true},
+            {name: 'escolaridadeId', label: 'Escolaridade', type: 'select', options: ESCOLARIDADES, required: true},
+            {name: 'nomePai', label: 'Nome do Pai', span: 3},
+            {name: 'nomeMae', label: 'Nome da Mãe', required: true, span: 3},
+        ],
+    },
+    {
+        key: 'contato',
+        label: 'Contato',
+        fields: [
+            {name: 'telefoneResidencial', label: 'Telefone Residencial', type: 'mask', mask: '(99) 9999-9999'},
+            {name: 'celular', label: 'Celular', type: 'mask', mask: '(99) 99999-9999'},
+            {name: 'nomeReferencia', label: 'Nome Referência', required: true, span: 3},
+            {name: 'telefoneReferencia', label: 'Telefone Referência', type: 'mask', mask: '(99) 9999-9999', required: true},
+            {name: 'celularReferencia', label: 'Celular Referência', type: 'mask', mask: '(99) 99999-9999', required: true},
+            {name: 'nomeReferencia2', label: 'Nome Referência 2', span: 3},
+            {name: 'telefoneReferencia2', label: 'Telefone Referência 2', type: 'mask', mask: '(99) 9999-9999'},
+            {name: 'celularReferencia2', label: 'Celular Referência 2', type: 'mask', mask: '(99) 99999-9999'},
+        ],
+    },
+];
+
 export default function ViewUsuarioFormUsuarioListScreen() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -139,8 +123,8 @@ export default function ViewUsuarioFormUsuarioListScreen() {
     const [agendas, setAgendas] = useState<ApiItem[]>([]);
     const [unidadesAcesso, setUnidadesAcesso] = useState<ApiItem[]>([]);
     const [turnos, setTurnos] = useState<ApiItem[]>([]);
-    const [enderecos, setEnderecos] = useState<Endereco[]>([]);
     const [salvando, setSalvando] = useState(false);
+    const [error, setError] = useState<string | undefined>();
 
     const [usuarioId, setUsuarioId] = useState<number | undefined>();
     const [usuarioOriginal, setUsuarioOriginal] = useState<Record<string, unknown> | null>(null);
@@ -148,7 +132,8 @@ export default function ViewUsuarioFormUsuarioListScreen() {
     const [pessoaId, setPessoaId] = useState<number | undefined>();
     const [pfOriginal, setPfOriginal] = useState<Record<string, unknown> | null>(null);
     const [pessoaOriginal, setPessoaOriginal] = useState<Record<string, unknown> | null>(null);
-    const [form, setForm] = useState<FormState>(FORM_VAZIO);
+    const [initialValues, setInitialValues] = useState<Record<string, unknown>>({});
+    const [enderecos, setEnderecos] = useState<Endereco[]>([]);
 
     const {data: allUnidades = []} = useQuery({
         queryKey: [UNIDADE_SOURCE],
@@ -161,6 +146,10 @@ export default function ViewUsuarioFormUsuarioListScreen() {
     const {data: allAgendas = []} = useQuery({
         queryKey: [AGENDA_SOURCE],
         queryFn: async () => (await api.get<ApiItem[]>(AGENDA_SOURCE)).data,
+    });
+    const {data: allTurnos = []} = useQuery({
+        queryKey: [TURNO_TRABALHO_SOURCE],
+        queryFn: async () => (await api.get<ApiItem[]>(TURNO_TRABALHO_SOURCE)).data,
     });
 
     useEffect(() => {
@@ -185,7 +174,9 @@ export default function ViewUsuarioFormUsuarioListScreen() {
                 setPessoaOriginal(pes);
                 setPfId(pf?.id as number | undefined);
                 setPfOriginal(pf);
-                setForm({
+                setInitialValues({
+                    login: str(usu.login),
+                    senha: '',
                     cpf: str(pf?.cpf),
                     rg: str(pf?.rg),
                     nome: str(pf?.nome),
@@ -208,7 +199,6 @@ export default function ViewUsuarioFormUsuarioListScreen() {
                     celularReferencia2: str(pf?.celularReferencia2),
                 });
 
-                // Carregar endereço da pessoa
                 if (pes) {
                     const enderecosCarregados: Endereco[] = [];
                     const cep = str(pes.cep);
@@ -218,145 +208,132 @@ export default function ViewUsuarioFormUsuarioListScreen() {
 
                     if (idLogradouro) {
                         try {
-                            const logradouro = (await api.get<Logradouro>(`/api/basico/logradouro/${idLogradouro}`)).data;
-                            let bairroDescricao = '';
-                            let cidadeDescricao = '';
-                            if (logradouro.id_bairro) {
-                                const bairro = (await api.get<Bairro>(`/api/basico/bairro/${logradouro.id_bairro}`)).data;
-                                bairroDescricao = bairro.descricao;
-                                if (bairro.cidadeId) {
-                                    const cidade = (await api.get<Cidade>(`/api/basico/cidade/${bairro.cidadeId}`)).data;
-                                    cidadeDescricao = cidade.nome;
+                            const logRes = (await api.get<Record<string, unknown>>(`/api/basico/logradouro/${idLogradouro}`)).data;
+                            let bairroDesc = '';
+                            let cidadeDesc = '';
+                            if (logRes.id_bairro) {
+                                const bairroRes = (await api.get<Record<string, unknown>>(`/api/basico/bairro/${logRes.id_bairro}`)).data;
+                                bairroDesc = str(bairroRes.descricao);
+                                if (bairroRes.cidadeId) {
+                                    const cidadeRes = (await api.get<Record<string, unknown>>(`/api/basico/cidade/${bairroRes.cidadeId}`)).data;
+                                    cidadeDesc = str(cidadeRes.nome);
                                 }
                             }
                             enderecosCarregados.push({
                                 id: idLogradouro,
-                                cep: logradouro.cep || cep,
-                                logradouro: logradouro.descricao,
-                                bairro: bairroDescricao,
-                                cidade: cidadeDescricao,
+                                cep: str(logRes.cep) || cep,
+                                logradouro: str(logRes.descricao),
+                                bairro: bairroDesc,
+                                cidade: cidadeDesc,
                                 numero,
                                 complemento,
                             });
                         } catch {
-                            // Se falhar ao buscar logradouro/bairro/cidade, usa apenas dados da pessoa
                             if (cep || numero || complemento) {
-                                enderecosCarregados.push({
-                                    cep,
-                                    cidade: '',
-                                    bairro: '',
-                                    logradouro: '',
-                                    numero,
-                                    complemento,
-                                });
+                                enderecosCarregados.push({cep, cidade: '', bairro: '', logradouro: '', numero, complemento});
                             }
                         }
                     } else if (cep || numero || complemento) {
-                        enderecosCarregados.push({
-                            cep,
-                            cidade: '',
-                            bairro: '',
-                            logradouro: '',
-                            numero,
-                            complemento,
-                        });
+                        enderecosCarregados.push({cep, cidade: '', bairro: '', logradouro: '', numero, complemento});
                     }
                     setEnderecos(enderecosCarregados);
                 }
 
-                const usuarioIdNum = usu.id as number;
-                const [unidadesIds, agendasIds, perfisIds] = await Promise.all([
-                    api.get<number[]>(`/api/basico/usuario/buscar-unidades-disponiveis`, {params: {usuarioId: usuarioIdNum}}).then(r => r.data),
-                    api.get<number[]>(`/api/basico/usuario/buscar-agendas-disponiveis`, {params: {usuarioId: usuarioIdNum}}).then(r => r.data),
-                    api.get<number[]>(`/api/basico/usuario/buscar-usuario-seu-perfil`, {params: {entityId: usuarioIdNum}}).then(r => r.data),
-                ]);
-
-                const unidadesSet = new Set(unidadesIds.map(String));
-                const agendasSet = new Set(agendasIds.map(String));
-                const perfisSet = new Set(perfisIds.map(String));
-
-                setUnidadesAcesso(allUnidades.filter(u => unidadesSet.has(String((u as Record<string, unknown>).id))));
-                setAgendas(allAgendas.filter(a => agendasSet.has(String((a as Record<string, unknown>).id))));
-                setPerfis(allPerfis.filter(p => perfisSet.has(String((p as Record<string, unknown>).id))));
-
-                const turnosResp = await api.get<Record<string, unknown>[]>(`/api/basico/usuario/buscar-usuario-com-turnos`, {params: {entityId: usuarioIdNum}});
-                // TODO: Backend endpoint only returns user ID, not turnos. Need backend fix to return associated turnos.
+                if (usu.perfis) {
+                    const perfisIds = (usu.perfis as any[]).map((p: any) => String(p.id));
+                    setPerfis(allPerfis.filter(p => perfisIds.has(String(p.id))));
+                }
+                if (usu.agendas) {
+                    const agendasIds = (usu.agendas as any[]).map((a: any) => String(a.id));
+                    setAgendas(allAgendas.filter(a => agendasIds.has(String(a.id))));
+                }
+                if (usu.unidades) {
+                    const unidadesIds = (usu.unidades as any[]).map((u: any) => String(u.id));
+                    setUnidadesAcesso(allUnidades.filter(u => unidadesIds.has(String(u.id))));
+                }
             } catch (erro) {
                 console.error('Erro ao carregar usuário:', erro);
                 alert('Erro ao carregar registro.');
             }
         })();
-        return () => {
-            ativoReq = false;
-        };
+        return () => { ativoReq = false; };
     }, [idParam, allUnidades, allPerfis, allAgendas]);
-
-    const set = (campo: keyof FormState, valor: string) => setForm((prev) => ({...prev, [campo]: valor}));
 
     const voltar = () => navigate('/view/usuario/listUsuario');
 
     const salvar = async (voltarDepois: boolean) => {
-        if (!form.nome.trim()) {
-            alert('Informe o Nome.');
+        const vals = initialValues;
+        if (!vals.login || !vals.nome || !vals.cpf) {
+            setError('Informe Login, Nome e CPF.');
             return;
         }
         setSalvando(true);
+        setError(undefined);
         try {
-            if (usuarioId) {
-                await api.put(`/api/basico/usuario/${usuarioId}`, {...semId(usuarioOriginal), ativo});
-            }
-            const enderecoPrincipal = enderecos[0];
-            if (pfId || !pessoaId) {
-                const pfBody: Record<string, unknown> = {
-                    ...semId(pfOriginal),
-                    nome: form.nome,
-                    cpf: form.cpf || null,
-                    rg: form.rg || null,
-                    nomeSocial: form.nomeSocial || null,
-                    dataNascimento: form.dataNascimento || null,
-                    generoId: num(form.generoId),
-                    etniaId: num(form.etniaId),
-                    estadoCivilId: num(form.estadoCivilId),
-                    escolaridadeId: num(form.escolaridadeId),
-                    nomeReferencia: form.nomeReferencia || null,
-                    telefoneReferencia: form.telefoneReferencia || null,
-                    celularReferencia: form.celularReferencia || null,
-                    nomeReferencia2: form.nomeReferencia2 || null,
-                    telefoneReferencia2: form.telefoneReferencia2 || null,
-                    celularReferencia2: form.celularReferencia2 || null,
-                    nomePai: form.nomePai || null,
-                    nomeMae: form.nomeMae || null,
-                };
-                const respostaPf = pfId
-                    ? await api.put(`/api/basico/pessoa-fisica/${pfId}`, pfBody)
-                    : await api.post('/api/basico/pessoa-fisica', pfBody);
-                const novoPfId = (respostaPf.data as Record<string, unknown>)?.id ?? pfId;
+            const usuBody: Record<string, unknown> = {
+                ...semId(usuarioOriginal),
+                login: vals.login,
+                senha: vals.senha || null,
+                ativo,
+                relatorio,
+                mensalista,
+                pessoaId: pessoaId || null,
+            };
+            const respostaUsu = usuarioId
+                ? await api.put(`/api/basico/usuario/${usuarioId}`, usuBody)
+                : await api.post('/api/basico/usuario', usuBody);
+            const novoUsuId = (respostaUsu.data as Record<string, unknown>)?.id ?? usuarioId;
 
-                const pessoaBody: Record<string, unknown> = {
-                    ...semId(pessoaOriginal),
-                    email: form.email || null,
-                    telefone: form.telefoneResidencial || null,
-                    celular: form.celular || null,
-                    numero: enderecoPrincipal?.numero || null,
-                    complemento: enderecoPrincipal?.complemento || null,
-                };
-                let novoPesId = pessoaId;
-                if (pessoaId) {
-                    await api.put(`/api/basico/pessoa/${pessoaId}`, pessoaBody);
-                } else {
-                    novoPesId = ((await api.post('/api/basico/pessoa', pessoaBody)).data as Record<string, unknown>)?.id as number | undefined;
-                }
-                if (!pfId && novoPesId && novoPfId) {
-                    await api.put(`/api/basico/pessoa-fisica/${novoPfId}`, {...pfBody, pessoaId: novoPesId});
-                }
-            } else if (pessoaId) {
-                await api.put(`/api/basico/pessoa/${pessoaId}`, {
-                    ...semId(pessoaOriginal),
-                    email: form.email || null,
-                    telefone: form.telefoneResidencial || null,
-                    celular: form.celular || null,
-                });
+            const pfBody: Record<string, unknown> = {
+                ...semId(pfOriginal),
+                nome: vals.nome,
+                cpf: vals.cpf,
+                rg: vals.rg,
+                nomeSocial: vals.nomeSocial || null,
+                dataNascimento: vals.dataNascimento || null,
+                generoId: num(vals.generoId as string),
+                etniaId: num(vals.etniaId as string),
+                estadoCivilId: num(vals.estadoCivilId as string),
+                escolaridadeId: num(vals.escolaridadeId as string),
+                nomePai: vals.nomePai || null,
+                nomeMae: vals.nomeMae || null,
+                nomeReferencia: vals.nomeReferencia || null,
+                telefoneReferencia: vals.telefoneReferencia || null,
+                celularReferencia: vals.celularReferencia || null,
+                nomeReferencia2: vals.nomeReferencia2 || null,
+                telefoneReferencia2: vals.telefoneReferencia2 || null,
+                celularReferencia2: vals.celularReferencia2 || null,
+            };
+            const respostaPf = pfId
+                ? await api.put(`/api/basico/pessoa-fisica/${pfId}`, pfBody)
+                : await api.post('/api/basico/pessoa-fisica', pfBody);
+            const novoPfId = (respostaPf.data as Record<string, unknown>)?.id ?? pfId;
+
+            const pessoaBody: Record<string, unknown> = {
+                ...semId(pessoaOriginal),
+                email: vals.email || null,
+                telefone: vals.telefoneResidencial || null,
+                celular: vals.celular || null,
+                cep: enderecos[0]?.cep || null,
+                numero: enderecos[0]?.numero || null,
+                complemento: enderecos[0]?.complemento || null,
+            };
+            let novoPesId = pessoaId;
+            if (pessoaId) {
+                await api.put(`/api/basico/pessoa/${pessoaId}`, pessoaBody);
+            } else {
+                novoPesId = ((await api.post('/api/basico/pessoa', pessoaBody)).data as Record<string, unknown>)?.id as number | undefined;
             }
+            if (!pfId && novoPesId && novoPfId) {
+                await api.put(`/api/basico/pessoa-fisica/${novoPfId}`, {...pfBody, pessoaId: novoPesId});
+            }
+
+            if (novoUsuId) {
+                await api.put(`/api/basico/usuario/${novoUsuId}/perfis`, perfis.map(p => p.id));
+                await api.put(`/api/basico/usuario/${novoUsuId}/agendas`, agendas.map(a => a.id));
+                await api.put(`/api/basico/usuario/${novoUsuId}/unidades`, unidadesAcesso.map(u => u.id));
+            }
+
             if (voltarDepois) {
                 voltar();
             } else {
@@ -364,342 +341,60 @@ export default function ViewUsuarioFormUsuarioListScreen() {
             }
         } catch (erro) {
             console.error('Erro ao salvar:', erro);
-            alert('Erro ao salvar registro.');
+            setError('Erro ao salvar registro.');
         } finally {
             setSalvando(false);
         }
     };
 
-    const tabs: TabItem[] = [
-        {
-            key: 'pessoal',
-            label: 'Pessoal',
-            content: (
-                <div className="form-grid">
-                    <label className="form-field">
-                        <span className="form-label">CPF *</span>
-                        <input className="form-input" placeholder="999.999.999-99" value={form.cpf}
-                               onChange={(e) => set('cpf', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">RG *</span>
-                        <input className="form-input" placeholder="RG" value={form.rg}
-                               onChange={(e) => set('rg', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Nome *</span>
-                        <input className="form-input" placeholder="Nome completo" style={{gridColumn: 'span 3'}}
-                               value={form.nome} onChange={(e) => set('nome', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">E-mail *</span>
-                        <input className="form-input" type="email" placeholder="E-mail"
-                               style={{gridColumn: 'span 3'}} value={form.email}
-                               onChange={(e) => set('email', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Nome Social</span>
-                        <input className="form-input" placeholder="Nome social" style={{gridColumn: 'span 3'}}
-                               value={form.nomeSocial} onChange={(e) => set('nomeSocial', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Data Nascimento *</span>
-                        <input className="form-input" type="date" value={form.dataNascimento}
-                               onChange={(e) => set('dataNascimento', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Nome do Pai</span>
-                        <input className="form-input" placeholder="Nome do pai" style={{gridColumn: 'span 3'}}
-                               value={form.nomePai} onChange={(e) => set('nomePai', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Nome da Mãe *</span>
-                        <input className="form-input" placeholder="Nome da mãe" style={{gridColumn: 'span 3'}}
-                               value={form.nomeMae} onChange={(e) => set('nomeMae', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Telefone Residencial *</span>
-                        <input className="form-input" placeholder="(99) 9999-9999"
-                               value={form.telefoneResidencial} onChange={(e) => set('telefoneResidencial', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Celular *</span>
-                        <input className="form-input" placeholder="(99) 99999-9999" value={form.celular}
-                               onChange={(e) => set('celular', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Nome Referência *</span>
-                        <input className="form-input" placeholder="Nome da referência"
-                               style={{gridColumn: 'span 3'}} value={form.nomeReferencia}
-                               onChange={(e) => set('nomeReferencia', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Telefone Referência</span>
-                        <input className="form-input" placeholder="(99) 9999-9999"
-                               value={form.telefoneReferencia} onChange={(e) => set('telefoneReferencia', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Celular Referência</span>
-                        <input className="form-input" placeholder="(99) 99999-9999"
-                               value={form.celularReferencia} onChange={(e) => set('celularReferencia', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Nome Referência 2</span>
-                        <input className="form-input" placeholder="Nome da referência 2"
-                               style={{gridColumn: 'span 3'}} value={form.nomeReferencia2}
-                               onChange={(e) => set('nomeReferencia2', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Telefone Referência 2</span>
-                        <input className="form-input" placeholder="(99) 9999-9999"
-                               value={form.telefoneReferencia2} onChange={(e) => set('telefoneReferencia2', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Celular Referência 2</span>
-                        <input className="form-input" placeholder="(99) 99999-9999"
-                               value={form.celularReferencia2} onChange={(e) => set('celularReferencia2', e.target.value)}/>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Sexo *</span>
-                        <select className="form-input form-select" value={form.generoId}
-                                onChange={(e) => set('generoId', e.target.value)}>
-                            <option value="">-- Selecione --</option>
-                            <option value="1">Masculino</option>
-                            <option value="2">Feminino</option>
-                            <option value="3">Outro</option>
-                        </select>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Etnia</span>
-                        <select className="form-input form-select" value={form.etniaId}
-                                onChange={(e) => set('etniaId', e.target.value)}>
-                            <option value="">-- Selecione --</option>
-                            <option value="1">Branca</option>
-                            <option value="2">Preta</option>
-                            <option value="3">Parda</option>
-                            <option value="4">Amarela</option>
-                            <option value="5">Indígena</option>
-                        </select>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Estado Civil *</span>
-                        <select className="form-input form-select" value={form.estadoCivilId}
-                                onChange={(e) => set('estadoCivilId', e.target.value)}>
-                            <option value="">-- Selecione --</option>
-                            <option value="1">Solteiro(a)</option>
-                            <option value="2">Casado(a)</option>
-                            <option value="3">Divorciado(a)</option>
-                            <option value="4">Viúvo(a)</option>
-                            <option value="5">União Estável</option>
-                        </select>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Escolaridade *</span>
-                        <select className="form-input form-select" value={form.escolaridadeId}
-                                onChange={(e) => set('escolaridadeId', e.target.value)}>
-                            <option value="">-- Selecione --</option>
-                            <option value="1">Ensino Fundamental Incompleto</option>
-                            <option value="2">Ensino Fundamental Completo</option>
-                            <option value="3">Ensino Médio Incompleto</option>
-                            <option value="4">Ensino Médio Completo</option>
-                            <option value="5">Superior Incompleto</option>
-                            <option value="6">Superior Completo</option>
-                            <option value="7">Pós-Graduação</option>
-                        </select>
-                    </label>
-                </div>
-            ),
-        },
+    const extraTabs = [
         {
             key: 'endereco',
             label: 'Endereço',
+            content: <EnderecoCampos value={enderecos} onChange={setEnderecos}/>,
+        },
+        {
+            key: 'perfis',
+            label: 'Perfis',
             content: (
-                <div className="form-grid">
-                    <EnderecoCampos value={enderecos} onChange={setEnderecos}/>
-                </div>
+                <MasterDetail
+                    label="Perfil"
+                    source={PERFIL_SOURCE}
+                    valueKey="id"
+                    searchKeys={PERFIL_SEARCH}
+                    columns={PERFIL_COLUMNS}
+                    items={perfis}
+                    onChange={setPerfis}
+                />
             ),
         },
         {
-            key: 'documentos',
-            label: 'Documentos',
+            key: 'agendas',
+            label: 'Agendas',
             content: (
-                <>
-                    <div className="form-grid">
-                        <label className="form-field">
-                            <span className="form-label">CTPS *</span>
-                            <input className="form-input" placeholder="Carteira de Trabalho"/>
-                        </label>
-                        <label className="form-field">
-                            <span className="form-label">Série *</span>
-                            <input className="form-input" placeholder="Série"/>
-                        </label>
-                        <label className="form-field">
-                            <span className="form-label">PIS *</span>
-                            <input className="form-input" placeholder="999.9999.999-9"/>
-                        </label>
-                        <label className="form-field">
-                            <span className="form-label">Data Emissão RG</span>
-                            <input className="form-input" type="date"/>
-                        </label>
-                        <label className="form-field">
-                            <span className="form-label">Órgão Emissor</span>
-                            <input className="form-input" placeholder="Órgão Emissor"/>
-                        </label>
-                        <label className="form-field">
-                            <span className="form-label">Título Eleitor</span>
-                            <input className="form-input" placeholder="Título de Eleitor"/>
-                        </label>
-                        <label className="form-field">
-                            <span className="form-label">Zona</span>
-                            <input className="form-input" placeholder="Zona"/>
-                        </label>
-                        <label className="form-field">
-                            <span className="form-label">Seção</span>
-                            <input className="form-input" placeholder="Seção"/>
-                        </label>
-                        <label className="form-field">
-                            <span className="form-label">Carteira Reservista</span>
-                            <input className="form-input" placeholder="Carteira de Reservista"/>
-                        </label>
-                        <label className="form-field">
-                            <span className="form-label">Qtd. Filhos Menores de 14</span>
-                            <input className="form-input" type="number" placeholder="Quantidade"/>
-                        </label>
-                    </div>
-                    <fieldset className="form-fieldset">
-                        <legend>Documentos Digitalizados
-                            <small> (campos com * são obrigatórios)</small>
-                        </legend>
-                        <div className="form-grid">
-                            <DocumentoUpload label="Foto 3x4" obrigatorio/>
-                            <DocumentoUpload label="Carteira de Trabalho - Pág. 1" obrigatorio/>
-                            <DocumentoUpload label="Carteira de Trabalho - Pág. 2" obrigatorio/>
-                            <DocumentoUpload label="Contrato de Trabalho" obrigatorio/>
-                            <DocumentoUpload label="Comprovante de Residência" obrigatorio/>
-                            <DocumentoUpload label="CPF" obrigatorio/>
-                            <DocumentoUpload label="RG - Frente"/>
-                            <DocumentoUpload label="RG - Verso"/>
-                            <DocumentoUpload label="Título Eleitoral"/>
-                            <DocumentoUpload label="Carteira de Reservista"/>
-                            <DocumentoUpload label="Certidão de Nascimento dos Filhos Menores" obrigatorio/>
-                            <DocumentoUpload label="Carteira de Vacinação dos Filhos Menores" obrigatorio/>
-                        </div>
-                    </fieldset>
-                </>
+                <MasterDetail
+                    label="Agenda"
+                    source={AGENDA_SOURCE}
+                    valueKey="id"
+                    searchKeys={AGENDA_SEARCH}
+                    columns={AGENDA_COLUMNS}
+                    items={agendas}
+                    onChange={setAgendas}
+                />
             ),
         },
         {
-            key: 'trabalho',
-            label: 'Trabalho',
+            key: 'unidadesAcesso',
+            label: 'Unidades de Acesso',
             content: (
-                <div className="form-grid">
-                    <div className="form-field">
-                        <span className="form-label">Usuário Ativo</span>
-                        <BooleanField value={ativo} onChange={setAtivo}/>
-                    </div>
-                    <label className="form-field">
-                        <span className="form-label">Função *</span>
-                        <select className="form-input form-select" style={{gridColumn: 'span 3'}}>
-                            <option value="">-- Selecione --</option>
-                        </select>
-                    </label>
-                    <label className="form-field">
-                        <span className="form-label">Data Admissão</span>
-                        <input className="form-input" type="date"/>
-                    </label>
-                    <div className="form-field">
-                        <span className="form-label">Vínculo</span>
-                        <div style={{display: 'flex', gap: '16px', alignItems: 'center'}}>
-                            <label style={{display: 'flex', gap: '4px', alignItems: 'center'}}>
-                                <input type="radio" name="vinculo" checked={mensalista === 'M'}
-                                       onChange={() => setMensalista('M')}/>
-                                Mensalista
-                            </label>
-                            <label style={{display: 'flex', gap: '4px', alignItems: 'center'}}>
-                                <input type="radio" name="vinculo" checked={mensalista === 'H'}
-                                       onChange={() => setMensalista('H')}/>
-                                Horista
-                            </label>
-                        </div>
-                    </div>
-                    {mensalista === 'M' && (
-                        <div className="form-field" style={{gridColumn: 'span 4'}}>
-                            <MasterDetail
-                                label="Turnos de Trabalho"
-                                source={TURNO_TRABALHO_SOURCE}
-                                valueKey="id"
-                                searchKeys={TURNO_TRABALHO_SEARCH}
-                                columns={TURNO_TRABALHO_COLUMNS}
-                                items={turnos}
-                                onChange={setTurnos}
-                            />
-                        </div>
-                    )}
-                    <div className="form-field">
-                        <span className="form-label">Relatório</span>
-                        <BooleanField value={relatorio} onChange={setRelatorio}/>
-                    </div>
-                    <label className="form-field">
-                        <span className="form-label">Observação</span>
-                        <textarea className="form-input" placeholder="Observações" rows={3}
-                                  style={{gridColumn: 'span 3', minHeight: '80px'}}/>
-                    </label>
-                </div>
-            ),
-        },
-        {
-            key: 'acesso',
-            label: 'Acessos',
-            content: (
-                <Tabs
-                    tabs={[
-                        {
-                            key: 'unidades',
-                            label: 'Unidades',
-                            content: (
-                                <MasterDetail
-                                    label="Unidade"
-                                    source={UNIDADE_SOURCE}
-                                    valueKey="id"
-                                    searchKeys={UNIDADE_SEARCH}
-                                    columns={UNIDADE_COLUMNS}
-                                    items={unidadesAcesso}
-                                    onChange={setUnidadesAcesso}
-                                />
-                            ),
-                        },
-                        {
-                            key: 'perfis',
-                            label: 'Perfis',
-                            content: (
-                                <MasterDetail
-                                    label="Perfil"
-                                    source={PERFIL_SOURCE}
-                                    valueKey="id"
-                                    searchKeys={PERFIL_SEARCH}
-                                    columns={PERFIL_COLUMNS}
-                                    items={perfis}
-                                    onChange={setPerfis}
-                                />
-                            ),
-                        },
-                        {
-                            key: 'agendas',
-                            label: 'Agendas',
-                            content: (
-                                <MasterDetail
-                                    label="Agenda"
-                                    source={AGENDA_SOURCE}
-                                    valueKey="id"
-                                    searchKeys={AGENDA_SEARCH}
-                                    columns={AGENDA_COLUMNS}
-                                    items={agendas}
-                                    onChange={setAgendas}
-                                />
-                            ),
-                        },
-                    ]}
-                    initial="unidades"
+                <MasterDetail
+                    label="Unidade"
+                    source={UNIDADE_SOURCE}
+                    valueKey="id"
+                    searchKeys={UNIDADE_SEARCH}
+                    columns={UNIDADE_COLUMNS}
+                    items={unidadesAcesso}
+                    onChange={setUnidadesAcesso}
                 />
             ),
         },
@@ -708,25 +403,31 @@ export default function ViewUsuarioFormUsuarioListScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>Cadastro de Usuário</h1>
-                <div className="div_form">
-                    <div className="form-title">{usuarioId ? `Usuário #${usuarioId}` : 'Usuário'}</div>
-                    <div className="table_form">
-                        <Tabs tabs={tabs} initial="pessoal"/>
-                        <div className="form-buttons">
-                            <button type="button" className="btnblue" title="Salvar registro"
-                                    disabled={salvando} onClick={() => void salvar(true)}>Gravar
-                            </button>
-                            <button type="button" className="btnstop" title="Salvar e continuar editando"
-                                    disabled={salvando} onClick={() => void salvar(false)}>
-                                Salvar e Continuar
-                            </button>
-                            <button type="button" className="btnyellow" title="Voltar para a lista"
-                                    onClick={voltar}>Voltar
-                            </button>
-                        </div>
+                <FormLayout
+                    title="Usuário"
+                    tabs={usuarioTabs}
+                    initialValues={initialValues}
+                    onSubmit={(vals) => {
+                        setInitialValues(vals);
+                        salvar(false);
+                    }}
+                    onCancel={voltar}
+                    submitLabel="Salvar"
+                    cancelLabel="Voltar"
+                    saving={salvando}
+                    error={error}
+                >
+                    <div style={{marginTop: '20px'}}>
+                        {extraTabs.map((tab) => (
+                            <div key={tab.key} style={{marginBottom: '30px'}}>
+                                <h3 style={{marginBottom: '10px', color: '#2e6e9e', borderBottom: '1px solid #a8d0e6', paddingBottom: '4px'}}>
+                                    {tab.label}
+                                </h3>
+                                {tab.content}
+                            </div>
+                        ))}
                     </div>
-                </div>
+                </FormLayout>
             </main>
         </PermissionGate>
     );

@@ -7,13 +7,20 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.*;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.List;
 
 import br.com.sol7.olimpio.basico.usuario.dto.UsuarioFotoRequest;
 import br.com.sol7.olimpio.basico.usuario.dto.UsuarioRequest;
 import br.com.sol7.olimpio.basico.usuario.dto.UsuarioResponse;
+import br.com.sol7.olimpio.basico.usuario.service.FileStorageService;
 import br.com.sol7.olimpio.basico.usuario.service.UsuarioService;
+import org.jboss.resteasy.reactive.RestForm;
+import org.jboss.resteasy.reactive.multipart.FileUpload;
 
 @Path("/api/basico/usuario")
 @Produces(MediaType.APPLICATION_JSON)
@@ -22,6 +29,12 @@ public class UsuarioController {
 
     @Inject
     UsuarioService service;
+
+    @Inject
+    FileStorageService fileStorageService;
+
+    @ConfigProperty(name = "olimpio.storage.foto-usuario-path", defaultValue = "fotousuario")
+    String fotoUsuarioPath;
 
     @GET
     public Uni<List<UsuarioResponse>> list() {
@@ -61,6 +74,23 @@ public class UsuarioController {
         Object user = ctx.getProperty("authenticatedUser");
         String username = user == null ? "" : user.toString();
         return service.atualizarFotoBase64(username, r.foto());
+    }
+
+    @POST
+    @Path("/foto-upload")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<UsuarioResponse> uploadFoto(@Context ContainerRequestContext ctx,
+                                           @RestForm("file") FileUpload file) {
+        Object user = ctx.getProperty("authenticatedUser");
+        String username = user == null ? "" : user.toString();
+        try (InputStream is = Files.newInputStream(file.uploadedFile())) {
+            String relativePath = fileStorageService.saveFotoUsuario(username, is, file.fileName());
+            String fotoUrl = "/app-resources/" + relativePath;
+            return service.atualizarFoto(username, fotoUrl);
+        } catch (IOException e) {
+            return Uni.createFrom().failure(new WebApplicationException("Erro ao fazer upload da foto", Response.Status.INTERNAL_SERVER_ERROR));
+        }
     }
 
     @PUT
