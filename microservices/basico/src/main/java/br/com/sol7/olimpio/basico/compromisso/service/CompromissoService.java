@@ -38,6 +38,11 @@ public class CompromissoService {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
     }
 
+    public Uni<List<CompromissoResponse>> listarCompromissosPorRangeData(Date inicio, Date fim) {
+        return repository.listarCompromissosPorRangeData(inicio, fim)
+                .map(items -> items.stream().map(this::toResponse).toList());
+    }
+
     public Uni<PagedResponse<CompromissoResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;

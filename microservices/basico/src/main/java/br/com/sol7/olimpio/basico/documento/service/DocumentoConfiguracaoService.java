@@ -16,47 +16,43 @@ public class DocumentoConfiguracaoService {
 
     public Uni<DocumentoConfiguracaoResponse> salvar(DocumentoConfiguracaoRequest request) {
         var entity = new DocumentoConfiguracao();
-        entity.id = UUID.randomUUID().getMostSignificantBits();
+        entity.id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
         entity.nome = request.nome();
         entity.descricao = request.descricao();
         entity.tipoRelatorio = request.tipoRelatorio();
         entity.arquivoModelo = request.arquivoModelo();
         entity.ativo = request.ativo();
-        return Panache
-            .withEntityManager(em -> em.persist(entity))
-            .replaceWith(() -> toResponse(entity));
+        return entity.persist().replaceWith(() -> toResponse(entity));
     }
 
     public Uni<List<DocumentoConfiguracaoResponse>> listar() {
         return DocumentoConfiguracao
-            .findAll()
-            .onItem()
-            .transformToUni(item -> Uni.createFrom().item(toResponse(item)))
-            .collect().asList();
+            .<DocumentoConfiguracao>findAll()
+            .list()
+            .map(items -> items.stream().map(this::toResponse).toList());
     }
 
     public Uni<DocumentoConfiguracaoResponse> atualizar(Long id, DocumentoConfiguracaoRequest request) {
         return DocumentoConfiguracao
-            .findById(id)
-            .onItem()
-            .ifNull().failWith(() -> new NotFoundException("Documento configuração not found"))
+            .<DocumentoConfiguracao>findById(id)
+            .onItem().ifNull().failWith(() -> new NotFoundException("Documento configuração not found"))
             .chain(entity -> {
                 entity.nome = request.nome();
                 entity.descricao = request.descricao();
                 entity.tipoRelatorio = request.tipoRelatorio();
                 entity.arquivoModelo = request.arquivoModelo();
                 entity.ativo = request.ativo();
+                return entity.<DocumentoConfiguracao>persistAndFlush().map(e -> (DocumentoConfiguracao) e);
             })
-            .replaceWith(() -> toResponse(entity));
+            .map(this::toResponse);
     }
 
     public Uni<Void> deletar(Long id) {
         return DocumentoConfiguracao
-            .findById(id)
+            .<DocumentoConfiguracao>findById(id)
             .onItem()
             .ifNull().failWith(() -> new NotFoundException("Documento configuração not found"))
-            .chain(() -> Panache.delete(entity))
-            .replaceWith(() -> Uni.createFrom().voidItem());
+            .chain(entity -> entity.delete().replaceWithVoid());
     }
 
     private DocumentoConfiguracaoResponse toResponse(DocumentoConfiguracao entity) {

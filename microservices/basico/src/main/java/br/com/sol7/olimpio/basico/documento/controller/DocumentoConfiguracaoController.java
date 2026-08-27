@@ -3,6 +3,7 @@ package br.com.sol7.olimpio.basico.documento.controller;
 import br.com.sol7.olimpio.basico.documento.dto.DocumentoConfiguracaoRequest;
 import br.com.sol7.olimpio.basico.documento.dto.DocumentoConfiguracaoResponse;
 import br.com.sol7.olimpio.basico.documento.service.DocumentoConfiguracaoService;
+import io.smallrye.mutiny.Uni;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -18,39 +19,33 @@ public class DocumentoConfiguracaoController {
 
     @GET
     @Path("/")
-    public Response listar() {
+    public Uni<Response> listar() {
         return service.listar()
-            .map(responses -> Response.ok(responses).build())
-            .defaultIfEmpty(Response.status(404).entity("Nenhum documento configurado").build())
-            .orElse(Response.serverError().build());
+            .map(responses -> responses.isEmpty() ? 
+                Response.status(404).entity("Nenhum documento configurado").build() : 
+                Response.ok(responses).build());
     }
 
     @POST
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response salvar(DocumentoConfiguracaoRequest request) {
+    public Uni<Response> salvar(DocumentoConfiguracaoRequest request) {
         return service.salvar(request)
-            .map(Response::ok)
-            .defaultIfEmpty(Response.serverError().build())
-            .orElse(Response.serverError().build());
+            .map(res -> Response.ok(res).build());
     }
 
     @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response atualizar(@PathParam("id") Long id, DocumentoConfiguracaoRequest request) {
+    public Uni<Response> atualizar(@PathParam("id") Long id, DocumentoConfiguracaoRequest request) {
         return service.atualizar(id, request)
-            .map(Response::ok)
-            .defaultIfEmpty(Response.status(404).build())
-            .orElse(Response.serverError().build());
+            .map(res -> Response.ok(res).build());
     }
 
     @DELETE
     @Path("/{id}")
-    public Response deletar(@PathParam("id") Long id) {
+    public Uni<Response> deletar(@PathParam("id") Long id) {
         return service.deletar(id)
-            .map(Response::ok)
-            .defaultIfEmpty(Response.status(404).build())
-            .orElse(Response.serverError().build());
+            .map(v -> Response.ok().build());
     }
 }

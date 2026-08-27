@@ -8,6 +8,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import java.util.List;
+import br.com.sol7.olimpio.comercial.turnotrabalho.TurnoTrabalho;
 
 @Entity
 @Table(name = "com_consultor")

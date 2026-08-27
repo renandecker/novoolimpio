@@ -186,12 +186,10 @@ public class CompromissoController {
                 .map(list -> {
                     if (agendaId != null) {
                         list = list.stream()
-                                .filter(c -> c.agendaId != null && c.agendaId.equals(agendaId))
+                                .filter(c -> c.agendaId() != null && c.agendaId().equals(agendaId))
                                 .toList();
                     }
-                    return list.stream()
-                            .map(service::toResponse)
-                            .toList();
+                    return list;
                 });
     }
 
