@@ -8,6 +8,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Path("/api/comercial/prospecto-list")
 @Produces(MediaType.APPLICATION_JSON)
@@ -52,29 +53,33 @@ public class ProspectoListController {
 
     @GET
     @Path("/carregar-quantidade-ligacao")
-    public Uni<Void> carregarQuantidadeLigacao(@QueryParam("prospectoId") Long prospectoId) {
+    public Uni<List<Map<String, Object>>> carregarQuantidadeLigacao(@QueryParam("prospectoId") Long prospectoId) {
         return service.carregarQuantidadeLigacao(prospectoId);
     }
 
-
     @GET
     @Path("/carregar-historico-ligacao")
-    public Uni<Void> carregarHistoricoLigacao(@QueryParam("prospectoId") Long prospectoId) {
+    public Uni<List<Map<String, Object>>> carregarHistoricoLigacao(@QueryParam("prospectoId") Long prospectoId) {
         return service.carregarHistoricoLigacao(prospectoId);
     }
 
-
     @GET
     @Path("/carregar-prospectos-link")
-    public Uni<Void> carregarProspectosLink() {
+    public Uni<List<Map<String, Object>>> carregarProspectosLink() {
         return service.carregarProspectosLink();
     }
 
-
-    @GET
-    @Path("/carregar-prospecto-para-visualizacao")
-    public Uni<Void> carregarProspectoParaVisualizacao(@QueryParam("entityId") Long entityId) {
-        return service.carregarProspectoParaVisualizacao(entityId);
+    @POST
+    @Path("/salvar-prospecto-link")
+    public Uni<Response> salvarProspectoLink(Map<String, Object> r) {
+        return service.salvarProspectoLink(r).map(item -> Response.status(Response.Status.CREATED).entity(item).build());
     }
+
+    @POST
+    @Path("/inativar")
+    public Uni<Response> inativar(@QueryParam("id") Long id) {
+        return service.inativar(id).map(item -> Response.ok(item).build());
+    }
+
 
 }

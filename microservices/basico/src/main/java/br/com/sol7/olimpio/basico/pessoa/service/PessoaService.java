@@ -122,4 +122,12 @@ public class PessoaService {
         return repository.buscarPessoaPorUnidades(unidade).map(list -> list.stream().map(x -> x.id).toList());
     }
 
+    // Retorna os ids de Unidade vinculados a uma Pessoa via bas_pessoa_unidade.
+    public Uni<List<Long>> buscarUnidades(Long pessoaId) {
+        if (pessoaId == null) {
+            return Uni.createFrom().item(java.util.Collections.emptyList());
+        }
+        return repository.buscarUnidadesPorPessoa(pessoaId);
+    }
+
 }

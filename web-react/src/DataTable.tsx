@@ -203,7 +203,7 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
     const colorColumnSet = new Set(colorColumns ?? []);
     const {can} = usePermissions();
     const {session} = useAuth();
-    const isAdmin = session?.hierarquia === 'ADMIN';
+    const isUserAdmin = session?.hierarquia === 'ADMIN';
     const routeOutcome = useCurrentOutcome();
     const screenOutcome = outcome ?? routeOutcome;
 
@@ -246,8 +246,8 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
     const canCreate = !hideCreate && (can('CREATE', screenOutcome) || (perfilModuloPermissions?.novo ?? false));
     const canUpdate = !hideUpdate && (can('UPDATE', screenOutcome) || (perfilModuloPermissions?.editar ?? false));
     const canDelete = !hideDelete && (can('DELETE', screenOutcome) || (perfilModuloPermissions?.remover ?? false));
-    const isAdmin = perfilModuloPermissions?.admin ?? false;
-    const canRelatorio = !hideView && (isAdmin || can('EXECUTE', screenOutcome));
+    const perfilPermissionsAdmin = perfilModuloPermissions?.admin ?? false;
+    const canRelatorio = !hideView && (isUserAdmin || perfilPermissionsAdmin || can('EXECUTE', screenOutcome));
 
     const feature = path.split('/').filter(Boolean)[2] ?? '';
     const resource = path.split('/').filter(Boolean)[3] ?? '';

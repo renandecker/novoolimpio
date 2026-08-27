@@ -2,7 +2,19 @@ import {PermissionGate} from '../permissions';
 import {DataTable} from '../DataTable';
 
 export default function ViewEstrategiaFormEstrategiaListScreen() {
-    return <PermissionGate permission="READ">
-        <main><h1>Form Estrategia</h1><DataTable path="/api/view/estrategia/formEstrategia"/></main>
-    </PermissionGate>
+    return (
+        <PermissionGate permission="READ">
+            <main>
+                <h1>Estratégia</h1>
+                <DataTable
+                    path="/api/comercial/estrategia"
+                    module="comercial"
+                    columns={[
+                        {key: 'id', label: 'Id'},
+                        {key: 'descricao', label: 'Descrição'}
+                    ]}
+                />
+            </main>
+        </PermissionGate>
+    );
 }

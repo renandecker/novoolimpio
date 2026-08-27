@@ -1,6 +1,8 @@
+import {useState} from 'react';
 import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
+import {DataTable, type DataTableColumn, type DataTableRowAction} from '../DataTable';
 import type {ApiItem} from '../types';
+import {api} from '../api';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -12,6 +14,7 @@ const formatDate = (value: unknown): string => {
 };
 
 const COLUMNS: DataTableColumn[] = [
+    {key: 'id', label: 'Id'},
     {key: 'nome', label: 'Nome'},
     {key: 'unidade_descricao', label: 'Unidade'},
     {key: 'nota', label: 'Nota'},
@@ -24,12 +27,207 @@ const COLUMNS: DataTableColumn[] = [
 ];
 
 export default function ViewProspectoListProspectoListScreen() {
+    const [historicoLigacaoModal, setHistoricoLigacaoModal] = useState<{ prospectoName: string; list: any[] } | null>(null);
+    const [quantidadeLigacaoModal, setQuantidadeLigacaoModal] = useState<{ prospectoName: string; list: any[] } | null>(null);
+    const [linkModalOpen, setLinkModalOpen] = useState(false);
+    const [linkList, setLinkList] = useState<any[]>([]);
+    const [linkForm, setLinkForm] = useState({ acao: '', unidade: '', usuario: '' });
+
+    const carregarHistoricoLigacao = async (item: ApiItem) => {
+        try {
+            const res = await api.get(`/api/comercial/prospecto-list/carregar-historico-ligacao?prospectoId=${item.id}`);
+            setHistoricoLigacaoModal({ prospectoName: String(item.nome ?? ''), list: res.data ?? [] });
+        } catch {
+            setHistoricoLigacaoModal({ prospectoName: String(item.nome ?? ''), list: [] });
+        }
+    };
+
+    const carregarQuantidadeLigacao = async (item: ApiItem) => {
+        try {
+            const res = await api.get(`/api/comercial/prospecto-list/carregar-quantidade-ligacao?prospectoId=${item.id}`);
+            setQuantidadeLigacaoModal({ prospectoName: String(item.nome ?? ''), list: res.data ?? [] });
+        } catch {
+            setQuantidadeLigacaoModal({ prospectoName: String(item.nome ?? ''), list: [] });
+        }
+    };
+
+    const abrirLinks = async () => {
+        setLinkModalOpen(true);
+        try {
+            const res = await api.get('/api/comercial/prospecto-list/carregar-prospectos-link');
+            setLinkList(res.data ?? []);
+        } catch {
+            setLinkList([]);
+        }
+    };
+
+    const salvarLink = async () => {
+        try {
+            await api.post('/api/comercial/prospecto-list/salvar-prospecto-link', linkForm);
+            const res = await api.get('/api/comercial/prospecto-list/carregar-prospectos-link');
+            setLinkList(res.data ?? []);
+            setLinkForm({ acao: '', unidade: '', usuario: '' });
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const extraActions: DataTableRowAction[] = [
+        {
+            key: 'historicoLigacao',
+            title: 'Histórico Ligação',
+            className: 'btnblue',
+            icon: <i className="fa fa-star"/>,
+            onClick: (item) => carregarHistoricoLigacao(item),
+        },
+        {
+            key: 'quantidadeLigacao',
+            title: 'Quantidade Ligação por Resultado',
+            className: 'btnstop',
+            icon: <i className="fa fa-phone"/>,
+            onClick: (item) => carregarQuantidadeLigacao(item),
+        },
+        {
+            key: 'inativarProspecto',
+            title: 'Inativar Prospecto',
+            className: 'btnblack',
+            icon: <i className="fa fa-ban"/>,
+            onClick: async (item) => {
+                if (window.confirm('Ao desativar ele não estará no radar e nas ligações. Deseja continuar?')) {
+                    await api.post(`/api/comercial/prospecto-list/inativar?id=${item.id}`);
+                }
+            },
+        },
+    ];
+
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>Prospecto</h1>
-                <DataTable path="/api/view/prospecto/listProspecto" columns={COLUMNS} maxMainColumns={COLUMNS.length}/>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
+                    <h1>Prospecto</h1>
+                    <button className="btn-primary btnblack" onClick={abrirLinks}>
+                        <i className="fa fa-link"/> Link
+                    </button>
+                </div>
+                <DataTable
+                    path="/api/view/prospecto/listProspecto"
+                    columns={COLUMNS}
+                    maxMainColumns={COLUMNS.length}
+                    extraRowActions={extraActions}
+                    editNavigateTo="/view/prospecto/editProspecto"
+                    createNavigateTo="/view/prospecto/prospectoRadar"
+                />
+
+                {historicoLigacaoModal && (
+                    <div className="modal-overlay" onClick={() => setHistoricoLigacaoModal(null)}>
+                        <div className="modal" onClick={e => e.stopPropagation()} style={{width: '600px'}}>
+                            <h3>Histórico Ligações</h3>
+                            <p><strong>{historicoLigacaoModal.prospectoName}</strong></p>
+                            <table style={{width: '100%', marginTop: '10px'}}>
+                                <thead>
+                                <tr>
+                                    <th>Operador</th>
+                                    <th>Data Inicial</th>
+                                    <th>Data Final</th>
+                                    <th>Resultado</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {historicoLigacaoModal.list.length === 0 ? (
+                                    <tr><td colSpan={4}>Nenhum registro</td></tr>
+                                ) : (
+                                    historicoLigacaoModal.list.map((h: any, idx: number) => (
+                                        <tr key={idx}>
+                                            <td>{h.operador}</td>
+                                            <td>{h.dataInicial}</td>
+                                            <td>{h.dataFinal}</td>
+                                            <td>{h.resultado}</td>
+                                        </tr>
+                                    ))
+                                )}
+                                </tbody>
+                            </table>
+                            <div className="modal-actions" style={{marginTop: '16px'}}>
+                                <button className="btnblue" onClick={() => setHistoricoLigacaoModal(null)}>Fechar</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {quantidadeLigacaoModal && (
+                    <div className="modal-overlay" onClick={() => setQuantidadeLigacaoModal(null)}>
+                        <div className="modal" onClick={e => e.stopPropagation()} style={{width: '450px'}}>
+                            <h3>Quantidade ligação por resultado</h3>
+                            <p><strong>{quantidadeLigacaoModal.prospectoName}</strong></p>
+                            <table style={{width: '100%', marginTop: '10px'}}>
+                                <thead>
+                                <tr>
+                                    <th>Resultado Ligação</th>
+                                    <th>Quantidade</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {quantidadeLigacaoModal.list.length === 0 ? (
+                                    <tr><td colSpan={2}>Nenhum registro</td></tr>
+                                ) : (
+                                    quantidadeLigacaoModal.list.map((q: any, idx: number) => (
+                                        <tr key={idx}>
+                                            <td>{q.resultado}</td>
+                                            <td>{q.quantidade}</td>
+                                        </tr>
+                                    ))
+                                )}
+                                </tbody>
+                            </table>
+                            <div className="modal-actions" style={{marginTop: '16px'}}>
+                                <button className="btnblue" onClick={() => setQuantidadeLigacaoModal(null)}>Fechar</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {linkModalOpen && (
+                    <div className="modal-overlay" onClick={() => setLinkModalOpen(false)}>
+                        <div className="modal" onClick={e => e.stopPropagation()} style={{width: '700px'}}>
+                            <h3>Gerador de link para cadastro</h3>
+                            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px'}}>
+                                <label>Ação *<input type="text" value={linkForm.acao} onChange={e => setLinkForm({...linkForm, acao: e.target.value})} style={{width: '100%'}}/></label>
+                                <label>Unidade *<input type="text" value={linkForm.unidade} onChange={e => setLinkForm({...linkForm, unidade: e.target.value})} style={{width: '100%'}}/></label>
+                                <label>Usuário *<input type="text" value={linkForm.usuario} onChange={e => setLinkForm({...linkForm, usuario: e.target.value})} style={{width: '100%'}}/></label>
+                            </div>
+                            <button className="btnstop" onClick={salvarLink}>Selecionar</button>
+                            <table style={{width: '100%', marginTop: '15px'}}>
+                                <thead>
+                                <tr>
+                                    <th>Ação</th>
+                                    <th>Unidade</th>
+                                    <th>Usuário</th>
+                                    <th>Ativo</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {linkList.length === 0 ? (
+                                    <tr><td colSpan={4}>Nenhum registro</td></tr>
+                                ) : (
+                                    linkList.map((l: any, idx: number) => (
+                                        <tr key={idx}>
+                                            <td>{l.acao}</td>
+                                            <td>{l.unidade}</td>
+                                            <td>{l.usuario}</td>
+                                            <td>{l.ativo ? 'Sim' : 'Não'}</td>
+                                        </tr>
+                                    ))
+                                )}
+                                </tbody>
+                            </table>
+                            <div className="modal-actions" style={{marginTop: '16px'}}>
+                                <button className="btnblue" onClick={() => setLinkModalOpen(false)}>Fechar</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </main>
         </PermissionGate>
     );
 }
+

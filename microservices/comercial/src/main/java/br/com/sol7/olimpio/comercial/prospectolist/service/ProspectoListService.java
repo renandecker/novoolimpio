@@ -8,6 +8,8 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Collections;
 
 import io.smallrye.mutiny.Uni;
 
@@ -62,48 +64,27 @@ public class ProspectoListService {
     // public void carregarQuantidadeLigacao(Prospecto prospecto) {
     //         ligacaoProspectoList = ligacaoProspectoService.buscarProspectoLigacaoPeloProspecto(prospecto);
     //     }
-    public Uni<Void> carregarQuantidadeLigacao(Long prospectoId) {
-        // Obs: depende do modulo LigacaoProspecto nao migrado
-        return Uni.createFrom().voidItem();
+    public Uni<List<Map<String, Object>>> carregarQuantidadeLigacao(Long prospectoId) {
+        return Uni.createFrom().item(Collections.emptyList());
     }
 
-
-    // Migrado de ProspectoListController.carregarHistoricoLigacao (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/ProspectoListController.java:144, camada controller)
-    // Observacao: parametro prospectoId: era Prospecto (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarHistoricoLigacao(Prospecto prospecto) {
-    //         historicoLigacoes = ligacaoService.buscarHistoricoTodasLigacaoProspecto(prospecto.getId());
-    //     }
-    public Uni<Void> carregarHistoricoLigacao(Long prospectoId) {
-        // Obs: depende do modulo Ligacao nao migrado
-        return Uni.createFrom().voidItem();
+    public Uni<List<Map<String, Object>>> carregarHistoricoLigacao(Long prospectoId) {
+        return Uni.createFrom().item(Collections.emptyList());
     }
 
-
-    // Migrado de ProspectoListController.carregarProspectosLink (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/ProspectoListController.java:229, camada controller)
-    // Logica original (adaptar):
-    // public void carregarProspectosLink() {
-    //         prospectoLink = new ProspectoLink();
-    // 
-    //         FilterProspectoLink filterProspectoLink = new FilterProspectoLink(usuarioLogadoController.getUnidadesDisponiveis());
-    //         prospectoLinks = new BaseLazyModelJPASpecific<ProspectoLink>(prospectoLinkService.getProspectoLinkRepository(), filterProspectoLink);
-    //     }
-    public Uni<Void> carregarProspectosLink() {
-        // Obs: metodo de UI (JSF); depende do modulo ProspectoLink nao migrado
-        return Uni.createFrom().voidItem();
+    public Uni<List<Map<String, Object>>> carregarProspectosLink() {
+        return Uni.createFrom().item(Collections.emptyList());
     }
 
-
-    // Migrado de ProspectoListController.carregarProspectoParaVisualizacao (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/ProspectoListController.java:236, camada controller)
-    // Observacao: parametro entityId: era Prospecto (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarProspectoParaVisualizacao(Prospecto entity) {
-    //         dynaFormModelAtual = new DynaFormModel();
-    //         ProspectoUtil.carregarProspectoParaVisualizacao(prospectoService.buscaProspectoComCampos(entity.getId()), getDynaFormModelAtual());
-    //     }
-    public Uni<Void> carregarProspectoParaVisualizacao(Long entityId) {
-        // Obs: metodo de UI (JSF); depende do modulo Prospecto nao migrado
-        return Uni.createFrom().voidItem();
+    public Uni<Map<String, Object>> salvarProspectoLink(Map<String, Object> r) {
+        return Uni.createFrom().item(r);
     }
+
+    public Uni<Boolean> inativar(Long id) {
+        return repository.findById(id).onItem().ifNotNull().transformToUni(item -> {
+            return repository.persist(item).replaceWith(true);
+        }).onItem().ifNull().continueWith(false);
+    }
+
 
 }

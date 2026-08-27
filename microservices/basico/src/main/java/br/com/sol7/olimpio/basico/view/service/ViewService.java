@@ -54,6 +54,8 @@ public class ViewService {
             Map.entry("mensagemMeta/listMensagemMeta", "cen_mensagem_meta"),
             Map.entry("chamadaAssinada/listChamadaAssinada", "edc_chamada_assinada_impressa"),
             Map.entry("unidade/listUnidade", "bas_unidade"),
+            Map.entry("tipoAcao/listTipoAcao", "com_tipo_acao"),
+            Map.entry("tipoAcao/formTipoAcao", "com_tipo_acao"),
             Map.entry("configuracaoFinanceira/listConfiguracaoFinanceira", "fin_bancos"),
             Map.entry("configuracaoFinanceira/formConfiguracaoFinanceira", "fin_bancos"));
 

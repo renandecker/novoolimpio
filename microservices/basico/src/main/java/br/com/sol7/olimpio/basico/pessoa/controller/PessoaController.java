@@ -74,4 +74,16 @@ public class PessoaController {
         return service.buscarPessoaPorUnidades(unidade);
     }
 
+    @GET
+    @Path("/buscar-unidades-disponiveis")
+    public Uni<List<Long>> buscarUnidadesDisponiveis(@QueryParam("pessoaId") Long pessoaId) {
+        return service.buscarUnidades(pessoaId);
+    }
+
+    @GET
+    @Path("/buscar-unidades")
+    public Uni<List<Long>> buscarUnidades(@QueryParam("entityId") Long entityId) {
+        return service.buscarUnidades(entityId);
+    }
+
 }
