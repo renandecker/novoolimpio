@@ -4,6 +4,7 @@ import {useQuery} from '@tanstack/react-query';
 import {PermissionGate} from '../permissions';
 import {MasterDetail} from '../MasterDetail';
 import {BooleanField} from '../BooleanField';
+import {Tabs} from '../Tabs';
 import type {ApiItem} from '../types';
 import {api} from '../api';
 import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../masterDetailSources';
@@ -15,19 +16,12 @@ import {
     formatCpf,
     formatCnpj,
     formatPhone,
-    formatCep,
     str,
     num,
     semId,
     toDateInput,
 } from '../cadastroUsuarioTypes';
 import '../AppLayout.css';
-
-const sectionStyle: React.CSSProperties = {
-    borderTop: '2px solid var(--cor-borda, #c2aa3c)',
-    marginTop: '20px',
-    paddingTop: '16px',
-};
 
 const sectionTitleStyle: React.CSSProperties = {
     fontSize: '14px',
@@ -41,12 +35,12 @@ const sectionTitleStyle: React.CSSProperties = {
 const toggleContainerStyle: React.CSSProperties = {
     display: 'flex',
     gap: '8px',
-    marginBottom: '20px',
+    marginBottom: '16px',
 };
 
 const toggleBtnStyle = (active: boolean): React.CSSProperties => ({
     flex: 1,
-    padding: '12px 16px',
+    padding: '10px 16px',
     border: active ? '2px solid #265a88' : '2px solid #d3d3d3',
     borderRadius: '6px',
     background: active ? 'linear-gradient(180deg, #337ab7, #265a88)' : '#fff',
@@ -425,6 +419,320 @@ export default function CadastroUsuarioScreen() {
         }
     };
 
+    const abaPessoal = (
+        <div className="form-grid">
+            <div style={sectionTitleStyle}>Dados Pessoais</div>
+            {tipoPessoa === 'FISICA' ? (
+                <>
+                    <label className="form-field">
+                        <span className="form-label">CPF *</span>
+                        <input className="form-input" value={form.cpf}
+                            onChange={(e) => set('cpf', formatCpf(e.target.value))}
+                            placeholder="999.999.999-99" maxLength={14} />
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">RG</span>
+                        <input className="form-input" value={form.rg}
+                            onChange={(e) => set('rg', e.target.value)}
+                            placeholder="Registro Geral" />
+                    </label>
+                    <label className="form-field" style={{gridColumn: 'span 4'}}>
+                        <span className="form-label">Nome Completo *</span>
+                        <input className="form-input" value={form.nome}
+                            onChange={(e) => set('nome', e.target.value)}
+                            placeholder="Nome completo" />
+                    </label>
+                    <label className="form-field" style={{gridColumn: 'span 4'}}>
+                        <span className="form-label">Nome Social</span>
+                        <input className="form-input" value={form.nomeSocial}
+                            onChange={(e) => set('nomeSocial', e.target.value)}
+                            placeholder="Nome social" />
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Data Nascimento *</span>
+                        <input className="form-input" type="date" value={form.dataNascimento}
+                            onChange={(e) => set('dataNascimento', e.target.value)} />
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Gênero</span>
+                        <select className="form-input form-select" value={form.generoId}
+                            onChange={(e) => set('generoId', e.target.value)}>
+                            <option value="">-- Selecione --</option>
+                            {GENEROS.map((g) => <option key={g.value} value={g.value}>{g.label}</option>)}
+                        </select>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Etnia</span>
+                        <select className="form-input form-select" value={form.etniaId}
+                            onChange={(e) => set('etniaId', e.target.value)}>
+                            <option value="">-- Selecione --</option>
+                            {etniaOptions.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
+                        </select>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Estado Civil *</span>
+                        <select className="form-input form-select" value={form.estadoCivilId}
+                            onChange={(e) => set('estadoCivilId', e.target.value)}>
+                            <option value="">-- Selecione --</option>
+                            {estadoCivilOptions.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
+                        </select>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Escolaridade *</span>
+                        <select className="form-input form-select" value={form.escolaridadeId}
+                            onChange={(e) => set('escolaridadeId', e.target.value)}>
+                            <option value="">-- Selecione --</option>
+                            {escolaridadeOptions.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
+                        </select>
+                    </label>
+                    <label className="form-field" style={{gridColumn: 'span 2'}}>
+                        <span className="form-label">Nome do Pai</span>
+                        <input className="form-input" value={form.nomePai}
+                            onChange={(e) => set('nomePai', e.target.value)}
+                            placeholder="Nome do pai" />
+                    </label>
+                    <label className="form-field" style={{gridColumn: 'span 2'}}>
+                        <span className="form-label">Nome da Mãe *</span>
+                        <input className="form-input" value={form.nomeMae}
+                            onChange={(e) => set('nomeMae', e.target.value)}
+                            placeholder="Nome da mãe" />
+                    </label>
+                </>
+            ) : (
+                <>
+                    <label className="form-field">
+                        <span className="form-label">CNPJ *</span>
+                        <input className="form-input" value={form.cnpj}
+                            onChange={(e) => set('cnpj', formatCnpj(e.target.value))}
+                            placeholder="99.999.999/9999-99" maxLength={18} />
+                    </label>
+                    <label className="form-field" style={{gridColumn: 'span 3'}}>
+                        <span className="form-label">Razão Social *</span>
+                        <input className="form-input" value={form.razaoSocial}
+                            onChange={(e) => set('razaoSocial', e.target.value)}
+                            placeholder="Razão social" />
+                    </label>
+                    <label className="form-field" style={{gridColumn: 'span 4'}}>
+                        <span className="form-label">Nome Fantasia</span>
+                        <input className="form-input" value={form.nomeFantasia}
+                            onChange={(e) => set('nomeFantasia', e.target.value)}
+                            placeholder="Nome fantasia" />
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Inscrição Municipal</span>
+                        <input className="form-input" value={form.inscricaoMunicipal}
+                            onChange={(e) => set('inscricaoMunicipal', e.target.value)}
+                            placeholder="Inscrição municipal" />
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Inscrição Estadual</span>
+                        <input className="form-input" value={form.inscricaoEstadual}
+                            onChange={(e) => set('inscricaoEstadual', e.target.value)}
+                            placeholder="Inscrição estadual" />
+                    </label>
+                </>
+            )}
+
+            {tipoPessoa === 'FISICA' && (
+                <>
+                    <div style={sectionTitleStyle}>Referências</div>
+                    <label className="form-field" style={{gridColumn: 'span 2'}}>
+                        <span className="form-label">Nome Referência 1 *</span>
+                        <input className="form-input" value={form.nomeReferencia}
+                            onChange={(e) => set('nomeReferencia', e.target.value)}
+                            placeholder="Nome referência" />
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Telefone</span>
+                        <input className="form-input" value={form.telefoneReferencia}
+                            onChange={(e) => set('telefoneReferencia', formatPhone(e.target.value))}
+                            placeholder="(99) 9999-9999" />
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Celular</span>
+                        <input className="form-input" value={form.celularReferencia}
+                            onChange={(e) => set('celularReferencia', formatPhone(e.target.value))}
+                            placeholder="(99) 99999-9999" />
+                    </label>
+                    <label className="form-field" style={{gridColumn: 'span 2'}}>
+                        <span className="form-label">Nome Referência 2</span>
+                        <input className="form-input" value={form.nomeReferencia2}
+                            onChange={(e) => set('nomeReferencia2', e.target.value)}
+                            placeholder="Nome referência 2" />
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Telefone</span>
+                        <input className="form-input" value={form.telefoneReferencia2}
+                            onChange={(e) => set('telefoneReferencia2', formatPhone(e.target.value))}
+                            placeholder="(99) 9999-9999" />
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Celular</span>
+                        <input className="form-input" value={form.celularReferencia2}
+                            onChange={(e) => set('celularReferencia2', formatPhone(e.target.value))}
+                            placeholder="(99) 99999-9999" />
+                    </label>
+                </>
+            )}
+        </div>
+    );
+
+    const abaEndereco = (
+        <div className="form-grid">
+            <div style={sectionTitleStyle}>Endereço</div>
+            <div style={{gridColumn: '1 / -1'}}>
+                <EnderecoCampos value={enderecos} onChange={setEnderecos} />
+            </div>
+        </div>
+    );
+
+    const abaContato = (
+        <div className="form-grid">
+            <div style={sectionTitleStyle}>Contato</div>
+            <label className="form-field" style={{gridColumn: 'span 4'}}>
+                <span className="form-label">E-mail *</span>
+                <input className="form-input" type="email" value={form.email}
+                    onChange={(e) => set('email', e.target.value)}
+                    placeholder="E-mail" />
+            </label>
+            <label className="form-field">
+                <span className="form-label">Telefone Residencial</span>
+                <input className="form-input" value={form.telefoneResidencial}
+                    onChange={(e) => set('telefoneResidencial', formatPhone(e.target.value))}
+                    placeholder="(99) 9999-9999" />
+            </label>
+            {tipoPessoa === 'FISICA' && (
+                <label className="form-field">
+                    <span className="form-label">Telefone Comercial</span>
+                    <input className="form-input" value={form.telefoneComercial}
+                        onChange={(e) => set('telefoneComercial', formatPhone(e.target.value))}
+                        placeholder="(99) 9999-9999" />
+                </label>
+            )}
+            <label className="form-field">
+                <span className="form-label">Celular</span>
+                <input className="form-input" value={form.celular}
+                    onChange={(e) => set('celular', formatPhone(e.target.value))}
+                    placeholder="(99) 99999-9999" />
+            </label>
+            {tipoPessoa === 'JURIDICA' && (
+                <label className="form-field">
+                    <span className="form-label">Fax</span>
+                    <input className="form-input" value={form.fax}
+                        onChange={(e) => set('fax', formatPhone(e.target.value))}
+                        placeholder="(99) 9999-9999" />
+                </label>
+            )}
+
+            {tipoPessoa === 'FISICA' && (
+                <>
+                    <div style={sectionTitleStyle}>Redes Sociais</div>
+                    <label className="form-field" style={{gridColumn: 'span 2'}}>
+                        <span className="form-label">Facebook</span>
+                        <input className="form-input" value={form.facebook}
+                            onChange={(e) => set('facebook', e.target.value)}
+                            placeholder="Facebook" />
+                    </label>
+                    <label className="form-field" style={{gridColumn: 'span 2'}}>
+                        <span className="form-label">Twitter</span>
+                        <input className="form-input" value={form.twitter}
+                            onChange={(e) => set('twitter', e.target.value)}
+                            placeholder="Twitter" />
+                    </label>
+                    <label className="form-field" style={{gridColumn: 'span 2'}}>
+                        <span className="form-label">Google+</span>
+                        <input className="form-input" value={form.googlePlus}
+                            onChange={(e) => set('googlePlus', e.target.value)}
+                            placeholder="Google+" />
+                    </label>
+                    <label className="form-field" style={{gridColumn: 'span 2'}}>
+                        <span className="form-label">Telegram</span>
+                        <input className="form-input" value={form.telegram}
+                            onChange={(e) => set('telegram', e.target.value)}
+                            placeholder="Telegram" />
+                    </label>
+                </>
+            )}
+        </div>
+    );
+
+    const abaDocumentos = (
+        <div className="form-grid">
+            <div style={sectionTitleStyle}>Documentos</div>
+            <div style={{gridColumn: '1 / -1', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '6px', color: '#666'}}>
+                <p style={{margin: 0}}>
+                    Documentos do funcionário (CTPS, RG, CPF, Comprovante de Residência, etc.) são gerenciados na
+                    seção específica de documentos. A integração completa com upload de arquivos será adicionada em
+                    versões futuras.
+                </p>
+            </div>
+        </div>
+    );
+
+    const abaTrabalho = (
+        <div className="form-grid">
+            <div style={sectionTitleStyle}>Trabalho</div>
+            <div style={{gridColumn: '1 / -1', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '6px', color: '#666'}}>
+                <p style={{margin: 0}}>
+                    Dados funcionais (cargo, turno, data de admissão, tipo de contrato) são gerenciados na seção
+                    específica de Recursos Humanos.
+                </p>
+            </div>
+            <label className="form-field" style={{gridColumn: '1 / -1'}}>
+                <span className="form-label">Observação</span>
+                <textarea className="form-input" placeholder="Observações" rows={4}
+                    style={{minHeight: '80px'}}
+                    value={form.observacao}
+                    onChange={(e) => set('observacao', e.target.value)} />
+            </label>
+        </div>
+    );
+
+    const abaAcessos = (
+        <div className="form-grid">
+            <div style={sectionTitleStyle}>Acesso ao Sistema</div>
+            <label className="form-field">
+                <span className="form-label">Login *</span>
+                <input className="form-input" value={form.login}
+                    onChange={(e) => set('login', e.target.value)}
+                    placeholder="Login do usuário" />
+            </label>
+            <label className="form-field">
+                <span className="form-label">Senha</span>
+                <input className="form-input" type="password" value={form.senha}
+                    onChange={(e) => set('senha', e.target.value)}
+                    placeholder="Senha" />
+            </label>
+
+            <div style={sectionTitleStyle}>Currículo / Banco de Talentos</div>
+            <label className="form-field">
+                <BooleanField value={curriculo} onChange={setCurriculo} />
+            </label>
+
+            <div style={sectionTitleStyle}>Unidades</div>
+            <div style={{gridColumn: '1 / -1'}}>
+                <MasterDetail
+                    label="Unidade"
+                    source={UNIDADE_SOURCE}
+                    valueKey="id"
+                    searchKeys={UNIDADE_SEARCH}
+                    columns={UNIDADE_COLUMNS}
+                    items={unidades}
+                    onChange={setUnidades}
+                />
+            </div>
+        </div>
+    );
+
+    const abas = [
+        {key: 'pessoal' as const, label: 'Pessoal', content: abaPessoal},
+        {key: 'endereco' as const, label: 'Endereço', content: abaEndereco},
+        {key: 'contato' as const, label: 'Contato', content: abaContato},
+        {key: 'documentos' as const, label: 'Documentos', content: abaDocumentos},
+        {key: 'trabalho' as const, label: 'Trabalho', content: abaTrabalho},
+        {key: 'acessos' as const, label: 'Acessos', content: abaAcessos},
+    ];
+
     return (
         <PermissionGate permission="READ">
             <main>
@@ -460,292 +768,10 @@ export default function CadastroUsuarioScreen() {
                         </button>
                     </div>
 
-                    <div className="div_form" style={{padding: '20px'}}>
-                        <div className="form-grid">
-
-                            <div style={sectionStyle}>
-                                <div style={sectionTitleStyle}>Acesso</div>
-                            </div>
-                            <label className="form-field">
-                                <span className="form-label">Login *</span>
-                                <input className="form-input" value={form.login}
-                                    onChange={(e) => set('login', e.target.value)}
-                                    placeholder="Login do usuário" />
-                            </label>
-                            <label className="form-field">
-                                <span className="form-label">Senha</span>
-                                <input className="form-input" type="password" value={form.senha}
-                                    onChange={(e) => set('senha', e.target.value)}
-                                    placeholder="Senha" />
-                            </label>
-
-                            {tipoPessoa === 'FISICA' && (
-                                <>
-                                    <div style={sectionStyle}>
-                                        <div style={sectionTitleStyle}>Dados Pessoais</div>
-                                    </div>
-                                    <label className="form-field">
-                                        <span className="form-label">CPF *</span>
-                                        <input className="form-input" value={form.cpf}
-                                            onChange={(e) => set('cpf', formatCpf(e.target.value))}
-                                            placeholder="999.999.999-99" maxLength={14} />
-                                    </label>
-                                    <label className="form-field">
-                                        <span className="form-label">RG</span>
-                                        <input className="form-input" value={form.rg}
-                                            onChange={(e) => set('rg', e.target.value)}
-                                            placeholder="Registro Geral" />
-                                    </label>
-                                    <label className="form-field" style={{gridColumn: 'span 3'}}>
-                                        <span className="form-label">Nome Completo *</span>
-                                        <input className="form-input" value={form.nome}
-                                            onChange={(e) => set('nome', e.target.value)}
-                                            placeholder="Nome completo" />
-                                    </label>
-                                    <label className="form-field" style={{gridColumn: 'span 3'}}>
-                                        <span className="form-label">Nome Social</span>
-                                        <input className="form-input" value={form.nomeSocial}
-                                            onChange={(e) => set('nomeSocial', e.target.value)}
-                                            placeholder="Nome social" />
-                                    </label>
-                                    <label className="form-field">
-                                        <span className="form-label">Data Nascimento *</span>
-                                        <input className="form-input" type="date" value={form.dataNascimento}
-                                            onChange={(e) => set('dataNascimento', e.target.value)} />
-                                    </label>
-                                    <label className="form-field" style={{gridColumn: 'span 3'}}>
-                                        <span className="form-label">Cidade Origem</span>
-                                        <input className="form-input" value={form.cidadeOrigem}
-                                            onChange={(e) => set('cidadeOrigem', e.target.value)}
-                                            placeholder="Cidade de origem" />
-                                    </label>
-                                    <label className="form-field">
-                                        <span className="form-label">Gênero</span>
-                                        <select className="form-input form-select" value={form.generoId}
-                                            onChange={(e) => set('generoId', e.target.value)}>
-                                            <option value="">-- Selecione --</option>
-                                            {GENEROS.map((g) => <option key={g.value} value={g.value}>{g.label}</option>)}
-                                        </select>
-                                    </label>
-                                    <label className="form-field">
-                                        <span className="form-label">Etnia</span>
-                                        <select className="form-input form-select" value={form.etniaId}
-                                            onChange={(e) => set('etniaId', e.target.value)}>
-                                            <option value="">-- Selecione --</option>
-                                            {etniaOptions.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
-                                        </select>
-                                    </label>
-                                    <label className="form-field">
-                                        <span className="form-label">Estado Civil *</span>
-                                        <select className="form-input form-select" value={form.estadoCivilId}
-                                            onChange={(e) => set('estadoCivilId', e.target.value)}>
-                                            <option value="">-- Selecione --</option>
-                                            {estadoCivilOptions.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
-                                        </select>
-                                    </label>
-                                    <label className="form-field">
-                                        <span className="form-label">Escolaridade *</span>
-                                        <select className="form-input form-select" value={form.escolaridadeId}
-                                            onChange={(e) => set('escolaridadeId', e.target.value)}>
-                                            <option value="">-- Selecione --</option>
-                                            {escolaridadeOptions.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
-                                        </select>
-                                    </label>
-                                    <label className="form-field" style={{gridColumn: 'span 3'}}>
-                                        <span className="form-label">Nome do Pai</span>
-                                        <input className="form-input" value={form.nomePai}
-                                            onChange={(e) => set('nomePai', e.target.value)}
-                                            placeholder="Nome do pai" />
-                                    </label>
-                                    <label className="form-field" style={{gridColumn: 'span 3'}}>
-                                        <span className="form-label">Nome da Mãe *</span>
-                                        <input className="form-input" value={form.nomeMae}
-                                            onChange={(e) => set('nomeMae', e.target.value)}
-                                            placeholder="Nome da mãe" />
-                                    </label>
-
-                                    <div style={sectionStyle}>
-                                        <div style={sectionTitleStyle}>Referências</div>
-                                    </div>
-                                    <label className="form-field" style={{gridColumn: 'span 3'}}>
-                                        <span className="form-label">Nome Referência *</span>
-                                        <input className="form-input" value={form.nomeReferencia}
-                                            onChange={(e) => set('nomeReferencia', e.target.value)}
-                                            placeholder="Nome referência" />
-                                    </label>
-                                    <label className="form-field">
-                                        <span className="form-label">Telefone Referência</span>
-                                        <input className="form-input" value={form.telefoneReferencia}
-                                            onChange={(e) => set('telefoneReferencia', formatPhone(e.target.value))}
-                                            placeholder="(99) 9999-9999" />
-                                    </label>
-                                    <label className="form-field">
-                                        <span className="form-label">Celular Referência</span>
-                                        <input className="form-input" value={form.celularReferencia}
-                                            onChange={(e) => set('celularReferencia', formatPhone(e.target.value))}
-                                            placeholder="(99) 99999-9999" />
-                                    </label>
-                                    <label className="form-field" style={{gridColumn: 'span 3'}}>
-                                        <span className="form-label">Nome Referência 2</span>
-                                        <input className="form-input" value={form.nomeReferencia2}
-                                            onChange={(e) => set('nomeReferencia2', e.target.value)}
-                                            placeholder="Nome referência 2" />
-                                    </label>
-                                    <label className="form-field">
-                                        <span className="form-label">Telefone Referência 2</span>
-                                        <input className="form-input" value={form.telefoneReferencia2}
-                                            onChange={(e) => set('telefoneReferencia2', formatPhone(e.target.value))}
-                                            placeholder="(99) 9999-9999" />
-                                    </label>
-                                    <label className="form-field">
-                                        <span className="form-label">Celular Referência 2</span>
-                                        <input className="form-input" value={form.celularReferencia2}
-                                            onChange={(e) => set('celularReferencia2', formatPhone(e.target.value))}
-                                            placeholder="(99) 99999-9999" />
-                                    </label>
-                                </>
-                            )}
-
-                            {tipoPessoa === 'JURIDICA' && (
-                                <>
-                                    <div style={sectionStyle}>
-                                        <div style={sectionTitleStyle}>Dados da Empresa</div>
-                                    </div>
-                                    <label className="form-field">
-                                        <span className="form-label">CNPJ *</span>
-                                        <input className="form-input" value={form.cnpj}
-                                            onChange={(e) => set('cnpj', formatCnpj(e.target.value))}
-                                            placeholder="99.999.999/9999-99" maxLength={18} />
-                                    </label>
-                                    <label className="form-field" style={{gridColumn: 'span 3'}}>
-                                        <span className="form-label">Razão Social *</span>
-                                        <input className="form-input" value={form.razaoSocial}
-                                            onChange={(e) => set('razaoSocial', e.target.value)}
-                                            placeholder="Razão social" />
-                                    </label>
-                                    <label className="form-field" style={{gridColumn: 'span 3'}}>
-                                        <span className="form-label">Nome Fantasia</span>
-                                        <input className="form-input" value={form.nomeFantasia}
-                                            onChange={(e) => set('nomeFantasia', e.target.value)}
-                                            placeholder="Nome fantasia" />
-                                    </label>
-                                    <label className="form-field">
-                                        <span className="form-label">Inscrição Municipal</span>
-                                        <input className="form-input" value={form.inscricaoMunicipal}
-                                            onChange={(e) => set('inscricaoMunicipal', e.target.value)}
-                                            placeholder="Inscrição municipal" />
-                                    </label>
-                                    <label className="form-field">
-                                        <span className="form-label">Inscrição Estadual</span>
-                                        <input className="form-input" value={form.inscricaoEstadual}
-                                            onChange={(e) => set('inscricaoEstadual', e.target.value)}
-                                            placeholder="Inscrição estadual" />
-                                    </label>
-                                </>
-                            )}
-
-                            <div style={sectionStyle}>
-                                <div style={sectionTitleStyle}>Contato</div>
-                            </div>
-                            <label className="form-field" style={{gridColumn: 'span 3'}}>
-                                <span className="form-label">E-mail *</span>
-                                <input className="form-input" type="email" value={form.email}
-                                    onChange={(e) => set('email', e.target.value)}
-                                    placeholder="E-mail" />
-                            </label>
-                            <label className="form-field">
-                                <span className="form-label">Telefone Residencial</span>
-                                <input className="form-input" value={form.telefoneResidencial}
-                                    onChange={(e) => set('telefoneResidencial', formatPhone(e.target.value))}
-                                    placeholder="(99) 9999-9999" />
-                            </label>
-                            <label className="form-field">
-                                <span className="form-label">Telefone Comercial</span>
-                                <input className="form-input" value={form.telefoneComercial}
-                                    onChange={(e) => set('telefoneComercial', formatPhone(e.target.value))}
-                                    placeholder="(99) 9999-9999" />
-                            </label>
-                            <label className="form-field">
-                                <span className="form-label">Celular</span>
-                                <input className="form-input" value={form.celular}
-                                    onChange={(e) => set('celular', formatPhone(e.target.value))}
-                                    placeholder="(99) 99999-9999" />
-                            </label>
-                            {tipoPessoa === 'JURIDICA' && (
-                                <label className="form-field">
-                                    <span className="form-label">Fax</span>
-                                    <input className="form-input" value={form.fax}
-                                        onChange={(e) => set('fax', formatPhone(e.target.value))}
-                                        placeholder="(99) 9999-9999" />
-                                </label>
-                            )}
-                            {tipoPessoa === 'FISICA' && (
-                                <>
-                                    <label className="form-field" style={{gridColumn: 'span 3'}}>
-                                        <span className="form-label">Facebook</span>
-                                        <input className="form-input" value={form.facebook}
-                                            onChange={(e) => set('facebook', e.target.value)}
-                                            placeholder="Facebook" />
-                                    </label>
-                                    <label className="form-field" style={{gridColumn: 'span 3'}}>
-                                        <span className="form-label">Twitter</span>
-                                        <input className="form-input" value={form.twitter}
-                                            onChange={(e) => set('twitter', e.target.value)}
-                                            placeholder="Twitter" />
-                                    </label>
-                                    <label className="form-field" style={{gridColumn: 'span 3'}}>
-                                        <span className="form-label">Google+</span>
-                                        <input className="form-input" value={form.googlePlus}
-                                            onChange={(e) => set('googlePlus', e.target.value)}
-                                            placeholder="Google+" />
-                                    </label>
-                                    <label className="form-field" style={{gridColumn: 'span 3'}}>
-                                        <span className="form-label">Telegram</span>
-                                        <input className="form-input" value={form.telegram}
-                                            onChange={(e) => set('telegram', e.target.value)}
-                                            placeholder="Telegram" />
-                                    </label>
-                                </>
-                            )}
-
-                            <div style={sectionStyle}>
-                                <div style={sectionTitleStyle}>Endereço</div>
-                            </div>
-                            <div style={{gridColumn: '1 / -1'}}>
-                                <EnderecoCampos value={enderecos} onChange={setEnderecos} />
-                            </div>
-
-                            <div style={sectionStyle}>
-                                <div style={sectionTitleStyle}>Unidades</div>
-                            </div>
-                            <div style={{gridColumn: '1 / -1'}}>
-                                <MasterDetail
-                                    label="Unidade"
-                                    source={UNIDADE_SOURCE}
-                                    valueKey="id"
-                                    searchKeys={UNIDADE_SEARCH}
-                                    columns={UNIDADE_COLUMNS}
-                                    items={unidades}
-                                    onChange={setUnidades}
-                                />
-                            </div>
-
-                            <div style={sectionStyle}>
-                                <div style={sectionTitleStyle}>Outros</div>
-                            </div>
-                            <label className="form-field">
-                                <span className="form-label">Currículo / Banco de Talentos</span>
-                                <BooleanField value={curriculo} onChange={setCurriculo} />
-                            </label>
-                            <label className="form-field" style={{gridColumn: 'span 3'}}>
-                                <span className="form-label">Observação</span>
-                                <textarea className="form-input" placeholder="Observações" rows={4}
-                                    style={{gridColumn: 'span 3', minHeight: '80px'}}
-                                    value={form.observacao}
-                                    onChange={(e) => set('observacao', e.target.value)} />
-                            </label>
-                        </div>
-                    </div>
+                    <Tabs
+                        tabs={abas}
+                        initial="pessoal"
+                    />
 
                     <div className="form-buttons" style={{marginTop: '16px', display: 'flex', gap: '8px', justifyContent: 'flex-end'}}>
                         <button type="button" className="btnyellow" onClick={voltar} disabled={salvando}>

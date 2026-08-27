@@ -11,40 +11,22 @@ import {
     Alert,
     ActivityIndicator,
 } from 'react-native';
-import {Colors, Spacing, BorderRadius, Typography, Layout} from '../theme';
+import {Colors, Spacing, BorderRadius, Typography, Shadows} from '../theme';
+import {Tabs} from '../Tabs';
 import {api} from '../api';
-import type {TipoPessoa} from '../cadastroUserTypes';
+import type {TipoPessoa} from '../cadastroUsuarioTypes';
+import {
+    GENEROS,
+    ETNIAS,
+    ESTADOS_CIVIS,
+    ESCOLARIDADES,
+    formatCpf,
+    formatCnpj,
+    formatPhone,
+    formatCep,
+} from '../cadastroUsuarioTypes';
 
-const GENEROS = [
-    {value: '1', label: 'Masculino'},
-    {value: '2', label: 'Feminino'},
-    {value: '3', label: 'Outro'},
-];
-
-interface SelectProps {
-    label: string;
-    value: string;
-    options: {value: string; label: string}[];
-    onChange: (v: string) => void;
-    required?: boolean;
-}
-
-function formatCnpj(value: string): string {
-    const digits = value.replace(/\D/g, '').slice(0, 14);
-    if (digits.length <= 2) return digits;
-    if (digits.length <= 5) return `${digits.slice(0, 2)}.${digits.slice(2)}`;
-    if (digits.length <= 8) return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5)}`;
-    if (digits.length <= 12) return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8)}`;
-    return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12)}`;
-}
-
-function formatPhone(value: string): string {
-    const digits = value.replace(/\D/g, '').slice(0, 11);
-    if (digits.length <= 2) return `(${digits}`;
-    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-}
+type AbaUsuario = 'pessoal' | 'endereco' | 'contato' | 'documentos' | 'trabalho' | 'acessos';
 
 interface SelectProps {
     label: string;
@@ -52,6 +34,22 @@ interface SelectProps {
     options: {value: string; label: string}[];
     onChange: (v: string) => void;
     required?: boolean;
+}
+
+interface FieldProps {
+    label: string;
+    value: string;
+    onChange: (v: string) => void;
+    placeholder?: string;
+    required?: boolean;
+    type?: 'text' | 'email' | 'number' | 'date' | 'password';
+    format?: (v: string) => string;
+    multiline?: boolean;
+}
+
+interface OptionItem {
+    value: string;
+    label: string;
 }
 
 function SelectField({label, value, options, onChange, required}: SelectProps) {
@@ -86,6 +84,36 @@ function SelectField({label, value, options, onChange, required}: SelectProps) {
                     ))}
                 </View>
             )}
+        </View>
+    );
+}
+
+function Field({label, value, onChange, placeholder, required, type, format, multiline}: FieldProps) {
+    return (
+        <View style={s.fieldContainer}>
+            <Text style={s.fieldLabel}>
+                {label} {required && <Text style={s.required}>*</Text>}
+            </Text>
+            <TextInput
+                style={[s.input, multiline && s.inputMultiline]}
+                value={value}
+                onChangeText={(t) => onChange(format ? format(t) : t)}
+                placeholder={placeholder ?? label}
+                placeholderTextColor={Colors.textPlaceholder}
+                secureTextEntry={type === 'password'}
+                keyboardType={type === 'email' ? 'email-address' : type === 'number' ? 'numeric' : 'default'}
+                autoCapitalize={type === 'email' || type === 'password' ? 'none' : 'sentences'}
+                multiline={multiline}
+                numberOfLines={multiline ? 4 : 1}
+            />
+        </View>
+    );
+}
+
+function Section({title}: {title: string}) {
+    return (
+        <View style={s.section}>
+            <Text style={s.sectionTitle}>{title}</Text>
         </View>
     );
 }
@@ -136,40 +164,37 @@ export default function CadastroUsuarioMobileScreen() {
         numero: '',
         complemento: '',
         observacao: '',
-
-        etniaOptions: [],
-        estadoCivilOptions: [],
-        escolaridadeOptions: [],
     });
+
+    const [etniaOptions, setEtniaOptions] = useState<OptionItem[]>([]);
+    const [estadoCivilOptions, setEstadoCivilOptions] = useState<OptionItem[]>([]);
+    const [escolaridadeOptions, setEscolaridadeOptions] = useState<OptionItem[]>([]);
 
     useEffect(() => {
         async function fetchOptions() {
             try {
                 const etnia = await api.get<Array<{id: number, descricao: string}>>('/api/basico/etnia');
-                setForm(prev => ({
-                    ...prev,
-                    etniaOptions: etnia.data.map(e => ({value: String(e.id), label: e.descricao})),
-                }));
+                const data = etnia.data?.length ? etnia.data.map(e => ({value: String(e.id), label: e.descricao})) : ETNIAS;
+                setEtniaOptions(data);
             } catch (e) {
                 console.error('Erro ao carregar etnias:', e);
+                setEtniaOptions(ETNIAS);
             }
             try {
                 const estadoCivil = await api.get<Array<{id: number, descricao: string}>>('/api/basico/estado-civil');
-                setForm(prev => ({
-                    ...prev,
-                    estadoCivilOptions: estadoCivil.data.map(e => ({value: String(e.id), label: e.descricao})),
-                }));
+                const data = estadoCivil.data?.length ? estadoCivil.data.map(e => ({value: String(e.id), label: e.descricao})) : ESTADOS_CIVIS;
+                setEstadoCivilOptions(data);
             } catch (e) {
                 console.error('Erro ao carregar estado civil:', e);
+                setEstadoCivilOptions(ESTADOS_CIVIS);
             }
             try {
                 const escolaridade = await api.get<Array<{id: number, descricao: string, ordem: number}>>('/api/basico/escolaridade');
-                setForm(prev => ({
-                    ...prev,
-                    escolaridadeOptions: escolaridade.data.map(e => ({value: String(e.id), label: e.descricao})),
-                }));
+                const data = escolaridade.data?.length ? escolaridade.data.map(e => ({value: String(e.id), label: e.descricao})) : ESCOLARIDADES;
+                setEscolaridadeOptions(data);
             } catch (e) {
                 console.error('Erro ao carregar escolaridade:', e);
+                setEscolaridadeOptions(ESCOLARIDADES);
             }
         }
         fetchOptions();
@@ -200,23 +225,217 @@ export default function CadastroUsuarioMobileScreen() {
         }
     }, [tipoPessoa, form]);
 
-    const renderField = (name: string, label: string, opts?: {placeholder?: string; type?: string; format?: (v: string) => string; required?: boolean}) => (
-        <View key={name} style={s.fieldContainer}>
-            <Text style={s.fieldLabel}>
-                {label} {opts?.required && <Text style={s.required}>*</Text>}
-            </Text>
-            <TextInput
-                style={s.input}
-                value={form[name]}
-                onChangeText={(t) => set(name, opts?.format ? opts.format(t) : t)}
-                placeholder={opts?.placeholder ?? label}
-                placeholderTextColor={Colors.textPlaceholder}
-                secureTextEntry={opts?.type === 'password'}
-                keyboardType={opts?.type === 'email' ? 'email-address' : opts?.type === 'number' ? 'numeric' : 'default'}
-                autoCapitalize="none"
-            />
-        </View>
+    const handleCancel = useCallback(() => {
+        Alert.alert('Confirmar', 'Deseja descartar as alterações?', [
+            {text: 'Não', style: 'cancel'},
+            {text: 'Sim', style: 'destructive', onPress: () => {
+                setForm((prev) => {
+                    const novo: Record<string, string> = {};
+                    Object.keys(prev).forEach((k) => { novo[k] = ''; });
+                    return novo;
+                });
+            }},
+        ]);
+    }, []);
+
+    const abaPessoal = (
+        <ScrollView
+            style={s.abaScroll}
+            contentContainerStyle={s.abaContent}
+            keyboardShouldPersistTaps="handled"
+        >
+            <Section title="Dados Pessoais" />
+            {tipoPessoa === 'FISICA' ? (
+                <>
+                    <Field label="CPF" value={form.cpf} onChange={(v) => set('cpf', v)}
+                        placeholder="999.999.999-99" format={formatCpf} required />
+                    <Field label="RG" value={form.rg} onChange={(v) => set('rg', v)} placeholder="Registro Geral" />
+                    <Field label="Nome Completo" value={form.nome} onChange={(v) => set('nome', v)}
+                        placeholder="Nome completo" required />
+                    <Field label="Nome Social" value={form.nomeSocial} onChange={(v) => set('nomeSocial', v)}
+                        placeholder="Nome social" />
+                    <Field label="Data Nascimento" value={form.dataNascimento}
+                        onChange={(v) => set('dataNascimento', v)} type="date" required />
+                    <Field label="Cidade Origem" value={form.cidadeOrigem} onChange={(v) => set('cidadeOrigem', v)}
+                        placeholder="Cidade de origem" />
+                    <SelectField label="Gênero" value={form.generoId} options={GENEROS}
+                        onChange={(v) => set('generoId', v)} />
+                    <SelectField label="Etnia" value={form.etniaId} options={etniaOptions}
+                        onChange={(v) => set('etniaId', v)} />
+                    <SelectField label="Estado Civil" value={form.estadoCivilId} options={estadoCivilOptions}
+                        onChange={(v) => set('estadoCivilId', v)} required />
+                    <SelectField label="Escolaridade" value={form.escolaridadeId} options={escolaridadeOptions}
+                        onChange={(v) => set('escolaridadeId', v)} required />
+                    <Field label="Nome do Pai" value={form.nomePai} onChange={(v) => set('nomePai', v)}
+                        placeholder="Nome do pai" />
+                    <Field label="Nome da Mãe" value={form.nomeMae} onChange={(v) => set('nomeMae', v)}
+                        placeholder="Nome da mãe" required />
+                </>
+            ) : (
+                <>
+                    <Field label="CNPJ" value={form.cnpj} onChange={(v) => set('cnpj', v)}
+                        placeholder="99.999.999/9999-99" format={formatCnpj} required />
+                    <Field label="Razão Social" value={form.razaoSocial} onChange={(v) => set('razaoSocial', v)}
+                        placeholder="Razão social" required />
+                    <Field label="Nome Fantasia" value={form.nomeFantasia} onChange={(v) => set('nomeFantasia', v)}
+                        placeholder="Nome fantasia" />
+                    <Field label="Inscrição Municipal" value={form.inscricaoMunicipal}
+                        onChange={(v) => set('inscricaoMunicipal', v)} placeholder="Inscrição municipal" />
+                    <Field label="Inscrição Estadual" value={form.inscricaoEstadual}
+                        onChange={(v) => set('inscricaoEstadual', v)} placeholder="Inscrição estadual" />
+                </>
+            )}
+
+            {tipoPessoa === 'FISICA' && (
+                <>
+                    <Section title="Referências" />
+                    <Field label="Nome Referência 1" value={form.nomeReferencia}
+                        onChange={(v) => set('nomeReferencia', v)} placeholder="Nome referência" required />
+                    <Field label="Telefone" value={form.telefoneReferencia}
+                        onChange={(v) => set('telefoneReferencia', v)}
+                        placeholder="(99) 9999-9999" format={formatPhone} />
+                    <Field label="Celular" value={form.celularReferencia}
+                        onChange={(v) => set('celularReferencia', v)}
+                        placeholder="(99) 99999-9999" format={formatPhone} />
+                    <Field label="Nome Referência 2" value={form.nomeReferencia2}
+                        onChange={(v) => set('nomeReferencia2', v)} placeholder="Nome referência 2" />
+                    <Field label="Telefone" value={form.telefoneReferencia2}
+                        onChange={(v) => set('telefoneReferencia2', v)}
+                        placeholder="(99) 9999-9999" format={formatPhone} />
+                    <Field label="Celular" value={form.celularReferencia2}
+                        onChange={(v) => set('celularReferencia2', v)}
+                        placeholder="(99) 99999-9999" format={formatPhone} />
+                </>
+            )}
+        </ScrollView>
     );
+
+    const abaEndereco = (
+        <ScrollView
+            style={s.abaScroll}
+            contentContainerStyle={s.abaContent}
+            keyboardShouldPersistTaps="handled"
+        >
+            <Section title="Endereço" />
+            <Field label="CEP" value={form.cep} onChange={(v) => set('cep', v)}
+                placeholder="99999-999" format={formatCep} />
+            <Field label="Logradouro" value={form.logradouro} onChange={(v) => set('logradouro', v)}
+                placeholder="Logradouro" />
+            <Field label="Número" value={form.numero} onChange={(v) => set('numero', v)}
+                placeholder="Número" type="number" />
+            <Field label="Bairro" value={form.bairro} onChange={(v) => set('bairro', v)}
+                placeholder="Bairro" />
+            <Field label="Cidade" value={form.cidade} onChange={(v) => set('cidade', v)}
+                placeholder="Cidade" />
+            <Field label="Complemento" value={form.complemento} onChange={(v) => set('complemento', v)}
+                placeholder="Complemento" multiline />
+        </ScrollView>
+    );
+
+    const abaContato = (
+        <ScrollView
+            style={s.abaScroll}
+            contentContainerStyle={s.abaContent}
+            keyboardShouldPersistTaps="handled"
+        >
+            <Section title="Contato" />
+            <Field label="E-mail" value={form.email} onChange={(v) => set('email', v)}
+                placeholder="E-mail" type="email" required />
+            <Field label="Telefone Residencial" value={form.telefoneResidencial}
+                onChange={(v) => set('telefoneResidencial', v)}
+                placeholder="(99) 9999-9999" format={formatPhone} />
+            {tipoPessoa === 'FISICA' && (
+                <Field label="Telefone Comercial" value={form.telefoneComercial}
+                    onChange={(v) => set('telefoneComercial', v)}
+                    placeholder="(99) 9999-9999" format={formatPhone} />
+            )}
+            <Field label="Celular" value={form.celular} onChange={(v) => set('celular', v)}
+                placeholder="(99) 99999-9999" format={formatPhone} />
+            {tipoPessoa === 'JURIDICA' && (
+                <Field label="Fax" value={form.fax} onChange={(v) => set('fax', v)}
+                    placeholder="(99) 9999-9999" format={formatPhone} />
+            )}
+
+            {tipoPessoa === 'FISICA' && (
+                <>
+                    <Section title="Redes Sociais" />
+                    <Field label="Facebook" value={form.facebook} onChange={(v) => set('facebook', v)}
+                        placeholder="Facebook" />
+                    <Field label="Twitter" value={form.twitter} onChange={(v) => set('twitter', v)}
+                        placeholder="Twitter" />
+                    <Field label="Google+" value={form.googlePlus} onChange={(v) => set('googlePlus', v)}
+                        placeholder="Google+" />
+                    <Field label="Telegram" value={form.telegram} onChange={(v) => set('telegram', v)}
+                        placeholder="Telegram" />
+                </>
+            )}
+        </ScrollView>
+    );
+
+    const abaDocumentos = (
+        <ScrollView
+            style={s.abaScroll}
+            contentContainerStyle={s.abaContent}
+            keyboardShouldPersistTaps="handled"
+        >
+            <Section title="Documentos" />
+            <View style={s.infoBox}>
+                <Text style={s.infoText}>
+                    Documentos do funcionário (CTPS, RG, CPF, Comprovante de Residência, etc.)
+                    são gerenciados na seção específica de documentos. A integração completa
+                    com upload de arquivos será adicionada em versões futuras.
+                </Text>
+            </View>
+        </ScrollView>
+    );
+
+    const abaTrabalho = (
+        <ScrollView
+            style={s.abaScroll}
+            contentContainerStyle={s.abaContent}
+            keyboardShouldPersistTaps="handled"
+        >
+            <Section title="Trabalho" />
+            <View style={s.infoBox}>
+                <Text style={s.infoText}>
+                    Dados funcionais (cargo, turno, data de admissão, tipo de contrato) são
+                    gerenciados na seção específica de Recursos Humanos.
+                </Text>
+            </View>
+            <Field label="Observação" value={form.observacao} onChange={(v) => set('observacao', v)}
+                placeholder="Observações" multiline />
+        </ScrollView>
+    );
+
+    const abaAcessos = (
+        <ScrollView
+            style={s.abaScroll}
+            contentContainerStyle={s.abaContent}
+            keyboardShouldPersistTaps="handled"
+        >
+            <Section title="Acesso ao Sistema" />
+            <Field label="Login" value={form.login} onChange={(v) => set('login', v)}
+                placeholder="Login do usuário" required />
+            <Field label="Senha" value={form.senha} onChange={(v) => set('senha', v)}
+                placeholder="Senha" type="password" />
+            <Section title="Unidades" />
+            <View style={s.infoBox}>
+                <Text style={s.infoText}>
+                    A seleção de unidades vinculadas ao usuário é feita pelo componente de
+                    Master Detail, disponível na versão web.
+                </Text>
+            </View>
+        </ScrollView>
+    );
+
+    const abas: {key: AbaUsuario; label: string; content: React.ReactNode}[] = [
+        {key: 'pessoal', label: 'Pessoal', content: abaPessoal},
+        {key: 'endereco', label: 'Endereço', content: abaEndereco},
+        {key: 'contato', label: 'Contato', content: abaContato},
+        {key: 'documentos', label: 'Documentos', content: abaDocumentos},
+        {key: 'trabalho', label: 'Trabalho', content: abaTrabalho},
+        {key: 'acessos', label: 'Acessos', content: abaAcessos},
+    ];
 
     return (
         <KeyboardAvoidingView style={s.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -243,91 +462,10 @@ export default function CadastroUsuarioMobileScreen() {
                 </Pressable>
             </View>
 
-            <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent}>
-                <View style={s.section}>
-                    <Text style={s.sectionTitle}>Acesso</Text>
-                </View>
-                {renderField('login', 'Login', {placeholder: 'Login do usuário', required: true})}
-                {renderField('senha', 'Senha', {type: 'password', placeholder: 'Senha'})}
-
-                {tipoPessoa === 'FISICA' && (
-                    <>
-                        <View style={s.section}>
-                            <Text style={s.sectionTitle}>Dados Pessoais</Text>
-                        </View>
-                        {renderField('cpf', 'CPF', {placeholder: '999.999.999-99', format: formatCpf, required: true})}
-                        {renderField('rg', 'RG', {placeholder: 'Registro Geral'})}
-                        {renderField('nome', 'Nome Completo', {placeholder: 'Nome completo', required: true})}
-                        {renderField('nomeSocial', 'Nome Social', {placeholder: 'Nome social'})}
-                        {renderField('dataNascimento', 'Data Nascimento', {type: 'date', required: true})}
-                        {renderField('cidadeOrigem', 'Cidade Origem', {placeholder: 'Cidade de origem'})}
-                        <SelectField label="Gênero" value={form.generoId} options={GENEROS} onChange={(v) => set('generoId', v)} />
-                        <SelectField label="Etnia" value={form.etniaId} options={form.etniaOptions} onChange={(v) => set('etniaId', v)} />
-                        <SelectField label="Estado Civil" value={form.estadoCivilId} options={form.estadoCivilOptions} onChange={(v) => set('estadoCivilId', v)} required />
-                        <SelectField label="Escolaridade" value={form.escolaridadeId} options={form.escolaridadeOptions} onChange={(v) => set('escolaridadeId', v)} required />
-                        {renderField('nomePai', 'Nome do Pai', {placeholder: 'Nome do pai'})}
-                        {renderField('nomeMae', 'Nome da Mãe', {placeholder: 'Nome da mãe', required: true})}
-
-                        <View style={s.section}>
-                            <Text style={s.sectionTitle}>Referências</Text>
-                        </View>
-                        {renderField('nomeReferencia', 'Nome Referência', {placeholder: 'Nome referência', required: true})}
-                        {renderField('telefoneReferencia', 'Telefone Referência', {placeholder: '(99) 9999-9999', format: formatPhone})}
-                        {renderField('celularReferencia', 'Celular Referência', {placeholder: '(99) 99999-9999', format: formatPhone})}
-                        {renderField('nomeReferencia2', 'Nome Referência 2', {placeholder: 'Nome referência 2'})}
-                        {renderField('telefoneReferencia2', 'Telefone Referência 2', {placeholder: '(99) 9999-9999', format: formatPhone})}
-                        {renderField('celularReferencia2', 'Celular Referência 2', {placeholder: '(99) 99999-9999', format: formatPhone})}
-                    </>
-                )}
-
-                {tipoPessoa === 'JURIDICA' && (
-                    <>
-                        <View style={s.section}>
-                            <Text style={s.sectionTitle}>Dados da Empresa</Text>
-                        </View>
-                        {renderField('cnpj', 'CNPJ', {placeholder: '99.999.999/9999-99', format: formatCnpj, required: true})}
-                        {renderField('razaoSocial', 'Razão Social', {placeholder: 'Razão social', required: true})}
-                        {renderField('nomeFantasia', 'Nome Fantasia', {placeholder: 'Nome fantasia'})}
-                        {renderField('inscricaoMunicipal', 'Inscrição Municipal', {placeholder: 'Inscrição municipal'})}
-                        {renderField('inscricaoEstadual', 'Inscrição Estadual', {placeholder: 'Inscrição estadual'})}
-                    </>
-                )}
-
-                <View style={s.section}>
-                    <Text style={s.sectionTitle}>Contato</Text>
-                </View>
-                {renderField('email', 'E-mail', {type: 'email', placeholder: 'E-mail', required: true})}
-                {renderField('telefoneResidencial', 'Telefone Residencial', {placeholder: '(99) 9999-9999', format: formatPhone})}
-                {renderField('telefoneComercial', 'Telefone Comercial', {placeholder: '(99) 9999-9999', format: formatPhone})}
-                {renderField('celular', 'Celular', {placeholder: '(99) 99999-9999', format: formatPhone})}
-                {tipoPessoa === 'JURIDICA' && renderField('fax', 'Fax', {placeholder: '(99) 9999-9999', format: formatPhone})}
-                {tipoPessoa === 'FISICA' && (
-                    <>
-                        {renderField('facebook', 'Facebook', {placeholder: 'Facebook'})}
-                        {renderField('twitter', 'Twitter', {placeholder: 'Twitter'})}
-                        {renderField('googlePlus', 'Google+', {placeholder: 'Google+'})}
-                        {renderField('telegram', 'Telegram', {placeholder: 'Telegram'})}
-                    </>
-                )}
-
-                <View style={s.section}>
-                    <Text style={s.sectionTitle}>Endereço</Text>
-                </View>
-                {renderField('cep', 'CEP', {placeholder: '99999-999'})}
-                {renderField('logradouro', 'Logradouro', {placeholder: 'Logradouro'})}
-                {renderField('numero', 'Número', {placeholder: 'Número', type: 'number'})}
-                {renderField('bairro', 'Bairro', {placeholder: 'Bairro'})}
-                {renderField('cidade', 'Cidade', {placeholder: 'Cidade'})}
-                {renderField('complemento', 'Complemento', {placeholder: 'Complemento'})}
-
-                <View style={s.section}>
-                    <Text style={s.sectionTitle}>Outros</Text>
-                </View>
-                {renderField('observacao', 'Observação', {placeholder: 'Observações'})}
-            </ScrollView>
+            <Tabs tabs={abas} initial="pessoal" />
 
             <View style={s.footer}>
-                <Pressable style={[s.btn, s.btnYellow]} disabled={salvando}>
+                <Pressable style={[s.btn, s.btnYellow]} onPress={handleCancel} disabled={salvando}>
                     <Text style={s.btnText}>Voltar</Text>
                 </Pressable>
                 <Pressable style={[s.btn, s.btnBlue]} onPress={handleSave} disabled={salvando}>
@@ -385,9 +523,9 @@ const s = StyleSheet.create({
         color: Colors.textWhite,
         fontWeight: Typography.weights.bold,
     },
-    scroll: {flex: 1},
-    scrollContent: {padding: Spacing.lg, paddingBottom: 100, gap: Spacing.sm},
-    section: {marginTop: Spacing.lg, marginBottom: Spacing.xs},
+    abaScroll: {flex: 1},
+    abaContent: {padding: Spacing.lg, gap: Spacing.sm, paddingBottom: 100},
+    section: {marginTop: Spacing.md, marginBottom: Spacing.xs},
     sectionTitle: {
         fontSize: Typography.sizes.lg,
         fontWeight: Typography.weights.bold,
@@ -401,7 +539,7 @@ const s = StyleSheet.create({
         fontWeight: Typography.weights.semibold,
         color: Colors.textPrimary,
     },
-    required: {color: Colors.danger},
+    required: {color: Colors.error},
     input: {
         height: 44,
         borderWidth: 1,
@@ -411,6 +549,11 @@ const s = StyleSheet.create({
         fontSize: Typography.sizes.md,
         color: Colors.textPrimary,
         backgroundColor: Colors.bgPrimary,
+    },
+    inputMultiline: {
+        height: 100,
+        textAlignVertical: 'top',
+        paddingTop: Spacing.sm,
     },
     selectContainer: {
         flexDirection: 'row',
@@ -437,11 +580,19 @@ const s = StyleSheet.create({
     dropdownItemActive: {backgroundColor: Colors.primary + '15'},
     dropdownItemText: {fontSize: Typography.sizes.md, color: Colors.textPrimary},
     dropdownItemTextActive: {color: Colors.primary, fontWeight: Typography.weights.bold},
+    infoBox: {
+        backgroundColor: Colors.goldBg,
+        borderLeftWidth: 4,
+        borderLeftColor: Colors.gold,
+        padding: Spacing.md,
+        borderRadius: BorderRadius.md,
+    },
+    infoText: {
+        color: Colors.goldText,
+        fontSize: Typography.sizes.md,
+        lineHeight: 20,
+    },
     footer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
         flexDirection: 'row',
         justifyContent: 'flex-end',
         padding: Spacing.lg,
@@ -449,7 +600,6 @@ const s = StyleSheet.create({
         backgroundColor: Colors.bgSecondary,
         borderTopWidth: 1,
         borderTopColor: Colors.borderLight,
-        ...Shadows.card,
     },
     btn: {
         borderRadius: BorderRadius.lg,
