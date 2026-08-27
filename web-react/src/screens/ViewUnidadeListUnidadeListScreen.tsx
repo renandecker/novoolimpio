@@ -17,7 +17,12 @@ export default function ViewUnidadeListUnidadeListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <h1>Unidade</h1>
-                <DataTable path="/api/view/unidade/listUnidade" columns={COLUMNS} maxMainColumns={COLUMNS.length}/>
+                <DataTable
+                    path="/api/view/unidade/listUnidade"
+                    columns={COLUMNS}
+                    maxMainColumns={COLUMNS.length}
+                    editNavigateTo="/view/unidade/formUnidade"
+                />
             </main>
         </PermissionGate>
     );

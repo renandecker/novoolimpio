@@ -128,7 +128,7 @@ const MATRICULA_COLUMNS = [
     {key: 'grupo', label: 'Grupo', width: '10%', render: (m: MatriculaContrato) => m.grupo},
     {key: 'componente', label: 'Componente Curricular', width: '20%', render: (m: MatriculaContrato) => m.componenteCurricular},
     {key: 'cargaHoraria', label: 'Carga Horária', width: '5%', align: 'center', render: (m: MatriculaContrato) => String(m.cargaHoraria ?? '')},
-    {key: 'unidade', label: 'Unidade', width: '12%', render: (m: MatriculaContrato) => m.unidade},
+    {key: 'unidade', label: 'Id_unidade', width: '12%', render: (m: MatriculaContrato) => m.unidade},
     {key: 'professor', label: 'Professor', width: '15%', render: (m: MatriculaContrato) => m.professor},
 ] as const;
 

@@ -243,13 +243,6 @@ export default function ViewAgendaCompromissosScreen() {
         setFormData(prev => ({...prev, agenda}));
     }, [formData.data, formTipoHorario, loadHorarios]);
 
-    const handleDateChange = useCallback((data: string) => {
-        if (formData.agenda?.id) {
-            loadHorarios(formData.agenda.id, data, formTipoHorario);
-        }
-        setFormData(prev => ({...prev, data}));
-    }, [formData.agenda?.id, formTipoHorario, loadHorarios]);
-
     const handleTipoHorarioChange = useCallback((tipo: 'unidade' | 'pessoa') => {
         setFormTipoHorario(tipo);
         if (formData.agenda?.id && formData.data) {
@@ -810,15 +803,28 @@ export default function ViewAgendaCompromissosScreen() {
                                 <div className="form-group">
                                     <label>Data *</label>
                                     <input
-                                        type="date"
-                                        value={formData.data || ''}
-                                        onChange={(e) => handleDateChange(e.target.value)}
+                                        type="text"
+                                        value={formData.data ? formatDateBR(formData.data) : ''}
+                                        onChange={(e) => {
+                                            const dateStr = e.target.value.trim();
+                                            if (!dateStr) {
+                                                setFormData(prev => ({...prev, data: ''}));
+                                                 return;
+                                            }
+                                            const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+                                            if (!match) return;
+                                            const date = new Date(`${match[1]}-${match[2]}-${match[3]}`);
+                                            if (isNaN(date.getTime())) return;
+                                            const formatted = `${match[3]}/${match[2]}/${match[1]}`;
+                                            setFormData(prev => ({...prev, data: formatted}));
+                                            
+                                            if (formData.agenda?.id) {
+                                                loadHorarios(formData.agenda.id, formatted, formTipoHorario);
+                                            }
+                                        }}
                                         required
-                                        min={isEditing ? undefined : format(new Date(), 'yyyy-MM-dd')}
-                                        max={formData.agenda?.diasmmaximo && formData.agenda?.qtdediasmaximo
-                                            ? format(new Date(new Date().getTime() + formData.agenda.qtdediasmaximo * 86400000), 'yyyy-MM-dd')
-                                            : undefined}
                                     />
+                                    <small className="form-hint">Formato: dd/MM/yyyy</small>
                                 </div>
                             </div>
 

@@ -95,6 +95,7 @@ function menuIcon(rotulo: string, icone?: string): string {
 const HIDDEN_ROTULOS = new Set([
     'gestaodecontrato',
     'gestaodecurriculo',
+    'curriculoempresa',
     'situacaocontrato',
     'tipodematrizcurricular',
     'grupocomponentecurricular',
@@ -106,6 +107,7 @@ const HIDDEN_OUTCOMES = [
     '/view/grupoComponenteCurricular',
     '/view/cronogramaComponenteCurricular',
 ];
+const CONFIGURACAO_DOCUMENTOS_OUTCOME = '/view/configuracao/listDocumentos';
 function isHiddenModulo(m: Modulo): boolean {
     if (HIDDEN_ROTULOS.has(normalizeName(m.rotulo))) return true;
     const out = (m.outcome || '').toLowerCase();
@@ -154,6 +156,7 @@ export default function Sidebar() {
     const flatItems = useMemo(() => {
         const items: { label: string; parent: string | null; path: string; icon: string; keywords: string }[] = [
             {label: 'Início', parent: null, path: defaultPath, icon: '🏠', keywords: 'inicio paginainicial'},
+            {label: 'Configuração Documentos', parent: null, path: CONFIGURACAO_DOCUMENTOS_OUTCOME, icon: '📄', keywords: 'configuracao documentos relatorios'},
         ];
         if (modulos.length === 0) {
             items.push(

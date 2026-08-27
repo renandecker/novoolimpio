@@ -50,9 +50,9 @@ export default function ViewEtapasCobrancaFormEtapasCobrancaListScreen() {
                         {key: 'aluno', label: 'Aluno', empty: 'Conteúdo de Aluno.'},
                         {
                             key: 'unidade',
-                            label: 'Unidade',
+                            label: 'Id_unidade',
                             masterDetail: {
-                                label: 'Unidade',
+                                label: 'Id_unidade',
                                 source: UNIDADE_SOURCE,
                                 valueKey: 'id',
                                 searchKeys: UNIDADE_SEARCH,

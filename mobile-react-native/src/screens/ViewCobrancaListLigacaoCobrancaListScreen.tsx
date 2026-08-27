@@ -3,12 +3,55 @@ import {ActivityIndicator, StyleSheet, Text, View} from 'react-native';
 import {useQuery} from '@tanstack/react-query';
 import {api} from '../api';
 import {Tabs} from '../Tabs';
-import {ModuleList} from '../ModuleListScreen';
+import {ModuleList, ModuleListExtraAction} from '../ModuleListScreen';
+import {executeAction} from '../actions';
+import type {ApiItem} from '../types';
 
 interface EtapaCobranca {
     id: number;
     descricao: string;
 }
+
+const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+
+const extraActions: ModuleListExtraAction[] = [
+    {
+        key: 'detalhes',
+        title: 'Detalhes',
+        icon: 'ℹ️',
+        permission: 'READ',
+        onPress: async (item) => {
+            await executeAction('ligacao-cobranca', 'carregarDetalhes', JSON.stringify({contrato: asRecord(item).contrato}), 'financeiro');
+        },
+    },
+    {
+        key: 'documento',
+        title: 'Documento',
+        icon: '📄',
+        permission: 'READ',
+        onPress: async (item) => {
+            await executeAction('ligacao-cobranca', 'carregarContrato', JSON.stringify({contrato: asRecord(item).contrato}), 'financeiro');
+        },
+    },
+    {
+        key: 'ligacao',
+        title: 'Ligação',
+        icon: '📞',
+        permission: 'EXECUTE',
+        onPress: async (item) => {
+            await executeAction('ligacao-cobranca', 'iniciarLigacao', JSON.stringify({cobranca: asRecord(item).cobranca, contrato: asRecord(item).contrato}), 'financeiro');
+        },
+    },
+    {
+        key: 'email',
+        title: 'E-mail',
+        icon: '✉️',
+        permission: 'EXECUTE',
+        onPress: async (item) => {
+            await executeAction('ligacao-cobranca', 'prepararEnvioEmail', JSON.stringify({id: item.id}), 'financeiro');
+        },
+    },
+];
 
 export default function ViewCobrancaListLigacaoCobrancaListScreen() {
     const etapasQuery = useQuery({
@@ -37,6 +80,11 @@ export default function ViewCobrancaListLigacaoCobrancaListScreen() {
                         <ModuleList
                             path="/api/view/cobranca/listLigacaoCobranca"
                             params={{etapasCobrancaId: etapa.id}}
+                            extraActions={extraActions}
+                            outcome="view/cobranca/listLigacaoCobranca/actions"
+                            hideCreate={true}
+                            hideUpdate={true}
+                            hideDelete={true}
                         />
                     ),
                 }))}

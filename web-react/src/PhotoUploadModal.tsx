@@ -43,7 +43,7 @@ export function PhotoUploadModal({isOpen, onClose, onPhotoUpdate, currentFoto, u
             return;
         }
         if (file.size > 5 * 1024 * 1024) {
-            setError('A imagem deve ter no máximo 5 MB.');
+            setError('A imagem deve ter no maximo 5 MB.');
             return;
         }
         const reader = new FileReader();
@@ -62,7 +62,7 @@ export function PhotoUploadModal({isOpen, onClose, onPhotoUpdate, currentFoto, u
                 videoRef.current.srcObject = mediaStream;
             }
         } catch {
-            setError('Não foi possível acessar a câmera. Verifique as permissões.');
+            setError('Nao foi possivel acessar a camera. Verifique as permissoes.');
         }
     };
 
@@ -94,16 +94,23 @@ export function PhotoUploadModal({isOpen, onClose, onPhotoUpdate, currentFoto, u
         setUploading(true);
         setError('');
         try {
-            const base64Data = preview.split(',')[1];
-            const {data} = await api.put<{foto: string}>(`/api/basico/usuario/foto-base64`, {foto: base64Data});
-            if (data.foto) {
-                onPhotoUpdate(data.foto);
+            const res = await fetch(preview);
+            const blob = await res.blob();
+            const ext = blob.type.includes('png') ? '.png' : '.jpg';
+            const file = new File([blob], username + ext, {type: blob.type});
+            const formData = new FormData();
+            formData.append('file', file);
+            const {data} = await api.put<{foto: string}>('/api/basico/usuario/foto-base64', {foto: ''});
+            const uploadRes = await api.post<{foto: string}>('/api/basico/usuario/foto-upload', formData, {
+                headers: {'Content-Type': 'multipart/form-data'},
+            });
+            const fotoUrl = uploadRes.data.foto;
+            if (fotoUrl) {
+                onPhotoUpdate(fotoUrl);
                 setSuccess(true);
-                setTimeout(() => {
-                    onClose();
-                }, 1500);
+                setTimeout(() => { onClose(); }, 1500);
             } else {
-                setError('Não foi possível obter a URL da foto.');
+                setError('Nao foi possivel obter a URL da foto.');
             }
         } catch (e: any) {
             const msg = e?.response?.data?.error || 'Erro ao fazer upload da foto.';
@@ -118,7 +125,8 @@ export function PhotoUploadModal({isOpen, onClose, onPhotoUpdate, currentFoto, u
         setUploading(true);
         setError('');
         try {
-            await api.put(`/api/basico/usuario/foto-base64`, {foto: ''});
+            await api.put('/api/basico/usuario/foto-base64', {foto: ''});
+            await api.put('/api/basico/usuario/foto', {foto: ''});
             onPhotoUpdate('');
             setSuccess(true);
             setTimeout(() => onClose(), 1500);
@@ -132,12 +140,14 @@ export function PhotoUploadModal({isOpen, onClose, onPhotoUpdate, currentFoto, u
 
     if (!isOpen) return null;
 
+    const canvasHiddenStyle = {display: 'none' as const};
+
     return (
         <div className="photo-upload-modal-overlay" onClick={onClose}>
             <div className="photo-upload-modal" onClick={e => e.stopPropagation()}>
                 <div className="photo-upload-header">
                     <h3>Alterar foto do perfil</h3>
-                    <button type="button" className="photo-upload-close" onClick={onClose} aria-label="Fechar">✕</button>
+                    <button type="button" className="photo-upload-close" onClick={onClose} aria-label="Fechar">&#10005;</button>
                 </div>
 
                 <div className="photo-upload-tabs">
@@ -161,9 +171,9 @@ export function PhotoUploadModal({isOpen, onClose, onPhotoUpdate, currentFoto, u
                     <div className="photo-upload-content">
                         <div className="photo-preview-area">
                             {preview ? (
-                                <img src={preview} alt="Pré-visualização" className="photo-preview-img"/>
+                                <img src={preview} alt="Pre-visualizacao" className="photo-preview-img" />
                             ) : currentFoto ? (
-                                <img src={currentFoto} alt="Foto atual" className="photo-preview-img"/>
+                                <img src={currentFoto} alt="Foto atual" className="photo-preview-img" />
                             ) : (
                                 <div className="photo-preview-placeholder">Nenhuma imagem selecionada</div>
                             )}
@@ -195,8 +205,8 @@ export function PhotoUploadModal({isOpen, onClose, onPhotoUpdate, currentFoto, u
 
                 {activeTab === 'camera' && stream && (
                     <div className="photo-camera-content">
-                        <video ref={videoRef} autoPlay playsInline className="camera-video"/>
-                        <canvas ref={canvasRef} className="camera-canvas" style={{display: 'none'}/>
+                        <video ref={videoRef} autoPlay playsInline className="camera-video" />
+                        <canvas ref={canvasRef} className="camera-canvas" style={canvasHiddenStyle} />
                         <div className="camera-controls">
                             <button type="button" className="camera-capture" onClick={capturePhoto}>
                                 Capturar

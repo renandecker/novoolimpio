@@ -1,9 +1,10 @@
 import {useQuery} from '@tanstack/react-query';
 import {api} from '../api';
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
+import {PermissionGate, useCurrentOutcome} from '../permissions';
+import {DataTable, type DataTableColumn, type DataTableRowAction} from '../DataTable';
 import {Tabs} from '../Tabs';
 import type {ApiItem} from '../types';
+import {executeAction} from '../actions';
 
 interface EtapaCobranca {
     id: number;
@@ -31,12 +32,52 @@ const COBRANCA_COLUMNS: DataTableColumn[] = [
     {key: 'observacao', label: 'Observação'},
 ];
 
+const extraRowActions: DataTableRowAction[] = [
+    {
+        key: 'detalhes',
+        title: 'Detalhes',
+        icon: <i className="fa fa-info-circle"/>,
+        permission: 'READ',
+        onClick: async (item) => {
+            await executeAction('ligacao-cobranca', 'carregarDetalhes', JSON.stringify({contrato: asRecord(item).contrato}), 'financeiro');
+        },
+    },
+    {
+        key: 'documento',
+        title: 'Documento',
+        icon: <i className="fa fa-file-text-o"/>,
+        permission: 'READ',
+        onClick: async (item) => {
+            await executeAction('ligacao-cobranca', 'carregarContrato', JSON.stringify({contrato: asRecord(item).contrato}), 'financeiro');
+        },
+    },
+    {
+        key: 'ligacao',
+        title: 'Ligação',
+        icon: <i className="fa fa-phone"/>,
+        permission: 'EXECUTE',
+        onClick: async (item) => {
+            await executeAction('ligacao-cobranca', 'iniciarLigacao', JSON.stringify({cobranca: asRecord(item).cobranca, contrato: asRecord(item).contrato}), 'financeiro');
+        },
+    },
+    {
+        key: 'email',
+        title: 'E-mail',
+        icon: <i className="fa fa-envelope"/>,
+        permission: 'EXECUTE',
+        onClick: async (item) => {
+            await executeAction('ligacao-cobranca', 'prepararEnvioEmail', JSON.stringify({id: asRecord(item).id}), 'financeiro');
+        },
+    },
+];
+
 export default function ViewCobrancaListLigacaoCobrancaListScreen() {
     const etapasQuery = useQuery({
         queryKey: ['etapas-cobranca'],
         queryFn: async () => (await api.get<EtapaCobranca[]>('/api/financeiro/etapas-cobranca')).data,
     });
     const etapas = etapasQuery.data ?? [];
+    const routeOutcome = useCurrentOutcome();
 
     return (
         <PermissionGate permission="READ">
@@ -50,12 +91,19 @@ export default function ViewCobrancaListLigacaoCobrancaListScreen() {
                             key: String(etapa.id),
                             label: etapa.descricao || `Etapa ${etapa.id}`,
                             content: (
-                                <DataTable
-                                    path="/api/financeiro/ligacao-cobranca"
-                                    params={{etapasCobrancaId: etapa.id}}
-                                    columns={COBRANCA_COLUMNS}
-                                    maxMainColumns={COBRANCA_COLUMNS.length}
-                                />
+                                 <DataTable
+                                     path="/api/financeiro/ligacao-cobranca"
+                                     params={{etapasCobrancaId: etapa.id}}
+                                     columns={COBRANCA_COLUMNS}
+                                     maxMainColumns={COBRANCA_COLUMNS.length}
+                                     extraRowActions={extraRowActions}
+                                     outcome="view/cobranca/listLigacaoCobranca/actions"
+                                     module="financeiro"
+                                     hideCreate={true}
+                                     hideUpdate={true}
+                                     hideDelete={true}
+                                     hideView={true}
+                                 />
                             ),
                         }))}
                     />

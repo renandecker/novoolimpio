@@ -94,6 +94,14 @@ public class ViewResource {
                                 .entity(Map.of("error", String.valueOf(failure.getMessage()))).build());
     }
 
+    @GET
+    @Path("/{feature}/{resource}/{id}")
+    public Uni<Map<String, Object>> findById(@PathParam("feature") String feature,
+                                              @PathParam("resource") String resource,
+                                              @PathParam("id") Long id) {
+        return service.findById(feature, resource, id);
+    }
+
     private String outcome(String feature, String resource) {
         return "view/" + feature + "/" + resource;
     }

@@ -90,6 +90,18 @@ public class CompromissoRepository implements PanacheRepository<Compromisso> {
     public static final String SQL_LISTAR_COMPROMISSOS_PELO_PROSPECTO =
             "SELECT c.* FROM bas_compromisso c WHERE c.id_prospecto = ?1";
 
+// Nova query para listar compromissos por range de data
+    public static final String SQL_LISTAR_COMPROMISSOS_POR_RANGE_DATA =
+            "SELECT c.* FROM bas_compromisso c LEFT JOIN bas_status_compromisso inner ON inner.id = c.id_status_compromisso LEFT JOIN bas_horario h ON h.id = c.id_horario WHERE c.data >= ?1 AND c.data <= ?2";
+
+    public Uni<java.util.List<Compromisso>> listarCompromissosPorRangeData(Date inicio, Date fim) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_LISTAR_COMPROMISSOS_POR_RANGE_DATA, Compromisso.class)
+                        .setParameter(1, inicio)
+                        .setParameter(2, fim)
+                        .getResultList());
+    }
+
     public Uni<java.util.List<Compromisso>> listarCompromissosPeloProspecto(Long prospectoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_LISTAR_COMPROMISSOS_PELO_PROSPECTO, Compromisso.class)

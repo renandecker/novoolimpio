@@ -41,9 +41,9 @@ export default function ViewComunicacaoFormComunicacaoMensagemListScreen() {
                         {key: 'filtros', label: 'Filtros', empty: 'Conteúdo de Filtros.'},
                         {
                             key: 'unidade',
-                            label: 'Unidade',
+                            label: 'Id_unidade',
                             masterDetail: {
-                                label: 'Unidade',
+                                label: 'Id_unidade',
                                 source: UNIDADE_SOURCE,
                                 valueKey: 'id',
                                 searchKeys: UNIDADE_SEARCH,

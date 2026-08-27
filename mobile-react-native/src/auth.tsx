@@ -10,6 +10,7 @@ export type Session = {
     permissions: string[];
     modulePermissions?: ModulePermissions;
     modules?: Modulo[];
+    hierarquia?: string;
 };
 
 type Auth = {

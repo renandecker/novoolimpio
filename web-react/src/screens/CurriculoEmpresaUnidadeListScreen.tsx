@@ -11,7 +11,7 @@ export default function CurriculoEmpresaUnidadeListScreen() {
                     module="curriculo"
                     columns={[
                         {key: 'id_empresa', label: 'Empresa'},
-                        {key: 'id_unidade', label: 'Unidade'},
+                        {key: 'id_unidade', label: 'Id_unidade'},
                         {key: 'inicio', label: 'Início'},
                         {key: 'fim', label: 'Fim'},
                         {key: 'pre_autorizado', label: 'Pré-autorizado'},

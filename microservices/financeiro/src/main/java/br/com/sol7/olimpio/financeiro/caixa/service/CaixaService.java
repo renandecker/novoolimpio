@@ -2,6 +2,10 @@ package br.com.sol7.olimpio.financeiro.caixa;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.financeiro.caixa.dto.CalculoValorParcelaRequest;
+import br.com.sol7.olimpio.financeiro.caixa.dto.CalculoValorParcelaResponse;
+import br.com.sol7.olimpio.financeiro.caixa.dto.FechamentoCaixaTotaisResponse;
+import br.com.sol7.olimpio.financeiro.caixa.dto.RegistrarPagamentoParcelaRequest;
 import br.com.sol7.olimpio.financeiro.caixa.entity.Caixa;
 import br.com.sol7.olimpio.financeiro.configuracaocaixa.ConfiguracaoCaixaService;
 import br.com.sol7.olimpio.financeiro.configuracaocaixa.ConfiguracaoCaixaResponse;
@@ -260,6 +264,69 @@ public class CaixaService {
         });
     }
 
+    // Calcula valores da parcela (desconto, multa, juros) baseado nas regras de negócio
+    public Uni<CalculoValorParcelaResponse> calcularValoresParcela(CalculoValorParcelaRequest r) {
+        BigDecimal valor = r.valor() != null ? r.valor() : BigDecimal.ZERO;
+        BigDecimal desconto = BigDecimal.ZERO;
+        BigDecimal multa = BigDecimal.ZERO;
+        BigDecimal juros = BigDecimal.ZERO;
+
+        // Parcela de entrada/matrícula (sequencia 0) nunca recebe desconto/multa/juros
+        if (r.parcelaSequencia() > 0) {
+            // Desconto
+            if (r.percentualDesconto() != null && r.percentualDesconto().compareTo(BigDecimal.ZERO) > 0) {
+                desconto = valor.multiply(r.percentualDesconto()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            }
+            // Multa
+            if (r.percentualMulta() != null && r.percentualMulta().compareTo(BigDecimal.ZERO) > 0) {
+                multa = valor.multiply(r.percentualMulta()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            }
+            // Juros
+            if (r.percentualJuros() != null && r.percentualJuros().compareTo(BigDecimal.ZERO) > 0) {
+                juros = valor.multiply(r.percentualJuros()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            }
+            // Feriado no dia anterior ao vencimento dobra a multa (regra legada)
+            if (r.feriadoNoDiaAnteriorVencimento() && multa.compareTo(BigDecimal.ZERO) > 0) {
+                multa = multa.multiply(BigDecimal.valueOf(2));
+            }
+        }
+
+        BigDecimal valorCobrado = valor.subtract(desconto).add(multa).add(juros);
+        return Uni.createFrom().item(new CalculoValorParcelaResponse(desconto, multa, juros, valorCobrado));
+    }
+
+    // Registra pagamento de parcela criando movimentações financeiras
+    public Uni<Void> registrarPagamentoParcela(RegistrarPagamentoParcelaRequest request) {
+        // TODO: Implementar criação de movimentações financeiras para o pagamento
+        // Por enquanto retorna vazio para compatibilidade
+        return Uni.createFrom().voidItem();
+    }
+
+    // Retorna totais para fechamento de caixa no formato de response
+    public Uni<FechamentoCaixaTotaisResponse> totaisFechamento(Long caixaId) {
+        return calcularTotaisCaixa(caixaId).map(totais -> {
+            BigDecimal totalEntradas = totais.totalEntradas();
+            BigDecimal totalSaidas = totais.totalSaidas();
+            BigDecimal totalValor = totalEntradas.subtract(totalSaidas);
+            return new FechamentoCaixaTotaisResponse(
+                    caixaId,
+                    totais.fundoCaixa(),
+                    totais.totalDinheiro(),
+                    totais.totalCheque(),
+                    totais.totalCartao(),
+                    totais.totalBoleto(),
+                    totais.totalTransferencia(),
+                    totais.totalDeposito(),
+                    totais.totalSangria(),
+                    totais.totalDinheiroCaixa(),
+                    totalValor,
+                    totais.totalDesconto(),
+                    totais.totalMultaJuros(),
+                    totalValor
+            );
+        });
+    }
+
     // Migrado de CaixaController.buscarMovimentacoes (via FundoCaixaController)
     // Busca movimentações de entrada do caixa + sangrias
     public Uni<List<MovimentacaoFinanceiraResponse>> buscarMovimentacaoCaixaEntrada(Long caixaId) {
@@ -330,6 +397,15 @@ public class CaixaService {
     public Uni<Long> buscarAberturaCaixaComUsuarioUnidade(Long usuarioId, Long unidadeId) {
         return repository.find("usuarioId = ?1 and unidadeId = ?2 and date(data) = current_date", usuarioId, unidadeId).firstResult()
                 .map(x -> x == null ? null : x.id);
+    }
+
+    // Busca o fundo de caixa sugerido baseado na configuração do usuário e unidade
+    public Uni<BigDecimal> fundoCaixaSugerido(Long usuarioId, Long unidadeId) {
+        return configuracaoCaixaService.buscarConfiguracaoComUnidadeUsuario(usuarioId, unidadeId)
+                .onItem().transformToUni(configId -> {
+                    if (configId == null) return Uni.createFrom().item(BigDecimal.ZERO);
+                    return configuracaoCaixaService.find(configId).map(config -> config.fundoCaixa() != null ? config.fundoCaixa() : BigDecimal.ZERO);
+                });
     }
 
     // Migrado de CaixaService.textoEmailCaixa (original service)

@@ -3,6 +3,7 @@ import {
     ActivityIndicator,
     Alert,
     FlatList,
+    Linking,
     Modal,
     Pressable,
     ScrollView,
@@ -14,7 +15,7 @@ import {
 import {useQuery} from '@tanstack/react-query';
 import {PAGE_SIZES, useModulePaged} from './useModulePaged';
 import {executeAction} from './actions';
-import {can} from './permissions';
+import {can, isAdmin} from './permissions';
 import {useAuth} from './auth';
 import type {ApiItem} from './types';
 import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from './theme';
@@ -48,6 +49,17 @@ const primaryLabel = (item: ApiItem) => {
     return `#${item.id}`;
 };
 
+const STATUS_COLORS: Record<string, string> = {
+    LIBERADA: '#32CD32',
+    PENDENTE: '#FF0000',
+    CANCELADA: '#000000',
+    LOTADA: '#FFA500',
+    EM_ANDAMENTO: '#000bc8',
+    FINALIZADA: '#8000FF',
+    CONCLUIDA: '#545454',
+    INICIANDO: '#61210B',
+};
+
 const editableFields = (item: ApiItem | null) => {
     if (!item) return ['nome'];
     return Object.keys(asRecord(item)).filter((key) => key !== 'id' && key !== 'dadosJson');
@@ -63,14 +75,26 @@ type ModalState =
     | { mode: 'edit'; item: ApiItem }
     | null;
 
+export interface ModuleListExtraAction {
+    key: string;
+    title: string;
+    icon?: string;
+    permission?: 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'EXECUTE';
+    onPress: (item: ApiItem) => void;
+}
+
 export function ModuleList({
                                 path,
                                 title,
                                 params,
+                                extraActions,
+                                outcome: customOutcome,
                             }: {
     path: string;
     title?: string;
     params?: Record<string, string | number | boolean | undefined>;
+    extraActions?: ModuleListExtraAction[];
+    outcome?: string;
 }) {
     const {session} = useAuth();
     const [page, setPage] = useState(0);
@@ -83,15 +107,17 @@ export function ModuleList({
     const segments = path.split('/').filter(Boolean);
     const feature = segments[2] ?? '';
     const resource = segments[3] ?? '';
-    const outcome = feature && resource ? `view/${feature}/${resource}` : '';
+    const outcome = customOutcome ?? (feature && resource ? `view/${feature}/${resource}` : '');
     const entityTitle = toTitle(resource.replace(/^(form|list|colunas)/i, '') || resource);
 
     const screenTitle = title ?? (resource ? entityTitle : toTitle(feature) || 'Lista');
 
-    const canCreate = can(session, 'CREATE', outcome);
-    const canUpdate = can(session, 'UPDATE', outcome);
-    const canDelete = can(session, 'DELETE', outcome);
+    const canCreate = !hideCreate && can(session, 'CREATE', outcome);
+    const canUpdate = !hideUpdate && can(session, 'UPDATE', outcome);
+    const canDelete = !hideDelete && can(session, 'DELETE', outcome);
     const canExecute = can(session, 'EXECUTE', outcome);
+    const isAdminUser = isAdmin(session);
+    const canRelatorio = isAdminUser || canExecute;
 
     const q = useModulePaged(path, page, size, params);
     const items = q.data?.content ?? [];
@@ -108,6 +134,20 @@ export function ModuleList({
             })
             .catch((error) => setNotice(`Falha ao executar "${toTitle(action)}": ${apiErrorMessage(error)}`))
             .finally(() => setRunningAction(null));
+    };
+
+    const exportarPDF = (item: ApiItem) => {
+        const url = `/api/relatorios/relatorio/disponiveis/TABELA/${item.id}`;
+        Linking.openURL(url);
+    };
+
+    const exportarDOCX = (item: ApiItem) => {
+        // Exportar DOCX - implementar conforme necessário
+    };
+
+    const exportarExcel = (item: ApiItem) => {
+        const url = `/api/relatorios/relatorio/disponiveis/GRAFICO/${item.id}`;
+        Linking.openURL(url);
     };
 
     const fields = useMemo(
@@ -163,6 +203,23 @@ export function ModuleList({
                         <Text style={styles.primaryButtonText}>Novo</Text>
                     </Pressable>
                 )}
+                {canRelatorio && items.length > 0 && (
+                    <Pressable style={styles.exportButton} onPress={() => {
+                        // Show action sheet or modal with export options
+                        Alert.alert(
+                            'Exportar',
+                            'Selecione o formato de exportação',
+                            [
+                                {text: 'PDF', onPress: () => exportarPDF(items[0])},
+                                {text: 'DOCX', onPress: () => exportarDOCX(items[0])},
+                                {text: 'Excel', onPress: () => exportarExcel(items[0])},
+                                {text: 'Cancelar', style: 'cancel'},
+                            ]
+                        );
+                    }}>
+                        <Text style={styles.exportButtonText}>Exportar</Text>
+                    </Pressable>
+                )}
             </View>
             {notice ? <Text style={styles.notice}>{notice}</Text> : null}
             {items.length === 0 ? (
@@ -173,13 +230,38 @@ export function ModuleList({
                     keyExtractor={(item) => String(item.id)}
                     refreshing={q.isFetching}
                     onRefresh={() => q.refetch()}
-                    renderItem={({item}) => (
-                        <View style={styles.row}>
-                            <View style={styles.rowMain}>
-                                <Text style={styles.rowText}>{primaryLabel(item)}</Text>
-                                <Text style={styles.rowId}>#{item.id}</Text>
-                            </View>
-                            <View style={styles.rowActions}>
+                    renderItem={({item}) => {
+                        const record = asRecord(item);
+                        const statusValue = String(record.status ?? '');
+                        const statusColor = STATUS_COLORS[statusValue];
+                        return (
+                            <View style={styles.row}>
+                                <View style={styles.rowMain}>
+                                    <View style={styles.rowLabelContainer}>
+                                        <Text style={styles.rowText}>{primaryLabel(item)}</Text>
+                                        {statusValue && statusColor && (
+                                            <View style={[styles.statusBadge, {backgroundColor: statusColor + '22'}]}>
+                                                <Text style={[styles.statusText, {color: statusColor}]}>
+                                                    {statusValue}
+                                                </Text>
+                                            </View>
+                                        )}
+                                    </View>
+                                    <Text style={styles.rowId}>#{item.id}</Text>
+                                </View>
+                                <View style={styles.rowActions}>
+                                {extraActions?.map((action) => {
+                                    if (action.permission && !can(session, action.permission, outcome)) return null;
+                                    return (
+                                        <Pressable
+                                            key={action.key}
+                                            style={styles.rowButton}
+                                            onPress={() => action.onPress(item)}
+                                        >
+                                            <Text style={styles.rowButtonText}>{action.icon ? `${action.icon} ` : ''}{action.title}</Text>
+                                        </Pressable>
+                                    );
+                                })}
                                 {canUpdate && (
                                     <Pressable style={styles.rowButton} onPress={() => setModal({mode: 'edit', item})}>
                                         <Text style={styles.rowButtonText}>Editar</Text>
@@ -424,6 +506,22 @@ const styles = StyleSheet.create({
         fontSize: Typography.sizes.base,
         fontWeight: Typography.weights.semibold,
     },
+    rowLabelContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flexShrink: 1,
+        marginRight: Spacing.md,
+    },
+    statusBadge: {
+        borderRadius: BorderRadius.md,
+        paddingHorizontal: Spacing.sm,
+        paddingVertical: Spacing.xs,
+        marginLeft: Spacing.xs,
+    },
+    statusText: {
+        fontSize: Typography.sizes.xs,
+        fontWeight: Typography.weights.bold,
+    },
     errorText: {
         color: Colors.error,
         fontSize: Typography.sizes.lg,
@@ -605,6 +703,18 @@ const styles = StyleSheet.create({
     },
     modalButtonText: {
         color: Colors.textWhite,
+        fontSize: Typography.sizes.lg,
+        fontWeight: Typography.weights.semibold,
+    },
+    exportButton: {
+        backgroundColor: Colors.goldBg,
+        borderRadius: BorderRadius.lg,
+        paddingHorizontal: Spacing.xl,
+        paddingVertical: Spacing.md,
+        marginLeft: Spacing.md,
+    },
+    exportButtonText: {
+        color: Colors.goldText,
         fontSize: Typography.sizes.lg,
         fontWeight: Typography.weights.semibold,
     },

@@ -7,7 +7,7 @@ export default function BreadCrumb() {
     const {module, ancestors} = useCurrentModule();
     if (!module) return null;
 
-    const defaultPath = session?.defaultOutcome || '/default';
+    const defaultPath = session?.defaultOutcome || '/meus-dados';
 
     return (
         <nav className="breadcrumb" aria-label="Trilha de navegação">

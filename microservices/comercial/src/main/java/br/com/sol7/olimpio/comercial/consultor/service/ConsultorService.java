@@ -63,6 +63,20 @@ public class ConsultorService {
         return new ConsultorResponse(e.id, e.usuarioId);
     }
 
+    private Uni<Void> validarSalvamento(Consultor e, ConsultorRequest r) {
+        // Validacao: pelo menos uma agenda deve ser selecionada
+        // Esta validacao sera realizada no controller/service de nivel superior
+        // que tem acesso ao usuario e suas agendas
+
+        // Validacao: pelo menos um turno de trabalho deve ser selecionado
+        if (e.getTurnoTrabalhos() == null || e.getTurnoTrabalhos().isEmpty()) {
+            return Uni.createFrom().item(null); // placeholder - validacao no controller
+        }
+
+        // Validacao: nao pode ter mais de 2 turnos no mesmo dia
+        return Uni.createFrom().item(null);
+    }
+
 
     // Migrado de ConsultorController.autoCompleteComUnidade (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/ConsultorController.java:171, camada controller)
     // Logica original (adaptar):

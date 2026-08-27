@@ -4,6 +4,7 @@ import {
     Alert,
     Image,
     FlatList,
+    Pressable,
     ScrollView,
     StyleSheet,
     Text,
@@ -19,6 +20,11 @@ import {moduleIcon} from '../moduleIcons';
 import {api} from '../api';
 import {useRoute} from '@react-navigation/native';
 import {PhotoUploadModal} from '../PhotoUploadModal';
+import {alunoApi, formatarData} from '../aluno';
+
+function normalizeOutcome(outcome: string): string {
+    return outcome.replace(/\.xhtml$/i, '').replace(/^\/+|\/+$/g, '');
+}
 
 type MeusDados = {
     username: string;
@@ -153,76 +159,78 @@ export default function MeusDadosScreen({navigation}: { navigation: any }) {
     };
 
     return (
-        <ScrollView style={styles.page} contentContainerStyle={styles.content}>
-            <Text style={styles.title}>Meus dados</Text>
+        <View style={styles.page}>
+            <ScrollView contentContainerStyle={styles.content}>
+                <Text style={styles.title}>Meus dados</Text>
 
-            <View style={styles.favoritesSection}>
-                <Text style={styles.favoritesTitle}>Favoritos</Text>
-                {favoritos.length === 0 ? (
-                    <Text style={styles.favoritesEmpty}>Nenhum favorito cadastrado.</Text>
-                ) : (
-                    <FlatList
-                        data={favoritos}
-                        keyExtractor={(item) => item.outcome}
-                        renderItem={({item}) => (
-                            <TouchableWithoutFeedback style={styles.favoriteItem}
-                                                      onPress={() => navigateTo(normalizeOutcome(item.outcome))}>
-                                <View style={styles.favoriteItemContent}>
-                                    <Text style={styles.favoriteItemIcon}>{moduleIcon(item.nome, item.icon)}</Text>
-                                    <Text style={styles.favoriteItemNome}>{item.nome}</Text>
-                                    <Pressable style={styles.favoriteRemove} onPress={(e) => {
-                                        e.stopPropagation();
-                                        api.delete('/api/basico/favorito-usuario', {params: {outcome: item.outcome}});
-                                        favoritosQuery.refetch();
-                                    }}>
-                                        <Text style={styles.favoriteRemoveIcon}>✕</Text>
-                                    </Pressable>
-                                </View>
-                            </TouchableWithoutFeedback>
-                        )}
-                    />
-                )}
-            </View>
-
-            <View style={styles.card}>
-                <View style={styles.photoWrap}>
-                    {dados.foto ? (
-                        <Image source={{uri: dados.foto}} style={styles.photo}/>
+                <View style={styles.favoritesSection}>
+                    <Text style={styles.favoritesTitle}>Favoritos</Text>
+                    {favoritos.length === 0 ? (
+                        <Text style={styles.favoritesEmpty}>Nenhum favorito cadastrado.</Text>
                     ) : (
-                        <View style={styles.avatar}>
-                            <Text style={styles.avatarText}>{inicial}</Text>
-                        </View>
+                        <FlatList
+                            data={favoritos}
+                            keyExtractor={(item) => item.outcome}
+                            renderItem={({item}) => (
+                                <TouchableWithoutFeedback style={styles.favoriteItem}
+                                                          onPress={() => navigateTo(normalizeOutcome(item.outcome))}>
+                                    <View style={styles.favoriteItemContent}>
+                                        <Text style={styles.favoriteItemIcon}>{moduleIcon(item.nome, item.icon)}</Text>
+                                        <Text style={styles.favoriteItemNome}>{item.nome}</Text>
+                                        <Pressable style={styles.favoriteRemove} onPress={(e) => {
+                                            e.stopPropagation();
+                                            api.delete('/api/basico/favorito-usuario', {params: {outcome: item.outcome}});
+                                            favoritosQuery.refetch();
+                                        }}>
+                                            <Text style={styles.favoriteRemoveIcon}>✕</Text>
+                                        </Pressable>
+                                    </View>
+                                </TouchableWithoutFeedback>
+                            )}
+                        />
                     )}
-                    <TouchableOpacity style={styles.editPhotoBtn} onPress={() => setPhotoModalVisible(true)}>
-                        <Text style={styles.editPhotoBtnText}>✎</Text>
-                    </TouchableOpacity>
                 </View>
 
-                <Text style={styles.nome}>{nomeExibido}</Text>
-                {dados.nomeSocial ? <Text style={styles.social}>{dados.nomeSocial}</Text> : null}
+                <View style={styles.card}>
+                    <View style={styles.photoWrap}>
+                        {dados.foto ? (
+                            <Image source={{uri: dados.foto}} style={styles.photo}/>
+                        ) : (
+                            <View style={styles.avatar}>
+                                <Text style={styles.avatarText}>{inicial}</Text>
+                            </View>
+                        )}
+                        <TouchableOpacity style={styles.editPhotoBtn} onPress={() => setPhotoModalVisible(true)}>
+                            <Text style={styles.editPhotoBtnText}>✎</Text>
+                        </TouchableOpacity>
+                    </View>
 
-                <View style={styles.grid}>
-                    {rows.map(([label, value]) => (
-                        <View style={styles.item} key={label}>
-                            <Text style={styles.itemLabel}>{label}</Text>
-                            <Text style={styles.itemValue}>{value}</Text>
-                        </View>
-                    ))}
+                    <Text style={styles.nome}>{nomeExibido}</Text>
+                    {dados.nomeSocial ? <Text style={styles.social}>{dados.nomeSocial}</Text> : null}
+
+                    <View style={styles.grid}>
+                        {rows.map(([label, value]) => (
+                            <View style={styles.item} key={label}>
+                                <Text style={styles.itemLabel}>{label}</Text>
+                                <Text style={styles.itemValue}>{value}</Text>
+                            </View>
+                        ))}
+                    </View>
                 </View>
-            </View>
-        </ScrollView>
-        <PhotoUploadModal
-            visible={photoModalVisible}
-            onClose={() => setPhotoModalVisible(false)}
-            onPhotoUpdate={handlePhotoUpdate}
-            currentFoto={dados.foto}
-            username={session?.username}
-        />
+            </ScrollView>
+            <PhotoUploadModal
+                visible={photoModalVisible}
+                onClose={() => setPhotoModalVisible(false)}
+                onPhotoUpdate={handlePhotoUpdate}
+                currentFoto={dados.foto}
+                username={session?.username}
+            />
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    page: {flex: 1},
+    page: {flex: 1, backgroundColor: '#fff'},
     content: {padding: 16},
     center: {flex: 1, justifyContent: 'center', alignItems: 'center'},
     title: {fontSize: 22, fontWeight: 'bold', color: '#2b2b2b', marginBottom: 16},

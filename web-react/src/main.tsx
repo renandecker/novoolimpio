@@ -2,7 +2,7 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
-import DefaultListScreen from './screens/DefaultListScreen';
+
 import {AuthProvider} from './auth';
 import {ThemeProvider} from './ThemeContext';
 import LoginScreen from './LoginScreen';
@@ -118,6 +118,7 @@ import ViewConfiguracaoListConfiguracaoMarketingListScreen
 import ViewConfiguracaoListConfiguracaoParcelaListScreen
     from './screens/ViewConfiguracaoListConfiguracaoParcelaListScreen';
 import ViewConfiguracaoListLayoutListScreen from './screens/ViewConfiguracaoListLayoutListScreen';
+import ViewConfiguracaoDocumentosListScreen from './screens/ViewConfiguracaoDocumentosListScreen';
 import ViewConsultorConsultorListScreen from './screens/ViewConsultorConsultorListScreen';
 import ViewConsultorFormConsultorListScreen from './screens/ViewConsultorFormConsultorListScreen';
 import ViewConsultorListConsultorListScreen from './screens/ViewConsultorListConsultorListScreen';
@@ -467,6 +468,7 @@ import ViewUsuarioColunasUsuarioListScreen from './screens/ViewUsuarioColunasUsu
 import ViewUsuarioFormUsuarioListScreen from './screens/ViewUsuarioFormUsuarioListScreen';
 import ViewUsuarioFormUsuarioRapidoListScreen from './screens/ViewUsuarioFormUsuarioRapidoListScreen';
 import ViewUsuarioListUsuarioListScreen from './screens/ViewUsuarioListUsuarioListScreen';
+import CadastroUsuarioScreen from './screens/CadastroUsuarioScreen';
 import ViewValorCursoColunasDescontoListScreen from './screens/ViewValorCursoColunasDescontoListScreen';
 import ViewValorCursoColunasRetencoesListScreen from './screens/ViewValorCursoColunasRetencoesListScreen';
 import ViewValorCursoColunasTaxaListScreen from './screens/ViewValorCursoColunasTaxaListScreen';
@@ -507,8 +509,7 @@ const q = new QueryClient();
 createRoot(document.getElementById('root')!).render(<QueryClientProvider
     client={q}><AuthProvider><ThemeProvider><PermissionBridge><BrowserRouter><Routes><Route path="/login"
                                                                              element={<LoginScreen/>}/><Route
-    element={<ProtectedRoute/>}><Route path="/default" element={
-    <DefaultListScreen/>}/><Route path="/auditoria" element={<AuditoriaScreen/>}/><Route path="/view/tema/listTemas"
+    element={<ProtectedRoute/>}><Route path="/auditoria" element={<AuditoriaScreen/>}/><Route path="/view/tema/listTemas"
                                                                                          element={
                                                                                              <ViewTemaListTemasListScreen/>}/>
     <Route path="/view/acao/colunasAcao" element={<ViewAcaoColunasAcaoListScreen/>}/>
@@ -638,6 +639,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/configuracao/listConfiguracaoParcela"
            element={<ViewConfiguracaoListConfiguracaoParcelaListScreen/>}/>
     <Route path="/view/configuracao/listLayout" element={<ViewConfiguracaoListLayoutListScreen/>}/>
+    <Route path="/view/configuracao/listDocumentos" element={<ViewConfiguracaoDocumentosListScreen/>}/>
     <Route path="/view/consultor/consultor" element={<ViewConsultorConsultorListScreen/>}/>
     <Route path="/view/consultor/formConsultor" element={<ViewConsultorFormConsultorListScreen/>}/>
     <Route path="/view/consultor/listConsultor" element={<ViewConsultorListConsultorListScreen/>}/>
@@ -992,6 +994,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/usuario/colunasUsuario" element={<ViewUsuarioColunasUsuarioListScreen/>}/>
     <Route path="/view/usuario/formUsuario" element={<ViewUsuarioFormUsuarioListScreen/>}/>
     <Route path="/view/usuario/formUsuarioRapido" element={<ViewUsuarioFormUsuarioRapidoListScreen/>}/>
+    <Route path="/view/usuario/cadastro" element={<CadastroUsuarioScreen/>}/>
     <Route path="/view/usuario/listUsuario" element={<ViewUsuarioListUsuarioListScreen/>}/>
     <Route path="/view/valorCurso/colunasDesconto" element={<ViewValorCursoColunasDescontoListScreen/>}/>
     <Route path="/view/valorCurso/colunasRetencoes" element={<ViewValorCursoColunasRetencoesListScreen/>}/>

@@ -48,7 +48,15 @@ const OFERECIMENTO_COLUMNS = [
         label: 'Replicar',
         render: (item) => (asRecord(item).replicar ? 'Sim' : 'Não'),
     },
-    {key: 'status', label: 'Status'},
+    {
+        key: 'status',
+        label: 'Status',
+        render: (item) => {
+            const value = String(asRecord(item).status ?? '');
+            const cls = legacyClassName(value);
+            return <span className={cls ?? ''}>{value}</span>;
+        },
+    },
 ];
 
 const exportarPDF = (item: ApiItem) => {

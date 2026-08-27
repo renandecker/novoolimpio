@@ -4,6 +4,7 @@ import {PermissionGate} from '../permissions';
 import {Tabs} from '../Tabs';
 import type {TabItem} from '../Tabs';
 import {MasterDetail} from '../MasterDetail';
+import {BooleanField} from '../BooleanField';
 import type {ApiItem} from '../types';
 import {api} from '../api';
 import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../masterDetailSources';
@@ -56,6 +57,8 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
     const [pjOriginal, setPjOriginal] = useState<Record<string, unknown> | null>(null);
     const [pessoaOriginal, setPessoaOriginal] = useState<Record<string, unknown> | null>(null);
     const [enderecos, setEnderecos] = useState<Endereco[]>([]);
+    const [unidades, setUnidades] = useState<ApiItem[]>([]);
+    const [curriculo, setCurriculo] = useState(false);
     const [salvando, setSalvando] = useState(false);
 
     const {data: allUnidades = []} = useQuery({
@@ -327,6 +330,10 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
             label: 'Outros',
             content: (
                 <div className="form-grid">
+                    <label className="form-field">
+                        <span className="form-label">Currículo / Banco de Talentos</span>
+                        <BooleanField value={curriculo} onChange={setCurriculo}/>
+                    </label>
                     <label className="form-field">
                         <span className="form-label">Observação</span>
                         <textarea className="form-input" placeholder="Observações" rows={5}

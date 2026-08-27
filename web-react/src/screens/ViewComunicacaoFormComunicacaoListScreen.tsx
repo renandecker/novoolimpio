@@ -62,7 +62,7 @@ export default function ViewComunicacaoFormComunicacaoListScreen() {
                                 },
                                 {
                                     key: 'unidade',
-                                    label: 'Unidade',
+                                    label: 'Id_unidade',
                                     content: (
                                         <MasterDetail
                                             label="Unidade"

@@ -3,6 +3,10 @@ import type {ModulePermissions} from './types';
 
 export type Permission = 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'EXECUTE';
 
+export const isAdmin = (session: Session | null): boolean => {
+    return session?.hierarquia === 'ADMIN';
+};
+
 export const normalizeOutcome = (value: string) =>
     value.replace(/\.xhtml$/i, '').replace(/^\/+|\/+$/g, '');
 

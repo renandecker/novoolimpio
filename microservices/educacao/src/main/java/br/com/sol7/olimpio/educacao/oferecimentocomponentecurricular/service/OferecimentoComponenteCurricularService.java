@@ -813,7 +813,9 @@ public class OferecimentoComponenteCurricularService {
     //         return getOferecimentoComponenteCurricularRepository().buscarMatrizCurricular(curriculo);
     //     }
     public Uni<List<Long>> buscarMatrizCurricular(Long curriculoId) {
-        return repository.find("curriculoId = ?1 order by ordem", curriculoId).list().map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarMatrizCurricular(curriculoId).map(list -> list.stream()
+                .map(x -> ((Number) ((Object[]) x)[0]).longValue())
+                .toList());
     }
 
 

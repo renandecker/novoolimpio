@@ -489,6 +489,7 @@ import ViewUsuarioColunasUsuarioListScreen from './src/screens/ViewUsuarioColuna
 import ViewUsuarioFormUsuarioListScreen from './src/screens/ViewUsuarioFormUsuarioListScreen';
 import ViewUsuarioFormUsuarioRapidoListScreen from './src/screens/ViewUsuarioFormUsuarioRapidoListScreen';
 import ViewUsuarioListUsuarioListScreen from './src/screens/ViewUsuarioListUsuarioListScreen';
+import CadastroUsuarioMobileScreen from './src/screens/CadastroUsuarioMobileScreen';
 import ViewValorCursoColunasDescontoListScreen from './src/screens/ViewValorCursoColunasDescontoListScreen';
 import ViewValorCursoColunasRetencoesListScreen from './src/screens/ViewValorCursoColunasRetencoesListScreen';
 import ViewValorCursoColunasTaxaListScreen from './src/screens/ViewValorCursoColunasTaxaListScreen';
@@ -1051,6 +1052,7 @@ function AppRoutes() {
         <Stack.Screen name='view/usuario/formUsuario' component={ViewUsuarioFormUsuarioListScreen}/>
         <Stack.Screen name='view/usuario/formUsuarioRapido' component={ViewUsuarioFormUsuarioRapidoListScreen}/>
         <Stack.Screen name='view/usuario/listUsuario' component={ViewUsuarioListUsuarioListScreen}/>
+        <Stack.Screen name='view/usuario/cadastro' component={CadastroUsuarioMobileScreen} options={{title: 'Cadastro de Usuário'}}/>
         <Stack.Screen name='view/valorCurso/colunasDesconto' component={ViewValorCursoColunasDescontoListScreen}/>
         <Stack.Screen name='view/valorCurso/colunasRetencoes' component={ViewValorCursoColunasRetencoesListScreen}/>
         <Stack.Screen name='view/valorCurso/colunasTaxa' component={ViewValorCursoColunasTaxaListScreen}/>

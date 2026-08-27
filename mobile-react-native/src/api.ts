@@ -6,7 +6,12 @@ api.interceptors.request.use(async config => {
     const raw = await AsyncStorage.getItem('olimpio.session');
     if (raw) {
         const session = JSON.parse(raw);
-        if (session.expiresAt * 1000 > Date.now()) config.headers.Authorization = `Bearer ${session.accessToken}`; else await AsyncStorage.removeItem('olimpio.session');
+        if (session.expiresAt * 1000 > Date.now()) {
+            config.headers.Authorization = `Bearer ${session.accessToken}`;
+            if (session.username) config.headers['X-Authenticated-Username'] = session.username;
+        } else {
+            await AsyncStorage.removeItem('olimpio.session');
+        }
     }
     return config;
 });

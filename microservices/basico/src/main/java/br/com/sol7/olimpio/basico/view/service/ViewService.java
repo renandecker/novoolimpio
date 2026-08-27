@@ -287,6 +287,34 @@ public class ViewService {
                 .chain(table -> delete(table, id));
     }
 
+    private String resolveFeatureTable(String feature, String resource) {
+        // Se o resource for um número (ID), tentar encontrar table pelo feature usando CURATED
+        if (resource != null && resource.matches("\\d+")) {
+            // Percorrer CURATED para encontrar entrada onde o feature corresponda
+            for (Map.Entry<String, String> entry : CURATED.entrySet()) {
+                String key = entry.getKey();
+                if (key.startsWith(feature + "/")) {
+                    return entry.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    public Uni<Map<String, Object>> findById(String feature, String resource, Long id) {
+        // Se resource for um ID numérico, tentar resolução pelo feature primeiro
+        String curatedTable = resolveFeatureTable(feature, resource);
+        if (curatedTable != null) {
+            return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                    .chain(session -> findById(curatedTable, id));
+        }
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> resolveTable(session, feature, resource))
+                .onItem().ifNull().failWith(() -> new NotFoundException(
+                        "Tabela nao encontrada para /api/view/" + feature + "/" + resource))
+                .chain(resolvedTable -> findById(resolvedTable, id));
+    }
+
     private Uni<Map<String, Object>> update(String table, Long id, Map<String, Object> body) {
         if (body == null || body.isEmpty())
             return Uni.createFrom().failure(new NotFoundException("Nenhum campo para atualizar"));
@@ -325,6 +353,22 @@ public class ViewService {
                                     ? Uni.createFrom().failure(new NotFoundException("Registro " + id + " não encontrado em " + table))
                                     : Uni.createFrom().voidItem());
                 });
+    }
+
+    private Uni<Map<String, Object>> findById(String table, Long id) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> columns(session, table).flatMap(cols -> {
+                    if (cols.isEmpty()) return Uni.createFrom().failure(new NotFoundException("Nenhuma coluna encontrada para " + table));
+                    String selectSql = "SELECT " + quoteColumns(cols) + " FROM " + quote(table) + " WHERE id = :id";
+                    return session.createNativeQuery(selectSql).setParameter("id", id).getSingleResultOrNull()
+                            .flatMap(row -> {
+                                if (row == null) return Uni.createFrom().failure(new NotFoundException("Registro " + id + " não encontrado em " + table));
+                                Object[] arr = (Object[]) row;
+                                Map<String, Object> m = new LinkedHashMap<>();
+                                for (int i = 0; i < cols.size() && i < arr.length; i++) m.put(cols.get(i), arr[i]);
+                                return enrichDescriptions(session, table, List.of(m)).map(list -> list.get(0));
+                            });
+                }));
     }
 
     private Uni<Map<String, Object>> insert(String table, Map<String, Object> body) {

@@ -90,9 +90,9 @@ public class CurriculoRepository implements PanacheRepository<Curriculo> {
 
 
     // Migrado de CurriculoRepository.buscarCursosDaUnidade (legado) - HQL original:
-    // Select c from Curriculo c left join c.unidades u where u in (?1) AND (c.dataCancelamento > current_date  or c.dataCancelamento is null)
+    // Select c from Curriculo c left join c.unidades u where u.id = ?1 AND (c.dataCancelamento > current_date  or c.dataCancelamento is null)
     public static final String SQL_BUSCAR_CURSOS_DA_UNIDADE =
-            "SELECT c.* FROM edc_curriculo c LEFT JOIN edc_curriculo_unidade c_u_jt ON c_u_jt.id_curriculo = c.id LEFT JOIN bas_unidade u ON u.id = c_u_jt.id_unidade WHERE u in (?1) AND (c.data_cancelamento > current_date or c.data_cancelamento is null)";
+            "SELECT c.* FROM edc_curriculo c LEFT JOIN edc_curriculo_unidade c_u_jt ON c_u_jt.id_curriculo = c.id LEFT JOIN bas_unidade u ON u.id = c_u_jt.id_unidade WHERE u.id = ?1 AND (c.data_cancelamento > current_date or c.data_cancelamento is null)";
 
     public Uni<java.util.List<Curriculo>> buscarCursosDaUnidade(Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()

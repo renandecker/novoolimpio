@@ -355,7 +355,7 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
         }
     }, [data.curriculoId, emEdicao, montarTurmasPorMatriz]);
 
-    useEffect(() => {
+useEffect(() => {
         if (!emEdicao || hidratadoRef.current) return;
         hidratadoRef.current = true;
         (async () => {
@@ -397,7 +397,7 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
                     }
                 } catch {}
 
-                // Populate salas and cursos for the unidade
+                // Load salas and cursos for the unidade
                 if (curso.unidadeId) {
                     try {
                         const idsCursos = await api.get<number[]>('/api/educacao/curriculo/buscar-cursos-da-unidade', {params: {unidadeId: curso.unidadeId}});
@@ -454,7 +454,7 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
                 setErro('Não foi possível carregar o oferecimento para edição.');
             }
         })();
-    }, [emEdicao, id, componentesQuery.data, curriculosQuery.data, salasQuery.data]);
+    }, [emEdicao, id]);
 
     const buscarCriterios = useCallback(async () => {
         if (!data.unidadeId || !data.curriculoId) {

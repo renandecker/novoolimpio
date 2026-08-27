@@ -2,6 +2,8 @@ import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {PermissionGate} from '../permissions';
 import {FormLayout, FormTabConfig} from '../FormLayout';
+import {MasterDetail} from '../MasterDetail';
+import {BooleanField} from '../BooleanField';
 import type {ApiItem} from '../types';
 import {api} from '../api';
 import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../masterDetailSources';
@@ -60,78 +62,252 @@ const semId = (obj: Record<string, unknown> | null): Record<string, unknown> => 
 const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
 const num = (v: string): number | null => (v !== '' && !isNaN(Number(v)) ? Number(v) : null);
 
-    const tabs: FormTabConfig[] = [
-    {
-        key: 'identificacao',
-        label: 'Identificação',
-        fields: [
-            {name: 'cpf', label: 'CPF', type: 'mask', mask: '999.999.999-99', required: true},
-            {name: 'rg', label: 'RG', required: true},
-            {name: 'nome', label: 'Nome', required: true, span: 3},
-            {name: 'email', label: 'E-mail', type: 'email', required: true, span: 3},
-        ],
-    },
-    {
-        key: 'informacoesBasicas',
-        label: 'Informações Básicas',
-        fields: [
-            {name: 'nomeSocial', label: 'Nome Social', span: 3},
-            {name: 'dataNascimento', label: 'Data Nascimento', type: 'date', required: true},
-            {name: 'cidadeOrigem', label: 'Cidade Origem', required: true, span: 3},
-            {name: 'generoId', label: 'Gênero', type: 'select', options: GENEROS},
-            {name: 'etniaId', label: 'Etnia', type: 'select', options: ETNIAS},
-            {name: 'estadoCivilId', label: 'Estado Civil', type: 'select', options: ESTADOS_CIVIS, required: true},
-            {name: 'escolaridadeId', label: 'Escolaridade', type: 'select', options: ESCOLARIDADES, required: true},
-        ],
-    },
-    {
-        key: 'referencias',
-        label: 'Referências',
-        fields: [
-            {name: 'nomeReferencia', label: 'Nome Referência', required: true, span: 3},
-            {name: 'telefoneReferencia', label: 'Telefone Referência', type: 'mask', mask: '(99) 9999-9999', required: true},
-            {name: 'celularReferencia', label: 'Celular Referência', type: 'mask', mask: '(99) 99999-9999', required: true},
-            {name: 'nomeReferencia2', label: 'Nome Referência 2', span: 3},
-            {name: 'telefoneReferencia2', label: 'Telefone Referência 2', type: 'mask', mask: '(99) 9999-9999'},
-            {name: 'celularReferencia2', label: 'Celular Referência 2', type: 'mask', mask: '(99) 99999-9999'},
-            {name: 'nomePai', label: 'Nome do Pai', span: 3},
-            {name: 'nomeMae', label: 'Nome da Mãe', required: true, span: 3},
-        ],
-    },
-    {
-        key: 'contato',
-        label: 'Contato',
-        fields: [
-            {name: 'telefoneResidencial', label: 'Telefone Residencial', type: 'mask', mask: '(99) 9999-9999'},
-            {name: 'telefoneComercial', label: 'Telefone Comercial', type: 'mask', mask: '(99) 9999-9999'},
-            {name: 'celular', label: 'Celular', type: 'mask', mask: '(99) 99999-9999'},
-            {name: 'facebook', label: 'Facebook', span: 3},
-            {name: 'twitter', label: 'Twitter', span: 3},
-            {name: 'googlePlus', label: 'Google+', span: 3},
-            {name: 'telegram', label: 'Telegram', span: 3},
-            {name: 'observacao', label: 'Observação', type: 'textarea', span: 4},
-        ],
-    },
-    {
-        key: 'endereco',
-        label: 'Endereço',
-        content: <EnderecoCampos value={enderecos} onChange={setEnderecos}/>,
-    },
-    ];
-
 export default function ViewPessoaFormPessoaFisicaListScreen() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const idParam = searchParams.get('id');
 
-    const [pfId, setPfId] = useState<number | undefined>();
+const [pfId, setPfId] = useState<number | undefined>();
     const [pessoaId, setPessoaId] = useState<number | undefined>();
     const [pfOriginal, setPfOriginal] = useState<Record<string, unknown> | null>(null);
     const [pessoaOriginal, setPessoaOriginal] = useState<Record<string, unknown> | null>(null);
     const [unidades, setUnidades] = useState<ApiItem[]>([]);
+    const [curriculo, setCurriculo] = useState(false);
     const [enderecos, setEnderecos] = useState<Endereco[]>([]);
     const [salvando, setSalvando] = useState(false);
     const [error, setError] = useState<string | undefined>();
+    const [initialValues, setInitialValues] = useState<Record<string, unknown>>({});
+
+    const tabs: FormTabConfig[] = [
+        {
+            key: 'identificacao',
+            label: 'Identificação',
+            content: (
+                <div className="form-grid">
+                    <label className="form-field">
+                        <span className="form-label">CPF *</span>
+                        <input className="form-input" placeholder="999.999.999-99"
+                               onChange={(e) => setInitialValues(prev => ({...prev, cpf: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">RG *</span>
+                        <input className="form-input" placeholder="RG"
+                               onChange={(e) => setInitialValues(prev => ({...prev, rg: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Nome *</span>
+                        <input className="form-input" placeholder="Nome completo" style={{gridColumn: 'span 3'}}
+                               onChange={(e) => setInitialValues(prev => ({...prev, nome: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">E-mail *</span>
+                        <input className="form-input" type="email" placeholder="E-mail"
+                               style={{gridColumn: 'span 3'}}
+                               onChange={(e) => setInitialValues(prev => ({...prev, email: e.target.value}))}/>
+                    </label>
+                </div>
+            ),
+        },
+        {
+            key: 'informacoesBasicas',
+            label: 'Informações Básicas',
+            content: (
+                <div className="form-grid">
+                    <label className="form-field">
+                        <span className="form-label">Nome Social *</span>
+                        <input className="form-input" placeholder="Nome social" style={{gridColumn: 'span 3'}}
+                               onChange={(e) => setInitialValues(prev => ({...prev, nomeSocial: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Data Nascimento *</span>
+                        <input className="form-input" type="date" value={str(initialValues.dataNascimento)}
+                               onChange={(e) => setInitialValues(prev => ({...prev, dataNascimento: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Cidade Origem *</span>
+                        <input className="form-input" placeholder="Cidade de origem" style={{gridColumn: 'span 3'}}
+                               onChange={(e) => setInitialValues(prev => ({...prev, cidadeOrigem: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Gênero</span>
+                        <select className="form-input form-select" value={str(initialValues.generoId)}
+                                onChange={(e) => setInitialValues(prev => ({...prev, generoId: e.target.value}))}>
+                            <option value="">-- Selecione --</option>
+                            <option value="1">Masculino</option>
+                            <option value="2">Feminino</option>
+                            <option value="3">Outro</option>
+                        </select>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Etnia</span>
+                        <select className="form-input form-select" value={str(initialValues.etniaId)}
+                                onChange={(e) => setInitialValues(prev => ({...prev, etniaId: e.target.value}))}>
+                            <option value="">-- Selecione --</option>
+                            <option value="1">Branca</option>
+                            <option value="2">Preta</option>
+                            <option value="3">Parda</option>
+                            <option value="4">Amarela</option>
+                            <option value="5">Indígena</option>
+                        </select>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Estado Civil *</span>
+                        <select className="form-input form-select" value={str(initialValues.estadoCivilId)}
+                                onChange={(e) => setInitialValues(prev => ({...prev, estadoCivilId: e.target.value}))}>
+                            <option value="">-- Selecione --</option>
+                            <option value="1">Solteiro(a)</option>
+                            <option value="2">Casado(a)</option>
+                            <option value="3">Divorciado(a)</option>
+                            <option value="4">Viúvo(a)</option>
+                            <option value="5">União Estável</option>
+                        </select>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Escolaridade *</span>
+                        <select className="form-input form-select" value={str(initialValues.escolaridadeId)}
+                                onChange={(e) => setInitialValues(prev => ({...prev, escolaridadeId: e.target.value}))}>
+                            <option value="">-- Selecione --</option>
+                            <option value="1">Ensino Fundamental Incompleto</option>
+                            <option value="2">Ensino Fundamental Completo</option>
+                            <option value="3">Ensino Médio Incompleto</option>
+                            <option value="4">Ensino Médio Completo</option>
+                            <option value="5">Superior Incompleto</option>
+                            <option value="6">Superior Completo</option>
+                            <option value="7">Pós-Graduação</option>
+                        </select>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Nome Referência *</span>
+                        <input className="form-input" placeholder="Nome da referência"
+                               style={{gridColumn: 'span 3'}} onChange={(e) => setInitialValues(prev => ({...prev, nomeReferencia: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Telefone Referência *</span>
+                        <input className="form-input" placeholder="(99) 9999-9999"
+                               onChange={(e) => setInitialValues(prev => ({...prev, telefoneReferencia: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Celular Referência *</span>
+                        <input className="form-input" placeholder="(99) 99999-9999"
+                               onChange={(e) => setInitialValues(prev => ({...prev, celularReferencia: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Nome Referência 2</span>
+                        <input className="form-input" placeholder="Nome da referência 2"
+                               style={{gridColumn: 'span 3'}} onChange={(e) => setInitialValues(prev => ({...prev, nomeReferencia2: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Telefone Referência 2</span>
+                        <input className="form-input" placeholder="(99) 9999-9999"
+                               onChange={(e) => setInitialValues(prev => ({...prev, telefoneReferencia2: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Celular Referência 2</span>
+                        <input className="form-input" placeholder="(99) 99999-9999"
+                               onChange={(e) => setInitialValues(prev => ({...prev, celularReferencia2: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Nome do Pai</span>
+                        <input className="form-input" placeholder="Nome do pai" style={{gridColumn: 'span 3'}}
+                               onChange={(e) => setInitialValues(prev => ({...prev, nomePai: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Nome da Mãe *</span>
+                        <input className="form-input" placeholder="Nome da mãe" style={{gridColumn: 'span 3'}}
+                               onChange={(e) => setInitialValues(prev => ({...prev, nomeMae: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Foto</span>
+                        <div style={{gridColumn: 'span 3', display: 'flex', gap: '8px', alignItems: 'center'}}>
+                            <input type="file" accept="image/*" className="form-input" style={{flex: 1}}/>
+                            <button type="button" className="btnblue">Capturar Foto</button>
+                        </div>
+                    </label>
+                </div>
+            ),
+        },
+        {
+            key: 'contatos',
+            label: 'Contatos',
+            content: (
+                <div className="form-grid">
+                    <label className="form-field">
+                        <span className="form-label">Telefone Residencial *</span>
+                        <input className="form-input" placeholder="(99) 9999-9999"
+                               onChange={(e) => setInitialValues(prev => ({...prev, telefoneResidencial: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Telefone Comercial</span>
+                        <input className="form-input" placeholder="(99) 9999-9999"
+                               onChange={(e) => setInitialValues(prev => ({...prev, telefoneComercial: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Celular *</span>
+                        <input className="form-input" placeholder="(99) 99999-9999" value={str(initialValues.celular)}
+                               onChange={(e) => setInitialValues(prev => ({...prev, celular: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Facebook</span>
+                        <input className="form-input" placeholder="facebook.com/usuario"
+                               style={{gridColumn: 'span 3'}} onChange={(e) => setInitialValues(prev => ({...prev, facebook: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Twitter</span>
+                        <input className="form-input" placeholder="@usuario" style={{gridColumn: 'span 3'}}
+                               onChange={(e) => setInitialValues(prev => ({...prev, twitter: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Google+</span>
+                        <input className="form-input" placeholder="plus.google.com/usuario"
+                               style={{gridColumn: 'span 3'}} onChange={(e) => setInitialValues(prev => ({...prev, googlePlus: e.target.value}))}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Telegram</span>
+                        <input className="form-input" placeholder="@usuario" style={{gridColumn: 'span 3'}}
+                               onChange={(e) => setInitialValues(prev => ({...prev, telegram: e.target.value}))}/>
+                    </label>
+                </div>
+            ),
+        },
+        {
+            key: 'endereco',
+            label: 'Endereço',
+            content: <EnderecoCampos value={enderecos} onChange={setEnderecos}/>,
+        },
+        {
+            key: 'unidades',
+            label: 'Unidades',
+            content: (
+                <MasterDetail
+                    label="Unidade"
+                    source={UNIDADE_SOURCE}
+                    valueKey="id"
+                    searchKeys={UNIDADE_SEARCH}
+                    columns={UNIDADE_COLUMNS}
+                    items={unidades}
+                    onChange={setUnidades}
+                />
+            ),
+        },
+        {
+            key: 'outros',
+            label: 'Outros',
+            content: (
+                <div className="form-grid">
+                    <div className="form-field">
+                        <span className="form-label">Currículo / Banco de Talentos</span>
+                        <BooleanField value={curriculo} onChange={setCurriculo}/>
+                    </div>
+                    <label className="form-field" style={{gridColumn: 'span 4'}}>
+                        <span className="form-label">Observação</span>
+                        <textarea className="form-input" placeholder="Observações" rows={5}
+                                  style={{width: '100%', minHeight: '100px'}} value={initialValues.observacao !== undefined ? String(initialValues.observacao) : ''}
+                                  onChange={(e) => setInitialValues(prev => ({...prev, observacao: e.target.value}))}/>
+                    </label>
+                </div>
+            ),
+        },
+    ];
 
     const {data: allUnidades = []} = useQuery({
         queryKey: [UNIDADE_SOURCE],
@@ -252,8 +428,6 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
             ativo = false;
         };
     }, [idParam, allUnidades]);
-
-    const [initialValues, setInitialValues] = useState<Record<string, unknown>>({});
 
     const voltar = () => navigate('/view/pessoa/listPessoaFisica');
 

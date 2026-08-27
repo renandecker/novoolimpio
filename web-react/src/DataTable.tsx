@@ -7,6 +7,8 @@ import {api} from './api';
 import {useModulePaged} from './useModulePaged';
 import {executeAction, type Action} from './actions';
 import {usePermissions, useCurrentOutcome} from './permissions';
+import {useAuth} from './auth';
+import {ExportDropdown} from './ExportDropdown';
 import {BooleanField} from './BooleanField';
 import {Base64FileUpload} from './Base64FileUpload';
 import {PerfilModuloPermissions} from './useModulePaged';
@@ -56,6 +58,9 @@ interface DataTableProps {
     maxMainColumns?: number;
     preview?: (values: Record<string, unknown>) => ReactNode;
     hideCreate?: boolean;
+    hideUpdate?: boolean;
+    hideDelete?: boolean;
+    hideView?: boolean;
     /** Rota do formulário para navegar ao clicar em Editar (fluxo legado lista -> formulário). */
     editNavigateTo?: string;
     /** Rota do formulário para navegar ao clicar em Novo. */
@@ -187,7 +192,7 @@ type ModalState =
     | { mode: 'delete'; item: ApiItem }
     | null;
 
-export function DataTable({path, columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, editNavigateTo, createNavigateTo, extraRowActions}: DataTableProps) {
+export function DataTable({path, columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, hideUpdate = false, hideDelete = false, hideView = false, editNavigateTo, createNavigateTo, extraRowActions}: DataTableProps) {
     const navigate = useNavigate();
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(PAGE_SIZES[0]);
@@ -197,6 +202,8 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
     const colorColumnSet = new Set(colorColumns ?? []);
     const {can} = usePermissions();
+    const {session} = useAuth();
+    const isAdmin = session?.hierarquia === 'ADMIN';
     const routeOutcome = useCurrentOutcome();
     const screenOutcome = outcome ?? routeOutcome;
 
@@ -237,9 +244,10 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
     }, [path]);
 
     const canCreate = !hideCreate && (can('CREATE', screenOutcome) || (perfilModuloPermissions?.novo ?? false));
-    const canUpdate = can('UPDATE', screenOutcome) || (perfilModuloPermissions?.editar ?? false);
-    const canDelete = can('DELETE', screenOutcome) || (perfilModuloPermissions?.remover ?? false);
-    const canRelatorio = can('EXECUTE', screenOutcome) || (perfilModuloPermissions?.relatorio ?? false);
+    const canUpdate = !hideUpdate && (can('UPDATE', screenOutcome) || (perfilModuloPermissions?.editar ?? false));
+    const canDelete = !hideDelete && (can('DELETE', screenOutcome) || (perfilModuloPermissions?.remover ?? false));
+    const isAdmin = perfilModuloPermissions?.admin ?? false;
+    const canRelatorio = !hideView && (isAdmin || can('EXECUTE', screenOutcome));
 
     const feature = path.split('/').filter(Boolean)[2] ?? '';
     const resource = path.split('/').filter(Boolean)[3] ?? '';
@@ -434,42 +442,32 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
                         onClick={() => createNavigateTo ? navigate(createNavigateTo) : setModal({mode: 'create'})}>
                     Novo
                 </button>}
-                {canRelatorio && (
-                    <div className="export-toolbar-group" style={{display: 'inline-block', marginLeft: '10px', verticalAlign: 'middle'}}>
-                        <button
-                            type="button"
-                            className="btn-action btnyellow"
-                            style={{padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', marginRight: '5px'}}
-                            title="Exportar PDF"
-                            onClick={() => {
-                                if (items.length > 0) exportarPDF(items[0]);
-                            }}
-                        >
-                            <i className="fa fa-file-pdf-o"/> PDF
-                        </button>
-                        <button
-                            type="button"
-                            className="btn-action btnyellow"
-                            style={{padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', marginRight: '5px'}}
-                            title="Exportar DOCX"
-                            onClick={() => {
-                                if (items.length > 0) exportarDOCX(items[0]);
-                            }}
-                        >
-                            <i className="fa fa-file-word-o"/> DOCX
-                        </button>
-                        <button
-                            type="button"
-                            className="btn-action btnyellow"
-                            style={{padding: '6px 12px', borderRadius: '4px', cursor: 'pointer'}}
-                            title="Exportar Excel"
-                            onClick={() => {
-                                if (items.length > 0) exportarExcel(items[0]);
-                            }}
-                        >
-                            <i className="fa fa-file-excel-o"/> Excel
-                        </button>
-                    </div>
+                {canRelatorio && items.length > 0 && (
+                    <ExportDropdown
+                        options={[
+                            {
+                                key: 'pdf',
+                                label: 'PDF',
+                                icon: <i className="fa fa-file-pdf-o"/>,
+                                onClick: () => exportarPDF(items[0]),
+                            },
+                            {
+                                key: 'docx',
+                                label: 'DOCX',
+                                icon: <i className="fa fa-file-word-o"/>,
+                                onClick: () => exportarDOCX(items[0]),
+                            },
+                            {
+                                key: 'excel',
+                                label: 'Excel',
+                                icon: <i className="fa fa-file-excel-o"/>,
+                                onClick: () => exportarExcel(items[0]),
+                            }
+                        ]}
+                        triggerLabel="Exportar"
+                        triggerIcon={<i className="fa fa-download"/>}
+                        triggerClassName="btnyellow"
+                    />
                 )}
                 {notice && <span className="data-table-notice">{notice}</span>}
             </div>

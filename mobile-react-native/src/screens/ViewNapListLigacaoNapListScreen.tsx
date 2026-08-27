@@ -3,12 +3,55 @@ import {ActivityIndicator, StyleSheet, Text, View} from 'react-native';
 import {useQuery} from '@tanstack/react-query';
 import {api} from '../api';
 import {Tabs} from '../Tabs';
-import {ModuleList} from '../ModuleListScreen';
+import {ModuleList, ModuleListExtraAction} from '../ModuleListScreen';
+import {executeAction} from '../actions';
+import type {ApiItem} from '../types';
 
 interface EtapaNap {
     id: number;
     descricao: string;
 }
+
+const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+
+const extraActions: ModuleListExtraAction[] = [
+    {
+        key: 'detalhes',
+        title: 'Detalhes',
+        icon: 'ℹ️',
+        permission: 'READ',
+        onPress: async (item) => {
+            await executeAction('ligacao-nap', 'carregarDetalhes', JSON.stringify({contrato: asRecord(item).contrato}), 'educacao');
+        },
+    },
+    {
+        key: 'documento',
+        title: 'Documento',
+        icon: '📄',
+        permission: 'READ',
+        onPress: async (item) => {
+            await executeAction('ligacao-nap', 'carregarContrato', JSON.stringify({contrato: asRecord(item).contrato}), 'educacao');
+        },
+    },
+    {
+        key: 'ligacao',
+        title: 'Ligação',
+        icon: '📞',
+        permission: 'EXECUTE',
+        onPress: async (item) => {
+            await executeAction('ligacao-nap', 'iniciarLigacao', JSON.stringify({nap: asRecord(item).nap, contrato: asRecord(item).contrato}), 'educacao');
+        },
+    },
+    {
+        key: 'email',
+        title: 'E-mail',
+        icon: '✉️',
+        permission: 'EXECUTE',
+        onPress: async (item) => {
+            await executeAction('ligacao-nap', 'prepararEnvioEmail', JSON.stringify({id: item.id}), 'educacao');
+        },
+    },
+];
 
 export default function ViewNapListLigacaoNapListScreen() {
     const etapasQuery = useQuery({
@@ -37,6 +80,11 @@ export default function ViewNapListLigacaoNapListScreen() {
                         <ModuleList
                             path="/api/view/nap/listLigacaoNap"
                             params={{etapasNapId: etapa.id}}
+                            extraActions={extraActions}
+                            outcome="view/nap/listLigacaoNap/actions"
+                            hideCreate={true}
+                            hideUpdate={true}
+                            hideDelete={true}
                         />
                     ),
                 }))}

@@ -9,9 +9,12 @@ api.interceptors.request.use((config) => {
     const session = localStorage.getItem('olimpio.session');
     if (session) {
         try {
-            const {accessToken} = JSON.parse(session);
+            const {accessToken, username} = JSON.parse(session);
             if (accessToken) {
                 config.headers.Authorization = `Bearer ${accessToken}`;
+            }
+            if (username) {
+                config.headers['X-Authenticated-Username'] = username;
             }
         } catch {
             // ignore parse errors

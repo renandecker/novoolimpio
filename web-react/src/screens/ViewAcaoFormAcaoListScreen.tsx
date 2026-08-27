@@ -16,7 +16,7 @@ const CAMPO_COLUMNS = [
 ];
 
 const UNIDADE_COLUMNS = [
-    {key: 'id', label: 'ID da Unidade'},
+    {key: 'id', label: 'Id_unidade'},
     {key: 'sucinto', label: 'Sucinto'},
     {key: 'razaoSocial', label: 'Razão Social'},
     {key: 'nomeFantasia', label: 'Nome Fantasia'},
@@ -59,7 +59,7 @@ export default function ViewAcaoFormAcaoListScreen() {
                                 },
                                 {
                                     key: 'unidade',
-                                    label: 'Unidade',
+                                    label: 'Id_unidade',
                                     content: (
                                         <MasterDetail
                                             label="Unidade"

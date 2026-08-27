@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 @ApplicationScoped @WithTransaction public class GenericActionService {
 
-    private static final String ACTION_REGEX = "(autocomplete|buscar|verif[a-z]*|carrega[a-z]*|atualizar[a-z]*|ajust[a-z]*|gerar[a-z]*|imprimir[a-z]*|export[a-z]*|import[a-z]*|obter[a-z]*|preparar[a-z]*|listar[a-z]*|entrar[a-z]*|acessar[a-z]*|trocar[a-z]*|remover[a-z]*|adicionar[a-z]*|aplicar[a-z]*|solicitar[a-z]*|validar[a-z]*|confirmar[a-z]*|salvar[a-z]*|executar[a-z]*|calcular[a-z]*|estornar[a-z]*|recalcular[a-z]*)";
+    private static final String ACTION_REGEX = "(autocomplete|buscar|verif[a-z]*|carrega[a-z]*|atualizar[a-z]*|ajust[a-z]*|gerar[a-z]*|imprimir[a-z]*|export[a-z]*|import[a-z]*|obter[a-z]*|preparar[a-z]*|listar[a-z]*|entrar[a-z]*|acessar[a-z]*|trocar[a-z]*|remover[a-z]*|adicionar[a-z]*|aplicar[a-z]*|solicitar[a-z]*|validar[a-z]*|confirmar[a-z]*|salvar[a-z]*|executar[a-z]*|calcular[a-z]*|estornar[a-z]*|recalcular[a-z]*|iniciarLigacao)";
 
     /**
      * Catalogo de acoes por recurso (feature), extraido das telas legadas (olimpio.zip).
@@ -13,7 +13,7 @@ import java.util.Map;
      */
     private static final Map<String, List<String>> CATALOG = Map.ofEntries(
             Map.entry("caixa", List.of("confirmarImpressao", "verificarCotaImpressao")),
-            Map.entry("cobranca", List.of("calcularTotalCartas", "calcularTotalEmails", "calcularTotalLigacoes", "calcularValorTotal", "carregarCobrancas", "carregarContrato", "carregarDetalhes", "obterHorarioAula", "obterIdadeAluno", "salvar", "salvarLote")),
+            Map.entry("cobranca", List.of("calcularTotalCartas", "calcularTotalEmails", "calcularTotalLigacoes", "calcularValorTotal", "carregarCobrancas", "carregarContrato", "carregarDetalhes", "obterHorarioAula", "obterIdadeAluno", "salvar", "salvarLote", "iniciarLigacao")),
             Map.entry("conta", List.of("ajustarSituacao", "aplicarPago", "calcularPagamento", "listarPagamento", "verificaData")),
             Map.entry("etapasCobranca", List.of("removeResultado")),
             Map.entry("mensagem", List.of("adicionarVariavelMensagem")),

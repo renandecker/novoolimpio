@@ -11,7 +11,7 @@ type SessionCore =
 const normalizeDefaultOutcome = (outcome?: string): string | undefined => {
     if (!outcome) return undefined;
     const normalized = outcome.replace(/\.xhtml$/i, '').replace(/^\/+|\/+$/g, '');
-    return normalized ? `/${normalized}` : '/default';
+    return normalized ? `/${normalized}` : '/meus-dados';
 };
 type Auth = { session: Session | null; signIn: (username: string, password: string, bootstrap?: boolean) => Promise<void>; signOut: () => Promise<void>; refreshSession: (next: SessionCore) => void };
 export type

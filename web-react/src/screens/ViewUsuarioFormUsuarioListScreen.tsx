@@ -240,15 +240,15 @@ export default function ViewUsuarioFormUsuarioListScreen() {
                 }
 
                 if (usu.perfis) {
-                    const perfisIds = (usu.perfis as any[]).map((p: any) => String(p.id));
+                    const perfisIds = new Set((usu.perfis as any[]).map((p: any) => String(p.id)));
                     setPerfis(allPerfis.filter(p => perfisIds.has(String(p.id))));
                 }
                 if (usu.agendas) {
-                    const agendasIds = (usu.agendas as any[]).map((a: any) => String(a.id));
+                    const agendasIds = new Set((usu.agendas as any[]).map((a: any) => String(a.id)));
                     setAgendas(allAgendas.filter(a => agendasIds.has(String(a.id))));
                 }
                 if (usu.unidades) {
-                    const unidadesIds = (usu.unidades as any[]).map((u: any) => String(u.id));
+                    const unidadesIds = new Set((usu.unidades as any[]).map((u: any) => String(u.id)));
                     setUnidadesAcesso(allUnidades.filter(u => unidadesIds.has(String(u.id))));
                 }
             } catch (erro) {
@@ -349,6 +349,145 @@ export default function ViewUsuarioFormUsuarioListScreen() {
 
     const extraTabs = [
         {
+            key: 'pessoal',
+            label: 'Pessoal',
+            content: (
+                <div className="form-grid">
+                    <label className="form-field">
+                        <span className="form-label">CPF *</span>
+                        <input className="form-input" placeholder="999.999.999-99" value={initialValues.cpf ?? ''}
+                               onChange={(e) => setInitialValues({...initialValues, cpf: e.target.value})}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">RG *</span>
+                        <input className="form-input" placeholder="RG" value={initialValues.rg ?? ''}
+                               onChange={(e) => setInitialValues({...initialValues, rg: e.target.value})}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Nome *</span>
+                        <input className="form-input" placeholder="Nome completo" style={{gridColumn: 'span 3'}}
+                               value={initialValues.nome ?? ''} onChange={(e) => setInitialValues({...initialValues, nome: e.target.value})}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">E-mail *</span>
+                        <input className="form-input" type="email" placeholder="E-mail"
+                               style={{gridColumn: 'span 3'}} value={initialValues.email ?? ''}
+                               onChange={(e) => setInitialValues({...initialValues, email: e.target.value})}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Nome Social</span>
+                        <input className="form-input" placeholder="Nome social" style={{gridColumn: 'span 3'}}
+                               value={initialValues.nomeSocial ?? ''} onChange={(e) => setInitialValues({...initialValues, nomeSocial: e.target.value})}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Data Nascimento *</span>
+                        <input className="form-input" type="date" value={initialValues.dataNascimento ?? ''}
+                               onChange={(e) => setInitialValues({...initialValues, dataNascimento: e.target.value})}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Nome do Pai</span>
+                        <input className="form-input" placeholder="Nome do pai" style={{gridColumn: 'span 3'}}
+                               value={initialValues.nomePai ?? ''} onChange={(e) => setInitialValues({...initialValues, nomePai: e.target.value})}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Nome da Mãe *</span>
+                        <input className="form-input" placeholder="Nome da mãe" style={{gridColumn: 'span 3'}}
+                               value={initialValues.nomeMae ?? ''} onChange={(e) => setInitialValues({...initialValues, nomeMae: e.target.value})}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Telefone Residencial *</span>
+                        <input className="form-input" placeholder="(99) 9999-9999"
+                               value={initialValues.telefoneResidencial ?? ''} onChange={(e) => setInitialValues({...initialValues, telefoneResidencial: e.target.value})}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Celular *</span>
+                        <input className="form-input" placeholder="(99) 99999-9999" value={initialValues.celular ?? ''}
+                               onChange={(e) => setInitialValues({...initialValues, celular: e.target.value})}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Nome Referência *</span>
+                        <input className="form-input" placeholder="Nome da referência"
+                               style={{gridColumn: 'span 3'}} value={initialValues.nomeReferencia ?? ''}
+                               onChange={(e) => setInitialValues({...initialValues, nomeReferencia: e.target.value})}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Telefone Referência</span>
+                        <input className="form-input" placeholder="(99) 9999-9999"
+                               value={initialValues.telefoneReferencia ?? ''} onChange={(e) => setInitialValues({...initialValues, telefoneReferencia: e.target.value})}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Celular Referência</span>
+                        <input className="form-input" placeholder="(99) 99999-9999"
+                               value={initialValues.celularReferencia ?? ''} onChange={(e) => setInitialValues({...initialValues, celularReferencia: e.target.value})}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Nome Referência 2</span>
+                        <input className="form-input" placeholder="Nome da referência 2"
+                               style={{gridColumn: 'span 3'}} value={initialValues.nomeReferencia2 ?? ''}
+                               onChange={(e) => setInitialValues({...initialValues, nomeReferencia2: e.target.value})}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Telefone Referência 2</span>
+                        <input className="form-input" placeholder="(99) 9999-9999"
+                               value={initialValues.telefoneReferencia2 ?? ''} onChange={(e) => setInitialValues({...initialValues, telefoneReferencia2: e.target.value})}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Celular Referência 2</span>
+                        <input className="form-input" placeholder="(99) 99999-9999"
+                               value={initialValues.celularReferencia2 ?? ''} onChange={(e) => setInitialValues({...initialValues, celularReferencia2: e.target.value})}/>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Sexo *</span>
+                        <select className="form-input form-select" value={initialValues.generoId ?? ''}
+                                onChange={(e) => setInitialValues({...initialValues, generoId: e.target.value})}>
+                            <option value="">-- Selecione --</option>
+                            <option value="1">Masculino</option>
+                            <option value="2">Feminino</option>
+                            <option value="3">Outro</option>
+                        </select>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Etnia</span>
+                        <select className="form-input form-select" value={initialValues.etniaId ?? ''}
+                                onChange={(e) => setInitialValues({...initialValues, etniaId: e.target.value})}>
+                            <option value="">-- Selecione --</option>
+                            <option value="1">Branca</option>
+                            <option value="2">Preta</option>
+                            <option value="3">Parda</option>
+                            <option value="4">Amarela</option>
+                            <option value="5">Indígena</option>
+                        </select>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Estado Civil *</span>
+                        <select className="form-input form-select" value={initialValues.estadoCivilId ?? ''}
+                                onChange={(e) => setInitialValues({...initialValues, estadoCivilId: e.target.value})}>
+                            <option value="">-- Selecione --</option>
+                            <option value="1">Solteiro(a)</option>
+                            <option value="2">Casado(a)</option>
+                            <option value="3">Divorciado(a)</option>
+                            <option value="4">Viúvo(a)</option>
+                            <option value="5">União Estável</option>
+                        </select>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Escolaridade *</span>
+                        <select className="form-input form-select" value={initialValues.escolaridadeId ?? ''}
+                                onChange={(e) => setInitialValues({...initialValues, escolaridadeId: e.target.value})}>
+                            <option value="">-- Selecione --</option>
+                            <option value="1">Ensino Fundamental Incompleto</option>
+                            <option value="2">Ensino Fundamental Completo</option>
+                            <option value="3">Ensino Médio Incompleto</option>
+                            <option value="4">Ensino Médio Completo</option>
+                            <option value="5">Superior Incompleto</option>
+                            <option value="6">Superior Completo</option>
+                            <option value="7">Pós-Graduação</option>
+                        </select>
+                    </label>
+                </div>
+            ),
+        },
+        {
             key: 'endereco',
             label: 'Endereço',
             content: <EnderecoCampos value={enderecos} onChange={setEnderecos}/>,
@@ -418,14 +557,6 @@ export default function ViewUsuarioFormUsuarioListScreen() {
                     error={error}
                 >
                     <div style={{marginTop: '20px'}}>
-                        {extraTabs.map((tab) => (
-                            <div key={tab.key} style={{marginBottom: '30px'}}>
-                                <h3 style={{marginBottom: '10px', color: '#2e6e9e', borderBottom: '1px solid #a8d0e6', paddingBottom: '4px'}}>
-                                    {tab.label}
-                                </h3>
-                                {tab.content}
-                            </div>
-                        ))}
                     </div>
                 </FormLayout>
             </main>

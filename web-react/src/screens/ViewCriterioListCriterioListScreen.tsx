@@ -2,7 +2,7 @@ import {PermissionGate} from '../permissions';
 import {DataTable} from '../DataTable';
 
 const COLUMNS = [
-    {key: 'unidade_descricao', label: 'Unidade'},
+    {key: 'unidade_descricao', label: 'Id_unidade'},
     {key: 'curriculo_descricao', label: 'Curso'},
     {key: 'tipo_matricula', label: 'Tipo Matrícula'},
     {key: 'qtd_aulas_tolerancia_matricula', label: 'Aulas Tolerância'},

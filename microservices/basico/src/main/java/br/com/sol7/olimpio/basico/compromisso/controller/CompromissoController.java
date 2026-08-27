@@ -175,6 +175,28 @@ public class CompromissoController {
 
 
     @GET
+    @Path("/list-compromisso")
+    public Uni<List<CompromissoResponse>> listCompromisso(
+            @QueryParam("inicio") String inicioStr,
+            @QueryParam("fim") String fimStr,
+            @QueryParam("agendaId") Long agendaId) {
+        Date inicio = inicioStr != null ? java.sql.Date.valueOf(inicioStr) : null;
+        Date fim = fimStr != null ? java.sql.Date.valueOf(fimStr) : null;
+        return service.listarCompromissosPorRangeData(inicio, fim)
+                .map(list -> {
+                    if (agendaId != null) {
+                        list = list.stream()
+                                .filter(c -> c.agendaId != null && c.agendaId.equals(agendaId))
+                                .toList();
+                    }
+                    return list.stream()
+                            .map(service::toResponse)
+                            .toList();
+                });
+    }
+
+
+    @GET
     @Path("/buscar-prospecto-do-compromisso")
     public Uni<Long> buscarProspectoDoCompromisso(@QueryParam("compromissoId") Long compromissoId) {
         return service.buscarProspectoDoCompromisso(compromissoId);

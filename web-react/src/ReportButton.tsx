@@ -2,6 +2,8 @@ import {useEffect, useRef, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
 import {listarRelatoriosDisponiveis, type RelatorioDisponivel} from './relatorios';
+import {useAuth} from './auth';
+import {usePermissions} from './permissions';
 
 const ReportIcon = () => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
@@ -28,6 +30,8 @@ const MIN_SEARCH = 3;
 
 export function ReportButton() {
     const navigate = useNavigate();
+    const {can} = usePermissions();
+    const {session} = useAuth();
     const [open, setOpen] = useState(false);
     const [page, setPage] = useState(0);
     const [allItems, setAllItems] = useState<RelatorioDisponivel[]>([]);
@@ -44,6 +48,8 @@ export function ReportButton() {
     }, [searchTerm]);
 
     const isSearching = debouncedSearch.length > 0;
+
+    const isAdmin = session?.perfis?.includes('ADMIN') || false;
 
     const list = useQuery({
         queryKey: ['relatorios', 'disponiveis', page, debouncedSearch],

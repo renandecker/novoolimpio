@@ -146,25 +146,25 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoComp
                     api.get('/api/educacao/sala'),
                     api.get('/api/educacao/dia-aula'),
                 ]);
-                setUnidades(uns ?? []);
-                setCurriculos(curs ?? []);
-                setComponentes(comps ?? []);
-                setGrupos(grps ?? []);
-                setSalas(sls ?? []);
-                setDiaAulas(das ?? []);
+                setUnidades(uns?.data ?? []);
+                setCurriculos(curs?.data ?? []);
+                setComponentes(comps?.data ?? []);
+                setGrupos(grps?.data ?? []);
+                setSalas(sls?.data ?? []);
+                setDiaAulas(das?.data ?? []);
                 try {
                     const res = await api.get('/api/view/diaSemana/listDiaSemana');
-                    setDiasSemana(Array.isArray(res) ? res : (res?.data || []));
+                    setDiasSemana(res?.data || []);
                 } catch { setDiasSemana([]); }
                 try {
                     const res = await api.get('/api/professor/professor');
-                    setProfessores(Array.isArray(res) ? res : (res?.data || []));
+                    setProfessores(res?.data || []);
                 } catch { setProfessores([]); }
 
                 if (idEdicao) {
                     try {
-                        const ent = await api.get(`/api/educacao/oferecimento-componente-curricular/${idEdicao}`);
-                        const todas = await api.get('/api/educacao/ocorrencia-componente-curricular');
+                        const ent = (await api.get(`/api/educacao/oferecimento-componente-curricular/${idEdicao}`))?.data;
+                        const todas = (await api.get('/api/educacao/ocorrencia-componente-curricular'))?.data;
                         const minhas: any[] = (todas ?? []).filter((o: any) => o.oferecimentoComponenteCurricularId === Number(idEdicao));
                         const ocorrencias: OcorrenciaLocal[] = minhas.map((o) => ({
                             key: `db-${o.id}`, id: o.id,
@@ -173,17 +173,17 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoComp
                             aulaCoringa: !!o.aulaCoringa, aulaPresencial: o.aulaPresencial !== false, ativo: o.ativo !== false,
                         }));
                         updateFields({
-                            entity: {...ent, dataCancelamento: ent.dataCancelamento ? fmtDate(parseISO(ent.dataCancelamento)!) : null},
+                            entity: {...ent, dataCancelamento: ent?.dataCancelamento ? fmtDate(parseISO(ent.dataCancelamento)!) : null},
                             novoGrupo: false, novoGrupoNome: '',
                             diasAulaSelecionados: [...new Set(minhas.map((o) => o.diaAulaId).filter(Boolean))] as number[],
                             ocorrencias, invalidas: [],
                             professorId: ent.professorId ?? minhas.find((o) => o.professorId)?.professorId ?? null,
                         });
                         if (ent.unidadeId) {
-                            try { setCursosDaUnidadeIds(await api.get('/api/educacao/curriculo/buscar-cursos-da-unidade', {params: {unidadeId: ent.unidadeId}}) ?? []); } catch { setCursosDaUnidadeIds([]); }
+                            try { setCursosDaUnidadeIds((await api.get('/api/educacao/curriculo/buscar-cursos-da-unidade', {params: {unidadeId: ent.unidadeId}}))?.data ?? []); } catch { setCursosDaUnidadeIds([]); }
                         }
                         if (ent.curriculoId) {
-                            try { setMatrizIds(await api.get('/api/educacao/oferecimento-componente-curricular/buscar-matriz-curricular', {params: {curriculoId: ent.curriculoId}}) ?? []); } catch { setMatrizIds([]); }
+                            try { setMatrizIds((await api.get('/api/educacao/oferecimento-componente-curricular/buscar-matriz-curricular', {params: {curriculoId: ent.curriculoId}}))?.data ?? []); } catch { setMatrizIds([]); }
                         }
                     } catch { alert('Não foi possível carregar o oferecimento para edição'); }
                 }
@@ -231,14 +231,14 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoComp
 
     const aoSelecionarUnidade = async (valor: number) => {
         updateFields({entity: {...dataRef.current.entity, unidadeId: valor, curriculoId: undefined, componenteCurricularId: undefined}});
-        try { setCursosDaUnidadeIds(await api.get('/api/educacao/curriculo/buscar-cursos-da-unidade', {params: {unidadeId: valor}}) ?? []); } catch { setCursosDaUnidadeIds([]); }
+        try { setCursosDaUnidadeIds((await api.get('/api/educacao/curriculo/buscar-cursos-da-unidade', {params: {unidadeId: valor}}))?.data ?? []); } catch { setCursosDaUnidadeIds([]); }
     };
 
     const aoSelecionarCurso = async (valor: number) => {
         updateFields({entity: {...dataRef.current.entity, curriculoId: valor, componenteCurricularId: undefined}});
-        try { setMatrizIds(await api.get('/api/educacao/oferecimento-componente-curricular/buscar-matriz-curricular', {params: {curriculoId: valor}}) ?? []); } catch { setMatrizIds([]); }
+        try { setMatrizIds((await api.get('/api/educacao/oferecimento-componente-curricular/buscar-matriz-curricular', {params: {curriculoId: valor}}))?.data ?? []); } catch { setMatrizIds([]); }
         if (valor && data.entity.unidadeId) {
-            try { const c = await api.get(`/api/educacao/criterio/buscar-criterio`, {params: {curriculoId: valor, unidadeId: data.entity.unidadeId}}); if (Array.isArray(c) && c.length) setCriterio(c[0]); else setCriterio(null); } catch { setCriterio(null); }
+            try { const c = (await api.get(`/api/educacao/criterio/buscar-criterio`, {params: {curriculoId: valor, unidadeId: data.entity.unidadeId}}))?.data; if (Array.isArray(c) && c.length) setCriterio(c[0]); else setCriterio(null); } catch { setCriterio(null); }
         }
     };
 
@@ -289,9 +289,9 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoComp
         try {
             const feriadoMap = new Map<string, string>();
             try {
-                const ids = await api.get('/api/basico/feriado/buscar-feriado-da-unidade-list', {params: {unidade: e.unidadeId, inicio: e.dataInicio, fim: e.dataFim}});
+                const ids = (await api.get('/api/basico/feriado/buscar-feriado-da-unidade-list', {params: {unidade: e.unidadeId, inicio: e.dataInicio, fim: e.dataFim}}))?.data;
                 if (Array.isArray(ids) && ids.length) {
-                    const todos = await api.get('/api/basico/feriado');
+                    const todos = (await api.get('/api/basico/feriado'))?.data;
                     for (const f of todos ?? []) { if (ids.includes(f.id)) { const dFer = parseISO(f.dataFeriado); if (dFer) feriadoMap.set(fmtDate(dFer), f.nome ?? 'Feriado'); } }
                 }
             } catch { feriadoMap.clear(); }
@@ -356,7 +356,7 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoComp
         if (!d.entity.vagas || d.entity.vagas <= 0) { alert('O número de vagas não pode ser zero'); return; }
         if (!d.ocorrencias.length) { alert('Defina os dias de aula antes de escolher o professor'); return; }
         try {
-            const ids = await api.get('/api/professor/professor/buscar-lista-professores-para-turma', {params: {componenteCurricularId: d.entity.componenteCurricularId, unidadeId: d.entity.unidadeId}});
+            const ids = (await api.get('/api/professor/professor/buscar-lista-professores-para-turma', {params: {componenteCurricularId: d.entity.componenteCurricularId, unidadeId: d.entity.unidadeId}}))?.data;
             const lista = Array.isArray(ids) ? ids : [];
             setProfessoresTurmaIds(lista.length ? lista : null);
             if (!d.professorId && lista.length) { updateField('professorId', lista[0]); }

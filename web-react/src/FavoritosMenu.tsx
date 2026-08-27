@@ -47,12 +47,13 @@ export function FavoritosMenu() {
     });
 
     useEffect(() => {
+        if (!open) return;
         if (page === 0) {
             setAllItems(list.data?.content ?? []);
         } else if (list.data?.content) {
             setAllItems((prev) => [...prev, ...list.data!.content]);
         }
-    }, [list.data, page]);
+    }, [list.data, page, open]);
 
     useEffect(() => {
         setPage(0);

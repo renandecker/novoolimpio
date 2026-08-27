@@ -72,8 +72,12 @@ function toMinutes(t: string): number {
     return (h || 0) * 60 + (m || 0);
 }
 
-function sameDay(d: Date | null, day: Date): boolean {
-    if (!d) return false;
+function isDateObject(d: unknown): d is Date {
+    return d instanceof Date && !isNaN(d.getTime());
+}
+
+function sameDay(d: unknown, day: Date): boolean {
+    if (!isDateObject(d)) return false;
     return d.getFullYear() === day.getFullYear() && d.getMonth() === day.getMonth() && d.getDate() === day.getDate();
 }
 
