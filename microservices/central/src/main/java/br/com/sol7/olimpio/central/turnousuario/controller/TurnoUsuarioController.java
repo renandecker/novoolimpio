@@ -84,4 +84,16 @@ public class TurnoUsuarioController {
         return service.buscarTurnoUsuario(operadorId);
     }
 
+    @POST
+    @Path("/salvar")
+    public Uni<Void> salvar(@Valid TurnoUsuarioLoteRequest req) {
+        return service.salvar(req.usuarioId(), req.turnoTrabalhoIds());
+    }
+
+    @GET
+    @Path("/por-usuario")
+    public Uni<List<TurnoUsuarioResponse>> porUsuario(@QueryParam("usuarioId") Long usuarioId) {
+        return service.buscarPorUsuario(usuarioId);
+    }
+
 }

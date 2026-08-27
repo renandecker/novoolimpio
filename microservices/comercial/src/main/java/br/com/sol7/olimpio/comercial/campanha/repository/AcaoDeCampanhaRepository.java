@@ -1,8 +1,7 @@
-package br.com.sol7.olimpio.financeiro.modelocarta;
+package br.com.sol7.olimpio.comercial.campanha;
 
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-public class ModeloCartaRepository implements PanacheRepository<ModeloCarta> {
-}
+public class AcaoDeCampanhaRepository implements PanacheRepository<AcaoDeCampanha> {}

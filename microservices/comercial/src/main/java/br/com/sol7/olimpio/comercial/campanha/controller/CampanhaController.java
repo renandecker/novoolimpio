@@ -56,18 +56,46 @@ public class CampanhaController {
         return service.buscarCampanhaComAcoes(id);
     }
 
-
     @GET
     @Path("/buscar-campanha-da-unidade")
     public Uni<List<Long>> buscarCampanhaDaUnidade() {
         return service.buscarCampanhaDaUnidade();
     }
 
-
     @GET
     @Path("/buscar-campanha-com-unidades")
     public Uni<Long> buscarCampanhaComUnidades(@QueryParam("entityId") Long entityId) {
         return service.buscarCampanhaComUnidades(entityId);
+    }
+
+    @GET
+    @Path("/{id}/acoes")
+    public Uni<List<AcaoDeCampanhaResponse>> listAcoes(@PathParam("id") Long id) {
+        return service.listAcoes(id);
+    }
+
+    @GET
+    @Path("/{id}/unidades")
+    public Uni<java.util.List<java.util.Map<String, Object>>> listUnidades(@PathParam("id") Long id) {
+        return service.listUnidades(id);
+    }
+
+    @GET
+    @Path("/{id}/tem-acoes-ativas")
+    public Uni<Boolean> temAcoesAtivas(@PathParam("id") Long id) {
+        return service.temAcoesAtivas(id);
+    }
+
+    @POST
+    @Path("/{id}/finalizar-prioritaria")
+    public Uni<java.util.Map<String, Object>> finalizarPrioritaria(@PathParam("id") Long id) {
+        return service.finalizarPrioritaria(id);
+    }
+
+    @POST
+    @Path("/{id}/finalizar-prioritaria-outros")
+    public Uni<java.util.Map<String, Object>> finalizarPrioritariaOutros(@PathParam("id") Long id) {
+        return service.finalizarPrioritariaOutros(id);
     }
 
 }

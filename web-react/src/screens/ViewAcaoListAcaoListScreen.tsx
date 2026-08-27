@@ -4,8 +4,8 @@ import {DataTable} from '../DataTable';
 const COLUMNS = [
     {key: 'id', label: 'Id', sortable: true},
     {key: 'descricao', label: 'Descrição', sortable: true},
-    {key: 'tipoAcaoDescricao', label: 'Tipo de Ação', sortable: true},
-    {key: 'responsavelNome', label: 'Contratante', sortable: true},
+    {key: 'tipoAcaoId', label: 'Tipo de Ação', sortable: true},
+    {key: 'responsavelId', label: 'Contratante', sortable: true},
     {key: 'dataInicial', label: 'Data Inicial', sortable: true},
     {key: 'dataFinal', label: 'Data Final', sortable: true},
     {key: 'dataFinalCaptacao', label: 'Data Final Captação', sortable: true},

@@ -110,7 +110,7 @@ export default function ViewAcaoFormAcaoListScreen() {
                     label: 'Campos',
                     masterDetail: {
                         label: 'Campo',
-                        source: '/api/view/campo/listCampo',
+                        source: '/api/comercial/campo',
                         valueKey: 'id',
                         searchKeys: ['rotulo', 'nome', 'tipo'],
                         columns: CAMPO_COLUMNS,
@@ -121,7 +121,7 @@ export default function ViewAcaoFormAcaoListScreen() {
                     label: 'Unidade',
                     masterDetail: {
                         label: 'Unidade',
-                        source: '/api/view/unidade/listUnidade',
+                        source: '/api/basico/unidade',
                         valueKey: 'id',
                         searchKeys: ['sucinto', 'razaoSocial', 'nomeFantasia'],
                         columns: UNIDADE_COLUMNS,

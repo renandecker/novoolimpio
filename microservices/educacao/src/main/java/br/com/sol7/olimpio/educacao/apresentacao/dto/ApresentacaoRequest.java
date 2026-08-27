@@ -1,3 +1,3 @@
 package br.com.sol7.olimpio.educacao.apresentacao;
 
-public record ApresentacaoRequest(int ordem,String local){}
+public record ApresentacaoRequest(Integer ordem,String local){}

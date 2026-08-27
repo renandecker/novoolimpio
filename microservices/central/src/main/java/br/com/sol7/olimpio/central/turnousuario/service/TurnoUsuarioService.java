@@ -125,4 +125,25 @@ public class TurnoUsuarioService {
         return repository.find("usuarioId = ?1", operadorId).list().map(list -> list.stream().map(x -> x.turnoTrabalhoId).toList());
     }
 
+    // Replica TurnoUsuarioController.salvar() – substitui todos os vínculos do operador de forma atômica
+    public Uni<Void> salvar(Long usuarioId, List<Long> turnoTrabalhoIds) {
+        if (usuarioId == null) return Uni.createFrom().failure(new jakarta.ws.rs.BadRequestException("usuarioId é obrigatório"));
+        List<Long> ids = turnoTrabalhoIds == null ? List.of() : turnoTrabalhoIds.stream().distinct().toList();
+        return repository.delete("usuarioId", usuarioId)
+                .chain(() -> {
+                    if (ids.isEmpty()) return Uni.createFrom().voidItem();
+                    var entities = ids.stream().map(tid -> {
+                        var e = new TurnoUsuario();
+                        e.usuarioId = usuarioId;
+                        e.turnoTrabalhoId = tid;
+                        return e;
+                    }).toList();
+                    return repository.persist(entities).replaceWithVoid();
+                });
+    }
+
+    public Uni<List<TurnoUsuarioResponse>> buscarPorUsuario(Long usuarioId) {
+        return repository.find("usuarioId = ?1", usuarioId).list().map(list -> list.stream().map(this::toResponse).toList());
+    }
+
 }

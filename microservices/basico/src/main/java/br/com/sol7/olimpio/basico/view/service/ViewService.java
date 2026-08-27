@@ -57,7 +57,9 @@ public class ViewService {
             Map.entry("tipoAcao/listTipoAcao", "com_tipo_acao"),
             Map.entry("tipoAcao/formTipoAcao", "com_tipo_acao"),
             Map.entry("configuracaoFinanceira/listConfiguracaoFinanceira", "fin_bancos"),
-            Map.entry("configuracaoFinanceira/formConfiguracaoFinanceira", "fin_bancos"));
+            Map.entry("configuracaoFinanceira/formConfiguracaoFinanceira", "fin_bancos"),
+            Map.entry("tipoPausa/listTipoPausa", "cen_tipo_pausa"),
+            Map.entry("tipoPausa/formTipoPausa", "cen_tipo_pausa"));
 
     // Consultas com JOIN para telas que exibem colunas de relacionamentos aninhados
     // (ex.: logradouro -> bairro -> cidade -> estado), como no listLogradouro.xhtml legado.
@@ -270,7 +272,16 @@ public class ViewService {
                 .chain(session -> resolveTable(session, feature, resource))
                 .onItem().ifNull().failWith(() -> new NotFoundException(
                         "Tabela nao encontrada para /api/view/" + feature + "/" + resource))
-                .chain(table -> insert(table, body));
+                .chain(table -> {
+                    String msg = validateTipoPausa(table, body);
+                    if (msg != null) return Uni.createFrom().failure(new jakarta.ws.rs.BadRequestException(msg));
+                    msg = validateTurnoTrabalho(table, body);
+                    if (msg != null) return Uni.createFrom().failure(new jakarta.ws.rs.BadRequestException(msg));
+                    // Normaliza alias "tempo" -> "qtde_tempo" para compatibilidade com DataTable/central API
+                    Map<String, Object> normalized = normalizeTipoPausaBody(table, body);
+                    normalized = normalizeTurnoTrabalhoBody(table, normalized);
+                    return insert(table, normalized).flatMap(row -> handleTurnoTrabalhoUnidades(table, row, body));
+                });
     }
 
     public Uni<Map<String, Object>> update(String feature, String resource, Long id, Map<String, Object> body) {
@@ -278,7 +289,208 @@ public class ViewService {
                 .chain(session -> resolveTable(session, feature, resource))
                 .onItem().ifNull().failWith(() -> new NotFoundException(
                         "Tabela nao encontrada para /api/view/" + feature + "/" + resource))
-                .chain(table -> update(table, id, body));
+                .chain(table -> {
+                    String msg = validateTipoPausa(table, body);
+                    if (msg != null) return Uni.createFrom().failure(new jakarta.ws.rs.BadRequestException(msg));
+                    msg = validateTurnoTrabalho(table, body);
+                    if (msg != null) return Uni.createFrom().failure(new jakarta.ws.rs.BadRequestException(msg));
+                    Map<String, Object> normalized = normalizeTipoPausaBody(table, body);
+                    normalized = normalizeTurnoTrabalhoBody(table, normalized);
+                    return update(table, id, normalized).flatMap(row -> handleTurnoTrabalhoUnidadesUpdate(table, id, body).replaceWith(row));
+                });
+    }
+
+    private Map<String, Object> normalizeTipoPausaBody(String table, Map<String, Object> body) {
+        if (!"cen_tipo_pausa".equals(table) || body == null) return body;
+        if (body.containsKey("tempo") && !body.containsKey("qtde_tempo")) {
+            Map<String, Object> copy = new LinkedHashMap<>(body);
+            copy.put("qtde_tempo", copy.remove("tempo"));
+            return copy;
+        }
+        return body;
+    }
+
+    private String validateTipoPausa(String table, Map<String, Object> body) {
+        if (!"cen_tipo_pausa".equals(table) || body == null) return null;
+        Object descObj = body.get("descricao");
+        if (descObj == null) descObj = body.get("Descricao");
+        String desc = descObj == null ? null : String.valueOf(descObj).trim();
+        if (desc == null || desc.isEmpty()) return "Descricao e obrigatoria";
+        if (desc.length() < 3) return "Descricao deve ter no minimo 3 caracteres";
+        if (desc.length() > 255) return "Descricao deve ter no maximo 255 caracteres";
+        Object tempoObj = body.get("qtde_tempo");
+        if (tempoObj == null) tempoObj = body.get("tempo");
+        if (tempoObj == null || String.valueOf(tempoObj).trim().isEmpty()) return "Insira o tempo intervalo";
+        try {
+            int t = Integer.parseInt(String.valueOf(tempoObj).trim());
+            if (t < 0) return "Tempo pausa deve ser um inteiro positivo";
+        } catch (NumberFormatException e) {
+            return "Tempo pausa deve ser um inteiro";
+        }
+        return null;
+    }
+
+    // ---- TurnoTrabalho: replica TurnoTrabalhoService.save + TurnoTrabalhoController.saveOrUpdate ----
+    private Map<String, Object> normalizeTurnoTrabalhoBody(String table, Map<String, Object> body) {
+        if (!"cen_turno_trabalho".equals(table) || body == null) return body;
+        Map<String, Object> copy = new LinkedHashMap<>(body);
+        // alias diaSemanaId / diaSemana -> id_dia_semana
+        if (copy.containsKey("diaSemanaId") && !copy.containsKey("id_dia_semana")) {
+            copy.put("id_dia_semana", copy.remove("diaSemanaId"));
+        }
+        if (copy.containsKey("diaSemana") && !copy.containsKey("id_dia_semana")) {
+            Object v = copy.remove("diaSemana");
+            if (v instanceof Map) {
+                Object id = ((Map<?, ?>) v).get("id");
+                if (id != null) copy.put("id_dia_semana", id);
+            } else if (v != null) {
+                copy.put("id_dia_semana", v);
+            }
+        }
+        // remove chave auxiliar unidadeIds (tratada separadamente no join)
+        // mantem no body original para handleTurnoTrabalhoUnidades
+        return copy;
+    }
+
+    private String validateTurnoTrabalho(String table, Map<String, Object> body) {
+        if (!"cen_turno_trabalho".equals(table) || body == null) return null;
+        // create (insert) valida tudo; update valida só campos presentes (DataTable manda só changed fields)
+        boolean isCreateCall = Thread.currentThread().getStackTrace().length > 0 && false;
+        // descricao — se create ou se campo está no body, valida
+        boolean hasDescricao = body.containsKey("descricao");
+        // heurística: se body tem id_dia_semana ou diaSemanaId, é create ou update completo; se não tem, é update parcial onde não precisa validar tudo
+        boolean isPartialUpdate = !hasDescricao && !body.containsKey("inicio") && !body.containsKey("fim");
+        if (hasDescricao || !isPartialUpdate) {
+            Object descObj = body.get("descricao");
+            String desc = descObj == null ? null : String.valueOf(descObj).trim();
+            if (desc == null || desc.isEmpty()) return "Descricao e obrigatoria";
+            if (desc.length() < 3) return "Descricao deve ter no minimo 3 caracteres";
+            if (desc.length() > 255) return "Descricao deve ter no maximo 255 caracteres";
+        }
+        // inicio / fim — valida se algum dos dois está no body
+        boolean hasInicio = body.containsKey("inicio");
+        boolean hasFim = body.containsKey("fim");
+        if (hasInicio || hasFim) {
+            String inicio = body.get("inicio") == null ? null : String.valueOf(body.get("inicio")).trim();
+            String fim = body.get("fim") == null ? null : String.valueOf(body.get("fim")).trim();
+            if (hasInicio && (inicio == null || inicio.isEmpty())) return "Inicio e obrigatorio (formato 99:99)";
+            if (hasFim && (fim == null || fim.isEmpty())) return "Fim e obrigatorio (formato 99:99)";
+            if (inicio != null && !inicio.isEmpty()) {
+                String errIni = validarHora(inicio);
+                if (errIni != null) return errIni;
+            }
+            if (fim != null && !fim.isEmpty()) {
+                String errFim = validarHora(fim);
+                if (errFim != null) return errFim;
+            }
+            if (inicio != null && fim != null && !inicio.isEmpty() && !fim.isEmpty()) {
+                try {
+                    int iniM = toMinutes(inicio);
+                    int fimM = toMinutes(fim);
+                    if (fimM - iniM <= 0) return "A hora de inicio deve ser inferior a hora final.";
+                } catch (Exception e) {
+                    return "Hora invalida. Ex.: 08:30";
+                }
+            }
+        } else if (!isPartialUpdate) {
+            // create sem inicio/fim
+            return "Inicio e obrigatorio (formato 99:99)";
+        }
+        // diaSemana — valida se campo está presente ou é create
+        boolean hasDia = body.containsKey("id_dia_semana") || body.containsKey("diaSemanaId") || body.containsKey("diaSemana");
+        if (hasDia) {
+            Object dia = body.get("id_dia_semana");
+            if (dia == null) dia = body.get("diaSemanaId");
+            if (dia == null) dia = body.get("diaSemana");
+            if (dia == null || String.valueOf(dia).trim().isEmpty()) return "Dia da semana e obrigatorio";
+        } else if (!isPartialUpdate) {
+            return "Dia da semana e obrigatorio";
+        }
+        return null;
+    }
+
+    private String validarHora(String hhmm) {
+        if (hhmm == null || hhmm.length() != 5) return "A hora deve ter 5 digitos. Ex.: 08:30";
+        if (!hhmm.contains(":")) return "A hora deve seguir o padrao Ex.: 08:30";
+        String[] p = hhmm.split(":");
+        if (p.length != 2 || p[0].length() != 2 || p[1].length() != 2) return "A hora deve seguir o padrao Ex.: 08:30";
+        try {
+            int h = Integer.parseInt(p[0]);
+            int m = Integer.parseInt(p[1]);
+            if (h < 0 || h >= 24) return "A hora deve estar no intervalo de 0 a 23h. Ex.: 08:30";
+            if (m < 0 || m >= 60) return "O minuto deve estar no intervalo de 0 a 59m. Ex.: 08:30";
+        } catch (NumberFormatException e) {
+            return "A hora deve seguir o padrao Ex.: 08:30";
+        }
+        return null;
+    }
+
+    private int toMinutes(String hhmm) {
+        String[] p = hhmm.split(":");
+        return Integer.parseInt(p[0]) * 60 + Integer.parseInt(p[1]);
+    }
+
+    private Uni<Map<String, Object>> handleTurnoTrabalhoUnidades(String table, Map<String, Object> row, Map<String, Object> body) {
+        if (!"cen_turno_trabalho".equals(table) || body == null) return Uni.createFrom().item(row);
+        Object unidadeIdsObj = body.get("unidadeIds");
+        if (unidadeIdsObj == null) unidadeIdsObj = body.get("unidades");
+        if (unidadeIdsObj == null) return Uni.createFrom().item(row);
+        List<Long> ids = extractIds(unidadeIdsObj);
+        if (ids.isEmpty()) return Uni.createFrom().item(row);
+        Object idObj = row.get("id");
+        if (idObj == null) return Uni.createFrom().item(row);
+        Long turnoId = ((Number) idObj).longValue();
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> {
+                    Uni<Void> chain = Uni.createFrom().voidItem();
+                    for (Long uid : ids) {
+                        chain = chain.flatMap(v -> session.createNativeQuery("INSERT INTO cen_turno_trabalho_unidade (id_turno_trabalho, id_unidade) VALUES (:tid, :uid)")
+                                .setParameter("tid", turnoId).setParameter("uid", uid).executeUpdate().replaceWithVoid()
+                                .onFailure().recoverWithItem(t -> null));
+                    }
+                    return chain.replaceWith(row);
+                });
+    }
+
+    private Uni<Void> handleTurnoTrabalhoUnidadesUpdate(String table, Long turnoId, Map<String, Object> body) {
+        if (!"cen_turno_trabalho".equals(table) || body == null) return Uni.createFrom().voidItem();
+        Object unidadeIdsObj = body.get("unidadeIds");
+        if (unidadeIdsObj == null) unidadeIdsObj = body.get("unidades");
+        if (unidadeIdsObj == null) return Uni.createFrom().voidItem();
+        List<Long> ids = extractIds(unidadeIdsObj);
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery("DELETE FROM cen_turno_trabalho_unidade WHERE id_turno_trabalho = :id").setParameter("id", turnoId).executeUpdate()
+                        .flatMap(v -> {
+                            if (ids.isEmpty()) return Uni.createFrom().voidItem();
+                            Uni<Void> chain = Uni.createFrom().voidItem();
+                            for (Long uid : ids) {
+                                chain = chain.flatMap(x -> session.createNativeQuery("INSERT INTO cen_turno_trabalho_unidade (id_turno_trabalho, id_unidade) VALUES (:tid, :uid)")
+                                        .setParameter("tid", turnoId).setParameter("uid", uid).executeUpdate().replaceWithVoid()
+                                        .onFailure().recoverWithItem(t -> null));
+                            }
+                            return chain;
+                        }));
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Long> extractIds(Object obj) {
+        List<Long> out = new ArrayList<>();
+        if (obj instanceof List) {
+            for (Object e : (List<?>) obj) {
+                if (e instanceof Number) out.add(((Number) e).longValue());
+                else if (e instanceof Map) {
+                    Object id = ((Map<?, ?>) e).get("id");
+                    if (id instanceof Number) out.add(((Number) id).longValue());
+                    else if (id != null) try { out.add(Long.parseLong(String.valueOf(id))); } catch (Exception ignored) {}
+                } else if (e != null) try { out.add(Long.parseLong(String.valueOf(e))); } catch (Exception ignored) {}
+            }
+        } else if (obj instanceof Number) {
+            out.add(((Number) obj).longValue());
+        } else if (obj instanceof String) {
+            String s = ((String) obj).trim();
+            if (!s.isEmpty()) try { out.add(Long.parseLong(s)); } catch (Exception ignored) {}
+        }
+        return out;
     }
 
     public Uni<Void> delete(String feature, String resource, Long id) {
@@ -349,11 +561,17 @@ public class ViewService {
     private Uni<Void> delete(String table, Long id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> {
-                    String sql = "DELETE FROM " + quote(table) + " WHERE id = :id";
-                    return session.createNativeQuery(sql).setParameter("id", id).executeUpdate()
-                            .flatMap(rows -> rows == 0
-                                    ? Uni.createFrom().failure(new NotFoundException("Registro " + id + " não encontrado em " + table))
-                                    : Uni.createFrom().voidItem());
+                    // limpa join antes para cen_turno_trabalho (FK sem cascade)
+                    Uni<Integer> pre = "cen_turno_trabalho".equals(table)
+                            ? session.createNativeQuery("DELETE FROM cen_turno_trabalho_unidade WHERE id_turno_trabalho = :id").setParameter("id", id).executeUpdate()
+                            : Uni.createFrom().item(0);
+                    return pre.flatMap(v -> {
+                        String sql = "DELETE FROM " + quote(table) + " WHERE id = :id";
+                        return session.createNativeQuery(sql).setParameter("id", id).executeUpdate()
+                                .flatMap(rows -> rows == 0
+                                        ? Uni.createFrom().failure(new NotFoundException("Registro " + id + " não encontrado em " + table))
+                                        : Uni.createFrom().voidItem());
+                    });
                 });
     }
 

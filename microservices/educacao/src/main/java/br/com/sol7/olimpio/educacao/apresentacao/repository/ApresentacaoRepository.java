@@ -14,11 +14,11 @@ public class ApresentacaoRepository implements PanacheRepository<Apresentacao> {
     public static final String SQL_MAIOR_ORDEM =
             "SELECT max(a.ordem) FROM bas_apresentacao a";
 
-    public Uni<java.util.List<Object>> maiorOrdem() {
+    public Uni<Integer> maiorOrdem() {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_MAIOR_ORDEM)
-
-                        .getResultList());
+                        .getSingleResult()
+                        .onItem().transform(v -> v == null ? 0 : ((Number) v).intValue()));
     }
 
 

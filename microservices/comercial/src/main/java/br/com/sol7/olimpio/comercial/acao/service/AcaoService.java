@@ -37,16 +37,43 @@ public class AcaoService {
     }
 
     public Uni<AcaoResponse> create(AcaoRequest r) {
+        validate(r);
         var e = new Acao();
         apply(e, r);
         return repository.persist(e).replaceWith(() -> toResponse(e));
     }
 
     public Uni<AcaoResponse> update(Long id, AcaoRequest r) {
+        validate(r);
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Acao not found"))
                 .invoke(e -> apply(e, r))
                 .map(this::toResponse);
+    }
+
+    private void validate(AcaoRequest r) {
+        if (r.descricao() == null || r.descricao().trim().length() < 3 || r.descricao().trim().length() > 255) {
+            throw new jakarta.ws.rs.BadRequestException("Descrição deve ter entre 3 e 255 caracteres");
+        }
+        if (r.responsavelId() == null) throw new jakarta.ws.rs.BadRequestException("Contratante (responsável) é obrigatório");
+        if (r.tipoAcaoId() == null) throw new jakarta.ws.rs.BadRequestException("TipoAção é obrigatório");
+        if (r.dataInicial() == null || r.dataFinal() == null || r.dataFinalCaptacao() == null || r.dataColeta() == null) {
+            throw new jakarta.ws.rs.BadRequestException("Datas são obrigatórias");
+        }
+        if (r.meta() == null) throw new jakarta.ws.rs.BadRequestException("Meta é obrigatória");
+        if (r.custo() == null) throw new jakarta.ws.rs.BadRequestException("Custo é obrigatório");
+        if (r.dataFinal().before(r.dataInicial())) {
+            throw new jakarta.ws.rs.BadRequestException("Data Invalida! Data inicial maior que data final!");
+        }
+        if (r.dataFinalCaptacao().before(r.dataInicial())) {
+            throw new jakarta.ws.rs.BadRequestException("A data final de captação não pode ser anterior a data inicial");
+        }
+        if (r.dataFinal().before(r.dataFinalCaptacao())) {
+            throw new jakarta.ws.rs.BadRequestException("A data final de Cadastro não pode ser anterior a data final de Captação");
+        }
+        if (r.dataColeta().before(r.dataInicial()) || r.dataColeta().after(r.dataFinal())) {
+            throw new jakarta.ws.rs.BadRequestException("A data da coleta tem que estar entre a data inicial e data Final");
+        }
     }
 
     public Uni<Void> delete(Long id) {

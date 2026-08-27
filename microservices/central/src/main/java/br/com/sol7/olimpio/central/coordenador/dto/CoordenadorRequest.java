@@ -1,5 +1,14 @@
 package br.com.sol7.olimpio.central.coordenador;
 
-import jakarta.validation.constraints.NotBlank;
+import java.util.Date;
 
-public record CoordenadorRequest(@NotBlank String nome,String dadosJson){}
+public record CoordenadorRequest(
+        Long idOperador,
+        Long idCoordenador,
+        Date data,
+        Integer ligacao,
+        Integer meta,
+        Integer agendado,
+        Integer pausa,
+        Integer prioritario
+) {}

@@ -9,6 +9,6 @@ import jakarta.persistence.Table;
 @Table(name = "com_estrategia")
 public class Estrategia extends PanacheEntity {
 
-    @Column(name = "descricao")
+    @Column(name = "descricao", length = 255, nullable = false)
     public String descricao;
 }

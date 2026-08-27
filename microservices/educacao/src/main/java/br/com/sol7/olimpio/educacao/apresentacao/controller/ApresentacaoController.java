@@ -28,6 +28,12 @@ public class ApresentacaoController {
     }
 
     @GET
+    @Path("/ordenado")
+    public Uni<java.util.List<ApresentacaoResponse>> ordenado() {
+        return service.ordenado();
+    }
+
+    @GET
     @Path("/{id}")
     public Uni<ApresentacaoResponse> find(@PathParam("id") Long id) {
         return service.find(id);

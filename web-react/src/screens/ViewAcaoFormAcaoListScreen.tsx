@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {PermissionGate} from '../permissions';
 import {MasterDetail} from '../MasterDetail';
 import {Tabs} from '../Tabs';
@@ -26,6 +26,7 @@ const UNIDADE_COLUMNS = [
 export default function ViewAcaoFormAcaoListScreen() {
     const [campos, setCampos] = useState<ApiItem[]>([]);
     const [unidades, setUnidades] = useState<ApiItem[]>([]);
+    const [tipoAcoes, setTipoAcoes] = useState<ApiItem[]>([]);
     const [formData, setFormData] = useState({
         id: '',
         descricao: '',
@@ -40,8 +41,45 @@ export default function ViewAcaoFormAcaoListScreen() {
     });
     const [showPessoaModal, setShowPessoaModal] = useState(false);
 
+    useEffect(() => {
+        fetch('/api/comercial/tipo-acao').then(r => r.json()).then(data => {
+            const list = Array.isArray(data) ? data : (data.content || data.items || []);
+            setTipoAcoes(list);
+        }).catch(() => {});
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (formData.descricao.trim().length < 3) {
+            alert('Descrição deve ter pelo menos 3 caracteres');
+            return;
+        }
+        if (!formData.responsavelId || !formData.tipoAcaoId) {
+            alert('Contratante e Tipo Ação são obrigatórios');
+            return;
+        }
+        if (unidades.length === 0) {
+            alert('Selecione pelo menos uma unidade');
+            return;
+        }
+        if (campos.length === 0) {
+            alert('Selecione pelo menos um campo');
+            return;
+        }
+        if (formData.dataColeta && formData.dataInicial && formData.dataFinal) {
+            if (formData.dataColeta < formData.dataInicial || formData.dataColeta > formData.dataFinal) {
+                alert('A data da coleta tem que estar entre a data inicial e data Final');
+                return;
+            }
+        }
+        if (formData.dataInicial && formData.dataFinalCaptacao && formData.dataFinalCaptacao < formData.dataInicial) {
+            alert('A data final de captação não pode ser anterior a data inicial');
+            return;
+        }
+        if (formData.dataFinal && formData.dataFinalCaptacao && formData.dataFinal < formData.dataFinalCaptacao) {
+            alert('A data final de Cadastro não pode ser anterior a data final de Captação');
+            return;
+        }
         try {
             const res = await fetch('/api/comercial/acao', {
                 method: 'POST',
@@ -58,7 +96,8 @@ export default function ViewAcaoFormAcaoListScreen() {
             if (res.ok) {
                 alert('Ação salva com sucesso!');
             } else {
-                alert('Erro ao salvar ação.');
+                const txt = await res.text();
+                alert('Erro ao salvar ação: ' + txt);
             }
         } catch (err) {
             console.error(err);
@@ -140,13 +179,16 @@ export default function ViewAcaoFormAcaoListScreen() {
                                             </div>
                                             <div>
                                                 <label>Tipo Ação *</label>
-                                                <input
-                                                    type="text"
+                                                <select
                                                     required
-                                                    placeholder="ID Tipo Ação"
                                                     value={formData.tipoAcaoId}
                                                     onChange={e => setFormData({...formData, tipoAcaoId: e.target.value})}
-                                                />
+                                                >
+                                                    <option value="">Selecione...</option>
+                                                    {tipoAcoes.map((t: any) => (
+                                                        <option key={t.id} value={t.id}>{t.descricao || t.nome || `#${t.id}`}</option>
+                                                    ))}
+                                                </select>
                                             </div>
                                             <div>
                                                 <label>Data Final Cadastro</label>
@@ -186,7 +228,7 @@ export default function ViewAcaoFormAcaoListScreen() {
                                     content: (
                                         <MasterDetail
                                             label="Campo"
-                                            source="/api/view/campo/listCampo"
+                                            source="/api/comercial/campo"
                                             valueKey="id"
                                             searchKeys={['rotulo', 'nome', 'tipo']}
                                             columns={CAMPO_COLUMNS}
@@ -201,7 +243,7 @@ export default function ViewAcaoFormAcaoListScreen() {
                                     content: (
                                         <MasterDetail
                                             label="Unidade"
-                                            source="/api/view/unidade/listUnidade"
+                                            source="/api/basico/unidade"
                                             valueKey="id"
                                             searchKeys={['sucinto', 'razaoSocial', 'nomeFantasia']}
                                             columns={UNIDADE_COLUMNS}

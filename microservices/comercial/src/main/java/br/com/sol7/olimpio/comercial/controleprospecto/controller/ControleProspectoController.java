@@ -18,7 +18,7 @@ public class ControleProspectoController {
 
     @GET
     public Uni<List<ControleProspectoResponse>> list(@QueryParam("campoId") Long campoId) {
-        return service.list(campoId);
+        return service.list();
     }
 
     @GET
