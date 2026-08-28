@@ -71,14 +71,14 @@ public class MetaController {
 
     @GET
     @Path("/buscar-meta-operador-dia")
-    public Uni<List<Long>> buscarMetaOperadorDia() {
-        return service.buscarMetaOperadorDia();
+    public Uni<Integer> buscarMetaOperadorDia(@QueryParam("data") Date data, @QueryParam("operadorId") Long operadorId) {
+        return service.buscarMetaOperadorDia(data, operadorId);
     }
 
     @GET
     @Path("/buscar-meta-operador-dia2")
     public Uni<Integer> buscarMetaOperadorDia2(@QueryParam("data") Date data, @QueryParam("operadorId") Long operadorId) {
-        return service.buscarMetaOperadorDia2(data, operadorId);
+        return service.buscarMetaOperadorDia(data, operadorId);
     }
 
     @GET

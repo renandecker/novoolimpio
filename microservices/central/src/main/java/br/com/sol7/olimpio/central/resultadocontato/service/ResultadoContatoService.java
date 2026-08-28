@@ -90,4 +90,8 @@ public class ResultadoContatoService {
         return repository.find("visivel = true order by descricao").list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
+    public Uni<List<ResultadoContatoResponse>> listarPorTela(int tipoTela) {
+        return repository.find("tela = ?1", tipoTela).list().map(items -> items.stream().map(this::toResponse).toList());
+    }
+
 }

@@ -1,7 +1,9 @@
 package br.com.sol7.olimpio.central.ligacao;
 
+import br.com.sol7.olimpio.central.filaprioritaria.FilaPrioritariaResponse;
 import br.com.sol7.olimpio.central.filaprioritaria.FilaPrioritariaService;
 import br.com.sol7.olimpio.central.ordemligacao.OrdemLigacaoService;
+import br.com.sol7.olimpio.central.resultadocontato.ResultadoContatoResponse;
 import br.com.sol7.olimpio.central.resultadocontato.ResultadoContatoService;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;

@@ -79,7 +79,7 @@ public class MetaService {
             selectQuery.setParameter("offset", (long) p * s);
             Uni<List<Map<String, Object>>> rows = selectQuery.getResultList().map(list -> {
                 List<Map<String, Object>> out = new ArrayList<>();
-                for (Object rowObj : list) {
+                for (Object rowObj : (List<Object>) list) {
                     Object[] arr = (Object[]) rowObj;
                     Map<String, Object> m = new LinkedHashMap<>();
                     m.put("id", arr[0]);

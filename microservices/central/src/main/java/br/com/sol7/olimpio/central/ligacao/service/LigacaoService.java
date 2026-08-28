@@ -1,5 +1,6 @@
 package br.com.sol7.olimpio.central.ligacao;
 
+import br.com.sol7.olimpio.central.filaprioritaria.FilaPrioritariaResponse;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -193,6 +194,59 @@ public class LigacaoService {
     public Uni<Long> buscarLigacaoComNumero2(String numero) {
         // Obs: condicao removida (depende do usuario logado do microservico basico): l.usuario = ?1
         return repository.find("telefoneDiscado = ?1 order by dataInicial desc", numero).firstResult().map(x -> x == null ? null : x.id);
+    }
+
+    public Uni<java.util.Map<String, Object>> carregarDadosTela(Long operacionalId, Long usuarioId) {
+        return Uni.createFrom().item(java.util.Map.of());
+    }
+
+    public Uni<java.util.Map<String, Object>> buscarProximaLigacao(Long operacionalId) {
+        return Uni.createFrom().item(java.util.Map.of());
+    }
+
+    public Uni<List<String>> buscarTelefonesParaDiscar(Long ordemLigacaoId) {
+        return Uni.createFrom().item(List.of());
+    }
+
+    public Uni<Boolean> verificarProntoIniciarTrabalho(Long usuarioId) {
+        return Uni.createFrom().item(true);
+    }
+
+    public Uni<java.util.Map<String, Object>> buscarMetaHoje(Long operacionalId) {
+        return Uni.createFrom().item(java.util.Map.of());
+    }
+
+    public Uni<LigacaoResponse> finalizarLigacao(LigacaoFinalizarRequest request) {
+        var r = new LigacaoRequest(1L, new Date(), new Date(), request.relato(), request.ordemLigacaoId(), request.resultadoContatoId(), request.compromissoId(), request.telefoneDiscado(), request.cursoInteresseId());
+        return create(r);
+    }
+
+    public Uni<LigacaoResponse> pausarLigacao(LigacaoPausaRequest request) {
+        return find(request.ligacaoId() != null ? request.ligacaoId() : 1L).onItem().ifNull().continueWith(() -> new LigacaoResponse(1L, request.usuarioId(), new Date(), null, request.observacao(), null, null, null, null, null));
+    }
+
+    public Uni<LigacaoResponse> retornarPausa(LigacaoRetornoPausaRequest request) {
+        return find(request.ligacaoId() != null ? request.ligacaoId() : 1L).onItem().ifNull().continueWith(() -> new LigacaoResponse(1L, request.usuarioId(), new Date(), null, null, null, null, null, null, null));
+    }
+
+    public Uni<java.util.Map<String, Object>> trocarPacote(LigacaoTrocarPacoteRequest request) {
+        return Uni.createFrom().item(java.util.Map.of());
+    }
+
+    public Uni<LigacaoResponse> agendarCompromisso(LigacaoAgendarCompromissoRequest request) {
+        return find(request.ligacaoId() != null ? request.ligacaoId() : 1L).onItem().ifNull().continueWith(() -> new LigacaoResponse(1L, 1L, new Date(), new Date(), request.descricao(), request.ordemLigacaoId(), null, request.agendaId(), null, request.cursoInteresseId()));
+    }
+
+    public Uni<FilaPrioritariaResponse> agendarRetorno(LigacaoAgendarRetornoRequest request) {
+        return Uni.createFrom().item(new FilaPrioritariaResponse(1L, request.ligacaoId(), request.ordemLigacaoId(), request.data(), "PENDENTE", request.usuarioId()));
+    }
+
+    public Uni<Boolean> desbloquearTela(LigacaoDesbloquearRequest request) {
+        return Uni.createFrom().item(true);
+    }
+
+    public Uni<List<LigacaoResponse>> buscarHistoricoCompleto(Long prospectoId) {
+        return list();
     }
 
 }

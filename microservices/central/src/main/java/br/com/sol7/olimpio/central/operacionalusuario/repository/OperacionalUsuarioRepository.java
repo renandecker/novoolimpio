@@ -18,7 +18,7 @@ public class OperacionalUsuarioRepository implements PanacheRepository<Operacion
     }
 
     public Uni<Void> deleteByOperacionalIdAndUsuarioId(Long operacionalId, Long usuarioId) {
-        return delete("operacionalId = ?1 and usuarioId = ?2", operacionalId, usuarioId);
+        return delete("operacionalId = ?1 and usuarioId = ?2", operacionalId, usuarioId).replaceWithVoid();
     }
 
     public Uni<Long> countByOperacionalId(Long operacionalId) {

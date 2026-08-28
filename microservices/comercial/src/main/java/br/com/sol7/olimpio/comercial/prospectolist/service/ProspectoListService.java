@@ -6,7 +6,6 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
-import org.hibernate.query.Tuple;
 import org.hibernate.reactive.mutiny.Mutiny;
 
 import java.util.ArrayList;
@@ -147,9 +146,9 @@ public class ProspectoListService {
     public Uni<Map<String, Object>> salvarProspectoLink(Map<String, Object> r) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> {
-                    Long usuarioId = toLong(r.get("id_usuario") ?? r.get("usuario"));
-                    Long acaoId = toLong(r.get("id_acao") ?? r.get("acao"));
-                    Long unidadeId = toLong(r.get("id_unidade") ?? r.get("unidade"));
+                    Long usuarioId = toLong(r.get("id_usuario") != null ? r.get("id_usuario") : r.get("usuario"));
+                    Long acaoId = toLong(r.get("id_acao") != null ? r.get("id_acao") : r.get("acao"));
+                    Long unidadeId = toLong(r.get("id_unidade") != null ? r.get("id_unidade") : r.get("unidade"));
 
                     if (usuarioId == null) {
                         return Uni.createFrom().failure(new IllegalArgumentException("Usuário é obrigatório"));
@@ -300,14 +299,12 @@ public class ProspectoListService {
         if (rows == null) return out;
         for (Object row : rows) {
             Map<String, Object> m = new HashMap<>();
-            if (row instanceof Tuple t) {
-                for (int i = 0; i < cols.size(); i++) {
-                    m.put(cols.get(i), t.get(i));
-                }
-            } else if (row instanceof Object[] arr) {
+            if (row instanceof Object[] arr) {
                 for (int i = 0; i < cols.size() && i < arr.length; i++) {
                     m.put(cols.get(i), arr[i]);
                 }
+            } else if (row != null && !cols.isEmpty()) {
+                m.put(cols.get(0), row);
             }
             out.add(m);
         }
@@ -316,14 +313,12 @@ public class ProspectoListService {
 
     private Map<String, Object> toSingleMap(Object row, List<String> cols) {
         Map<String, Object> m = new HashMap<>();
-        if (row instanceof Tuple t) {
-            for (int i = 0; i < cols.size(); i++) {
-                m.put(cols.get(i), t.get(i));
-            }
-        } else if (row instanceof Object[] arr) {
+        if (row instanceof Object[] arr) {
             for (int i = 0; i < cols.size() && i < arr.length; i++) {
                 m.put(cols.get(i), arr[i]);
             }
+        } else if (row != null && !cols.isEmpty()) {
+            m.put(cols.get(0), row);
         }
         return m;
     }
