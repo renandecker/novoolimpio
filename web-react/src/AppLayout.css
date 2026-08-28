@@ -1277,6 +1277,30 @@
     display: contents;
 }
 
+/* Garante que span.form-label sempre antecede visualmente o input dentro do grid */
+.form-field > .form-label {
+    order: -1;
+}
+
+@media (max-width: 900px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    /* Em mobile, força campos que eram display:contents ou fullRow a empilhar label acima do input */
+    .form-field {
+        display: flex !important;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        grid-column: auto !important;
+    }
+    .form-field[style*="gridColumn"] {
+        display: flex !important;
+        grid-column: auto !important;
+        grid-template-columns: unset !important;
+    }
+}
+
 .form-label {
     color: #333;
     font-size: 12px;

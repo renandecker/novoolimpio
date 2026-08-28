@@ -62,6 +62,22 @@ const semId = (obj: Record<string, unknown> | null): Record<string, unknown> => 
 const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
 const num = (v: string): number | null => (v !== '' && !isNaN(Number(v)) ? Number(v) : null);
 
+// estilo para campos que ocupam largura total (label 160px + input 1fr) ocupando toda a linha do grid
+const fullRow: React.CSSProperties = {
+    display: 'grid',
+    gridColumn: '1 / -1',
+    gridTemplateColumns: '160px 1fr',
+    gap: '14px',
+    alignItems: 'center',
+};
+const fullRowTop: React.CSSProperties = {
+    display: 'grid',
+    gridColumn: '1 / -1',
+    gridTemplateColumns: '160px 1fr',
+    gap: '14px',
+    alignItems: 'start',
+};
+
 export default function ViewPessoaFormPessoaFisicaListScreen() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -86,23 +102,22 @@ const [pfId, setPfId] = useState<number | undefined>();
                 <div className="form-grid">
                     <label className="form-field">
                         <span className="form-label">CPF *</span>
-                        <input className="form-input" placeholder="999.999.999-99"
+                        <input className="form-input" placeholder="999.999.999-99" value={str(initialValues.cpf)}
                                onChange={(e) => setInitialValues(prev => ({...prev, cpf: e.target.value}))}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">RG *</span>
-                        <input className="form-input" placeholder="RG"
+                        <input className="form-input" placeholder="RG" value={str(initialValues.rg)}
                                onChange={(e) => setInitialValues(prev => ({...prev, rg: e.target.value}))}/>
                     </label>
-                    <label className="form-field">
+                    <label className="form-field" style={fullRow}>
                         <span className="form-label">Nome *</span>
-                        <input className="form-input" placeholder="Nome completo" style={{gridColumn: 'span 3'}}
+                        <input className="form-input" placeholder="Nome completo" value={str(initialValues.nome)}
                                onChange={(e) => setInitialValues(prev => ({...prev, nome: e.target.value}))}/>
                     </label>
-                    <label className="form-field">
+                    <label className="form-field" style={fullRow}>
                         <span className="form-label">E-mail *</span>
-                        <input className="form-input" type="email" placeholder="E-mail"
-                               style={{gridColumn: 'span 3'}}
+                        <input className="form-input" type="email" placeholder="E-mail" value={str(initialValues.email)}
                                onChange={(e) => setInitialValues(prev => ({...prev, email: e.target.value}))}/>
                     </label>
                 </div>
@@ -113,9 +128,9 @@ const [pfId, setPfId] = useState<number | undefined>();
             label: 'Informações Básicas',
             content: (
                 <div className="form-grid">
-                    <label className="form-field">
+                    <label className="form-field" style={fullRow}>
                         <span className="form-label">Nome Social *</span>
-                        <input className="form-input" placeholder="Nome social" style={{gridColumn: 'span 3'}}
+                        <input className="form-input" placeholder="Nome social" value={str(initialValues.nomeSocial)}
                                onChange={(e) => setInitialValues(prev => ({...prev, nomeSocial: e.target.value}))}/>
                     </label>
                     <label className="form-field">
@@ -123,9 +138,9 @@ const [pfId, setPfId] = useState<number | undefined>();
                         <input className="form-input" type="date" value={str(initialValues.dataNascimento)}
                                onChange={(e) => setInitialValues(prev => ({...prev, dataNascimento: e.target.value}))}/>
                     </label>
-                    <label className="form-field">
+                    <label className="form-field" style={fullRow}>
                         <span className="form-label">Cidade Origem *</span>
-                        <input className="form-input" placeholder="Cidade de origem" style={{gridColumn: 'span 3'}}
+                        <input className="form-input" placeholder="Cidade de origem" value={str(initialValues.cidadeOrigem)}
                                onChange={(e) => setInitialValues(prev => ({...prev, cidadeOrigem: e.target.value}))}/>
                     </label>
                     <label className="form-field">
@@ -176,49 +191,49 @@ const [pfId, setPfId] = useState<number | undefined>();
                             <option value="7">Pós-Graduação</option>
                         </select>
                     </label>
-                    <label className="form-field">
+                    <label className="form-field" style={fullRow}>
                         <span className="form-label">Nome Referência *</span>
-                        <input className="form-input" placeholder="Nome da referência"
-                               style={{gridColumn: 'span 3'}} onChange={(e) => setInitialValues(prev => ({...prev, nomeReferencia: e.target.value}))}/>
+                        <input className="form-input" placeholder="Nome da referência" value={str(initialValues.nomeReferencia)}
+                               onChange={(e) => setInitialValues(prev => ({...prev, nomeReferencia: e.target.value}))}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Telefone Referência *</span>
-                        <input className="form-input" placeholder="(99) 9999-9999"
+                        <input className="form-input" placeholder="(99) 9999-9999" value={str(initialValues.telefoneReferencia)}
                                onChange={(e) => setInitialValues(prev => ({...prev, telefoneReferencia: e.target.value}))}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Celular Referência *</span>
-                        <input className="form-input" placeholder="(99) 99999-9999"
+                        <input className="form-input" placeholder="(99) 99999-9999" value={str(initialValues.celularReferencia)}
                                onChange={(e) => setInitialValues(prev => ({...prev, celularReferencia: e.target.value}))}/>
                     </label>
-                    <label className="form-field">
+                    <label className="form-field" style={fullRow}>
                         <span className="form-label">Nome Referência 2</span>
-                        <input className="form-input" placeholder="Nome da referência 2"
-                               style={{gridColumn: 'span 3'}} onChange={(e) => setInitialValues(prev => ({...prev, nomeReferencia2: e.target.value}))}/>
+                        <input className="form-input" placeholder="Nome da referência 2" value={str(initialValues.nomeReferencia2)}
+                               onChange={(e) => setInitialValues(prev => ({...prev, nomeReferencia2: e.target.value}))}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Telefone Referência 2</span>
-                        <input className="form-input" placeholder="(99) 9999-9999"
+                        <input className="form-input" placeholder="(99) 9999-9999" value={str(initialValues.telefoneReferencia2)}
                                onChange={(e) => setInitialValues(prev => ({...prev, telefoneReferencia2: e.target.value}))}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Celular Referência 2</span>
-                        <input className="form-input" placeholder="(99) 99999-9999"
+                        <input className="form-input" placeholder="(99) 99999-9999" value={str(initialValues.celularReferencia2)}
                                onChange={(e) => setInitialValues(prev => ({...prev, celularReferencia2: e.target.value}))}/>
                     </label>
-                    <label className="form-field">
+                    <label className="form-field" style={fullRow}>
                         <span className="form-label">Nome do Pai</span>
-                        <input className="form-input" placeholder="Nome do pai" style={{gridColumn: 'span 3'}}
+                        <input className="form-input" placeholder="Nome do pai" value={str(initialValues.nomePai)}
                                onChange={(e) => setInitialValues(prev => ({...prev, nomePai: e.target.value}))}/>
                     </label>
-                    <label className="form-field">
+                    <label className="form-field" style={fullRow}>
                         <span className="form-label">Nome da Mãe *</span>
-                        <input className="form-input" placeholder="Nome da mãe" style={{gridColumn: 'span 3'}}
+                        <input className="form-input" placeholder="Nome da mãe" value={str(initialValues.nomeMae)}
                                onChange={(e) => setInitialValues(prev => ({...prev, nomeMae: e.target.value}))}/>
                     </label>
-                    <label className="form-field">
+                    <label className="form-field" style={fullRow}>
                         <span className="form-label">Foto</span>
-                        <div style={{gridColumn: 'span 3', display: 'flex', gap: '8px', alignItems: 'center'}}>
+                        <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
                             <input type="file" accept="image/*" className="form-input" style={{flex: 1}}/>
                             <button type="button" className="btnblue">Capturar Foto</button>
                         </div>
@@ -233,12 +248,12 @@ const [pfId, setPfId] = useState<number | undefined>();
                 <div className="form-grid">
                     <label className="form-field">
                         <span className="form-label">Telefone Residencial *</span>
-                        <input className="form-input" placeholder="(99) 9999-9999"
+                        <input className="form-input" placeholder="(99) 9999-9999" value={str(initialValues.telefoneResidencial)}
                                onChange={(e) => setInitialValues(prev => ({...prev, telefoneResidencial: e.target.value}))}/>
                     </label>
                     <label className="form-field">
                         <span className="form-label">Telefone Comercial</span>
-                        <input className="form-input" placeholder="(99) 9999-9999"
+                        <input className="form-input" placeholder="(99) 9999-9999" value={str(initialValues.telefoneComercial)}
                                onChange={(e) => setInitialValues(prev => ({...prev, telefoneComercial: e.target.value}))}/>
                     </label>
                     <label className="form-field">
@@ -246,24 +261,24 @@ const [pfId, setPfId] = useState<number | undefined>();
                         <input className="form-input" placeholder="(99) 99999-9999" value={str(initialValues.celular)}
                                onChange={(e) => setInitialValues(prev => ({...prev, celular: e.target.value}))}/>
                     </label>
-                    <label className="form-field">
+                    <label className="form-field" style={fullRow}>
                         <span className="form-label">Facebook</span>
-                        <input className="form-input" placeholder="facebook.com/usuario"
-                               style={{gridColumn: 'span 3'}} onChange={(e) => setInitialValues(prev => ({...prev, facebook: e.target.value}))}/>
+                        <input className="form-input" placeholder="facebook.com/usuario" value={str(initialValues.facebook)}
+                               onChange={(e) => setInitialValues(prev => ({...prev, facebook: e.target.value}))}/>
                     </label>
-                    <label className="form-field">
+                    <label className="form-field" style={fullRow}>
                         <span className="form-label">Twitter</span>
-                        <input className="form-input" placeholder="@usuario" style={{gridColumn: 'span 3'}}
+                        <input className="form-input" placeholder="@usuario" value={str(initialValues.twitter)}
                                onChange={(e) => setInitialValues(prev => ({...prev, twitter: e.target.value}))}/>
                     </label>
-                    <label className="form-field">
+                    <label className="form-field" style={fullRow}>
                         <span className="form-label">Google+</span>
-                        <input className="form-input" placeholder="plus.google.com/usuario"
-                               style={{gridColumn: 'span 3'}} onChange={(e) => setInitialValues(prev => ({...prev, googlePlus: e.target.value}))}/>
+                        <input className="form-input" placeholder="plus.google.com/usuario" value={str(initialValues.googlePlus)}
+                               onChange={(e) => setInitialValues(prev => ({...prev, googlePlus: e.target.value}))}/>
                     </label>
-                    <label className="form-field">
+                    <label className="form-field" style={fullRow}>
                         <span className="form-label">Telegram</span>
-                        <input className="form-input" placeholder="@usuario" style={{gridColumn: 'span 3'}}
+                        <input className="form-input" placeholder="@usuario" value={str(initialValues.telegram)}
                                onChange={(e) => setInitialValues(prev => ({...prev, telegram: e.target.value}))}/>
                     </label>
                 </div>
@@ -272,7 +287,11 @@ const [pfId, setPfId] = useState<number | undefined>();
         {
             key: 'endereco',
             label: 'Endereço',
-            content: <EnderecoCampos value={enderecos} onChange={setEnderecos}/>,
+            content: (
+                <div className="form-grid">
+                    <EnderecoCampos value={enderecos} onChange={setEnderecos}/>
+                </div>
+            ),
         },
         {
             key: 'unidades',
@@ -294,11 +313,11 @@ const [pfId, setPfId] = useState<number | undefined>();
             label: 'Outros',
             content: (
                 <div className="form-grid">
-                    <div className="form-field">
+                    <label className="form-field">
                         <span className="form-label">Currículo / Banco de Talentos</span>
                         <BooleanField value={curriculo} onChange={setCurriculo}/>
-                    </div>
-                    <label className="form-field" style={{gridColumn: 'span 4'}}>
+                    </label>
+                    <label className="form-field" style={fullRowTop}>
                         <span className="form-label">Observação</span>
                         <textarea className="form-input" placeholder="Observações" rows={5}
                                   style={{width: '100%', minHeight: '100px'}} value={initialValues.observacao !== undefined ? String(initialValues.observacao) : ''}

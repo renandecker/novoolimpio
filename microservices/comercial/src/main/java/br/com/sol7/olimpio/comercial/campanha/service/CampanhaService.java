@@ -50,11 +50,8 @@ public class CampanhaService {
         validate(r, true);
         var e = new Campanha();
         apply(e, r);
-        // ativo default true for new
-        if (r.ativo() == false && r.descricao() != null) {
-            // allow explicit but default true
-            e.ativo = true;
-        }
+        // o layout legado não exibe "ativo" na criação; padrão da coluna fl_ativo = true
+        e.ativo = true;
         return repository.persist(e)
                 .flatMap(persisted -> persistRelations(persisted.id, r))
                 .flatMap(v -> enrich(e));
@@ -76,7 +73,7 @@ public class CampanhaService {
                 .failWith(() -> new NotFoundException("Campanha not found"))
                 .flatMap(e -> {
                     e.ativo = false;
-                    return Uni.createFrom().voidItem();
+                    return repository.persist(e).replaceWithVoid();
                 });
     }
 
@@ -198,7 +195,7 @@ public class CampanhaService {
     public Uni<List<Map<String, Object>>> listUnidades(Long campanhaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session ->
                 session.createNativeQuery(
-                        "SELECT u.id, u.sucinto, u.\":CNPJ\" as cnpj, u.razao_social FROM bas_unidade u " +
+                        "SELECT u.id, u.sucinto, u.cnpj AS cnpj, u.razao_social FROM bas_unidade u " +
                         "INNER JOIN com_campanha_unidade cu ON cu.id_unidade = u.id WHERE cu.id_campanha = :campId ORDER BY u.id")
                         .setParameter("campId", campanhaId)
                         .getResultList()
@@ -223,7 +220,6 @@ public class CampanhaService {
         e.descricao = r.descricao();
         e.meta = r.meta();
         e.ativo = r.ativo();
-        if (e.ativo == false && r.ativo() == false && e.id == null) e.ativo = true;
         e.dataInicial = r.dataInicial();
     }
 

@@ -75,11 +75,34 @@ public class ProspectoListController {
         return service.salvarProspectoLink(r).map(item -> Response.status(Response.Status.CREATED).entity(item).build());
     }
 
+    @PUT
+    @Path("/alterar-status-link/{id}")
+    public Uni<Map<String, Object>> alterarStatusLink(@PathParam("id") Long id) {
+        return service.alterarStatusProspectoLink(id);
+    }
+
+    @DELETE
+    @Path("/remover-link/{id}")
+    public Uni<Void> removerLink(@PathParam("id") Long id) {
+        return service.removerProspectoLink(id);
+    }
+
     @POST
     @Path("/inativar")
     public Uni<Response> inativar(@QueryParam("id") Long id) {
         return service.inativar(id).map(item -> Response.ok(item).build());
     }
 
+    @DELETE
+    @Path("/remover/{id}")
+    public Uni<Response> remover(@PathParam("id") Long id) {
+        return service.remover(id).map(item -> Response.ok(item).build());
+    }
+
+    @GET
+    @Path("/carregar-prospecto-para-visualizacao")
+    public Uni<List<Map<String, Object>>> carregarProspectoParaVisualizacao(@QueryParam("id") Long id) {
+        return service.carregarProspectoParaVisualizacao(id);
+    }
 
 }

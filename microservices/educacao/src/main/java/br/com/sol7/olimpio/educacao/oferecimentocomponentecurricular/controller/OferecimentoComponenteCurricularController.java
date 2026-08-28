@@ -9,6 +9,7 @@ import jakarta.ws.rs.core.*;
 
 import java.util.List;
 import java.util.Date;
+import br.com.sol7.olimpio.educacao.diaaula.DiaAulaResponse;
 
 @Path("/api/educacao/oferecimento-componente-curricular")
 @Produces(MediaType.APPLICATION_JSON)
@@ -216,6 +217,12 @@ public class OferecimentoComponenteCurricularController {
     @Path("/buscar-oferecimento-com-dias-aula")
     public Uni<Long> buscarOferecimentoComDiasAula(@QueryParam("entityId") Long entityId) {
         return service.buscarOferecimentoComDiasAula(entityId);
+    }
+
+    @GET
+    @Path("/buscar-dias-aula-por-grupo")
+    public Uni<List<DiaAulaResponse>> buscarDiasAulaPorGrupo(@QueryParam("grupoId") Long grupoId) {
+        return service.buscarDiasAulaPorGrupo(grupoId);
     }
 
 

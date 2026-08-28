@@ -72,9 +72,9 @@ function toOptions(arr: Array<{ id: number; nome: string }>): AutoCompleteOption
     return arr.map((a) => ({id: a.id, label: a.nome}));
 }
 
-function fetchAutoComplete(path: string, valueKey: string, labelKey: string) {
+function fetchAutoComplete(path: string, valueKey: string, labelKey: string, allowEmpty = false) {
     return async (query: string): Promise<AutoCompleteOption[]> => {
-        if (!query || query.length < 2) return [];
+        if (!allowEmpty && (!query || query.length < 2)) return [];
         const {data} = await api.get<Array<Record<string, unknown>>>(path, {
             params: {q: query, limit: 20},
         });
@@ -158,9 +158,9 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
     const [caixa, setCaixa] = useState<Caixa | null>(null);
 
     // AutoComplete fetch functions
-    const fetchUsuario = fetchAutoComplete('/api/view/usuario/listUsuario', 'id', 'nome');
-    const fetchUnidade = fetchAutoComplete('/api/view/unidade/listUnidade', 'id', 'sucinto');
-    const fetchImpressora = fetchAutoComplete('/api/view/impressora/listImpressora', 'id', 'descricao');
+    const fetchUsuario = fetchAutoComplete('/api/view/usuario/listUsuario', 'id', 'nome', true);
+    const fetchUnidade = fetchAutoComplete('/api/view/unidade/listUnidade', 'id', 'sucinto', true);
+    const fetchImpressora = fetchAutoComplete('/api/view/impressora/listImpressora', 'id', 'descricao', true);
     const fetchParcela = fetchAutoComplete('/api/financeiro/parcela/buscar', 'id', 'descricao');
     const fetchMovimento = fetchAutoComplete('/api/view/movimento/listMovimento', 'id', 'descricaocompleta');
     const fetchCategoriaFinanceira = fetchAutoComplete('/api/view/tipoMovimento/listTipoMovimento', 'id', 'descricao');
@@ -169,41 +169,43 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
     // AutoComplete fetchById functions (for loading label when value has ID but no label)
     const fetchUsuarioById = async (id: number) => {
         const {data} = await api.get(`/api/view/usuario/${id}`);
-        return {id: data.id, label: data.nome};
+        return {id: data.id, label: data.nome ?? data.name ?? `#${data.id}`};
     };
     const fetchUnidadeById = async (id: number) => {
         const {data} = await api.get(`/api/view/unidade/${id}`);
-        return {id: data.id, label: data.sucinto};
+        return {id: data.id, label: data.sucinto ?? data.nome ?? data.name ?? `#${data.id}`};
     };
     const fetchImpressoraById = async (id: number) => {
         const {data} = await api.get(`/api/view/impressora/${id}`);
-        return {id: data.id, label: data.descricao};
+        return {id: data.id, label: data.descricao ?? data.description ?? `#${data.id}`};
     };
     const fetchParcelaById = async (id: number) => {
         const {data} = await api.get(`/api/financeiro/parcela/${id}`);
-        return {id: data.id, label: data.descricao};
+        return {id: data.id, label: data.descricao ?? data.description ?? `#${data.id}`};
     };
     const fetchMovimentoById = async (id: number) => {
         const {data} = await api.get(`/api/view/movimento/${id}`);
-        return {id: data.id, label: data.descricaocompleta};
+        return {id: data.id, label: data.descricaocompleta ?? data.descricao ?? data.description ?? `#${data.id}`};
     };
     const fetchCategoriaFinanceiraById = async (id: number) => {
         const {data} = await api.get(`/api/view/tipoMovimento/${id}`);
-        return {id: data.id, label: data.descricao};
+        return {id: data.id, label: data.descricao ?? data.description ?? `#${data.id}`};
     };
     const fetchBandeiraById = async (id: number) => {
         const {data} = await api.get(`/api/view/bandeira/${id}`);
-        return {id: data.id, label: data.descricao};
+        return {id: data.id, label: data.descricao ?? data.description ?? `#${data.id}`};
     };
 
     // Load caixa when usuario/unidade change
     useEffect(() => {
-        if (!data.usuarioId || !data.unidadeId) return;
+        const usuarioId = data.usuarioId;
+        const unidadeId = data.unidadeId;
+        if (!usuarioId || !unidadeId) return;
         let cancelled = false;
         (async () => {
             try {
                 const {data: caixaId} = await api.get<number | null>('/api/financeiro/caixa/buscar-abertura-caixa-com-usuario-unidade', {
-                    params: {usuarioId: Number(data.usuarioId), unidadeId: Number(data.unidadeId)},
+                    params: {usuarioId: Number(usuarioId), unidadeId: Number(unidadeId)},
                 });
                 if (!cancelled && caixaId) {
                     const {data: caixaData} = await api.get<Caixa>(`/api/financeiro/caixa/${caixaId}`);
@@ -216,11 +218,12 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                 }
                 if (!cancelled && !caixaId) {
                     const {data: sugerido} = await api.get<number | null>('/api/financeiro/caixa/fundo-caixa-sugerido', {
-                        params: {usuarioId: Number(data.usuarioId), unidadeId: Number(data.unidadeId)},
+                        params: {usuarioId: Number(usuarioId), unidadeId: Number(unidadeId)},
                     });
                     if (sugerido != null && !cancelled) updateField('fundoCaixa', String(sugerido));
                 }
-            } catch {
+            } catch (err) {
+                console.error('Erro ao carregar caixa:', err);
                 if (!cancelled) {
                     updateField('caixaAberto', false);
                     updateField('caixaId', null);
@@ -230,7 +233,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
         return () => {
             cancelled = true;
         };
-    }, [data.usuarioId, data.unidadeId, updateField]);
+    }, [data.usuarioId, data.unidadeId]);
 
     // Step validation functions
     const validateStep1 = useCallback(async (d: FechamentoCaixaData) => {

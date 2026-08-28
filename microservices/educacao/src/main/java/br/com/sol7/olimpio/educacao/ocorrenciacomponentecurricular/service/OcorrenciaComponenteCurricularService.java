@@ -121,6 +121,18 @@ public class OcorrenciaComponenteCurricularService {
                         + " as " + DateTimeFormatter.ofPattern("HH:mm").format(t.fim);
             }).findFirst().orElse(null);
         }
+        Long diaSemanaId (Long id){
+            if (id == null) return null;
+            return diaAulas.stream().filter(x -> x.id.equals(id)).map(x -> x.diaSemanaId).findFirst().orElse(null);
+        }
+        Long turnoEducacaoId (Long id){
+            if (id == null) return null;
+            return diaAulas.stream().filter(x -> x.id.equals(id)).map(x -> x.turnoEducacaoId).findFirst().orElse(null);
+        }
+        Long tempoAulaId (Long id){
+            if (id == null) return null;
+            return diaAulas.stream().filter(x -> x.id.equals(id)).map(x -> x.tempoAulaId).findFirst().orElse(null);
+        }
         String oferecimentoDescricao (Long id){
             if (id == null) return null;
             return oferecimentos.stream().filter(x -> x.id.equals(id)).findFirst()
@@ -172,7 +184,10 @@ public class OcorrenciaComponenteCurricularService {
                 refs != null ? refs.professorNome(e.professorId) : null,
                 refs != null ? refs.salaDescricao(e.salaId) : null,
                 refs != null ? refs.diaAulaDescricao(e.diaAulaId) : null,
-                refs != null ? refs.oferecimentoDescricao(e.oferecimentoComponenteCurricularId) : null);
+                refs != null ? refs.oferecimentoDescricao(e.oferecimentoComponenteCurricularId) : null,
+                refs != null ? refs.diaSemanaId(e.diaAulaId) : null,
+                refs != null ? refs.turnoEducacaoId(e.diaAulaId) : null,
+                refs != null ? refs.tempoAulaId(e.diaAulaId) : null);
     }
 
 
@@ -291,6 +306,11 @@ public class OcorrenciaComponenteCurricularService {
     //     }
     public Uni<List<Long>> buscarOcorrenciaPorOferecimentoComGrupo(Long grupoId) {
         return repository.buscarOcorrenciaPorOferecimentoComGrupo(grupoId).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<OcorrenciaComponenteCurricularResponse>> buscarOcorrenciaPorOferecimentoComGrupoCompleto(Long grupoId) {
+        return repository.buscarOcorrenciaPorOferecimentoComGrupo(grupoId)
+                .flatMap(list -> withRefs(Uni.createFrom().item(list)));
     }
 
 }

@@ -207,7 +207,6 @@ export default function ViewCaixaListCaixaListScreen() {
                         const totals = calculateTotals(movs);
                         const fundoCaixa = Number(caixaRow.fundoCaixa) || 0;
                         const totalDinheiroCaixa = totals.totalDinheiro + fundoCaixa;
-                        const canSangria = (totalDinheiroCaixa - fundoCaixa) > 0;
 
                         return (
                             <View style={styles.rowContainer}>
@@ -236,23 +235,19 @@ export default function ViewCaixaListCaixaListScreen() {
                                             <Text style={styles.rowLabel}>Fundo Caixa:</Text>
                                             <Text style={styles.rowValue}>{formatCurrency(caixaRow.fundoCaixa)}</Text>
                                         </View>
-                                        <View style={styles.rowActions}>
-                                            <Pressable style={[styles.actionButton, styles.actionBlue]} onPress={() => Alert.alert('Fluxo Caixa', `Detalhes do caixa ${caixaRow.idCaixaUnidade}`)}>
-                                                <Text style={styles.actionButtonText}>📊 Fluxo</Text>
-                                            </Pressable>
-                                            <Pressable style={[styles.actionButton, styles.actionBlue]} disabled={!caixaRow.dataFechamento} onPress={() => Alert.alert('Imprimir', 'Não implementado')}>
-                                                <Text style={styles.actionButtonText}>🖨️ Imprimir</Text>
-                                            </Pressable>
-                                            {caixaRow.dataFechamento ? (
-                                                <Pressable style={[styles.actionButton, styles.actionStop]} onPress={() => Alert.alert('Reabrir Caixa', 'Não implementado')}>
-                                                    <Text style={styles.actionButtonText}>🔓 Reabrir</Text>
-                                                </Pressable>
-                                            ) : (
-                                                <Pressable style={[styles.actionButton, styles.actionRed]} onPress={() => Alert.alert('Fechar Caixa', 'Não implementado')}>
-                                                    <Text style={styles.actionButtonText}>🔒 Fechar</Text>
-                                                </Pressable>
-                                            )}
-                                        </View>
+<View style={styles.rowActions}>
+                                             <Pressable style={[styles.actionButton, styles.actionBlue]} onPress={() => Alert.alert('Fluxo Caixa', `Detalhes do caixa ${caixaRow.idCaixaUnidade}`)}>
+                                                 <Text style={styles.actionButtonText}>📊 Fluxo</Text>
+                                             </Pressable>
+                                             <Pressable style={[styles.actionButton, styles.actionBlue]} disabled={!caixaRow.dataFechamento} onPress={() => Alert.alert('Imprimir', 'Não implementado')}>
+                                                 <Text style={styles.actionButtonText}>🖨️ Imprimir</Text>
+                                             </Pressable>
+                                             {caixaRow.dataFechamento ? (
+                                                 <Pressable style={[styles.actionButton, styles.actionStop]} onPress={() => Alert.alert('Reabrir Caixa', 'Não implementado')}>
+                                                     <Text style={styles.actionButtonText}>🔓 Reabrir</Text>
+                                                 </Pressable>
+                                             ) : null}
+                                         </View>
                                     </View>
                                 </View>
                                 {isOpen && (
@@ -363,27 +358,14 @@ export default function ViewCaixaListCaixaListScreen() {
                                                         </View>
                                                     </ScrollView>
                                                 </View>
-                                                <View style={styles.actionsBar}>
-                                                    <Pressable
-                                                        style={[styles.actionBtn, styles.actionStop, {width: 160}]}
-                                                        disabled={!canSangria}
-                                                        onPress={() => Alert.alert('Realizar Sangria', 'Não implementado')}
-                                                    >
-                                                        <Text style={styles.actionBtnText}>Realizar Sangria</Text>
-                                                    </Pressable>
-                                                    <Pressable
-                                                        style={[styles.actionBtn, styles.actionRed, {width: 160}]}
-                                                        onPress={() => Alert.alert('Fechar Caixa', 'Não implementado')}
-                                                    >
-                                                        <Text style={styles.actionBtnText}>Fechar Caixa</Text>
-                                                    </Pressable>
-                                                    <Pressable
-                                                        style={[styles.actionBtn, styles.actionYellow, {width: 160}]}
-                                                        onPress={() => setExpandedRows(prev => ({...prev, [caixaId]: false}))}
-                                                    >
-                                                        <Text style={styles.actionBtnText}>Voltar Caixa</Text>
-                                                    </Pressable>
-                                                </View>
+<View style={styles.actionsBar}>
+                                                     <Pressable
+                                                         style={[styles.actionBtn, styles.actionYellow, {width: 160}]}
+                                                         onPress={() => setExpandedRows(prev => ({...prev, [caixaId]: false}))}
+                                                     >
+                                                         <Text style={styles.actionBtnText}>Fechar Detalhes</Text>
+                                                     </Pressable>
+                                                 </View>
                                             </>
                                         )}
                                     </View>
@@ -534,6 +516,9 @@ const styles = StyleSheet.create({
     },
     actionStop: {
         backgroundColor: Colors.infoBg,
+    },
+    actionYellow: {
+        backgroundColor: Colors.warningBg,
     },
     actionButtonText: {
         color: Colors.textPrimary,

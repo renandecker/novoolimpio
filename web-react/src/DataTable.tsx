@@ -443,31 +443,41 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
                     Novo
                 </button>}
                 {canRelatorio && items.length > 0 && (
-                    <ExportDropdown
-                        options={[
-                            {
-                                key: 'pdf',
-                                label: 'PDF',
-                                icon: <i className="fa fa-file-pdf-o"/>,
-                                onClick: () => exportarPDF(items[0]),
-                            },
-                            {
-                                key: 'docx',
-                                label: 'DOCX',
-                                icon: <i className="fa fa-file-word-o"/>,
-                                onClick: () => exportarDOCX(items[0]),
-                            },
-                            {
-                                key: 'excel',
-                                label: 'Excel',
-                                icon: <i className="fa fa-file-excel-o"/>,
-                                onClick: () => exportarExcel(items[0]),
-                            }
-                        ]}
-                        triggerLabel="Exportar"
-                        triggerIcon={<i className="fa fa-download"/>}
-                        triggerClassName="btnyellow"
-                    />
+                    <>
+                        <button
+                            type="button"
+                            className="btngreen"
+                            style={{marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px'}}
+                            onClick={() => setModal({mode: 'create'})}
+                        >
+                            <i className="fa fa-search"/> Busca
+                        </button>
+                        <ExportDropdown
+                            options={[
+                                {
+                                    key: 'pdf',
+                                    label: 'PDF',
+                                    icon: <i className="fa fa-file-pdf-o"/>,
+                                    onClick: () => exportarPDF(items[0]),
+                                },
+                                {
+                                    key: 'docx',
+                                    label: 'DOCX',
+                                    icon: <i className="fa fa-file-word-o"/>,
+                                    onClick: () => exportarDOCX(items[0]),
+                                },
+                                {
+                                    key: 'excel',
+                                    label: 'Excel',
+                                    icon: <i className="fa fa-file-excel-o"/>,
+                                    onClick: () => exportarExcel(items[0]),
+                                }
+                            ]}
+                            triggerLabel="Exportar"
+                            triggerIcon={<i className="fa fa-download"/>}
+                            triggerClassName="btnyellow"
+                        />
+                    </>
                 )}
                 {notice && <span className="data-table-notice">{notice}</span>}
             </div>

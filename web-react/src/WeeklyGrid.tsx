@@ -28,7 +28,10 @@ const SLOT = 30;
 const DIA_NOME = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 export function parseDate(s: string): Date {
-    const [y, m, d] = s.split('-').map(Number);
+    if (!s) return new Date();
+    const parts = s.split('-').map(Number);
+    if (parts.length !== 3 || parts.some(isNaN)) return new Date();
+    const [y, m, d] = parts;
     return new Date(y, m - 1, d);
 }
 
@@ -76,8 +79,8 @@ function isDateObject(d: unknown): d is Date {
     return d instanceof Date && !isNaN(d.getTime());
 }
 
-function sameDay(d: unknown, day: Date): boolean {
-    if (!isDateObject(d)) return false;
+function sameDay(d: unknown, day: unknown): boolean {
+    if (!isDateObject(d) || !isDateObject(day)) return false;
     return d.getFullYear() === day.getFullYear() && d.getMonth() === day.getMonth() && d.getDate() === day.getDate();
 }
 

@@ -59,7 +59,9 @@ public class ViewService {
             Map.entry("configuracaoFinanceira/listConfiguracaoFinanceira", "fin_bancos"),
             Map.entry("configuracaoFinanceira/formConfiguracaoFinanceira", "fin_bancos"),
             Map.entry("tipoPausa/listTipoPausa", "cen_tipo_pausa"),
-            Map.entry("tipoPausa/formTipoPausa", "cen_tipo_pausa"));
+            Map.entry("tipoPausa/formTipoPausa", "cen_tipo_pausa"),
+            Map.entry("categoriaCampo/listCategoriaCampo", "com_categoria"),
+            Map.entry("categoriaCampo/formCategoriaCampo", "com_categoria"));
 
     // Consultas com JOIN para telas que exibem colunas de relacionamentos aninhados
     // (ex.: logradouro -> bairro -> cidade -> estado), como no listLogradouro.xhtml legado.
@@ -75,12 +77,41 @@ public class ViewService {
             "id", "descricao", "cep", "tipo", "complemento", "latitude", "longitude",
             "bairro_descricao", "cidade_descricao", "estado_descricao", "estado_uf");
 
+    private static final String META_SELECT =
+            "SELECT m.id, m.meta, m.data, m.data_inicial, m.data_final, m.id_operador, m.id_operacional, m.id_usuario_lancou_media, "
+                    + "uOp.login AS operador_login, "
+                    + "cp.id AS operacional_pacote_id, cp.descricao AS operacional_pacote_descricao "
+                    + "FROM cen_meta m "
+                    + "LEFT JOIN bas_usuario uOp ON uOp.id = m.id_operador "
+                    + "LEFT JOIN cen_operacional cOp ON cOp.id = m.id_operacional "
+                    + "LEFT JOIN com_pacote cp ON cp.id = cOp.id_pacote";
+    private static final List<String> META_COLUMNS = List.of(
+            "id", "meta", "data", "data_inicial", "data_final", "id_operador", "id_operacional", "id_usuario_lancou_media",
+            "operador_login", "operacional_pacote_id", "operacional_pacote_descricao");
+
+    // Operacional list: joins to com_pacote and com_acao_de_campanha for data_criacao and data_final
+    private static final String OPERACIONAL_LIST_SELECT =
+            "SELECT op.id, op.id_pacote, op.status, op.direcionamento, op.id_coordenador, "
+                    + "p.descricao AS pacote_descricao, p.data_criacao AS pacote_data_criacao, "
+                    + "adc.data_final AS acao_data_final, "
+                    + "(SELECT COUNT(*) FROM com_pacote_prospecto pp WHERE pp.id_pacote = op.id_pacote) AS quantidade_prospecto "
+                    + "FROM cen_operacional op "
+                    + "LEFT JOIN com_pacote p ON p.id = op.id_pacote "
+                    + "LEFT JOIN com_acao_de_campanha adc ON adc.id = p.id_acao_de_campanha";
+    private static final List<String> OPERACIONAL_LIST_COLUMNS = List.of(
+            "id", "id_pacote", "status", "direcionamento", "id_coordenador",
+            "pacote_descricao", "pacote_data_criacao", "acao_data_final", "quantidade_prospecto");
+
     private record CuratedSelect(String selectSql, List<String> columns) {
     }
 
     private static final Map<String, CuratedSelect> CURATED_SELECTS = Map.of(
             "logradouro/listLogradouro", new CuratedSelect(LOGRADOURO_SELECT, LOGRADOURO_COLUMNS),
-            "logradouro/formLogradouro", new CuratedSelect(LOGRADOURO_SELECT, LOGRADOURO_COLUMNS));
+            "logradouro/formLogradouro", new CuratedSelect(LOGRADOURO_SELECT, LOGRADOURO_COLUMNS),
+            "meta/listMeta", new CuratedSelect(META_SELECT, META_COLUMNS),
+            "meta/formMeta", new CuratedSelect(META_SELECT, META_COLUMNS),
+            "operacional/listOperacional", new CuratedSelect(OPERACIONAL_LIST_SELECT, OPERACIONAL_LIST_COLUMNS),
+            "operacional/formOperacional", new CuratedSelect(OPERACIONAL_LIST_SELECT, OPERACIONAL_LIST_COLUMNS));
 
     public Uni<PagedResponse<Map<String, Object>>> paged(String feature, String resource, int page, int size) {
         int p = Math.max(0, page);
@@ -277,6 +308,8 @@ public class ViewService {
                     if (msg != null) return Uni.createFrom().failure(new jakarta.ws.rs.BadRequestException(msg));
                     msg = validateTurnoTrabalho(table, body);
                     if (msg != null) return Uni.createFrom().failure(new jakarta.ws.rs.BadRequestException(msg));
+                    msg = validateMeta(table, body);
+                    if (msg != null) return Uni.createFrom().failure(new jakarta.ws.rs.BadRequestException(msg));
                     // Normaliza alias "tempo" -> "qtde_tempo" para compatibilidade com DataTable/central API
                     Map<String, Object> normalized = normalizeTipoPausaBody(table, body);
                     normalized = normalizeTurnoTrabalhoBody(table, normalized);
@@ -293,6 +326,8 @@ public class ViewService {
                     String msg = validateTipoPausa(table, body);
                     if (msg != null) return Uni.createFrom().failure(new jakarta.ws.rs.BadRequestException(msg));
                     msg = validateTurnoTrabalho(table, body);
+                    if (msg != null) return Uni.createFrom().failure(new jakarta.ws.rs.BadRequestException(msg));
+                    msg = validateMeta(table, body);
                     if (msg != null) return Uni.createFrom().failure(new jakarta.ws.rs.BadRequestException(msg));
                     Map<String, Object> normalized = normalizeTipoPausaBody(table, body);
                     normalized = normalizeTurnoTrabalhoBody(table, normalized);
@@ -405,6 +440,62 @@ public class ViewService {
             if (dia == null || String.valueOf(dia).trim().isEmpty()) return "Dia da semana e obrigatorio";
         } else if (!isPartialUpdate) {
             return "Dia da semana e obrigatorio";
+        }
+        return null;
+    }
+
+    // ---- Meta: replica MetaController.saveOrUpdate + MetaService.save ----
+    private String validateMeta(String table, Map<String, Object> body) {
+        if (!"cen_meta".equals(table) || body == null) return null;
+        boolean isCreate = !body.containsKey("id");
+        // meta obrigatorio
+        Object metaObj = body.get("meta");
+        if (metaObj == null || String.valueOf(metaObj).trim().isEmpty()) return "Meta diaria e obrigatoria";
+        try {
+            Integer.parseInt(String.valueOf(metaObj).trim());
+        } catch (NumberFormatException e) {
+            return "Meta deve ser um numero inteiro";
+        }
+        // periodo: data null, dataInicial/dataFinal required
+        boolean periodo = Boolean.TRUE.equals(body.get("periodo"));
+        if (periodo) {
+            if (body.get("dataInicial") == null) return "Data inicial e obrigatoria";
+            if (body.get("dataFinal") == null) return "Data final e obrigatoria";
+            if (body.get("data") != null && body.get("data") != "") return "Data deve ser nula quando periodo e true";
+            // equipe
+            boolean equipe = Boolean.TRUE.equals(body.get("equipe"));
+            if (equipe) {
+                if (body.get("operacionalId") == null) return "Equipe e obrigatoria";
+                if (body.get("operadorId") != null) return "Operador deve ser nulo quando equipe e true";
+                // conflito equipe
+                if (isCreate) {
+                    // validação será no service central
+                }
+            } else {
+                if (body.get("operadorId") == null) return "Operador e obrigatorio";
+                if (body.get("operacionalId") != null) return "Equipe deve ser nula quando operador e true";
+                // conflito operador
+                if (isCreate) {
+                    // validação será no service central
+                }
+            }
+            // dataHoje = hoje - 1 dia
+            java.time.LocalDate hoje = java.time.LocalDate.now().minusDays(1);
+            try {
+                java.time.LocalDate dataIni = java.time.LocalDate.parse(String.valueOf(body.get("dataInicial")));
+                if (hoje.isAfter(dataIni)) return "Data selecionada invalida, dia inferior ao dia de hoje";
+            } catch (Exception ignored) {}
+        } else {
+            // data: data required, dataInicial null
+            if (body.get("data") == null) return "Data e obrigatoria";
+            if (body.get("dataInicial") != null && body.get("dataInicial") != "") return "Data inicial deve ser nula quando periodo e false";
+            if (isCreate) {
+                java.time.LocalDate hoje = java.time.LocalDate.now().minusDays(1);
+                try {
+                    java.time.LocalDate data = java.time.LocalDate.parse(String.valueOf(body.get("data")));
+                    if (hoje.isAfter(data)) return "Data selecionada invalida, dia inferior ao dia de hoje";
+                } catch (Exception ignored) {}
+            }
         }
         return null;
     }

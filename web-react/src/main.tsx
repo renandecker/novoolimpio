@@ -361,10 +361,10 @@ import ViewRelatoriosFormMapaListScreen from './screens/ViewRelatoriosFormMapaLi
 import ViewRelatoriosFormOrganogramaListScreen from './screens/ViewRelatoriosFormOrganogramaListScreen';
 import ViewRelatoriosFormTabelaListScreen from './screens/ViewRelatoriosFormTabelaListScreen';
 import ViewRelatoriosListDashboardListScreen from './screens/ViewRelatoriosListDashboardListScreen';
-import ViewRelatoriosListGraficoListScreen from './screens/ViewRelatoriosListGraficoListScreen';
-import ViewRelatoriosListMapaListScreen from './screens/ViewRelatoriosListMapaListScreen';
+import ListGraficoScreen from './screens/ListGraficoScreen';
+import ListMapaScreen from './screens/ListMapaScreen';
+import ListTabelaScreen from './screens/ListTabelaScreen';
 import ViewRelatoriosListOrganogramaListScreen from './screens/ViewRelatoriosListOrganogramaListScreen';
-import ViewRelatoriosListTabelaListScreen from './screens/ViewRelatoriosListTabelaListScreen';
 import ViewRelatoriosViewDashboardListScreen from './screens/ViewRelatoriosViewDashboardListScreen';
 import ViewRelatoriosViewGraficoBarrasHorizontalListScreen
     from './screens/ViewRelatoriosViewGraficoBarrasHorizontalListScreen';
@@ -885,10 +885,10 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/relatorios/formOrganograma" element={<ViewRelatoriosFormOrganogramaListScreen/>}/>
     <Route path="/view/relatorios/formTabela" element={<ViewRelatoriosFormTabelaListScreen/>}/>
     <Route path="/view/relatorios/listDashboard" element={<ViewRelatoriosListDashboardListScreen/>}/>
-    <Route path="/view/relatorios/listGrafico" element={<ViewRelatoriosListGraficoListScreen/>}/>
-    <Route path="/view/relatorios/listMapa" element={<ViewRelatoriosListMapaListScreen/>}/>
-    <Route path="/view/relatorios/listOrganograma" element={<ViewRelatoriosListOrganogramaListScreen/>}/>
-    <Route path="/view/relatorios/listTabela" element={<ViewRelatoriosListTabelaListScreen/>}/>
+<Route path="/view/relatorios/listGrafico" element={<ListGraficoScreen/>}/>
+<Route path="/view/relatorios/listMapa" element={<ListMapaScreen/>}/>
+<Route path="/view/relatorios/listOrganograma" element={<ViewRelatoriosListOrganogramaListScreen/>}/>
+<Route path="/view/relatorios/listTabela" element={<ListTabelaScreen/>}/>
     <Route path="/view/relatorios/viewDashboard" element={<ViewRelatoriosViewDashboardListScreen/>}/>
     <Route path="/view/relatorios/viewGraficoBarrasHorizontal"
            element={<ViewRelatoriosViewGraficoBarrasHorizontalListScreen/>}/>

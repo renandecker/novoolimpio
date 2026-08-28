@@ -18,7 +18,35 @@ public class ControleProspectoController {
 
     @GET
     public Uni<List<ControleProspectoResponse>> list(@QueryParam("campoId") Long campoId) {
-        return service.list();
+        return service.list(campoId);
+    }
+
+    @GET
+    @Path("/wapper")
+    public Uni<List<ControleProspectoWapperResponse>> listarPorCampo(
+            @QueryParam("campoId") Long campoId,
+            @QueryParam("page") Integer page,
+            @QueryParam("size") Integer size,
+            @QueryParam("sortField") String sortField,
+            @QueryParam("sortOrder") String sortOrder,
+            @QueryParam("filtroNome") String filtroNome,
+            @QueryParam("filtroId") String filtroId,
+            @QueryParam("filtroValor") String filtroValor) {
+        return service.listarPorCampo(campoId, page == null ? 0 : page, size == null ? 10 : size, sortField, sortOrder, filtroNome, filtroId, filtroValor);
+    }
+
+    @GET
+    @Path("/wapper/paged")
+    public Uni<PagedResponse<ControleProspectoWapperResponse>> pagedPorCampo(
+            @QueryParam("campoId") Long campoId,
+            @QueryParam("page") Integer page,
+            @QueryParam("size") Integer size,
+            @QueryParam("sortField") String sortField,
+            @QueryParam("sortOrder") String sortOrder,
+            @QueryParam("filtroNome") String filtroNome,
+            @QueryParam("filtroId") String filtroId,
+            @QueryParam("filtroValor") String filtroValor) {
+        return service.pagedPorCampo(campoId, page == null ? 0 : page, size == null ? 10 : size, sortField, sortOrder, filtroNome, filtroId, filtroValor);
     }
 
     @GET
@@ -52,22 +80,36 @@ public class ControleProspectoController {
 
     @GET
     @Path("/carregar-prospecto-para-visualizacao")
-    public Uni<Void> carregarProspectoParaVisualizacao(@QueryParam("id") Integer id) {
+    public Uni<List<ProspectoDetalheResponse>> carregarProspectoParaVisualizacao(@QueryParam("id") Integer id) {
         return service.carregarProspectoParaVisualizacao(id);
     }
 
 
     @GET
     @Path("/carregar-prospecto-para-visualizacao2")
-    public Uni<Void> carregarProspectoParaVisualizacao2(@QueryParam("id") String id) {
+    public Uni<List<ProspectoDetalheResponse>> carregarProspectoParaVisualizacao2(@QueryParam("id") String id) {
         return service.carregarProspectoParaVisualizacao2(id);
     }
 
 
     @GET
     @Path("/carregar-outros-prospecto")
-    public Uni<Void> carregarOutrosProspecto(@QueryParam("id") String id, @QueryParam("valor") String valor) {
+    public Uni<List<ProspectoSimplesResponse>> carregarOutrosProspecto(@QueryParam("id") String id, @QueryParam("valor") String valor) {
         return service.carregarOutrosProspecto(id, valor);
+    }
+
+    @POST
+    @Path("/salvar")
+    public Uni<Response> salvar(@Valid AjustarProspectoRequest r) {
+        return service.salvar(r.id(), r.outro())
+                .map(v -> Response.ok().build());
+    }
+
+    @POST
+    @Path("/salvar-selecionados")
+    public Uni<Response> salvarSelecionados(@Valid AjustarProspectoRequest r) {
+        return service.salvarSelecionados(r.id(), r.selectedIds())
+                .map(v -> Response.ok().build());
     }
 
 }

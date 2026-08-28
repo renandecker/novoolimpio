@@ -365,31 +365,58 @@ useEffect(() => {
                 const ofs = detalhe.oferecimentos ?? [];
                 const primeiro = ofs[0] ?? {};
 
-                // Load diasAula from oferecimentos
-                const diasAulaSet = new Set<string>();
-                ofs.forEach((o) => {
-                    if (o.diaSemanaId && o.turnoEducacaoId && o.tempoAulaId) {
-                        diasAulaSet.add(`${o.diaSemanaId}-${o.turnoEducacaoId}-${o.tempoAulaId}`);
-                    }
-                });
-                const diasAulaLoaded = Array.from(diasAulaSet).map((key) => {
-                    const [diaSemanaId, turnoEducacaoId, tempoAulaId] = key.split('-').map(Number);
-                    return {diaSemanaId, turnoEducacaoId, tempoAulaId};
-                });
+                // Load diasAula from backend (new endpoint)
+                const {data: diasAulaData} = await api.get<Array<{diaSemanaId: number; turnoEducacaoId: number; tempoAulaId: number}>>('/api/educacao/oferecimento-componente-curricular/buscar-dias-aula-por-grupo', {params: {grupoId: curso.id}});
+                const diasAulaLoaded = (diasAulaData ?? []).map((d) => ({
+                    diaSemanaId: d.diaSemanaId,
+                    turnoEducacaoId: d.turnoEducacaoId,
+                    tempoAulaId: d.tempoAulaId,
+                }));
 
-                // Load ocorrencias for each turma
+                // Load ocorrencias for each turma (new endpoint with full objects)
                 let ocorrenciasPorTurma: Record<number, OcorrenciaItem[]> = {};
                 try {
-                    const {data: ocorrenciasData} = await api.get<OcorrenciaItem[]>('/api/educacao/ocorrencia-componente-curricular', {params: {grupoId: curso.id}});
+                    const {data: ocorrenciasData} = await api.get<Array<{
+                        id: number;
+                        oferecimentoComponenteCurricularId: number;
+                        data: string;
+                        diaAulaId: number;
+                        aulaPresencial: boolean;
+                        diaSemanaId: number;
+                        turnoEducacaoId: number;
+                        tempoAulaId: number;
+                    }>>('/api/educacao/ocorrencia-componente-curricular/buscar-ocorrencia-por-oferecimento-com-grupo-completo', {params: {grupoId: curso.id}});
+
+                    // Map offering ID -> componenteCurricularId
+                    const ofertaIdParaCompId: Record<number, number> = {};
+                    ofs.forEach((o) => {
+                        if (o.id && o.componenteCurricularId) {
+                            ofertaIdParaCompId[o.id] = o.componenteCurricularId;
+                        }
+                    });
+
+                    // Map diaAula (diaSemanaId-turnoEducacaoId-tempoAulaId) -> index in diasAulaLoaded
+                    const diaAulaKeyParaIndex: Record<string, number> = {};
+                    diasAulaLoaded.forEach((d, idx) => {
+                        const key = `${d.diaSemanaId}-${d.turnoEducacaoId}-${d.tempoAulaId}`;
+                        diaAulaKeyParaIndex[key] = idx;
+                    });
+
                     if (ocorrenciasData) {
                         ocorrenciasPorTurma = ocorrenciasData.reduce((acc, occ) => {
-                            const compId = occ.componenteCurricularId;
+                            const compId = ofertaIdParaCompId[occ.oferecimentoComponenteCurricularId];
+                            if (!compId) return acc;
+
+                            // Find diaAula index by matching diaSemanaId, turnoEducacaoId, tempoAulaId from response
+                            const occDiaAulaKey = `${occ.diaSemanaId}-${occ.turnoEducacaoId}-${occ.tempoAulaId}`;
+                            const diaAulaIndex = diaAulaKeyParaIndex[occDiaAulaKey] ?? 0;
+
                             if (!acc[compId]) acc[compId] = [];
                             acc[compId].push({
-                                key: occ.key ?? `${compId}-${occ.data}`,
+                                key: occ.id.toString(),
                                 componenteCurricularId: compId,
                                 data: occ.data,
-                                diaAulaIndex: occ.diaAulaIndex ?? 0,
+                                diaAulaIndex,
                                 aulaPresencial: occ.aulaPresencial ?? true,
                             });
                             return acc;

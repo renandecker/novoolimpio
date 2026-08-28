@@ -224,45 +224,36 @@ export default function ViewCaixaListCaixaListScreen() {
                                                     {column.render ? column.render(item) : String(row[column.key] ?? '')}
                                                 </td>
                                             ))}
-                                            <td className="col-actions">
-                                                <div className="row-actions-menu">
-                                                    <button
-                                                        type="button"
-                                                        className="btn-action btnblue"
-                                                        title="Fluxo Caixa"
-                                                        onClick={() => openFluxoCaixa(caixaRow)}
-                                                    >
-                                                        📊
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="btn-action btnblue"
-                                                        title="Imprimir"
-                                                        disabled={!caixaRow.dataFechamento}
-                                                    >
-                                                        🖨️
-                                                    </button>
-                                                    {caixaRow.dataFechamento ? (
-                                                        <button
-                                                            type="button"
-                                                            className="btn-action btnstop"
-                                                            title="Reabrir Caixa"
-                                                            onClick={() => alert('Reabrir caixa - não implementado')}
-                                                        >
-                                                            🔓
-                                                        </button>
-                                                    ) : (
-                                                        <button
-                                                            type="button"
-                                                            className="btn-action btnred"
-                                                            title="Fechar Caixa"
-                                                            onClick={() => alert('Fechar caixa - não implementado')}
-                                                        >
-                                                            🔒
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </td>
+<td className="col-actions">
+                                                 <div className="row-actions-menu">
+                                                     <button
+                                                         type="button"
+                                                         className="btn-action btnblue"
+                                                         title="Fluxo Caixa"
+                                                         onClick={() => openFluxoCaixa(caixaRow)}
+                                                     >
+                                                         📊
+                                                     </button>
+                                                     <button
+                                                         type="button"
+                                                         className="btn-action btnblue"
+                                                         title="Imprimir"
+                                                         disabled={!caixaRow.dataFechamento}
+                                                     >
+                                                         🖨️
+                                                     </button>
+                                                     {caixaRow.dataFechamento ? (
+                                                         <button
+                                                             type="button"
+                                                             className="btn-action btnstop"
+                                                             title="Reabrir Caixa"
+                                                             onClick={() => alert('Reabrir caixa - não implementado')}
+                                                         >
+                                                             🔓
+                                                             </button>
+                                                     ) : null}
+                                                 </div>
+                                             </td>
                                         </tr>,
                                         isOpen && (
                                             <tr key={`${caixaId}-detail`} className="row-detail">
@@ -314,12 +305,11 @@ export default function ViewCaixaListCaixaListScreen() {
                                                                 </table>
                                                                 <div className="caixa-totals-actions">
                                                                     <div className="caixa-totals">
-                                                                        {(() => {
-                                                                            const totals = calculateTotals(movs);
-                                                                            const fundoCaixa = Number(caixaRow.fundoCaixa) || 0;
-                                                                            const totalDinheiroCaixa = totals.totalDinheiro + fundoCaixa;
-                                                                            const canSangria = (totalDinheiroCaixa - fundoCaixa) > 0;
-                                                                            return (
+{(() => {
+                                                                             const totals = calculateTotals(movs);
+                                                                             const fundoCaixa = Number(caixaRow.fundoCaixa) || 0;
+                                                                             const totalDinheiroCaixa = totals.totalDinheiro + fundoCaixa;
+                                                                             return (
                                                                                 <table className="totals-table">
                                                                                     <thead>
                                                                                     <tr>
@@ -359,33 +349,16 @@ export default function ViewCaixaListCaixaListScreen() {
                                                                             );
                                                                         })()}
                                                                     </div>
-                                                                    <div className="caixa-actions-bar">
-                                                                        <button
-                                                                            type="button"
-                                                                            className="btnstop"
-                                                                            style={{width: '200px'}}
-                                                                            disabled={!((calculateTotals(movs).totalDinheiro + Number(caixaRow.fundoCaixa || 0)) - Number(caixaRow.fundoCaixa || 0) > 0)}
-                                                                            onClick={() => alert('Realizar Sangria - não implementado')}
-                                                                        >
-                                                                            Realizar Sangria
-                                                                        </button>
-                                                                        <button
-                                                                            type="button"
-                                                                            className="btnred"
-                                                                            style={{width: '200px', marginLeft: 'auto'}}
-                                                                            onClick={() => alert('Fechar Caixa - não implementado')}
-                                                                        >
-                                                                            Fechar Caixa
-                                                                        </button>
-                                                                        <button
-                                                                            type="button"
-                                                                            className="btnyellow"
-                                                                            style={{width: '200px'}}
-                                                                            onClick={() => setExpandedRows(prev => ({...prev, [caixaId]: false}))}
-                                                                        >
-                                                                            Voltar Caixa
-                                                                        </button>
-                                                                    </div>
+<div className="caixa-actions-bar">
+                                                                         <button
+                                                                             type="button"
+                                                                             className="btnyellow"
+                                                                             style={{width: '200px'}}
+                                                                             onClick={() => setExpandedRows(prev => ({...prev, [caixaId]: false}))}
+                                                                         >
+                                                                             Fechar Detalhes
+                                                                         </button>
+                                                                     </div>
                                                                 </div>
                                                             </>
                                                         )}

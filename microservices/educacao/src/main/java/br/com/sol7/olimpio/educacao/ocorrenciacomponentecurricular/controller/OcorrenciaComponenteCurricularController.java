@@ -120,4 +120,10 @@ public class OcorrenciaComponenteCurricularController {
         return service.buscarOcorrenciaPorOferecimentoComGrupo(grupoId);
     }
 
+    @GET
+    @Path("/buscar-ocorrencia-por-oferecimento-com-grupo-completo")
+    public Uni<List<OcorrenciaComponenteCurricularResponse>> buscarOcorrenciaPorOferecimentoComGrupoCompleto(@QueryParam("grupoId") Long grupoId) {
+        return service.buscarOcorrenciaPorOferecimentoComGrupoCompleto(grupoId);
+    }
+
 }

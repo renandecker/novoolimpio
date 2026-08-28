@@ -4,6 +4,7 @@ import {PermissionGate} from '../permissions';
 import {AutoComplete, type AutoCompleteOption} from '../AutoComplete';
 import {api, useApi} from '../api';
 import {legacyClassName} from '../DataTable';
+import {format} from 'date-fns';
 
 interface OcorrenciaLocal {
     key: string;
@@ -19,6 +20,13 @@ interface OcorrenciaLocal {
 interface InvalidaData {
     data: string;
     motivo: string;
+}
+
+interface DiaAulaConfig {
+    id?: number;
+    diaSemanaId: number;
+    turnoEducacaoId: number;
+    tempoAulaId: number;
 }
 
 interface OferecimentoCCData {
@@ -51,7 +59,7 @@ interface OferecimentoCCData {
     };
     novoGrupo: boolean;
     novoGrupoNome: string;
-    diasAulaSelecionados: number[];
+    diasAulaConfig: DiaAulaConfig[];
     ocorrencias: OcorrenciaLocal[];
     invalidas: InvalidaData[];
     professorId?: number | null;
@@ -104,7 +112,7 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoComp
     const navigate = useNavigate();
     const idEdicao = searchParams.get('id');
 
-    const [carregando, setCarregando] = useState(true);
+const [carregando, setCarregando] = useState(true);
     const [unidades, setUnidades] = useState<any[]>([]);
     const [curriculos, setCurriculos] = useState<any[]>([]);
     const [cursosDaUnidadeIds, setCursosDaUnidadeIds] = useState<number[]>([]);
@@ -115,16 +123,31 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoComp
     const [diaAulas, setDiaAulas] = useState<any[]>([]);
     const [diasSemana, setDiasSemana] = useState<any[]>([]);
     const [professores, setProfessores] = useState<any[]>([]);
+    const [turnos, setTurnos] = useState<any[]>([]);
+    const [tempoAulas, setTempoAulas] = useState<any[]>([]);
     const [professoresTurmaIds, setProfessoresTurmaIds] = useState<number[] | null>(null);
     const [gerando, setGerando] = useState(false);
     const [activeTab, setActiveTab] = useState<TabKey>('tabComponente');
     const [criterio, setCriterio] = useState<any>(null);
 
+    // Master-detail state for diaSemana entries
+    const [diaSemanaSelecionado, setDiaSemanaSelecionado] = useState<any>({
+        diaSemanaId: undefined,
+        turnoEducacaoId: undefined,
+        tempoAulaId: undefined,
+    });
+    const [diasSemanaConfigurados, setDiasSemanaConfigurados] = useState<Array<{
+        key: string;
+        diaSemanaId: number;
+        turnoEducacaoId: number;
+        tempoAulaId: number;
+    }>>([]);
+
     const [data, setData] = useState<OferecimentoCCData>({
         entity: {},
         novoGrupo: true,
         novoGrupoNome: '',
-        diasAulaSelecionados: [],
+        diasAulaConfig: [],
         ocorrencias: [],
         invalidas: [],
         professorId: null,
@@ -138,13 +161,15 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoComp
     useEffect(() => {
         (async () => {
             try {
-                const [uns, curs, comps, grps, sls, das] = await Promise.all([
+                const [uns, curs, comps, grps, sls, das, tnos, tpas] = await Promise.all([
                     api.get('/api/basico/unidade'),
                     api.get('/api/educacao/curriculo'),
                     api.get('/api/educacao/componente-curricular'),
                     api.get('/api/educacao/grupo'),
                     api.get('/api/educacao/sala'),
                     api.get('/api/educacao/dia-aula'),
+                    api.get('/api/educacao/turno-educacao'),
+                    api.get('/api/educacao/tempo-aula'),
                 ]);
                 setUnidades(uns?.data ?? []);
                 setCurriculos(curs?.data ?? []);
@@ -152,6 +177,8 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoComp
                 setGrupos(grps?.data ?? []);
                 setSalas(sls?.data ?? []);
                 setDiaAulas(das?.data ?? []);
+                setTurnos(tnos?.data ?? []);
+                setTempoAulas(tpas?.data ?? []);
                 try {
                     const res = await api.get('/api/view/diaSemana/listDiaSemana');
                     setDiasSemana(res?.data || []);
@@ -172,13 +199,19 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoComp
                             diaAulaId: o.diaAulaId, salaId: o.salaId,
                             aulaCoringa: !!o.aulaCoringa, aulaPresencial: o.aulaPresencial !== false, ativo: o.ativo !== false,
                         }));
+                        const diaAulaIdsUnicos = [...new Set(minhas.map((o) => o.diaAulaId).filter(Boolean))] as number[];
+                        const diasAulaConfig: DiaAulaConfig[] = diaAulas
+                            .filter((da) => diaAulaIdsUnicos.includes(da.id))
+                            .map((da) => ({id: da.id, diaSemanaId: da.diaSemanaId, turnoEducacaoId: da.turnoEducacaoId, tempoAulaId: da.tempoAulaId}));
+                        const diasSemanaConfigLoaded = diasAulaConfig.map((c, idx) => ({key: `loaded-${idx}`, ...c}));
                         updateFields({
                             entity: {...ent, dataCancelamento: ent?.dataCancelamento ? fmtDate(parseISO(ent.dataCancelamento)!) : null},
                             novoGrupo: false, novoGrupoNome: '',
-                            diasAulaSelecionados: [...new Set(minhas.map((o) => o.diaAulaId).filter(Boolean))] as number[],
+                            diasAulaConfig,
                             ocorrencias, invalidas: [],
                             professorId: ent.professorId ?? minhas.find((o) => o.professorId)?.professorId ?? null,
                         });
+                        setDiasSemanaConfigurados(diasSemanaConfigLoaded);
                         if (ent.unidadeId) {
                             try { setCursosDaUnidadeIds((await api.get('/api/educacao/curriculo/buscar-cursos-da-unidade', {params: {unidadeId: ent.unidadeId}}))?.data ?? []); } catch { setCursosDaUnidadeIds([]); }
                         }
@@ -252,9 +285,26 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoComp
         updateFields({entity: {...atual.entity, vagas: calcularVagas(atual.entity.salaId, atual.entity.curriculoId)}});
     };
 
-    const alternarDiaAula = (id: number) => {
-        const atuais = dataRef.current.diasAulaSelecionados;
-        updateField('diasAulaSelecionados', atuais.includes(id) ? atuais.filter((x) => x !== id) : [...atuais, id]);
+    const alternarDiaAulaConfig = (config: DiaAulaConfig) => {
+        const atuais = dataRef.current.diasAulaConfig;
+        const existe = atuais.find((c) => c.diaSemanaId === config.diaSemanaId && c.turnoEducacaoId === config.turnoEducacaoId && c.tempoAulaId === config.tempoAulaId);
+        if (existe) {
+            updateField('diasAulaConfig', atuais.filter((c) => c !== existe));
+        } else {
+            updateField('diasAulaConfig', [...atuais, config]);
+        }
+    };
+
+    const removerDiaAulaConfig = (config: DiaAulaConfig) => {
+        const atuais = dataRef.current.diasAulaConfig;
+        updateField('diasAulaConfig', atuais.filter((c) => c !== config));
+    };
+
+    const getDiaAulaIdsSelecionados = (): number[] => {
+        const configs = dataRef.current.diasAulaConfig;
+        return diaAulas
+            .filter((da) => configs.some((c) => c.diaSemanaId === da.diaSemanaId && c.turnoEducacaoId === da.turnoEducacaoId && c.tempoAulaId === da.tempoAulaId))
+            .map((da) => da.id);
     };
 
     const removerOcorrencia = async (occ: OcorrenciaLocal) => {
@@ -281,9 +331,12 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoComp
         const atual = dataRef.current;
         const e = atual.entity;
         if (!e.unidadeId || !e.curriculoId || !e.salaId) { alert('Selecione unidade, curso e sala antes de gerar as aulas'); return; }
-        if (!atual.diasAulaSelecionados.length) { alert('Selecione pelo menos um dia de aula'); return; }
+        if (!atual.diasAulaConfig.length) { alert('Adicione pelo menos uma configuração de dia de aula'); return; }
         if (!e.dataInicio || !e.dataFim) { alert('Defina as datas de início e fim do oferecimento'); return; }
         if (e.dataInicio > e.dataFim) { alert('A data inicial deve ser anterior ou igual à data final'); return; }
+
+        const diaAulaIdsSelecionados = getDiaAulaIdsSelecionados();
+        if (!diaAulaIdsSelecionados.length) { alert('Nenhum dia de aula válido encontrado para as configurações selecionadas'); return; }
 
         setGerando(true);
         try {
@@ -308,7 +361,7 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoComp
                 const iso = fmtDate(cursor);
                 const diaSemanaData = cursor.getDay() + 1;
                 for (const da of diaAulas) {
-                    if (!atual.diasAulaSelecionados.includes(da.id)) continue;
+                    if (!diaAulaIdsSelecionados.includes(da.id)) continue;
                     if (numeroDiaSemana(nomeDiaSemana(da.diaSemanaId), da.diaSemanaId) !== diaSemanaData) continue;
                     const feriado = feriadoMap.get(iso);
                     if (feriado) { invalidas.push({data: iso, motivo: feriado}); continue; }
@@ -333,6 +386,7 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoComp
             if (!d.entity.componenteCurricularId) { alert('Selecione o componente curricular'); return false; }
             if (d.novoGrupo && !d.novoGrupoNome.trim()) { alert('Informe o nome do grupo'); return false; }
             if (!d.novoGrupo && !d.entity.grupoId) { alert('Selecione o grupo'); return false; }
+            if (!d.diasAulaConfig.length) { alert('Adicione pelo menos uma configuração de dia de aula (dia semana, turno e tempo)'); return false; }
         }
         if (targetTab === 'tabProfessor') {
             if (!d.entity.vagas || d.entity.vagas <= 0) { alert('O número de vagas deve ser maior que zero'); return false; }
@@ -409,160 +463,177 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoComp
         <PermissionGate permission="READ">
             <main>
                 <h1>Oferecimento Componente Curricular</h1>
-                <div className="div_form">
-                    <div className="form-title">Oferecimento Componente Curricular</div>
-                    <div className="ofc-tabs">
-                        <nav className="ofc-tabs-nav" role="tablist">
-                            {TABS.map((tab) => (
-                                <button key={tab.key} type="button" role="tab" aria-selected={activeTab === tab.key} aria-controls={`panel-${tab.key}`} id={`tab-${tab.key}`}
-                                    className={`ofc-tab ${activeTab === tab.key ? 'ofc-tab-active' : ''} ${tab.key !== activeTab && TABS.findIndex(t => t.key === activeTab) > TABS.findIndex(t => t.key === tab.key) ? 'ofc-tab-disabled' : ''}`}
-                                    onClick={() => handleTabChange(tab.key)} disabled={gerando}>
-                                    {tab.label}
-                                </button>
-                            ))}
-                        </nav>
-                        <div className="ofc-tabs-panels">
-                            <div role="tabpanel" id="panel-tabComponente" aria-labelledby="tab-tabComponente" hidden={activeTab !== 'tabComponente'}>
-                                <section className="tab-content">
-                                    <fieldset className="form-fieldset" style={{marginBottom: 16}}>
-                                        <legend>Grupo</legend>
-                                        <div className="form-grid">
-                                            <div className="form-field">
-                                                <span className="form-label">Criar nova sequência</span>
-                                                <label style={{display: 'flex', gap: 6, alignItems: 'center'}}>
-                                                    <input type="checkbox" checked={data.novoGrupo} onChange={(ev) => updateField('novoGrupo', ev.target.checked)}/> Sim
-                                                </label>
-                                            </div>
-                                            {data.novoGrupo ? (
-                                                <label className="form-field"><span className="form-label">Grupo *</span><input type="text" className="form-input" value={data.novoGrupoNome} onChange={(ev) => updateField('novoGrupoNome', ev.target.value)}/></label>
-                                            ) : (
-                                                <label className="form-field"><span className="form-label">Grupo *</span><select className="form-input form-select" value={data.entity.grupoId ?? ''} onChange={(ev) => updateField('entity.grupoId', Number(ev.target.value))}><option value="">Selecione</option>{gruposDisponiveis.map((g) => <option key={g.id} value={g.id}>{g.nome}</option>)}</select></label>
-                                            )}
-                                            <button type="button" className="btn-action btnyellow" style={{gridColumn: 'span 2'}} onClick={() => alert('Consulte os Oferecimentos - não implementado')}>
-                                                Consulte os Oferecimentos
-                                            </button>
-                                        </div>
-                                    </fieldset>
-                                    <fieldset className="form-fieldset" style={{marginBottom: 16}}>
-                                        <legend>Geral</legend>
-                                        <div className="form-grid">
-                                            <label className="form-field"><span className="form-label">ID</span><input type="text" className="form-input" value={data.entity.id ?? ''} disabled/></label>
-                                            <label className="form-field"><span className="form-label">Unidade *</span><select className="form-input form-select" value={data.entity.unidadeId ?? ''} onChange={(ev) => aoSelecionarUnidade(Number(ev.target.value))}><option value="">Selecione</option>{unidades.map((u) => <option key={u.id} value={u.id}>{u.nomeFantasia || u.razaoSocial || u.sucinto || `Unidade ${u.id}`}</option>)}</select></label>
-                                            <label className="form-field"><span className="form-label">Curso *</span><select className="form-input form-select" value={data.entity.curriculoId ?? ''} onChange={(ev) => aoSelecionarCurso(Number(ev.target.value))}><option value="">Selecione</option>{cursosDisponiveis.map((c) => <option key={c.id} value={c.id}>{c.descricao || c.sigla || `Curso ${c.id}`}</option>)}</select></label>
-                                            <label className="form-field"><span className="form-label">Componente Curricular *</span><select className="form-input form-select" value={data.entity.componenteCurricularId ?? ''} onChange={(ev) => updateField('entity.componenteCurricularId', Number(ev.target.value))}><option value="">Selecione</option>{componentesDoCurso.map((c) => <option key={c.id} value={c.id}>{c.descricao || c.sucinto || `Componente ${c.id}`}</option>)}</select></label>
-                                            <label className="form-field"><span className="form-label">Data Cancelamento</span><input type="date" className="form-input" value={data.entity.dataCancelamento ?? ''} disabled/></label>
-                                        </div>
-                                    </fieldset>
-                                    {criterio && (
-                                        <div className="form-field" style={{marginTop: 16, padding: 12, background: '#f8f9fa', borderRadius: 8}}>
-                                            <strong>Critério do Curso:</strong><br/>
-                                            Turmas máximas: {criterio.qtd_turma_abertas ?? 'Não definido'} | Período: {criterio.periodo ?? 'Não definido'}<br/>
-                                            {criterio.data_inicio && `Início válido a partir de: ${fmtDate(parseISO(criterio.data_inicio)!)}`} | {criterio.data_fim && `Término até: ${fmtDate(parseISO(criterio.data_fim)!)}`}
-                                        </div>
-                                    )}
-                                    <fieldset className="form-fieldset" style={{marginBottom: 16}}>
-                                        <legend>Replicar</legend>
-                                        <div className="form-grid">
-                                            <div className="form-field"><span className="form-label">Replicar</span><div style={{display: 'flex', gap: 14, alignItems: 'center'}}>
-                                                <label style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="radio" name="replicar" checked={!!data.entity.replicar} onChange={() => updateField('entity.replicar', true)}/> Sim</label>
-                                                <label style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="radio" name="replicar" checked={!data.entity.replicar} onChange={() => updateField('entity.replicar', false)}/> Não</label>
-                                            </div></div>
-                                            {data.entity.replicar && (
-                                                <>
-                                                    <label className="form-field"><span className="form-label">Dias a Replicar</span><input type="number" min={1} className="form-input" value={data.entity.diasReplicar ?? ''} onChange={(ev) => updateField('entity.diasReplicar', Number(ev.target.value))}/></label>
-                                                    <div className="form-field"><span className="form-label">Detalhar Replicação</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={!!data.entity.detalharReplicacao} onChange={(ev) => updateField('entity.detalharReplicacao', ev.target.checked)}/> Sim</label></div>
-                                                    {data.entity.detalharReplicacao && (
-                                                        <>
-                                                            <label className="form-field"><span className="form-label">Componente Curricular</span><select className="form-input form-select" value={data.entity.componenteCurricularReplicarId ?? ''} onChange={(ev) => updateField('entity.componenteCurricularReplicarId', Number(ev.target.value))}><option value="">Selecione</option>{componentes.map((c) => <option key={c.id} value={c.id}>{c.descricao || c.sucinto || `Componente ${c.id}`}</option>)}</select></label>
-                                                            <div className="form-field" style={{gridColumn: 'span 3'}}><span className="form-label">Tipo</span><div style={{display: 'flex', gap: 14, flexWrap: 'wrap'}}>{TIPOS_REPLICACAO.map((t) => (<label key={t.valor} style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="radio" name="tipoReplicacao" checked={(data.entity.tipoReplicacao ?? 0) === t.valor} onChange={() => updateField('entity.tipoReplicacao', t.valor)}/> {t.rotulo}</label>))}</div></div>
-                                                        </>
-                                                    )}
-                                                </>
-                                            )}
-                                        </div>
-                                    </fieldset>
-                                    <fieldset className="form-fieldset" style={{marginBottom: 16}}>
-                                        <legend>Responsável</legend>
-                                        <div className="form-grid">
-                                            <label className="form-field" style={{gridColumn: 'span 4'}}>
-                                                <span className="form-label">Responsável</span>
-                                                <AutoComplete
-                                                    placeholder="Digite para buscar o usuário..."
-                                                    value={null}
-                                                    onChange={(opt) => {}}
-                                                    fetchOptions={(q) => api.get('/api/view/usuario/listUsuario', {params: {q, limit: 20}}).then(r => (r.data ?? []).map((u: any) => ({id: u.id, label: u.nome || u.login || `#${u.id}`})))}
-                                                    minChars={2}
-                                                />
-                                            </label>
-                                        </div>
-                                    </fieldset>
-                                </section>
-                            </div>
-                            <div role="tabpanel" id="panel-tabDiaAula" aria-labelledby="tab-tabDiaAula" hidden={activeTab !== 'tabDiaAula'}>
-                                <section className="tab-content">
-                                    <fieldset className="form-fieldset" style={{marginBottom: 16}}>
-                                        <legend>Dias Aula</legend>
-                                        <div className="form-grid">
-                                            <label className="form-field"><span className="form-label">Sala *</span><select className="form-input form-select" value={data.entity.salaId ?? ''} onChange={(ev) => aoSelecionarSala(Number(ev.target.value))}><option value="">Selecione</option>{salasDaUnidade.map((s) => <option key={s.id} value={s.id}>{s.descricao || s.sucinto || `Sala ${s.id}`}</option>)}</select></label>
-                                            <label className="form-field"><span className="form-label">Qtde Sequência</span><input type="number" min={1} className="form-input" value={data.entity.qtdeSequencia ?? 1} onChange={(ev) => updateField('entity.qtdeSequencia', Math.max(1, Number(ev.target.value)))}/></label>
-                                            <label className="form-field"><span className="form-label">Data Inicial *</span><input type="date" className="form-input" value={data.entity.dataInicio ?? ''} onChange={(ev) => updateField('entity.dataInicio', ev.target.value)}/></label>
-                                            <label className="form-field"><span className="form-label">Data Fim</span><input type="date" className="form-input" value={data.entity.dataFim ?? ''} onChange={(ev) => updateField('entity.dataFim', ev.target.value)}/></label>
-                                            <div className="form-field" style={{gridColumn: 'span 4'}}><span className="form-label">Dias de Aula</span><div style={{display: 'flex', gap: 12, flexWrap: 'wrap'}}>{diaAulas.map((da) => (<label key={da.id} style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="checkbox" checked={data.diasAulaSelecionados.includes(da.id)} onChange={() => alternarDiaAula(da.id)}/> {rotuloDiaAula(da)}</label>))}</div></div>
-                                            <div className="form-field" style={{gridColumn: 'span 4'}}><button type="button" className="btnblue" onClick={gerarAulas} disabled={gerando}>{gerando ? 'Gerando...' : 'Gerar Aulas'}</button></div>
-                                        </div>
-                                        {data.ocorrencias.length > 0 && (
-                                            <table className="data-table" style={{width: '100%', marginTop: 12}}>
-                                                <thead><tr><th>Data</th><th>Dia Semana</th><th>Turno</th><th>Tempo Aula</th><th>Sala</th><th>Ação</th></tr></thead>
-                                                <tbody>{[...data.ocorrencias].sort((a, b) => a.data.localeCompare(b.data)).map((occ) => {const da = diaAulas.find((x) => x.id === occ.diaAulaId); const sala = salas.find((s) => s.id === occ.salaId); return (<tr key={occ.key}><td>{occ.data}</td><td>{nomeDiaSemana(da?.diaSemanaId)}</td><td>{da?.turnoEducacao_descricao ?? '-'}</td><td>{da?.tempoAula_descricao ?? '-'}</td><td>{sala?.descricao ?? sala?.sucinto ?? occ.salaId}</td><td><button type="button" className="btn-action btnred" onClick={() => removerOcorrencia(occ)}>✕</button></td></tr>); })}</tbody>
-                                            </table>
-                                        )}
-                                        {data.invalidas.length > 0 && (
-                                            <table className="data-table" style={{width: '100%', marginTop: 12}}>
-                                                <thead><tr><th style={{width: 130}}>Data Inválida</th><th>Motivo</th></tr></thead>
-                                                <tbody>{data.invalidas.map((inv, idx) => (<tr key={`${inv.data}-${idx}`}><td style={{color: 'red'}}>{inv.data}</td><td style={{color: 'red'}}>{inv.motivo}</td></tr>))}</tbody>
-                                            </table>
-                                        )}
-                                    </fieldset>
-                                    <fieldset className="form-fieldset" style={{marginBottom: 16}}>
-                                        <legend>Vagas</legend>
-                                        <div className="form-grid">
-                                            <label className="form-field"><span className="form-label">Vagas</span><input type="number" className="form-input" value={data.entity.vagas ?? ''} onChange={(ev) => updateField('entity', {...dataRef.current.entity, vagas: Number(ev.target.value)})}/><button type="button" className="btnblue" onClick={ajustarVagas}>Ajustar Vagas</button></label>
-                                            <label className="form-field"><span className="form-label">Registra Frequência</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={data.entity.registraFrequencia !== false} onChange={(ev) => updateField('entity', {...dataRef.current.entity, registraFrequencia: ev.target.checked})}/> Sim</label></label>
-                                            <label className="form-field"><span className="form-label">Possui Avaliação</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={data.entity.possuiAvaliacao !== false} onChange={(ev) => updateField('entity', {...dataRef.current.entity, possuiAvaliacao: ev.target.checked})}/> Sim</label></label>
-                                            <button type="button" className="btn-action btnyellow" style={{gridColumn: 'span 2'}} onClick={() => alert('Consulte os Oferecimentos - não implementado')}>
-                                                Consulte os Oferecimentos
-                                            </button>
-                                        </div>
-                                    </fieldset>
-                                </section>
-                            </div>
-                            <div role="tabpanel" id="panel-tabProfessor" aria-labelledby="tab-tabProfessor" hidden={activeTab !== 'tabProfessor'}>
-                                <section className="tab-content">
-                                    <fieldset className="form-fieldset">
-                                        <legend>Professor</legend>
-                                        <div className="form-grid">
-<label className="form-field" style={{gridColumn: 'span 3'}}>
-                                                <span className="form-label">Responsável pela Turma</span>
-                                                <AutoComplete
-                                                    placeholder="Digite para buscar o professor..."
-                                                    value={data.professorId ? {id: data.professorId, label: professores.find(p => p.id === data.professorId)?.nome ?? ''} : null}
-                                                    onChange={(opt) => updateField('professorId', opt?.id ?? null)}
-                                                    fetchOptions={(q) => {
-                                                        const firstDa = diaAulas.find(da => data.diasAulaSelecionados.includes(da.id));
-                                                        return fetchProfessor(q, firstDa?.diaSemanaId, firstDa?.turnoEducacaoId, firstDa?.tempoAulaId);
-                                                    }}
-                                                    fetchById={fetchProfessorById}
-                                                    minChars={3}
-                                                />
-                                            </label>
-                                        </div>
-                                    </fieldset>
-                                </section>
+                <div style={{display: 'flex', width: '100%', gap: '16px', marginTop: '16px'}}>
+                    <div style={{width: '20%', minWidth: '200px'}}>
+                        <div className="div_form" style={{padding: '12px'}}>
+                            <div className="form-title" style={{fontSize: '14px', marginBottom: '12px'}}>Opções</div>
+                            <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                                <button type="button" className="btn-action btnblack" style={{width: '100%', textAlign: 'left'}} onClick={() => navigate('/view/oferecimentoComponenteCurricular/formOferecimentoComponenteCurricular')}>Novo Oferecimento</button>
+                                <button type="button" className="btn-action btnyellow" style={{width: '100%', textAlign: 'left'}} onClick={() => navigate('/view/oferecimentoComponenteCurricular/listOferecimentoComponenteCurricular')}>Listar Oferecimentos</button>
+                                <button type="button" className="btn-action btnblue" style={{width: '100%', textAlign: 'left'}} onClick={() => alert('Disponibilidade de Salas - não implementado')}>Disponibilidade Salas</button>
+                                <button type="button" className="btn-action btnpurple" style={{width: '100%', textAlign: 'left'}} onClick={() => alert('Disponibilidade de Professores - não implementado')}>Disponibilidade Professores</button>
+                                <button type="button" className="btn-action btnstop" style={{width: '100%', textAlign: 'left'}} onClick={() => navigate('/view/oferecimentoComponenteCurricular/listOferecimentoCurso')}>Oferecimentos Curso</button>
+                                <button type="button" className="btn-action btnred" style={{width: '100%', textAlign: 'left'}} onClick={voltarAbaOuLista}>Voltar</button>
                             </div>
                         </div>
-                        <div className="ofc-tabs-actions">
-                            <button type="button" className="btn-form-back" onClick={voltarAbaOuLista} disabled={gerando}>Anterior</button>
-                            <button type="button" className="btn-form-save" onClick={proximaAbaOuSalvar} disabled={gerando}>{saveLabel}</button>
+                    </div>
+                    <div style={{width: '80%'}}>
+                        <div className="div_form">
+                            <div className="form-title">Oferecimento Componente Curricular</div>
+                            <div className="ofc-tabs">
+                                <nav className="ofc-tabs-nav" role="tablist">
+                                    {TABS.map((tab) => (
+                                        <button key={tab.key} type="button" role="tab" aria-selected={activeTab === tab.key} aria-controls={`panel-${tab.key}`} id={`tab-${tab.key}`}
+                                            className={`ofc-tab ${activeTab === tab.key ? 'ofc-tab-active' : ''} ${tab.key !== activeTab && TABS.findIndex(t => t.key === activeTab) > TABS.findIndex(t => t.key === tab.key) ? 'ofc-tab-disabled' : ''}`}
+                                            onClick={() => handleTabChange(tab.key)} disabled={gerando}>
+                                            {tab.label}
+                                        </button>
+                                    ))}
+                                </nav>
+                                <div className="ofc-tabs-panels">
+                                    <div role="tabpanel" id="panel-tabComponente" aria-labelledby="tab-tabComponente" hidden={activeTab !== 'tabComponente'}>
+                                        <section className="tab-content">
+                                            <fieldset className="form-fieldset" style={{marginBottom: 16}}>
+                                                <legend>Grupo</legend>
+                                                <div className="form-grid">
+                                                    <div className="form-field">
+                                                        <span className="form-label">Criar nova sequência</span>
+                                                        <label style={{display: 'flex', gap: 6, alignItems: 'center'}}>
+                                                            <input type="checkbox" checked={data.novoGrupo} onChange={(ev) => updateField('novoGrupo', ev.target.checked)}/> Sim
+                                                        </label>
+                                                    </div>
+                                                    {data.novoGrupo ? (
+                                                        <label className="form-field"><span className="form-label">Grupo *</span><input type="text" className="form-input" value={data.novoGrupoNome} onChange={(ev) => updateField('novoGrupoNome', ev.target.value)}/></label>
+                                                    ) : (
+                                                        <label className="form-field"><span className="form-label">Grupo *</span><select className="form-input form-select" value={data.entity.grupoId ?? ''} onChange={(ev) => updateField('entity.grupoId', Number(ev.target.value))}><option value="">Selecione</option>{gruposDisponiveis.map((g) => <option key={g.id} value={g.id}>{g.nome}</option>)}</select></label>
+                                                    )}
+                                                    <button type="button" className="btn-action btnyellow" style={{gridColumn: 'span 2'}} onClick={() => alert('Consulte os Oferecimentos - não implementado')}>
+                                                        Consulte os Oferecimentos
+                                                    </button>
+                                                </div>
+                                            </fieldset>
+                                            <fieldset className="form-fieldset" style={{marginBottom: 16}}>
+                                                <legend>Geral</legend>
+                                                <div className="form-grid">
+                                                    <label className="form-field"><span className="form-label">ID</span><input type="text" className="form-input" value={data.entity.id ?? ''} disabled/></label>
+                                                    <label className="form-field"><span className="form-label">Unidade *</span><select className="form-input form-select" value={data.entity.unidadeId ?? ''} onChange={(ev) => aoSelecionarUnidade(Number(ev.target.value))}><option value="">Selecione</option>{unidades.map((u) => <option key={u.id} value={u.id}>{u.nomeFantasia || u.razaoSocial || u.sucinto || `Unidade ${u.id}`}</option>)}</select></label>
+                                                    <label className="form-field"><span className="form-label">Curso *</span><select className="form-input form-select" value={data.entity.curriculoId ?? ''} onChange={(ev) => aoSelecionarCurso(Number(ev.target.value))}><option value="">Selecione</option>{cursosDisponiveis.map((c) => <option key={c.id} value={c.id}>{c.descricao || c.sigla || `Curso ${c.id}`}</option>)}</select></label>
+                                                    <label className="form-field"><span className="form-label">Componente Curricular *</span><select className="form-input form-select" value={data.entity.componenteCurricularId ?? ''} onChange={(ev) => updateField('entity.componenteCurricularId', Number(ev.target.value))}><option value="">Selecione</option>{componentesDoCurso.map((c) => <option key={c.id} value={c.id}>{c.descricao || c.sucinto || `Componente ${c.id}`}</option>)}</select></label>
+                                                    <label className="form-field"><span className="form-label">Data Cancelamento</span><input type="date" className="form-input" value={data.entity.dataCancelamento ?? ''} disabled/></label>
+                                                </div>
+                                            </fieldset>
+                                            {criterio && (
+                                                <div className="form-field" style={{marginTop: 16, padding: 12, background: '#f8f9fa', borderRadius: 8}}>
+                                                    <strong>Critério do Curso:</strong><br/>
+                                                    Turmas máximas: {criterio.qtd_turma_abertas ?? 'Não definido'} | Período: {criterio.periodo ?? 'Não definido'}<br/>
+                                                    {criterio.data_inicio && `Início válido a partir de: ${fmtDate(parseISO(criterio.data_inicio)!)}`} | {criterio.data_fim && `Término até: ${fmtDate(parseISO(criterio.data_fim)!)}`}
+                                                </div>
+                                            )}
+                                            <fieldset className="form-fieldset" style={{marginBottom: 16}}>
+                                                <legend>Replicar</legend>
+                                                <div className="form-grid">
+                                                    <div className="form-field"><span className="form-label">Replicar</span><div style={{display: 'flex', gap: 14, alignItems: 'center'}}>
+                                                        <label style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="radio" name="replicar" checked={!!data.entity.replicar} onChange={() => updateField('entity.replicar', true)}/> Sim</label>
+                                                        <label style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="radio" name="replicar" checked={!data.entity.replicar} onChange={() => updateField('entity.replicar', false)}/> Não</label>
+                                                    </div></div>
+                                                    {data.entity.replicar && (
+                                                        <>
+                                                            <label className="form-field"><span className="form-label">Dias a Replicar</span><input type="number" min={1} className="form-input" value={data.entity.diasReplicar ?? ''} onChange={(ev) => updateField('entity.diasReplicar', Number(ev.target.value))}/></label>
+                                                            <div className="form-field"><span className="form-label">Detalhar Replicação</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={!!data.entity.detalharReplicacao} onChange={(ev) => updateField('entity.detalharReplicacao', ev.target.checked)}/> Sim</label></div>
+                                                            {data.entity.detalharReplicacao && (
+                                                                <>
+                                                                    <label className="form-field"><span className="form-label">Componente Curricular</span><select className="form-input form-select" value={data.entity.componenteCurricularReplicarId ?? ''} onChange={(ev) => updateField('entity.componenteCurricularReplicarId', Number(ev.target.value))}><option value="">Selecione</option>{componentes.map((c) => <option key={c.id} value={c.id}>{c.descricao || c.sucinto || `Componente ${c.id}`}</option>)}</select></label>
+                                                                    <div className="form-field" style={{gridColumn: 'span 3'}}><span className="form-label">Tipo</span><div style={{display: 'flex', gap: 14, flexWrap: 'wrap'}}>{TIPOS_REPLICACAO.map((t) => (<label key={t.valor} style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="radio" name="tipoReplicacao" checked={(data.entity.tipoReplicacao ?? 0) === t.valor} onChange={() => updateField('entity.tipoReplicacao', t.valor)}/> {t.rotulo}</label>))}</div></div>
+                                                                </>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </fieldset>
+                                            <fieldset className="form-fieldset" style={{marginBottom: 16}}>
+                                                <legend>Responsável</legend>
+                                                <div className="form-grid">
+                                                    <label className="form-field" style={{gridColumn: 'span 4'}}>
+                                                        <span className="form-label">Responsável</span>
+                                                        <AutoComplete
+                                                            placeholder="Digite para buscar o usuário..."
+                                                            value={null}
+                                                            onChange={(opt) => {}}
+                                                            fetchOptions={(q) => api.get('/api/view/usuario/listUsuario', {params: {q, limit: 20}}).then(r => (r.data ?? []).map((u: any) => ({id: u.id, label: u.nome || u.login || `#${u.id}`})))}
+                                                            minChars={2}
+                                                        />
+                                                    </label>
+                                                </div>
+                                            </fieldset>
+                                        </section>
+                                    </div>
+                                    <div role="tabpanel" id="panel-tabDiaAula" aria-labelledby="tab-tabDiaAula" hidden={activeTab !== 'tabDiaAula'}>
+                                        <section className="tab-content">
+                                            <fieldset className="form-fieldset" style={{marginBottom: 16}}>
+                                                <legend>Dias Aula</legend>
+                                                <div className="form-grid">
+                                                    <label className="form-field"><span className="form-label">Sala *</span><select className="form-input form-select" value={data.entity.salaId ?? ''} onChange={(ev) => aoSelecionarSala(Number(ev.target.value))}><option value="">Selecione</option>{salasDaUnidade.map((s) => <option key={s.id} value={s.id}>{s.descricao || s.sucinto || `Sala ${s.id}`}</option>)}</select></label>
+                                                    <label className="form-field"><span className="form-label">Qtde Sequência</span><input type="number" min={1} className="form-input" value={data.entity.qtdeSequencia ?? 1} onChange={(ev) => updateField('entity.qtdeSequencia', Math.max(1, Number(ev.target.value)))}/></label>
+                                                    <label className="form-field"><span className="form-label">Data Inicial *</span><input type="date" className="form-input" value={data.entity.dataInicio ?? ''} onChange={(ev) => updateField('entity.dataInicio', ev.target.value)}/></label>
+                                                    <label className="form-field"><span className="form-label">Data Fim</span><input type="date" className="form-input" value={data.entity.dataFim ?? ''} onChange={(ev) => updateField('entity.dataFim', ev.target.value)}/></label>
+                                                    <div className="form-field" style={{gridColumn: 'span 4'}}><span className="form-label">Dias de Aula</span><div style={{display: 'flex', gap: 12, flexWrap: 'wrap'}}>{diaAulas.map((da) => (<label key={da.id} style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="checkbox" checked={data.diasAulaSelecionados.includes(da.id)} onChange={() => alternarDiaAula(da.id)}/> {rotuloDiaAula(da)}</label>))}</div></div>
+                                                    <div className="form-field" style={{gridColumn: 'span 4'}}><button type="button" className="btnblue" onClick={gerarAulas} disabled={gerando}>{gerando ? 'Gerando...' : 'Gerar Aulas'}</button></div>
+                                                </div>
+                                                {data.ocorrencias.length > 0 && (
+                                                    <table className="data-table" style={{width: '100%', marginTop: 12}}>
+                                                        <thead><tr><th>Data</th><th>Dia Semana</th><th>Turno</th><th>Tempo Aula</th><th>Sala</th><th>Ação</th></tr></thead>
+                                                        <tbody>{[...data.ocorrencias].sort((a, b) => a.data.localeCompare(b.data)).map((occ) => {const da = diaAulas.find((x) => x.id === occ.diaAulaId); const sala = salas.find((s) => s.id === occ.salaId); return (<tr key={occ.key}><td>{occ.data}</td><td>{nomeDiaSemana(da?.diaSemanaId)}</td><td>{da?.turnoEducacao_descricao ?? '-'}</td><td>{da?.tempoAula_descricao ?? '-'}</td><td>{sala?.descricao ?? sala?.sucinto ?? occ.salaId}</td><td><button type="button" className="btn-action btnred" onClick={() => removerOcorrencia(occ)}>✕</button></td></tr>); })}</tbody>
+                                                    </table>
+                                                )}
+                                                {data.invalidas.length > 0 && (
+                                                    <table className="data-table" style={{width: '100%', marginTop: 12}}>
+                                                        <thead><tr><th style={{width: 130}}>Data Inválida</th><th>Motivo</th></tr></thead>
+                                                        <tbody>{data.invalidas.map((inv, idx) => (<tr key={`${inv.data}-${idx}`}><td style={{color: 'red'}}>{inv.data}</td><td style={{color: 'red'}}>{inv.motivo}</td></tr>))}</tbody>
+                                                    </table>
+                                                )}
+                                            </fieldset>
+                                            <fieldset className="form-fieldset" style={{marginBottom: 16}}>
+                                                <legend>Vagas</legend>
+                                                <div className="form-grid">
+                                                    <label className="form-field"><span className="form-label">Vagas</span><input type="number" className="form-input" value={data.entity.vagas ?? ''} onChange={(ev) => updateField('entity', {...dataRef.current.entity, vagas: Number(ev.target.value)})}/><button type="button" className="btnblue" onClick={ajustarVagas}>Ajustar Vagas</button></label>
+                                                    <label className="form-field"><span className="form-label">Registra Frequência</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={data.entity.registraFrequencia !== false} onChange={(ev) => updateField('entity', {...dataRef.current.entity, registraFrequencia: ev.target.checked})}/> Sim</label></label>
+                                                    <label className="form-field"><span className="form-label">Possui Avaliação</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={data.entity.possuiAvaliacao !== false} onChange={(ev) => updateField('entity', {...dataRef.current.entity, possuiAvaliacao: ev.target.checked})}/> Sim</label></label>
+                                                    <button type="button" className="btn-action btnyellow" style={{gridColumn: 'span 2'}} onClick={() => alert('Consulte os Oferecimentos - não implementado')}>
+                                                        Consulte os Oferecimentos
+                                                    </button>
+                                                </div>
+                                            </fieldset>
+                                        </section>
+                                    </div>
+                                    <div role="tabpanel" id="panel-tabProfessor" aria-labelledby="tab-tabProfessor" hidden={activeTab !== 'tabProfessor'}>
+                                        <section className="tab-content">
+                                            <fieldset className="form-fieldset">
+                                                <legend>Professor</legend>
+                                                <div className="form-grid">
+                                                    <label className="form-field" style={{gridColumn: 'span 3'}}>
+                                                        <span className="form-label">Responsável pela Turma</span>
+                                                        <AutoComplete
+                                                            placeholder="Digite para buscar o professor..."
+                                                            value={data.professorId ? {id: data.professorId, label: professores.find(p => p.id === data.professorId)?.nome ?? ''} : null}
+                                                            onChange={(opt) => updateField('professorId', opt?.id ?? null)}
+                                                            fetchOptions={(q) => {
+                                                                const firstDa = diaAulas.find(da => data.diasAulaSelecionados.includes(da.id));
+                                                                return fetchProfessor(q, firstDa?.diaSemanaId, firstDa?.turnoEducacaoId, firstDa?.tempoAulaId);
+                                                            }}
+                                                            fetchById={fetchProfessorById}
+                                                            minChars={3}
+                                                        />
+                                                    </label>
+                                                </div>
+                                            </fieldset>
+                                        </section>
+                                    </div>
+                                </div>
+                                <div className="ofc-tabs-actions">
+                                    <button type="button" className="btn-form-back" onClick={voltarAbaOuLista} disabled={gerando}>Anterior</button>
+                                    <button type="button" className="btn-form-save" onClick={proximaAbaOuSalvar} disabled={gerando}>{saveLabel}</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

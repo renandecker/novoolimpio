@@ -7,8 +7,9 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 
-import java.util.List;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Path("/api/central/meta")
 @Produces(MediaType.APPLICATION_JSON)
@@ -26,6 +27,17 @@ public class MetaController {
     @Path("/paged")
     public Uni<PagedResponse<MetaResponse>> paged(@QueryParam("page") Integer page, @QueryParam("size") Integer size) {
         return service.paged(page == null ? 0 : page, size == null ? 10 : size);
+    }
+
+    @GET
+    @Path("/paged-enriched")
+    public Uni<PagedResponse<Map<String, Object>>> pagedEnriched(
+            @QueryParam("page") Integer page,
+            @QueryParam("size") Integer size,
+            @QueryParam("operadorLogin") String operadorLogin,
+            @QueryParam("operacionalId") Long operacionalId,
+            @QueryParam("data") String dataStr) {
+        return service.pagedEnriched(page == null ? 0 : page, size == null ? 10 : size, operadorLogin, operacionalId, dataStr);
     }
 
     @GET
@@ -57,13 +69,11 @@ public class MetaController {
         return service.atualizarOperadores(event);
     }
 
-
     @GET
     @Path("/buscar-meta-operador-dia")
     public Uni<List<Long>> buscarMetaOperadorDia() {
         return service.buscarMetaOperadorDia();
     }
-
 
     @GET
     @Path("/buscar-meta-operador-dia2")
@@ -71,13 +81,11 @@ public class MetaController {
         return service.buscarMetaOperadorDia2(data, operadorId);
     }
 
-
     @GET
     @Path("/buscar-meta-operador")
     public Uni<Integer> buscarMetaOperador(@QueryParam("data") Date data, @QueryParam("operadorId") Long operadorId) {
         return service.buscarMetaOperador(data, operadorId);
     }
-
 
     @GET
     @Path("/buscar-conflito-datas-com-equipe")
@@ -85,13 +93,11 @@ public class MetaController {
         return service.buscarConflitoDatasComEquipe(dataInicial, dataFinal, operacionalId);
     }
 
-
     @GET
     @Path("/buscar-conflito-datas-com-equipe-com-meta")
     public Uni<List<Long>> buscarConflitoDatasComEquipeComMeta(@QueryParam("dataInicial") Date dataInicial, @QueryParam("dataFinal") Date dataFinal, @QueryParam("operacionalId") Long operacionalId, @QueryParam("id") Integer id) {
         return service.buscarConflitoDatasComEquipeComMeta(dataInicial, dataFinal, operacionalId, id);
     }
-
 
     @GET
     @Path("/buscar-conflito-datas-com-operador")
@@ -99,13 +105,11 @@ public class MetaController {
         return service.buscarConflitoDatasComOperador(dataInicial, dataFinal, operadorId);
     }
 
-
     @GET
     @Path("/buscar-conflito-datas-com-operador-com-meta")
     public Uni<List<Long>> buscarConflitoDatasComOperadorComMeta(@QueryParam("dataInicial") Date dataInicial, @QueryParam("dataFinal") Date dataFinal, @QueryParam("operadorId") Long operadorId, @QueryParam("id") Integer id) {
         return service.buscarConflitoDatasComOperadorComMeta(dataInicial, dataFinal, operadorId, id);
     }
-
 
     @GET
     @Path("/buscar-meta-operador-periodo")
@@ -113,4 +117,15 @@ public class MetaController {
         return service.buscarMetaOperadorPeriodo(data, operadorId);
     }
 
+    @GET
+    @Path("/operadores-disponiveis")
+    public Uni<List<Map<String, Object>>> operadoresDisponiveis(@QueryParam("coordenadorId") Long coordenadorId, @QueryParam("data") String data) {
+        return service.operadoresDisponiveis(coordenadorId, data);
+    }
+
+    @GET
+    @Path("/operacionais-do-coordenador")
+    public Uni<List<Map<String, Object>>> operacionaisDoCoordenador(@QueryParam("coordenadorId") Long coordenadorId) {
+        return service.operacionaisDoCoordenador(coordenadorId);
+    }
 }

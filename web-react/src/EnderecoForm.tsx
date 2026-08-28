@@ -25,6 +25,21 @@ interface ViaCepResponse {
     logradouro?: string;
 }
 
+const fullRow: React.CSSProperties = {
+    display: 'grid',
+    gridColumn: '1 / -1',
+    gridTemplateColumns: '160px 1fr',
+    gap: '14px',
+    alignItems: 'center',
+};
+const fullRowTop: React.CSSProperties = {
+    display: 'grid',
+    gridColumn: '1 / -1',
+    gridTemplateColumns: '160px 1fr',
+    gap: '14px',
+    alignItems: 'start',
+};
+
 export async function buscarCep(cep: string): Promise<Partial<Endereco> | null> {
     const clean = cep.replace(/\D/g, '');
     if (clean.length !== 8) return null;
@@ -118,32 +133,29 @@ function EnderecoModal({
                                 </div>
                                 {aviso && <small style={{color: '#c0392b'}}>{aviso}</small>}
                             </label>
-                            <label className="form-field">
+                            <label className="form-field" style={fullRow}>
                                 <span className="form-label">Cidade</span>
                                 <input
                                     className="form-input"
                                     placeholder="Cidade"
-                                    style={{gridColumn: 'span 3'}}
                                     value={form.cidade ?? ''}
                                     onChange={(event) => setForm((prev) => ({...prev, cidade: event.target.value}))}
                                 />
                             </label>
-                            <label className="form-field">
+                            <label className="form-field" style={fullRow}>
                                 <span className="form-label">Bairro</span>
                                 <input
                                     className="form-input"
                                     placeholder="Bairro"
-                                    style={{gridColumn: 'span 3'}}
                                     value={form.bairro ?? ''}
                                     onChange={(event) => setForm((prev) => ({...prev, bairro: event.target.value}))}
                                 />
                             </label>
-                            <label className="form-field">
+                            <label className="form-field" style={fullRow}>
                                 <span className="form-label">Logradouro</span>
                                 <input
                                     className="form-input"
                                     placeholder="Logradouro"
-                                    style={{gridColumn: 'span 3'}}
                                     value={form.logradouro ?? ''}
                                     onChange={(event) => setForm((prev) => ({...prev, logradouro: event.target.value}))}
                                 />
@@ -158,13 +170,13 @@ function EnderecoModal({
                                     onChange={(event) => setForm((prev) => ({...prev, numero: event.target.value}))}
                                 />
                             </label>
-                            <label className="form-field">
+                            <label className="form-field" style={fullRowTop}>
                                 <span className="form-label">Complemento</span>
                                 <textarea
                                     className="form-input"
                                     placeholder="Complemento"
                                     rows={3}
-                                    style={{gridColumn: 'span 3', minHeight: '80px'}}
+                                    style={{minHeight: '80px'}}
                                     value={form.complemento ?? ''}
                                     onChange={(event) =>
                                         setForm((prev) => ({...prev, complemento: event.target.value}))
@@ -281,32 +293,29 @@ export function EnderecoCampos({
                 </div>
                 {aviso && <small style={{color: '#c0392b'}}>{aviso}</small>}
             </label>
-            <label className="form-field">
+            <label className="form-field" style={fullRow}>
                 <span className="form-label">Cidade</span>
                 <input
                     className="form-input"
                     placeholder="Cidade"
-                    style={{gridColumn: 'span 3'}}
                     value={atual.cidade ?? ''}
                     onChange={(event) => atualizar({cidade: event.target.value})}
                 />
             </label>
-            <label className="form-field">
+            <label className="form-field" style={fullRow}>
                 <span className="form-label">Bairro</span>
                 <input
                     className="form-input"
                     placeholder="Bairro"
-                    style={{gridColumn: 'span 3'}}
                     value={atual.bairro ?? ''}
                     onChange={(event) => atualizar({bairro: event.target.value})}
                 />
             </label>
-            <label className="form-field">
+            <label className="form-field" style={fullRow}>
                 <span className="form-label">Logradouro</span>
                 <input
                     className="form-input"
                     placeholder="Logradouro"
-                    style={{gridColumn: 'span 3'}}
                     value={atual.logradouro ?? ''}
                     onChange={(event) => atualizar({logradouro: event.target.value})}
                 />
@@ -321,13 +330,13 @@ export function EnderecoCampos({
                     onChange={(event) => atualizar({numero: event.target.value})}
                 />
             </label>
-            <label className="form-field">
+            <label className="form-field" style={fullRowTop}>
                 <span className="form-label">Complemento</span>
                 <textarea
                     className="form-input"
                     placeholder="Complemento"
                     rows={3}
-                    style={{gridColumn: 'span 3', minHeight: '80px'}}
+                    style={{minHeight: '80px'}}
                     value={atual.complemento ?? ''}
                     onChange={(event) => atualizar({complemento: event.target.value})}
                 />

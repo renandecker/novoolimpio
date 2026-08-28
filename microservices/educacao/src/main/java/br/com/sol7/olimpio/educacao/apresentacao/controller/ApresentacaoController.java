@@ -1,11 +1,14 @@
 package br.com.sol7.olimpio.educacao.apresentacao;
 
+import br.com.sol7.olimpio.educacao.apresentacaovideo.ApresentacaoVideoResponse;
 import br.com.sol7.olimpio.educacao.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
+import org.jboss.resteasy.reactive.RestForm;
+import org.jboss.resteasy.reactive.multipart.FileUpload;
 
 import java.util.List;
 
@@ -34,6 +37,12 @@ public class ApresentacaoController {
     }
 
     @GET
+    @Path("/imagens")
+    public Uni<java.util.List<String>> imagens() {
+        return service.imagens();
+    }
+
+    @GET
     @Path("/{id}")
     public Uni<ApresentacaoResponse> find(@PathParam("id") Long id) {
         return service.find(id);
@@ -50,9 +59,37 @@ public class ApresentacaoController {
         return service.update(id, r);
     }
 
+    @PUT
+    @Path("/{id}/ordem")
+    public Uni<ApresentacaoResponse> updateOrdem(@PathParam("id") Long id, @QueryParam("ordem") Integer ordem) {
+        return service.updateOrdem(id, ordem);
+    }
+
     @DELETE
     @Path("/{id}")
     public Uni<Void> delete(@PathParam("id") Long id) {
         return service.delete(id);
+    }
+
+    @POST
+    @Path("/upload-imagem")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<ApresentacaoResponse> uploadImagem(
+            @RestForm("file") FileUpload fileUpload,
+            @RestForm("ordem") Integer ordem
+    ) {
+        return service.uploadImagem(fileUpload, ordem);
+    }
+
+    @POST
+    @Path("/upload-video")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<ApresentacaoVideoResponse> uploadVideo(
+            @RestForm("file") FileUpload fileUpload,
+            @RestForm("titulo") String titulo
+    ) {
+        return service.uploadVideo(fileUpload, titulo);
     }
 }

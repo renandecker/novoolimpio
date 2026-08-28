@@ -11,14 +11,6 @@ import {format} from 'date-fns';
 import '../Disponibilidade.css';
 import './ViewAgendaCompromissosScreen.css';
 
-function test() {
-    var i = $('.ui-row-toggler.ui-icon-circle-triangle-s').length;
-    if (i == 1) {
-        return;
-    }
-    $('.ui-row-toggler.ui-icon-circle-triangle-s').trigger('click');
-}
-
 interface Compromisso {
     id: number;
     descricao: string;
@@ -1194,46 +1186,6 @@ export default function ViewAgendaCompromissosScreen() {
                     </Modal>
                 )}
 
-                            {selectedCompromisso.statusCompromisso?.alguem && (
-                                <div className="wizard-section">
-                                    <h4>Atendente (obrigatório)</h4>
-                                    <AutoComplete
-                                        value={nextStatusAtendente ? {id: nextStatusAtendente.id, label: nextStatusAtendente.login} : null}
-                                        onChange={(opt) => setNextStatusAtendente(opt ? usuariosOptions.find(u => u.id === opt.id) || null : null)}
-                                        fetchOptions={async (query) => {
-                                            if (!query) return usuariosOptions.slice(0, 20).map(u => ({id: u.id, label: u.login}));
-                                            return usuariosOptions.filter(u => u.login.toLowerCase().includes(query.toLowerCase())).slice(0, 20).map(u => ({id: u.id, label: u.login}));
-                                        }}
-                                        fetchById={async (id) => {
-                                            const u = usuariosOptions.find(u => u.id === id);
-                                            return u ? {id: u.id, label: u.login} : null;
-                                        }}
-                                        minChars={2}
-                                        placeholder="Buscar atendente..."
-                                    />
-                                </div>
-                            )}
-
-                            <div className="modal-actions">
-                                <button className="btn btn-secondary" onClick={() => setShowNextStatus(false)}>Cancelar</button>
-                                <button
-                                    className="btn btn-success"
-                                    onClick={() => nextStatusMutation.mutate({
-                                        compromissoId: selectedCompromisso.id!,
-                                        observacao: nextStatusObservacao,
-                                        resultadoIds: nextStatusResultados.map(r => r.id),
-                                        atendenteId: nextStatusAtendente?.id,
-                                        testemunhaIds: nextStatusTestemunhas.map(t => t.id),
-                                    })}
-                                    disabled={nextStatusMutation.isPending ||
-                                        (selectedCompromisso.statusCompromisso?.proxStatusCompromisso && nextStatusResultados.length === 0) ||
-                                        (selectedCompromisso.statusCompromisso?.alguem && !nextStatusAtendente) ||
-                                        (selectedCompromisso.statusCompromisso?.alguem && selectedCompromisso.statusCompromisso.qtdeUsuario > 0 && nextStatusTestemunhas.length < (selectedCompromisso.statusCompromisso.qtdeUsuario || 0))
-                                    }
-                                >
-                                    Avançar para Próximo Status
-                                </button>
-                            </div>
             </main>
         </PermissionGate>
     );
