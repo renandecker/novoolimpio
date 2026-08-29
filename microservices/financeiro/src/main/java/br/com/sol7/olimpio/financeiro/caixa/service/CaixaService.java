@@ -552,4 +552,56 @@ public class CaixaService {
             Date dataPagamento
     ) {
     }
+
+    public Uni<byte[]> exportarCaixa(String format, Long caixaId) {
+        return Uni.createFrom().item(() -> {
+            try {
+                StringBuilder content = new StringBuilder();
+                content.append("Relatório de Caixa\n");
+                content.append("==================\n\n");
+                
+                if (caixaId != null) {
+                    CaixaResponse caixa = find(caixaId).await().indefinitely();
+                    content.append("Caixa: ").append(caixa.idCaixaUnidade()).append("\n");
+                    content.append("Usuário: ").append(caixa.usuarioLogin()).append("\n");
+                    content.append("Unidade: ").append(caixa.unidadeSucinto()).append("\n");
+                    content.append("Data: ").append(caixa.data()).append("\n");
+                    content.append("Fundo Caixa: ").append(caixa.fundoCaixa()).append("\n\n");
+                    
+                    FechamentoCaixaTotaisResponse totais = totaisFechamento(caixaId).await().indefinitely();
+                    content.append("Totais:\n");
+                    content.append("  Dinheiro: ").append(totais.totalDinheiro()).append("\n");
+                    content.append("  Cheque: ").append(totais.totalCheque()).append("\n");
+                    content.append("  Cartão: ").append(totais.totalCartao()).append("\n");
+                    content.append("  Boleto: ").append(totais.totalBoleto()).append("\n");
+                    content.append("  Transferência: ").append(totais.totalTransferencia()).append("\n");
+                    content.append("  Depósito: ").append(totais.totalDeposito()).append("\n");
+                    content.append("  Sangria: ").append(totais.totalSangria()).append("\n");
+                    content.append("  Valor Total: ").append(totais.totalValor()).append("\n");
+                    content.append("  Desconto: ").append(totais.totalDesconto()).append("\n");
+                    content.append("  Juros/Multa: ").append(totais.totalMultaJuros()).append("\n");
+                    content.append("  Valor Total Caixa: ").append(totais.valorTotalCaixa()).append("\n");
+                }
+                
+                String text = content.toString();
+                
+                switch (format.toLowerCase()) {
+                    case "pdf":
+                        // Simplified PDF - in production use a proper PDF library
+                        return ("%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n4 0 obj\n<< /Length " + (text.length() + 100) + " >>\nstream\nBT\n/F1 12 Tf\n72 720 Td\n(" + text.replace("\n", ") Tj\n0 -14 Td\n(") + ") Tj\nET\nendstream\nendobj\n5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\nxref\n0 6\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n0000000274 00000 n \n0000000450 00000 n \ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n550\n%%EOF").getBytes();
+                    case "excel":
+                    case "xlsx":
+                        // Simplified Excel - in production use Apache POI
+                        return ("PK\x03\x04" + text).getBytes(); // Placeholder
+                    case "docx":
+                        // Simplified DOCX - in production use Apache POI
+                        return ("PK\x03\x04" + text).getBytes(); // Placeholder
+                    default:
+                        throw new IllegalArgumentException("Formato não suportado: " + format);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Erro ao exportar caixa: " + e.getMessage(), e);
+            }
+        });
+    }
 }

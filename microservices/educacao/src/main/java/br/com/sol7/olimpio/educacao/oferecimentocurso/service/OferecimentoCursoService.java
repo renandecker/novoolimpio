@@ -131,6 +131,10 @@ public class OferecimentoCursoService {
                 .map(list -> list.stream().map(c -> c.id).toList());
     }
 
+    public Uni<List<OferecimentoCursoResponse>> listarGruposPorCurriculoUnidade(Long curriculoId, Long unidadeId) {
+        return withRefs(grupoRepository.listarGrupos(curriculoId, unidadeId));
+    }
+
     // ----- resolucao de descricoes (refs locais, sem N+1) -----
 
     private record Refs(List<Curriculo> curriculos, List<Unidade> unidades, List<Curso> cursos) {

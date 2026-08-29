@@ -470,8 +470,8 @@ const [carregando, setCarregando] = useState(true);
                             <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
                                 <button type="button" className="btn-action btnblack" style={{width: '100%', textAlign: 'left'}} onClick={() => navigate('/view/oferecimentoComponenteCurricular/formOferecimentoComponenteCurricular')}>Novo Oferecimento</button>
                                 <button type="button" className="btn-action btnyellow" style={{width: '100%', textAlign: 'left'}} onClick={() => navigate('/view/oferecimentoComponenteCurricular/listOferecimentoComponenteCurricular')}>Listar Oferecimentos</button>
-                                <button type="button" className="btn-action btnblue" style={{width: '100%', textAlign: 'left'}} onClick={() => alert('Disponibilidade de Salas - não implementado')}>Disponibilidade Salas</button>
-                                <button type="button" className="btn-action btnpurple" style={{width: '100%', textAlign: 'left'}} onClick={() => alert('Disponibilidade de Professores - não implementado')}>Disponibilidade Professores</button>
+                                <button type="button" className="btn-action btnblue" style={{width: '100%', textAlign: 'left'}} onClick={() => window.open(`/api/educacao/disponibilidade-sala/schedule-events?unidadeId=${data.entity.unidadeId}`, '_blank')}>Disponibilidade Salas</button>
+                                <button type="button" className="btn-action btnpurple" style={{width: '100%', textAlign: 'left'}} onClick={() => window.open(`/api/educacao/disponibilidade-professor/schedule-events?unidadeId=${data.entity.unidadeId}`, '_blank')}>Disponibilidade Professores</button>
                                 <button type="button" className="btn-action btnstop" style={{width: '100%', textAlign: 'left'}} onClick={() => navigate('/view/oferecimentoComponenteCurricular/listOferecimentoCurso')}>Oferecimentos Curso</button>
                                 <button type="button" className="btn-action btnred" style={{width: '100%', textAlign: 'left'}} onClick={voltarAbaOuLista}>Voltar</button>
                             </div>
@@ -507,7 +507,7 @@ const [carregando, setCarregando] = useState(true);
                                                     ) : (
                                                         <label className="form-field"><span className="form-label">Grupo *</span><select className="form-input form-select" value={data.entity.grupoId ?? ''} onChange={(ev) => updateField('entity.grupoId', Number(ev.target.value))}><option value="">Selecione</option>{gruposDisponiveis.map((g) => <option key={g.id} value={g.id}>{g.nome}</option>)}</select></label>
                                                     )}
-                                                    <button type="button" className="btn-action btnyellow" style={{gridColumn: 'span 2'}} onClick={() => alert('Consulte os Oferecimentos - não implementado')}>
+                                                    <button type="button" className="btn-action btnyellow" style={{gridColumn: 'span 2'}} onClick={() => window.open(`/api/educacao/oferecimento-componente-curricular/paged?unidadeId=${data.entity.unidadeId}&curriculoId=${data.entity.curriculoId}`, '_blank')}>
                                                         Consulte os Oferecimentos
                                                     </button>
                                                 </div>
@@ -598,7 +598,7 @@ const [carregando, setCarregando] = useState(true);
                                                     <label className="form-field"><span className="form-label">Vagas</span><input type="number" className="form-input" value={data.entity.vagas ?? ''} onChange={(ev) => updateField('entity', {...dataRef.current.entity, vagas: Number(ev.target.value)})}/><button type="button" className="btnblue" onClick={ajustarVagas}>Ajustar Vagas</button></label>
                                                     <label className="form-field"><span className="form-label">Registra Frequência</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={data.entity.registraFrequencia !== false} onChange={(ev) => updateField('entity', {...dataRef.current.entity, registraFrequencia: ev.target.checked})}/> Sim</label></label>
                                                     <label className="form-field"><span className="form-label">Possui Avaliação</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={data.entity.possuiAvaliacao !== false} onChange={(ev) => updateField('entity', {...dataRef.current.entity, possuiAvaliacao: ev.target.checked})}/> Sim</label></label>
-                                                    <button type="button" className="btn-action btnyellow" style={{gridColumn: 'span 2'}} onClick={() => alert('Consulte os Oferecimentos - não implementado')}>
+                                                    <button type="button" className="btn-action btnyellow" style={{gridColumn: 'span 2'}} onClick={() => window.open(`/api/educacao/oferecimento-componente-curricular/paged?unidadeId=${data.entity.unidadeId}&curriculoId=${data.entity.curriculoId}`, '_blank')}>
                                                         Consulte os Oferecimentos
                                                     </button>
                                                 </div>

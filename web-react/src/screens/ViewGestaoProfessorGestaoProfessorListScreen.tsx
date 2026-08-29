@@ -587,7 +587,7 @@ function GestaoTab() {
                                     </>
                                 )}
                                 <button className="gp-btn gp-btn-acoes btnyellow" title="Informações"
-                                        onClick={() => alert('Informações - não implementado')}>
+                                        onClick={() => window.open(`/api/educacao/professor/${t.id}/informacoes`, '_blank')}>
                                     ℹ️
                                 </button>
                             </td>

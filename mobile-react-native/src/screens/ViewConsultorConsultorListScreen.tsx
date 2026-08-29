@@ -2,6 +2,7 @@ import React from 'react';
 import {Tabs} from '../Tabs';
 import {ModuleList} from '../ModuleListScreen';
 import {ModuleWizard} from '../ModuleWizard';
+import ViewConsultorMatriculaLayoutScreen from './ViewConsultorMatriculaLayoutScreen';
 
 // consultor.xhtml (olimpio.zip) shows one form per menu option; "menu==2" embeds the same
 // <p:wizard id="wizardmatricula"> from formMatricula.xhtml, and "menu==4" embeds the same
@@ -15,20 +16,7 @@ export default function ViewConsultorConsultorListScreen() {
                 {
                     key: 'tabMatricula',
                     label: 'Matrícula',
-                    content: (
-                        <ModuleWizard
-                            steps={[
-                                {key: 'tabMatricula', label: 'Matrícula', path: '/api/educacao/matricula'},
-                                {key: 'tabMaterial', label: 'Material', empty: 'Material escolar da matrícula.'},
-                                {
-                                    key: 'tabValores',
-                                    label: 'Valores',
-                                    path: '/api/educacao/valor-curso',
-                                    nextLabel: 'Salvar'
-                                },
-                            ]}
-                        />
-                    ),
+                    content: <ViewConsultorMatriculaLayoutScreen />,
                 },
                 {
                     key: 'tabRematricula',

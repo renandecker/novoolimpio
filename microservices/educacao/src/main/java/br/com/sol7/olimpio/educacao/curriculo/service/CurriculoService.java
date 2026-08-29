@@ -153,6 +153,13 @@ public class CurriculoService {
         return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
     }
 
+    public Uni<List<CurriculoResponse>> autoCompleteFull(String query) {
+        if (query == null || query.isEmpty()) {
+            return repository.find("(dataCancelamento > current_date or dataCancelamento is null)").page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(this::toResponse).toList());
+        }
+        return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(this::toResponse).toList());
+    }
+
 
     // Migrado de CurriculoController.buscarProduto (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/CurriculoController.java:891, camada controller)
     // Logica original (adaptar):

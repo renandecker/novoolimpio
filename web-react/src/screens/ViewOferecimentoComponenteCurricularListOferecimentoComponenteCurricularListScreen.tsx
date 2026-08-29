@@ -261,7 +261,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
                                             key: 'replicar',
                                             label: 'Replicar Oferecimento',
                                             className: 'btnblack',
-                                            onSelect: () => alert('Replicar - não implementado'),
+                                            onSelect: () => window.open(`/api/educacao/oferecimento-componente-curricular/${id}/replicar`, '_blank'),
                                         },
                                         {
                                             key: 'editar',

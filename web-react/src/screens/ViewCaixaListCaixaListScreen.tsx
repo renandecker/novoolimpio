@@ -99,8 +99,22 @@ export default function ViewCaixaListCaixaListScreen() {
         }
     };
 
-    const openFluxoCaixa = (row: CaixaRow) => {
+    const [totaisCaixa, setTotaisCaixa] = useState<Record<number, any>>({});
+    const [loadingTotais, setLoadingTotais] = useState<Record<number, boolean>>({});
+
+    const openFluxoCaixa = async (row: CaixaRow) => {
         setFluxoCaixaDialog({open: true, caixa: row});
+        if (!totaisCaixa[row.id] && !loadingTotais[row.id]) {
+            setLoadingTotais(prev => ({...prev, [row.id]: true}));
+            try {
+                const {data} = await api.get(`/api/financeiro/caixa/${row.id}/totais-fechamento`);
+                setTotaisCaixa(prev => ({...prev, [row.id]: data}));
+            } catch (e) {
+                console.error('Erro ao carregar totais:', e);
+            } finally {
+                setLoadingTotais(prev => ({...prev, [row.id]: false}));
+            }
+        }
     };
 
     const closeFluxoCaixa = () => {
@@ -114,28 +128,58 @@ export default function ViewCaixaListCaixaListScreen() {
         return '📦';
     };
 
-    const handleExcluirMovimentacao = (mov: Movimentacao) => {
+    const handleExcluirMovimentacao = async (mov: Movimentacao) => {
         if (window.confirm(`Excluir movimentação ${mov.id}?`)) {
-            alert(`Excluir movimentação ${mov.id} - não implementado`);
+            try {
+                await api.delete(`/api/financeiro/movimentacao-financeira/${mov.id}`);
+                alert('Movimentação excluída com sucesso');
+            } catch (e) {
+                alert('Erro ao excluir movimentação');
+            }
         }
     };
 
-    const handleSegundaViaPagamento = (mov: Movimentacao) => {
-        alert(`Segunda Via Pagamento ${mov.id} - não implementado`);
+    const handleSegundaViaPagamento = async (mov: Movimentacao) => {
+        try {
+            await api.post(`/api/financeiro/caixa/imprimir-comprovante-pagamento`, {movimentacaoFinanceiraId: mov.id});
+            alert('Comprovante enviado para impressão');
+        } catch (e) {
+            alert('Erro ao gerar segunda via');
+        }
     };
 
-    const handleSegundaViaSangria = (mov: Movimentacao) => {
-        alert(`Segunda Via Sangria ${mov.id} - não implementado`);
+    const handleSegundaViaSangria = async (mov: Movimentacao) => {
+        try {
+            await api.post(`/api/financeiro/sangria/${mov.id}/imprimir`);
+            alert('Segunda via da sangria enviada para impressão');
+        } catch (e) {
+            alert('Erro ao gerar segunda via da sangria');
+        }
     };
 
     const shouldShowExcluir = () => true;
     const shouldShowSegundaViaPagamento = (tipo: string) => tipo === 'ENTRADA' || tipo === '1';
     const shouldShowSegundaViaSangria = (tipo: string) => tipo === 'SANGRIA' || tipo === '3';
 
+    const handleExport = async (format: 'pdf' | 'docx' | 'excel') => {
+        try {
+            const response = await api.get(`/api/financeiro/caixa/exportar/${format}`, {responseType: 'blob'});
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `caixa-relatorio.${format}`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (e) {
+            alert(`Erro ao exportar ${format.toUpperCase()}`);
+        }
+    };
+
     const exportOptions = [
-        {key: 'pdf', label: 'PDF', icon: <i className="fa fa-file-pdf-o"/>, onClick: () => alert('Exportar PDF - não implementado')},
-        {key: 'docx', label: 'DOCX', icon: <i className="fa fa-file-word-o"/>, onClick: () => alert('Exportar DOCX - não implementado')},
-        {key: 'excel', label: 'Excel', icon: <i className="fa fa-file-excel-o"/>, onClick: () => alert('Exportar Excel - não implementado')},
+        {key: 'pdf', label: 'PDF', icon: <i className="fa fa-file-pdf-o"/>, onClick: () => handleExport('pdf')},
+        {key: 'docx', label: 'DOCX', icon: <i className="fa fa-file-word-o"/>, onClick: () => handleExport('docx')},
+        {key: 'excel', label: 'Excel', icon: <i className="fa fa-file-excel-o"/>, onClick: () => handleExport('excel')},
     ];
 
     const calculateTotals = (movs: Movimentacao[]) => {
@@ -260,16 +304,24 @@ export default function ViewCaixaListCaixaListScreen() {
                                                      >
                                                          🖨️
                                                      </button>
-                                                     {caixaRow.dataFechamento ? (
-                                                         <button
-                                                             type="button"
-                                                             className="btn-action btnstop"
-                                                             title="Reabrir Caixa"
-                                                             onClick={() => alert('Reabrir caixa - não implementado')}
-                                                         >
-                                                             🔓
-                                                             </button>
-                                                     ) : null}
+{caixaRow.dataFechamento ? (
+                                                          <button
+                                                              type="button"
+                                                              className="btn-action btnstop"
+                                                              title="Reabrir Caixa"
+                                                              onClick={async () => {
+                                                                  try {
+                                                                      await api.post(`/api/financeiro/caixa/${caixaRow.id}/abrir`);
+                                                                      alert('Caixa reaberto com sucesso');
+                                                                      q.refetch();
+                                                                  } catch (e) {
+                                                                      alert('Erro ao reabrir caixa');
+                                                                  }
+                                                              }}
+                                                          >
+                                                              🔓
+                                                              </button>
+                                                      ) : null}
                                                  </div>
                                              </td>
                                         </tr>,
@@ -398,11 +450,12 @@ export default function ViewCaixaListCaixaListScreen() {
                                                                                         <td>{formatCurrency(totalDinheiroCaixa)}</td>
                                                                                     </tr>
                                                                                     </tbody>
-                                                                                </table>
-                                                                            );
-                                                                        })()}
-</div>
-                                                             </>
+</table>
+                                                                              );
+                                                                          })()}
+                                                               </div>
+                                                           </div>
+                                                           </>
                                                         )}
                                                     </div>
                                                 </td>
@@ -472,12 +525,36 @@ export default function ViewCaixaListCaixaListScreen() {
                                             <th>Valor Total Caixa</th>
                                         </tr>
                                         </thead>
-                                        <tbody>
-                                        <tr>
-                                            <td>{formatCurrency(fluxoCaixaDialog.caixa.fundoCaixa)}</td>
-                                            <td colspan="12" style={{textAlign: 'center', color: '#666'}}>Totais calculados no servidor (não implementado)</td>
-                                        </tr>
-                                        </tbody>
+<tbody>
+                                        {loadingTotais[fluxoCaixaDialog.caixa.id] ? (
+                                            <tr>
+                                                <td colSpan={13} style={{textAlign: 'center'}}>Carregando totais...</td>
+                                            </tr>
+                                        ) : totaisCaixa[fluxoCaixaDialog.caixa.id] ? (
+                                            <>
+                                            <tr>
+                                                <td>{formatCurrency(totaisCaixa[fluxoCaixaDialog.caixa.id].fundoCaixa)}</td>
+                                                <td>{formatCurrency(totaisCaixa[fluxoCaixaDialog.caixa.id].totalDinheiro)}</td>
+                                                <td>{formatCurrency(totaisCaixa[fluxoCaixaDialog.caixa.id].totalCheque)}</td>
+                                                <td>{formatCurrency(totaisCaixa[fluxoCaixaDialog.caixa.id].totalCartao)}</td>
+                                                <td>{formatCurrency(totaisCaixa[fluxoCaixaDialog.caixa.id].totalBoleto)}</td>
+                                                <td>{formatCurrency(totaisCaixa[fluxoCaixaDialog.caixa.id].totalTransferencia)}</td>
+                                                <td>{formatCurrency(totaisCaixa[fluxoCaixaDialog.caixa.id].totalDeposito)}</td>
+                                                <td>{formatCurrency(totaisCaixa[fluxoCaixaDialog.caixa.id].totalSangria)}</td>
+                                                <td>{formatCurrency(totaisCaixa[fluxoCaixaDialog.caixa.id].totalValor)}</td>
+                                                <td>{formatCurrency(totaisCaixa[fluxoCaixaDialog.caixa.id].totalDesconto)}</td>
+                                                <td>{formatCurrency(totaisCaixa[fluxoCaixaDialog.caixa.id].totalMultaJuros)}</td>
+                                                <td>{formatCurrency(totaisCaixa[fluxoCaixaDialog.caixa.id].valorTotal)}</td>
+                                                <td>{formatCurrency(totaisCaixa[fluxoCaixaDialog.caixa.id].valorTotalCaixa)}</td>
+                                            </tr>
+                                            </>
+                                        ) : (
+                                            <tr>
+                                                <td>{formatCurrency(fluxoCaixaDialog.caixa.fundoCaixa)}</td>
+                                                <td colSpan={12} style={{textAlign: 'center', color: '#666'}}>Totais calculados no servidor (não disponível)</td>
+                                            </tr>
+                                        )}
+                                    </tbody>
                                     </table>
                                     <h3 style={{marginTop: '20px', marginBottom: '10px'}}>Movimentações</h3>
                                     <div className="fluxo-movimentacoes">

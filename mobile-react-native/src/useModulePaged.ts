@@ -9,12 +9,18 @@ export const useModulePaged = (
     page: number,
     size: number,
     extraParams?: Record<string, string | number | boolean | undefined>,
+    filters?: Record<string, unknown>,
 ) => {
     const queryClient = useQueryClient();
+    const hasFilters = filters && Object.keys(filters).length > 0;
     const query = useQuery({
-        queryKey: [path, 'paged', page, size, extraParams],
-        queryFn: async () =>
-            (await api.get<PagedResponse<ApiItem>>(`${path}/paged`, {params: {page, size, ...extraParams}})).data,
+        queryKey: [path, hasFilters ? 'search' : 'paged', page, size, extraParams, filters],
+        queryFn: async () => {
+            if (hasFilters) {
+                return (await api.post<PagedResponse<ApiItem>>(`${path}/search`, filters, {params: {page, size, ...extraParams}})).data;
+            }
+            return (await api.get<PagedResponse<ApiItem>>(`${path}/paged`, {params: {page, size, ...extraParams}})).data;
+        },
         placeholderData: keepPreviousData,
     });
     const invalidate = () => queryClient.invalidateQueries({queryKey: [path]});

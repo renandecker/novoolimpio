@@ -85,11 +85,18 @@ public class OferecimentoCursoController {
         return service.autoComplete(query);
     }
 
-    @GET
+@GET
     @Path("/auto-complete-curriculo")
     public Uni<List<Long>> autoCompleteCurriculo(@QueryParam("query") String query) {
         return service.autoCompleteCurriculo(query);
     }
+
+    @GET
+    @Path("/listar-grupos")
+    public Uni<List<OferecimentoCursoResponse>> listarGrupos(@QueryParam("curriculoId") Long curriculoId, @QueryParam("unidadeId") Long unidadeId) {
+        return service.listarGruposPorCurriculoUnidade(curriculoId, unidadeId);
+    }
+}
 
     @GET
     @Path("/buscar-informacoes-oferecimentos")

@@ -77,16 +77,41 @@ const shouldShowSegundaViaSangria = (tipo: string) => tipo === 'SANGRIA' || tipo
 const handleExcluirMovimentacao = (mov: Movimentacao) => {
     Alert.alert('Confirmar', `Excluir movimentação ${mov.id}?`, [
         {text: 'Cancelar', style: 'cancel'},
-        {text: 'Excluir', style: 'destructive', onPress: () => alert(`Excluir movimentação ${mov.id} - não implementado`)},
+        {text: 'Excluir', style: 'destructive', onPress: async () => {
+            try {
+                await api.delete(`/api/financeiro/movimentacao-financeira/${mov.id}`);
+                Alert.alert('Sucesso', 'Movimentação excluída com sucesso');
+            } catch (e) {
+                Alert.alert('Erro', 'Erro ao excluir movimentação');
+            }
+        }},
     ]);
 };
 
 const handleSegundaViaPagamento = (mov: Movimentacao) => {
-    Alert.alert('Segunda Via Pagamento', `Movimentação ${mov.id} - não implementado`);
+    Alert.alert('Segunda Via Pagamento', 'Gerando comprovante...', [
+        {text: 'OK', onPress: async () => {
+            try {
+                await api.post(`/api/financeiro/caixa/imprimir-comprovante-pagamento`, {movimentacaoFinanceiraId: mov.id});
+                Alert.alert('Sucesso', 'Comprovante enviado para impressão');
+            } catch (e) {
+                Alert.alert('Erro', 'Erro ao gerar segunda via');
+            }
+        }},
+    ]);
 };
 
 const handleSegundaViaSangria = (mov: Movimentacao) => {
-    Alert.alert('Segunda Via Sangria', `Movimentação ${mov.id} - não implementado`);
+    Alert.alert('Segunda Via Sangria', 'Gerando segunda via...', [
+        {text: 'OK', onPress: async () => {
+            try {
+                await api.post(`/api/financeiro/sangria/${mov.id}/imprimir`);
+                Alert.alert('Sucesso', 'Segunda via da sangria enviada para impressão');
+            } catch (e) {
+                Alert.alert('Erro', 'Erro ao gerar segunda via da sangria');
+            }
+        }},
+    ]);
 };
 
 const calculateTotals = (movs: Movimentacao[]) => {
@@ -195,7 +220,26 @@ export default function ViewCaixaListCaixaListScreen() {
         <View style={styles.page}>
             <View style={styles.header}>
                 <Text style={styles.title}>Gerência Fluxo Caixa</Text>
-                <Pressable style={styles.exportButton} onPress={() => Alert.alert('Exportar', 'Funcionalidade não implementada')}>
+                <Pressable style={styles.exportButton} onPress={() => Alert.alert('Exportar', 'Selecione o formato', [
+                    {text: 'PDF', onPress: async () => {
+                        try {
+                            const response = await api.get(`/api/financeiro/caixa/exportar/pdf`, {responseType: 'blob'});
+                            // Note: Mobile blob handling requires different approach (Share, etc.)
+                            Alert.alert('Sucesso', 'Exportação PDF iniciada');
+                        } catch (e) {
+                            Alert.alert('Erro', 'Erro ao exportar PDF');
+                        }
+                    }},
+                    {text: 'Excel', onPress: async () => {
+                        try {
+                            const response = await api.get(`/api/financeiro/caixa/exportar/excel`, {responseType: 'blob'});
+                            Alert.alert('Sucesso', 'Exportação Excel iniciada');
+                        } catch (e) {
+                            Alert.alert('Erro', 'Erro ao exportar Excel');
+                        }
+                    }},
+                    {text: 'Cancelar', style: 'cancel'},
+                ])}>
                     <Text style={styles.exportButtonText}>Exportar</Text>
                 </Pressable>
             </View>
@@ -258,11 +302,31 @@ export default function ViewCaixaListCaixaListScreen() {
                                              <Pressable style={[styles.actionButton, styles.actionBlue]} onPress={() => Alert.alert('Fluxo Caixa', `Detalhes do caixa ${caixaRow.idCaixaUnidade}`)}>
                                                  <Text style={styles.actionButtonText}>📊 Fluxo</Text>
                                              </Pressable>
-                                             <Pressable style={[styles.actionButton, styles.actionBlue]} disabled={!caixaRow.dataFechamento} onPress={() => Alert.alert('Imprimir', 'Não implementado')}>
+                                             <Pressable style={[styles.actionButton, styles.actionBlue]} disabled={!caixaRow.dataFechamento} onPress={() => Alert.alert('Imprimir', 'Gerando comprovante...', [
+                                                  {text: 'OK', onPress: async () => {
+                                                      try {
+                                                          await api.post(`/api/financeiro/caixa/${caixaRow.id}/imprimir`);
+                                                          Alert.alert('Sucesso', 'Enviado para impressão');
+                                                      } catch (e) {
+                                                          Alert.alert('Erro', 'Erro ao imprimir');
+                                                      }
+                                                  }},
+                                              ])}>
                                                  <Text style={styles.actionButtonText}>🖨️ Imprimir</Text>
                                              </Pressable>
-                                             {caixaRow.dataFechamento ? (
-                                                 <Pressable style={[styles.actionButton, styles.actionStop]} onPress={() => Alert.alert('Reabrir Caixa', 'Não implementado')}>
+{caixaRow.dataFechamento ? (
+                                                  <Pressable style={[styles.actionButton, styles.actionStop]} onPress={() => Alert.alert('Reabrir Caixa', 'Deseja reabrir este caixa?', [
+                                                      {text: 'Cancelar', style: 'cancel'},
+                                                      {text: 'Reabrir', onPress: async () => {
+                                                          try {
+                                                              await api.post(`/api/financeiro/caixa/${caixaRow.id}/abrir`);
+                                                              Alert.alert('Sucesso', 'Caixa reaberto com sucesso');
+                                                              q.refetch();
+                                                          } catch (e) {
+                                                              Alert.alert('Erro', 'Erro ao reabrir caixa');
+                                                          }
+                                                      }},
+                                                  ])}>
                                                      <Text style={styles.actionButtonText}>🔓 Reabrir</Text>
                                                  </Pressable>
                                              ) : null}

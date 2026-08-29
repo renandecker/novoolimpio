@@ -77,6 +77,12 @@ public class CurriculoController {
         return service.autoComplete(query);
     }
 
+    @GET
+    @Path("/auto-complete-full")
+    public Uni<List<CurriculoResponse>> autoCompleteFull(@QueryParam("query") String query) {
+        return service.autoCompleteFull(query);
+    }
+
 
     @GET
     @Path("/buscar-produto")

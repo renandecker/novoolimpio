@@ -23,6 +23,37 @@ import {
 } from '../cadastroUsuarioTypes';
 import '../AppLayout.css';
 
+interface Funcionario {
+    id?: number;
+    funcaoId?: number;
+    funcao?: {id: number; descricao: string};
+    dataAdmissao?: string;
+    mensalista?: boolean;
+    ctps?: string;
+    serie?: string;
+    pis?: string;
+    tituloEleitor?: string;
+    zona?: string;
+    secao?: string;
+    carteiraReservista?: string;
+    qtdFilhosMenor14?: number;
+}
+
+interface Perfil {
+    id: number;
+    descricao: string;
+}
+
+interface Agenda {
+    id: number;
+    descricao: string;
+    agendar?: boolean;
+    alterar?: boolean;
+    fechar?: boolean;
+    iniciar?: boolean;
+    atender?: boolean;
+}
+
 const sectionTitleStyle: React.CSSProperties = {
     fontSize: '14px',
     fontWeight: 700,
@@ -71,10 +102,14 @@ export default function CadastroUsuarioScreen() {
     const [unidades, setUnidades] = useState<ApiItem[]>([]);
     const [curriculo, setCurriculo] = useState(false);
     const [enderecos, setEnderecos] = useState<Endereco[]>([]);
+    const [funcionario, setFuncionario] = useState<Funcionario | null>(null);
+    const [perfis, setPerfis] = useState<Perfil[]>([]);
+    const [agendas, setAgendas] = useState<Agenda[]>([]);
 
     const [etniaOptions, setEtniaOptions] = useState<Array<{value: string, label: string}>>([]);
     const [estadoCivilOptions, setEstadoCivilOptions] = useState<Array<{value: string, label: string}>>([]);
     const [escolaridadeOptions, setEscolaridadeOptions] = useState<Array<{value: string, label: string}>>([]);
+    const [funcaoOptions, setFuncaoOptions] = useState<Array<{value: string, label: string}>>([]);
 
     useEffect(() => {
         async function fetchOptions() {
@@ -95,6 +130,12 @@ export default function CadastroUsuarioScreen() {
                 setEscolaridadeOptions(escolaridade.data.map(e => ({value: String(e.id), label: e.descricao})));
             } catch (e) {
                 console.error('Erro ao carregar escolaridade:', e);
+            }
+            try {
+                const funcao = await api.get<Array<{id: number, descricao: string}>>('/api/basico/funcao');
+                setFuncaoOptions(funcao.data.map(e => ({value: String(e.id), label: e.descricao})));
+            } catch (e) {
+                console.error('Erro ao carregar funções:', e);
             }
         }
         fetchOptions();
@@ -136,6 +177,18 @@ export default function CadastroUsuarioScreen() {
         inscricaoEstadual: '',
         fax: '',
         observacao: '',
+        // Funcionario fields
+        ctps: '',
+        serie: '',
+        pis: '',
+        tituloEleitor: '',
+        zona: '',
+        secao: '',
+        carteiraReservista: '',
+        qtdFilhosMenor14: '',
+        funcaoId: '',
+        dataAdmissao: '',
+        mensalista: '',
     });
 
     const {data: allUnidades = []} = useQuery({
@@ -289,6 +342,46 @@ export default function CadastroUsuarioScreen() {
                             // ignore
                         }
                     }
+
+                    // Load funcionario
+                    try {
+                        const func = (await api.get<Record<string, unknown>>(`/api/basico/funcionario/buscar-por-pessoa/${pes.id}`)).data;
+                        if (func) {
+                            setFuncionario(func as Funcionario);
+                            setForm(prev => ({
+                                ...prev,
+                                ctps: str(func.ctps),
+                                serie: str(func.serie),
+                                pis: str(func.pis),
+                                tituloEleitor: str(func.tituloEleitor),
+                                zona: str(func.zona),
+                                secao: str(func.secao),
+                                carteiraReservista: str(func.carteiraReservista),
+                                qtdFilhosMenor14: func.qtdFilhosMenor14 ? String(func.qtdFilhosMenor14) : '',
+                                funcaoId: func.funcaoId ? String(func.funcaoId) : '',
+                                dataAdmissao: func.dataAdmissao ? toDateInput(func.dataAdmissao) : '',
+                                mensalista: func.mensalista ? 'true' : 'false',
+                            }));
+                        }
+                    } catch (e) {
+                        console.error('Erro ao carregar funcionário:', e);
+                    }
+
+                    // Load perfis
+                    try {
+                        const perfisData = (await api.get<Perfil[]>(`/api/basico/usuario/${idParam}/perfis`)).data;
+                        setPerfis(perfisData || []);
+                    } catch (e) {
+                        console.error('Erro ao carregar perfis:', e);
+                    }
+
+                    // Load agendas
+                    try {
+                        const agendasData = (await api.get<Agenda[]>(`/api/basico/usuario/${idParam}/agendas`)).data;
+                        setAgendas(agendasData || []);
+                    } catch (e) {
+                        console.error('Erro ao carregar agendas:', e);
+                    }
                 }
             } catch (erro) {
                 console.error('Erro ao carregar registro:', erro);
@@ -369,6 +462,45 @@ export default function CadastroUsuarioScreen() {
                 }
                 if (!pfId && novoPesId && novoPfId) {
                     await api.put(`/api/basico/pessoa-fisica/${novoPfId}`, {...pfBody, pessoaId: novoPesId});
+                }
+
+                const usuarioId = pfId ?? novoPfId;
+
+                // Save funcionario
+                const funcionarioBody: Record<string, unknown> = {
+                    ...semId(funcionario),
+                    pessoaId: novoPesId,
+                    funcaoId: num(form.funcaoId),
+                    dataAdmissao: form.dataAdmissao || null,
+                    mensalista: form.mensalista === 'true',
+                    ctps: form.ctps || null,
+                    serie: form.serie || null,
+                    pis: form.pis || null,
+                    tituloEleitor: form.tituloEleitor || null,
+                    zona: form.zona || null,
+                    secao: form.secao || null,
+                    carteiraReservista: form.carteiraReservista || null,
+                    qtdFilhosMenor14: num(form.qtdFilhosMenor14),
+                };
+                if (funcionario?.id) {
+                    await api.put(`/api/basico/funcionario/${funcionario.id}`, funcionarioBody);
+                } else if (novoPesId) {
+                    await api.post('/api/basico/funcionario', funcionarioBody);
+                }
+
+                // Save perfis
+                if (usuarioId) {
+                    await api.put(`/api/basico/usuario/${usuarioId}/perfis`, perfis.map(p => p.id));
+                }
+
+                // Save agendas
+                if (usuarioId) {
+                    await api.put(`/api/basico/usuario/${usuarioId}/agendas`, agendas.map(a => a.id));
+                }
+
+                // Save unidades
+                if (usuarioId) {
+                    await api.put(`/api/basico/usuario/${usuarioId}/unidades`, unidades.map(u => (u as Record<string, unknown>).id));
                 }
             } else {
                 const pjBody: Record<string, unknown> = {
@@ -659,10 +791,57 @@ export default function CadastroUsuarioScreen() {
     const abaDocumentos = (
         <div className="form-grid">
             <div style={sectionTitleStyle}>Documentos</div>
-            <div style={{gridColumn: '1 / -1', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '6px', color: '#666'}}>
+            <label className="form-field">
+                <span className="form-label">CTPS *</span>
+                <input className="form-input" value={form.ctps}
+                    onChange={(e) => set('ctps', e.target.value)}
+                    placeholder="Carteira de Trabalho" />
+            </label>
+            <label className="form-field">
+                <span className="form-label">Série *</span>
+                <input className="form-input" value={form.serie}
+                    onChange={(e) => set('serie', e.target.value)}
+                    placeholder="Série" />
+            </label>
+            <label className="form-field">
+                <span className="form-label">PIS *</span>
+                <input className="form-input" value={form.pis}
+                    onChange={(e) => set('pis', e.target.value)}
+                    placeholder="999.9999.999-9" />
+            </label>
+            <label className="form-field">
+                <span className="form-label">Título Eleitor</span>
+                <input className="form-input" value={form.tituloEleitor}
+                    onChange={(e) => set('tituloEleitor', e.target.value)}
+                    placeholder="Título de Eleitor" />
+            </label>
+            <label className="form-field">
+                <span className="form-label">Zona</span>
+                <input className="form-input" value={form.zona}
+                    onChange={(e) => set('zona', e.target.value)}
+                    placeholder="Zona Eleitoral" />
+            </label>
+            <label className="form-field">
+                <span className="form-label">Seção</span>
+                <input className="form-input" value={form.secao}
+                    onChange={(e) => set('secao', e.target.value)}
+                    placeholder="Seção Eleitoral" />
+            </label>
+            <label className="form-field">
+                <span className="form-label">Carteira Reservista</span>
+                <input className="form-input" value={form.carteiraReservista}
+                    onChange={(e) => set('carteiraReservista', e.target.value)}
+                    placeholder="Carteira de Reservista" />
+            </label>
+            <label className="form-field">
+                <span className="form-label">Qtd Filhos Menor 14</span>
+                <input className="form-input" type="number" value={form.qtdFilhosMenor14}
+                    onChange={(e) => set('qtdFilhosMenor14', e.target.value)}
+                    placeholder="Quantidade" />
+            </label>
+            <div style={{gridColumn: '1 / -1', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '6px', color: '#666', marginTop: '16px'}}>
                 <p style={{margin: 0}}>
-                    Documentos do funcionário (CTPS, RG, CPF, Comprovante de Residência, etc.) são gerenciados na
-                    seção específica de documentos. A integração completa com upload de arquivos será adicionada em
+                    Upload de arquivos (Foto 3x4, CTPS, RG, CPF, Comprovante de Residência, etc.) será adicionado em
                     versões futuras.
                 </p>
             </div>
@@ -672,12 +851,28 @@ export default function CadastroUsuarioScreen() {
     const abaTrabalho = (
         <div className="form-grid">
             <div style={sectionTitleStyle}>Trabalho</div>
-            <div style={{gridColumn: '1 / -1', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '6px', color: '#666'}}>
-                <p style={{margin: 0}}>
-                    Dados funcionais (cargo, turno, data de admissão, tipo de contrato) são gerenciados na seção
-                    específica de Recursos Humanos.
-                </p>
-            </div>
+            <label className="form-field">
+                <span className="form-label">Função *</span>
+                <select className="form-input form-select" value={form.funcaoId}
+                    onChange={(e) => set('funcaoId', e.target.value)}>
+                    <option value="">-- Selecione --</option>
+                    {funcaoOptions.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
+                </select>
+            </label>
+            <label className="form-field">
+                <span className="form-label">Data Admissão</span>
+                <input className="form-input" type="date" value={form.dataAdmissao}
+                    onChange={(e) => set('dataAdmissao', e.target.value)} />
+            </label>
+            <label className="form-field">
+                <span className="form-label">Mensalista</span>
+                <select className="form-input form-select" value={form.mensalista}
+                    onChange={(e) => set('mensalista', e.target.value)}>
+                    <option value="">-- Selecione --</option>
+                    <option value="true">Sim</option>
+                    <option value="false">Não</option>
+                </select>
+            </label>
             <label className="form-field" style={{gridColumn: '1 / -1'}}>
                 <span className="form-label">Observação</span>
                 <textarea className="form-input" placeholder="Observações" rows={4}
@@ -688,39 +883,115 @@ export default function CadastroUsuarioScreen() {
         </div>
     );
 
+    const [acessoSubTab, setAcessoSubTab] = useState<'unidade' | 'perfil' | 'agenda'>('unidade');
+
     const abaAcessos = (
         <div className="form-grid">
-            <div style={sectionTitleStyle}>Acesso ao Sistema</div>
-            <label className="form-field">
-                <span className="form-label">Login *</span>
-                <input className="form-input" value={form.login}
-                    onChange={(e) => set('login', e.target.value)}
-                    placeholder="Login do usuário" />
-            </label>
-            <label className="form-field">
-                <span className="form-label">Senha</span>
-                <input className="form-input" type="password" value={form.senha}
-                    onChange={(e) => set('senha', e.target.value)}
-                    placeholder="Senha" />
-            </label>
-
-            <div style={sectionTitleStyle}>Currículo / Banco de Talentos</div>
-            <label className="form-field">
-                <BooleanField value={curriculo} onChange={setCurriculo} />
-            </label>
-
-            <div style={sectionTitleStyle}>Unidades</div>
-            <div style={{gridColumn: '1 / -1'}}>
-                <MasterDetail
-                    label="Unidade"
-                    source={UNIDADE_SOURCE}
-                    valueKey="id"
-                    searchKeys={UNIDADE_SEARCH}
-                    columns={UNIDADE_COLUMNS}
-                    items={unidades}
-                    onChange={setUnidades}
-                />
+            <div style={{display: 'flex', gap: '8px', marginBottom: '16px', borderBottom: '1px solid #ddd', paddingBottom: '8px'}}>
+                <button
+                    type="button"
+                    className={acessoSubTab === 'unidade' ? 'btnblue' : 'btnyellow'}
+                    onClick={() => setAcessoSubTab('unidade')}
+                    style={{padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer'}}
+                >
+                    Unidade
+                </button>
+                <button
+                    type="button"
+                    className={acessoSubTab === 'perfil' ? 'btnblue' : 'btnyellow'}
+                    onClick={() => setAcessoSubTab('perfil')}
+                    style={{padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer'}}
+                >
+                    Perfil
+                </button>
+                <button
+                    type="button"
+                    className={acessoSubTab === 'agenda' ? 'btnblue' : 'btnyellow'}
+                    onClick={() => setAcessoSubTab('agenda')}
+                    style={{padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer'}}
+                >
+                    Agenda
+                </button>
             </div>
+
+            {acessoSubTab === 'unidade' && (
+                <>
+                    <div style={sectionTitleStyle}>Acesso ao Sistema</div>
+                    <label className="form-field">
+                        <span className="form-label">Login *</span>
+                        <input className="form-input" value={form.login}
+                            onChange={(e) => set('login', e.target.value)}
+                            placeholder="Login do usuário" />
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Senha</span>
+                        <input className="form-input" type="password" value={form.senha}
+                            onChange={(e) => set('senha', e.target.value)}
+                            placeholder="Senha" />
+                    </label>
+
+                    <div style={sectionTitleStyle}>Currículo / Banco de Talentos</div>
+                    <label className="form-field">
+                        <BooleanField value={curriculo} onChange={setCurriculo} />
+                    </label>
+
+                    <div style={sectionTitleStyle}>Unidades</div>
+                    <div style={{gridColumn: '1 / -1'}}>
+                        <MasterDetail
+                            label="Unidade"
+                            source={UNIDADE_SOURCE}
+                            valueKey="id"
+                            searchKeys={UNIDADE_SEARCH}
+                            columns={UNIDADE_COLUMNS}
+                            items={unidades}
+                            onChange={setUnidades}
+                        />
+                    </div>
+                </>
+            )}
+
+            {acessoSubTab === 'perfil' && (
+                <>
+                    <div style={sectionTitleStyle}>Perfis</div>
+                    <div style={{gridColumn: '1 / -1'}}>
+                        <MasterDetail
+                            label="Perfil"
+                            source="/api/basico/perfil"
+                            valueKey="id"
+                            searchKeys={['descricao']}
+                            columns={[
+                                {key: 'descricao', header: 'Descrição'}
+                            ]}
+                            items={perfis}
+                            onChange={setPerfis}
+                        />
+                    </div>
+                </>
+            )}
+
+            {acessoSubTab === 'agenda' && (
+                <>
+                    <div style={sectionTitleStyle}>Agendas</div>
+                    <div style={{gridColumn: '1 / -1'}}>
+                        <MasterDetail
+                            label="Agenda"
+                            source="/api/basico/agenda"
+                            valueKey="id"
+                            searchKeys={['descricao']}
+                            columns={[
+                                {key: 'descricao', header: 'Descrição'},
+                                {key: 'agendar', header: 'Agendar', type: 'boolean'},
+                                {key: 'alterar', header: 'Alterar', type: 'boolean'},
+                                {key: 'fechar', header: 'Fechar', type: 'boolean'},
+                                {key: 'iniciar', header: 'Iniciar', type: 'boolean'},
+                                {key: 'atender', header: 'Atender', type: 'boolean'},
+                            ]}
+                            items={agendas}
+                            onChange={setAgendas}
+                        />
+                    </div>
+                </>
+            )}
         </div>
     );
 

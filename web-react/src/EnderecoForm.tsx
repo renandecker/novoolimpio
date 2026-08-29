@@ -206,31 +206,24 @@ export function EnderecoCampos({
     value: Endereco[];
     onChange: (enderecos: Endereco[]) => void;
 }) {
-    const [indiceSelecionado, setIndiceSelecionado] = useState<number | null>(null);
-    const [rascunho, setRascunho] = useState<Partial<Endereco>>({});
+    const [endereco, setEndereco] = useState<Partial<Endereco>>(value[0] || {});
     const [buscando, setBuscando] = useState(false);
     const [aviso, setAviso] = useState('');
-    const [modal, setModal] = useState<'novo' | 'ajuste' | null>(null);
-
-    const selecionado = indiceSelecionado !== null ? value[indiceSelecionado] : undefined;
-    const atual: Partial<Endereco> = selecionado ?? rascunho;
 
     const atualizar = (patch: Partial<Endereco>) => {
         setAviso('');
-        if (indiceSelecionado !== null) {
-            onChange(value.map((item, i) => (i === indiceSelecionado ? {...item, ...patch} : item)));
-        } else {
-            setRascunho((prev) => ({...prev, ...patch}));
-        }
+        const novo = {...endereco, ...patch};
+        setEndereco(novo);
+        onChange([novo as Endereco]);
     };
 
     const handleBuscar = async () => {
-        if ((atual.cep ?? '').replace(/\D/g, '').length !== 8) {
+        if ((endereco.cep ?? '').replace(/\D/g, '').length !== 8) {
             setAviso('Informe um CEP com 8 dígitos.');
             return;
         }
         setBuscando(true);
-        const dados = await buscarCep(atual.cep ?? '');
+        const dados = await buscarCep(endereco.cep ?? '');
         setBuscando(false);
         if (dados) {
             atualizar(dados);
@@ -239,94 +232,59 @@ export function EnderecoCampos({
         }
     };
 
-    const salvarModal = (dados: Endereco) => {
-        setModal(null);
-        if (modal === 'novo') {
-            onChange([...value, {...dados, id: Date.now()}]);
-            setIndiceSelecionado(value.length);
-            setRascunho({});
-        } else if (indiceSelecionado !== null) {
-            onChange(value.map((item, i) => (i === indiceSelecionado ? {...item, ...dados} : item)));
-        } else {
-            setRascunho((prev) => ({...prev, ...dados}));
-        }
-    };
-
-    const selecionarLinha = (index: number) => {
-        setIndiceSelecionado(index);
-        setRascunho({});
-        setAviso('');
-    };
-
-    const removerLinha = (index: number) => {
-        onChange(value.filter((_, i) => i !== index));
-        if (indiceSelecionado === index) {
-            setIndiceSelecionado(null);
-            setRascunho({});
-        } else if (indiceSelecionado !== null && indiceSelecionado > index) {
-            setIndiceSelecionado(indiceSelecionado - 1);
-        }
-    };
-
     return (
         <>
             <label className="form-field">
-                <span className="form-label">CEP</span>
+                <span className="form-label">CEP *</span>
                 <div style={{display: 'flex', gap: '8px', width: '100%'}}>
                     <input
                         className="form-input"
                         placeholder="99.999-999"
                         style={{width: '120px'}}
                         maxLength={9}
-                        value={atual.cep ?? ''}
+                        value={endereco.cep ?? ''}
                         onChange={(event) => atualizar({cep: formatCep(event.target.value)})}
                     />
                     <button type="button" className="btnyellow" disabled={buscando} onClick={handleBuscar}>
                         {buscando ? '...' : 'Busca'}
                     </button>
-                    <button type="button" className="btngreen" onClick={() => setModal('ajuste')}>
-                        Ajuste
-                    </button>
-                    <button type="button" className="btnstop" onClick={() => setModal('novo')}>
-                        Novo
-                    </button>
                 </div>
                 {aviso && <small style={{color: '#c0392b'}}>{aviso}</small>}
             </label>
             <label className="form-field" style={fullRow}>
-                <span className="form-label">Cidade</span>
+                <span className="form-label">Cidade *</span>
                 <input
                     className="form-input"
                     placeholder="Cidade"
-                    value={atual.cidade ?? ''}
+                    value={endereco.cidade ?? ''}
                     onChange={(event) => atualizar({cidade: event.target.value})}
                 />
             </label>
             <label className="form-field" style={fullRow}>
-                <span className="form-label">Bairro</span>
+                <span className="form-label">Bairro *</span>
                 <input
                     className="form-input"
                     placeholder="Bairro"
-                    value={atual.bairro ?? ''}
+                    value={endereco.bairro ?? ''}
                     onChange={(event) => atualizar({bairro: event.target.value})}
                 />
             </label>
             <label className="form-field" style={fullRow}>
-                <span className="form-label">Logradouro</span>
+                <span className="form-label">Logradouro *</span>
                 <input
                     className="form-input"
                     placeholder="Logradouro"
-                    value={atual.logradouro ?? ''}
+                    value={endereco.logradouro ?? ''}
                     onChange={(event) => atualizar({logradouro: event.target.value})}
                 />
             </label>
             <label className="form-field">
-                <span className="form-label">Número</span>
+                <span className="form-label">Número *</span>
                 <input
                     className="form-input"
                     type="number"
                     placeholder="Número"
-                    value={atual.numero ?? ''}
+                    value={endereco.numero ?? ''}
                     onChange={(event) => atualizar({numero: event.target.value})}
                 />
             </label>
@@ -337,72 +295,10 @@ export function EnderecoCampos({
                     placeholder="Complemento"
                     rows={3}
                     style={{minHeight: '80px'}}
-                    value={atual.complemento ?? ''}
+                    value={endereco.complemento ?? ''}
                     onChange={(event) => atualizar({complemento: event.target.value})}
                 />
             </label>
-            {value.length > 0 && (
-                <div className="master-detail-table" style={{gridColumn: '1 / -1', marginTop: '16px'}}>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>CEP</th>
-                                <th>Logradouro</th>
-                                <th>Número</th>
-                                <th>Bairro</th>
-                                <th>Cidade</th>
-                                <th>Complemento</th>
-                                <th className="col-actions">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {value.map((endereco, index) => (
-                                <tr
-                                    key={endereco.id ?? index}
-                                    style={
-                                        indiceSelecionado === index
-                                            ? {backgroundColor: 'rgba(59, 130, 246, 0.12)'}
-                                            : undefined
-                                    }
-                                >
-                                    <td>{endereco.cep}</td>
-                                    <td>{endereco.logradouro}</td>
-                                    <td>{endereco.numero}</td>
-                                    <td>{endereco.bairro}</td>
-                                    <td>{endereco.cidade}</td>
-                                    <td>{endereco.complemento}</td>
-                                    <td className="col-actions">
-                                        <button
-                                            type="button"
-                                            className="btn-action btnyellow"
-                                            title="Editar"
-                                            onClick={() => selecionarLinha(index)}
-                                        >
-                                            ✏
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="btn-action btn-danger"
-                                            title="Remover"
-                                            onClick={() => removerLinha(index)}
-                                        >
-                                            ×
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-            {modal !== null && (
-                <EnderecoModal
-                    titulo={modal === 'novo' ? 'Novo Endereço' : 'Ajustar Endereço'}
-                    inicial={modal === 'novo' ? {...atual, id: undefined} : {...atual}}
-                    onSave={salvarModal}
-                    onClose={() => setModal(null)}
-                />
-            )}
         </>
     );
 }

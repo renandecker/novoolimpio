@@ -137,10 +137,25 @@ function PendenciaVendaTab({unidadeId}: { unidadeId: string }) {
 
     const itens = data ?? [];
 
+    const handleExport = async (format: 'pdf' | 'docx' | 'excel') => {
+        try {
+            const response = await api.get(`/api/estoque/estoque-produto/exportar/${format}`, {params: {unidadeId}, responseType: 'blob'});
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `estoque-pendencias.${format}`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (e) {
+            alert(`Erro ao exportar ${format.toUpperCase()}`);
+        }
+    };
+
     const exportOptions = [
-        {key: 'pdf', label: 'PDF', icon: <i className="fa fa-file-pdf-o"/>, onClick: () => alert('Exportar PDF - não implementado')},
-        {key: 'docx', label: 'DOCX', icon: <i className="fa fa-file-word-o"/>, onClick: () => alert('Exportar DOCX - não implementado')},
-        {key: 'excel', label: 'Excel', icon: <i className="fa fa-file-excel-o"/>, onClick: () => alert('Exportar Excel - não implementado')},
+        {key: 'pdf', label: 'PDF', icon: <i className="fa fa-file-pdf-o"/>, onClick: () => handleExport('pdf')},
+        {key: 'docx', label: 'DOCX', icon: <i className="fa fa-file-word-o"/>, onClick: () => handleExport('docx')},
+        {key: 'excel', label: 'Excel', icon: <i className="fa fa-file-excel-o"/>, onClick: () => handleExport('excel')},
     ];
 
     if (!unidadeId) return <p className="disp-aviso">Selecione uma unidade para visualizar as pendências.</p>;

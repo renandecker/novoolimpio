@@ -8,13 +8,13 @@ import br.com.sol7.olimpio.financeiro.caixa.dto.RegistrarPagamentoParcelaRequest
 import br.com.sol7.olimpio.financeiro.movimentacaofinanceira.dto.MovimentacaoFinanceiraResponse;
 import br.com.sol7.olimpio.financeiro.sangria.dto.SangriaResponse;
 import io.smallrye.mutiny.Uni;
-import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
 
 import java.util.List;
 import java.math.BigDecimal;
+import java.io.ByteArrayInputStream;
 
 @Path("/api/financeiro/caixa")
 @Produces(MediaType.APPLICATION_JSON)
@@ -191,6 +191,38 @@ public class CaixaController {
     @Path("/{id}/fechar")
     public Uni<CaixaResponse> fecharCaixa(@PathParam("id") Long id) {
         return service.fecharCaixa(id);
+    }
+
+    @GET
+    @Path("/exportar/{format}")
+    @Produces({"application/pdf", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"})
+    public Uni<Response> exportar(@PathParam("format") String format, @QueryParam("caixaId") Long caixaId) {
+        return service.exportarCaixa(format, caixaId)
+                .map(bytes -> {
+                    String contentType;
+                    String fileName;
+                    switch (format.toLowerCase()) {
+                        case "pdf":
+                            contentType = "application/pdf";
+                            fileName = "caixa-relatorio.pdf";
+                            break;
+                        case "excel":
+                        case "xlsx":
+                            contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                            fileName = "caixa-relatorio.xlsx";
+                            break;
+                        case "docx":
+                            contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                            fileName = "caixa-relatorio.docx";
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Formato não suportado: " + format);
+                    }
+                    return Response.ok(bytes)
+                            .header("Content-Type", contentType)
+                            .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
+                            .build();
+                });
     }
 
 }

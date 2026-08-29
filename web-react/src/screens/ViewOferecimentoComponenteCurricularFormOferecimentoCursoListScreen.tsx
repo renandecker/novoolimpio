@@ -1069,7 +1069,7 @@ useEffect(() => {
                                 type="button"
                                 className="btn-secondary ofc-btn-yellow"
                                 title="Disponibilidade da Sala"
-                                onClick={() => alert('Disponibilidade da Sala - não implementado')}
+                                onClick={() => data.entity.unidadeId && data.salaId ? window.open(`/api/educacao/disponibilidade-sala/schedule-events?unidadeId=${data.entity.unidadeId}&salaId=${data.salaId}`, '_blank') : alert('Selecione uma unidade e uma sala primeiro')}
                             >
                                 Disponibilidade
                             </button>
@@ -1320,14 +1320,14 @@ useEffect(() => {
                         type="button"
                         className="btn-secondary ofc-btn-yellow"
                         title="Disponibilidade dos Professores"
-                        onClick={() => alert('Disponibilidade dos Professores - não implementado')}
+                        onClick={() => data.entity.unidadeId ? window.open(`/api/educacao/disponibilidade-professor/schedule-events?unidadeId=${data.entity.unidadeId}`, '_blank') : alert('Selecione uma unidade primeiro')}
                     >
                         Disponibilidade
                     </button>
                     <button
                         type="button"
                         className="btn-primary"
-                        onClick={() => alert('Novo Professor - não implementado')}
+                        onClick={() => alert('Novo Professor - implementar cadastro de professor')}
                     >
                         Professor
                     </button>

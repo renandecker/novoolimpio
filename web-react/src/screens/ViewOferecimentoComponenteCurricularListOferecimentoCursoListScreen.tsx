@@ -339,13 +339,13 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                                             </tbody>
                                         </table>
                                         <div className="form-footer" style={{marginTop: '16px', display: 'flex', gap: '8px', justifyContent: 'flex-end'}}>
-                                            <button type="button" className="btnblue" onClick={() => alert('Ordem pelo início do oferecimento - não implementado')}>
+                                            <button type="button" className="btnblue" onClick={() => alert('Ordem pelo início do oferecimento - implementar ordenação')}>
                                                 Ordem pelo início oferecimento
                                             </button>
-                                            <button type="button" className="btnstop" onClick={() => alert('Ordem pela listagem tabela - não implementado')}>
+                                            <button type="button" className="btnstop" onClick={() => alert('Ordem pela listagem tabela - implementar ordenação')}>
                                                 Ordem pela listagem tabela
                                             </button>
-                                            <button type="button" className="btngreen" onClick={() => alert('Ordem conforme selecionando - não implementado')}>
+                                            <button type="button" className="btngreen" onClick={() => alert('Ordem conforme selecionando - implementar ordenação')}>
                                                 Ordem conforme selecionando
                                             </button>
                                             <button type="button" className="btn-form-back" onClick={() => { setSelecaoDialog({open: false, entity: null}); setSelecionados([]); }}>

@@ -1,15 +1,15 @@
 import {PermissionGate} from '../permissions';
 import {api} from '../api';
 import {useState, useEffect, useCallback} from 'react';
-import {AutoComplete} from '../AutoComplete';
+import {AutoComplete, type AutoCompleteOption} from '../AutoComplete';
 import {Tabs} from '../Tabs';
 
-interface Aluno {
+interface ContratoAutoCompleteResponse {
     id: number;
-    pessoaFisica: { nome: string; cpf: string };
+    nome: string;
 }
 
-interface Curriculo {
+interface CurriculoResponse {
     id: number;
     sucinto: string;
     curso: { nome: string };
@@ -17,15 +17,21 @@ interface Curriculo {
     cargaHoraria: number;
 }
 
-interface Unidade {
+interface UnidadeResponse {
     id: number;
     sucinto: string;
 }
 
-interface Pessoa {
+interface PessoaFisicaResponse {
     id: number;
-    pessoaFisica?: { nome: string; cpf: string };
-    pessoaJuridica?: { nomeFantasia: string; cnpj: string };
+    nome: string;
+    cpf: string;
+}
+
+interface PessoaJuridicaResponse {
+    id: number;
+    nomeFantasia: string;
+    cnpj: string;
 }
 
 interface OferecimentoGrupo {
@@ -61,14 +67,25 @@ interface FiltroMatricula {
     tipoMatricula: 'GRUPO' | 'LIVRE';
 }
 
+function toAutoCompleteOption(item: { id: number; nome?: string; nomeFantasia?: string; cpf?: string; cnpj?: string; sucinto?: string; curso?: { nome: string } }): AutoCompleteOption {
+    const label = item.nome 
+        ? `${item.nome} (${item.cpf || ''})`
+        : item.nomeFantasia
+        ? `${item.nomeFantasia} (${item.cnpj || ''})`
+        : item.sucinto
+        ? `${item.sucinto} - ${item.curso?.nome || ''}`
+        : `#${item.id}`;
+    return { id: item.id, label };
+}
+
 export default function ViewConsultorMatriculaLayoutScreen() {
     const [activeTab, setActiveTab] = useState<'contrato' | 'matricula'>('contrato');
-    const [alunos, setAlunos] = useState<Aluno[]>([]);
-    const [curriculos, setCurriculos] = useState<Curriculo[]>([]);
-    const [unidades, setUnidades] = useState<Unidade[]>([]);
-    const [pessoasFisicas, setPessoasFisicas] = useState<Pessoa[]>([]);
-    const [pessoasJuridicas, setPessoasJuridicas] = useState<Pessoa[]>([]);
-    const [testemunhas, setTestemunhas] = useState<Pessoa[]>([]);
+    const [alunos, setAlunos] = useState<AutoCompleteOption[]>([]);
+    const [curriculos, setCurriculos] = useState<AutoCompleteOption[]>([]);
+    const [unidades, setUnidades] = useState<UnidadeResponse[]>([]);
+    const [pessoasFisicas, setPessoasFisicas] = useState<AutoCompleteOption[]>([]);
+    const [pessoasJuridicas, setPessoasJuridicas] = useState<AutoCompleteOption[]>([]);
+    const [testemunhas, setTestemunhas] = useState<AutoCompleteOption[]>([]);
     const [grupos, setGrupos] = useState<OferecimentoGrupo[]>([]);
     const [ofertasLivre, setOfertasLivre] = useState<OferecimentoItem[]>([]);
     const [filtro, setFiltro] = useState<FiltroMatricula>({ tipoMatricula: 'LIVRE' });
@@ -76,62 +93,67 @@ export default function ViewConsultorMatriculaLayoutScreen() {
     const [contrato, setContrato] = useState<Record<string, unknown>>({});
     const [matriculaSelecionadas, setMatriculaSelecionadas] = useState<OferecimentoItem[]>([]);
 
-    const loadAlunos = useCallback(async (query: string) => {
-        if (!query || query.length < 3) return;
+    const loadAlunos = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
+        if (!query || query.length < 3) return [];
         try {
-            const response = await api.get<Aluno[]>('/api/educacao/contrato/auto-complete-aluno', { params: { query } });
-            setAlunos(response.data);
+            const response = await api.get<ContratoAutoCompleteResponse[]>('/api/educacao/contrato/auto-complete-aluno', { params: { query } });
+            return response.data.map(toAutoCompleteOption);
         } catch (e) {
             console.error('Erro ao buscar alunos:', e);
+            return [];
         }
     }, []);
 
-    const loadCurriculos = useCallback(async (query: string) => {
-        if (!query) return;
+    const loadCurriculos = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
+        if (!query) return [];
         try {
-            const response = await api.get<Curriculo[]>('/api/educacao/curriculo', { params: { query } });
-            setCurriculos(response.data);
+            const response = await api.get<CurriculoResponse[]>('/api/educacao/curriculo/auto-complete-full', { params: { query } });
+            return response.data.map(toAutoCompleteOption);
         } catch (e) {
             console.error('Erro ao buscar currículos:', e);
+            return [];
         }
     }, []);
 
     const loadUnidades = useCallback(async () => {
         try {
-            const response = await api.get<Unidade[]>('/api/educacao/unidade');
+            const response = await api.get<UnidadeResponse[]>('/api/basico/unidade');
             setUnidades(response.data);
         } catch (e) {
             console.error('Erro ao buscar unidades:', e);
         }
     }, []);
 
-    const loadPessoasFisicas = useCallback(async (query: string) => {
-        if (!query || query.length < 3) return;
+    const loadPessoasFisicas = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
+        if (!query || query.length < 3) return [];
         try {
-            const response = await api.get<Pessoa[]>('/api/educacao/pessoa-fisica/auto-complete', { params: { query } });
-            setPessoasFisicas(response.data);
+            const response = await api.get<PessoaFisicaResponse[]>('/api/basico/pessoa-fisica/auto-complete-todos', { params: { query } });
+            return response.data.map(toAutoCompleteOption);
         } catch (e) {
             console.error('Erro ao buscar pessoas físicas:', e);
+            return [];
         }
     }, []);
 
-    const loadPessoasJuridicas = useCallback(async (query: string) => {
-        if (!query || query.length < 3) return;
+    const loadPessoasJuridicas = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
+        if (!query || query.length < 3) return [];
         try {
-            const response = await api.get<Pessoa[]>('/api/educacao/pessoa-juridica/auto-complete', { params: { query } });
-            setPessoasJuridicas(response.data);
+            const response = await api.get<PessoaJuridicaResponse[]>('/api/basico/pessoa-juridica/auto-complete-todos', { params: { query } });
+            return response.data.map(toAutoCompleteOption);
         } catch (e) {
             console.error('Erro ao buscar pessoas jurídicas:', e);
+            return [];
         }
     }, []);
 
-    const loadTestemunhas = useCallback(async (query: string) => {
-        if (!query || query.length < 3) return;
+    const loadTestemunhas = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
+        if (!query || query.length < 3) return [];
         try {
-            const response = await api.get<Pessoa[]>('/api/educacao/pessoa-fisica/auto-complete-testemunha', { params: { query } });
-            setTestemunhas(response.data);
+            const response = await api.get<PessoaFisicaResponse[]>('/api/basico/pessoa-fisica/auto-complete-testemunha', { params: { query } });
+            return response.data.map(toAutoCompleteOption);
         } catch (e) {
             console.error('Erro ao buscar testemunhas:', e);
+            return [];
         }
     }, []);
 
@@ -142,9 +164,7 @@ export default function ViewConsultorMatriculaLayoutScreen() {
             const params = new URLSearchParams();
             params.append('curriculoId', String(filtro.curriculoId));
             if (filtro.unidadeId) params.append('unidadeId', String(filtro.unidadeId));
-            if (filtro.turnoEducacaoId) params.append('turnoEducacaoId', String(filtro.turnoEducacaoId));
-            if (filtro.diaSemanaId) params.append('diaSemanaId', String(filtro.diaSemanaId));
-            const response = await api.get<OferecimentoGrupo[]>(`/api/educacao/oferecimento-curso/listar-oferecimentos?${params}`);
+            const response = await api.get<OferecimentoGrupo[]>(`/api/educacao/oferecimento-curso/listar-grupos?${params}`);
             setGrupos(response.data);
         } catch (e) {
             console.error('Erro ao buscar grupos:', e);
@@ -162,8 +182,8 @@ export default function ViewConsultorMatriculaLayoutScreen() {
             if (filtro.unidadeId) params.append('unidadeId', String(filtro.unidadeId));
             if (filtro.turnoEducacaoId) params.append('turnoEducacaoId', String(filtro.turnoEducacaoId));
             if (filtro.diaSemanaId) params.append('diaSemanaId', String(filtro.diaSemanaId));
-            const response = await api.get<OferecimentoItem[]>(`/api/educacao/oferecimento-componente-curricular/paged?${params}`);
-            setOfertasLivre(response.data.content || response.data);
+            const response = await api.get<{ content: OferecimentoItem[] }>(`/api/educacao/oferecimento-componente-curricular/paged?${params}`);
+            setOfertasLivre(response.data.content || []);
         } catch (e) {
             console.error('Erro ao buscar ofertas livre:', e);
         } finally {
@@ -183,26 +203,30 @@ export default function ViewConsultorMatriculaLayoutScreen() {
         }
     }, [filtro, loadGrupos, loadOfertasLivre]);
 
-    const handleAlunoSelect = (aluno: Aluno) => {
-        setContrato(prev => ({ ...prev, pessoa: aluno }));
+    const handleAlunoSelect = (option: AutoCompleteOption | null) => {
+        if (option) setContrato(prev => ({ ...prev, pessoa: option }));
     };
 
-    const handleCursoSelect = (curriculo: Curriculo) => {
-        setContrato(prev => ({ ...prev, curriculo }));
-        setFiltro(prev => ({ ...prev, curriculoId: curriculo.id }));
+    const handleCursoSelect = (option: AutoCompleteOption | null) => {
+        if (option) {
+            setContrato(prev => ({ ...prev, curriculo: option }));
+            setFiltro(prev => ({ ...prev, curriculoId: option.id }));
+        }
     };
 
-    const handleResponsavelSelect = (pessoa: Pessoa, tipo: 'fisica' | 'juridica') => {
-        setContrato(prev => ({ ...prev, responsavel: pessoa, tipoContratante: tipo }));
+    const handleResponsavelSelect = (option: AutoCompleteOption | null, tipo: 'fisica' | 'juridica') => {
+        if (option) setContrato(prev => ({ ...prev, responsavel: option, tipoContratante: tipo }));
     };
 
-    const handleUnidadeChange = (unidade: Unidade) => {
-        setContrato(prev => ({ ...prev, unidade }));
-        setFiltro(prev => ({ ...prev, unidadeId: unidade.id }));
+    const handleUnidadeChange = (unidade: UnidadeResponse | undefined) => {
+        if (unidade) {
+            setContrato(prev => ({ ...prev, unidade }));
+            setFiltro(prev => ({ ...prev, unidadeId: unidade.id }));
+        }
     };
 
-    const handleTestemunhaSelect = (testemunha: Pessoa, num: 1 | 2) => {
-        setContrato(prev => ({ ...prev, [`testemunha${num}`]: testemunha }));
+    const handleTestemunhaSelect = (option: AutoCompleteOption | null, num: 1 | 2) => {
+        if (option) setContrato(prev => ({ ...prev, [`testemunha${num}`]: option }));
     };
 
     const handleGrupoSelect = (grupo: OferecimentoGrupo) => {
@@ -270,12 +294,10 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                     <div>
                         <label>Aluno *</label>
                         <AutoComplete
-                            items={alunos}
-                            value={contrato.pessoa as Aluno | undefined}
-                            itemLabel={a => `${a.pessoaFisica.nome} (${a.pessoaFisica.cpf})`}
-                            onSelect={handleAlunoSelect}
-                            onSearch={loadAlunos}
-                            minLength={3}
+                            value={contrato.pessoa as AutoCompleteOption | undefined}
+                            onChange={handleAlunoSelect}
+                            fetchOptions={loadAlunos}
+                            minChars={3}
                             placeholder="Digite 3+ caracteres..."
                         />
                     </div>
@@ -283,12 +305,10 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                     <div>
                         <label>Curso *</label>
                         <AutoComplete
-                            items={curriculos}
-                            value={contrato.curriculo as Curriculo | undefined}
-                            itemLabel={c => `${c.sucinto} - ${c.curso.nome}`}
-                            onSelect={handleCursoSelect}
-                            onSearch={loadCurriculos}
-                            minLength={1}
+                            value={contrato.curriculo as AutoCompleteOption | undefined}
+                            onChange={handleCursoSelect}
+                            fetchOptions={loadCurriculos}
+                            minChars={1}
                             placeholder="Digite para buscar..."
                         />
                     </div>
@@ -306,22 +326,18 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                         <label>Contratante *</label>
                         {contrato.tipoContratante === 'fisica' ? (
                             <AutoComplete
-                                items={pessoasFisicas}
-                                value={contrato.responsavel as Pessoa | undefined}
-                                itemLabel={p => `${p.pessoaFisica?.nome} (${p.pessoaFisica?.cpf})`}
-                                onSelect={p => handleResponsavelSelect(p, 'fisica')}
-                                onSearch={loadPessoasFisicas}
-                                minLength={3}
+                                value={contrato.responsavel as AutoCompleteOption | undefined}
+                                onChange={p => handleResponsavelSelect(p, 'fisica')}
+                                fetchOptions={loadPessoasFisicas}
+                                minChars={3}
                                 placeholder="Digite 3+ caracteres..."
                             />
                         ) : (
                             <AutoComplete
-                                items={pessoasJuridicas}
-                                value={contrato.responsavel as Pessoa | undefined}
-                                itemLabel={p => `${p.pessoaJuridica?.nomeFantasia} (${p.pessoaJuridica?.cnpj})`}
-                                onSelect={p => handleResponsavelSelect(p, 'juridica')}
-                                onSearch={loadPessoasJuridicas}
-                                minLength={3}
+                                value={contrato.responsavel as AutoCompleteOption | undefined}
+                                onChange={p => handleResponsavelSelect(p, 'juridica')}
+                                fetchOptions={loadPessoasJuridicas}
+                                minChars={3}
                                 placeholder="Digite 3+ caracteres..."
                             />
                         )}
@@ -335,35 +351,31 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                     <div>
                         <label>Unidade do Contrato *</label>
                         <select
-                            value={contrato.unidade?.id || ''}
-                            onChange={e => handleUnidadeChange(unidades.find(u => u.id === Number(e.target.value))!)}
+                            value={contrato.unidade ? String((contrato.unidade as UnidadeResponse).id) : ''}
+                            onChange={e => handleUnidadeChange(unidades.find(u => u.id === Number(e.target.value)))}
                             className="form-input"
                         >
                             <option value="">Selecione</option>
-                            {unidades.map(u => <option key={u.id} value={u.id}>{u.sucinto}</option>)}
+                            {unidades.map(u => <option key={u.id} value={String(u.id)}>{u.sucinto}</option>)}
                         </select>
                     </div>
                     <div>
                         <label>Primeira Testemunha</label>
                         <AutoComplete
-                            items={testemunhas}
-                            value={contrato.testemunha1 as Pessoa | undefined}
-                            itemLabel={p => `${p.pessoaFisica?.nome} (${p.pessoaFisica?.cpf})`}
-                            onSelect={p => handleTestemunhaSelect(p, 1)}
-                            onSearch={loadTestemunhas}
-                            minLength={3}
+                            value={contrato.testemunha1 as AutoCompleteOption | undefined}
+                            onChange={p => handleTestemunhaSelect(p, 1)}
+                            fetchOptions={loadTestemunhas}
+                            minChars={3}
                             placeholder="Digite 3+ caracteres..."
                         />
                     </div>
                     <div>
                         <label>Segunda Testemunha</label>
                         <AutoComplete
-                            items={testemunhas}
-                            value={contrato.testemunha2 as Pessoa | undefined}
-                            itemLabel={p => `${p.pessoaFisica?.nome} (${p.pessoaFisica?.cpf})`}
-                            onSelect={p => handleTestemunhaSelect(p, 2)}
-                            onSearch={loadTestemunhas}
-                            minLength={3}
+                            value={contrato.testemunha2 as AutoCompleteOption | undefined}
+                            onChange={p => handleTestemunhaSelect(p, 2)}
+                            fetchOptions={loadTestemunhas}
+                            minChars={3}
                             placeholder="Digite 3+ caracteres..."
                         />
                     </div>
@@ -375,9 +387,7 @@ export default function ViewConsultorMatriculaLayoutScreen() {
     const renderMatriculaTab = () => (
         <div className="matricula-tab">
             <div className="curso-info" style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: '20px', alignItems: 'center' }}>
-                <div><strong>Curso:</strong> {contrato.curriculo ? `${contrato.curriculo.curso?.nome} - ${contrato.curriculo.sucinto}` : 'Não selecionado'}</div>
-                <div><strong>Tipo:</strong> {contrato.curriculo?.tipoCurso?.descricao}</div>
-                <div><strong>Carga Horária:</strong> {contrato.curriculo?.cargaHoraria}H/A</div>
+                <div><strong>Curso:</strong> {contrato.curriculo ? (contrato.curriculo as AutoCompleteOption).label : 'Não selecionado'}</div>
                 <button className="btnyellow" style={{ marginLeft: 'auto' }}>
                     <i className="fa fa-calculator"/> Matriz Curricular
                 </button>
@@ -390,7 +400,7 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                         <label>Unidade</label>
                         <select value={filtro.unidadeId || ''} onChange={e => handleFiltroChange('unidadeId', e.target.value ? Number(e.target.value) : undefined)} className="form-input">
                             <option value="">Selecione</option>
-                            {unidades.map(u => <option key={u.id} value={u.id}>{u.sucinto}</option>)}
+                            {unidades.map(u => <option key={u.id} value={String(u.id)}>{u.sucinto}</option>)}
                         </select>
                     </div>
                     <div>
