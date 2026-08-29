@@ -560,11 +560,11 @@ public class CaixaService {
                 content.append("Relatório de Caixa\n");
                 content.append("==================\n\n");
                 
-                if (caixaId != null) {
+if (caixaId != null) {
                     CaixaResponse caixa = find(caixaId).await().indefinitely();
                     content.append("Caixa: ").append(caixa.idCaixaUnidade()).append("\n");
-                    content.append("Usuário: ").append(caixa.usuarioLogin()).append("\n");
-                    content.append("Unidade: ").append(caixa.unidadeSucinto()).append("\n");
+                    content.append("Usuário: ").append(caixa.usuarioId()).append("\n");
+                    content.append("Unidade: ").append(caixa.unidadeId()).append("\n");
                     content.append("Data: ").append(caixa.data()).append("\n");
                     content.append("Fundo Caixa: ").append(caixa.fundoCaixa()).append("\n\n");
                     
@@ -579,8 +579,8 @@ public class CaixaService {
                     content.append("  Sangria: ").append(totais.totalSangria()).append("\n");
                     content.append("  Valor Total: ").append(totais.totalValor()).append("\n");
                     content.append("  Desconto: ").append(totais.totalDesconto()).append("\n");
-                    content.append("  Juros/Multa: ").append(totais.totalMultaJuros()).append("\n");
-                    content.append("  Valor Total Caixa: ").append(totais.valorTotalCaixa()).append("\n");
+                    content.append("  Juros/Multa: ").append(totais.totalJurosMulta()).append("\n");
+                    content.append("  Valor Total Caixa: ").append(totais.totalValorPagar()).append("\n");
                 }
                 
                 String text = content.toString();
@@ -592,10 +592,20 @@ public class CaixaService {
                     case "excel":
                     case "xlsx":
                         // Simplified Excel - in production use Apache POI
-                        return ("PK\x03\x04" + text).getBytes(); // Placeholder
+                        byte[] zipHeader = new byte[] {0x50, 0x4B, 0x03, 0x04};
+                        byte[] textBytes = text.getBytes();
+                        byte[] result = new byte[zipHeader.length + textBytes.length];
+                        System.arraycopy(zipHeader, 0, result, 0, zipHeader.length);
+                        System.arraycopy(textBytes, 0, result, zipHeader.length, textBytes.length);
+                        return result;
                     case "docx":
                         // Simplified DOCX - in production use Apache POI
-                        return ("PK\x03\x04" + text).getBytes(); // Placeholder
+                        zipHeader = new byte[] {0x50, 0x4B, 0x03, 0x04};
+                        textBytes = text.getBytes();
+                        result = new byte[zipHeader.length + textBytes.length];
+                        System.arraycopy(zipHeader, 0, result, 0, zipHeader.length);
+                        System.arraycopy(textBytes, 0, result, zipHeader.length, textBytes.length);
+                        return result;
                     default:
                         throw new IllegalArgumentException("Formato não suportado: " + format);
                 }

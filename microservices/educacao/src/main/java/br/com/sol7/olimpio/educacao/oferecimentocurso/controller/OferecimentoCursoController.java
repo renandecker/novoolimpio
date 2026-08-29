@@ -96,7 +96,6 @@ public class OferecimentoCursoController {
     public Uni<List<OferecimentoCursoResponse>> listarGrupos(@QueryParam("curriculoId") Long curriculoId, @QueryParam("unidadeId") Long unidadeId) {
         return service.listarGruposPorCurriculoUnidade(curriculoId, unidadeId);
     }
-}
 
     @GET
     @Path("/buscar-informacoes-oferecimentos")

@@ -8,6 +8,8 @@ import br.com.sol7.olimpio.financeiro.caixa.dto.RegistrarPagamentoParcelaRequest
 import br.com.sol7.olimpio.financeiro.movimentacaofinanceira.dto.MovimentacaoFinanceiraResponse;
 import br.com.sol7.olimpio.financeiro.sangria.dto.SangriaResponse;
 import io.smallrye.mutiny.Uni;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import jakarta.ws.rs.core.Response.ResponseBuilder;

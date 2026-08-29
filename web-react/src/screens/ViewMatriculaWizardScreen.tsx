@@ -342,10 +342,14 @@ export default function ViewMatriculaWizardScreen() {
         queryKey: ['matricula-criterios', data.entity.unidadeId, data.entity.curriculoId],
         queryFn: async () => {
             if (!data.entity.unidadeId || !data.entity.curriculoId) return null;
-            const {data: rows} = await api.get<CriterioRow[]>('/api/educacao/criterio', {
+            const {data: rows} = await api.get<number[]>('/api/educacao/criterio/buscar-criterio', {
                 params: {unidadeId: data.entity.unidadeId, curriculoId: data.entity.curriculoId}
             });
-            return rows.data?.[0] ?? null;
+            if (rows.data && rows.data.length > 0) {
+                const {data: criterio} = await api.get<CriterioRow>(`/api/educacao/criterio/${rows.data[0]}`);
+                return criterio.data;
+            }
+            return null;
         },
         enabled: !!data.entity.unidadeId && !!data.entity.curriculoId,
     });

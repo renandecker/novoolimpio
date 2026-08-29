@@ -147,7 +147,7 @@ interface OferecimentoCursoData {
     novoDiaTurno: number | null;
     novoDiaTempoAula: number | null;
     professores: Record<string, number>;
-    criterio: {qtd_turma_abertas?: number; data_inicio?: string; data_fim?: string; periodo?: number} | null;
+    criterio: {qtdTurmaAbertas?: number; dataInicio?: string; dataFim?: string; periodo?: number} | null;
 }
 
 const initialData: OferecimentoCursoData = {
@@ -513,9 +513,10 @@ useEffect(() => {
             return;
         }
         try {
-            const {data: criterios} = await api.get<Array<{qtd_turma_abertas?: number; data_inicio?: string; data_fim?: string; periodo?: number}>>('/api/educacao/criterio', {params: {unidadeId: data.unidadeId, curriculoId: data.curriculoId}});
-            if (criterios && criterios.length > 0) {
-                setData(prev => ({...prev, criterio: criterios[0]}));
+            const {data: ids} = await api.get<number[]>('/api/educacao/criterio/buscar-criterio', {params: {unidadeId: data.unidadeId, curriculoId: data.curriculoId}});
+            if (ids && ids.length > 0) {
+                const {data: criterio} = await api.get<{qtd_turma_abertas?: number; data_inicio?: string; data_fim?: string; periodo?: number}>(`/api/educacao/criterio/${ids[0]}`);
+                setData(prev => ({...prev, criterio: criterio}));
             } else {
                 setData(prev => ({...prev, criterio: null}));
             }
