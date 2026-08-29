@@ -235,13 +235,26 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                     <div className="form-grid" style={{flex:'1 1 520px', gridTemplateColumns:'1fr 1fr'}}>
                         <label className="form-field" style={fullRow}><span className="form-label">Nome Social *</span><input className="form-input" placeholder="Nome social" value={str(initialValues.nomeSocial)} onChange={e=>setInitialValues(p=>({...p, nomeSocial:e.target.value}))}/></label>
                         <label className="form-field"><span className="form-label">Data Nascimento *</span><input className="form-input" type="date" value={str(initialValues.dataNascimento)} onChange={e=>setInitialValues(p=>({...p, dataNascimento:e.target.value}))}/></label>
-                        <div style={{gridColumn:'1 / -1'}}>
-                            <AutoComplete label="Cidade Origem *" placeholder="Digite 3 letras..." value={cidadeOrigemOpt} onChange={setCidadeOrigemOpt} fetchOptions={fetchCidade} fetchById={fetchCidadeById} />
-                        </div>
-                        <div style={{gridColumn:'1 / -1'}}><AutoComplete label="Gênero" placeholder="Selecione" value={generoOpt} onChange={setGeneroOpt} fetchOptions={fetchGenero} fetchById={fetchGeneroById} /></div>
-                        <div style={{gridColumn:'1 / -1'}}><AutoComplete label="Etnia" placeholder="Selecione" value={etniaOpt} onChange={setEtniaOpt} fetchOptions={fetchEtnia} fetchById={fetchEtniaById} /></div>
-                        <div style={{gridColumn:'1 / -1'}}><AutoComplete label="Estado Civil *" placeholder="Digite 3 letras..." value={estadoCivilOpt} onChange={setEstadoCivilOpt} fetchOptions={fetchEstadoCivil} fetchById={fetchEstadoCivilById} /></div>
-                        <div style={{gridColumn:'1 / -1'}}><AutoComplete label="Escolaridade *" placeholder="Digite 3 letras..." value={escolaridadeOpt} onChange={setEscolaridadeOpt} fetchOptions={fetchEscolaridade} fetchById={fetchEscolaridadeById} /></div>
+                        <label className="form-field" style={fullRow}>
+                            <span className="form-label">Cidade Origem *</span>
+                            <AutoComplete placeholder="Digite 3 letras..." value={cidadeOrigemOpt} onChange={setCidadeOrigemOpt} fetchOptions={fetchCidade} fetchById={fetchCidadeById} />
+                        </label>
+                        <label className="form-field" style={fullRow}>
+                            <span className="form-label">Gênero</span>
+                            <AutoComplete placeholder="Selecione" value={generoOpt} onChange={setGeneroOpt} fetchOptions={fetchGenero} fetchById={fetchGeneroById} />
+                        </label>
+                        <label className="form-field" style={fullRow}>
+                            <span className="form-label">Etnia</span>
+                            <AutoComplete placeholder="Selecione" value={etniaOpt} onChange={setEtniaOpt} fetchOptions={fetchEtnia} fetchById={fetchEtniaById} />
+                        </label>
+                        <label className="form-field" style={fullRow}>
+                            <span className="form-label">Estado Civil *</span>
+                            <AutoComplete placeholder="Digite 3 letras..." value={estadoCivilOpt} onChange={setEstadoCivilOpt} fetchOptions={fetchEstadoCivil} fetchById={fetchEstadoCivilById} />
+                        </label>
+                        <label className="form-field" style={fullRow}>
+                            <span className="form-label">Escolaridade *</span>
+                            <AutoComplete placeholder="Digite 3 letras..." value={escolaridadeOpt} onChange={setEscolaridadeOpt} fetchOptions={fetchEscolaridade} fetchById={fetchEscolaridadeById} />
+                        </label>
                         {/* Referências - layout fiel ao xhtml: nome + telefone/celular na mesma linha */}
                         <label className="form-field" style={fullRow}><span className="form-label">Nome Referência *</span><input className="form-input" placeholder="Nome da referência" value={str(initialValues.nomeReferencia)} onChange={e=>setInitialValues(p=>({...p, nomeReferencia:e.target.value}))}/></label>
                         <label className="form-field"><span className="form-label">Telefone Referência</span><input className="form-input" placeholder="99-99999999" value={str(initialValues.telefoneReferencia)} onChange={e=>setInitialValues(p=>({...p, telefoneReferencia:e.target.value}))}/></label>
@@ -290,9 +303,18 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                         </div>
                         {enderecoAviso && <small style={{color:'#c0392b'}}>{enderecoAviso}</small>}
                     </label>
-                    <div style={{gridColumn:'1 / -1'}}><AutoComplete label="Cidade" placeholder="Digite 3 letras..." value={cidadeOpt} onChange={setCidadeOpt} fetchOptions={fetchCidadesLog} /></div>
-                    <div style={{gridColumn:'1 / -1'}}><AutoComplete label="Bairro" placeholder="Digite 3 letras..." value={bairroOpt} onChange={setBairroOpt} fetchOptions={fetchBairros} /></div>
-                    <div style={{gridColumn:'1 / -1'}}><AutoComplete label="Logradouro" placeholder="Digite 3 letras..." value={logradouroOpt} onChange={o=>{ setLogradouroOpt(o); if(o) setLogradouroId(o.id);}} fetchOptions={fetchLogradouros} /></div>
+                    <label className="form-field" style={fullRow}>
+                        <span className="form-label">Cidade</span>
+                        <AutoComplete placeholder="Digite 3 letras..." value={cidadeOpt} onChange={setCidadeOpt} fetchOptions={fetchCidadesLog} />
+                    </label>
+                    <label className="form-field" style={fullRow}>
+                        <span className="form-label">Bairro</span>
+                        <AutoComplete placeholder="Digite 3 letras..." value={bairroOpt} onChange={setBairroOpt} fetchOptions={fetchBairros} />
+                    </label>
+                    <label className="form-field" style={fullRow}>
+                        <span className="form-label">Logradouro</span>
+                        <AutoComplete placeholder="Digite 3 letras..." value={logradouroOpt} onChange={o=>{ setLogradouroOpt(o); if(o) setLogradouroId(o.id);}} fetchOptions={fetchLogradouros} />
+                    </label>
                     <label className="form-field"><span className="form-label">Número *</span><input className="form-input" placeholder="Número" value={numero} onChange={e=>setNumero(e.target.value)}/></label>
                     <label className="form-field" style={fullRowTop}><span className="form-label">Complemento</span><textarea className="form-input" placeholder="Complemento" rows={3} style={{minHeight:'80px'}} value={complemento} onChange={e=>setComplemento(e.target.value)}/></label>
                 </div>

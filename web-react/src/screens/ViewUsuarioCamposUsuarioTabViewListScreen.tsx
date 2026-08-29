@@ -79,14 +79,14 @@ export default function ViewUsuarioCamposUsuarioTabViewListScreen(){
             <label className="form-field"><span className="form-label">Ativo</span><BooleanField value={true} onChange={()=>{}} /></label>
             <label className="form-field"><span className="form-label">Função *</span><select className="form-input form-select"><option>-- Selecione --</option></select></label>
             <label className="form-field"><span className="form-label">Data Admissão</span><input className="form-input" type="date" /></label>
-            <div className="form-field" style={{gridColumn:'span 3'}}>
+            <label className="form-field">
                 <span className="form-label">Regime</span>
-                <div style={{display:'flex',gap:12,marginTop:6}}><label style={{display:'flex',gap:6,fontSize:13}}><input type="radio" name="mensalista" defaultChecked/> Mensalista</label><label style={{display:'flex',gap:6,fontSize:13}}><input type="radio" name="mensalista"/> Horista</label></div>
-            </div>
+                <div style={{display:'flex',gap:12,gridColumn:'span 3'}}><label style={{display:'flex',gap:6,fontSize:13}}><input type="radio" name="mensalista" defaultChecked/> Mensalista</label><label style={{display:'flex',gap:6,fontSize:13}}><input type="radio" name="mensalista"/> Horista</label></div>
+            </label>
             <div style={{gridColumn:'1 / -1'}}>
                 <MasterDetail label="Turnos de Trabalho" source={TURNO_TRABALHO_SOURCE} valueKey="id" searchKeys={TURNO_TRABALHO_SEARCH} columns={TURNO_TRABALHO_COLUMNS} items={turnosTrabalho} onChange={setTurnosTrabalho}/>
             </div>
-            <label className="form-field" style={{gridColumn:'span 3'}}><span className="form-label">Observação</span><textarea className="form-input" rows={3} style={{minHeight:80}} placeholder="Observações" /></label>
+            <label className="form-field"><span className="form-label">Observação</span><textarea className="form-input" rows={3} style={{minHeight:80, gridColumn:'span 3'}} placeholder="Observações" /></label>
         </div>
     );
 

@@ -33,7 +33,7 @@ const sectionTitleStyle: React.CSSProperties = {
 // ── Documento upload card ────────────────────────────────────────────
 function DocCard({label, required, value, onChange}:{label:string; required?:boolean; value:string; onChange:(v:string)=>void}){
     return (
-        <div className="form-field" style={{border:'1px solid #e0e0e0',borderRadius:6,padding:12,background:'#fafafa'}}>
+        <div style={{display:'flex', flexDirection:'column', gap:6, border:'1px solid #e0e0e0',borderRadius:6,padding:12,background:'#fafafa'}}>
             <span className="form-label" style={{fontWeight:700,fontSize:12}}>{label} {required && requiredMark}</span>
             <Base64FileUpload value={value} onChange={onChange} accept="image/*,application/pdf" label={label} />
         </div>
@@ -240,20 +240,20 @@ export default function ViewUsuarioFormUsuarioListScreen(){
             <label className="form-field"><span className="form-label">RG</span>
                 <input className="form-input" value={f.rg} onChange={e=>upd('rg',e.target.value)} placeholder="RG" /></label>
 
-            <label className="form-field" style={{gridColumn:'span 3'}}><span className="form-label">Nome {requiredMark}</span>
-                <input className="form-input" value={f.nome} onChange={e=>upd('nome',e.target.value)} placeholder="Nome completo" style={{width:'100%'}} /></label>
-            <label className="form-field" style={{gridColumn:'span 3'}}><span className="form-label">E-mail {requiredMark}</span>
-                <input className="form-input" type="email" value={f.email} onChange={e=>upd('email',e.target.value)} placeholder="E-mail" style={{width:'100%'}} /></label>
+            <label className="form-field"><span className="form-label">Nome {requiredMark}</span>
+                <input className="form-input" value={f.nome} onChange={e=>upd('nome',e.target.value)} placeholder="Nome completo" style={{gridColumn:'span 3'}} /></label>
+            <label className="form-field"><span className="form-label">E-mail {requiredMark}</span>
+                <input className="form-input" type="email" value={f.email} onChange={e=>upd('email',e.target.value)} placeholder="E-mail" style={{gridColumn:'span 3'}} /></label>
 
-            <label className="form-field" style={{gridColumn:'span 3'}}><span className="form-label">Nome Social {requiredMark}</span>
-                <input className="form-input" value={f.nomeSocial} onChange={e=>upd('nomeSocial',e.target.value)} placeholder="Nome social" style={{width:'100%'}} /></label>
+            <label className="form-field"><span className="form-label">Nome Social {requiredMark}</span>
+                <input className="form-input" value={f.nomeSocial} onChange={e=>upd('nomeSocial',e.target.value)} placeholder="Nome social" style={{gridColumn:'span 3'}} /></label>
 
             <label className="form-field"><span className="form-label">Data Nascimento {requiredMark}</span>
                 <input className="form-input" type="date" value={f.dataNascimento} onChange={e=>upd('dataNascimento',e.target.value)} /></label>
             <label className="form-field"><span className="form-label">Nome do Pai</span>
                 <input className="form-input" value={f.nomePai} onChange={e=>upd('nomePai',e.target.value)} placeholder="Nome do pai" /></label>
-            <label className="form-field" style={{gridColumn:'span 3'}}><span className="form-label">Nome da Mãe {requiredMark}</span>
-                <input className="form-input" value={f.nomeMae} onChange={e=>upd('nomeMae',e.target.value)} placeholder="Nome da mãe" style={{width:'100%'}} /></label>
+            <label className="form-field"><span className="form-label">Nome da Mãe {requiredMark}</span>
+                <input className="form-input" value={f.nomeMae} onChange={e=>upd('nomeMae',e.target.value)} placeholder="Nome da mãe" style={{gridColumn:'span 3'}} /></label>
 
             {/* Contato */}
             <div style={{gridColumn:'1 / -1', borderTop:'1px solid #e6e6e6', marginTop:8, paddingTop:12, fontWeight:700, fontSize:13, color:'#2f333b'}}>Contato {requiredMark}</div>
@@ -263,15 +263,15 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                 <input className="form-input" value={f.celular} onChange={e=>upd('celular',formatPhone(e.target.value))} placeholder="(99) 99999-9999" /></label>
             <div style={{gridColumn:'1 / -1', display:'flex', alignItems:'center', gap:8, color:'#888', fontSize:12, marginTop:-4}}>Preencha Telefone <b>OU</b> Celular</div>
 
-            <label className="form-field" style={{gridColumn:'span 3'}}><span className="form-label">Nome Referência {requiredMark}</span>
-                <input className="form-input" value={f.nomeReferencia} onChange={e=>upd('nomeReferencia',e.target.value)} placeholder="Nome referência" style={{width:'100%'}} /></label>
+            <label className="form-field"><span className="form-label">Nome Referência {requiredMark}</span>
+                <input className="form-input" value={f.nomeReferencia} onChange={e=>upd('nomeReferencia',e.target.value)} placeholder="Nome referência" style={{gridColumn:'span 3'}} /></label>
             <label className="form-field"><span className="form-label">Telefone Referência</span>
                 <input className="form-input" value={f.telefoneReferencia} onChange={e=>upd('telefoneReferencia',formatPhone(e.target.value))} placeholder="(99) 9999-9999" /></label>
             <label className="form-field"><span className="form-label">Celular Referência</span>
                 <input className="form-input" value={f.celularReferencia} onChange={e=>upd('celularReferencia',formatPhone(e.target.value))} placeholder="(99) 99999-9999" /></label>
 
-            <label className="form-field" style={{gridColumn:'span 3'}}><span className="form-label">Nome Referência 2</span>
-                <input className="form-input" value={f.nomeReferencia2} onChange={e=>upd('nomeReferencia2',e.target.value)} placeholder="Nome referência 2" style={{width:'100%'}} /></label>
+            <label className="form-field"><span className="form-label">Nome Referência 2</span>
+                <input className="form-input" value={f.nomeReferencia2} onChange={e=>upd('nomeReferencia2',e.target.value)} placeholder="Nome referência 2" style={{gridColumn:'span 3'}} /></label>
             <label className="form-field"><span className="form-label">Telefone Referência 2</span>
                 <input className="form-input" value={f.telefoneReferencia2} onChange={e=>upd('telefoneReferencia2',formatPhone(e.target.value))} placeholder="(99) 9999-9999" /></label>
             <label className="form-field"><span className="form-label">Celular Referência 2</span>
@@ -447,13 +447,13 @@ export default function ViewUsuarioFormUsuarioListScreen(){
             <label className="form-field"><span className="form-label">Data Admissão</span>
                 <input className="form-input" type="date" value={dataAdmissao} onChange={e=>setDataAdmissao(e.target.value)} /></label>
 
-            <div className="form-field" style={{gridColumn:'span 3'}}>
+            <label className="form-field">
                 <span className="form-label">Regime</span>
-                <div style={{display:'flex', gap:12, marginTop:6}}>
+                <div style={{display:'flex', gap:12, gridColumn:'span 3'}}>
                     <label style={{display:'flex', alignItems:'center', gap:6, fontSize:13}}><input type="radio" checked={mensalista==='M'} onChange={()=>setMensalista('M')} /> Mensalista</label>
                     <label style={{display:'flex', alignItems:'center', gap:6, fontSize:13}}><input type="radio" checked={mensalista==='H'} onChange={()=>setMensalista('H')} /> Horista</label>
                 </div>
-            </div>
+            </label>
 
             {mensalista==='M' && (
                 <div style={{gridColumn:'1 / -1'}}>
@@ -461,8 +461,8 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                 </div>
             )}
 
-            <label className="form-field" style={{gridColumn:'span 3'}}><span className="form-label">Observação</span>
-                <textarea className="form-input" rows={3} style={{minHeight:80}} value={observacao} onChange={e=>setObservacao(e.target.value)} placeholder="Observações" /></label>
+            <label className="form-field"><span className="form-label">Observação</span>
+                <textarea className="form-input" rows={3} style={{minHeight:80, gridColumn:'span 3'}} value={observacao} onChange={e=>setObservacao(e.target.value)} placeholder="Observações" /></label>
         </div>
     );
 

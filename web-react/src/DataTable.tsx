@@ -11,7 +11,7 @@ import {useAuth} from './auth';
 import {ExportDropdown} from './ExportDropdown';
 import {BooleanField} from './BooleanField';
 import {Base64FileUpload} from './Base64FileUpload';
-import {Pagination} from './Pagination';
+import {PerfilModuloPermissions} from './useModulePaged';
 
 export const PAGE_SIZES = [10, 20, 50, 100];
 
@@ -603,17 +603,39 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
                     </tbody>
                     <tfoot>
                     <tr>
-                        <td colSpan={headerCount} style={{ padding: 0, border: 'none', background: 'transparent' }}>
-                            <Pagination
-                                currentPage={page + 1}
-                                totalPages={totalPages}
-                                pageSize={size}
-                                onPageChange={(newPage) => setPage(newPage - 1)}
-                                onPageSizeChange={(newSize) => {
-                                    setSize(newSize);
-                                    setPage(0);
-                                }}
-                            />
+                        <td colSpan={headerCount} className="data-table-paginator">
+                            <button
+                                onClick={() => setPage((current) => Math.max(0, current - 1))}
+                                disabled={page === 0 || q.isFetching}
+                            >
+                                Anterior
+                            </button>
+                            <span>
+                  Página {page + 1} de {totalPages}
+                </span>
+                            <button
+                                onClick={() => setPage((current) => Math.min(totalPages - 1, current + 1))}
+                                disabled={page >= totalPages - 1 || q.isFetching}
+                            >
+                                Próxima
+                            </button>
+                            <label>
+                                Registros por página
+                                <select
+                                    value={size}
+                                    onChange={(event) => {
+                                        setSize(Number(event.target.value));
+                                        setPage(0);
+                                    }}
+                                >
+                                    {PAGE_SIZES.map((option) => (
+                                        <option key={option} value={option}>
+                                            {option}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+                            <span>Total: {totalElements}</span>
                         </td>
                     </tr>
                     </tfoot>
