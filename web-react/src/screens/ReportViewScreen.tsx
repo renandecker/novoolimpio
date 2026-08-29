@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
+import {useNavigate, useParams, useSearchParams, useLocation} from 'react-router-dom';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {api} from '../api';
 import {abrirRelatorio, type RelatorioAberto} from '../relatorios';
@@ -37,6 +37,19 @@ const resourceFor: Record<ReportType, string> = {
     BARRA_HORIZONTAL: 'grafico',
 };
 
+const pathToReportType: Record<string, ReportType> = {
+    'viewTabela': 'TABELA',
+    'viewGraficoBarrasHorizontal': 'BARRA_HORIZONTAL',
+    'viewGraficoBarrasVertical': 'BARRA_VERTICAL',
+    'viewGraficoCircular': 'CIRCULAR',
+    'viewGraficoCombinado': 'COMBINADO',
+    'viewGraficoLinhas': 'LINHA',
+    'viewGraficoPizza': 'PIZZA',
+    'viewMapa': 'MAPA',
+    'viewOrganograma': 'ORGANOGRAMA',
+    'viewDashboard': 'DASHBOARD',
+};
+
 const labelFor = (key: string) => key
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/^./, (letter) => letter.toUpperCase());
@@ -56,22 +69,34 @@ const valueFor = (value: unknown): string => {
         return keys.length > 0 ? keys.join(', ') : '—';
     }
     return String(value);
-};
+}
 
 function isReportType(value: string | undefined): value is ReportType {
     return reportTypes.includes(value?.toUpperCase() as ReportType);
 }
 
+function getReportTypeFromPath(pathname: string): ReportType | undefined {
+    for (const [path, type] of Object.entries(pathToReportType)) {
+        if (pathname.includes(path)) {
+            return type;
+        }
+    }
+    return undefined;
+}
+
 export default function ReportViewScreen() {
-    const {tipo, id} = useParams();
+    const location = useLocation();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const queryClient = useQueryClient();
     const {can} = usePermissions();
     const [editing, setEditing] = useState(() => searchParams.get('edit') === '1');
     const [confirmingDelete, setConfirmingDelete] = useState(false);
-    const reportType = isReportType(tipo) ? tipo.toUpperCase() as ReportType : undefined;
-    const reportId = Number(id);
+    
+    // Determine report type from the route path (e.g., /view/relatorios/viewTabela -> TABELA)
+    const reportType = getReportTypeFromPath(location.pathname);
+    // Get ID from query parameter ?id=18
+    const reportId = Number(searchParams.get('id'));
     const managementOutcome = reportType ? `view/relatorios/${routeFor[reportType]}` : '';
 
     const [page, setPage] = useState(0);
