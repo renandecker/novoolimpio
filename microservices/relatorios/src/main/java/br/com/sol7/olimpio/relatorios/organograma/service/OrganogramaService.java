@@ -4,11 +4,20 @@ import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
 import io.smallrye.mutiny.Uni;
+import io.vertx.mutiny.sqlclient.Pool;
+import io.vertx.mutiny.sqlclient.Row;
+import io.vertx.mutiny.sqlclient.RowSet;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 @ApplicationScoped
 @WithTransaction
@@ -16,6 +25,13 @@ public class OrganogramaService {
 
     @Inject
     OrganogramaRepository repository;
+
+    /** Pool reativo (Vert.x) usado só para executar, sob demanda e sem persistir nada, o SQL livre do organograma. */
+    @Inject
+    Pool pool;
+
+    public static final List<String> DIRECOES_VALIDAS = List.of("HORIZONTAL", "VERTICAL", "TOGGLE_REVERSE");
+    private static final String DIRECAO_PADRAO = "VERTICAL";
 
     public Uni<List<OrganogramaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -37,12 +53,14 @@ public class OrganogramaService {
     }
 
     public Uni<OrganogramaResponse> create(OrganogramaRequest r) {
+        validarDirecao(r.direcao());
         var e = new Organograma();
         apply(e, r);
         return repository.persist(e).replaceWith(() -> toResponse(e));
     }
 
     public Uni<OrganogramaResponse> update(Long id, OrganogramaRequest r) {
+        validarDirecao(r.direcao());
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Organograma not found"))
                 .invoke(e -> apply(e, r))
@@ -57,12 +75,114 @@ public class OrganogramaService {
 
     private void apply(Organograma e, OrganogramaRequest r) {
         e.nome = r.nome();
+        e.direcao = (r.direcao() == null || r.direcao().isBlank()) ? DIRECAO_PADRAO : r.direcao().trim().toUpperCase(Locale.ROOT);
+        e.sql = r.sql();
         e.dataCadastro = r.dataCadastro();
         e.dataAlteracao = r.dataAlteracao();
     }
 
     private OrganogramaResponse toResponse(Organograma e) {
-        return new OrganogramaResponse(e.id, e.nome, e.dataCadastro, e.dataAlteracao);
+        return new OrganogramaResponse(e.id, e.nome, e.direcao, e.sql, e.dataCadastro, e.dataAlteracao);
+    }
+
+    private void validarDirecao(String direcao) {
+        if (direcao == null || direcao.isBlank()) return;
+        if (!DIRECOES_VALIDAS.contains(direcao.trim().toUpperCase(Locale.ROOT))) {
+            throw new BadRequestException("Direção inválida. Use HORIZONTAL, VERTICAL ou TOGGLE_REVERSE.");
+        }
+    }
+
+    // =====================================================================================
+    // Execução em tempo real do SQL cadastrado, montando os nós do AG Charts Org Chart.
+    // Nada aqui é gravado no banco: o resultado (incluindo a cor por departamento) é
+    // recalculado a cada chamada.
+    // =====================================================================================
+
+    /** Nomes de colunas potencialmente perigosos/reservados não são bloqueados aqui: o filtro é por comando SQL. */
+    private static final Pattern COMANDOS_BLOQUEADOS = Pattern.compile(
+            "(?i)\\b(insert|update|delete|drop|alter|truncate|grant|revoke|create|exec|execute|call|copy|merge|vacuum|do|comment)\\b");
+    private static final Pattern INICIA_COM_SELECT = Pattern.compile("(?is)^\\s*(with|select)\\b");
+
+    // Sinônimos aceitos (case-insensitive) para cada campo canônico do organograma.
+    private static final Map<String, List<String>> SINONIMOS = Map.of(
+            "id", List.of("id"),
+            "parentId", List.of("parentid", "parent_id", "idpai", "id_pai"),
+            "name", List.of("name", "nome"),
+            "job", List.of("job", "cargo", "funcao", "função"),
+            "department", List.of("department", "departamento", "setor"),
+            "location", List.of("location", "local", "localizacao", "localização"),
+            "status", List.of("status", "situacao", "situação"),
+            "avatar", List.of("avatar", "foto", "imagem")
+    );
+    private static final List<String> ORDEM_CANONICA =
+            List.of("id", "parentId", "name", "job", "department", "location", "status", "avatar");
+
+    public Uni<OrganogramaDadosResponse> dados(Long id) {
+        return repository.findById(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Organograma not found"))
+                .onItem().transformToUni(e -> {
+                    validarSql(e.sql);
+                    return pool.query(e.sql).execute().map(rowSet -> montarResposta(e, rowSet));
+                });
+    }
+
+    private void validarSql(String sql) {
+        if (sql == null || sql.isBlank()) throw new BadRequestException("SQL do organograma não cadastrado.");
+        String semComentarios = sql.replaceAll("(?s)/\\*.*?\\*/", " ").replaceAll("--.*", " ").trim();
+        if (semComentarios.contains(";")) throw new BadRequestException("SQL não pode conter múltiplos comandos (';').");
+        if (!INICIA_COM_SELECT.matcher(semComentarios).find()) throw new BadRequestException("SQL deve iniciar com SELECT (ou WITH).");
+        if (COMANDOS_BLOQUEADOS.matcher(semComentarios).find()) throw new BadRequestException("SQL contém comando não permitido para consultas de organograma.");
+    }
+
+    private OrganogramaDadosResponse montarResposta(Organograma e, RowSet<Row> rowSet) {
+        List<String> colunas = rowSet.columnsNames();
+        Map<String, String> colunaCanonicaPorOriginal = mapearColunas(colunas);
+
+        List<Map<String, Object>> nos = new ArrayList<>();
+        for (Row row : rowSet) {
+            Map<String, Object> no = new LinkedHashMap<>();
+            // Garante a presença de todas as chaves canônicas esperadas pelo AG Charts Org Chart.
+            for (String canonica : ORDEM_CANONICA) no.put(canonica, null);
+            for (String original : colunas) {
+                Object valor = valorDaColuna(row, original);
+                String canonica = colunaCanonicaPorOriginal.get(original);
+                if (canonica != null) no.put(canonica, valor);
+                else no.put(original, valor); // preserva colunas extras que o usuário tenha incluído no SQL
+            }
+            String departamento = texto(no.get("department"));
+            no.put("cor", OrganogramaCores.corPara(departamento));
+            nos.add(no);
+        }
+        return new OrganogramaDadosResponse(e.id, e.nome, e.direcao, colunas, nos);
+    }
+
+    private Map<String, String> mapearColunas(List<String> colunas) {
+        Map<String, String> mapa = new LinkedHashMap<>();
+        for (String original : colunas) {
+            String chaveOriginal = original.toLowerCase(Locale.ROOT);
+            for (var entrada : SINONIMOS.entrySet()) {
+                if (entrada.getValue().contains(chaveOriginal)) {
+                    mapa.put(original, entrada.getKey());
+                    break;
+                }
+            }
+        }
+        return mapa;
+    }
+
+    private Object valorDaColuna(Row row, String nome) {
+        Object valor = row.getValue(nome);
+        // Tipos numéricos/monetários/datas do Vert.x SQL client já vêm como Number/String/LocalDate,
+        // que o Jackson serializa naturalmente; convertidos para String apenas quando necessário
+        // (ex.: java.util.UUID) para evitar problemas de serialização no JSON de retorno.
+        if (valor != null && !(valor instanceof Number) && !(valor instanceof String) && !(valor instanceof Boolean)) {
+            return String.valueOf(valor);
+        }
+        return valor;
+    }
+
+    private String texto(Object valor) {
+        return valor == null ? "" : String.valueOf(valor).trim();
     }
 
 

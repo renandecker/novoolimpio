@@ -33,6 +33,17 @@ public class OrganogramaController {
         return service.find(id);
     }
 
+    /**
+     * Executa, em tempo real e sem persistir nada, o SQL cadastrado no organograma e devolve
+     * os nós já normalizados (id, parentId, name, job, department, location, status, avatar)
+     * com a cor calculada por departamento, prontos para o AG Charts Org Chart.
+     */
+    @GET
+    @Path("/{id}/dados")
+    public Uni<OrganogramaDadosResponse> dados(@PathParam("id") Long id) {
+        return service.dados(id);
+    }
+
     @POST
     public Uni<Response> create(@Valid OrganogramaRequest r) {
         return service.create(r).map(item -> Response.status(Response.Status.CREATED).entity(item).build());
