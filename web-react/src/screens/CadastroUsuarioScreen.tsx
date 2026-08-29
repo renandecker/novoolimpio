@@ -536,6 +536,45 @@ export default function CadastroUsuarioScreen() {
                 if (!pjId && novoPesId && novoPjId) {
                     await api.put(`/api/basico/pessoa-juridica/${novoPjId}`, {...pjBody, pessoaId: novoPesId});
                 }
+
+                const usuarioId = pjId ?? novoPjId;
+
+                // Save funcionario (if applicable for PJ)
+                const funcionarioBody: Record<string, unknown> = {
+                    ...semId(funcionario),
+                    pessoaId: novoPesId,
+                    funcaoId: num(form.funcaoId),
+                    dataAdmissao: form.dataAdmissao || null,
+                    mensalista: form.mensalista === 'true',
+                    ctps: form.ctps || null,
+                    serie: form.serie || null,
+                    pis: form.pis || null,
+                    tituloEleitor: form.tituloEleitor || null,
+                    zona: form.zona || null,
+                    secao: form.secao || null,
+                    carteiraReservista: form.carteiraReservista || null,
+                    qtdFilhosMenor14: num(form.qtdFilhosMenor14),
+                };
+                if (funcionario?.id) {
+                    await api.put(`/api/basico/funcionario/${funcionario.id}`, funcionarioBody);
+                } else if (novoPesId) {
+                    await api.post('/api/basico/funcionario', funcionarioBody);
+                }
+
+                // Save perfis
+                if (usuarioId) {
+                    await api.put(`/api/basico/usuario/${usuarioId}/perfis`, perfis.map(p => p.id));
+                }
+
+                // Save agendas
+                if (usuarioId) {
+                    await api.put(`/api/basico/usuario/${usuarioId}/agendas`, agendas.map(a => a.id));
+                }
+
+                // Save unidades
+                if (usuarioId) {
+                    await api.put(`/api/basico/usuario/${usuarioId}/unidades`, unidades.map(u => (u as Record<string, unknown>).id));
+                }
             }
 
             if (voltarDepois) {
