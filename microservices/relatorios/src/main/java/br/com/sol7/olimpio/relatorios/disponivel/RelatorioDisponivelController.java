@@ -14,6 +14,8 @@ import jakarta.ws.rs.core.MediaType;
 import br.com.sol7.olimpio.relatorios.tabela.TabelaService;
 import br.com.sol7.olimpio.relatorios.grafico.GraficoService;
 import br.com.sol7.olimpio.relatorios.mapa.MapaService;
+import br.com.sol7.olimpio.relatorios.organograma.OrganogramaService;
+import br.com.sol7.olimpio.relatorios.painel.PainelService;
 
 import java.util.List;
 
@@ -29,6 +31,10 @@ public class RelatorioDisponivelController {
     GraficoService graficoService;
     @Inject
     MapaService mapaService;
+    @Inject
+    OrganogramaService organogramaService;
+    @Inject
+    PainelService painelService;
 
     @GET
     public Uni<PagedResponse<RelatorioDisponivelResponse>> listar(
@@ -54,9 +60,13 @@ public class RelatorioDisponivelController {
                         case "TABELA" ->tabelaService.find(id)
                                 .chain(r -> tabelaService.executar(id)
                                         .map(dados -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, dados)));
-                        case "GRAFICO" ->graficoService.find(id)
+                        case "GRAFICO", "PIZZA", "LINHA", "COMBINADO", "CIRCULAR", "BARRA_VERTICAL", "BARRA_HORIZONTAL" ->graficoService.find(id)
                                 .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, null));
                         case "MAPA" ->mapaService.find(id)
+                                .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, null));
+                        case "ORGANOGRAMA" ->organogramaService.find(id)
+                                .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, null));
+                        case "DASHBOARD" ->painelService.find(id)
                                 .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, null));
                         default ->Uni.createFrom().failure(new ForbiddenException("Tipo de relatório inválido"));
                     } ;

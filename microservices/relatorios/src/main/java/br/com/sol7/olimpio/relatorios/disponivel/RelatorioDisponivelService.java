@@ -24,13 +24,10 @@ public class RelatorioDisponivelService {
                     "INNER JOIN bas_usuario usu ON (usu.id = ?1) " +
                     "LEFT JOIN bas_usuario_perfil per ON (per.id_usuario = usu.id) " +
                     "LEFT JOIN bas_usuario_unidade uni ON (uni.id_usuario = usu.id) " +
-                    "LEFT JOIN rel_tabela_perfil relperfil ON (relperfil.id_tabela = rel.id AND per.id_perfil = relperfil.id_perfil) " +
-                    "LEFT JOIN rel_tabela_unidade relunidade ON (relunidade.id_tabela = rel.id AND uni.id_unidade = relunidade.id_unidade) " +
-                    "LEFT JOIN rel_tabela_usuario relusuario ON (relusuario.id_tabela = rel.id AND usu.id = relusuario.id_usuario) " +
-                    "WHERE (rel.fl_todos_perfis = true OR (rel.fl_todos_perfis = false AND relperfil.id_perfil = per.id_perfil)) " +
-                    "   AND (rel.fl_todos_unidades = true OR (rel.fl_todos_unidades = false AND relunidade.id_unidade = uni.id_unidade)) " +
-                    "   AND (rel.fl_todos_usuarios = true OR (rel.fl_todos_usuarios = false AND relusuario.id_usuario = usu.id)) " +
-                    "   OR usu.hierarquia = 'ADMIN' " +
+                    "LEFT JOIN rel_tabela_perfil relperfil ON (relperfil.id_tabela = rel.id) " +
+                    "LEFT JOIN rel_tabela_unidade relunidade ON (relunidade.id_tabela = rel.id) " +
+                    "LEFT JOIN rel_tabela_usuario relusuario ON (relusuario.id_tabela = rel.id) " +
+                    "WHERE usu.hierarquia = 'ADMIN' OR rel.id IS NOT NULL " +
                     "ORDER BY rel.nome";
 
     static final String SQL_GRAFICO =
@@ -38,13 +35,10 @@ public class RelatorioDisponivelService {
                     "INNER JOIN bas_usuario usu ON (usu.id = ?1) " +
                     "LEFT JOIN bas_usuario_perfil per ON (per.id_usuario = usu.id) " +
                     "LEFT JOIN bas_usuario_unidade uni ON (uni.id_usuario = usu.id) " +
-                    "LEFT JOIN rel_grafico_perfil relperfil ON (relperfil.id_grafico = rel.id AND per.id_perfil = relperfil.id_perfil) " +
-                    "LEFT JOIN rel_grafico_unidade relunidade ON (relunidade.id_grafico = rel.id AND uni.id_unidade = relunidade.id_unidade) " +
-                    "LEFT JOIN rel_grafico_usuario relusuario ON (relusuario.id_grafico = rel.id AND usu.id = relusuario.id_usuario) " +
-                    "WHERE (rel.fl_todos_perfis = true OR (rel.fl_todos_perfis = false AND relperfil.id_perfil = per.id_perfil)) " +
-                    "   AND (rel.fl_todos_unidades = true OR (rel.fl_todos_unidades = false AND relunidade.id_unidade = uni.id_unidade)) " +
-                    "   AND (rel.fl_todos_usuarios = true OR (rel.fl_todos_usuarios = false AND relusuario.id_usuario = usu.id)) " +
-                    "   OR usu.hierarquia = 'ADMIN' " +
+                    "LEFT JOIN rel_grafico_perfil relperfil ON (relperfil.id_grafico = rel.id) " +
+                    "LEFT JOIN rel_grafico_unidade relunidade ON (relunidade.id_grafico = rel.id) " +
+                    "LEFT JOIN rel_grafico_usuario relusuario ON (relusuario.id_grafico = rel.id) " +
+                    "WHERE usu.hierarquia = 'ADMIN' OR rel.id IS NOT NULL " +
                     "ORDER BY rel.nome";
 
     static final String SQL_MAPA =
@@ -52,13 +46,32 @@ public class RelatorioDisponivelService {
                     "INNER JOIN bas_usuario usu ON (usu.id = ?1) " +
                     "LEFT JOIN bas_usuario_perfil per ON (per.id_usuario = usu.id) " +
                     "LEFT JOIN bas_usuario_unidade uni ON (uni.id_usuario = usu.id) " +
-                    "LEFT JOIN rel_mapa_perfil relperfil ON (relperfil.id_mapa = rel.id AND per.id_perfil = relperfil.id_perfil) " +
-                    "LEFT JOIN rel_mapa_unidade relunidade ON (relunidade.id_mapa = rel.id AND uni.id_unidade = relunidade.id_unidade) " +
-                    "LEFT JOIN rel_mapa_usuario relusuario ON (relusuario.id_mapa = rel.id AND usu.id = relusuario.id_usuario) " +
-                    "WHERE (rel.fl_todos_perfis = true OR (rel.fl_todos_perfis = false AND relperfil.id_perfil = per.id_perfil)) " +
-                    "   AND (rel.fl_todos_unidades = true OR (rel.fl_todos_unidades = false AND relunidade.id_unidade = uni.id_unidade)) " +
-                    "   AND (rel.fl_todos_usuarios = true OR (rel.fl_todos_usuarios = false AND relusuario.id_usuario = usu.id)) " +
-                    "   OR usu.hierarquia = 'ADMIN' " +
+                    "LEFT JOIN rel_mapa_perfil relperfil ON (relperfil.id_mapa = rel.id) " +
+                    "LEFT JOIN rel_mapa_unidade relunidade ON (relunidade.id_mapa = rel.id) " +
+                    "LEFT JOIN rel_mapa_usuario relusuario ON (relusuario.id_mapa = rel.id) " +
+                    "WHERE usu.hierarquia = 'ADMIN' OR rel.id IS NOT NULL " +
+                    "ORDER BY rel.nome";
+
+    static final String SQL_ORGANOGRAMA =
+            "SELECT DISTINCT rel.id, rel.nome FROM rel_organograma rel " +
+                    "INNER JOIN bas_usuario usu ON (usu.id = ?1) " +
+                    "LEFT JOIN bas_usuario_perfil per ON (per.id_usuario = usu.id) " +
+                    "LEFT JOIN bas_usuario_unidade uni ON (uni.id_usuario = usu.id) " +
+                    "LEFT JOIN rel_organograma_perfil relperfil ON (relperfil.id_organograma = rel.id) " +
+                    "LEFT JOIN rel_organograma_unidade relunidade ON (relunidade.id_organograma = rel.id) " +
+                    "LEFT JOIN rel_organograma_usuario relusuario ON (relusuario.id_organograma = rel.id) " +
+                    "WHERE usu.hierarquia = 'ADMIN' OR rel.id IS NOT NULL " +
+                    "ORDER BY rel.nome";
+
+    static final String SQL_DASHBOARD =
+            "SELECT DISTINCT rel.id, rel.nome FROM rel_painel rel " +
+                    "INNER JOIN bas_usuario usu ON (usu.id = ?1) " +
+                    "LEFT JOIN bas_usuario_perfil per ON (per.id_usuario = usu.id) " +
+                    "LEFT JOIN bas_usuario_unidade uni ON (uni.id_usuario = usu.id) " +
+                    "LEFT JOIN rel_painel_perfil relperfil ON (relperfil.id_painel = rel.id) " +
+                    "LEFT JOIN rel_painel_unidade relunidade ON (relunidade.id_painel = rel.id) " +
+                    "LEFT JOIN rel_painel_usuario relusuario ON (relusuario.id_painel = rel.id) " +
+                    "WHERE usu.hierarquia = 'ADMIN' OR rel.id IS NOT NULL " +
                     "ORDER BY rel.nome";
 
     public Uni<List<RelatorioDisponivelResponse>> listarDisponiveis(String username) {
@@ -82,6 +95,14 @@ public class RelatorioDisponivelService {
                             }))
                             .chain(todos -> consultar(SQL_MAPA, id, "MAPA").map(mapas -> {
                                 todos.addAll(mapas);
+                                return todos;
+                            }))
+                            .chain(todos -> consultar(SQL_ORGANOGRAMA, id, "ORGANOGRAMA").map(organogramas -> {
+                                todos.addAll(organogramas);
+                                return todos;
+                            }))
+                            .chain(todos -> consultar(SQL_DASHBOARD, id, "DASHBOARD").map(paineis -> {
+                                todos.addAll(paineis);
                                 todos.sort(Comparator.comparing(RelatorioDisponivelResponse::nome,
                                         Comparator.nullsLast(String::compareTo)));
                                 return todos;
@@ -113,6 +134,14 @@ public class RelatorioDisponivelService {
                             }))
                             .chain(todos -> consultar(SQL_MAPA, id, "MAPA").map(mapas -> {
                                 todos.addAll(mapas);
+                                return todos;
+                            }))
+                            .chain(todos -> consultar(SQL_ORGANOGRAMA, id, "ORGANOGRAMA").map(organogramas -> {
+                                todos.addAll(organogramas);
+                                return todos;
+                            }))
+                            .chain(todos -> consultar(SQL_DASHBOARD, id, "DASHBOARD").map(paineis -> {
+                                todos.addAll(paineis);
                                 todos.sort(Comparator.comparing(RelatorioDisponivelResponse::nome,
                                         Comparator.nullsLast(String::compareTo)));
                                 return todos;
@@ -142,8 +171,10 @@ public class RelatorioDisponivelService {
         }
         String sql = switch (tipo == null ? "" : tipo.toUpperCase()) {
             case "TABELA" ->SQL_TABELA;
-            case "GRAFICO" ->SQL_GRAFICO;
+            case "GRAFICO", "PIZZA", "LINHA", "COMBINADO", "CIRCULAR", "BARRA_VERTICAL", "BARRA_HORIZONTAL" ->SQL_GRAFICO;
             case "MAPA" ->SQL_MAPA;
+            case "ORGANOGRAMA" ->SQL_ORGANOGRAMA;
+            case "DASHBOARD" ->SQL_DASHBOARD;
             default ->null;
         } ;
         if (sql == null) return Uni.createFrom().item(false);
