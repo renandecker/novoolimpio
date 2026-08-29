@@ -1,5 +1,8 @@
 package br.com.sol7.olimpio.relatorios.organograma;
 
+import io.quarkus.cache.CacheInvalidate;
+import io.quarkus.cache.CacheKey;
+import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -12,6 +15,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,6 +33,15 @@ public class OrganogramaService {
     /** Pool reativo (Vert.x) usado só para executar, sob demanda e sem persistir nada, o SQL livre do organograma. */
     @Inject
     Pool pool;
+
+    /**
+     * Auto-injeção do proxy CDI do próprio bean. É necessária porque @CacheResult/@CacheInvalidate
+     * são interceptors CDI: chamar dadosCacheado()/invalidarCacheMesAtual() diretamente (this.metodo(...))
+     * de dentro da própria classe ("self-invocation") NÃO passa pelo proxy e o cache seria ignorado.
+     * Chamando via "self" (o proxy injetado), o interceptor de cache passa a funcionar normalmente.
+     */
+    @Inject
+    OrganogramaService self;
 
     public static final List<String> DIRECOES_VALIDAS = List.of("HORIZONTAL", "VERTICAL", "TOGGLE_REVERSE");
     private static final String DIRECAO_PADRAO = "VERTICAL";
@@ -64,13 +77,15 @@ public class OrganogramaService {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Organograma not found"))
                 .invoke(e -> apply(e, r))
-                .map(this::toResponse);
+                .map(this::toResponse)
+                .invoke(resp -> self.invalidarCacheMesAtual(id, mesReferenciaAtual()));
     }
 
     public Uni<Void> delete(Long id) {
         return repository.deleteById(id).onItem()
                 .transformToUni(deleted -> deleted ? Uni.createFrom().voidItem()
-                        : Uni.createFrom().failure(new NotFoundException("Organograma not found")));
+                        : Uni.createFrom().failure(new NotFoundException("Organograma not found")))
+                .invoke(() -> self.invalidarCacheMesAtual(id, mesReferenciaAtual()));
     }
 
     private void apply(Organograma e, OrganogramaRequest r) {
@@ -117,13 +132,42 @@ public class OrganogramaService {
     private static final List<String> ORDEM_CANONICA =
             List.of("id", "parentId", "name", "job", "department", "location", "status", "avatar");
 
+    /** Nome do cache Quarkus/Caffeine configurado em application.properties. */
+    private static final String CACHE_ORGANOGRAMA_DADOS = "organograma-dados";
+
+    /**
+     * Endpoint público: delega ao método cacheado incluindo o mês/ano corrente na chave do
+     * cache, então o resultado é recalculado automaticamente uma vez por mês (na virada do
+     * mês a chave muda e o SQL volta a ser executado). Um "expire-after-write" configurado em
+     * application.properties (quarkus.cache.caffeine."organograma-dados".expire-after-write)
+     * serve apenas de rede de segurança para não acumular memória indefinidamente.
+     */
     public Uni<OrganogramaDadosResponse> dados(Long id) {
+        return self.dadosCacheado(id, mesReferenciaAtual());
+    }
+
+    @CacheResult(cacheName = CACHE_ORGANOGRAMA_DADOS)
+    Uni<OrganogramaDadosResponse> dadosCacheado(@CacheKey Long id, @CacheKey String mesReferencia) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Organograma not found"))
                 .onItem().transformToUni(e -> {
                     validarSql(e.sql);
                     return pool.query(e.sql).execute().map(rowSet -> montarResposta(e, rowSet));
                 });
+    }
+
+    /**
+     * Invalida, no cache, o valor do mês corrente para o organograma informado (chamado ao
+     * salvar/excluir o cadastro, para não deixar um SQL/direção antigos servidos até o fim do
+     * mês). Meses anteriores não precisam ser invalidados: eles nunca mais são consultados,
+     * pois a chave sempre usa o mês atual.
+     */
+    @CacheInvalidate(cacheName = CACHE_ORGANOGRAMA_DADOS)
+    void invalidarCacheMesAtual(@CacheKey Long id, @CacheKey String mesReferencia) {
+    }
+
+    private String mesReferenciaAtual() {
+        return YearMonth.now().toString(); // ex.: "2026-08"
     }
 
     private void validarSql(String sql) {
