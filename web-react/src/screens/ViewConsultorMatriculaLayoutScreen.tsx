@@ -79,7 +79,7 @@ function toAutoCompleteOption(item: { id: number; nome?: string; nomeFantasia?: 
 }
 
 export default function ViewConsultorMatriculaLayoutScreen() {
-    const [activeTab, setActiveTab] = useState<'contrato' | 'matricula'>('contrato');
+    const [activeTab, setActiveTab] = useState<'contrato' | 'matricula' | 'material'>('contrato');
     const [alunos, setAlunos] = useState<AutoCompleteOption[]>([]);
     const [curriculos, setCurriculos] = useState<AutoCompleteOption[]>([]);
     const [unidades, setUnidades] = useState<UnidadeResponse[]>([]);
@@ -91,7 +91,8 @@ export default function ViewConsultorMatriculaLayoutScreen() {
     const [filtro, setFiltro] = useState<FiltroMatricula>({ tipoMatricula: 'LIVRE' });
     const [loading, setLoading] = useState(false);
     const [contrato, setContrato] = useState<Record<string, unknown>>({});
-    const [matriculaSelecionadas, setMatriculaSelecionadas] = useState<OferecimentoItem[]>([]);
+    const [materialEstoque, setMaterialEstoque] = useState<any[]>([]);
+    const [materialContrato, setMaterialContrato] = useState<any[]>([]);
 
     const loadAlunos = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
         if (!query || query.length < 3) return [];
@@ -510,6 +511,57 @@ export default function ViewConsultorMatriculaLayoutScreen() {
         </div>
     );
 
+    const renderMaterialTab = () => (
+        <div className="material-tab" style={{ padding: '20px' }}>
+            <h3>Material Escolar</h3>
+            <div style={{ display: 'flex', gap: '15px', marginBottom: '15px', fontSize: '14px' }}>
+                <span style={{ color: '#000', fontWeight: 'bold' }}>■ Fornecido</span>
+                <span style={{ color: '#0275d8', fontWeight: 'bold' }}>■ Compra</span>
+                <span style={{ color: '#5cb85c', fontWeight: 'bold' }}>■ Estoque</span>
+                <span style={{ color: '#f0ad4e', fontWeight: 'bold' }}>■ Solicitado</span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '15px' }}>
+                {materialContrato.map((item, idx) => (
+                    <div key={idx} style={{ border: '1px solid #ddd', borderRadius: '4px', padding: '15px', background: '#fff' }}>
+                        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>{item.nome}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                            <span>Valor:</span>
+                            <strong>R$ {Number(item.valor || 0).toFixed(2)}</strong>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                            <span>Quantidade:</span>
+                            <input
+                                type="number"
+                                min={1}
+                                value={item.quantidade || 1}
+                                onChange={(e) => {
+                                    const val = Math.max(1, Number(e.target.value));
+                                    setMaterialContrato(prev => prev.map((m, i) => i === idx ? {...m, quantidade: val} : m));
+                                }}
+                                style={{ width: '60px', padding: '4px' }}
+                            />
+                        </div>
+                        <div style={{ fontSize: '12px', display: 'flex', gap: '5px', marginBottom: '10px' }}>
+                            <span style={{ color: '#000' }}>({item.quantidadeCurso || 0})</span>
+                            <span style={{ color: '#0275d8' }}>({item.quantidadeCompra || 0})</span>
+                            <span style={{ color: '#5cb85c' }}>({item.quantidadeEstoque || 0})</span>
+                            <span style={{ color: '#f0ad4e' }}>({item.quantidadeSolicitado || 0})</span>
+                        </div>
+                        <button
+                            className="btnred"
+                            style={{ width: '100%', padding: '6px' }}
+                            onClick={() => setMaterialContrato(prev => prev.filter((_, i) => i !== idx))}
+                        >
+                            Remover
+                        </button>
+                    </div>
+                ))}
+                {materialContrato.length === 0 && <p>Nenhum material adicionado ao contrato.</p>}
+            </div>
+        </div>
+    );
+
     return (
         <PermissionGate permission="READ">
             <main className="consultor-matricula-layout">
@@ -517,9 +569,10 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                     tabs={[
                         { key: 'contrato', label: 'Contrato', content: renderContratoTab() },
                         { key: 'matricula', label: 'Matrícula', content: renderMatriculaTab() },
+                        { key: 'material', label: 'Material', content: renderMaterialTab() },
                     ]}
                     activeKey={activeTab}
-                    onChange={setActiveTab}
+                    onChange={(k) => setActiveTab(k as any)}
                 />
             </main>
         </PermissionGate>

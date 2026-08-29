@@ -407,7 +407,7 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
         String sql = """
         SELECT tt.id,
                 tt.data,
-                COALESCE(u.username, '') AS usuario_nome,
+                COALESCE(l.username, '') AS usuario_nome,
                 COALESCE(c.nome, '') AS curso,
                 COALESCE(cc.descricao, '') AS componente,
                 COALESCE(un.nome_fantasia, '') AS unidade,
@@ -416,8 +416,10 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
         FROM edc_troca_turma tt
         JOIN edc_matricula m ON m.id = tt.id_matricula
         JOIN edc_contrato ct ON ct.id = m.id_contrato
-        JOIN edc_curso c ON c.id = ct.id_curso
+        LEFT JOIN edc_curriculo cur ON cur.id = ct.id_curso
+        LEFT JOIN edc_curso c ON c.id = cur.id_curso
         LEFT JOIN bas_usuario u ON u.id = tt.id_usuario
+        LEFT JOIN bas_login l ON l.id_usuario = u.id
         LEFT JOIN edc_oferecimento_componente_curricular of_antes ON of_antes.id = tt.id_oferecimento_componente_curricular_antes
         LEFT JOIN edc_oferecimento_componente_curricular of_depois ON of_depois.id = tt.id_oferecimento_componente_curricular_depois
         LEFT JOIN edc_componente_curricular cc ON cc.id = of_antes.id_componente_curricular

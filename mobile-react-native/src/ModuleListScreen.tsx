@@ -279,43 +279,44 @@ export function ModuleList({
                                     <Text style={styles.rowId}>#{item.id}</Text>
                                 </View>
                                 <View style={styles.rowActions}>
-                                {extraActions?.map((action) => {
-                                    if (action.permission && !can(session, action.permission, outcome)) return null;
-                                    return (
-                                        <Pressable
-                                            key={action.key}
-                                            style={styles.rowButton}
-                                            onPress={() => action.onPress(item)}
-                                        >
-                                            <Text style={styles.rowButtonText}>{action.icon ? `${action.icon} ` : ''}{action.title}</Text>
+                                    {extraActions?.map((action) => {
+                                        if (action.permission && !can(session, action.permission, outcome)) return null;
+                                        return (
+                                            <Pressable
+                                                key={action.key}
+                                                style={styles.rowButton}
+                                                onPress={() => action.onPress(item)}
+                                            >
+                                                <Text style={styles.rowButtonText}>{action.icon ? `${action.icon} ` : ''}{action.title}</Text>
+                                            </Pressable>
+                                        );
+                                    })}
+                                    {canUpdate && (
+                                        <Pressable style={styles.rowButton} onPress={() => setModal({mode: 'edit', item})}>
+                                            <Text style={styles.rowButtonText}>Editar</Text>
                                         </Pressable>
-                                    );
-                                })}
-                                {canUpdate && (
-                                    <Pressable style={styles.rowButton} onPress={() => setModal({mode: 'edit', item})}>
-                                        <Text style={styles.rowButtonText}>Editar</Text>
-                                    </Pressable>
-                                )}
-                                {canDelete && (
-                                    <Pressable
-                                        style={[styles.rowButton, styles.dangerButton]}
-                                        onPress={() =>
-                                            Alert.alert('Excluir registro', `Deseja realmente excluir o registro #${item.id}?`, [
-                                                {text: 'Cancelar', style: 'cancel'},
-                                                {
-                                                    text: 'Excluir',
-                                                    style: 'destructive',
-                                                    onPress: () => confirmDelete(item)
-                                                },
-                                            ])
-                                        }
-                                    >
-                                        <Text style={styles.rowButtonText}>Excluir</Text>
-                                    </Pressable>
-                                )}
+                                    )}
+                                    {canDelete && (
+                                        <Pressable
+                                            style={[styles.rowButton, styles.dangerButton]}
+                                            onPress={() =>
+                                                Alert.alert('Excluir registro', `Deseja realmente excluir o registro #${item.id}?`, [
+                                                    {text: 'Cancelar', style: 'cancel'},
+                                                    {
+                                                        text: 'Excluir',
+                                                        style: 'destructive',
+                                                        onPress: () => confirmDelete(item)
+                                                    },
+                                                ])
+                                            }
+                                        >
+                                            <Text style={styles.rowButtonText}>Excluir</Text>
+                                        </Pressable>
+                                    )}
+                                </View>
                             </View>
-                        </View>
-                    )}
+                        );
+                    }}
                 />
             )}
 

@@ -1,11 +1,19 @@
 import {PermissionGate} from '../permissions';
 import {DataTable, type DataTableColumn} from '../DataTable';
+import type {ApiItem} from '../types';
+
+const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+
+const formatValor = (value: unknown): string => {
+    if (value === null || value === undefined || value === '') return '';
+    return new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(Number(value));
+};
 
 const COLUMNS: DataTableColumn[] = [
     {key: 'vezes', label: 'Vezes'},
-    {key: 'desconto', label: 'Desconto'},
-    {key: 'juros', label: 'Juros'},
-    {key: 'multa', label: 'Multa'},
+    {key: 'desconto', label: 'Desconto', render: (item) => formatValor(asRecord(item).desconto)},
+    {key: 'juros', label: 'Juros', render: (item) => formatValor(asRecord(item).juros)},
+    {key: 'multa', label: 'Multa', render: (item) => formatValor(asRecord(item).multa)},
     {key: 'dias_spc', label: 'Dias Atraso'},
     {key: 'dias_tolerancia_multa', label: 'Dia Tolerância'},
 ];

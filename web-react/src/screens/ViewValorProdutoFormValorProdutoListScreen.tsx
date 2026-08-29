@@ -22,8 +22,6 @@ export default function ViewValorProdutoFormValorProdutoListScreen() {
                             }
                         },
                         {key: 'formaPagamento', label: 'Forma Pagamento', empty: 'Conteúdo de Forma Pagamento.'},
-                        {key: 'ativos', label: 'Ativos', empty: 'Conteúdo de Ativos.'},
-                        {key: 'todos', label: 'Todos', empty: 'Conteúdo de Todos.'},
                     ]}
                 />
             </main>

@@ -12,8 +12,6 @@ import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
 
-import io.smallrye.mutiny.Uni;
-
 @ApplicationScoped
 @WithTransaction
 public class TurmaService {

@@ -291,37 +291,56 @@ export default function ViewCaixaListCaixaListScreen() {
                                                      <button
                                                          type="button"
                                                          className="btn-action btnblue"
-                                                         title="Fluxo Caixa"
-                                                         onClick={() => openFluxoCaixa(caixaRow)}
-                                                     >
-                                                         📊
-                                                     </button>
+                                                          title="Fluxo Caixa"
+                                                          onClick={() => openFluxoCaixa(caixaRow)}
+                                                      >
+                                                          <i className="fa fa-bar-chart"/>
+                                                      </button>
                                                      <button
                                                          type="button"
                                                          className="btn-action btnblue"
-                                                         title="Imprimir"
-                                                         disabled={!caixaRow.dataFechamento}
-                                                     >
-                                                         🖨️
-                                                     </button>
-{caixaRow.dataFechamento ? (
-                                                          <button
-                                                              type="button"
-                                                              className="btn-action btnstop"
-                                                              title="Reabrir Caixa"
-                                                              onClick={async () => {
-                                                                  try {
-                                                                      await api.post(`/api/financeiro/caixa/${caixaRow.id}/abrir`);
-                                                                      alert('Caixa reaberto com sucesso');
-                                                                      q.refetch();
-                                                                  } catch (e) {
-                                                                      alert('Erro ao reabrir caixa');
-                                                                  }
-                                                              }}
-                                                          >
-                                                              🔓
-                                                              </button>
-                                                      ) : null}
+                                                          title="Imprimir"
+                                                          disabled={!caixaRow.dataFechamento}
+                                                      >
+                                                          <i className="fa fa-print"/>
+                                                      </button>
+                                                       {!caixaRow.dataFechamento ? (
+                                                           <button
+                                                               type="button"
+                                                               className="btn-action btnred"
+                                                               title="Fechar Caixa"
+                                                               onClick={async () => {
+                                                                   if (window.confirm('Tem certeza que deseja fechar este caixa?')) {
+                                                                       try {
+                                                                           await api.post(`/api/financeiro/caixa/${caixaRow.id}/fechar`);
+                                                                           alert('Caixa fechado com sucesso');
+                                                                           q.refetch();
+                                                                       } catch (e) {
+                                                                           alert('Erro ao fechar caixa');
+                                                                       }
+                                                                   }
+                                                               }}
+                                                           >
+                                                               <i className="fa fa-lock"/>
+                                                           </button>
+                                                       ) : (
+                                                           <button
+                                                               type="button"
+                                                               className="btn-action btnstop"
+                                                               title="Reabrir Caixa"
+                                                               onClick={async () => {
+                                                                   try {
+                                                                       await api.post(`/api/financeiro/caixa/${caixaRow.id}/abrir`);
+                                                                       alert('Caixa reaberto com sucesso');
+                                                                       q.refetch();
+                                                                   } catch (e) {
+                                                                       alert('Erro ao reabrir caixa');
+                                                                   }
+                                                               }}
+                                                           >
+                                                               <i className="fa fa-unlock"/>
+                                                           </button>
+                                                       )}
                                                  </div>
                                              </td>
                                         </tr>,
@@ -374,33 +393,33 @@ export default function ViewCaixaListCaixaListScreen() {
                                                                                 <div className="row-actions-menu">
                                                                                     {shouldShowExcluir() && (
                                                                                         <button
-                                                                                            type="button"
-                                                                                            className="btn-action btnred"
-                                                                                            title="Excluir movimentação"
-                                                                                            onClick={() => handleExcluirMovimentacao(mov)}
-                                                                                        >
-                                                                                            🗑️
-                                                                                        </button>
+                                                            type="button"
+                                                            className="btn-action btnred"
+                                                            title="Excluir movimentação do caixa"
+                                                            onClick={() => handleExcluirMovimentacao(mov)}
+                                                        >
+                                                            <i className="fa fa-times"/>
+                                                        </button>
                                                                                     )}
                                                                                     {shouldShowSegundaViaPagamento(mov.tipoMovimento) && (
                                                                                         <button
-                                                                                            type="button"
-                                                                                            className="btn-action btnblue"
-                                                                                            title="Segunda Via Pagamento"
-                                                                                            onClick={() => handleSegundaViaPagamento(mov)}
-                                                                                        >
-                                                                                            🖨️
-                                                                                        </button>
+                                                            type="button"
+                                                            className="btn-action btnstop"
+                                                            title="Segunda Via Pagamento"
+                                                            onClick={() => handleSegundaViaPagamento(mov)}
+                                                        >
+                                                            <i className="fa fa-print"/>
+                                                        </button>
                                                                                     )}
                                                                                     {shouldShowSegundaViaSangria(mov.tipoMovimento) && (
                                                                                         <button
-                                                                                            type="button"
-                                                                                            className="btn-action btngreen"
-                                                                                            title="Segunda Via Sangria"
-                                                                                            onClick={() => handleSegundaViaSangria(mov)}
-                                                                                        >
-                                                                                            📄
-                                                                                        </button>
+                                                            type="button"
+                                                            className="btn-action btngreen"
+                                                            title="Segunda Via Sangria"
+                                                            onClick={() => handleSegundaViaSangria(mov)}
+                                                        >
+                                                            <i className="fa fa-print"/>
+                                                        </button>
                                                                                     )}
                                                                                 </div>
                                                                             </td>

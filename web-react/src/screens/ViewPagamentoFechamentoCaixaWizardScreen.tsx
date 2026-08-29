@@ -168,15 +168,15 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
     // AutoComplete fetchById functions (for loading label when value has ID but no label)
     const fetchUsuarioById = async (id: number) => {
-        const {data} = await api.get(`/api/view/usuario/${id}`);
-        return {id: data.id, label: data.nome ?? data.name ?? `#${data.id}`};
+        const {data} = await api.get(`/api/view/usuario/listUsuario/${id}`);
+        return {id: data.id, label: data.nome ?? data.name ?? data.pessoa_descricao ?? `#${data.id}`};
     };
     const fetchUnidadeById = async (id: number) => {
-        const {data} = await api.get(`/api/view/unidade/${id}`);
+        const {data} = await api.get(`/api/view/unidade/listUnidade/${id}`);
         return {id: data.id, label: data.sucinto ?? data.nome ?? data.name ?? `#${data.id}`};
     };
     const fetchImpressoraById = async (id: number) => {
-        const {data} = await api.get(`/api/view/impressora/${id}`);
+        const {data} = await api.get(`/api/view/impressora/listImpressora/${id}`);
         return {id: data.id, label: data.descricao ?? data.description ?? `#${data.id}`};
     };
     const fetchParcelaById = async (id: number) => {
@@ -184,15 +184,15 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
         return {id: data.id, label: data.descricao ?? data.description ?? `#${data.id}`};
     };
     const fetchMovimentoById = async (id: number) => {
-        const {data} = await api.get(`/api/view/movimento/${id}`);
+        const {data} = await api.get(`/api/view/movimento/listMovimento/${id}`);
         return {id: data.id, label: data.descricaocompleta ?? data.descricao ?? data.description ?? `#${data.id}`};
     };
     const fetchCategoriaFinanceiraById = async (id: number) => {
-        const {data} = await api.get(`/api/view/tipoMovimento/${id}`);
+        const {data} = await api.get(`/api/view/tipoMovimento/listTipoMovimento/${id}`);
         return {id: data.id, label: data.descricao ?? data.description ?? `#${data.id}`};
     };
     const fetchBandeiraById = async (id: number) => {
-        const {data} = await api.get(`/api/view/bandeira/${id}`);
+        const {data} = await api.get(`/api/view/bandeira/listBandeira/${id}`);
         return {id: data.id, label: data.descricao ?? data.description ?? `#${data.id}`};
     };
 

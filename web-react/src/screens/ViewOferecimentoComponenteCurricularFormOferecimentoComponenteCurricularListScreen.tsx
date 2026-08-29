@@ -60,6 +60,7 @@ interface OferecimentoCCData {
     novoGrupo: boolean;
     novoGrupoNome: string;
     diasAulaConfig: DiaAulaConfig[];
+    diasAulaSelecionados: number[];
     ocorrencias: OcorrenciaLocal[];
     invalidas: InvalidaData[];
     professorId?: number | null;
@@ -148,6 +149,7 @@ const [carregando, setCarregando] = useState(true);
         novoGrupo: true,
         novoGrupoNome: '',
         diasAulaConfig: [],
+        diasAulaSelecionados: [],
         ocorrencias: [],
         invalidas: [],
         professorId: null,
@@ -208,6 +210,7 @@ const [carregando, setCarregando] = useState(true);
                             entity: {...ent, dataCancelamento: ent?.dataCancelamento ? fmtDate(parseISO(ent.dataCancelamento)!) : null},
                             novoGrupo: false, novoGrupoNome: '',
                             diasAulaConfig,
+                            diasAulaSelecionados: diaAulaIdsUnicos,
                             ocorrencias, invalidas: [],
                             professorId: ent.professorId ?? minhas.find((o) => o.professorId)?.professorId ?? null,
                         });
@@ -271,7 +274,15 @@ const [carregando, setCarregando] = useState(true);
         updateFields({entity: {...dataRef.current.entity, curriculoId: valor, componenteCurricularId: undefined}});
         try { setMatrizIds((await api.get('/api/educacao/oferecimento-componente-curricular/buscar-matriz-curricular', {params: {curriculoId: valor}}))?.data ?? []); } catch { setMatrizIds([]); }
         if (valor && data.entity.unidadeId) {
-            try { const c = (await api.get(`/api/educacao/criterio/buscar-criterio`, {params: {curriculoId: valor, unidadeId: data.entity.unidadeId}}))?.data; if (Array.isArray(c) && c.length) setCriterio(c[0]); else setCriterio(null); } catch { setCriterio(null); }
+            try {
+                const ids = (await api.get(`/api/educacao/criterio/buscar-criterio`, {params: {curriculoId: valor, unidadeId: data.entity.unidadeId}}))?.data;
+                if (Array.isArray(ids) && ids.length) {
+                    const {data: criterio} = await api.get(`/api/educacao/criterio/${ids[0]}`);
+                    setCriterio(criterio);
+                } else {
+                    setCriterio(null);
+                }
+            } catch { setCriterio(null); }
         }
     };
 
@@ -298,6 +309,35 @@ const [carregando, setCarregando] = useState(true);
     const removerDiaAulaConfig = (config: DiaAulaConfig) => {
         const atuais = dataRef.current.diasAulaConfig;
         updateField('diasAulaConfig', atuais.filter((c) => c !== config));
+    };
+
+    const alternarDiaAula = (id: number) => {
+        const atuais = dataRef.current.diasAulaSelecionados ?? [];
+        const existe = atuais.includes(id);
+        const novos = existe ? atuais.filter((x) => x !== id) : [...atuais, id];
+        // manter diasAulaConfig sincronizado para gerarAulas
+        const da = diaAulas.find((x: any) => x.id === id);
+        let novosConfigs = dataRef.current.diasAulaConfig;
+        if (da) {
+            const diaSemanaId = da.diaSemanaId ?? da.diaSemana?.id;
+            const turnoEducacaoId = da.turnoEducacaoId ?? da.turnoEducacao?.id;
+            const tempoAulaId = da.tempoAulaId ?? da.tempoAula?.id;
+            if (diaSemanaId && turnoEducacaoId && tempoAulaId) {
+                const config: DiaAulaConfig = {diaSemanaId, turnoEducacaoId, tempoAulaId};
+                const configs = dataRef.current.diasAulaConfig;
+                const existeConfig = configs.find((c) => c.diaSemanaId === config.diaSemanaId && c.turnoEducacaoId === config.turnoEducacaoId && c.tempoAulaId === config.tempoAulaId);
+                if (existe && existeConfig) {
+                    novosConfigs = configs.filter((c) => c !== existeConfig);
+                } else if (!existe && !existeConfig) {
+                    novosConfigs = [...configs, config];
+                }
+            }
+        }
+        if (novosConfigs !== dataRef.current.diasAulaConfig) {
+            updateFields({diasAulaSelecionados: novos, diasAulaConfig: novosConfigs});
+        } else {
+            updateField('diasAulaSelecionados', novos);
+        }
     };
 
     const getDiaAulaIdsSelecionados = (): number[] => {
@@ -525,8 +565,8 @@ const [carregando, setCarregando] = useState(true);
                                             {criterio && (
                                                 <div className="form-field" style={{marginTop: 16, padding: 12, background: '#f8f9fa', borderRadius: 8}}>
                                                     <strong>Critério do Curso:</strong><br/>
-                                                    Turmas máximas: {criterio.qtd_turma_abertas ?? 'Não definido'} | Período: {criterio.periodo ?? 'Não definido'}<br/>
-                                                    {criterio.data_inicio && `Início válido a partir de: ${fmtDate(parseISO(criterio.data_inicio)!)}`} | {criterio.data_fim && `Término até: ${fmtDate(parseISO(criterio.data_fim)!)}`}
+                                                    Turmas máximas: {criterio.qtdTurmaAbertas ?? 'Não definido'} | Período: {criterio.periodo ?? 'Não definido'}<br/>
+                                                    {criterio.dataInicio && `Início válido a partir de: ${fmtDate(parseISO(criterio.dataInicio)!)}`} | {criterio.dataFim && `Término até: ${fmtDate(parseISO(criterio.dataFim)!)}`}
                                                 </div>
                                             )}
                                             <fieldset className="form-fieldset" style={{marginBottom: 16}}>
@@ -576,7 +616,7 @@ const [carregando, setCarregando] = useState(true);
                                                     <label className="form-field"><span className="form-label">Qtde Sequência</span><input type="number" min={1} className="form-input" value={data.entity.qtdeSequencia ?? 1} onChange={(ev) => updateField('entity.qtdeSequencia', Math.max(1, Number(ev.target.value)))}/></label>
                                                     <label className="form-field"><span className="form-label">Data Inicial *</span><input type="date" className="form-input" value={data.entity.dataInicio ?? ''} onChange={(ev) => updateField('entity.dataInicio', ev.target.value)}/></label>
                                                     <label className="form-field"><span className="form-label">Data Fim</span><input type="date" className="form-input" value={data.entity.dataFim ?? ''} onChange={(ev) => updateField('entity.dataFim', ev.target.value)}/></label>
-                                                    <div className="form-field" style={{gridColumn: 'span 4'}}><span className="form-label">Dias de Aula</span><div style={{display: 'flex', gap: 12, flexWrap: 'wrap'}}>{diaAulas.map((da) => (<label key={da.id} style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="checkbox" checked={data.diasAulaSelecionados.includes(da.id)} onChange={() => alternarDiaAula(da.id)}/> {rotuloDiaAula(da)}</label>))}</div></div>
+                                                    <div className="form-field" style={{gridColumn: 'span 4'}}><span className="form-label">Dias de Aula</span><div style={{display: 'flex', gap: 12, flexWrap: 'wrap'}}>{diaAulas.map((da) => (<label key={da.id} style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="checkbox" checked={(data.diasAulaSelecionados ?? []).includes(da.id)} onChange={() => alternarDiaAula(da.id)}/> {rotuloDiaAula(da)}</label>))}</div></div>
                                                     <div className="form-field" style={{gridColumn: 'span 4'}}><button type="button" className="btnblue" onClick={gerarAulas} disabled={gerando}>{gerando ? 'Gerando...' : 'Gerar Aulas'}</button></div>
                                                 </div>
                                                 {data.ocorrencias.length > 0 && (
@@ -617,7 +657,7 @@ const [carregando, setCarregando] = useState(true);
                                                             value={data.professorId ? {id: data.professorId, label: professores.find(p => p.id === data.professorId)?.nome ?? ''} : null}
                                                             onChange={(opt) => updateField('professorId', opt?.id ?? null)}
                                                             fetchOptions={(q) => {
-                                                                const firstDa = diaAulas.find(da => data.diasAulaSelecionados.includes(da.id));
+                                                                const firstDa = diaAulas.find(da => (data.diasAulaSelecionados ?? []).includes(da.id));
                                                                 return fetchProfessor(q, firstDa?.diaSemanaId, firstDa?.turnoEducacaoId, firstDa?.tempoAulaId);
                                                             }}
                                                             fetchById={fetchProfessorById}

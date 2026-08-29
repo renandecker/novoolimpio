@@ -13,7 +13,7 @@ export default function ListGraficoScreen() {
             icon: <i className="fa fa-external-link" />,
             permission: 'EXECUTE',
             onClick: (item) => {
-                navigate(`/view/relatorios/viewGrafico?id=${item.id}`);
+                navigate(`/view/relatorios/viewGraficoBarrasVertical?id=${item.id}`);
             },
         },
     ];

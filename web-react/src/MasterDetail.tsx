@@ -32,13 +32,9 @@ const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
 const fkBase = (key: string): string | null => (key.startsWith('id_') ? key.slice(3) : null);
 
-const renderValue = (item: ApiItem, key: string): string => {
-    const base = fkBase(key);
-    if (base) {
-        const description = asRecord(item)[`${base}_descricao`];
-        if (description !== null && description !== undefined) return String(description);
-    }
-    const value = asRecord(item)[key];
+const ACTIVE_COLUMN_RE = /ativo|situacao|status|fl_ativo|fl_situacao|fl_status/i;
+
+const formatTableCellValue = (key: string, value: unknown): string => {
     if (value === null || value === undefined) return '';
     if (typeof value === 'object') {
         const record = value as Record<string, unknown>;
@@ -54,7 +50,44 @@ const renderValue = (item: ApiItem, key: string): string => {
         }
         return flat.join(' - ');
     }
+
+    let boolVal: boolean | null = null;
+    if (typeof value === 'boolean') {
+        boolVal = value;
+    } else if (value === 'true' || value === 'false') {
+        boolVal = value === 'true';
+    } else if (value === 1 || value === 0) {
+        boolVal = value === 1;
+    } else if (value === '1' || value === '0') {
+        boolVal = value === '1';
+    } else if (typeof value === 'string') {
+        const v = value.trim().toUpperCase();
+        if (v === 'TRUE' || v === '1' || v === 'S' || v === 'SIM' || v === 'ATIVO' || v === 'A' || v === 'YES' || v === 'Y') {
+            boolVal = true;
+        } else if (v === 'FALSE' || v === '0' || v === 'N' || v === 'NAO' || v === 'NÃO' || v === 'INATIVO' || v === 'I' || v === 'NO') {
+            boolVal = false;
+        }
+    }
+
+    if (boolVal !== null) {
+        if (ACTIVE_COLUMN_RE.test(key)) {
+            return boolVal ? 'ATIVO' : 'INATIVO';
+        } else {
+            return boolVal ? 'SIM' : 'NÃO';
+        }
+    }
+
     return String(value);
+};
+
+const renderValue = (item: ApiItem, key: string): string => {
+    const base = fkBase(key);
+    if (base) {
+        const description = asRecord(item)[`${base}_descricao`];
+        if (description !== null && description !== undefined) return String(description);
+    }
+    const value = asRecord(item)[key];
+    return formatTableCellValue(key, value);
 };
 
 const deriveColumns = (item: ApiItem): MasterDetailColumn[] => {

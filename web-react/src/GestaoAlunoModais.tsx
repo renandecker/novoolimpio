@@ -1185,14 +1185,14 @@ function PixQrCodeModal({isOpen, onClose, parcela}: PixQrCodeModalProps) {
     const [sendingEmail, setSendingEmail] = useState(false);
     const [emailSent, setEmailSent] = useState(false);
 
-    if (!isOpen || !parcela) return null;
-
-    // Fetch existing PIX data when modal opens and parcela has idParcelaPix
     useEffect(() => {
-        if (parcela?.idParcelaPix) {
+        if (isOpen && parcela?.idParcelaPix) {
             fetchPixData();
         }
-    }, [parcela?.idParcelaPix]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, parcela?.idParcelaPix]);
+
+    if (!isOpen || !parcela) return null;
 
     const fetchPixData = async () => {
         if (!parcela) return;

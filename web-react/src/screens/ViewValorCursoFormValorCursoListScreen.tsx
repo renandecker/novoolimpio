@@ -22,14 +22,8 @@ export default function ViewValorCursoFormValorCursoListScreen() {
                             }
                         },
                         {key: 'formaPagamento', label: 'Forma Pagamento', empty: 'Conteúdo de Forma Pagamento.'},
-                        {key: 'ativos', label: 'Ativos', empty: 'Conteúdo de Ativos.'},
-                        {key: 'todos', label: 'Todos', empty: 'Conteúdo de Todos.'},
                         {key: 'descontos', label: 'Descontos', empty: 'Conteúdo de Descontos.'},
-                        {key: 'ativos2', label: 'Ativos 2', empty: 'Conteúdo de Ativos 2.'},
-                        {key: 'todos2', label: 'Todos 2', empty: 'Conteúdo de Todos 2.'},
                         {key: 'taxas', label: 'Taxas', empty: 'Conteúdo de Taxas.'},
-                        {key: 'ativos3', label: 'Ativos 3', empty: 'Conteúdo de Ativos 3.'},
-                        {key: 'todos3', label: 'Todos 3', empty: 'Conteúdo de Todos 3.'},
                     ]}
                 />
             </main>

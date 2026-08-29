@@ -11,7 +11,7 @@ import {useAuth} from './auth';
 import {ExportDropdown} from './ExportDropdown';
 import {BooleanField} from './BooleanField';
 import {Base64FileUpload} from './Base64FileUpload';
-import {PerfilModuloPermissions} from './useModulePaged';
+import {Pagination} from './Pagination';
 
 export const PAGE_SIZES = [10, 20, 50, 100];
 
@@ -86,13 +86,46 @@ const fkDescription = (item: ApiItem, key: string): string | null => {
     return value === null || value === undefined ? null : String(value);
 };
 
+const ACTIVE_COLUMN_RE = /ativo|situacao|status|fl_ativo|fl_situacao|fl_status/i;
+
+export const formatTableCellValue = (key: string, value: unknown): string => {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'object') return JSON.stringify(value);
+
+    let boolVal: boolean | null = null;
+    if (typeof value === 'boolean') {
+        boolVal = value;
+    } else if (value === 'true' || value === 'false') {
+        boolVal = value === 'true';
+    } else if (value === 1 || value === 0) {
+        boolVal = value === 1;
+    } else if (value === '1' || value === '0') {
+        boolVal = value === '1';
+    } else if (typeof value === 'string') {
+        const v = value.trim().toUpperCase();
+        if (v === 'TRUE' || v === '1' || v === 'S' || v === 'SIM' || v === 'ATIVO' || v === 'A' || v === 'YES' || v === 'Y') {
+            boolVal = true;
+        } else if (v === 'FALSE' || v === '0' || v === 'N' || v === 'NAO' || v === 'NÃO' || v === 'INATIVO' || v === 'I' || v === 'NO') {
+            boolVal = false;
+        }
+    }
+
+    if (boolVal !== null) {
+        if (ACTIVE_COLUMN_RE.test(key)) {
+            return boolVal ? 'ATIVO' : 'INATIVO';
+        } else {
+            return boolVal ? 'SIM' : 'NÃO';
+        }
+    }
+
+    return String(value);
+};
+
 const renderValue = (item: ApiItem, key: string): ReactNode => {
     const description = fkDescription(item, key);
     if (description !== null) return description;
     const value = asRecord(item)[key];
-    if (value === null || value === undefined) return '';
-    if (typeof value === 'object') return JSON.stringify(value);
-    return String(value);
+    return formatTableCellValue(key, value);
 };
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
@@ -570,39 +603,17 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
                     </tbody>
                     <tfoot>
                     <tr>
-                        <td colSpan={headerCount} className="data-table-paginator">
-                            <button
-                                onClick={() => setPage((current) => Math.max(0, current - 1))}
-                                disabled={page === 0 || q.isFetching}
-                            >
-                                Anterior
-                            </button>
-                            <span>
-                  Página {page + 1} de {totalPages}
-                </span>
-                            <button
-                                onClick={() => setPage((current) => Math.min(totalPages - 1, current + 1))}
-                                disabled={page >= totalPages - 1 || q.isFetching}
-                            >
-                                Próxima
-                            </button>
-                            <label>
-                                Registros por página
-                                <select
-                                    value={size}
-                                    onChange={(event) => {
-                                        setSize(Number(event.target.value));
-                                        setPage(0);
-                                    }}
-                                >
-                                    {PAGE_SIZES.map((option) => (
-                                        <option key={option} value={option}>
-                                            {option}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                            <span>Total: {totalElements}</span>
+                        <td colSpan={headerCount} style={{ padding: 0, border: 'none', background: 'transparent' }}>
+                            <Pagination
+                                currentPage={page + 1}
+                                totalPages={totalPages}
+                                pageSize={size}
+                                onPageChange={(newPage) => setPage(newPage - 1)}
+                                onPageSizeChange={(newSize) => {
+                                    setSize(newSize);
+                                    setPage(0);
+                                }}
+                            />
                         </td>
                     </tr>
                     </tfoot>

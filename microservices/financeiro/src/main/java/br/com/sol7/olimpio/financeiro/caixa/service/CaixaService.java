@@ -389,14 +389,14 @@ public class CaixaService {
 
     // Migrado de CaixaService.buscarAberturaCaixa (original service)
     public Uni<List<Long>> buscarAberturaCaixa(Long usuarioId) {
-        return repository.find("usuarioId = ?1 and date(data) = current_date order by id", usuarioId).list()
+        return repository.buscarAberturaCaixa(usuarioId)
                 .map(list -> list.stream().map(x -> x.id).toList());
     }
 
     // Migrado de CaixaService.buscarAberturaCaixaComUsuarioUnidade (original service)
     public Uni<Long> buscarAberturaCaixaComUsuarioUnidade(Long usuarioId, Long unidadeId) {
-        return repository.find("usuarioId = ?1 and unidadeId = ?2 and date(data) = current_date", usuarioId, unidadeId).firstResult()
-                .map(x -> x == null ? null : x.id);
+        return repository.buscarAberturaCaixaComUsuarioUnidade(usuarioId, unidadeId)
+                .map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
     // Busca o fundo de caixa sugerido baseado na configuração do usuário e unidade

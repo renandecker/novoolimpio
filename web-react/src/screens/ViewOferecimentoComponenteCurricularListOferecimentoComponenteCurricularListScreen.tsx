@@ -17,11 +17,31 @@ const formatDate = (value: unknown): string => {
     return `${match[3]}/${match[2]}/${match[1]}`;
 };
 
+const ACTIVE_COLUMN_RE = /ativo|situacao|status|fl_ativo|fl_situacao|fl_status/i;
+
 const renderValue = (item: ApiItem, key: string) => {
     const value = asRecord(item)[key];
     if (value === null || value === undefined) return '';
-    if (typeof value === 'boolean') return value ? 'Sim' : 'Não';
     if (typeof value === 'object') return JSON.stringify(value);
+
+    let boolVal: boolean | null = null;
+    if (typeof value === 'boolean') {
+        boolVal = value;
+    } else if (value === 'true' || value === 'false') {
+        boolVal = value === 'true';
+    } else if (value === 1 || value === 0) {
+        boolVal = value === 1;
+    } else if (value === '1' || value === '0') {
+        boolVal = value === '1';
+    }
+
+    if (boolVal !== null) {
+        if (ACTIVE_COLUMN_RE.test(key)) {
+            return boolVal ? 'ATIVO' : 'INATIVO';
+        } else {
+            return boolVal ? 'SIM' : 'NÃO';
+        }
+    }
     return String(value);
 };
 

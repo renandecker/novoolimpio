@@ -939,8 +939,9 @@
     white-space: nowrap;
 }
 
-.row-actions {
-    display: flex;
+.row-actions,
+.row-actions-menu {
+    display: inline-flex;
     gap: 4px;
     align-items: center;
 }

@@ -377,6 +377,10 @@ useEffect(() => {
 
                 // Load ocorrencias for each turma (new endpoint with full objects)
                 let ocorrenciasPorTurma: Record<number, OcorrenciaItem[]> = {};
+                // Reconstruir os dias de aula a partir das ocorrências persistidas quando o
+                // grupo não retornar os dias (join table vazia), garantindo a pré-visualização
+                // correta das aulas ao editar.
+                let diasAulaFinal = [...diasAulaLoaded];
                 try {
                     const {data: ocorrenciasData} = await api.get<Array<{
                         id: number;
@@ -389,6 +393,17 @@ useEffect(() => {
                         tempoAulaId: number;
                     }>>('/api/educacao/ocorrencia-componente-curricular/buscar-ocorrencia-por-oferecimento-com-grupo-completo', {params: {grupoId: curso.id}});
 
+                    if (ocorrenciasData && diasAulaFinal.length === 0) {
+                        const vistos = new Set<string>();
+                        for (const occ of ocorrenciasData) {
+                            if (occ.diaSemanaId == null || occ.turnoEducacaoId == null || occ.tempoAulaId == null) continue;
+                            const key = `${occ.diaSemanaId}-${occ.turnoEducacaoId}-${occ.tempoAulaId}`;
+                            if (vistos.has(key)) continue;
+                            vistos.add(key);
+                            diasAulaFinal.push({diaSemanaId: occ.diaSemanaId, turnoEducacaoId: occ.turnoEducacaoId, tempoAulaId: occ.tempoAulaId});
+                        }
+                    }
+
                     // Map offering ID -> componenteCurricularId
                     const ofertaIdParaCompId: Record<number, number> = {};
                     ofs.forEach((o) => {
@@ -397,9 +412,9 @@ useEffect(() => {
                         }
                     });
 
-                    // Map diaAula (diaSemanaId-turnoEducacaoId-tempoAulaId) -> index in diasAulaLoaded
+                    // Map diaAula (diaSemanaId-turnoEducacaoId-tempoAulaId) -> index in diasAulaFinal
                     const diaAulaKeyParaIndex: Record<string, number> = {};
-                    diasAulaLoaded.forEach((d, idx) => {
+                    diasAulaFinal.forEach((d, idx) => {
                         const key = `${d.diaSemanaId}-${d.turnoEducacaoId}-${d.tempoAulaId}`;
                         diaAulaKeyParaIndex[key] = idx;
                     });
@@ -464,7 +479,7 @@ useEffect(() => {
                     vagas: primeiro.vagas ?? 0,
                     qtdeSequencia: primeiro.qtdeSequencia ?? 0,
                     dataInicio: isoDate(primeiro.dataInicio),
-                    diasAula: diasAulaLoaded,
+                    diasAula: diasAulaFinal,
                     novoDiaDiaSemana: null,
                     novoDiaTurno: null,
                     novoDiaTempoAula: null,
@@ -515,7 +530,7 @@ useEffect(() => {
         try {
             const {data: ids} = await api.get<number[]>('/api/educacao/criterio/buscar-criterio', {params: {unidadeId: data.unidadeId, curriculoId: data.curriculoId}});
             if (ids && ids.length > 0) {
-                const {data: criterio} = await api.get<{qtd_turma_abertas?: number; data_inicio?: string; data_fim?: string; periodo?: number}>(`/api/educacao/criterio/${ids[0]}`);
+                const {data: criterio} = await api.get<{qtdTurmaAbertas?: number; dataInicio?: string; dataFim?: string; periodo?: number}>(`/api/educacao/criterio/${ids[0]}`);
                 setData(prev => ({...prev, criterio: criterio}));
             } else {
                 setData(prev => ({...prev, criterio: null}));
@@ -546,7 +561,11 @@ useEffect(() => {
 
     const gerarPreview = useCallback(() => {
         if (!data.dataInicio || data.diasAula.length === 0) {
-            setTurmas((prev) => prev.map((t) => ({...t, ocorrencias: []})));
+            // Em edição, preserva as aulas (ocorrências) já persistidas no banco em vez de
+            // apagá-las quando ainda não há data inicial/dias de aula informados.
+            if (!emEdicao) {
+                setTurmas((prev) => prev.map((t) => ({...t, ocorrencias: []})));
+            }
             return;
         }
         const invalidas: DataInvalidaItem[] = [];
@@ -599,7 +618,7 @@ useEffect(() => {
             }
         }
         setDatasInvalidas(invalidas);
-    }, [data.dataInicio, data.diasAula, minutosTempo, minutosTurno]);
+    }, [data.dataInicio, data.diasAula, minutosTempo, minutosTurno, emEdicao]);
 
     useEffect(() => {
         gerarPreview();
@@ -990,10 +1009,10 @@ useEffect(() => {
                         <div className="ofc-hint">
                             {data.criterio ? (
                                 <>
-                                    Turmas máximas abertas: {data.criterio.qtd_turma_abertas ?? 'Não definido'}<br />
+                                    Turmas máximas abertas: {data.criterio.qtdTurmaAbertas ?? 'Não definido'}<br />
                                     Período: {data.criterio.periodo ?? 'Não definido'}<br />
-                                    {data.criterio.data_inicio && `Início válido a partir de: ${brDate(data.criterio.data_inicio)}`}<br />
-                                    {data.criterio.data_fim && `Término até: ${brDate(data.criterio.data_fim)}`}
+                                    {data.criterio.dataInicio && `Início válido a partir de: ${brDate(data.criterio.dataInicio)}`}<br />
+                                    {data.criterio.dataFim && `Término até: ${brDate(data.criterio.dataFim)}`}
                                 </>
                             ) : (
                                 'Nenhum critério específico definido para esta unidade/curso.'
@@ -1070,7 +1089,7 @@ useEffect(() => {
                                 type="button"
                                 className="btn-secondary ofc-btn-yellow"
                                 title="Disponibilidade da Sala"
-                                onClick={() => data.entity.unidadeId && data.salaId ? window.open(`/api/educacao/disponibilidade-sala/schedule-events?unidadeId=${data.entity.unidadeId}&salaId=${data.salaId}`, '_blank') : alert('Selecione uma unidade e uma sala primeiro')}
+                                onClick={() => data.unidadeId && data.salaId ? window.open(`/api/educacao/disponibilidade-sala/schedule-events?unidadeId=${data.unidadeId}&salaId=${data.salaId}`, '_blank') : alert('Selecione uma unidade e uma sala primeiro')}
                             >
                                 Disponibilidade
                             </button>
@@ -1321,7 +1340,7 @@ useEffect(() => {
                         type="button"
                         className="btn-secondary ofc-btn-yellow"
                         title="Disponibilidade dos Professores"
-                        onClick={() => data.entity.unidadeId ? window.open(`/api/educacao/disponibilidade-professor/schedule-events?unidadeId=${data.entity.unidadeId}`, '_blank') : alert('Selecione uma unidade primeiro')}
+                        onClick={() => data.unidadeId ? window.open(`/api/educacao/disponibilidade-professor/schedule-events?unidadeId=${data.unidadeId}`, '_blank') : alert('Selecione uma unidade primeiro')}
                     >
                         Disponibilidade
                     </button>

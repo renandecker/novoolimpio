@@ -1,6 +1,5 @@
 import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
-import type {DataTableColumn} from '../DataTable';
+import {DataTable, type DataTableColumn} from '../DataTable';
 import type {ApiItem} from '../types';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
@@ -12,15 +11,28 @@ const formatDate = (value: unknown): string => {
     return `${match[3]}/${match[2]}/${match[1]}`;
 };
 
+const formatValor = (value: unknown): string => {
+    if (value === null || value === undefined || value === '') return '';
+    return new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(Number(value));
+};
+
+const formatCargaHoraria = (item: ApiItem): string => {
+    const record = asRecord(item);
+    const value = record.curriculo_carga_horaria ?? record.curriculoCargaHoraria ?? record.carga_horaria;
+    if (value === null || value === undefined || value === '') return '';
+    return `${String(value)} H/A`;
+};
+
 const VALOR_CURSO_COLUMNS: DataTableColumn[] = [
     {key: 'data', label: 'Data', render: (item) => formatDate(asRecord(item).data)},
     {key: 'curriculo_descricao', label: 'Curso'},
+    {key: 'carga_horaria', label: 'Carga Horária', render: formatCargaHoraria},
     {
         key: 'valor',
         label: 'Valor Curso',
         render: (item) => {
             const record = asRecord(item);
-            return record.valor_hora ? '' : String(record.valor ?? '');
+            return record.valor_hora ? '' : formatValor(record.valor);
         },
     },
     {
@@ -33,7 +45,7 @@ const VALOR_CURSO_COLUMNS: DataTableColumn[] = [
         label: 'Valor Hora',
         render: (item) => {
             const record = asRecord(item);
-            return record.valor_hora ? String(record.valor ?? '') : '';
+            return record.valor_hora ? formatValor(record.valor) : '';
         },
     },
     {key: 'dias_spc', label: 'Dias Atraso'},
@@ -45,19 +57,8 @@ export default function ViewValorCursoListValorCursoListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <h1>Valor Curso</h1>
-                <ModuleTabs
-                    tabs={[
-                        {
-                            key: 'formaPagamento',
-                            label: 'Forma Pagamento',
-                            path: '/api/view/valorCurso/listValorCurso',
-                            columns: VALOR_CURSO_COLUMNS,
-                            maxMainColumns: VALOR_CURSO_COLUMNS.length,
-                        },
-                        {key: 'descontos', label: 'Descontos', empty: 'Conteúdo de Descontos.'},
-                        {key: 'taxas', label: 'Taxas', empty: 'Conteúdo de Taxas.'},
-                    ]}
-                />
+                <DataTable path="/api/view/valorCurso/listValorCurso" columns={VALOR_CURSO_COLUMNS}
+                           maxMainColumns={VALOR_CURSO_COLUMNS.length}/>
             </main>
         </PermissionGate>
     );

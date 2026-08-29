@@ -185,7 +185,7 @@ function PendenciaVendaTab({unidadeId}: { unidadeId: string }) {
                             )}
                         </td>
                         <td>
-                            <div>Produto: {item.produtoNome || `#${item.produtoId}</div>}
+                            <div>Produto: {item.produtoNome || `#${item.produtoId}`}</div>
                             <div>Categoria: {item.produtoCategoriaDescricao || '-'}</div>
                         </td>
                         <td>

@@ -5,6 +5,7 @@ import {api} from '../api';
 import {abrirRelatorio, type RelatorioAberto} from '../relatorios';
 import {usePermissions} from '../permissions';
 import {ExportButton} from '../ExportButton';
+import './ReportView.css';
 
 const reportTypes = ['TABELA', 'GRAFICO', 'MAPA', 'ORGANOGRAMA', 'DASHBOARD', 'PIZZA', 'LINHA', 'COMBINADO', 'CIRCULAR', 'BARRA_VERTICAL', 'BARRA_HORIZONTAL'] as const;
 type ReportType = (typeof reportTypes)[number];
@@ -53,6 +54,8 @@ const pathToReportType: Record<string, ReportType> = {
 const labelFor = (key: string) => key
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/^./, (letter) => letter.toUpperCase());
+
+const tipoLabel = (tipo: string) => labelFor(tipo.replace(/_/g, ' ').toLowerCase());
 
 const isObject = (v: unknown): v is Record<string, unknown> =>
     typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -153,8 +156,8 @@ export default function ReportViewScreen() {
     return (
         <main className="report-view">
             <div className="report-view-header">
-                <div>
-                    <span className="report-view-type">{data.tipo}</span>
+                <div className="report-view-header-text">
+                    <span className="report-view-type">{tipoLabel(data.tipo)}</span>
                     <h1>{data.nome}</h1>
                 </div>
                 <div className="report-view-actions">
