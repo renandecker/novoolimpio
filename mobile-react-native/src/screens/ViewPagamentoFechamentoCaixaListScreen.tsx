@@ -13,7 +13,7 @@ import {
 import {api} from '../api';
 import {Wizard} from '../Wizard';
 import type {WizardStep} from '../Wizard';
-import {useQuery} from '@tanstack/react-query';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
 
 type Caixa = {
     id: number; data: string; dataFechamento: string | null; usuarioId: number; fundoCaixa: number;
@@ -60,6 +60,7 @@ function ChipSelect<T extends string>({options, value, onChange}: { options: { v
 }
 
 export default function ViewPagamentoFechamentoCaixaListScreen() {
+    const queryClient = useQueryClient();
     const [usuarioId, setUsuarioId] = useState('');
     const [unidadeId, setUnidadeId] = useState('');
     const [caixa, setCaixa] = useState<Caixa | null>(null);
@@ -69,7 +70,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
 
     const [usuarioOptions, setUsuarioOptions] = useState<Array<{ id: number; nome: string }>>([]);
     const [loadingUsuario, setLoadingUsuario] = useState(false);
-    useQuery({
+    const usuarioQuery = useQuery({
         queryKey: ['combo-usuario'],
         queryFn: async () => {
             setLoadingUsuario(true);
@@ -87,7 +88,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
     });
     const [unidadeOptions, setUnidadeOptions] = useState<Array<{ id: number; nome: string }>>([]);
     const [loadingUnidade, setLoadingUnidade] = useState(false);
-    useQuery({
+    const unidadeQuery = useQuery({
         queryKey: ['combo-unidade'],
         queryFn: async () => {
             setLoadingUnidade(true);
@@ -105,7 +106,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
     });
     const [impressoraOptions, setImpressoraOptions] = useState<Array<{ id: number; nome: string }>>([]);
     const [loadingImpressora, setLoadingImpressora] = useState(false);
-    useQuery({
+    const impressoraQuery = useQuery({
         queryKey: ['combo-impressora'],
         queryFn: async () => {
             setLoadingImpressora(true);
@@ -121,6 +122,12 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
         },
         enabled: false,
     });
+
+    useEffect(() => {
+        queryClient.prefetchQuery({queryKey: ['combo-usuario']});
+        queryClient.prefetchQuery({queryKey: ['combo-unidade']});
+        queryClient.prefetchQuery({queryKey: ['combo-impressora']});
+    }, [queryClient]);
 
     const [fundoCaixa, setFundoCaixa] = useState('');
     const [impressoraId, setImpressoraId] = useState('');
@@ -340,7 +347,9 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                     onPress={loadingUsuario ? undefined : () => { /* open combo */
                     }}
                 >
-                    <RNText style={styles.inputText}>{usuarioId || '-- Selecione --'}</RNText>
+                    <RNText style={styles.inputText}>
+                        {usuarioOptions.find(u => String(u.id) === usuarioId)?.nome || usuarioId || '-- Selecione --'}
+                    </RNText>
                     {loadingUsuario && <ActivityIndicator size="small"/>}
                 </TouchableOpacity>
             </View>
@@ -355,7 +364,9 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                     onPress={loadingUnidade ? undefined : () => { /* open combo */
                     }}
                 >
-                    <RNText style={styles.inputText}>{unidadeId || '-- Selecione --'}</RNText>
+                    <RNText style={styles.inputText}>
+                        {unidadeOptions.find(u => String(u.id) === unidadeId)?.nome || unidadeId || '-- Selecione --'}
+                    </RNText>
                     {loadingUnidade && <ActivityIndicator size="small"/>}
                 </TouchableOpacity>
             </View>
@@ -386,7 +397,9 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                             onPress={loadingImpressora ? undefined : () => { /* open combo */
                             }}
                         >
-                            <RNText style={styles.inputText}>{impressoraId || '-- Selecione --'}</RNText>
+                            <RNText style={styles.inputText}>
+                                {impressoraOptions.find(i => String(i.id) === impressoraId)?.nome || impressoraId || '-- Selecione --'}
+                            </RNText>
                             {loadingImpressora && <ActivityIndicator size="small"/>}
                         </TouchableOpacity>
                     </View>

@@ -70,6 +70,25 @@ const renderMovimentacaoIcon = (tipo: string) => {
     return '📦';
 };
 
+const shouldShowExcluir = () => true;
+const shouldShowSegundaViaPagamento = (tipo: string) => tipo === 'ENTRADA' || tipo === '1';
+const shouldShowSegundaViaSangria = (tipo: string) => tipo === 'SANGRIA' || tipo === '3';
+
+const handleExcluirMovimentacao = (mov: Movimentacao) => {
+    Alert.alert('Confirmar', `Excluir movimentação ${mov.id}?`, [
+        {text: 'Cancelar', style: 'cancel'},
+        {text: 'Excluir', style: 'destructive', onPress: () => alert(`Excluir movimentação ${mov.id} - não implementado`)},
+    ]);
+};
+
+const handleSegundaViaPagamento = (mov: Movimentacao) => {
+    Alert.alert('Segunda Via Pagamento', `Movimentação ${mov.id} - não implementado`);
+};
+
+const handleSegundaViaSangria = (mov: Movimentacao) => {
+    Alert.alert('Segunda Via Sangria', `Movimentação ${mov.id} - não implementado`);
+};
+
 const calculateTotals = (movs: Movimentacao[]) => {
     const totals = {
         totalDinheiro: 0,
@@ -276,6 +295,7 @@ export default function ViewCaixaListCaixaListScreen() {
                                                         <Text style={styles.movTh}>Juros</Text>
                                                         <Text style={styles.movTh}>Troco</Text>
                                                         <Text style={styles.movTh}>Total</Text>
+                                                        <Text style={styles.movTh}>Ações</Text>
                                                     </View>
                                                     <ScrollView horizontal={true} style={styles.movTableScroll}>
                                                         <View style={styles.movTableBody}>
@@ -294,6 +314,23 @@ export default function ViewCaixaListCaixaListScreen() {
                                                                     <Text style={styles.movTd}>{formatCurrency(mov.multaJuros)}</Text>
                                                                     <Text style={styles.movTd}>{formatCurrency(mov.troco)}</Text>
                                                                     <Text style={styles.movTd}>{formatCurrency(mov.total)}</Text>
+                                                                    <View style={styles.movActions}>
+                                                                        {shouldShowExcluir() && (
+                                                                            <Pressable style={styles.actionBtnSmall} onPress={() => handleExcluirMovimentacao(mov)}>
+                                                                                <Text style={styles.actionBtnSmallText}>🗑️</Text>
+                                                                            </Pressable>
+                                                                        )}
+                                                                        {shouldShowSegundaViaPagamento(mov.tipoMovimento) && (
+                                                                            <Pressable style={styles.actionBtnSmall} onPress={() => handleSegundaViaPagamento(mov)}>
+                                                                                <Text style={styles.actionBtnSmallText}>🖨️</Text>
+                                                                            </Pressable>
+                                                                        )}
+                                                                        {shouldShowSegundaViaSangria(mov.tipoMovimento) && (
+                                                                            <Pressable style={styles.actionBtnSmall} onPress={() => handleSegundaViaSangria(mov)}>
+                                                                                <Text style={styles.actionBtnSmallText}>📄</Text>
+                                                                            </Pressable>
+                                                                        )}
+                                                                    </View>
                                                                 </View>
                                                             ))}
                                                         </View>
@@ -356,16 +393,8 @@ export default function ViewCaixaListCaixaListScreen() {
                                                                 <Text style={styles.totalsValue}>{formatCurrency(totalDinheiroCaixa)}</Text>
                                                             </View>
                                                         </View>
-                                                    </ScrollView>
+</ScrollView>
                                                 </View>
-<View style={styles.actionsBar}>
-                                                     <Pressable
-                                                         style={[styles.actionBtn, styles.actionYellow, {width: 160}]}
-                                                         onPress={() => setExpandedRows(prev => ({...prev, [caixaId]: false}))}
-                                                     >
-                                                         <Text style={styles.actionBtnText}>Fechar Detalhes</Text>
-                                                     </Pressable>
-                                                 </View>
                                             </>
                                         )}
                                     </View>
@@ -586,6 +615,21 @@ const styles = StyleSheet.create({
         color: Colors.textPrimary,
         textAlign: 'center',
         width: 70,
+    },
+    movActions: {
+        flexDirection: 'row',
+        gap: Spacing.xs,
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: 80,
+    },
+    actionBtnSmall: {
+        paddingHorizontal: Spacing.xs,
+        paddingVertical: 2,
+        borderRadius: BorderRadius.sm,
+    },
+    actionBtnSmallText: {
+        fontSize: Typography.sizes.xs,
     },
     totalsContainer: {
         marginTop: Spacing.md,

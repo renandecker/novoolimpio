@@ -20,9 +20,17 @@ const SearchIcon = () => (
 );
 
 const tipoRota: Record<string, string> = {
-    TABELA: '/view/relatorios/listTabela',
-    GRAFICO: '/view/relatorios/listGrafico',
-    MAPA: '/view/relatorios/listMapa',
+    TABELA: '/view/relatorios/viewTabela',
+    GRAFICO: '/view/relatorios/viewGraficoBarrasVertical',
+    MAPA: '/view/relatorios/viewMapa',
+    ORGANOGRAMA: '/view/relatorios/viewOrganograma',
+    DASHBOARD: '/view/relatorios/viewDashboard',
+    PIZZA: '/view/relatorios/viewGraficoPizza',
+    LINHA: '/view/relatorios/viewGraficoLinhas',
+    COMBINADO: '/view/relatorios/viewGraficoCombinado',
+    CIRCULAR: '/view/relatorios/viewGraficoCircular',
+    BARRA_VERTICAL: '/view/relatorios/viewGraficoBarrasVertical',
+    BARRA_HORIZONTAL: '/view/relatorios/viewGraficoBarrasHorizontal',
 };
 
 const PAGE_SIZE = 10;
@@ -110,7 +118,9 @@ export function ReportButton() {
 
     const handleItemClick = (item: RelatorioDisponivel) => {
         setOpen(false);
-        navigate(tipoRota[item.tipo] ?? '/view/relatorios/listTabela');
+        const tipoKey = (item.tipo || '').toUpperCase();
+        const baseRoute = tipoRota[tipoKey] ?? '/view/relatorios/viewTabela';
+        navigate(`${baseRoute}?id=${item.id}`);
     };
 
     return (

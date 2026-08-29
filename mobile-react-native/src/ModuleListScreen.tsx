@@ -103,6 +103,9 @@ export function ModuleList({
     const [modal, setModal] = useState<ModalState>(null);
     const [notice, setNotice] = useState('');
     const [runningAction, setRunningAction] = useState<string | null>(null);
+    const [filterModalVisible, setFilterModalVisible] = useState(false);
+    const [filterParams, setFilterParams] = useState<Record<string, unknown>>({});
+    const [filterInputs, setFilterInputs] = useState<Record<string, string>>({});
 
     const segments = path.split('/').filter(Boolean);
     const feature = segments[2] ?? '';
@@ -119,7 +122,7 @@ export function ModuleList({
     const isAdminUser = isAdmin(session);
     const canRelatorio = isAdminUser || canExecute;
 
-    const q = useModulePaged(path, page, size, params);
+    const q = useModulePaged(path, page, size, {...params, ...filterParams});
     const items = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);
@@ -194,6 +197,27 @@ export function ModuleList({
         );
     }
 
+    const openFilterModal = () => {
+        setFilterInputs({});
+        setFilterModalVisible(true);
+    };
+
+    const applyFilters = () => {
+        const cleanFilters: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(filterInputs)) {
+            if (value !== null && value !== undefined && value !== '') {
+                cleanFilters[key] = value;
+            }
+        }
+        setFilterParams(cleanFilters);
+        setPage(0);
+        setFilterModalVisible(false);
+    };
+
+    const clearFilters = () => {
+        setFilterInputs({});
+    };
+
     return (
         <View style={styles.page}>
             <View style={styles.header}>
@@ -204,21 +228,26 @@ export function ModuleList({
                     </Pressable>
                 )}
                 {canRelatorio && items.length > 0 && (
-                    <Pressable style={styles.exportButton} onPress={() => {
-                        // Show action sheet or modal with export options
-                        Alert.alert(
-                            'Exportar',
-                            'Selecione o formato de exportação',
-                            [
-                                {text: 'PDF', onPress: () => exportarPDF(items[0])},
-                                {text: 'DOCX', onPress: () => exportarDOCX(items[0])},
-                                {text: 'Excel', onPress: () => exportarExcel(items[0])},
-                                {text: 'Cancelar', style: 'cancel'},
-                            ]
-                        );
-                    }}>
-                        <Text style={styles.exportButtonText}>Exportar</Text>
-                    </Pressable>
+                    <>
+                        <Pressable style={[styles.exportButton, styles.searchButton]} onPress={openFilterModal}>
+                            <Text style={styles.exportButtonText}>Busca</Text>
+                        </Pressable>
+                        <Pressable style={styles.exportButton} onPress={() => {
+                            // Show action sheet or modal with export options
+                            Alert.alert(
+                                'Exportar',
+                                'Selecione o formato de exportação',
+                                [
+                                    {text: 'PDF', onPress: () => exportarPDF(items[0])},
+                                    {text: 'DOCX', onPress: () => exportarDOCX(items[0])},
+                                    {text: 'Excel', onPress: () => exportarExcel(items[0])},
+                                    {text: 'Cancelar', style: 'cancel'},
+                                ]
+                            );
+                        }}>
+                            <Text style={styles.exportButtonText}>Exportar</Text>
+                        </Pressable>
+                    </>
                 )}
             </View>
             {notice ? <Text style={styles.notice}>{notice}</Text> : null}
@@ -350,6 +379,19 @@ export function ModuleList({
                     </Pressable>
                 </Pressable>
             </Modal>
+            <Modal visible={filterModalVisible} transparent animationType="fade" onRequestClose={() => setFilterModalVisible(false)}>
+                <Pressable style={styles.modalOverlay} onPress={() => setFilterModalVisible(false)}>
+                    <Pressable style={styles.modalBox} onPress={(e) => e.stopPropagation()}>
+                        <FilterModal
+                            columns={Object.keys(asRecord(items[0] ?? {})).filter(k => k !== 'id' && k !== 'dadosJson')}
+                            initialFilters={filterInputs}
+                            onClose={() => setFilterModalVisible(false)}
+                            onApply={applyFilters}
+                            onClear={clearFilters}
+                        />
+                    </Pressable>
+                </Pressable>
+            </Modal>
         </View>
     );
 }
@@ -408,6 +450,65 @@ function RecordModal({
                 </Pressable>
                 <Pressable style={[styles.modalButton, styles.saveButton]} onPress={() => onSubmit(values)}>
                     <Text style={styles.modalButtonText}>{submitLabel}</Text>
+                </Pressable>
+            </View>
+        </View>
+    );
+}
+
+function FilterModal({
+    columns,
+    initialFilters,
+    onClose,
+    onApply,
+    onClear,
+}: {
+    columns: string[];
+    initialFilters: Record<string, string>;
+    onClose: () => void;
+    onApply: () => void;
+    onClear: () => void;
+}) {
+    const [filters, setFilters] = useState<Record<string, string>>(() => ({...initialFilters}));
+
+    const handleChange = (key: string, value: string) => {
+        setFilters(prev => ({...prev, [key]: value}));
+    };
+
+    return (
+        <View style={styles.recordModalContainer}>
+            <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Filtros de Busca</Text>
+                <Pressable style={styles.closeBtn} onPress={onClose} accessibilityLabel="Fechar">
+                    <Text style={styles.closeBtnText}>✕</Text>
+                </Pressable>
+            </View>
+            <ScrollView style={styles.modalScroll}>
+                {columns.length === 0 ? (
+                    <Text style={styles.modalEmpty}>Nenhum campo disponível para filtro.</Text>
+                ) : (
+                    columns.map((field) => (
+                        <View key={field} style={styles.field}>
+                            <Text style={styles.fieldLabel}>{toTitle(field)}</Text>
+                            <TextInput
+                                style={styles.fieldInput}
+                                value={filters[field] ?? ''}
+                                onChangeText={(text) => handleChange(field, text)}
+                                placeholder={`Filtrar por ${toTitle(field)}`}
+                            />
+                        </View>
+                    ))
+                )}
+            </ScrollView>
+            <View style={styles.modalActions}>
+                <Pressable style={[styles.modalButton, styles.cancelButton]} onPress={onClose}>
+                    <Text style={styles.cancelButtonText}>Cancelar</Text>
+                </Pressable>
+                <Pressable style={[styles.modalButton, {backgroundColor: Colors.warningBg}]} onPress={onClear}>
+                    <Text style={styles.cancelButtonText}>Limpar</Text>
+                </Pressable>
+                <Pressable style={[styles.modalButton, styles.saveButton]} onPress={onApply}>
+                    <Text style={styles.modalButtonText}>Pesquisar</Text>
                 </Pressable>
             </View>
         </View>
@@ -717,5 +818,12 @@ const styles = StyleSheet.create({
         color: Colors.goldText,
         fontSize: Typography.sizes.lg,
         fontWeight: Typography.weights.semibold,
+    },
+    searchButton: {
+        backgroundColor: Colors.success,
+        borderRadius: BorderRadius.lg,
+        paddingHorizontal: Spacing.xl,
+        paddingVertical: Spacing.md,
+        marginLeft: Spacing.md,
     },
 });

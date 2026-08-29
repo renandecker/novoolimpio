@@ -3,7 +3,7 @@ import {api} from '../api';
 import {useAuth} from '../auth';
 import {PermissionGate} from '../permissions';
 import '../Wizard.css';
-import {useQuery} from '@tanstack/react-query';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
 
 // ==== Tipos espelhando os DTOs REST de financeiro.zip (módulo caixa) ====
 type Caixa = {
@@ -39,6 +39,7 @@ const ;
 export default function ViewPagamentoFechamentoCaixaListScreen() {
     const {session} = useAuth();
     void session;
+    const queryClient = useQueryClient();
 
     // Sessão ainda não carrega usuarioId/unidadeId (ver auth.tsx) - mantidos editáveis até que o
     // módulo básico exponha esses campos no token/sessão.
@@ -49,7 +50,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
     // Combo search for Usuario
     const [usuarioOptions, setUsuarioOptions] = useState<Array<{ id: number; nome: string }>>([]);
     const [loadingUsuario, setLoadingUsuario] = useState(false);
-    useQuery({
+    const usuarioQuery = useQuery({
         queryKey: ['combo-usuario'],
         queryFn: async () => {
             setLoadingUsuario(true);
@@ -68,7 +69,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
     // Combo search for Unidade
     const [unidadeOptions, setUnidadeOptions] = useState<Array<{ id: number; nome: string }>>([]);
     const [loadingUnidade, setLoadingUnidade] = useState(false);
-    useQuery({
+    const unidadeQuery = useQuery({
         queryKey: ['combo-unidade'],
         queryFn: async () => {
             setLoadingUnidade(true);
@@ -87,7 +88,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
     // Combo search for Impressora
     const [impressoraOptions, setImpressoraOptions] = useState<Array<{ id: number; nome: string }>>([]);
     const [loadingImpressora, setLoadingImpressora] = useState(false);
-    useQuery({
+    const impressoraQuery = useQuery({
         queryKey: ['combo-impressora'],
         queryFn: async () => {
             setLoadingImpressora(true);
@@ -103,6 +104,12 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
         },
         enabled: false,
     });
+
+    useEffect(() => {
+        queryClient.prefetchQuery({queryKey: ['combo-usuario']});
+        queryClient.prefetchQuery({queryKey: ['combo-unidade']});
+        queryClient.prefetchQuery({queryKey: ['combo-impressora']});
+    }, [queryClient]);
 
     const [step, setStep] = useState<number>(0);
     const [caixa, setCaixa] = useState<Caixa | null>(null);

@@ -125,6 +125,18 @@ public class ViewService {
                 .chain(session -> doPaged(session, feature, resource, p, s));
     }
 
+    public Uni<PagedResponse<Map<String, Object>>> search(String feature, String resource, int page, int size, Map<String, Object> filters) {
+        int p = Math.max(0, page);
+        int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
+        CuratedSelect curated = CURATED_SELECTS.get(feature + "/" + resource);
+        if (curated != null) {
+            return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                    .chain(session -> doPagedCuratedWithFilters(session, curated, p, s, filters));
+        }
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> doPagedWithFilters(session, feature, resource, p, s, filters));
+    }
+
     public Uni<List<Map<String, Object>>> list(String feature, String resource) {
         CuratedSelect curated = CURATED_SELECTS.get(feature + "/" + resource);
         if (curated != null) {
@@ -142,8 +154,8 @@ public class ViewService {
                         .chain(session -> listRows(session, table)));
     }
 
-    private Uni<PagedResponse<Map<String, Object>>> doPagedCurated(Mutiny.Session session, CuratedSelect curated,
-                                                                   int p, int s) {
+private Uni<PagedResponse<Map<String, Object>>> doPagedCurated(Mutiny.Session session, CuratedSelect curated,
+                                                                    int p, int s) {
         String selectSql = "SELECT * FROM (" + curated.selectSql() + ") sub ORDER BY id LIMIT :limit OFFSET :offset";
         String countSql = "SELECT count(*) FROM (" + curated.selectSql() + ") sub";
         Uni<Long> total = session.createNativeQuery(countSql).getSingleResult()
@@ -154,6 +166,115 @@ public class ViewService {
                 .getResultList()
                 .map(raw -> toMaps(curated.columns(), raw));
         return total.flatMap(count -> rows.map(content -> new PagedResponse<>(content, count, p, s)));
+    }
+
+private Uni<PagedResponse<Map<String, Object>>> doPagedCuratedWithFilters(Mutiny.Session session, CuratedSelect curated,
+                                                                                int p, int s, Map<String, Object> filters) {
+        String whereClause = buildWhereClause(filters);
+        String selectSql = "SELECT * FROM (" + curated.selectSql() + ") sub" + whereClause + " ORDER BY id LIMIT :limit OFFSET :offset";
+        String countSql = "SELECT count(*) FROM (" + curated.selectSql() + ") sub" + whereClause;
+        Mutiny.Query<?> countQuery = session.createNativeQuery(countSql);
+        Mutiny.Query<?> selectQuery = session.createNativeQuery(selectSql)
+                .setParameter("limit", s)
+                .setParameter("offset", (long) p * s);
+        setFilterParameters(countQuery, filters);
+        setFilterParameters(selectQuery, filters);
+        Uni<Long> total = countQuery.getSingleResult().map(r -> ((Number) r).longValue());
+        Uni<List<Map<String, Object>>> rows = selectQuery.getResultList().map(raw -> toMaps(curated.columns(), raw));
+        return total.flatMap(count -> rows.map(content -> new PagedResponse<>(content, count, p, s)));
+    }
+
+    private Uni<PagedResponse<Map<String, Object>>> doPagedWithFilters(Mutiny.Session session, String feature, String resource,
+                                                                        int p, int s, Map<String, Object> filters) {
+        return resolveTable(session, feature, resource)
+                .flatMap(table -> {
+                    if (table == null) return Uni.createFrom().item(new PagedResponse<>(List.of(), 0, p, s));
+                    return columns(session, table).flatMap(cols -> {
+                        if (cols.isEmpty()) return Uni.createFrom().item(new PagedResponse<>(List.of(), 0L, p, s));
+                        String whereClause = buildWhereClause(filters, cols);
+                        String orderBy = cols.contains("id") ? "id" : cols.get(0);
+                        String selectSql = "SELECT " + quoteColumns(cols) + " FROM " + quote(table)
+                                + whereClause + " ORDER BY " + quote(orderBy) + " LIMIT :limit OFFSET :offset";
+                        String countSql = "SELECT count(*) FROM " + quote(table) + whereClause;
+                        Mutiny.Query<?> countQuery = session.createNativeQuery(countSql);
+                        Mutiny.Query<?> selectQuery = session.createNativeQuery(selectSql)
+                                .setParameter("limit", s)
+                                .setParameter("offset", (long) p * s);
+                        setFilterParameters(countQuery, filters);
+                        setFilterParameters(selectQuery, filters);
+                        Uni<Long> total = countQuery.getSingleResult().map(r -> ((Number) r).longValue());
+                        Uni<List<Map<String, Object>>> rows = selectQuery.getResultList()
+                                .map(list -> list.stream().map(row -> {
+                                    Object[] arr = (Object[]) row;
+                                    Map<String, Object> m = new LinkedHashMap<>();
+                                    for (int i = 0; i < cols.size() && i < arr.length; i++) m.put(cols.get(i), arr[i]);
+                                    return m;
+                                }).collect(Collectors.toList()))
+                                .flatMap(content -> enrichDescriptions(session, table, content));
+                        return total.flatMap(count -> rows.map(content -> new PagedResponse<>(content, count, p, s)));
+                    });
+                });
+    }
+
+    private String buildWhereClause(Map<String, Object> filters) {
+        return buildWhereClause(filters, null);
+    }
+
+    private String buildWhereClause(Map<String, Object> filters, List<String> cols) {
+        if (filters == null || filters.isEmpty()) return "";
+        List<String> conditions = new ArrayList<>();
+        for (Map.Entry<String, Object> entry : filters.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (value == null || "".equals(value)) continue;
+            if (cols != null && !cols.contains(key)) continue;
+            String col = quote(key);
+            if (value instanceof Map) {
+                Map<String, Object> op = (Map<String, Object>) value;
+                String operator = (String) op.get("operator");
+                Object val = op.get("value");
+                if (operator != null && val != null) {
+                    conditions.add(buildCondition(col, operator, val));
+                }
+            } else {
+                conditions.add(col + " ILIKE :" + key);
+            }
+        }
+        if (conditions.isEmpty()) return "";
+        return " WHERE " + String.join(" AND ", conditions);
+    }
+
+    private String buildCondition(String col, String operator, Object value) {
+        return switch (operator.toUpperCase()) {
+            case "EQ", "=" -> col + " = :" + col.replaceAll("[^a-zA-Z0-9_]", "");
+case "NE", "!=" -> col + " != :" + col.replaceAll("[^a-zA-Z0-9_]", "");
+            case "GT", ">" -> col + " > :" + col.replaceAll("[^a-zA-Z0-9_]", "");
+            case "GE", ">=" -> col + " >= :" + col.replaceAll("[^a-zA-Z0-9_]", "");
+            case "LT", "<" -> col + " < :" + col.replaceAll("[^a-zA-Z0-9_]", "");
+            case "LE", "<=" -> col + " <= :" + col.replaceAll("[^a-zA-Z0-9_]", "");
+            case "LIKE" -> col + " ILIKE :" + col.replaceAll("[^a-zA-Z0-9_]", "");
+            case "IN" -> col + " IN (:" + col.replaceAll("[^a-zA-Z0-9_]", "") + ")";
+            default -> col + " ILIKE :" + col.replaceAll("[^a-zA-Z0-9_]", "");
+        };
+    }
+
+    private void setFilterParameters(Mutiny.Query<?> query, Map<String, Object> filters) {
+        if (filters == null || filters.isEmpty()) return;
+        for (Map.Entry<String, Object> entry : filters.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (value == null || "".equals(value)) continue;
+            String paramName = key.replaceAll("[^a-zA-Z0-9_]", "");
+            if (value instanceof Map) {
+                Map<String, Object> op = (Map<String, Object>) value;
+                Object val = op.get("value");
+                if (val != null) {
+                    query.setParameter(paramName, val);
+                }
+            } else {
+                query.setParameter(paramName, "%" + value + "%");
+            }
+        }
     }
 
     private static List<Map<String, Object>> toMaps(List<String> cols, List<?> rawList) {

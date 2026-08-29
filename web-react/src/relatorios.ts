@@ -4,7 +4,7 @@ import type {PagedResponse} from './types';
 export type RelatorioDisponivel = {
     id: number;
     nome: string;
-    tipo: 'TABELA' | 'GRAFICO' | 'MAPA';
+    tipo: 'TABELA' | 'GRAFICO' | 'MAPA' | 'ORGANOGRAMA' | 'DASHBOARD' | 'PIZZA' | 'LINHA' | 'COMBINADO' | 'CIRCULAR' | 'BARRA_VERTICAL' | 'BARRA_HORIZONTAL';
 };
 
 export type RelatorioAberto = {

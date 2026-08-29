@@ -6,20 +6,35 @@ import {abrirRelatorio, type RelatorioAberto} from '../relatorios';
 import {usePermissions} from '../permissions';
 import {ExportButton} from '../ExportButton';
 
-const reportTypes = ['TABELA', 'GRAFICO', 'MAPA'] as
-const ;
+const reportTypes = ['TABELA', 'GRAFICO', 'MAPA', 'ORGANOGRAMA', 'DASHBOARD', 'PIZZA', 'LINHA', 'COMBINADO', 'CIRCULAR', 'BARRA_VERTICAL', 'BARRA_HORIZONTAL'] as const;
 type ReportType = (typeof reportTypes)[number];
 
 const routeFor: Record<ReportType, string> = {
     TABELA: 'listTabela',
     GRAFICO: 'listGrafico',
     MAPA: 'listMapa',
+    ORGANOGRAMA: 'listOrganograma',
+    DASHBOARD: 'listDashboard',
+    PIZZA: 'listGrafico',
+    LINHA: 'listGrafico',
+    COMBINADO: 'listGrafico',
+    CIRCULAR: 'listGrafico',
+    BARRA_VERTICAL: 'listGrafico',
+    BARRA_HORIZONTAL: 'listGrafico',
 };
 
 const resourceFor: Record<ReportType, string> = {
     TABELA: 'tabela',
     GRAFICO: 'grafico',
     MAPA: 'mapa',
+    ORGANOGRAMA: 'organograma',
+    DASHBOARD: 'dashboard',
+    PIZZA: 'grafico',
+    LINHA: 'grafico',
+    COMBINADO: 'grafico',
+    CIRCULAR: 'grafico',
+    BARRA_VERTICAL: 'grafico',
+    BARRA_HORIZONTAL: 'grafico',
 };
 
 const labelFor = (key: string) => key

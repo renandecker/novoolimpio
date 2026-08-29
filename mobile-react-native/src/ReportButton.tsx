@@ -5,15 +5,31 @@ import {listarRelatoriosDisponiveis, type RelatorioDisponivel} from './relatorio
 import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from './theme';
 
 const TIPO_ROTA: Record<string, string> = {
-    TABELA: 'view/relatorios/listTabela',
-    GRAFICO: 'view/relatorios/listGrafico',
-    MAPA: 'view/relatorios/listMapa',
+    TABELA: 'view/relatorios/viewTabela',
+    GRAFICO: 'view/relatorios/viewGraficoBarrasVertical',
+    MAPA: 'view/relatorios/viewMapa',
+    ORGANOGRAMA: 'view/relatorios/viewOrganograma',
+    DASHBOARD: 'view/relatorios/viewDashboard',
+    PIZZA: 'view/relatorios/viewGraficoPizza',
+    LINHA: 'view/relatorios/viewGraficoLinhas',
+    COMBINADO: 'view/relatorios/viewGraficoCombinado',
+    CIRCULAR: 'view/relatorios/viewGraficoCircular',
+    BARRA_VERTICAL: 'view/relatorios/viewGraficoBarrasVertical',
+    BARRA_HORIZONTAL: 'view/relatorios/viewGraficoBarrasHorizontal',
 };
 
 const TIPO_LABEL: Record<string, string> = {
     TABELA: 'Tabela',
     GRAFICO: 'Gráfico',
     MAPA: 'Mapa',
+    ORGANOGRAMA: 'Organograma',
+    DASHBOARD: 'Dashboard',
+    PIZZA: 'Gráfico Pizza',
+    LINHA: 'Gráfico Linhas',
+    COMBINADO: 'Gráfico Combinado',
+    CIRCULAR: 'Gráfico Circular',
+    BARRA_VERTICAL: 'Gráfico Barras Vertical',
+    BARRA_HORIZONTAL: 'Gráfico Barras Horizontal',
 };
 
 export function ReportButton({navigateTo}: { navigateTo: (key: string) => void }) {
@@ -29,7 +45,9 @@ export function ReportButton({navigateTo}: { navigateTo: (key: string) => void }
 
     const handleItemPress = (item: RelatorioDisponivel) => {
         setOpen(false);
-        navigateTo(TIPO_ROTA[item.tipo] ?? 'view/relatorios/listTabela');
+        const tipoKey = (item.tipo || '').toUpperCase();
+        const baseRoute = TIPO_ROTA[tipoKey] ?? 'view/relatorios/viewTabela';
+        navigateTo(`${baseRoute}?id=${item.id}`);
     };
 
     return (

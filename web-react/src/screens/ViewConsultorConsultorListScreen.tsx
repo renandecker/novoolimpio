@@ -4,6 +4,7 @@ import {Tabs} from '../Tabs';
 import {Wizard} from '../Wizard';
 import {useState} from 'react';
 import {api} from '../api';
+import ViewConsultorMatriculaLayoutScreen from './ViewConsultorMatriculaLayoutScreen';
 
 const CONSULTOR_COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID'},
@@ -110,7 +111,7 @@ export default function ViewConsultorConsultorListScreen() {
                             <CursosScreen />
                         )}
                         {menu === 2 && (
-                            <MatriculaWizardScreen />
+                            <ViewConsultorMatriculaLayoutScreen />
                         )}
                         {menu === 3 && (
                             <IndicacaoScreen />

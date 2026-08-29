@@ -5,12 +5,14 @@ import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 
 import {AuthProvider} from './auth';
 import {ThemeProvider} from './ThemeContext';
+import {AlertDialogProvider} from './AlertDialog';
 import LoginScreen from './LoginScreen';
 import ProtectedRoute from './ProtectedRoute';
 import PermissionBridge from './PermissionBridge';
 import './colors.css';
-import ViewAcaoColunasAcaoListScreen from './screens/ViewAcaoColunasAcaoListScreen';
+import ReportViewScreen from './screens/ReportViewScreen';
 import ViewAcaoColunasAcaoCampoListScreen from './screens/ViewAcaoColunasAcaoCampoListScreen';
+import ViewAcaoColunasAcaoListScreen from './screens/ViewAcaoColunasAcaoListScreen';
 import ViewAcaoFormAcaoListScreen from './screens/ViewAcaoFormAcaoListScreen';
 import ViewAcaoListAcaoListScreen from './screens/ViewAcaoListAcaoListScreen';
 import ViewRegraNotificacaoListRegraListScreen from './screens/ViewRegraNotificacaoListRegraListScreen';
@@ -507,7 +509,7 @@ import ViewConfiguracaoFinanceiraFormConfiguracaoFinanceiraListScreen from './sc
 
 const q = new QueryClient();
 createRoot(document.getElementById('root')!).render(<QueryClientProvider
-    client={q}><AuthProvider><ThemeProvider><PermissionBridge><BrowserRouter><Routes><Route path="/login"
+    client={q}><AuthProvider><ThemeProvider><AlertDialogProvider><PermissionBridge><BrowserRouter><Routes><Route path="/login"
                                                                              element={<LoginScreen/>}/><Route
     element={<ProtectedRoute/>}><Route path="/auditoria" element={<AuditoriaScreen/>}/><Route path="/view/tema/listTemas"
                                                                                          element={
@@ -889,18 +891,18 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
 <Route path="/view/relatorios/listMapa" element={<ListMapaScreen/>}/>
 <Route path="/view/relatorios/listOrganograma" element={<ViewRelatoriosListOrganogramaListScreen/>}/>
 <Route path="/view/relatorios/listTabela" element={<ListTabelaScreen/>}/>
-    <Route path="/view/relatorios/viewDashboard" element={<ViewRelatoriosViewDashboardListScreen/>}/>
+    <Route path="/view/relatorios/viewDashboard" element={<ReportViewScreen/>}/>
     <Route path="/view/relatorios/viewGraficoBarrasHorizontal"
-           element={<ViewRelatoriosViewGraficoBarrasHorizontalListScreen/>}/>
+           element={<ReportViewScreen/>}/>
     <Route path="/view/relatorios/viewGraficoBarrasVertical"
-           element={<ViewRelatoriosViewGraficoBarrasVerticalListScreen/>}/>
-    <Route path="/view/relatorios/viewGraficoCircular" element={<ViewRelatoriosViewGraficoCircularListScreen/>}/>
-    <Route path="/view/relatorios/viewGraficoCombinado" element={<ViewRelatoriosViewGraficoCombinadoListScreen/>}/>
-    <Route path="/view/relatorios/viewGraficoLinhas" element={<ViewRelatoriosViewGraficoLinhasListScreen/>}/>
-    <Route path="/view/relatorios/viewGraficoPizza" element={<ViewRelatoriosViewGraficoPizzaListScreen/>}/>
-    <Route path="/view/relatorios/viewMapa" element={<ViewRelatoriosViewMapaListScreen/>}/>
-    <Route path="/view/relatorios/viewOrganograma" element={<ViewRelatoriosViewOrganogramaListScreen/>}/>
-    <Route path="/view/relatorios/viewTabela" element={<ViewRelatoriosViewTabelaListScreen/>}/>
+           element={<ReportViewScreen/>}/>
+    <Route path="/view/relatorios/viewGraficoCircular" element={<ReportViewScreen/>}/>
+    <Route path="/view/relatorios/viewGraficoCombinado" element={<ReportViewScreen/>}/>
+    <Route path="/view/relatorios/viewGraficoLinhas" element={<ReportViewScreen/>}/>
+    <Route path="/view/relatorios/viewGraficoPizza" element={<ReportViewScreen/>}/>
+    <Route path="/view/relatorios/viewMapa" element={<ReportViewScreen/>}/>
+    <Route path="/view/relatorios/viewOrganograma" element={<ReportViewScreen/>}/>
+    <Route path="/view/relatorios/viewTabela" element={<ReportViewScreen/>}/>
     <Route path="/view/resultado/colunasResultado" element={<ViewResultadoColunasResultadoListScreen/>}/>
     <Route path="/view/resultado/formResultado" element={<ViewResultadoFormResultadoListScreen/>}/>
     <Route path="/view/resultado/listResultado" element={<ViewResultadoListResultadoListScreen/>}/>
@@ -1017,4 +1019,4 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
         <CurriculoConfiguracaoListScreen/>}/>
     <Route path="/view/configuracaoFinanceira/listConfiguracaoFinanceira" element={<ViewConfiguracaoFinanceiraListConfiguracaoFinanceiraListScreen/>}/>
     <Route path="/view/configuracaoFinanceira/formConfiguracaoFinanceira" element={<ViewConfiguracaoFinanceiraFormConfiguracaoFinanceiraListScreen/>}/>
-    <Route path='*' element={<p>Selecione uma tela.</p>}/></Route><Route path="/login" element={<LoginScreen/>}/></Routes></BrowserRouter></PermissionBridge></ThemeProvider></AuthProvider></QueryClientProvider>);
+    <Route path='*' element={<p>Selecione uma tela.</p>}/></Route><Route path="/login" element={<LoginScreen/>}/></Routes></BrowserRouter></PermissionBridge></AlertDialogProvider></ThemeProvider></AuthProvider></QueryClientProvider>);

@@ -136,6 +136,7 @@ interface OferecimentoCursoData {
     possuiAvaliacao: boolean;
     replicar: boolean;
     dataCancelamento: string;
+    dataFim: string;
     responsaveis: AutoCompleteOption[];
     salaId: number | null;
     qtdeSequencia: number;
@@ -159,6 +160,7 @@ const initialData: OferecimentoCursoData = {
     possuiAvaliacao: false,
     replicar: false,
     dataCancelamento: '',
+    dataFim: '',
     responsaveis: [],
     salaId: null,
     qtdeSequencia: 0,
@@ -457,6 +459,7 @@ useEffect(() => {
                     possuiAvaliacao: primeiro.possuiAvaliacao ?? true,
                     replicar: primeiro.replicar ?? false,
                     dataCancelamento: isoDate(primeiro.dataCancelamento),
+                    dataFim: isoDate(primeiro.dataFim),
                     salaId: primeiro.salaId ?? null,
                     vagas: primeiro.vagas ?? 0,
                     qtdeSequencia: primeiro.qtdeSequencia ?? 0,
@@ -477,6 +480,27 @@ useEffect(() => {
                     ocorrencias: ocorrenciasPorTurma[o.componenteCurricularId ?? 0] ?? [],
                     professorId: o.professorId ?? undefined,
                 })));
+
+                // Check for inconsistent values across offerings
+                const checkInconsistencies = () => {
+                    const fieldsToCheck = ['salaId', 'vagas', 'qtdeSequencia', 'dataCancelamento', 'dataFim', 'registraFrequencia', 'possuiAvaliacao'] as const;
+                    const inconsistencies: string[] = [];
+
+                    for (const field of fieldsToCheck) {
+                        const values = new Set(ofs.map(o => {
+                            const val = o[field];
+                            return val === undefined || val === null ? 'null' : String(val);
+                        }));
+                        if (values.size > 1) {
+                            inconsistencies.push(field);
+                        }
+                    }
+
+                    if (inconsistencies.length > 0) {
+                        setMensagem(`Atenção: As turmas deste grupo têm valores diferentes para: ${inconsistencies.join(', ')}. O formulário usa os valores da primeira turma.`);
+                    }
+                };
+                checkInconsistencies();
             } catch {
                 setErro('Não foi possível carregar o oferecimento para edição.');
             }
@@ -763,6 +787,7 @@ useEffect(() => {
                     possuiAvaliacao: data.possuiAvaliacao,
                     replicar: data.novoGrupo ? data.replicar : false,
                     dataCancelamento: emEdicao && data.dataCancelamento ? data.dataCancelamento : null,
+                    dataFim: emEdicao && data.dataFim ? data.dataFim : null,
                     tipoPlanejamento: 'AULA',
                     sequencia: 1,
                 };
@@ -924,6 +949,16 @@ useEffect(() => {
                                 className="form-input"
                                 value={data.dataCancelamento}
                                 onChange={(e) => updateField('dataCancelamento', e.target.value)}
+                            />
+                        </div>
+                        <div className="field-group">
+                            <label htmlFor="ofc-data-fim">Data Fim</label>
+                            <input
+                                id="ofc-data-fim"
+                                type="date"
+                                className="form-input"
+                                value={data.dataFim}
+                                onChange={(e) => updateField('dataFim', e.target.value)}
                             />
                         </div>
                     </div>

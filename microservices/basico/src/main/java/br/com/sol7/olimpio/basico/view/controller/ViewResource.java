@@ -107,6 +107,16 @@ public class ViewResource {
     }
 
     @SuppressWarnings("unchecked")
+    @POST
+    @Path("/{feature}/{resource}/search")
+    public Uni<PagedResponse<Map<String, Object>>> search(@PathParam("feature") String feature,
+                                                           @PathParam("resource") String resource,
+                                                           @QueryParam("page") Integer page,
+                                                           @QueryParam("size") Integer size,
+                                                           Map<String, Object> filters) {
+        return service.search(feature, resource, page == null ? 0 : page, size == null ? 10 : size, filters == null ? Map.of() : filters);
+    }
+
     private Map<String, Set<String>> modulePermissionsOf(ContainerRequestContext context) {
         Object value = context.getProperty("modulePermissions");
         return value instanceof Map ? (Map<String, Set<String>>) value : null;

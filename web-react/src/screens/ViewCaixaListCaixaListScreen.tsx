@@ -114,6 +114,24 @@ export default function ViewCaixaListCaixaListScreen() {
         return '📦';
     };
 
+    const handleExcluirMovimentacao = (mov: Movimentacao) => {
+        if (window.confirm(`Excluir movimentação ${mov.id}?`)) {
+            alert(`Excluir movimentação ${mov.id} - não implementado`);
+        }
+    };
+
+    const handleSegundaViaPagamento = (mov: Movimentacao) => {
+        alert(`Segunda Via Pagamento ${mov.id} - não implementado`);
+    };
+
+    const handleSegundaViaSangria = (mov: Movimentacao) => {
+        alert(`Segunda Via Sangria ${mov.id} - não implementado`);
+    };
+
+    const shouldShowExcluir = () => true;
+    const shouldShowSegundaViaPagamento = (tipo: string) => tipo === 'ENTRADA' || tipo === '1';
+    const shouldShowSegundaViaSangria = (tipo: string) => tipo === 'SANGRIA' || tipo === '3';
+
     const exportOptions = [
         {key: 'pdf', label: 'PDF', icon: <i className="fa fa-file-pdf-o"/>, onClick: () => alert('Exportar PDF - não implementado')},
         {key: 'docx', label: 'DOCX', icon: <i className="fa fa-file-word-o"/>, onClick: () => alert('Exportar DOCX - não implementado')},
@@ -281,6 +299,7 @@ export default function ViewCaixaListCaixaListScreen() {
                                                                         <th>Juros/Multa</th>
                                                                         <th>Troco</th>
                                                                         <th>Total</th>
+                                                                        <th>Ações</th>
                                                                     </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -299,6 +318,40 @@ export default function ViewCaixaListCaixaListScreen() {
                                                                             <td>{formatCurrency(mov.multaJuros)}</td>
                                                                             <td>{formatCurrency(mov.troco)}</td>
                                                                             <td>{formatCurrency(mov.total)}</td>
+                                                                            <td>
+                                                                                <div className="row-actions-menu">
+                                                                                    {shouldShowExcluir() && (
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            className="btn-action btnred"
+                                                                                            title="Excluir movimentação"
+                                                                                            onClick={() => handleExcluirMovimentacao(mov)}
+                                                                                        >
+                                                                                            🗑️
+                                                                                        </button>
+                                                                                    )}
+                                                                                    {shouldShowSegundaViaPagamento(mov.tipoMovimento) && (
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            className="btn-action btnblue"
+                                                                                            title="Segunda Via Pagamento"
+                                                                                            onClick={() => handleSegundaViaPagamento(mov)}
+                                                                                        >
+                                                                                            🖨️
+                                                                                        </button>
+                                                                                    )}
+                                                                                    {shouldShowSegundaViaSangria(mov.tipoMovimento) && (
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            className="btn-action btngreen"
+                                                                                            title="Segunda Via Sangria"
+                                                                                            onClick={() => handleSegundaViaSangria(mov)}
+                                                                                        >
+                                                                                            📄
+                                                                                        </button>
+                                                                                    )}
+                                                                                </div>
+                                                                            </td>
                                                                         </tr>
                                                                     ))}
                                                                     </tbody>
@@ -348,19 +401,8 @@ export default function ViewCaixaListCaixaListScreen() {
                                                                                 </table>
                                                                             );
                                                                         })()}
-                                                                    </div>
-<div className="caixa-actions-bar">
-                                                                         <button
-                                                                             type="button"
-                                                                             className="btnyellow"
-                                                                             style={{width: '200px'}}
-                                                                             onClick={() => setExpandedRows(prev => ({...prev, [caixaId]: false}))}
-                                                                         >
-                                                                             Fechar Detalhes
-                                                                         </button>
-                                                                     </div>
-                                                                </div>
-                                                            </>
+</div>
+                                                             </>
                                                         )}
                                                     </div>
                                                 </td>

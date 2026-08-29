@@ -192,6 +192,11 @@ type ModalState =
     | { mode: 'delete'; item: ApiItem }
     | null;
 
+interface FilterModalState {
+    open: boolean;
+    filters: Record<string, unknown>;
+}
+
 export function DataTable({path, columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, hideUpdate = false, hideDelete = false, hideView = false, editNavigateTo, createNavigateTo, extraRowActions}: DataTableProps) {
     const navigate = useNavigate();
     const [page, setPage] = useState(0);
@@ -200,6 +205,8 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
     const [executing, setExecuting] = useState<Action | null>(null);
     const [notice, setNotice] = useState<string>('');
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+    const [filterModal, setFilterModal] = useState<FilterModalState>({open: false, filters: {}});
+    const [filterParams, setFilterParams] = useState<Record<string, unknown>>({});
     const colorColumnSet = new Set(colorColumns ?? []);
     const {can} = usePermissions();
     const {session} = useAuth();
@@ -207,7 +214,7 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
     const routeOutcome = useCurrentOutcome();
     const screenOutcome = outcome ?? routeOutcome;
 
-    const q = useModulePaged(path, page, size, params);
+    const q = useModulePaged(path, page, size, {...params, ...filterParams});
     const items = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);
@@ -448,7 +455,7 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
                             type="button"
                             className="btngreen"
                             style={{marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px'}}
-                            onClick={() => setModal({mode: 'create'})}
+                            onClick={() => setFilterModal({open: true, filters: filterParams})}
                         >
                             <i className="fa fa-search"/> Busca
                         </button>
@@ -669,6 +676,18 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
                         </div>
                     </div>
                 </div>
+            )}
+            {filterModal.open && (
+                <FilterModal
+                    columns={cols}
+                    initialFilters={filterModal.filters}
+                    onClose={() => setFilterModal({open: false, filters: {}})}
+                    onApply={(filters) => {
+                        setFilterParams(filters);
+                        setPage(0);
+                        setFilterModal({open: false, filters});
+                    }}
+                />
             )}
         </div>
     );
@@ -969,6 +988,66 @@ function ExportModal({ item, tipo, onClose, onExport, entityTitle }: ExportModal
                             </button>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+interface FilterModalProps {
+    columns: DataTableColumn[];
+    initialFilters: Record<string, unknown>;
+    onClose: () => void;
+    onApply: (filters: Record<string, unknown>) => void;
+}
+
+function FilterModal({columns, initialFilters, onClose, onApply}: FilterModalProps) {
+    const [filters, setFilters] = useState<Record<string, unknown>>(() => ({...initialFilters}));
+
+    const handleChange = (key: string, value: unknown) => {
+        setFilters(prev => ({...prev, [key]: value === '' ? null : value}));
+    };
+
+    const handleClear = () => {
+        setFilters({});
+    };
+
+    const handleSubmit = () => {
+        const cleanFilters: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(filters)) {
+            if (value !== null && value !== undefined && value !== '') {
+                cleanFilters[key] = value;
+            }
+        }
+        onApply(cleanFilters);
+    };
+
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal form-modal" onClick={e => e.stopPropagation()} style={{maxWidth: '700px', width: '90%'}}>
+                <div className="div_form">
+                    <div className="form-title">Filtros de Busca</div>
+                    <form className="table_form" onSubmit={e => {e.preventDefault(); handleSubmit();}}>
+                        <div className="form-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '12px'}}>
+                            {columns.map((column) => (
+                                <label key={column.key} className="form-field">
+                                    <span className="form-label">{column.label}</span>
+                                    <input
+                                        className="form-input"
+                                        type="text"
+                                        value={String(filters[column.key] ?? '')}
+                                        onChange={e => handleChange(column.key, e.target.value)}
+                                        placeholder={`Filtrar por ${column.label}`}
+                                    />
+                                </label>
+                            ))}
+                        </div>
+                        <div className="modal-actions form-footer" style={{marginTop: '16px', display: 'flex', gap: '8px', justifyContent: 'flex-end'}}>
+                            <button type="button" className="btn-form-back" onClick={onClose}>Cancelar</button>
+                            <button type="button" className="btnorange" onClick={handleClear}>Limpar</button>
+                            <button type="submit" className="btngreen" style={{marginLeft: 'auto'}}>Pesquisar</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
