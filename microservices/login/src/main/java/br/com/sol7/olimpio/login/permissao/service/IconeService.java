@@ -44,10 +44,8 @@ public class IconeService {
         if (icones == null || icones.isEmpty()) {
             return Uni.createFrom().voidItem();
         }
-        return Uni.createFrom().iterable(icones)
-                .onItem().transformToUniAndMerge(icone -> icone.persist())
-                .collect().asList()
-                .replaceWithVoid();
+        return Uni.createFrom().item(icones)
+                .flatMap(list -> Uni.join().all(list.stream().map(icone -> (Uni<?>) icone.persist()).toList()).andFailFast().replaceWithVoid());
     }
 
     @CacheResult(cacheName = "icones-cache")
