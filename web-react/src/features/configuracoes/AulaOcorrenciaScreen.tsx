@@ -1,7 +1,7 @@
 ﻿import {useEffect, useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
-import {aulaApi, formatarDataAula, OcorrenciaAula} from '../../features/aluno/aluno';
-import '../../features/aluno/alunoPortal.css';
+import {aulaApi, formatarDataAula, OcorrenciaAula} from '../../features/professor/aula';
+import '../../features/aluno/AlunoPortal.css';
 
 export default function AulaOcorrenciaScreen() {
     const {oferecimentoId} = useParams<{ oferecimentoId: string }>();

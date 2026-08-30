@@ -483,3 +483,5 @@ export { default as Wizard } from '../shared/components/Wizard.tsx';
 export { default as ProtectedRoute } from '../ProtectedRoute';
 export { default as ReportButton } from '../ReportButton';
 export { AuthProvider } from '../features/auth/auth';
+export { ThemeProvider } from '../shared/context/ThemeContext';
+export { AlertDialogProvider } from '../shared/components/AlertDialog';

@@ -1,4 +1,4 @@
-import {api} from './api';
+﻿import {api} from '../../shared/services/api';
 
 export type AuditoriaCampo = { nome: string; valor: unknown };
 

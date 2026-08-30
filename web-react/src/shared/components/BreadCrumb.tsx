@@ -1,6 +1,6 @@
 ﻿import {Link} from 'react-router-dom';
-import {useAuth} from './auth';
-import {useCurrentModule} from './useCurrentModule';
+import {useAuth} from '../../features/auth/auth';
+import {useCurrentModule} from '../hooks/useCurrentModule';
 
 export default function BreadCrumb() {
     const {session} = useAuth();

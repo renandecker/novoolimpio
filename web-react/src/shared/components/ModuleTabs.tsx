@@ -5,7 +5,7 @@ import type {MasterDetailColumn} from './MasterDetail';
 import {Tabs} from './Tabs';
 import type {TabItem} from './Tabs';
 import {useState} from 'react';
-import type {ApiItem} from './types';
+import type {ApiItem} from '../types/index';
 
 export interface ModuleTabMasterDetail {
     label: string;

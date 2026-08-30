@@ -1,7 +1,7 @@
 ﻿import {useCallback, useEffect, useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
-import {aulaApi, Aula, AulaAnexo} from '../../features/aluno/aluno';
-import '../../features/aluno/alunoPortal.css';
+import {aulaApi, Aula, AulaAnexo} from '../../features/professor/aula';
+import '../../features/aluno/AlunoPortal.css';
 
 export default function AulaAlunoScreen() {
     const {aulaId} = useParams<{ aulaId: string }>();

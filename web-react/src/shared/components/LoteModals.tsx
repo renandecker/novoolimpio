@@ -1,6 +1,6 @@
 ﻿import {useState} from 'react';
 import {useMutation, useQuery} from '@tanstack/react-query';
-import {api} from './api';
+import {api} from '../services/api';
 import {Wizard} from './Wizard';
 
 export interface ModeloEmail {

@@ -1,7 +1,7 @@
 ﻿import {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
-import {aulaApi, ContratoAula} from '../../features/aluno/aluno';
-import '../../features/aluno/alunoPortal.css';
+import {aulaApi, ContratoAula} from '../../features/professor/aula';
+import '../../features/aluno/AlunoPortal.css';
 
 export default function AulaContratoScreen() {
     const [contratos, setContratos] = useState<ContratoAula[]>([]);

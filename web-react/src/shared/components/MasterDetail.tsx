@@ -1,8 +1,8 @@
 ﻿import {useMemo, useRef, useState} from 'react';
 import type {ReactNode} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {api} from './api';
-import type {ApiItem} from './types';
+import {api} from '../services/api';
+import type {ApiItem} from '../types/index';
 
 export interface MasterDetailColumn {
     key: string;

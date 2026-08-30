@@ -1,5 +1,5 @@
 ﻿import {useEffect, useRef, useState} from 'react';
-import {useCurrentModule} from './useCurrentModule';
+import {useCurrentModule} from '../hooks/useCurrentModule';
 
 export default function HelpOverlay() {
     const {module} = useCurrentModule();

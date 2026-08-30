@@ -1,8 +1,8 @@
 ﻿import {useMemo, useState} from 'react';
 import {Link, useLocation} from 'react-router-dom';
-import {useAuth} from './auth';
-import {normalizeOutcome} from './permissions';
-import {useMenuIcon} from '../../../shared/hooks/useIcones';
+import {useAuth} from '../../features/auth/auth';
+import {normalizeOutcome} from '../services/permissions';
+import {useMenuIcon} from '../hooks/useIcones';
 import './Sidebar.css';
 
 type Modulo = { id: number; antecessorId: number | null; rotulo: string; descricao: string; icone: string; ajuda: string; outcome: string; ordem: number };

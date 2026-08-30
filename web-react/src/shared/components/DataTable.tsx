@@ -2,16 +2,16 @@
 import type {ReactNode} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
-import type {ApiItem} from './types';
-import {api} from './api';
-import {useModulePaged} from './useModulePaged';
-import {executeAction, type Action} from './actions';
-import {usePermissions, useCurrentOutcome} from './permissions';
-import {useAuth} from './auth';
+import type {ApiItem} from '../types/index';
+import {api} from '../services/api';
+import {useModulePaged} from '../hooks/useModulePaged';
+import {executeAction, type Action} from '../services/actions';
+import {usePermissions, useCurrentOutcome} from '../services/permissions';
+import {useAuth} from '../../features/auth/auth';
 import {ExportDropdown} from './ExportDropdown';
 import {BooleanField} from './BooleanField';
 import {Base64FileUpload} from './Base64FileUpload';
-import {PerfilModuloPermissions} from './useModulePaged';
+import {PerfilModuloPermissions} from '../hooks/useModulePaged';
 import {IconPickerButton} from './IconPickerModal';
 import './IconPicker.css';
 

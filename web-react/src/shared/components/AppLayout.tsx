@@ -1,12 +1,12 @@
 ﻿import type {ReactNode} from 'react';
-import {useAuth} from './auth';
-import {NotificationBell} from './NotificationBell';
-import {ReportButton} from './ReportButton';
-import {FavoritosMenu} from './FavoritosMenu';
+import {useAuth} from '../../features/auth/auth';
+import {NotificationBell} from '../../features/notificacoes/NotificationBell';
+import {ReportButton} from '../../ReportButton';
+import {FavoritosMenu} from '../../features/favoritos/FavoritosMenu';
 import {UserMenu} from './UserMenu';
 import Sidebar from './Sidebar';
 import PageHeader from './PageHeader';
-import {useTheme} from './ThemeContext';
+import {useTheme} from '../context/ThemeContext';
 import './AppLayout.css';
 
 export default function AppLayout({children}: { children: ReactNode }) {

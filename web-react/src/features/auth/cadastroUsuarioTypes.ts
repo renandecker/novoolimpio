@@ -1,4 +1,4 @@
-export type TipoPessoa = 'FISICA' | 'JURIDICA';
+﻿export type TipoPessoa = 'FISICA' | 'JURIDICA';
 
 export interface PessoaFisicaFormData {
   login: string;

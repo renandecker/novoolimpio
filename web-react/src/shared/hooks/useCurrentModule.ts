@@ -1,6 +1,6 @@
 import {useMemo} from 'react';
-import {useAuth} from './auth';
-import {normalizeOutcome, useCurrentOutcome} from './permissions';
+import {useAuth} from '../../features/auth/auth';
+import {normalizeOutcome, useCurrentOutcome} from '../services/permissions';
 
 export type Module = {
     id: number;
