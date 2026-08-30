@@ -1,9 +1,9 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+﻿import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {PermissionGate} from '../permissions';
-import {AutoComplete, type AutoCompleteOption} from '../AutoComplete';
-import {api, useApi} from '../api';
-import {legacyClassName} from '../DataTable';
+import {PermissionGate} from '../../shared/services/permissions';
+import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
+import {api, useApi} from '../../shared/services/api';
+import {legacyClassName} from '../../shared/components/DataTable';
 import {format} from 'date-fns';
 
 interface OcorrenciaLocal {
@@ -66,13 +66,13 @@ interface OferecimentoCCData {
     professorId?: number | null;
 }
 
-const DIAS_NOMES = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+const DIAS_NOMES = ['Domingo', 'Segunda-feira', 'TerÃ§a-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'SÃ¡bado'];
 
 const TIPOS_REPLICACAO = [
     {valor: 0, rotulo: 'Na data inicio'},
-    {valor: 1, rotulo: 'Após data inicio'},
+    {valor: 1, rotulo: 'ApÃ³s data inicio'},
     {valor: 2, rotulo: 'Na data fim'},
-    {valor: 3, rotulo: 'Após data fim'},
+    {valor: 3, rotulo: 'ApÃ³s data fim'},
 ];
 
 function fmtDate(d: Date): string {
@@ -96,7 +96,7 @@ function numeroDiaSemana(nome: any, id: any): number {
     if (texto.startsWith('qua')) return 4;
     if (texto.startsWith('qui')) return 5;
     if (texto.startsWith('sex')) return 6;
-    if (texto.startsWith('sáb') || texto.startsWith('sab')) return 7;
+    if (texto.startsWith('sÃ¡b') || texto.startsWith('sab')) return 7;
     return ((Number(id) || 1) - 1) % 7 + 1;
 }
 
@@ -221,7 +221,7 @@ const [carregando, setCarregando] = useState(true);
                         if (ent.curriculoId) {
                             try { setMatrizIds((await api.get('/api/educacao/oferecimento-componente-curricular/buscar-matriz-curricular', {params: {curriculoId: ent.curriculoId}}))?.data ?? []); } catch { setMatrizIds([]); }
                         }
-                    } catch { alert('Não foi possível carregar o oferecimento para edição'); }
+                    } catch { alert('NÃ£o foi possÃ­vel carregar o oferecimento para ediÃ§Ã£o'); }
                 }
             } finally { setCarregando(false); }
         })();
@@ -253,7 +253,7 @@ const [carregando, setCarregando] = useState(true);
 
     const nomeDiaSemana = (diaSemanaId?: number): string => diasSemana.find((d) => d.id === diaSemanaId)?.nome ?? DIAS_NOMES[(((diaSemanaId ?? 1) - 1) % 7)];
 
-    const rotuloDiaAula = (da: any): string => [nomeDiaSemana(da.diaSemanaId), da.turnoEducacao_descricao, da.tempoAula_descricao].filter(Boolean).join(' • ');
+    const rotuloDiaAula = (da: any): string => [nomeDiaSemana(da.diaSemanaId), da.turnoEducacao_descricao, da.tempoAula_descricao].filter(Boolean).join(' â€¢ ');
 
     const calcularVagas = (salaId?: number, curriculoId?: number): number | undefined => {
         const sala = salas.find((s) => s.id === salaId);
@@ -348,7 +348,7 @@ const [carregando, setCarregando] = useState(true);
     };
 
     const removerOcorrencia = async (occ: OcorrenciaLocal) => {
-        if (occ.id) { try { await api.delete(`/api/educacao/ocorrencia-componente-curricular/${occ.id}`); } catch { alert('Não foi possível remover a aula salva'); return; } }
+        if (occ.id) { try { await api.delete(`/api/educacao/ocorrencia-componente-curricular/${occ.id}`); } catch { alert('NÃ£o foi possÃ­vel remover a aula salva'); return; } }
         updateField('ocorrencias', dataRef.current.ocorrencias.filter((o) => o.key !== occ.key));
     };
 
@@ -371,12 +371,12 @@ const [carregando, setCarregando] = useState(true);
         const atual = dataRef.current;
         const e = atual.entity;
         if (!e.unidadeId || !e.curriculoId || !e.salaId) { alert('Selecione unidade, curso e sala antes de gerar as aulas'); return; }
-        if (!atual.diasAulaConfig.length) { alert('Adicione pelo menos uma configuração de dia de aula'); return; }
-        if (!e.dataInicio || !e.dataFim) { alert('Defina as datas de início e fim do oferecimento'); return; }
-        if (e.dataInicio > e.dataFim) { alert('A data inicial deve ser anterior ou igual à data final'); return; }
+        if (!atual.diasAulaConfig.length) { alert('Adicione pelo menos uma configuraÃ§Ã£o de dia de aula'); return; }
+        if (!e.dataInicio || !e.dataFim) { alert('Defina as datas de inÃ­cio e fim do oferecimento'); return; }
+        if (e.dataInicio > e.dataFim) { alert('A data inicial deve ser anterior ou igual Ã  data final'); return; }
 
         const diaAulaIdsSelecionados = getDiaAulaIdsSelecionados();
-        if (!diaAulaIdsSelecionados.length) { alert('Nenhum dia de aula válido encontrado para as configurações selecionadas'); return; }
+        if (!diaAulaIdsSelecionados.length) { alert('Nenhum dia de aula vÃ¡lido encontrado para as configuraÃ§Ãµes selecionadas'); return; }
 
         setGerando(true);
         try {
@@ -405,8 +405,8 @@ const [carregando, setCarregando] = useState(true);
                     if (numeroDiaSemana(nomeDiaSemana(da.diaSemanaId), da.diaSemanaId) !== diaSemanaData) continue;
                     const feriado = feriadoMap.get(iso);
                     if (feriado) { invalidas.push({data: iso, motivo: feriado}); continue; }
-                    if (critInicio && iso < fmtDate(critInicio)) { invalidas.push({data: iso, motivo: 'Existe um critério definido para o inicio das aulas'}); continue; }
-                    if (critFim && iso > fmtDate(critFim)) { invalidas.push({data: iso, motivo: 'Existe um critério definido para o fim das aulas'}); continue; }
+                    if (critInicio && iso < fmtDate(critInicio)) { invalidas.push({data: iso, motivo: 'Existe um critÃ©rio definido para o inicio das aulas'}); continue; }
+                    if (critFim && iso > fmtDate(critFim)) { invalidas.push({data: iso, motivo: 'Existe um critÃ©rio definido para o fim das aulas'}); continue; }
                     if (existentes.some((o) => o.data === iso && o.salaId === e.salaId && o.diaAulaId === da.id)) { invalidas.push({data: iso, motivo: `Aula marcada na turma ${salas.find((s) => s.id === e.salaId)?.descricao ?? e.salaId}`}); continue; }
                     const nova: OcorrenciaLocal = {key: `${iso}-${da.id}`, data: iso, diaAulaId: da.id, salaId: e.salaId, aulaCoringa: false, aulaPresencial: true, ativo: true};
                     existentes.push(nova); novas.push(nova);
@@ -426,10 +426,10 @@ const [carregando, setCarregando] = useState(true);
             if (!d.entity.componenteCurricularId) { alert('Selecione o componente curricular'); return false; }
             if (d.novoGrupo && !d.novoGrupoNome.trim()) { alert('Informe o nome do grupo'); return false; }
             if (!d.novoGrupo && !d.entity.grupoId) { alert('Selecione o grupo'); return false; }
-            if (!d.diasAulaConfig.length) { alert('Adicione pelo menos uma configuração de dia de aula (dia semana, turno e tempo)'); return false; }
+            if (!d.diasAulaConfig.length) { alert('Adicione pelo menos uma configuraÃ§Ã£o de dia de aula (dia semana, turno e tempo)'); return false; }
         }
         if (targetTab === 'tabProfessor') {
-            if (!d.entity.vagas || d.entity.vagas <= 0) { alert('O número de vagas deve ser maior que zero'); return false; }
+            if (!d.entity.vagas || d.entity.vagas <= 0) { alert('O nÃºmero de vagas deve ser maior que zero'); return false; }
             if (!d.ocorrencias.length) { alert('Defina os dias de aula antes de escolher o professor'); return false; }
         }
         return true;
@@ -447,7 +447,7 @@ const [carregando, setCarregando] = useState(true);
 
     const prepararProfessores = async () => {
         const d = dataRef.current;
-        if (!d.entity.vagas || d.entity.vagas <= 0) { alert('O número de vagas não pode ser zero'); return; }
+        if (!d.entity.vagas || d.entity.vagas <= 0) { alert('O nÃºmero de vagas nÃ£o pode ser zero'); return; }
         if (!d.ocorrencias.length) { alert('Defina os dias de aula antes de escolher o professor'); return; }
         try {
             const ids = (await api.get('/api/professor/professor/buscar-lista-professores-para-turma', {params: {componenteCurricularId: d.entity.componenteCurricularId, unidadeId: d.entity.unidadeId}}))?.data;
@@ -460,14 +460,14 @@ const [carregando, setCarregando] = useState(true);
     const salvar = async () => {
         const d = dataRef.current; const e = d.entity;
         if (!validateTab('tabDiaAula') || !validateTab('tabProfessor')) return;
-        if (!d.professorId) { alert('Selecione o responsável pela turma'); return; }
+        if (!d.professorId) { alert('Selecione o responsÃ¡vel pela turma'); return; }
         try {
             let grupoId = e.grupoId;
             if (d.novoGrupo) {
                 const nome = d.novoGrupoNome.trim();
                 const existente = gruposDisponiveis.find((g) => (g.nome ?? '').toLowerCase() === nome.toLowerCase());
                 grupoId = existente ? existente.id : (await api.post('/api/educacao/grupo', {nome, unidadeId: e.unidadeId, curriculoId: e.curriculoId}))?.id;
-                if (!grupoId) { alert('Não foi possível criar o grupo'); return; }
+                if (!grupoId) { alert('NÃ£o foi possÃ­vel criar o grupo'); return; }
             }
             const datas = d.ocorrencias.map((o) => o.data).sort();
             const payload = {unidadeId: e.unidadeId, grupoId, salaId: e.salaId, curriculoId: e.curriculoId, componenteCurricularId: e.componenteCurricularId, professorId: d.professorId, vagas: e.vagas, inscritos: 0, dataInicio: datas[0], dataFim: datas[datas.length - 1], dataAlteracao: new Date().toISOString(), tipoReplicacao: e.replicar ? (e.tipoReplicacao ?? 0) : 0, diasReplicar: e.replicar ? e.diasReplicar : null, qtdeSequencia: e.qtdeSequencia ?? 1, registraFrequencia: e.registraFrequencia !== false, possuiAvaliacao: e.possuiAvaliacao !== false, replicar: !!e.replicar, replicado: false, detalharReplicacao: !!e.detalharReplicacao, componenteCurricularReplicarId: e.detalharReplicacao ? e.componenteCurricularReplicarId : null, status: e.status ?? 0, sequencia: e.sequencia ?? 0};
@@ -483,7 +483,7 @@ const [carregando, setCarregando] = useState(true);
 
     if (carregando) return (<PermissionGate permission="READ"><main><h1>Oferecimento Componente Curricular</h1><div className="div_form"><p className="master-detail-empty">Carregando...</p></div></main></PermissionGate>);
 
-    const saveLabel = gerando ? 'Salvando...' : activeTab === 'tabProfessor' ? 'Salvar' : 'Próximo';
+    const saveLabel = gerando ? 'Salvando...' : activeTab === 'tabProfessor' ? 'Salvar' : 'PrÃ³ximo';
 
     const voltarAbaOuLista = () => {
         const tabOrder: TabKey[] = ['tabComponente', 'tabDiaAula', 'tabProfessor'];
@@ -506,7 +506,7 @@ const [carregando, setCarregando] = useState(true);
                 <div style={{display: 'flex', width: '100%', gap: '16px', marginTop: '16px'}}>
                     <div style={{width: '20%', minWidth: '200px'}}>
                         <div className="div_form" style={{padding: '12px'}}>
-                            <div className="form-title" style={{fontSize: '14px', marginBottom: '12px'}}>Opções</div>
+                            <div className="form-title" style={{fontSize: '14px', marginBottom: '12px'}}>OpÃ§Ãµes</div>
                             <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
                                 <button type="button" className="btn-action btnblack" style={{width: '100%', textAlign: 'left'}} onClick={() => navigate('/view/oferecimentoComponenteCurricular/formOferecimentoComponenteCurricular')}>Novo Oferecimento</button>
                                 <button type="button" className="btn-action btnyellow" style={{width: '100%', textAlign: 'left'}} onClick={() => navigate('/view/oferecimentoComponenteCurricular/listOferecimentoComponenteCurricular')}>Listar Oferecimentos</button>
@@ -537,7 +537,7 @@ const [carregando, setCarregando] = useState(true);
                                                 <legend>Grupo</legend>
                                                 <div className="form-grid">
                                                     <div className="form-field">
-                                                        <span className="form-label">Criar nova sequência</span>
+                                                        <span className="form-label">Criar nova sequÃªncia</span>
                                                         <label style={{display: 'flex', gap: 6, alignItems: 'center'}}>
                                                             <input type="checkbox" checked={data.novoGrupo} onChange={(ev) => updateField('novoGrupo', ev.target.checked)}/> Sim
                                                         </label>
@@ -564,9 +564,9 @@ const [carregando, setCarregando] = useState(true);
                                             </fieldset>
                                             {criterio && (
                                                 <div className="form-field" style={{marginTop: 16, padding: 12, background: '#f8f9fa', borderRadius: 8}}>
-                                                    <strong>Critério do Curso:</strong><br/>
-                                                    Turmas máximas: {criterio.qtdTurmaAbertas ?? 'Não definido'} | Período: {criterio.periodo ?? 'Não definido'}<br/>
-                                                    {criterio.dataInicio && `Início válido a partir de: ${fmtDate(parseISO(criterio.dataInicio)!)}`} | {criterio.dataFim && `Término até: ${fmtDate(parseISO(criterio.dataFim)!)}`}
+                                                    <strong>CritÃ©rio do Curso:</strong><br/>
+                                                    Turmas mÃ¡ximas: {criterio.qtdTurmaAbertas ?? 'NÃ£o definido'} | PerÃ­odo: {criterio.periodo ?? 'NÃ£o definido'}<br/>
+                                                    {criterio.dataInicio && `InÃ­cio vÃ¡lido a partir de: ${fmtDate(parseISO(criterio.dataInicio)!)}`} | {criterio.dataFim && `TÃ©rmino atÃ©: ${fmtDate(parseISO(criterio.dataFim)!)}`}
                                                 </div>
                                             )}
                                             <fieldset className="form-fieldset" style={{marginBottom: 16}}>
@@ -574,12 +574,12 @@ const [carregando, setCarregando] = useState(true);
                                                 <div className="form-grid">
                                                     <div className="form-field"><span className="form-label">Replicar</span><div style={{display: 'flex', gap: 14, alignItems: 'center'}}>
                                                         <label style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="radio" name="replicar" checked={!!data.entity.replicar} onChange={() => updateField('entity.replicar', true)}/> Sim</label>
-                                                        <label style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="radio" name="replicar" checked={!data.entity.replicar} onChange={() => updateField('entity.replicar', false)}/> Não</label>
+                                                        <label style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="radio" name="replicar" checked={!data.entity.replicar} onChange={() => updateField('entity.replicar', false)}/> NÃ£o</label>
                                                     </div></div>
                                                     {data.entity.replicar && (
                                                         <>
                                                             <label className="form-field"><span className="form-label">Dias a Replicar</span><input type="number" min={1} className="form-input" value={data.entity.diasReplicar ?? ''} onChange={(ev) => updateField('entity.diasReplicar', Number(ev.target.value))}/></label>
-                                                            <div className="form-field"><span className="form-label">Detalhar Replicação</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={!!data.entity.detalharReplicacao} onChange={(ev) => updateField('entity.detalharReplicacao', ev.target.checked)}/> Sim</label></div>
+                                                            <div className="form-field"><span className="form-label">Detalhar ReplicaÃ§Ã£o</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={!!data.entity.detalharReplicacao} onChange={(ev) => updateField('entity.detalharReplicacao', ev.target.checked)}/> Sim</label></div>
                                                             {data.entity.detalharReplicacao && (
                                                                 <>
                                                                     <label className="form-field"><span className="form-label">Componente Curricular</span><select className="form-input form-select" value={data.entity.componenteCurricularReplicarId ?? ''} onChange={(ev) => updateField('entity.componenteCurricularReplicarId', Number(ev.target.value))}><option value="">Selecione</option>{componentes.map((c) => <option key={c.id} value={c.id}>{c.descricao || c.sucinto || `Componente ${c.id}`}</option>)}</select></label>
@@ -591,12 +591,12 @@ const [carregando, setCarregando] = useState(true);
                                                 </div>
                                             </fieldset>
                                             <fieldset className="form-fieldset" style={{marginBottom: 16}}>
-                                                <legend>Responsável</legend>
+                                                <legend>ResponsÃ¡vel</legend>
                                                 <div className="form-grid">
                                                     <label className="form-field" style={{gridColumn: 'span 4'}}>
-                                                        <span className="form-label">Responsável</span>
+                                                        <span className="form-label">ResponsÃ¡vel</span>
                                                         <AutoComplete
-                                                            placeholder="Digite para buscar o usuário..."
+                                                            placeholder="Digite para buscar o usuÃ¡rio..."
                                                             value={null}
                                                             onChange={(opt) => {}}
                                                             fetchOptions={(q) => api.get('/api/view/usuario/listUsuario', {params: {q, limit: 20}}).then(r => (r.data ?? []).map((u: any) => ({id: u.id, label: u.nome || u.login || `#${u.id}`})))}
@@ -613,7 +613,7 @@ const [carregando, setCarregando] = useState(true);
                                                 <legend>Dias Aula</legend>
                                                 <div className="form-grid">
                                                     <label className="form-field"><span className="form-label">Sala *</span><select className="form-input form-select" value={data.entity.salaId ?? ''} onChange={(ev) => aoSelecionarSala(Number(ev.target.value))}><option value="">Selecione</option>{salasDaUnidade.map((s) => <option key={s.id} value={s.id}>{s.descricao || s.sucinto || `Sala ${s.id}`}</option>)}</select></label>
-                                                    <label className="form-field"><span className="form-label">Qtde Sequência</span><input type="number" min={1} className="form-input" value={data.entity.qtdeSequencia ?? 1} onChange={(ev) => updateField('entity.qtdeSequencia', Math.max(1, Number(ev.target.value)))}/></label>
+                                                    <label className="form-field"><span className="form-label">Qtde SequÃªncia</span><input type="number" min={1} className="form-input" value={data.entity.qtdeSequencia ?? 1} onChange={(ev) => updateField('entity.qtdeSequencia', Math.max(1, Number(ev.target.value)))}/></label>
                                                     <label className="form-field"><span className="form-label">Data Inicial *</span><input type="date" className="form-input" value={data.entity.dataInicio ?? ''} onChange={(ev) => updateField('entity.dataInicio', ev.target.value)}/></label>
                                                     <label className="form-field"><span className="form-label">Data Fim</span><input type="date" className="form-input" value={data.entity.dataFim ?? ''} onChange={(ev) => updateField('entity.dataFim', ev.target.value)}/></label>
                                                     <div className="form-field" style={{gridColumn: 'span 4'}}><span className="form-label">Dias de Aula</span><div style={{display: 'flex', gap: 12, flexWrap: 'wrap'}}>{diaAulas.map((da) => (<label key={da.id} style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="checkbox" checked={(data.diasAulaSelecionados ?? []).includes(da.id)} onChange={() => alternarDiaAula(da.id)}/> {rotuloDiaAula(da)}</label>))}</div></div>
@@ -621,13 +621,13 @@ const [carregando, setCarregando] = useState(true);
                                                 </div>
                                                 {data.ocorrencias.length > 0 && (
                                                     <table className="data-table" style={{width: '100%', marginTop: 12}}>
-                                                        <thead><tr><th>Data</th><th>Dia Semana</th><th>Turno</th><th>Tempo Aula</th><th>Sala</th><th>Ação</th></tr></thead>
-                                                        <tbody>{[...data.ocorrencias].sort((a, b) => a.data.localeCompare(b.data)).map((occ) => {const da = diaAulas.find((x) => x.id === occ.diaAulaId); const sala = salas.find((s) => s.id === occ.salaId); return (<tr key={occ.key}><td>{occ.data}</td><td>{nomeDiaSemana(da?.diaSemanaId)}</td><td>{da?.turnoEducacao_descricao ?? '-'}</td><td>{da?.tempoAula_descricao ?? '-'}</td><td>{sala?.descricao ?? sala?.sucinto ?? occ.salaId}</td><td><button type="button" className="btn-action btnred" onClick={() => removerOcorrencia(occ)}>✕</button></td></tr>); })}</tbody>
+                                                        <thead><tr><th>Data</th><th>Dia Semana</th><th>Turno</th><th>Tempo Aula</th><th>Sala</th><th>AÃ§Ã£o</th></tr></thead>
+                                                        <tbody>{[...data.ocorrencias].sort((a, b) => a.data.localeCompare(b.data)).map((occ) => {const da = diaAulas.find((x) => x.id === occ.diaAulaId); const sala = salas.find((s) => s.id === occ.salaId); return (<tr key={occ.key}><td>{occ.data}</td><td>{nomeDiaSemana(da?.diaSemanaId)}</td><td>{da?.turnoEducacao_descricao ?? '-'}</td><td>{da?.tempoAula_descricao ?? '-'}</td><td>{sala?.descricao ?? sala?.sucinto ?? occ.salaId}</td><td><button type="button" className="btn-action btnred" onClick={() => removerOcorrencia(occ)}>âœ•</button></td></tr>); })}</tbody>
                                                     </table>
                                                 )}
                                                 {data.invalidas.length > 0 && (
                                                     <table className="data-table" style={{width: '100%', marginTop: 12}}>
-                                                        <thead><tr><th style={{width: 130}}>Data Inválida</th><th>Motivo</th></tr></thead>
+                                                        <thead><tr><th style={{width: 130}}>Data InvÃ¡lida</th><th>Motivo</th></tr></thead>
                                                         <tbody>{data.invalidas.map((inv, idx) => (<tr key={`${inv.data}-${idx}`}><td style={{color: 'red'}}>{inv.data}</td><td style={{color: 'red'}}>{inv.motivo}</td></tr>))}</tbody>
                                                     </table>
                                                 )}
@@ -636,8 +636,8 @@ const [carregando, setCarregando] = useState(true);
                                                 <legend>Vagas</legend>
                                                 <div className="form-grid">
                                                     <label className="form-field"><span className="form-label">Vagas</span><input type="number" className="form-input" value={data.entity.vagas ?? ''} onChange={(ev) => updateField('entity', {...dataRef.current.entity, vagas: Number(ev.target.value)})}/><button type="button" className="btnblue" onClick={ajustarVagas}>Ajustar Vagas</button></label>
-                                                    <label className="form-field"><span className="form-label">Registra Frequência</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={data.entity.registraFrequencia !== false} onChange={(ev) => updateField('entity', {...dataRef.current.entity, registraFrequencia: ev.target.checked})}/> Sim</label></label>
-                                                    <label className="form-field"><span className="form-label">Possui Avaliação</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={data.entity.possuiAvaliacao !== false} onChange={(ev) => updateField('entity', {...dataRef.current.entity, possuiAvaliacao: ev.target.checked})}/> Sim</label></label>
+                                                    <label className="form-field"><span className="form-label">Registra FrequÃªncia</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={data.entity.registraFrequencia !== false} onChange={(ev) => updateField('entity', {...dataRef.current.entity, registraFrequencia: ev.target.checked})}/> Sim</label></label>
+                                                    <label className="form-field"><span className="form-label">Possui AvaliaÃ§Ã£o</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={data.entity.possuiAvaliacao !== false} onChange={(ev) => updateField('entity', {...dataRef.current.entity, possuiAvaliacao: ev.target.checked})}/> Sim</label></label>
                                                     <button type="button" className="btn-action btnyellow" style={{gridColumn: 'span 2'}} onClick={() => window.open(`/api/educacao/oferecimento-componente-curricular/paged?unidadeId=${data.entity.unidadeId}&curriculoId=${data.entity.curriculoId}`, '_blank')}>
                                                         Consulte os Oferecimentos
                                                     </button>
@@ -651,7 +651,7 @@ const [carregando, setCarregando] = useState(true);
                                                 <legend>Professor</legend>
                                                 <div className="form-grid">
                                                     <label className="form-field" style={{gridColumn: 'span 3'}}>
-                                                        <span className="form-label">Responsável pela Turma</span>
+                                                        <span className="form-label">ResponsÃ¡vel pela Turma</span>
                                                         <AutoComplete
                                                             placeholder="Digite para buscar o professor..."
                                                             value={data.professorId ? {id: data.professorId, label: professores.find(p => p.id === data.professorId)?.nome ?? ''} : null}

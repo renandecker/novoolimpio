@@ -1,10 +1,10 @@
-import {useState} from 'react';
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import type {ApiItem} from '../types';
-import {api} from '../api';
-import {AutoComplete} from '../AutoComplete';
-import type {AutoCompleteOption} from '../AutoComplete';
+﻿import {useState} from 'react';
+import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../features/auth/types';
+import {api} from '../../shared/services/api';
+import {AutoComplete} from '../../shared/components/AutoComplete';
+import type {AutoCompleteOption} from '../../shared/components/AutoComplete';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -89,7 +89,7 @@ export default function ViewLogradouroListLogradouroListScreen() {
     );
 }
 
-/** Espelha o diálogo p:dialog widgetVar="trocaLogradouro" do listLogradouro.xhtml. */
+/** Espelha o diÃ¡logo p:dialog widgetVar="trocaLogradouro" do listLogradouro.xhtml. */
 function TrocaLogradouroDialog({entity, onClose}: { entity: ApiItem; onClose: () => void }) {
     const record = asRecord(entity);
     const destinoId = Number(record.id);
@@ -145,7 +145,7 @@ function TrocaLogradouroDialog({entity, onClose}: { entity: ApiItem; onClose: ()
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal form-modal" onClick={(event) => event.stopPropagation()}>
                 <div className="div_form">
-                    <div className="form-title">Troca e remoção logradouro</div>
+                    <div className="form-title">Troca e remoÃ§Ã£o logradouro</div>
                     <div className="table_form">
                         <div className="form-grid">
                             <div className="form-field">
@@ -181,7 +181,7 @@ function TrocaLogradouroDialog({entity, onClose}: { entity: ApiItem; onClose: ()
                                 <div style={{display: 'flex', gap: '8px', width: '100%'}}>
                                     <div style={{flex: 1}}>
                                         <AutoComplete
-                                            placeholder="Digite para buscar (mínimo 3 caracteres)"
+                                            placeholder="Digite para buscar (mÃ­nimo 3 caracteres)"
                                             value={selecao}
                                             onChange={setSelecao}
                                             fetchOptions={buscarOpcoes}
@@ -210,7 +210,7 @@ function TrocaLogradouroDialog({entity, onClose}: { entity: ApiItem; onClose: ()
                                             <td>
                                                 <button type="button" className="btn-action btnred" title="Remover"
                                                         onClick={() => remover(item.id)}>
-                                                    ×
+                                                    Ã—
                                                 </button>
                                             </td>
                                         </tr>

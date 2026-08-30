@@ -1,9 +1,9 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {PermissionGate} from '../permissions';
-import {api} from '../api';
-import {AutoComplete} from '../AutoComplete';
-import type {AutoCompleteOption} from '../AutoComplete';
+import {PermissionGate} from '../../shared/services/permissions';
+import {api} from '../../shared/services/api';
+import {AutoComplete} from '../../shared/components/AutoComplete';
+import type {AutoCompleteOption} from '../../shared/components/AutoComplete';
 
 interface ViaCepResposta {
     erro?: boolean;
@@ -82,7 +82,7 @@ export default function ViewLogradouroFormLogradouroListScreen() {
                 }
             } catch (erro) {
                 console.error('Erro ao carregar logradouro:', erro);
-                alert('Não foi possível carregar o logradouro para edição');
+                alert('NÃ£o foi possÃ­vel carregar o logradouro para ediÃ§Ã£o');
             } finally {
                 if (ativo) setCarregando(false);
             }
@@ -104,7 +104,7 @@ export default function ViewLogradouroFormLogradouroListScreen() {
     const handleBuscarCep = async () => {
         const digitos = cep.replace(/\D/g, '');
         if (digitos.length !== 8) {
-            setMensagem('Informe um CEP com 8 dígitos.');
+            setMensagem('Informe um CEP com 8 dÃ­gitos.');
             return;
         }
         setBuscando(true);
@@ -113,7 +113,7 @@ export default function ViewLogradouroFormLogradouroListScreen() {
             const resposta = await fetch(`https://viacep.com.br/ws/${digitos}/json/`);
             const dados = (await resposta.json()) as ViaCepResposta;
             if (!resposta.ok || dados.erro) {
-                setMensagem('Não foi encontrado esse cep nos correios');
+                setMensagem('NÃ£o foi encontrado esse cep nos correios');
                 return;
             }
             setDescricao(dados.logradouro ?? '');
@@ -144,7 +144,7 @@ export default function ViewLogradouroFormLogradouroListScreen() {
             }
             setMensagem('CEP identificado no correio');
         } catch (error) {
-            setMensagem(`Não foi possível consultar o CEP: ${apiErrorMessage(error)}`);
+            setMensagem(`NÃ£o foi possÃ­vel consultar o CEP: ${apiErrorMessage(error)}`);
         } finally {
             setBuscando(false);
         }
@@ -260,7 +260,7 @@ export default function ViewLogradouroFormLogradouroListScreen() {
                             </label>
                             <label className="form-field">
                                 <span className="form-label">Estado</span>
-                                <AutoComplete placeholder="Digite para buscar (mínimo 3 caracteres)"
+                                <AutoComplete placeholder="Digite para buscar (mÃ­nimo 3 caracteres)"
                                               value={estado}
                                               onChange={(option) => {
                                                   setEstado(option);
@@ -273,7 +273,7 @@ export default function ViewLogradouroFormLogradouroListScreen() {
                             </label>
                             <label className="form-field">
                                 <span className="form-label">Cidade</span>
-                                <AutoComplete placeholder="Digite para buscar (mínimo 3 caracteres)"
+                                <AutoComplete placeholder="Digite para buscar (mÃ­nimo 3 caracteres)"
                                               value={cidade}
                                               onChange={(option) => {
                                                   setCidade(option);
@@ -283,7 +283,7 @@ export default function ViewLogradouroFormLogradouroListScreen() {
                             </label>
                             <label className="form-field">
                                 <span className="form-label">Bairro *</span>
-                                <AutoComplete placeholder="Digite para buscar (mínimo 3 caracteres)"
+                                <AutoComplete placeholder="Digite para buscar (mÃ­nimo 3 caracteres)"
                                               value={bairro}
                                               onChange={setBairro}
                                               fetchOptions={buscarBairros}/>

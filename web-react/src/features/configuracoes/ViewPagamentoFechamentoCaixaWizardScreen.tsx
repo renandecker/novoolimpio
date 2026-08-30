@@ -1,10 +1,10 @@
-import {useState, useEffect, useCallback} from 'react';
+﻿import {useState, useEffect, useCallback} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {api} from '../api';
-import {useAuth} from '../auth';
-import {PermissionGate} from '../permissions';
-import {AutoComplete, type AutoCompleteOption} from '../AutoComplete';
-import {Wizard, useWizardData} from '../Wizard';
+import {api} from '../../shared/services/api';
+import {useAuth} from '../../features/auth/auth';
+import {PermissionGate} from '../../shared/services/permissions';
+import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
+import {Wizard, useWizardData} from '../../shared/components/Wizard';
 import './FechamentoCaixa.css';
 
 type Caixa = {
@@ -23,11 +23,11 @@ type TipoPagamento = 'DINHEIRO' | 'CHEQUE' | 'CARTAO' | 'BOLETO' | 'PIX' | 'TRAN
 const TIPOS_PAGAMENTO: { value: TipoPagamento; label: string }[] = [
     {value: 'DINHEIRO', label: 'Dinheiro'},
     {value: 'CHEQUE', label: 'Cheque'},
-    {value: 'CARTAO', label: 'Cartão'},
+    {value: 'CARTAO', label: 'CartÃ£o'},
     {value: 'BOLETO', label: 'Boleto'},
     {value: 'PIX', label: 'Pix'},
-    {value: 'TRANFERENCIA', label: 'Transferência'},
-    {value: 'DEPOSITO', label: 'Depósito'},
+    {value: 'TRANFERENCIA', label: 'TransferÃªncia'},
+    {value: 'DEPOSITO', label: 'DepÃ³sito'},
 ];
 
 type FormaPagamentoLinha = {
@@ -86,7 +86,7 @@ function fetchAutoComplete(path: string, valueKey: string, labelKey: string, all
 }
 
 interface FechamentoCaixaData {
-    // Step 1 - Configuração
+    // Step 1 - ConfiguraÃ§Ã£o
     usuarioId: string;
     unidadeId: string;
     impressoraId: string;
@@ -94,7 +94,7 @@ interface FechamentoCaixaData {
     caixaAberto: boolean;
     caixaId: number | null;
 
-    // Step 2 - Movimentação
+    // Step 2 - MovimentaÃ§Ã£o
     movSubTab: 'parcela' | 'extra' | 'sangria';
 
     // Parcela
@@ -237,7 +237,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
     // Step validation functions
     const validateStep1 = useCallback(async (d: FechamentoCaixaData) => {
-        if (!d.usuarioId) return 'Selecione o usuário';
+        if (!d.usuarioId) return 'Selecione o usuÃ¡rio';
         if (!d.unidadeId) return 'Selecione a unidade';
         if (!d.caixaAberto) {
             if (!d.impressoraId) return 'Selecione a impressora';
@@ -247,15 +247,15 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
     }, []);
 
     const validateStep2 = useCallback(async (d: FechamentoCaixaData) => {
-        if (!d.caixaId) return 'Caixa não está aberto';
+        if (!d.caixaId) return 'Caixa nÃ£o estÃ¡ aberto';
 
         if (d.movSubTab === 'parcela') {
-            if (!d.parcelaId) return 'Informe o número da parcela ou busque por aluno';
+            if (!d.parcelaId) return 'Informe o nÃºmero da parcela ou busque por aluno';
             if (!d.calculo) return 'Calcule os valores antes de confirmar';
             const totalFormas = d.formasPagamento.reduce((acc, f) => acc + (Number(f.valor) || 0), 0);
             if (totalFormas < (d.calculo.valorCobrado ?? 0)) return 'Valor recebido deve ser >= valor cobrado';
         } else if (d.movSubTab === 'extra') {
-            if (!d.historico) return 'Informe a descrição/histórico';
+            if (!d.historico) return 'Informe a descriÃ§Ã£o/histÃ³rico';
             if (!d.valorExtra || Number(d.valorExtra) <= 0) return 'Informe o valor (> 0)';
             if (!d.movimentoId) return 'Selecione o tipo de movimento';
         } else if (d.movSubTab === 'sangria') {
@@ -265,7 +265,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
     }, []);
 
     const validateStep3 = useCallback(async (d: FechamentoCaixaData) => {
-        if (!d.caixaId) return 'Caixa não está aberto';
+        if (!d.caixaId) return 'Caixa nÃ£o estÃ¡ aberto';
         if (!d.totais) return 'Carregue os totais antes de fechar';
         return true;
     }, []);
@@ -324,7 +324,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
             });
             updateField('calculo', calc);
         } catch {
-            setErro('Não foi possível calcular os valores da parcela.');
+            setErro('NÃ£o foi possÃ­vel calcular os valores da parcela.');
         }
     };
 
@@ -393,10 +393,10 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                 usuarioId: Number(data.usuarioId),
                 valorTroco: 0,
             });
-            setMensagem('Movimentação registrada com sucesso!');
+            setMensagem('MovimentaÃ§Ã£o registrada com sucesso!');
             updateFields({historico: '', valorExtra: '', movimentoId: ''});
         } catch (e: any) {
-            setErro(e?.response?.data?.message ?? 'Erro ao registrar movimentação!');
+            setErro(e?.response?.data?.message ?? 'Erro ao registrar movimentaÃ§Ã£o!');
         } finally {
             setLoading(false);
         }
@@ -426,7 +426,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
             const {data: tot} = await api.get<FechamentoCaixaTotais>(`/api/financeiro/caixa/${caixa.id}/totais-fechamento`);
             updateField('totais', tot);
         } catch {
-            setErro('Não foi possível carregar os totais do caixa.');
+            setErro('NÃ£o foi possÃ­vel carregar os totais do caixa.');
         }
         finally {
             setLoading(false);
@@ -452,11 +452,11 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
     const goToStep = (index: number) => {
         if (index === 1 && !data.caixaAberto) {
-            setErro('Você precisa configurar e abrir o caixa antes!');
+            setErro('VocÃª precisa configurar e abrir o caixa antes!');
             return;
         }
         if (index === 2 && !data.caixaId) {
-            setErro('Caixa não está aberto!');
+            setErro('Caixa nÃ£o estÃ¡ aberto!');
             return;
         }
         setErro(null);
@@ -476,17 +476,17 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                     steps={[
                         {
                             key: 'configuracao',
-                            label: 'Configuração do Caixa',
+                            label: 'ConfiguraÃ§Ã£o do Caixa',
                             content: (
                                 <section className="step-content">
                                     <p className="step-description">
-                                        Informe o usuário e a unidade para localizar (ou abrir) o caixa do dia.
+                                        Informe o usuÃ¡rio e a unidade para localizar (ou abrir) o caixa do dia.
                                     </p>
 
                                     <div className="field-row">
                                         <AutoComplete
                                             id="usuario"
-                                            label="Usuário *"
+                                            label="UsuÃ¡rio *"
                                             placeholder="Digite para buscar..."
                                             value={data.usuarioId ? {id: Number(data.usuarioId), label: ''} : null}
                                             onChange={(opt) => updateField('usuarioId', opt ? String(opt.id) : '')}
@@ -510,7 +510,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                         <div className="caixa-info">
                                             <p>
                                                 Caixa <strong>#{caixa.idCaixaUnidade}</strong> aberto em{' '}
-                                                {new Date(caixa.data).toLocaleString('pt-BR')} —{' '}
+                                                {new Date(caixa.data).toLocaleString('pt-BR')} â€”{' '}
                                                 {caixa.dataFechamento ? (
                                                     <strong className="status-fechado">Fechado</strong>
                                                 ) : (
@@ -527,7 +527,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                         </div>
                                     ) : (
                                         <div className="caixa-config">
-                                            <p>Nenhum caixa aberto hoje para este usuário/unidade.</p>
+                                            <p>Nenhum caixa aberto hoje para este usuÃ¡rio/unidade.</p>
                                             <div className="field-row">
                                                 <AutoComplete
                                                     id="impressora"
@@ -569,10 +569,10 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                         },
                         {
                             key: 'movimentacao',
-                            label: 'Movimentação Financeira',
+                            label: 'MovimentaÃ§Ã£o Financeira',
                             content: (
                                 <section className="step-content">
-                                    {!data.caixaAberto && <p className="warning">Caixa não está aberto!</p>}
+                                    {!data.caixaAberto && <p className="warning">Caixa nÃ£o estÃ¡ aberto!</p>}
 
                                     <div className="sub-tabs">
                                         <button
@@ -585,7 +585,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                             className={data.movSubTab === 'extra' ? 'active' : ''}
                                             onClick={() => updateField('movSubTab', 'extra')}
                                         >
-                                            Movimentação Extra
+                                            MovimentaÃ§Ã£o Extra
                                         </button>
                                         <button
                                             className={data.movSubTab === 'sangria' ? 'active' : ''}
@@ -600,8 +600,8 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                             <div className="field-row">
                                                 <AutoComplete
                                                     id="parcela"
-                                                    label="Nº Parcela / Buscar Aluno *"
-                                                    placeholder="Número da parcela ou nome do aluno..."
+                                                    label="NÂº Parcela / Buscar Aluno *"
+                                                    placeholder="NÃºmero da parcela ou nome do aluno..."
                                                     value={data.parcelaId ? {
                                                         id: Number(data.parcelaId),
                                                         label: `Parcela #${data.parcelaId}`
@@ -629,7 +629,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                                     />
                                                 </div>
                                                 <div className="field-group">
-                                                    <label>Nº Parcela (0 = entrada)</label>
+                                                    <label>NÂº Parcela (0 = entrada)</label>
                                                     <input
                                                         type="number"
                                                         value={data.parcelaSequencia}
@@ -667,7 +667,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                                     />
                                                 </div>
                                                 <div className="field-group">
-                                                    <label>Dias tolerância</label>
+                                                    <label>Dias tolerÃ¢ncia</label>
                                                     <input
                                                         type="number"
                                                         value={data.diasTolerancia}
@@ -721,7 +721,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                                     />
                                                     {f.tipoPagamento !== 'DINHEIRO' && f.tipoPagamento !== 'PIX' && (
                                                         <input
-                                                            placeholder="Documento / nº"
+                                                            placeholder="Documento / nÂº"
                                                             value={f.documento}
                                                             onChange={(e) => updateFormaPagamento(idx, {documento: e.target.value})}
                                                         />
@@ -736,7 +736,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                                                            data: e.target.value
                                                                        }
                                                                    })}/>
-                                                            <input type="text" placeholder="Número do cheque"
+                                                            <input type="text" placeholder="NÃºmero do cheque"
                                                                    value={f.cheque?.numero || ''}
                                                                    onChange={(e) => updateFormaPagamento(idx, {
                                                                        cheque: {
@@ -773,8 +773,8 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                                                         }
                                                                     })}>
                                                                 <option value="">Tipo de Pagamento</option>
-                                                                <option value="CREDITO">Crédito</option>
-                                                                <option value="DEBITO">Débito</option>
+                                                                <option value="CREDITO">CrÃ©dito</option>
+                                                                <option value="DEBITO">DÃ©bito</option>
                                                             </select>
                                                             <input type="number" min="1" placeholder="Parcelas"
                                                                    value={f.cartao?.quantidadeParcelas || ''}
@@ -796,7 +796,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                                                            data: e.target.value
                                                                        }
                                                                    })}/>
-                                                            <input placeholder="Agência Origem"
+                                                            <input placeholder="AgÃªncia Origem"
                                                                    value={f.transferencia?.agenciaOrigem || ''}
                                                                    onChange={(e) => updateFormaPagamento(idx, {
                                                                        transferencia: {
@@ -812,7 +812,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                                                            contaOrigem: e.target.value
                                                                        }
                                                                    })}/>
-                                                            <input placeholder="Agência Destino"
+                                                            <input placeholder="AgÃªncia Destino"
                                                                    value={f.transferencia?.agenciaDestino || ''}
                                                                    onChange={(e) => updateFormaPagamento(idx, {
                                                                        transferencia: {
@@ -840,7 +840,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                                                            data: e.target.value
                                                                        }
                                                                    })}/>
-                                                            <input placeholder="Agência Destino"
+                                                            <input placeholder="AgÃªncia Destino"
                                                                    value={f.deposito?.agenciaDestino || ''}
                                                                    onChange={(e) => updateFormaPagamento(idx, {
                                                                        deposito: {
@@ -860,7 +860,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                                     )}
                                                     {f.tipoPagamento === 'BOLETO' && (
                                                         <div className="forma-detalhe">
-                                                            <input type="text" placeholder="Código de barras"
+                                                            <input type="text" placeholder="CÃ³digo de barras"
                                                                    value={f.boleto?.barCode || ''}
                                                                    onChange={(e) => updateFormaPagamento(idx, {
                                                                        boleto: {
@@ -883,7 +883,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
                                             <div className="totais-parcelas">
                                                 <p>Valor recebido: <strong>{money(valorRecebido)}</strong>
-                                                    {data.calculo && troco > 0 && <span> — Troco: {money(troco)}</span>}
+                                                    {data.calculo && troco > 0 && <span> â€” Troco: {money(troco)}</span>}
                                                 </p>
                                             </div>
 
@@ -901,11 +901,11 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                         <div className="sub-content">
                                             <div className="field-row">
                                                 <div className="field-group full">
-                                                    <label>Descrição / Histórico *</label>
+                                                    <label>DescriÃ§Ã£o / HistÃ³rico *</label>
                                                     <input
                                                         value={data.historico}
                                                         onChange={(e) => updateField('historico', e.target.value)}
-                                                        placeholder="Descrição da movimentação"
+                                                        placeholder="DescriÃ§Ã£o da movimentaÃ§Ã£o"
                                                     />
                                                 </div>
                                                 <AutoComplete
@@ -945,7 +945,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                             </div>
                                             <button className="btn-primary" onClick={registrarMovimentacaoExtra}
                                                     disabled={loading}>
-                                                Registrar Movimentação
+                                                Registrar MovimentaÃ§Ã£o
                                             </button>
                                         </div>
                                     )}
@@ -978,7 +978,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                             nextLabel: 'Fechar Caixa',
                             content: (
                                 <section className="step-content">
-                                    {!data.caixaAberto && <p className="warning">Caixa não está aberto!</p>}
+                                    {!data.caixaAberto && <p className="warning">Caixa nÃ£o estÃ¡ aberto!</p>}
 
                                     <h3>Totais do Caixa #{caixa?.idCaixaUnidade}</h3>
                                     {data.totais ? (
@@ -997,7 +997,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                                 <td>{money(data.totais.totalCheque)}</td>
                                             </tr>
                                             <tr>
-                                                <td>Cartão</td>
+                                                <td>CartÃ£o</td>
                                                 <td>{money(data.totais.totalCartao)}</td>
                                             </tr>
                                             <tr>
@@ -1005,11 +1005,11 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                                 <td>{money(data.totais.totalBoleto)}</td>
                                             </tr>
                                             <tr>
-                                                <td>Transferência</td>
+                                                <td>TransferÃªncia</td>
                                                 <td>{money(data.totais.totalTransferencia)}</td>
                                             </tr>
                                             <tr>
-                                                <td>Depósito</td>
+                                                <td>DepÃ³sito</td>
                                                 <td>{money(data.totais.totalDeposito)}</td>
                                             </tr>
                                             <tr>

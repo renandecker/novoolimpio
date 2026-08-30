@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import type {ApiItem} from '../types';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../shared/types/index';
 
 const formatDate = (value: unknown): string => {
     if (value === null || value === undefined) return '';

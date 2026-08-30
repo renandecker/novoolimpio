@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import type {ApiItem} from '../types';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../features/auth/types';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -13,9 +13,9 @@ const formatDate = (value: unknown): string => {
 
 const COLUMNS: DataTableColumn[] = [
     {key: 'produto_descricao', label: 'Produto'},
-    {key: 'usuario_descricao', label: 'Usuário'},
+    {key: 'usuario_descricao', label: 'UsuÃ¡rio'},
     {key: 'unidade_descricao', label: 'Unidade'},
-    {key: 'tipo', label: 'Tipo Movimentação'},
+    {key: 'tipo', label: 'Tipo MovimentaÃ§Ã£o'},
     {
         key: 'dt_movimento',
         label: 'Data Movimento',

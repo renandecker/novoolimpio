@@ -1,5 +1,5 @@
-import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {ModuleTabs} from '../../shared/components/ModuleTabs';
 
 export default function ViewMetaIndicadorMetaDinamicaListScreen() {
     return (
@@ -9,8 +9,8 @@ export default function ViewMetaIndicadorMetaDinamicaListScreen() {
                 <ModuleTabs
                     tabs={[
                         {key: 'meta', label: 'Meta', path: '/api/view/meta/indicadorMetaDinamica'},
-                        {key: 'item2', label: 'Item 2', empty: 'Conteúdo de Item 2.'},
-                        {key: 'listagem', label: 'Listagem', empty: 'Conteúdo de Listagem.'},
+                        {key: 'item2', label: 'Item 2', empty: 'ConteÃºdo de Item 2.'},
+                        {key: 'listagem', label: 'Listagem', empty: 'ConteÃºdo de Listagem.'},
                     ]}
                 />
             </main>

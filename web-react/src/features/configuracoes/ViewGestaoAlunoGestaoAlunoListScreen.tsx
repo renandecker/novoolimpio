@@ -1,12 +1,12 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {api} from '../api';
-import {PermissionGate, usePermissions, useCurrentOutcome} from '../permissions';
-import {PAGE_SIZES} from '../DataTable';
-import {useModulePaged} from '../useModulePaged';
-import {AutoComplete, type AutoCompleteOption} from '../AutoComplete';
-import {CancelamentoModal} from '../CancelamentoModal';
-import {RowMenu, type RowMenuItem} from '../RowMenu';
+import {api} from '../../shared/services/api';
+import {PermissionGate, usePermissions, useCurrentOutcome} from '../../shared/services/permissions';
+import {PAGE_SIZES} from '../../shared/components/DataTable';
+import {useModulePaged} from '../../shared/hooks/useModulePaged';
+import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
+import {CancelamentoModal} from '../../shared/components/CancelamentoModal';
+import {RowMenu, type RowMenuItem} from '../../shared/components/RowMenu';
 import {
     SituacaoFinanceiraModal,
     DadosPessoaisModal,
@@ -16,16 +16,16 @@ import {
     NotasModal,
     PresencasModal,
     HistoricoAlunoModal,
-} from '../GestaoAlunoModais';
-import type {ApiItem} from '../types';
-import {PerfilModuloPermissions} from '../useModulePaged';
+} from '../../features/professor/GestaoAlunoModais';
+import type {ApiItem} from '../../features/auth/types';
+import {PerfilModuloPermissions} from '../../shared/hooks/useModulePaged';
 
 const CONTRACT_COLUMNS = [
     {key: 'id', label: 'Contrato'},
     {key: 'pessoa_descricao', label: 'Aluno'},
     {key: 'curso_descricao', label: 'Curso'},
     {key: 'unidade_descricao', label: 'Unidade'},
-    {key: 'unidade_resposavel_descricao', label: 'Unidade Responsável'},
+    {key: 'unidade_resposavel_descricao', label: 'Unidade ResponsÃ¡vel'},
     {key: 'data', label: 'Data'},
     {key: 'ativo', label: 'Status'},
     {key: 'qtde_parcelas_atrasadas', label: 'Pendente'},
@@ -36,17 +36,17 @@ const CONTRACT_COLUMNS = [
 // in gestaoAluno.xhtml (olimpio.zip): every action opens its own modal dialog, they are NOT
 // sequential steps of a wizard.
 const ACTIONS = [
-    {key: 'situacao', label: '$ Situação Financeira', className: 'btnblue'},
+    {key: 'situacao', label: '$ SituaÃ§Ã£o Financeira', className: 'btnblue'},
     {key: 'pessoais', label: 'Dados Pessoais Aluno', className: 'btngreen'},
     {key: 'contratante', label: 'Dados Pessoais Contratante', className: 'btnstop'},
-    {key: 'historicoNap', label: 'Histórico NAP', className: 'btnsky'},
-    {key: 'historicoCobranca', label: 'Histórico Cobrança', className: 'btnpurple'},
+    {key: 'historicoNap', label: 'HistÃ³rico NAP', className: 'btnsky'},
+    {key: 'historicoCobranca', label: 'HistÃ³rico CobranÃ§a', className: 'btnpurple'},
     {key: 'notas', label: 'Notas', className: 'btnblack'},
-    {key: 'presencas', label: 'Presenças', className: 'btnbrown'},
-    {key: 'historicoAluno', label: 'Histórico aluno', className: 'btnpink'},
+    {key: 'presencas', label: 'PresenÃ§as', className: 'btnbrown'},
+    {key: 'historicoAluno', label: 'HistÃ³rico aluno', className: 'btnpink'},
 ] as const;
 
-// Espelha as chamadas <p:fileDownload> do botão amarelo "Relatórios" em gestaoAluno.xhtml
+// Espelha as chamadas <p:fileDownload> do botÃ£o amarelo "RelatÃ³rios" em gestaoAluno.xhtml
 // (olimpio_extracted): cada item POSTa no endpoint que gera o PDF do documento.
 const DOCUMENTOS = {
     contrato: {
@@ -103,14 +103,14 @@ const renderValue = (item: ApiItem, key: string) => {
         if (ACTIVE_COLUMN_RE.test(key)) {
             return boolVal ? 'ATIVO' : 'INATIVO';
         } else {
-            return boolVal ? 'SIM' : 'NÃO';
+            return boolVal ? 'SIM' : 'NÃƒO';
         }
     }
     return String(value);
 };
 
-// Espelha a subtabela "detalhesAluno" (<p:rowExpansion>) de gestaoAluno.xhtml: matrículas do
-// contrato com colunas descritivas do oferecimento + menus de ação por permissão.
+// Espelha a subtabela "detalhesAluno" (<p:rowExpansion>) de gestaoAluno.xhtml: matrÃ­culas do
+// contrato com colunas descritivas do oferecimento + menus de aÃ§Ã£o por permissÃ£o.
 interface MatriculaContrato {
     id: number;
     turma: number | null;
@@ -130,7 +130,7 @@ interface MatriculaContrato {
 const fmtDataMatricula = (value?: string | null) =>
     value ? new Date(value).toLocaleDateString('pt-BR') : '';
 
-// Espelha turmaController.styleClass(matricula): classe de cor do status da matrícula.
+// Espelha turmaController.styleClass(matricula): classe de cor do status da matrÃ­cula.
 const STATUS_MATRICULA_CLASS: Record<string, string> = {
     APROVADO: 'statusEM_ANDAMENTO',
     REPROVADO: 'statusPENDENTE',
@@ -141,13 +141,13 @@ const STATUS_MATRICULA_CLASS: Record<string, string> = {
 const statusTurmaClass = (status: string) => (status ? `status${status}` : '');
 
 const MATRICULA_COLUMNS = [
-    {key: 'id', label: 'Matrícula', width: '5%', render: (m: MatriculaContrato) => String(m.id)},
+    {key: 'id', label: 'MatrÃ­cula', width: '5%', render: (m: MatriculaContrato) => String(m.id)},
     {key: 'turma', label: 'Turma', width: '5%', render: (m: MatriculaContrato) => String(m.turma ?? '')},
-    {key: 'dataInicio', label: 'Data Início', width: '60px', render: (m: MatriculaContrato) => fmtDataMatricula(m.dataInicio)},
+    {key: 'dataInicio', label: 'Data InÃ­cio', width: '60px', render: (m: MatriculaContrato) => fmtDataMatricula(m.dataInicio)},
     {key: 'dataFim', label: 'Data Fim', width: '60px', render: (m: MatriculaContrato) => fmtDataMatricula(m.dataFim)},
     {key: 'grupo', label: 'Grupo', width: '10%', render: (m: MatriculaContrato) => m.grupo},
     {key: 'componente', label: 'Componente Curricular', width: '20%', render: (m: MatriculaContrato) => m.componenteCurricular},
-    {key: 'cargaHoraria', label: 'Carga Horária', width: '5%', align: 'center', render: (m: MatriculaContrato) => String(m.cargaHoraria ?? '')},
+    {key: 'cargaHoraria', label: 'Carga HorÃ¡ria', width: '5%', align: 'center', render: (m: MatriculaContrato) => String(m.cargaHoraria ?? '')},
     {key: 'unidade', label: 'Id_unidade', width: '12%', render: (m: MatriculaContrato) => m.unidade},
     {key: 'professor', label: 'Professor', width: '15%', render: (m: MatriculaContrato) => m.professor},
 ] as const;
@@ -178,49 +178,49 @@ function MatriculasTable({contratoId, acessoTudo, acessoRelatorios, acessoNovo, 
 
     const abrirPlaceholder = (titulo: string, texto: string) => setPlaceholder({titulo, texto});
 
-    // Espelha os <p:menuButton> por linha da matrícula em gestaoAluno.xhtml (acessoTudo,
+    // Espelha os <p:menuButton> por linha da matrÃ­cula em gestaoAluno.xhtml (acessoTudo,
     // acessoRelatorios, acessoNovo, acessoEditar, acessoRemover), com as mesmas cores.
     const acoesDaMatricula = (m: MatriculaContrato) => {
         const cancelada = m.statusMatricula === 'CANCELADO';
         return (
             <>
                 {acessoTudo && (
-                    <RowMenu icon={<i className="fa fa-check"/>} className="btnblue" title="Permissão total"
+                    <RowMenu icon={<i className="fa fa-check"/>} className="btnblue" title="PermissÃ£o total"
                              items={[{
                                  key: 'alunosTurma',
                                  label: 'Alunos da turma',
                                  className: 'btnbrown',
                                  onSelect: () => abrirPlaceholder(
                                      'Alunos da turma',
-                                     `Alunos sobre os oferecimentos da matrícula #${m.id} (turma ${m.turma ?? '—'}).`),
+                                     `Alunos sobre os oferecimentos da matrÃ­cula #${m.id} (turma ${m.turma ?? 'â€”'}).`),
                              }]}/>
                 )}
                 {acessoRelatorios && (
-                    <RowMenu icon={<i className="fa fa-file-text-o"/>} className="btnyellow" title="Relatórios"
+                    <RowMenu icon={<i className="fa fa-file-text-o"/>} className="btnyellow" title="RelatÃ³rios"
                              items={[
                                  {
                                      key: 'informacoes',
-                                     label: 'Informações',
+                                     label: 'InformaÃ§Ãµes',
                                      className: 'btnyellow',
-                                     onSelect: () => abrirPlaceholder('Informações', `Mais informações da turma ${m.turma ?? '—'}.`),
+                                     onSelect: () => abrirPlaceholder('InformaÃ§Ãµes', `Mais informaÃ§Ãµes da turma ${m.turma ?? 'â€”'}.`),
                                  },
                                  {
                                      key: 'preCancelamentos',
-                                     label: 'Pré cancelamentos',
+                                     label: 'PrÃ© cancelamentos',
                                      className: 'btnorange',
-                                     onSelect: () => abrirPlaceholder('Pré cancelamentos', 'Pré cancelamentos criados na matrícula.'),
+                                     onSelect: () => abrirPlaceholder('PrÃ© cancelamentos', 'PrÃ© cancelamentos criados na matrÃ­cula.'),
                                  },
                                  {
                                      key: 'presencas',
-                                     label: 'Presenças',
+                                     label: 'PresenÃ§as',
                                      className: 'btnbrown',
-                                     onSelect: () => abrirPlaceholder('Presenças', `Presenças da matrícula #${m.id}.`),
+                                     onSelect: () => abrirPlaceholder('PresenÃ§as', `PresenÃ§as da matrÃ­cula #${m.id}.`),
                                  },
                                  {
                                      key: 'notas',
                                      label: 'Notas',
                                      className: 'btnblack',
-                                     onSelect: () => abrirPlaceholder('Notas', `Notas da matrícula #${m.id}.`),
+                                     onSelect: () => abrirPlaceholder('Notas', `Notas da matrÃ­cula #${m.id}.`),
                                  },
                                  ...(m.dataCancelamento ? [{
                                      key: 'cancelamentoMatricula',
@@ -272,7 +272,7 @@ function MatriculasTable({contratoId, acessoTudo, acessoRelatorios, acessoNovo, 
     return (
         <div className="data-table">
             {q.isError ? (
-                <p>Erro ao carregar as matrículas.</p>
+                <p>Erro ao carregar as matrÃ­culas.</p>
             ) : (
                 <table>
                     <thead>
@@ -281,8 +281,8 @@ function MatriculasTable({contratoId, acessoTudo, acessoRelatorios, acessoNovo, 
                             <th key={column.key} style={{width: column.width}}>{column.label}</th>
                         ))}
                         <th style={{width: '6%', textAlign: 'center'}}>Status Turma</th>
-                        <th style={{width: '6%', textAlign: 'center'}}>Status Matrícula</th>
-                        {showActionsColumn && <th className="col-actions">Ações</th>}
+                        <th style={{width: '6%', textAlign: 'center'}}>Status MatrÃ­cula</th>
+                        {showActionsColumn && <th className="col-actions">AÃ§Ãµes</th>}
                     </tr>
                     </thead>
                     <tbody>
@@ -358,7 +358,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
     const {can} = usePermissions();
     const outcome = useCurrentOutcome();
 
-    // Busca permissões do bas_perfil_modulo para esta tela/outcome
+    // Busca permissÃµes do bas_perfil_modulo para esta tela/outcome
     const [perfilModuloPermissions, setPerfilModuloPermissions] = useState<PerfilModuloPermissions | null>(null);
     const [perfilModuloLoading, setPerfilModuloLoading] = useState(false);
 
@@ -369,7 +369,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                 const response = await api.get<PerfilModuloPermissions>(`/api/permissao/permissoes?caminho=${outcome}`);
                 setPerfilModuloPermissions(response.data);
             } catch (error) {
-                console.error('Erro ao carregar permissões do perfil-modulo:', error);
+                console.error('Erro ao carregar permissÃµes do perfil-modulo:', error);
             } finally {
                 setPerfilModuloLoading(false);
             }
@@ -378,21 +378,21 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
     }, [outcome]);
 
     // Espelha gestaoAlunoController.acessoRelatorios/acessoNovo/acessoEditar/acessoRemover em
-    // gestaoAluno.xhtml: cada coluna de ações só aparece se o usuário tiver a permissão correspondente.
+    // gestaoAluno.xhtml: cada coluna de aÃ§Ãµes sÃ³ aparece se o usuÃ¡rio tiver a permissÃ£o correspondente.
     const acessoRelatorios = can('EXECUTE', outcome) || (perfilModuloPermissions?.relatorio ?? false);
     const acessoNovo = can('CREATE', outcome) || (perfilModuloPermissions?.novo ?? false);
     const acessoEditar = can('UPDATE', outcome) || (perfilModuloPermissions?.editar ?? false);
     const acessoRemover = can('DELETE', outcome) || (perfilModuloPermissions?.remover ?? false);
-    // Espelha BaseController.getAcessoTudo: todas as permissões simultâneas.
+    // Espelha BaseController.getAcessoTudo: todas as permissÃµes simultÃ¢neas.
     const acessoTudo = acessoRelatorios && acessoNovo && acessoEditar && acessoRemover;
     const showActionsColumn = acessoTudo || acessoRelatorios || acessoNovo || acessoEditar || acessoRemover;
 
     const abrirPlaceholder = (titulo: string, texto: string) => setPlaceholder({titulo, texto});
 
-    // Documento em geração (chave do item do menu) — desabilita o item enquanto o PDF é gerado.
+    // Documento em geraÃ§Ã£o (chave do item do menu) â€” desabilita o item enquanto o PDF Ã© gerado.
     const [gerandoDoc, setGerandoDoc] = useState<string | null>(null);
 
-    // Espelha <p:fileDownload value="#{controller.metodo(entity)}"/>: POST no endpoint de geração
+    // Espelha <p:fileDownload value="#{controller.metodo(entity)}"/>: POST no endpoint de geraÃ§Ã£o
     // e baixa o PDF retornado (string base64 ou {fileName, contentType, base64Data}).
     const gerarDocumento = async (key: DocumentoKey | string, contratoId: number) => {
         const doc = DOCUMENTOS[key as DocumentoKey];
@@ -419,8 +419,8 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
             }
             if (!base64) {
                 abrirPlaceholder(
-                    'Documento indisponível',
-                    'A geração deste documento ainda não está disponível no servidor.',
+                    'Documento indisponÃ­vel',
+                    'A geraÃ§Ã£o deste documento ainda nÃ£o estÃ¡ disponÃ­vel no servidor.',
                 );
                 return;
             }
@@ -437,7 +437,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                 (error as { response?: { data?: { error?: string } } })?.response?.data?.error
                 ?? (error as Error)?.message
                 ?? 'erro desconhecido';
-            abrirPlaceholder('Erro ao gerar documento', `Não foi possível gerar o documento: ${msg}`);
+            abrirPlaceholder('Erro ao gerar documento', `NÃ£o foi possÃ­vel gerar o documento: ${msg}`);
         } finally {
             setGerandoDoc(null);
         }
@@ -467,7 +467,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                         {CONTRACT_COLUMNS.map((column) => (
                             <th key={column.key}>{column.label}</th>
                         ))}
-                        {showActionsColumn && <th className="col-actions">Ações</th>}
+                        {showActionsColumn && <th className="col-actions">AÃ§Ãµes</th>}
                     </tr>
                     </thead>
                     <tbody>
@@ -491,13 +491,13 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
                             // Regras espelhadas de gestaoAluno.xhtml:
                             // - Troca Turma: rendered="#{entity.trocaTurma eq true}"
-                            // - Cancelamento (2ª via): rendered="#{entity.ativo eq false}"
-                            // - Histórico Escolar: disabled="#{entity.dataConclusao eq null}"
+                            // - Cancelamento (2Âª via): rendered="#{entity.ativo eq false}"
+                            // - HistÃ³rico Escolar: disabled="#{entity.dataConclusao eq null}"
                             // - Certificado: rendered="#{entity.dataConclusao ne null}"
                             const temTrocaTurma = rec.troca_turma === true;
                             const temConclusao = Boolean(rec.data_conclusao);
 
-                            // Relatórios: <p:menuButton icon="ui-icon-document" styleClass="btnyellow"> em gestaoAluno.xhtml.
+                            // RelatÃ³rios: <p:menuButton icon="ui-icon-document" styleClass="btnyellow"> em gestaoAluno.xhtml.
                             const relatoriosItems: RowMenuItem[] = [
                                 {
                                     key: 'contrato',
@@ -508,7 +508,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                                 },
                                 {
                                     key: 'promissoria',
-                                    label: 'Promissória',
+                                    label: 'PromissÃ³ria',
                                     className: 'btnsky',
                                     disabled: gerandoDoc === 'promissoria',
                                     onSelect: () => gerarDocumento('promissoria', contratoId),
@@ -524,9 +524,9 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                                 },
                                 {
                                     key: 'precancelamentos',
-                                    label: 'Pré cancelamentos',
+                                    label: 'PrÃ© cancelamentos',
                                     className: 'btnorange',
-                                    onSelect: () => abrirPlaceholder('Pré cancelamentos', 'Pré cancelamentos criados no contrato.'),
+                                    onSelect: () => abrirPlaceholder('PrÃ© cancelamentos', 'PrÃ© cancelamentos criados no contrato.'),
                                 },
                                 ...(temTrocaTurma ? [{
                                     key: 'trocaTurma',
@@ -543,7 +543,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                                 }]),
                                 {
                                     key: 'historicoEscolar',
-                                    label: 'Histórico Escolar',
+                                    label: 'HistÃ³rico Escolar',
                                     className: 'btngrey',
                                     disabled: !temConclusao || gerandoDoc === 'historicoEscolar',
                                     onSelect: () => gerarDocumento('historicoEscolar', contratoId),
@@ -564,9 +564,9 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                                 },
                                 {
                                     key: 'presencasContrato',
-                                    label: 'Presenças',
+                                    label: 'PresenÃ§as',
                                     className: 'btnbrown',
-                                    onSelect: () => abrirPlaceholder('Presenças', 'Ver presenças deste contrato.'),
+                                    onSelect: () => abrirPlaceholder('PresenÃ§as', 'Ver presenÃ§as deste contrato.'),
                                 },
                                 {
                                     key: 'notasContrato',
@@ -580,15 +580,15 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                             const novoItems: RowMenuItem[] = [
                                 {
                                     key: 'trocaUnidade',
-                                    label: 'Troca Unidade Responsável',
+                                    label: 'Troca Unidade ResponsÃ¡vel',
                                     className: 'btnstop',
-                                    onSelect: () => abrirPlaceholder('Troca de Unidade', 'Troca de unidade responsável do contrato.')
+                                    onSelect: () => abrirPlaceholder('Troca de Unidade', 'Troca de unidade responsÃ¡vel do contrato.')
                                 },
                                 {
                                     key: 'documento',
                                     label: 'Documento',
                                     className: 'btngreen',
-                                    onSelect: () => abrirPlaceholder('Documento', 'Documentos do aluno/responsável.')
+                                    onSelect: () => abrirPlaceholder('Documento', 'Documentos do aluno/responsÃ¡vel.')
                                 },
                             ];
 
@@ -596,9 +596,9 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                             const editarItems: RowMenuItem[] = [
                                 {
                                     key: 'trocaResponsavel',
-                                    label: 'Troca Responsável',
+                                    label: 'Troca ResponsÃ¡vel',
                                     className: 'btnsky',
-                                    onSelect: () => abrirPlaceholder('Troca de Responsável', 'Troca do responsável pelo contrato.')
+                                    onSelect: () => abrirPlaceholder('Troca de ResponsÃ¡vel', 'Troca do responsÃ¡vel pelo contrato.')
                                 },
                                 {
                                     key: 'reparcelamento',
@@ -648,7 +648,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                                             title={isOpen ? 'Recolher' : 'Expandir'}
                                             onClick={() => setExpanded((prev) => ({...prev, [rowKey]: !prev[rowKey]}))}
                                         >
-                                            {isOpen ? '▾' : '▸'}
+                                            {isOpen ? 'â–¾' : 'â–¸'}
                                         </button>
                                     </td>
                                     <td className="col-id">{item.id}</td>
@@ -660,7 +660,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                                             <div className="row-actions-menu">
                                                 {acessoRelatorios && (
                                                     <RowMenu icon={<i className="fa fa-file-text-o"/>}
-                                                             className="btnyellow" title="Relatórios"
+                                                             className="btnyellow" title="RelatÃ³rios"
                                                              items={relatoriosItems}/>
                                                 )}
                                                 {acessoNovo && (
@@ -707,16 +707,16 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                                 Anterior
                             </button>
                             <span>
-                  Página {page + 1} de {totalPages}
+                  PÃ¡gina {page + 1} de {totalPages}
                 </span>
                             <button
                                 onClick={() => setPage((current) => Math.min(totalPages - 1, current + 1))}
                                 disabled={page >= totalPages - 1 || q.isFetching}
                             >
-                                Próxima
+                                PrÃ³xima
                             </button>
                             <label>
-                                Registros por página
+                                Registros por pÃ¡gina
                                 <select
                                     value={size}
                                     onChange={(event) => {
@@ -800,9 +800,9 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>Gestão de Aluno</h1>
+                <h1>GestÃ£o de Aluno</h1>
                 <section className="div_form">
-                    <div className="form-title">Gestão do Aluno</div>
+                    <div className="form-title">GestÃ£o do Aluno</div>
                     <div className="table_form">
                         <div className="form-grid">
                             <label className="form-field">
@@ -830,8 +830,8 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
                             </button>
                         </div>
 
-                        {/* Ações do aluno: cada botão abre seu próprio modal (p:dialog), assim como em
-                gestaoAluno.xhtml — não são etapas de um wizard. */}
+                        {/* AÃ§Ãµes do aluno: cada botÃ£o abre seu prÃ³prio modal (p:dialog), assim como em
+                gestaoAluno.xhtml â€” nÃ£o sÃ£o etapas de um wizard. */}
                         {aluno && (
                             <div className="modal-actions" style={{flexWrap: 'wrap', marginTop: '1rem'}}>
                                 {ACTIONS.map((action) => (

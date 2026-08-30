@@ -1,10 +1,10 @@
-import {useState, useEffect} from 'react';
-import {PermissionGate} from '../permissions';
-import {MasterDetail} from '../MasterDetail';
-import {Tabs} from '../Tabs';
-import {Wizard, useWizardData} from '../Wizard';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import {AutoComplete} from '../AutoComplete';
+﻿import {useState, useEffect} from 'react';
+import {PermissionGate} from '../../shared/services/permissions';
+import {MasterDetail} from '../../shared/components/MasterDetail';
+import {Tabs} from '../../shared/components/Tabs';
+import {Wizard, useWizardData} from '../../shared/components/Wizard';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import {AutoComplete} from '../../shared/components/AutoComplete';
 import {
     PERFIL_SOURCE,
     PERFIL_COLUMNS,
@@ -27,10 +27,10 @@ import {
     PAINEL_PAINEL_SOURCE,
     PAINEL_PAINEL_COLUMNS,
     PAINEL_PAINEL_SEARCH,
-} from '../masterDetailSources';
-import type {ApiItem} from '../types';
-import {useApi} from '../api';
-import {FormLayout, FormTabConfig} from '../FormLayout';
+} from '../../shared/services/masterDetailSources';
+import type {ApiItem} from '../../features/auth/types';
+import {useApi} from '../../shared/services/api';
+import {FormLayout, FormTabConfig} from '../../shared/components/FormLayout';
 
 const TABELA_COLS: DataTableColumn[] = [
     {key: 'id', label: 'ID'},
@@ -49,7 +49,7 @@ const MAPA_COLS: DataTableColumn[] = [
 ];
 
 const PAINEL_COLUMNS: DataTableColumn[] = [
-    {key: 'relatorioNome', label: 'Relatório', width: '60%'},
+    {key: 'relatorioNome', label: 'RelatÃ³rio', width: '60%'},
     {key: 'tipo', label: 'Tipo', width: '20%'},
     {key: 'ordem', label: 'Ordem', width: '50px'},
 ];
@@ -190,7 +190,7 @@ export default function ViewRelatoriosFormDashboardListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <div className="div_form">
-                    <div className="form-title">Cadastro / Edição de Relatório de Dashboard</div>
+                    <div className="form-title">Cadastro / EdiÃ§Ã£o de RelatÃ³rio de Dashboard</div>
                     <div className="table_form">
                         <Wizard
                             initialData={data}
@@ -198,18 +198,18 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                             steps={[
                                 {
                                     key: 'definicao',
-                                    label: 'Definição',
+                                    label: 'DefiniÃ§Ã£o',
                                     content: (
                                         <div>
                                             <FormLayout
-                                                title="Configuração"
+                                                title="ConfiguraÃ§Ã£o"
                                                 tabs={[
                                                     {
                                                         key: 'principal',
                                                         label: 'Principal',
                                                         fields: [
                                                             {name: 'nome', label: 'Nome', required: true, span: 4},
-                                                            {name: 'descricao', label: 'Descrição', type: 'textarea', span: 4},
+                                                            {name: 'descricao', label: 'DescriÃ§Ã£o', type: 'textarea', span: 4},
                                                         ],
                                                     },
                                                 ]}
@@ -245,11 +245,11 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                                     },
                                                     {
                                                         key: 'grafico',
-                                                        label: 'Gráfico',
+                                                        label: 'GrÃ¡fico',
                                                         content: (
                                                             <div>
                                                                 <AutoComplete
-                                                                    label="Adicionar Gráfico"
+                                                                    label="Adicionar GrÃ¡fico"
                                                                     source={GRAFICO_SOURCE}
                                                                     searchKeys={GRAFICO_SEARCH}
                                                                     columns={GRAFICO_COLUMNS}
@@ -290,7 +290,7 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                                 ]} />
                                             </div>
                                             <div style={{marginTop: '20px'}}>
-                                                <h4>Painéis do Dashboard</h4>
+                                                <h4>PainÃ©is do Dashboard</h4>
                                                 <div style={{display: 'flex', gap: '10px', marginBottom: '10px', flexWrap: 'wrap'}}>
                                                     <AutoComplete
                                                         label="Tabela"
@@ -301,7 +301,7 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                                         onSelect={(item) => addPainel({tabelaId: item.id, ordem: painelPainels.length + 1})}
                                                     />
                                                     <AutoComplete
-                                                        label="Gráfico"
+                                                        label="GrÃ¡fico"
                                                         source={GRAFICO_SOURCE}
                                                         searchKeys={GRAFICO_SEARCH}
                                                         columns={GRAFICO_COLUMNS}
@@ -333,13 +333,13 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                 },
                                 {
                                     key: 'permissao',
-                                    label: 'Permissão',
+                                    label: 'PermissÃ£o',
                                     content: (
                                         <div>
                                             <div style={{marginBottom: '20px'}}>
-                                                <h3>Usuários</h3>
+                                                <h3>UsuÃ¡rios</h3>
                                                 <MasterDetail
-                                                    label="Usuário"
+                                                    label="UsuÃ¡rio"
                                                     source={USUARIO_SOURCE}
                                                     valueKey="id"
                                                     searchKeys={USUARIO_SEARCH}
@@ -386,7 +386,7 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                                     {key: 'id', label: 'ID'},
                                                     {key: 'nome', label: 'Nome'},
                                                     {key: 'estruturaNome', label: 'Estrutura'},
-                                                    {key: 'dimensaoNome', label: 'Dimensão'},
+                                                    {key: 'dimensaoNome', label: 'DimensÃ£o'},
                                                 ]}
                                                 selectionMode="multiple"
                                                 selectedItems={filtroSelecionados}

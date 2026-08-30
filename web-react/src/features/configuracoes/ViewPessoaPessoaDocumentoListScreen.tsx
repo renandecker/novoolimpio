@@ -1,5 +1,5 @@
-import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {ModuleTabs} from '../../shared/components/ModuleTabs';
 
 export default function ViewPessoaPessoaDocumentoListScreen() {
     return (
@@ -9,7 +9,7 @@ export default function ViewPessoaPessoaDocumentoListScreen() {
                 <ModuleTabs
                     tabs={[
                         {key: 'aluno', label: 'Aluno', path: '/api/view/pessoa/pessoaDocumento'},
-                        {key: 'responsavel', label: 'Responsável', empty: 'Conteúdo de Responsável.'},
+                        {key: 'responsavel', label: 'ResponsÃ¡vel', empty: 'ConteÃºdo de ResponsÃ¡vel.'},
                     ]}
                 />
             </main>

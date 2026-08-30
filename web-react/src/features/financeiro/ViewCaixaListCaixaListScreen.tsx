@@ -1,10 +1,10 @@
-import {useState, useMemo} from 'react';
-import {PermissionGate, useCurrentOutcome} from '../permissions';
-import {api} from '../api';
-import {useModulePaged} from '../useModulePaged';
-import type {ApiItem} from '../types';
-import {legacyClassName} from '../DataTable';
-import {ExportDropdown} from '../ExportDropdown';
+﻿import {useState, useMemo} from 'react';
+import {PermissionGate, useCurrentOutcome} from '../../shared/services/permissions';
+import {api} from '../../shared/services/api';
+import {useModulePaged} from '../../shared/hooks/useModulePaged';
+import type {ApiItem} from '../../shared/types/index';
+import {legacyClassName} from '../../shared/components/DataTable';
+import {ExportDropdown} from '../../shared/components/ExportDropdown';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 

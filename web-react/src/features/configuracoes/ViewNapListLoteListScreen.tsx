@@ -1,9 +1,9 @@
-import {useState} from 'react';
+﻿import {useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {api} from '../api';
-import {PermissionGate} from '../permissions';
-import {Tabs} from '../Tabs';
-import {LoteEmailModal, LoteLigacaoModal, SITUACOES_NAP} from '../LoteModals';
+import {api} from '../../shared/services/api';
+import {PermissionGate} from '../../shared/services/permissions';
+import {Tabs} from '../../shared/components/Tabs';
+import {LoteEmailModal, LoteLigacaoModal, SITUACOES_NAP} from '../../shared/components/LoteModals';
 
 interface EtapaNap {
     id: number;
@@ -39,7 +39,7 @@ export default function ViewNapListLoteListScreen() {
                                             @ E-mail
                                         </button>
                                         <button className="btnblue" onClick={() => setLigacaoEtapa(etapa)}>
-                                            Ligação
+                                            LigaÃ§Ã£o
                                         </button>
                                     </div>
                                 </div>

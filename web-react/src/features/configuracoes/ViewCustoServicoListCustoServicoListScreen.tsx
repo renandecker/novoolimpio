@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import type {ApiItem} from '../types';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../features/auth/types';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -11,7 +11,7 @@ const formatDate = (value: unknown): string => {
     return `${match[3]}/${match[2]}/${match[1]}`;
 };
 
-const TIPOS = ['Por Contato', 'Por Minuto', 'Por Dia', 'Por Semana', 'Por Mês', 'Por Ano'];
+const TIPOS = ['Por Contato', 'Por Minuto', 'Por Dia', 'Por Semana', 'Por MÃªs', 'Por Ano'];
 
 const renderTipo = (key: string) => (item: ApiItem) => {
     const value = asRecord(item)[key];
@@ -22,11 +22,11 @@ const renderTipo = (key: string) => (item: ApiItem) => {
 const renderValor = (key: string) => (item: ApiItem) => `R$ ${Number(asRecord(item)[key] ?? 0).toFixed(2)}`;
 
 const COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID do Custo de Serviço'},
+    {key: 'id', label: 'ID do Custo de ServiÃ§o'},
     {key: 'valor_email', label: 'Valor Email', render: renderValor('valor_email')},
-    {key: 'tipo_email', label: 'Tipo Serviço Email', render: renderTipo('tipo_email')},
-    {key: 'valor_ligacao', label: 'Valor Ligação', render: renderValor('valor_ligacao')},
-    {key: 'tipo_ligacao', label: 'Tipo Serviço Ligação', render: renderTipo('tipo_ligacao')},
+    {key: 'tipo_email', label: 'Tipo ServiÃ§o Email', render: renderTipo('tipo_email')},
+    {key: 'valor_ligacao', label: 'Valor LigaÃ§Ã£o', render: renderValor('valor_ligacao')},
+    {key: 'tipo_ligacao', label: 'Tipo ServiÃ§o LigaÃ§Ã£o', render: renderTipo('tipo_ligacao')},
     {key: 'data_alteracao', label: 'Data', render: (item) => formatDate(asRecord(item).data_alteracao)},
 ];
 

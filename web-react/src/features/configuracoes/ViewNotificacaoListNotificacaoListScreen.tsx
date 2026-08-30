@@ -1,9 +1,9 @@
-import {useState} from 'react';
+﻿import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {PermissionGate} from '../permissions';
-import {listMinhasNotificacoes, marcarNotificacaoLida} from '../notificacoes';
-import '../NotificacaoScreen.css';
+import {PermissionGate} from '../../shared/services/permissions';
+import {listMinhasNotificacoes, marcarNotificacaoLida} from '../../features/notificacoes/NotificationBell';
+import '../../features/notificacoes/NotificacaoScreen.css';
 
 const PAGE_SIZES = [10, 20, 50];
 
@@ -41,13 +41,13 @@ export default function ViewNotificacaoListNotificacaoListScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>Notificações</h1>
+                <h1>NotificaÃ§Ãµes</h1>
                 <div className="notificacao-list">
                     {query.isLoading && items.length === 0 ? (
                         <p className="notificacao-empty">Carregando...</p>
                     ) : items.length === 0 ? (
                         <div className="notificacao-empty">
-                            <p>Nenhuma notificação no momento.</p>
+                            <p>Nenhuma notificaÃ§Ã£o no momento.</p>
                         </div>
                     ) : (
                         items.map((notification) => (
@@ -64,7 +64,7 @@ export default function ViewNotificacaoListNotificacaoListScreen() {
                                         <span
                                             className="notificacao-item-time">{formatTime(notification.createdAt)}</span>
                                         {!notification.lida &&
-                                        <span className="notificacao-item-unread-tag">não lida</span>}
+                                        <span className="notificacao-item-unread-tag">nÃ£o lida</span>}
                                     </div>
                                 </div>
                                 <div className="notificacao-item-actions">
@@ -96,16 +96,16 @@ export default function ViewNotificacaoListNotificacaoListScreen() {
                                 Anterior
                             </button>
                             <span>
-                Página {page + 1} de {totalPages}
+                PÃ¡gina {page + 1} de {totalPages}
               </span>
                             <button
                                 onClick={() => setPage((current) => Math.min(totalPages - 1, current + 1))}
                                 disabled={page >= totalPages - 1 || query.isFetching}
                             >
-                                Próxima
+                                PrÃ³xima
                             </button>
                             <label>
-                                Por página
+                                Por pÃ¡gina
                                 <select
                                     value={size}
                                     onChange={(event) => {

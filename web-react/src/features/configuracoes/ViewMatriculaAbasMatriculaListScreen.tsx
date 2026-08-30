@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {DataTable} from '../DataTable';
-import {Wizard} from '../Wizard';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable} from '../../shared/components/DataTable';
+import {Wizard} from '../../shared/components/Wizard';
 
 export default function ViewMatriculaAbasMatriculaListScreen() {
     return (
@@ -8,7 +8,7 @@ export default function ViewMatriculaAbasMatriculaListScreen() {
             <main>
                 <h1>Abas Matricula</h1>
                 <div className="div_form">
-                    <div className="form-title">Matrícula</div>
+                    <div className="form-title">MatrÃ­cula</div>
                     <div className="table_form">
                         <Wizard
                             steps={[
@@ -20,12 +20,12 @@ export default function ViewMatriculaAbasMatriculaListScreen() {
                                 {
                                     key: 'valores',
                                     label: 'Valores',
-                                    content: <p className="master-detail-empty">Valores da matrícula.</p>
+                                    content: <p className="master-detail-empty">Valores da matrÃ­cula.</p>
                                 },
                                 {
                                     key: 'curso',
                                     label: 'Curso',
-                                    content: <p className="master-detail-empty">Curso da matrícula.</p>
+                                    content: <p className="master-detail-empty">Curso da matrÃ­cula.</p>
                                 },
                                 {
                                     key: 'produtos',
@@ -36,7 +36,7 @@ export default function ViewMatriculaAbasMatriculaListScreen() {
                                     key: 'parcelado',
                                     label: 'Parcelado',
                                     nextLabel: 'Salvar',
-                                    content: <p className="master-detail-empty">Parcelamento da matrícula.</p>,
+                                    content: <p className="master-detail-empty">Parcelamento da matrÃ­cula.</p>,
                                 },
                             ]}
                         />

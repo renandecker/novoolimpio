@@ -1,10 +1,10 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+﻿import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
-import {api} from '../api';
-import {PermissionGate} from '../permissions';
-import {AutoComplete, type AutoCompleteOption} from '../AutoComplete';
-import {Wizard, useWizardData, type WizardStep} from '../Wizard';
+import {api} from '../../shared/services/api';
+import {PermissionGate} from '../../shared/services/permissions';
+import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
+import {Wizard, useWizardData, type WizardStep} from '../../shared/components/Wizard';
 import './MatriculaWizard.css';
 
 type Opcao = {id: number; label: string};
@@ -211,7 +211,7 @@ const initialData: MatriculaData = {
 
 const TABS = [
     {key: 'tabContrato', label: 'Contrato'},
-    {key: 'tabMatricula', label: 'Matrícula'},
+    {key: 'tabMatricula', label: 'MatrÃ­cula'},
     {key: 'tabMaterial', label: 'Material'},
     {key: 'tabValores', label: 'Valores'},
 ];
@@ -398,11 +398,11 @@ export default function ViewMatriculaWizardScreen() {
                 if (!current.entity.testemunha1Id) { setMensagem('Informe a primeira testemunha'); return false; }
                 if (!current.entity.testemunha2Id) { setMensagem('Informe a segunda testemunha'); return false; }
                 if (current.entity.testemunha1Id === current.entity.testemunha2Id) {
-                    setMensagem('Testemunhas não podem ser a mesma pessoa'); return false;
+                    setMensagem('Testemunhas nÃ£o podem ser a mesma pessoa'); return false;
                 }
             }
-            if (!current.entity.valorCurso) { setMensagem('Valor do curso não definido'); return false; }
-            if (!current.criterio) { setMensagem('Critérios não foram aplicados'); return false; }
+            if (!current.entity.valorCurso) { setMensagem('Valor do curso nÃ£o definido'); return false; }
+            if (!current.criterio) { setMensagem('CritÃ©rios nÃ£o foram aplicados'); return false; }
         }
 
         if (targetIndex >= 2) {
@@ -482,10 +482,10 @@ export default function ViewMatriculaWizardScreen() {
             };
 
             await api.post('/api/educacao/matricula', payload);
-            setMensagem('Matrícula realizada com sucesso!');
+            setMensagem('MatrÃ­cula realizada com sucesso!');
             setData(prev => ({...prev, verificaMatriculaFinalizada: true}));
         } catch (e: any) {
-            setErro(e?.response?.data?.message ?? e?.response?.data?.error ?? 'Erro ao salvar a matrícula.');
+            setErro(e?.response?.data?.message ?? e?.response?.data?.error ?? 'Erro ao salvar a matrÃ­cula.');
         } finally {
             setSalvando(false);
         }
@@ -494,7 +494,7 @@ export default function ViewMatriculaWizardScreen() {
     const renderTabContrato = () => (
         <section className="tab-content">
             <p className="step-description">
-                {emEdicao ? 'Edite os dados do contrato de matrícula.' : 'Informe os dados do aluno, curso, contratante e testemunhas.'}
+                {emEdicao ? 'Edite os dados do contrato de matrÃ­cula.' : 'Informe os dados do aluno, curso, contratante e testemunhas.'}
             </p>
 
             <div className="field-row">
@@ -540,7 +540,7 @@ export default function ViewMatriculaWizardScreen() {
                                 checked={data.entity.pessoaFisica}
                                 onChange={() => updateEntityField('pessoaFisica', true)}
                             />
-                            Pessoa Física
+                            Pessoa FÃ­sica
                         </label>
                         <label className="radio-label">
                             <input
@@ -548,7 +548,7 @@ export default function ViewMatriculaWizardScreen() {
                                 checked={!data.entity.pessoaFisica}
                                 onChange={() => updateEntityField('pessoaFisica', false)}
                             />
-                            Pessoa Jurídica
+                            Pessoa JurÃ­dica
                         </label>
                     </div>
                 </div>
@@ -622,12 +622,12 @@ export default function ViewMatriculaWizardScreen() {
             {data.entity.curriculoId && data.criterio && (
                 <div className="field-row">
                     <div className="field-group">
-                        <label>Critério do Curso</label>
+                        <label>CritÃ©rio do Curso</label>
                         <div className="ofc-hint">
-                            Turmas máximas abertas: {data.criterio.qtdTurmaAbertas ?? 'Não definido'}<br />
-                            Período: {data.criterio.periodo ?? 'Não definido'}<br />
-                            {data.criterio.dataInicio && `Início válido a partir de: ${brDate(data.criterio.dataInicio)}`}<br />
-                            {data.criterio.dataFim && `Término até: ${brDate(data.criterio.dataFim)}`}
+                            Turmas mÃ¡ximas abertas: {data.criterio.qtdTurmaAbertas ?? 'NÃ£o definido'}<br />
+                            PerÃ­odo: {data.criterio.periodo ?? 'NÃ£o definido'}<br />
+                            {data.criterio.dataInicio && `InÃ­cio vÃ¡lido a partir de: ${brDate(data.criterio.dataInicio)}`}<br />
+                            {data.criterio.dataFim && `TÃ©rmino atÃ©: ${brDate(data.criterio.dataFim)}`}
                         </div>
                     </div>
                 </div>
@@ -641,8 +641,8 @@ export default function ViewMatriculaWizardScreen() {
             <section className="tab-content">
                 <p className="step-description">
                     {tipoLivre
-                        ? 'Selecione os componentes curriculares (ofertas) para a matrícula.'
-                        : 'Selecione os grupos para a matrícula.'}
+                        ? 'Selecione os componentes curriculares (ofertas) para a matrÃ­cula.'
+                        : 'Selecione os grupos para a matrÃ­cula.'}
                 </p>
 
                 {tipoLivre ? (
@@ -672,7 +672,7 @@ export default function ViewMatriculaWizardScreen() {
                                         }))}
                                     >
                                         <span>{grupoData.grupo?.nome || `Grupo #${grupoId}`}</span>
-                                        <span className="accordion-toggle">▼</span>
+                                        <span className="accordion-toggle">â–¼</span>
                                     </button>
                                     <div className="accordion-content">
                                         <table className="ofc-table">
@@ -690,7 +690,7 @@ export default function ViewMatriculaWizardScreen() {
                                                 <th>Componente Curricular</th>
                                                 <th>Sala</th>
                                                 <th>Unidade</th>
-                                                <th>Data Início</th>
+                                                <th>Data InÃ­cio</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -715,7 +715,7 @@ export default function ViewMatriculaWizardScreen() {
                                                     <td>{of.componenteCurricular?.descricao || `#${of.componenteCurricularId}`}</td>
                                                     <td>{of.sala?.numero}</td>
                                                     <td>{of.unidade?.sucinto}</td>
-                                                    <td>{of.dataInicio ? brDate(of.dataInicio) : ''} até {of.dataFim ? brDate(of.dataFim) : ''}</td>
+                                                    <td>{of.dataInicio ? brDate(of.dataInicio) : ''} atÃ© {of.dataFim ? brDate(of.dataFim) : ''}</td>
                                                 </tr>
                                             ))}
                                             </tbody>
@@ -763,7 +763,7 @@ export default function ViewMatriculaWizardScreen() {
             </p>
 
             <div className="material-disponivel">
-                <h4>Produtos Disponíveis</h4>
+                <h4>Produtos DisponÃ­veis</h4>
                 <table className="ofc-table">
                     <thead>
                     <tr>
@@ -812,7 +812,7 @@ export default function ViewMatriculaWizardScreen() {
             </div>
 
             <div className="material-selecionado">
-                <h4>Materiais da Matrícula</h4>
+                <h4>Materiais da MatrÃ­cula</h4>
                 {data.materialEscolar.length === 0 ? (
                     <p className="ofc-aviso">Nenhum material adicionado.</p>
                 ) : (
@@ -881,7 +881,7 @@ export default function ViewMatriculaWizardScreen() {
                             <th>Sala</th>
                             <th>Componente Curricular</th>
                             <th>C.H.</th>
-                            <th>Data Início/Fim</th>
+                            <th>Data InÃ­cio/Fim</th>
                             <th>Professor</th>
                         </tr>
                         </thead>
@@ -893,7 +893,7 @@ export default function ViewMatriculaWizardScreen() {
                                 <td>{of.sala?.numero}</td>
                                 <td>{of.componenteCurricular?.descricao}</td>
                                 <td>{of.componenteCurricular?.cargaHoraria} H/A</td>
-                                <td>{of.dataInicio ? brDate(of.dataInicio) : ''} até {of.dataFim ? brDate(of.dataFim) : ''}</td>
+                                <td>{of.dataInicio ? brDate(of.dataInicio) : ''} atÃ© {of.dataFim ? brDate(of.dataFim) : ''}</td>
                                 <td>{of.professor?.pessoa?.pessoaFisica?.nome || of.professor?.pessoa?.pessoaJuridica?.nomeFantasia}</td>
                             </tr>
                         ))}
@@ -932,7 +932,7 @@ export default function ViewMatriculaWizardScreen() {
 
             <div className="field-row">
                 <div className="field-group">
-                    <label htmlFor="mat-data-primeira">Pagamento 1ª Parcela *</label>
+                    <label htmlFor="mat-data-primeira">Pagamento 1Âª Parcela *</label>
                     <input
                         id="mat-data-primeira"
                         type="date"
@@ -943,7 +943,7 @@ export default function ViewMatriculaWizardScreen() {
                     />
                 </div>
                 <div className="field-group">
-                    <label htmlFor="mat-data-parcela">Pagamento 2ª Parcela</label>
+                    <label htmlFor="mat-data-parcela">Pagamento 2Âª Parcela</label>
                     <select
                         id="mat-data-parcela"
                         className="form-input form-select"
@@ -959,7 +959,7 @@ export default function ViewMatriculaWizardScreen() {
             </div>
 
             <div className="field-row">
-                <button type="button" className="btn-danger" disabled={data.descontoBolsa}>$ Autorização bolsa estudos</button>
+                <button type="button" className="btn-danger" disabled={data.descontoBolsa}>$ AutorizaÃ§Ã£o bolsa estudos</button>
                 <button type="button" className="btn-warning" disabled={!data.entity.formaPagamentoId}>$ Ajuste parcela</button>
             </div>
 
@@ -971,7 +971,7 @@ export default function ViewMatriculaWizardScreen() {
                     <table className="ofc-table">
                         <thead>
                         <tr>
-                            <th>Descrição</th>
+                            <th>DescriÃ§Ã£o</th>
                             <th>Parcela</th>
                             <th>Data Vencimento</th>
                             <th>Valor</th>
@@ -980,7 +980,7 @@ export default function ViewMatriculaWizardScreen() {
                         <tbody>
                         {data.valores.parcelas.map((p, i) => (
                             <tr key={i}>
-                                <td>{p.parcela === 0 ? 'Taxa Inscrição' : 'Matrícula Parcelada'}</td>
+                                <td>{p.parcela === 0 ? 'Taxa InscriÃ§Ã£o' : 'MatrÃ­cula Parcelada'}</td>
                                 <td>{p.parcela}</td>
                                 <td>{brDate(p.dataVencimento)}</td>
                                 <td>
@@ -1006,7 +1006,7 @@ export default function ViewMatriculaWizardScreen() {
                         </tbody>
                         <tfoot>
                         <tr>
-                            <td colSpan={3}>Parcela mínima: {data.valores.valorMinimoParcela ? formatCurrency(data.valores.valorMinimoParcela) : ''}</td>
+                            <td colSpan={3}>Parcela mÃ­nima: {data.valores.valorMinimoParcela ? formatCurrency(data.valores.valorMinimoParcela) : ''}</td>
                             <td>Total: {data.valores.valorTotalParcela ? formatCurrency(data.valores.valorTotalParcela) : ''}</td>
                         </tr>
                         </tfoot>
@@ -1025,7 +1025,7 @@ export default function ViewMatriculaWizardScreen() {
                             onChange={(e) => updateValoresField('tipoFormaPagamento', e.target.value)}
                         >
                             <option value="">Selecione</option>
-                            <option value="AVISTA">À Vista</option>
+                            <option value="AVISTA">Ã€ Vista</option>
                             <option value="PARCELA">Parcelado</option>
                         </select>
                     </div>
@@ -1055,17 +1055,17 @@ export default function ViewMatriculaWizardScreen() {
 
     const renderTabFinalizar = () => (
         <section className="tab-content">
-            <h3>Finalizar Matrícula</h3>
-            <p>Revise os dados abaixo e clique em "Finalizar Matrícula" para confirmar.</p>
+            <h3>Finalizar MatrÃ­cula</h3>
+            <p>Revise os dados abaixo e clique em "Finalizar MatrÃ­cula" para confirmar.</p>
             <div className="resumo-section">
                 <h4>Aluno</h4>
-                <p>{(pessoasQuery.data ?? []).find(p => p.id === data.entity.pessoaId)?.nome || 'Não selecionado'}</p>
+                <p>{(pessoasQuery.data ?? []).find(p => p.id === data.entity.pessoaId)?.nome || 'NÃ£o selecionado'}</p>
                 <h4>Curso</h4>
-                <p>{(curriculosQuery.data ?? []).find(c => c.id === data.entity.curriculoId)?.descricao || 'Não selecionado'}</p>
+                <p>{(curriculosQuery.data ?? []).find(c => c.id === data.entity.curriculoId)?.descricao || 'NÃ£o selecionado'}</p>
                 <h4>Unidade</h4>
-                <p>{(unidadesQuery.data ?? []).find(u => u.id === data.entity.unidadeId)?.sucinto || 'Não selecionado'}</p>
+                <p>{(unidadesQuery.data ?? []).find(u => u.id === data.entity.unidadeId)?.sucinto || 'NÃ£o selecionado'}</p>
                 <h4>Forma Pagamento</h4>
-                <p>{(formasPagamentoQuery.data ?? []).find(f => f.id === data.entity.formaPagamentoId)?.vezes + 'X' || 'Não selecionado'}</p>
+                <p>{(formasPagamentoQuery.data ?? []).find(f => f.id === data.entity.formaPagamentoId)?.vezes + 'X' || 'NÃ£o selecionado'}</p>
                 <h4>Total Parcelas</h4>
                 <p>{data.valores.parcelas.reduce((sum, p) => sum + p.valor, 0).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</p>
             </div>
@@ -1092,12 +1092,12 @@ export default function ViewMatriculaWizardScreen() {
         <PermissionGate permission="READ">
             <main>
                 <div className="div_form">
-                    <div className="form-title">Matrícula</div>
+                    <div className="form-title">MatrÃ­cula</div>
                     <div className="table_form">
                         <Wizard
                             steps={steps}
                             initial={0}
-                            completeLabel="Finalizar Matrícula"
+                            completeLabel="Finalizar MatrÃ­cula"
                             onComplete={handleSave}
                         />
                     </div>

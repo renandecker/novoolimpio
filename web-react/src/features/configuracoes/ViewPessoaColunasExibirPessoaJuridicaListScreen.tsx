@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
-import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../masterDetailSources';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {ModuleTabs} from '../../shared/components/ModuleTabs';
+import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../../shared/services/masterDetailSources';
 
 export default function ViewPessoaColunasExibirPessoaJuridicaListScreen() {
     return (
@@ -11,11 +11,11 @@ export default function ViewPessoaColunasExibirPessoaJuridicaListScreen() {
                     tabs={[
                         {
                             key: 'informacoesBasicas',
-                            label: 'Informações Básicas',
+                            label: 'InformaÃ§Ãµes BÃ¡sicas',
                             path: '/api/view/pessoa/colunasExibirPessoaJuridica'
                         },
-                        {key: 'contato', label: 'Contato', empty: 'Conteúdo de Contato.'},
-                        {key: 'endereco', label: 'Endereço', empty: 'Conteúdo de Endereço.'},
+                        {key: 'contato', label: 'Contato', empty: 'ConteÃºdo de Contato.'},
+                        {key: 'endereco', label: 'EndereÃ§o', empty: 'ConteÃºdo de EndereÃ§o.'},
                         {
                             key: 'unidades',
                             label: 'Unidades',
@@ -27,7 +27,7 @@ export default function ViewPessoaColunasExibirPessoaJuridicaListScreen() {
                                 columns: UNIDADE_COLUMNS
                             }
                         },
-                        {key: 'outros', label: 'Outros', empty: 'Conteúdo de Outros.'},
+                        {key: 'outros', label: 'Outros', empty: 'ConteÃºdo de Outros.'},
                     ]}
                 />
             </main>

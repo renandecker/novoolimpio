@@ -1,20 +1,20 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
-import {PermissionGate} from '../permissions';
-import {Tabs} from '../Tabs';
-import {MasterDetail} from '../MasterDetail';
-import {BooleanField} from '../BooleanField';
-import {Base64FileUpload} from '../Base64FileUpload';
-import type {Endereco} from '../EnderecoForm';
-import type {ApiItem} from '../types';
-import {api} from '../api';
+import {PermissionGate} from '../../shared/services/permissions';
+import {Tabs} from '../../shared/components/Tabs';
+import {MasterDetail} from '../../shared/components/MasterDetail';
+import {BooleanField} from '../../shared/components/BooleanField';
+import {Base64FileUpload} from '../../shared/components/Base64FileUpload';
+import type {Endereco} from '../../shared/components/EnderecoForm';
+import type {ApiItem} from '../../shared/types/index';
+import {api} from '../../shared/services/api';
 import {
     PERFIL_SOURCE, PERFIL_COLUMNS, PERFIL_SEARCH,
     UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH,
     AGENDA_SOURCE, AGENDA_COLUMNS, AGENDA_SEARCH,
     TURNO_TRABALHO_SOURCE, TURNO_TRABALHO_COLUMNS, TURNO_TRABALHO_SEARCH,
-} from '../masterDetailSources';
+} from '../../shared/services/masterDetailSources';
 import {GENEROS, ETNIAS, ESTADOS_CIVIS, ESCOLARIDADES, formatCpf, formatPhone, str, num, semId, toDateInput} from '../cadastroUsuarioTypes';
 
 // ── helpers ──────────────────────────────────────────────────────────

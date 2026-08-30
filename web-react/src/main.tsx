@@ -3,509 +3,454 @@ import {createRoot} from 'react-dom/client';
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 
-import {AuthProvider} from './auth';
-import {ThemeProvider} from './ThemeContext';
-import {AlertDialogProvider} from './AlertDialog';
-import LoginScreen from './LoginScreen';
-import ProtectedRoute from './ProtectedRoute';
-import PermissionBridge from './PermissionBridge';
-import './colors.css';
-import ReportViewScreen from './screens/ReportViewScreen';
-import ViewAcaoColunasAcaoCampoListScreen from './screens/ViewAcaoColunasAcaoCampoListScreen';
-import ViewAcaoColunasAcaoListScreen from './screens/ViewAcaoColunasAcaoListScreen';
-import ViewAcaoFormAcaoListScreen from './screens/ViewAcaoFormAcaoListScreen';
-import ViewAcaoListAcaoListScreen from './screens/ViewAcaoListAcaoListScreen';
-import ViewRegraNotificacaoListRegraListScreen from './screens/ViewRegraNotificacaoListRegraListScreen';
-import ViewAgendaCalendarioAgendaListScreen from './screens/ViewAgendaCalendarioAgendaListScreen';
-import ViewAgendaColunasListScreen from './screens/ViewAgendaColunasListScreen';
-import ViewAgendaColunasUsuarioAgendaListScreen from './screens/ViewAgendaColunasUsuarioAgendaListScreen';
-import ViewAgendaFormAgendaListScreen from './screens/ViewAgendaFormAgendaListScreen';
-import ViewAgendaListAgendaListScreen from './screens/ViewAgendaListAgendaListScreen';
-import ViewAgendaCompromissosScreen from './screens/ViewAgendaCompromissosScreen';
-import ViewAlterarSenhaAlterarSenhaListScreen from './screens/ViewAlterarSenhaAlterarSenhaListScreen';
-import ViewApresentacaoListApresentacaoListScreen from './screens/ViewApresentacaoListApresentacaoListScreen';
-import ViewArquivoProconListArquivoProconListScreen from './screens/ViewArquivoProconListArquivoProconListScreen';
-import ViewAtividadeComplementarFormAtividadeComplementarListScreen
-    from './screens/ViewAtividadeComplementarFormAtividadeComplementarListScreen';
-import ViewAtividadeComplementarListAtividadeComplementarListScreen
-    from './screens/ViewAtividadeComplementarListAtividadeComplementarListScreen';
-import ViewAuditoriaFormAuditoriaHistoricoListScreen from './screens/ViewAuditoriaFormAuditoriaHistoricoListScreen';
-import ViewAuditoriaListAuditoriaListScreen from './screens/ViewAuditoriaListAuditoriaListScreen';
-import ViewAuditoriaListAuditoriaHistoricoListScreen from './screens/ViewAuditoriaListAuditoriaHistoricoListScreen';
-import ViewBairroFormBairroListScreen from './screens/ViewBairroFormBairroListScreen';
-import ViewBairroListBairroListScreen from './screens/ViewBairroListBairroListScreen';
-import ViewBandeiraFormBandeiraListScreen from './screens/ViewBandeiraFormBandeiraListScreen';
-import ViewBandeiraListBandeiraListScreen from './screens/ViewBandeiraListBandeiraListScreen';
-import ViewBaseTecnologicaColunasBaseTecnologicaListScreen
-    from './screens/ViewBaseTecnologicaColunasBaseTecnologicaListScreen';
-import ViewBaseTecnologicaFormBaseTecnologicaListScreen
-    from './screens/ViewBaseTecnologicaFormBaseTecnologicaListScreen';
-import ViewBaseTecnologicaListBaseTecnologicaListScreen
-    from './screens/ViewBaseTecnologicaListBaseTecnologicaListScreen';
-import ViewCaixaFormCaixaListScreen from './screens/ViewCaixaFormCaixaListScreen';
-import ViewCaixaListCaixaListScreen from './screens/ViewCaixaListCaixaListScreen';
-import ViewCampanhaColunasAcaoDeCampanhaListScreen from './screens/ViewCampanhaColunasAcaoDeCampanhaListScreen';
-import ViewCampanhaColunasFiltroListScreen from './screens/ViewCampanhaColunasFiltroListScreen';
-import ViewCampanhaFormCampanhaListScreen from './screens/ViewCampanhaFormCampanhaListScreen';
-import ViewCampanhaFormDirecionamentoListScreen from './screens/ViewCampanhaFormDirecionamentoListScreen';
-import ViewCampanhaFormGerarPacotesListScreen from './screens/ViewCampanhaFormGerarPacotesListScreen';
-import ViewCampanhaListCampanhaListScreen from './screens/ViewCampanhaListCampanhaListScreen';
-import ViewCampanhaNegociacaoFormCampanhaNegociacaoListScreen
-    from './screens/ViewCampanhaNegociacaoFormCampanhaNegociacaoListScreen';
-import ViewCampanhaNegociacaoListCampanhaNegociacaoListScreen
-    from './screens/ViewCampanhaNegociacaoListCampanhaNegociacaoListScreen';
-import ViewCampoColunasCampoListScreen from './screens/ViewCampoColunasCampoListScreen';
-import ViewCampoFormCampoListScreen from './screens/ViewCampoFormCampoListScreen';
-import ViewCampoListCampoListScreen from './screens/ViewCampoListCampoListScreen';
-import ViewCancelamentoColunasPreCancelamentoListScreen
-    from './screens/ViewCancelamentoColunasPreCancelamentoListScreen';
-import ViewCargaFormCargaListScreen from './screens/ViewCargaFormCargaListScreen';
-import ViewCargaListCargaListScreen from './screens/ViewCargaListCargaListScreen';
-import ViewCategoriaFormCategoriaListScreen from './screens/ViewCategoriaFormCategoriaListScreen';
-import ViewCategoriaListCategoriaListScreen from './screens/ViewCategoriaListCategoriaListScreen';
-import ViewCategoriaCampoFormCategoriaCampoListScreen from './screens/ViewCategoriaCampoFormCategoriaCampoListScreen';
-import ViewCategoriaCampoListCategoriaCampoListScreen from './screens/ViewCategoriaCampoListCategoriaCampoListScreen';
-import ViewCategoriaEstoqueListCategoriaListScreen from './screens/ViewCategoriaEstoqueListCategoriaListScreen';
-import ViewChamadaAssinadaListChamadaAssinadaListScreen
-    from './screens/ViewChamadaAssinadaListChamadaAssinadaListScreen';
-import ViewCidadeFormCidadeListScreen from './screens/ViewCidadeFormCidadeListScreen';
-import ViewCidadeListCidadeListScreen from './screens/ViewCidadeListCidadeListScreen';
-import ViewCobrancaColunasCompromissoListScreen from './screens/ViewCobrancaColunasCompromissoListScreen';
-import ViewCobrancaColunasEmailListScreen from './screens/ViewCobrancaColunasEmailListScreen';
-import ViewCobrancaColunasLigacaoListScreen from './screens/ViewCobrancaColunasLigacaoListScreen';
-import ViewCobrancaColunasParcelasListScreen from './screens/ViewCobrancaColunasParcelasListScreen';
-import ViewCobrancaColunasPrioritarioListScreen from './screens/ViewCobrancaColunasPrioritarioListScreen';
-import ViewCobrancaFormLigacaoCobrancaListScreen from './screens/ViewCobrancaFormLigacaoCobrancaListScreen';
-import ViewCobrancaListGerirCobrancaListScreen from './screens/ViewCobrancaListGerirCobrancaListScreen';
-import ViewCobrancaListLigacaoCobrancaListScreen from './screens/ViewCobrancaListLigacaoCobrancaListScreen';
-import ViewCobrancaListLoteListScreen from './screens/ViewCobrancaListLoteListScreen';
-import ViewComponenteCurricularColunasComponenteCurricularListScreen
-    from './screens/ViewComponenteCurricularColunasComponenteCurricularListScreen';
-import ViewComponenteCurricularFormComponenteCurricularListScreen
-    from './screens/ViewComponenteCurricularFormComponenteCurricularListScreen';
-import ViewComponenteCurricularListComponenteCurricularListScreen
-    from './screens/ViewComponenteCurricularListComponenteCurricularListScreen';
-import ViewCompromissoAbasMatriculaListScreen from './screens/ViewCompromissoAbasMatriculaListScreen';
-import ViewCompromissoColunasCompromissoListScreen from './screens/ViewCompromissoColunasCompromissoListScreen';
-import ViewCompromissoFinalizarCompromissoListScreen from './screens/ViewCompromissoFinalizarCompromissoListScreen';
-import ViewCompromissoFormCompromissoListScreen from './screens/ViewCompromissoFormCompromissoListScreen';
-import ViewCompromissoFormTipoCompromissoListScreen from './screens/ViewCompromissoFormTipoCompromissoListScreen';
-import ViewCompromissoListCompromissoListScreen from './screens/ViewCompromissoListCompromissoListScreen';
-import ViewCompromissoListTipoCompromissoListScreen from './screens/ViewCompromissoListTipoCompromissoListScreen';
-import ViewComunicacaoColunasComunicacaoListScreen from './screens/ViewComunicacaoColunasComunicacaoListScreen';
-import ViewComunicacaoColunasComunicacaoMensagemListScreen
-    from './screens/ViewComunicacaoColunasComunicacaoMensagemListScreen';
-import ViewComunicacaoFormComunicacaoListScreen from './screens/ViewComunicacaoFormComunicacaoListScreen';
-import ViewComunicacaoFormComunicacaoMensagemListScreen
-    from './screens/ViewComunicacaoFormComunicacaoMensagemListScreen';
-import ViewComunicacaoListComunicacaoListScreen from './screens/ViewComunicacaoListComunicacaoListScreen';
-import ViewComunicacaoListComunicacaoMensagemListScreen
-    from './screens/ViewComunicacaoListComunicacaoMensagemListScreen';
-import ViewConfiguracaoColunasMarketingCampoListScreen from './screens/ViewConfiguracaoColunasMarketingCampoListScreen';
-import ViewConfiguracaoFormConfiguracaoListScreen from './screens/ViewConfiguracaoFormConfiguracaoListScreen';
-import ViewConfiguracaoFormConfiguracaoCaixaListScreen from './screens/ViewConfiguracaoFormConfiguracaoCaixaListScreen';
-import ViewConfiguracaoFormConfiguracaoEmailListScreen from './screens/ViewConfiguracaoFormConfiguracaoEmailListScreen';
-import ViewConfiguracaoFormConfiguracaoEstoqueListScreen
-    from './screens/ViewConfiguracaoFormConfiguracaoEstoqueListScreen';
-import ViewConfiguracaoFormConfiguracaoParcelaListScreen
-    from './screens/ViewConfiguracaoFormConfiguracaoParcelaListScreen';
-import ViewConfiguracaoFormLayoutListScreen from './screens/ViewConfiguracaoFormLayoutListScreen';
-import ViewConfiguracaoListConfiguracaoListScreen from './screens/ViewConfiguracaoListConfiguracaoListScreen';
-import ViewConfiguracaoListConfiguracaoCaixaListScreen from './screens/ViewConfiguracaoListConfiguracaoCaixaListScreen';
-import ViewConfiguracaoListConfiguracaoEmailListScreen from './screens/ViewConfiguracaoListConfiguracaoEmailListScreen';
-import ViewConfiguracaoListConfiguracaoEstoqueListScreen
-    from './screens/ViewConfiguracaoListConfiguracaoEstoqueListScreen';
-import ViewConfiguracaoListConfiguracaoMarketingListScreen
-    from './screens/ViewConfiguracaoListConfiguracaoMarketingListScreen';
-import ViewConfiguracaoListConfiguracaoParcelaListScreen
-    from './screens/ViewConfiguracaoListConfiguracaoParcelaListScreen';
-import ViewConfiguracaoListLayoutListScreen from './screens/ViewConfiguracaoListLayoutListScreen';
-import ViewConfiguracaoDocumentosListScreen from './screens/ViewConfiguracaoDocumentosListScreen';
-import ViewConsultorConsultorListScreen from './screens/ViewConsultorConsultorListScreen';
-import ViewConsultorFormConsultorListScreen from './screens/ViewConsultorFormConsultorListScreen';
-import ViewConsultorListConsultorListScreen from './screens/ViewConsultorListConsultorListScreen';
-import ViewContaControlePagamentoListScreen from './screens/ViewContaControlePagamentoListScreen';
-import ViewContaGestaoContaListScreen from './screens/ViewContaGestaoContaListScreen';
-import ViewContaCorrenteFormContaCorrenteListScreen from './screens/ViewContaCorrenteFormContaCorrenteListScreen';
-import ViewContaCorrenteListContaCorrenteListScreen from './screens/ViewContaCorrenteListContaCorrenteListScreen';
-import ViewContratoColunasContratoListScreen from './screens/ViewContratoColunasContratoListScreen';
-import ViewContratoFormContratoListScreen from './screens/ViewContratoFormContratoListScreen';
-import ViewContratoListContratoListScreen from './screens/ViewContratoListContratoListScreen';
-import ViewCoordenadorColunasAdminListScreen from './screens/ViewCoordenadorColunasAdminListScreen';
-import ViewCoordenadorColunasOperadorListScreen from './screens/ViewCoordenadorColunasOperadorListScreen';
-import ViewCoordenadorListCoordenadorListScreen from './screens/ViewCoordenadorListCoordenadorListScreen';
-import ViewCorFormCoresListScreen from './screens/ViewCorFormCoresListScreen';
-import ViewCorListCoresListScreen from './screens/ViewCorListCoresListScreen';
-import ViewCpfalunosFormCpfalunosListScreen from './screens/ViewCpfalunosFormCpfalunosListScreen';
-import ViewCpfalunosListCpfalunosListScreen from './screens/ViewCpfalunosListCpfalunosListScreen';
-import ViewCriterioListCriterioFormScreen from './screens/ViewCriterioListCriterioFormScreen';
-import ViewCriterioListCriterioListScreen from './screens/ViewCriterioListCriterioListScreen';
-import ViewCurriculoColunasListScreen from './screens/ViewCurriculoColunasListScreen';
-import ViewCurriculoColunasMatrizCurricularListScreen from './screens/ViewCurriculoColunasMatrizCurricularListScreen';
-import ViewCurriculoColunasRequisitoMatrizListScreen from './screens/ViewCurriculoColunasRequisitoMatrizListScreen';
-import ViewCurriculoFormCurriculoListScreen from './screens/ViewCurriculoFormCurriculoListScreen';
-import ViewCurriculoListCurriculoListScreen from './screens/ViewCurriculoListCurriculoListScreen';
-import ViewCursoFormCursoListScreen from './screens/ViewCursoFormCursoListScreen';
-import ViewCursoListCursoListScreen from './screens/ViewCursoListCursoListScreen';
-import ViewCustoServicoFormCustoServicoListScreen from './screens/ViewCustoServicoFormCustoServicoListScreen';
-import ViewCustoServicoListCustoServicoListScreen from './screens/ViewCustoServicoListCustoServicoListScreen';
-import ViewDesistenteFormDesistenteListScreen from './screens/ViewDesistenteFormDesistenteListScreen';
-import ViewDesistenteListDesistenteListScreen from './screens/ViewDesistenteListDesistenteListScreen';
-import ViewDiaPagamentoFormDiaPagamentoListScreen from './screens/ViewDiaPagamentoFormDiaPagamentoListScreen';
-import ViewDiaPagamentoListDiaPagamentoListScreen from './screens/ViewDiaPagamentoListDiaPagamentoListScreen';
-import ViewDiaSemanaColunasDiaSemanaListScreen from './screens/ViewDiaSemanaColunasDiaSemanaListScreen';
-import ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScreen
-    from './screens/ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScreen';
-import ViewDisponibilidadeProfessorListDisponibilidadeProfessorListScreen
-    from './screens/ViewDisponibilidadeProfessorListDisponibilidadeProfessorListScreen';
-import ViewDisponibilidadeSalaListDisponibilidadeSalaListScreen
-    from './screens/ViewDisponibilidadeSalaListDisponibilidadeSalaListScreen';
-import ViewEntregaFormEntregaListScreen from './screens/ViewEntregaFormEntregaListScreen';
-import ViewEntregaListEntregaListScreen from './screens/ViewEntregaListEntregaListScreen';
-import ViewEscolaridadeFormEscolaridadeListScreen from './screens/ViewEscolaridadeFormEscolaridadeListScreen';
-import ViewEscolaridadeListEscolaridadeListScreen from './screens/ViewEscolaridadeListEscolaridadeListScreen';
-import ViewEstadoFormEstadoListScreen from './screens/ViewEstadoFormEstadoListScreen';
-import ViewEstadoListEstadoListScreen from './screens/ViewEstadoListEstadoListScreen';
-import ViewEstadoCivilFormEstadoCivilListScreen from './screens/ViewEstadoCivilFormEstadoCivilListScreen';
-import ViewEstadoCivilListEstadoCivilListScreen from './screens/ViewEstadoCivilListEstadoCivilListScreen';
-import ViewEstoqueControleestoqueListScreen from './screens/ViewEstoqueControleestoqueListScreen';
-import ViewEstoqueEstoqueprodutoListScreen from './screens/ViewEstoqueEstoqueprodutoListScreen';
-import ViewEstrategiaFormEstrategiaListScreen from './screens/ViewEstrategiaFormEstrategiaListScreen';
-import ViewEstrategiaListEstrategiaListScreen from './screens/ViewEstrategiaListEstrategiaListScreen';
-import ViewEstruturaFormEstruturaListScreen from './screens/ViewEstruturaFormEstruturaListScreen';
-import ViewEstruturaListEstruturaListScreen from './screens/ViewEstruturaListEstruturaListScreen';
-import ViewEtapasCobrancaColunasEtapasCobrancaListScreen
-    from './screens/ViewEtapasCobrancaColunasEtapasCobrancaListScreen';
-import ViewEtapasCobrancaFormEtapasCobrancaListScreen from './screens/ViewEtapasCobrancaFormEtapasCobrancaListScreen';
-import ViewEtapasCobrancaListEtapasCobrancaListScreen from './screens/ViewEtapasCobrancaListEtapasCobrancaListScreen';
-import ViewEtapasNapColunasEtapasNapListScreen from './screens/ViewEtapasNapColunasEtapasNapListScreen';
-import ViewEtapasNapFormEtapasNapListScreen from './screens/ViewEtapasNapFormEtapasNapListScreen';
-import ViewEtapasNapListEtapasNapListScreen from './screens/ViewEtapasNapListEtapasNapListScreen';
-import ViewEtniaFormEtniaListScreen from './screens/ViewEtniaFormEtniaListScreen';
-import ViewEtniaListEtniaListScreen from './screens/ViewEtniaListEtniaListScreen';
-import ViewFavoritoPerfilColunasFavoritoPerfilListScreen
-    from './screens/ViewFavoritoPerfilColunasFavoritoPerfilListScreen';
-import ViewFavoritoPerfilFormFavoritoPerfilListScreen from './screens/ViewFavoritoPerfilFormFavoritoPerfilListScreen';
-import ViewFavoritoPerfilListFavoritoPerfilListScreen from './screens/ViewFavoritoPerfilListFavoritoPerfilListScreen';
-import ViewFavoritoUsuarioFormFavoritoUsuarioListScreen
-    from './screens/ViewFavoritoUsuarioFormFavoritoUsuarioListScreen';
-import ViewFavoritoUsuarioListFavoritoUsuarioListScreen
-    from './screens/ViewFavoritoUsuarioListFavoritoUsuarioListScreen';
-import ViewFeriadoFormFeriadoListScreen from './screens/ViewFeriadoFormFeriadoListScreen';
-import ViewFeriadoListFeriadoListScreen from './screens/ViewFeriadoListFeriadoListScreen';
-import ViewFiltrosColunasListScreen from './screens/ViewFiltrosColunasListScreen';
-import ViewFiltrosFormFiltrosListScreen from './screens/ViewFiltrosFormFiltrosListScreen';
-import ViewFiltrosListFiltrosListScreen from './screens/ViewFiltrosListFiltrosListScreen';
-import ViewFornecedorColunasFornecedoresListScreen from './screens/ViewFornecedorColunasFornecedoresListScreen';
-import ViewFornecedorFormFornecedorListScreen from './screens/ViewFornecedorFormFornecedorListScreen';
-import ViewFornecedorListFornecedorListScreen from './screens/ViewFornecedorListFornecedorListScreen';
-import ViewFuncaoFormFuncaoListScreen from './screens/ViewFuncaoFormFuncaoListScreen';
-import ViewFuncaoListFuncaoListScreen from './screens/ViewFuncaoListFuncaoListScreen';
-import ViewGeneroListGeneroListScreen from './screens/ViewGeneroListGeneroListScreen';
-import ViewGestaoAlunoColunasHistoricoAlunoListScreen from './screens/ViewGestaoAlunoColunasHistoricoAlunoListScreen';
-import ViewGestaoAlunoColunasParcelaListScreen from './screens/ViewGestaoAlunoColunasParcelaListScreen';
-import ViewGestaoAlunoColunasParcelaAlterarListScreen from './screens/ViewGestaoAlunoColunasParcelaAlterarListScreen';
-import ViewGestaoAlunoGestaoAlunoListScreen from './screens/ViewGestaoAlunoGestaoAlunoListScreen';
-import ViewGestaoAlunoListHistoricoAlunoListScreen from './screens/ViewGestaoAlunoListHistoricoAlunoListScreen';
-import ViewGestaoProfessorGestaoProfessorListScreen from './screens/ViewGestaoProfessorGestaoProfessorListScreen';
-import ViewCriarPerguntaScreen from './screens/ViewCriarPerguntaScreen';
-import ViewGrauFormGrauListScreen from './screens/ViewGrauFormGrauListScreen';
-import ViewGrauListGrauListScreen from './screens/ViewGrauListGrauListScreen';
-import ViewGrupoColunasListScreen from './screens/ViewGrupoColunasListScreen';
-import ViewGrupoFormGrupoListScreen from './screens/ViewGrupoFormGrupoListScreen';
-import ViewGrupoListGrupoListScreen from './screens/ViewGrupoListGrupoListScreen';
-import ViewHorarioFormHorarioListScreen from './screens/ViewHorarioFormHorarioListScreen';
-import ViewHorarioListHorarioListScreen from './screens/ViewHorarioListHorarioListScreen';
-import ViewHorarioPeriodoFormHorarioPeriodoListScreen from './screens/ViewHorarioPeriodoFormHorarioPeriodoListScreen';
-import ViewHorarioPeriodoListHorarioPeriodoListScreen from './screens/ViewHorarioPeriodoListHorarioPeriodoListScreen';
-import ViewImpressoraFormImpressoraListScreen from './screens/ViewImpressoraFormImpressoraListScreen';
-import ViewImpressoraListImpressoraListScreen from './screens/ViewImpressoraListImpressoraListScreen';
-import ViewIndicadorFormIndicadorListScreen from './screens/ViewIndicadorFormIndicadorListScreen';
-import ViewIndicadorListIndicadorListScreen from './screens/ViewIndicadorListIndicadorListScreen';
-import ViewLigacaoColunasLigacaoListScreen from './screens/ViewLigacaoColunasLigacaoListScreen';
-import ViewLigacaoLigacaoListScreen from './screens/ViewLigacaoLigacaoListScreen';
-import ViewLoginLoginListScreen from './screens/ViewLoginLoginListScreen';
-import ViewLogradouroFormLogradouroListScreen from './screens/ViewLogradouroFormLogradouroListScreen';
-import ViewLogradouroListLogradouroListScreen from './screens/ViewLogradouroListLogradouroListScreen';
-import ViewMarcaListMarcaListScreen from './screens/ViewMarcaListMarcaListScreen';
-import ViewMatriculaAbasMatriculaListScreen from './screens/ViewMatriculaAbasMatriculaListScreen';
-import ViewMatriculaColunasCentraisListScreen from './screens/ViewMatriculaColunasCentraisListScreen';
-import ViewMatriculaColunasContratoListScreen from './screens/ViewMatriculaColunasContratoListScreen';
-import ViewMatriculaColunasPessoaListScreen from './screens/ViewMatriculaColunasPessoaListScreen';
-import ViewMatriculaFormMatriculaListScreen from './screens/ViewMatriculaFormMatriculaListScreen';
-import ViewMatriculaFormRematriculaListScreen from './screens/ViewMatriculaFormRematriculaListScreen';
-import ViewMatriculaWizardScreen from './screens/ViewMatriculaWizardScreen';
-import ViewMatriculaListMatriculaListScreen from './screens/ViewMatriculaListMatriculaListScreen';
-import ViewMatriculaListRematriculaListScreen from './screens/ViewMatriculaListRematriculaListScreen';
-import ViewMatriculaMatriculaListScreen from './screens/ViewMatriculaMatriculaListScreen';
-import ViewMatriculaRematriculaListScreen from './screens/ViewMatriculaRematriculaListScreen';
-import ViewMensagemFormMensagemListScreen from './screens/ViewMensagemFormMensagemListScreen';
-import ViewMensagemListMensagemListScreen from './screens/ViewMensagemListMensagemListScreen';
-import ViewMensagemMetaListMensagemMetaListScreen from './screens/ViewMensagemMetaListMensagemMetaListScreen';
-import ViewMensagemCobrancaFormMensagemCobrancaListScreen
-    from './screens/ViewMensagemCobrancaFormMensagemCobrancaListScreen';
-import ViewMensagemCobrancaListMensagemCobrancaListScreen
-    from './screens/ViewMensagemCobrancaListMensagemCobrancaListScreen';
-import ViewMensagemNapFormMensagemNapListScreen from './screens/ViewMensagemNapFormMensagemNapListScreen';
-import ViewMensagemNapListMensagemNapListScreen from './screens/ViewMensagemNapListMensagemNapListScreen';
-import ViewMenuListMapaMenuListScreen from './screens/ViewMenuListMapaMenuListScreen';
-import ViewMetaFormMetaListScreen from './screens/ViewMetaFormMetaListScreen';
-import ViewMetaIndicadorMetaDinamicaListScreen from './screens/ViewMetaIndicadorMetaDinamicaListScreen';
-import ViewMetaListMetaListScreen from './screens/ViewMetaListMetaListScreen';
-import ViewMetaListMetaDinamicaListScreen from './screens/ViewMetaListMetaDinamicaListScreen';
-import ViewModuloColunasModuloListScreen from './screens/ViewModuloColunasModuloListScreen';
-import ViewModuloFormModuloListScreen from './screens/ViewModuloFormModuloListScreen';
-import ViewModuloListModuloListScreen from './screens/ViewModuloListModuloListScreen';
-import ViewModuloListOrdemModuloListScreen from './screens/ViewModuloListOrdemModuloListScreen';
-import ViewMotivoFormMotivoListScreen from './screens/ViewMotivoFormMotivoListScreen';
-import ViewMotivoListMotivoListScreen from './screens/ViewMotivoListMotivoListScreen';
-import ViewMovimentacaoFormMovimentacaoEstoqueListScreen
-    from './screens/ViewMovimentacaoFormMovimentacaoEstoqueListScreen';
-import ViewMovimentacaoListMovimentacaoEstoqueListScreen
-    from './screens/ViewMovimentacaoListMovimentacaoEstoqueListScreen';
-import ViewMovimentoFormMovimentoListScreen from './screens/ViewMovimentoFormMovimentoListScreen';
-import ViewMovimentoListMovimentoListScreen from './screens/ViewMovimentoListMovimentoListScreen';
-import ViewNotificacaoListNotificacaoListScreen from './screens/ViewNotificacaoListNotificacaoListScreen';
-import ViewNapAbasinfoListScreen from './screens/ViewNapAbasinfoListScreen';
-import ViewNapColunasCadernoListScreen from './screens/ViewNapColunasCadernoListScreen';
-import ViewNapColunasCadernoPrioritariaListScreen from './screens/ViewNapColunasCadernoPrioritariaListScreen';
-import ViewNapColunasCompromissoListScreen from './screens/ViewNapColunasCompromissoListScreen';
-import ViewNapColunasEmailListScreen from './screens/ViewNapColunasEmailListScreen';
-import ViewNapColunasLigacaoListScreen from './screens/ViewNapColunasLigacaoListScreen';
-import ViewNapColunasPrioritarioListScreen from './screens/ViewNapColunasPrioritarioListScreen';
-import ViewNapFormLigacaoNapListScreen from './screens/ViewNapFormLigacaoNapListScreen';
-import ViewNapListGerirNapListScreen from './screens/ViewNapListGerirNapListScreen';
-import ViewNapListLigacaoNapListScreen from './screens/ViewNapListLigacaoNapListScreen';
-import ViewNapListLoteListScreen from './screens/ViewNapListLoteListScreen';
-import ViewOferecimentoComponenteCurricularColunasDiaAulaListScreen
-    from './screens/ViewOferecimentoComponenteCurricularColunasDiaAulaListScreen';
-import ViewOferecimentoComponenteCurricularColunasInfoOcorrenciaListScreen
-    from './screens/ViewOferecimentoComponenteCurricularColunasInfoOcorrenciaListScreen';
-import ViewOferecimentoComponenteCurricularColunasOferecimentoListScreen
-    from './screens/ViewOferecimentoComponenteCurricularColunasOferecimentoListScreen';
-import ViewOferecimentoComponenteCurricularDisponibilidadeOferecimentoListScreen
-    from './screens/ViewOferecimentoComponenteCurricularDisponibilidadeOferecimentoListScreen';
-import ViewOferecimentoComponenteCurricularFormOferecimentoComponenteCurricularListScreen
-    from './screens/ViewOferecimentoComponenteCurricularFormOferecimentoComponenteCurricularListScreen';
-import ViewOferecimentoComponenteCurricularFormOferecimentoCursoListScreen
-    from './screens/ViewOferecimentoComponenteCurricularFormOferecimentoCursoListScreen';
-import ViewOferecimentoComponenteCurricularListOferecimentoComponenteCurricularListScreen
-    from './screens/ViewOferecimentoComponenteCurricularListOferecimentoComponenteCurricularListScreen';
-import ViewOferecimentoComponenteCurricularListOferecimentoCursoListScreen
-    from './screens/ViewOferecimentoComponenteCurricularListOferecimentoCursoListScreen';
-import ViewOperacionalFormOperacionalListScreen from './screens/ViewOperacionalFormOperacionalListScreen';
-import ViewOperacionalListOperacionalListScreen from './screens/ViewOperacionalListOperacionalListScreen';
-import ViewPacoteListPacoteListScreen from './screens/ViewPacoteListPacoteListScreen';
-import ViewPagamentoAberturacaixaListScreen from './screens/ViewPagamentoAberturacaixaListScreen';
-import ViewPagamentoCaixaentradaListScreen from './screens/ViewPagamentoCaixaentradaListScreen';
-import ViewPagamentoCaixasaidaListScreen from './screens/ViewPagamentoCaixasaidaListScreen';
-import ViewPagamentoCodigoVerificadorListScreen from './screens/ViewPagamentoCodigoVerificadorListScreen';
-import ViewPagamentoEfetuarPagamentoListScreen from './screens/ViewPagamentoEfetuarPagamentoListScreen';
-import ViewPagamentoFechamentoCaixaWizardScreen from './screens/ViewPagamentoFechamentoCaixaWizardScreen';
-import ViewPagamentoMovimentocaixaListScreen from './screens/ViewPagamentoMovimentocaixaListScreen';
-import ViewPagamentoProdutoListScreen from './screens/ViewPagamentoProdutoListScreen';
-import ViewPaisFormPaisListScreen from './screens/ViewPaisFormPaisListScreen';
-import ViewPaisListPaisListScreen from './screens/ViewPaisListPaisListScreen';
-import ViewPerfilColunasPerfilListScreen from './screens/ViewPerfilColunasPerfilListScreen';
-import ViewPerfilColunasPerfilModuloListScreen from './screens/ViewPerfilColunasPerfilModuloListScreen';
-import ViewPerfilFormPerfilListScreen from './screens/ViewPerfilFormPerfilListScreen';
-import ViewPerfilListPerfilListScreen from './screens/ViewPerfilListPerfilListScreen';
-import ViewPeriodoFormPeriodoListScreen from './screens/ViewPeriodoFormPeriodoListScreen';
-import ViewPeriodoListPeriodoListScreen from './screens/ViewPeriodoListPeriodoListScreen';
-import ViewPessoaColunasListScreen from './screens/ViewPessoaColunasListScreen';
-import ViewPessoaColunasExibirPessoaFisicaListScreen from './screens/ViewPessoaColunasExibirPessoaFisicaListScreen';
-import ViewPessoaColunasExibirPessoaJuridicaListScreen from './screens/ViewPessoaColunasExibirPessoaJuridicaListScreen';
-import ViewPessoaColunasPessoaFisicaListScreen from './screens/ViewPessoaColunasPessoaFisicaListScreen';
-import ViewPessoaColunasPessoaJuridicaListScreen from './screens/ViewPessoaColunasPessoaJuridicaListScreen';
-import ViewPessoaFormPessoaFisicaListScreen from './screens/ViewPessoaFormPessoaFisicaListScreen';
-import ViewPessoaFormPessoaJuridicaListScreen from './screens/ViewPessoaFormPessoaJuridicaListScreen';
-import ViewPessoaFormPessoaPessoaFisicaListScreen from './screens/ViewPessoaFormPessoaPessoaFisicaListScreen';
-import ViewPessoaFormPessoaPessoaJuridicaListScreen from './screens/ViewPessoaFormPessoaPessoaJuridicaListScreen';
-import ViewPessoaFormPessoaPessoaUsuarioListScreen from './screens/ViewPessoaFormPessoaPessoaUsuarioListScreen';
-import ViewPessoaListDisponibilidadePessoaListScreen from './screens/ViewPessoaListDisponibilidadePessoaListScreen';
-import ViewPessoaListPessoaListScreen from './screens/ViewPessoaListPessoaListScreen';
-import ViewPessoaListPessoaFisicaListScreen from './screens/ViewPessoaListPessoaFisicaListScreen';
-import ViewPessoaListPessoaJuridicaListScreen from './screens/ViewPessoaListPessoaJuridicaListScreen';
-import ViewPessoaPessoaDocumentoListScreen from './screens/ViewPessoaPessoaDocumentoListScreen';
-import ViewProdutoColunasListScreen from './screens/ViewProdutoColunasListScreen';
-import ViewProdutoColunasProdutoCampoListScreen from './screens/ViewProdutoColunasProdutoCampoListScreen';
-import ViewProdutoFormProdutoListScreen from './screens/ViewProdutoFormProdutoListScreen';
-import ViewProdutoListConfiguracaoProdutoListScreen from './screens/ViewProdutoListConfiguracaoProdutoListScreen';
-import ViewProdutoListProdutoListScreen from './screens/ViewProdutoListProdutoListScreen';
-import ViewProfessorColunasListScreen from './screens/ViewProfessorColunasListScreen';
-import ViewProfessorColunasDisponibilidadeProfessorListScreen
-    from './screens/ViewProfessorColunasDisponibilidadeProfessorListScreen';
-import ViewProfessorFormProfessorListScreen from './screens/ViewProfessorFormProfessorListScreen';
-import ViewProfessorListProfessorListScreen from './screens/ViewProfessorListProfessorListScreen';
-import ViewProspectoCadastroProspectoListScreen from './screens/ViewProspectoCadastroProspectoListScreen';
-import ViewProspectoControleProspectoListScreen from './screens/ViewProspectoControleProspectoListScreen';
-import ViewProspectoEditProspectoListScreen from './screens/ViewProspectoEditProspectoListScreen';
-import ViewProspectoListProspectoListScreen from './screens/ViewProspectoListProspectoListScreen';
-import ViewProspectoProspectoRadarListScreen from './screens/ViewProspectoProspectoRadarListScreen';
-import ViewReferenciaBibliograficaColunasReferenciaBibliograficaListScreen
-    from './screens/ViewReferenciaBibliograficaColunasReferenciaBibliograficaListScreen';
-import ViewReferenciaBibliograficaFormReferenciaBibliograficaListScreen
-    from './screens/ViewReferenciaBibliograficaFormReferenciaBibliograficaListScreen';
-import ViewReferenciaBibliograficaListReferenciaBibliograficaListScreen
-    from './screens/ViewReferenciaBibliograficaListReferenciaBibliograficaListScreen';
-import ViewRegiaoFormRegiaoListScreen from './screens/ViewRegiaoFormRegiaoListScreen';
-import ViewRegiaoListRegiaoListScreen from './screens/ViewRegiaoListRegiaoListScreen';
-import ViewRelatoriosColunasDashboardListScreen from './screens/ViewRelatoriosColunasDashboardListScreen';
-import ViewRelatoriosColunasGraficoListScreen from './screens/ViewRelatoriosColunasGraficoListScreen';
-import ViewRelatoriosColunasMapaListScreen from './screens/ViewRelatoriosColunasMapaListScreen';
-import ViewRelatoriosColunasOrganogramaListScreen from './screens/ViewRelatoriosColunasOrganogramaListScreen';
-import ViewRelatoriosColunasTabelaListScreen from './screens/ViewRelatoriosColunasTabelaListScreen';
-import ViewRelatoriosDocumentosListScreen from './screens/ViewRelatoriosDocumentosListScreen';
-import ViewRelatoriosExtratorListScreen from './screens/ViewRelatoriosExtratorListScreen';
-import ViewRelatoriosFormDashboardListScreen from './screens/ViewRelatoriosFormDashboardListScreen';
-import ViewRelatoriosFormGraficoListScreen from './screens/ViewRelatoriosFormGraficoListScreen';
-import ViewRelatoriosFormMapaListScreen from './screens/ViewRelatoriosFormMapaListScreen';
-import ViewRelatoriosFormOrganogramaListScreen from './screens/ViewRelatoriosFormOrganogramaListScreen';
-import ViewRelatoriosFormTabelaListScreen from './screens/ViewRelatoriosFormTabelaListScreen';
-import ViewRelatoriosListDashboardListScreen from './screens/ViewRelatoriosListDashboardListScreen';
-import ListGraficoScreen from './screens/ListGraficoScreen';
-import ListMapaScreen from './screens/ListMapaScreen';
-import ListTabelaScreen from './screens/ListTabelaScreen';
-import ViewRelatoriosListOrganogramaListScreen from './screens/ViewRelatoriosListOrganogramaListScreen';
-import ViewRelatoriosViewDashboardListScreen from './screens/ViewRelatoriosViewDashboardListScreen';
-import ViewRelatoriosViewGraficoBarrasHorizontalListScreen
-    from './screens/ViewRelatoriosViewGraficoBarrasHorizontalListScreen';
-import ViewRelatoriosViewGraficoBarrasVerticalListScreen
-    from './screens/ViewRelatoriosViewGraficoBarrasVerticalListScreen';
-import ViewRelatoriosViewGraficoCircularListScreen from './screens/ViewRelatoriosViewGraficoCircularListScreen';
-import ViewRelatoriosViewGraficoCombinadoListScreen from './screens/ViewRelatoriosViewGraficoCombinadoListScreen';
-import ViewRelatoriosViewGraficoLinhasListScreen from './screens/ViewRelatoriosViewGraficoLinhasListScreen';
-import ViewRelatoriosViewGraficoPizzaListScreen from './screens/ViewRelatoriosViewGraficoPizzaListScreen';
-import ViewRelatoriosViewMapaListScreen from './screens/ViewRelatoriosViewMapaListScreen';
-import ViewRelatoriosViewOrganogramaListScreen from './screens/ViewRelatoriosViewOrganogramaListScreen';
-import ViewRelatoriosViewTabelaListScreen from './screens/ViewRelatoriosViewTabelaListScreen';
-import ViewResultadoColunasResultadoListScreen from './screens/ViewResultadoColunasResultadoListScreen';
-import ViewResultadoFormResultadoListScreen from './screens/ViewResultadoFormResultadoListScreen';
-import ViewResultadoListResultadoListScreen from './screens/ViewResultadoListResultadoListScreen';
-import ViewResultadoCobrancaColunasListScreen from './screens/ViewResultadoCobrancaColunasListScreen';
-import ViewResultadoCobrancaFormResultadoCobrancaListScreen
-    from './screens/ViewResultadoCobrancaFormResultadoCobrancaListScreen';
-import ViewResultadoCobrancaListResultadoCobrancaListScreen
-    from './screens/ViewResultadoCobrancaListResultadoCobrancaListScreen';
-import ViewResultadoContatoFormResultadoContatoListScreen
-    from './screens/ViewResultadoContatoFormResultadoContatoListScreen';
-import ViewResultadoContatoListResultadoContatoListScreen
-    from './screens/ViewResultadoContatoListResultadoContatoListScreen';
-import ViewResultadoLigacaoNapColunasListScreen from './screens/ViewResultadoLigacaoNapColunasListScreen';
-import ViewResultadoLigacaoNapFormResultadoLigacaoNapListScreen
-    from './screens/ViewResultadoLigacaoNapFormResultadoLigacaoNapListScreen';
-import ViewResultadoLigacaoNapListResultadoLigacaoNapListScreen
-    from './screens/ViewResultadoLigacaoNapListResultadoLigacaoNapListScreen';
-import ViewSalaFormSalaListScreen from './screens/ViewSalaFormSalaListScreen';
-import ViewSalaListSalaListScreen from './screens/ViewSalaListSalaListScreen';
-import ViewStatusCompromissoColunasStatusCompromissoListScreen
-    from './screens/ViewStatusCompromissoColunasStatusCompromissoListScreen';
-import ViewStatusCompromissoColunasStatusModulosListScreen
-    from './screens/ViewStatusCompromissoColunasStatusModulosListScreen';
-import ViewStatusCompromissoFormStatusCompromissoListScreen
-    from './screens/ViewStatusCompromissoFormStatusCompromissoListScreen';
-import ViewStatusCompromissoListStatusCompromissoListScreen
-    from './screens/ViewStatusCompromissoListStatusCompromissoListScreen';
-import ViewSubCategoriaFormSubCategoriaListScreen from './screens/ViewSubCategoriaFormSubCategoriaListScreen';
-import ViewSubCategoriaListSubCategoriaListScreen from './screens/ViewSubCategoriaListSubCategoriaListScreen';
-import ViewSubcategoriaEstoqueListSubCategoriaListScreen
-    from './screens/ViewSubcategoriaEstoqueListSubCategoriaListScreen';
-import ViewTelefoneColunasTelefoneListScreen from './screens/ViewTelefoneColunasTelefoneListScreen';
-import ViewTelefoneFormTelefoneListScreen from './screens/ViewTelefoneFormTelefoneListScreen';
-import ViewTelefoneListTelefoneListScreen from './screens/ViewTelefoneListTelefoneListScreen';
-import ViewTempoAulaFormTempoAulaListScreen from './screens/ViewTempoAulaFormTempoAulaListScreen';
-import ViewTempoAulaListTempoAulaListScreen from './screens/ViewTempoAulaListTempoAulaListScreen';
-import ViewTipoAcaoFormTipoAcaoListScreen from './screens/ViewTipoAcaoFormTipoAcaoListScreen';
-import ViewTipoAcaoListTipoAcaoListScreen from './screens/ViewTipoAcaoListTipoAcaoListScreen';
-import ViewTipoAgendaFormTipoAgendaListScreen from './screens/ViewTipoAgendaFormTipoAgendaListScreen';
-import ViewTipoAgendaListTipoAgendaListScreen from './screens/ViewTipoAgendaListTipoAgendaListScreen';
-import ViewTipoAtividadeFormTipoAtividadeListScreen from './screens/ViewTipoAtividadeFormTipoAtividadeListScreen';
-import ViewTipoAtividadeListTipoAtividadeListScreen from './screens/ViewTipoAtividadeListTipoAtividadeListScreen';
-import ViewTipoCanalFormTipoCanalListScreen from './screens/ViewTipoCanalFormTipoCanalListScreen';
-import ViewTipoCanalListTipoCanalListScreen from './screens/ViewTipoCanalListTipoCanalListScreen';
-import ViewTipoContratoFormTipoContratoListScreen from './screens/ViewTipoContratoFormTipoContratoListScreen';
-import ViewTipoContratoListTipoContratoListScreen from './screens/ViewTipoContratoListTipoContratoListScreen';
-import ViewTipoCursoColunasListScreen from './screens/ViewTipoCursoColunasListScreen';
-import ViewTipoCursoFormTipoCursoListScreen from './screens/ViewTipoCursoFormTipoCursoListScreen';
-import ViewTipoCursoListTipoCursoListScreen from './screens/ViewTipoCursoListTipoCursoListScreen';
-import ViewTipoHistoricoFormTipoHistoricoListScreen from './screens/ViewTipoHistoricoFormTipoHistoricoListScreen';
-import ViewTipoHistoricoListTipoHistoricoListScreen from './screens/ViewTipoHistoricoListTipoHistoricoListScreen';
-import ViewTipoPagamentoColunasTipoPagamentoListScreen from './screens/ViewTipoPagamentoColunasTipoPagamentoListScreen';
-import ViewTipoPagamentoFormTipoPagamentoListScreen from './screens/ViewTipoPagamentoFormTipoPagamentoListScreen';
-import ViewTipoPagamentoListTipoPagamentoListScreen from './screens/ViewTipoPagamentoListTipoPagamentoListScreen';
-import ViewTipoPausaFormTipoPausaListScreen from './screens/ViewTipoPausaFormTipoPausaListScreen';
-import ViewTipoPausaListTipoPausaListScreen from './screens/ViewTipoPausaListTipoPausaListScreen';
-import ViewTipoSalaFormTipoSalaListScreen from './screens/ViewTipoSalaFormTipoSalaListScreen';
-import ViewTipoSalaListTipoSalaListScreen from './screens/ViewTipoSalaListTipoSalaListScreen';
-import ViewTipoTelefoneFormTipoTelefoneListScreen from './screens/ViewTipoTelefoneFormTipoTelefoneListScreen';
-import ViewTipoTelefoneListTipoTelefoneListScreen from './screens/ViewTipoTelefoneListTipoTelefoneListScreen';
-import ViewTipoUnidadeFormTipoUnidadeListScreen from './screens/ViewTipoUnidadeFormTipoUnidadeListScreen';
-import ViewTipoUnidadeListTipoUnidadeListScreen from './screens/ViewTipoUnidadeListTipoUnidadeListScreen';
-import ViewTurmaColunasTurmaListScreen from './screens/ViewTurmaColunasTurmaListScreen';
-import ViewTurmaFormAjusteCalendarioListScreen from './screens/ViewTurmaFormAjusteCalendarioListScreen';
-import ViewTurmaListTurmaListScreen from './screens/ViewTurmaListTurmaListScreen';
-import ViewTurmaListTurmaFinalizandoListScreen from './screens/ViewTurmaListTurmaFinalizandoListScreen';
-import ViewTurmaRecriarCalendarioAcademicoListScreen from './screens/ViewTurmaRecriarCalendarioAcademicoListScreen';
-import ViewTurnoFormTurnoListScreen from './screens/ViewTurnoFormTurnoListScreen';
-import ViewTurnoListTurnoListScreen from './screens/ViewTurnoListTurnoListScreen';
-import ViewTurnoEducacaoColunasTurnoEducacaoListScreen from './screens/ViewTurnoEducacaoColunasTurnoEducacaoListScreen';
-import ViewTurnoEducacaoFormTurnoEducacaoListScreen from './screens/ViewTurnoEducacaoFormTurnoEducacaoListScreen';
-import ViewTurnoEducacaoListTurnoEducacaoListScreen from './screens/ViewTurnoEducacaoListTurnoEducacaoListScreen';
-import ViewTurnoFuncionarioFormTurnoFuncionarioListScreen
-    from './screens/ViewTurnoFuncionarioFormTurnoFuncionarioListScreen';
-import ViewTurnoFuncionarioListTurnoFuncionarioListScreen
-    from './screens/ViewTurnoFuncionarioListTurnoFuncionarioListScreen';
-import ViewTurnoTrabalhoColunasTurnoTrabalhoListScreen from './screens/ViewTurnoTrabalhoColunasTurnoTrabalhoListScreen';
-import ViewTurnoTrabalhoFormTurnoTrabalhoListScreen from './screens/ViewTurnoTrabalhoFormTurnoTrabalhoListScreen';
-import ViewTurnoTrabalhoListTurnoTrabalhoListScreen from './screens/ViewTurnoTrabalhoListTurnoTrabalhoListScreen';
-import ViewTurnoUsuarioListTurnoUsuarioListScreen from './screens/ViewTurnoUsuarioListTurnoUsuarioListScreen';
-import ViewUnidadeColunasListScreen from './screens/ViewUnidadeColunasListScreen';
-import ViewUnidadeColunasRedeListScreen from './screens/ViewUnidadeColunasRedeListScreen';
-import ViewUnidadeFormRedeListScreen from './screens/ViewUnidadeFormRedeListScreen';
-import ViewUnidadeFormUnidadeListScreen from './screens/ViewUnidadeFormUnidadeListScreen';
-import ViewUnidadeListRedeListScreen from './screens/ViewUnidadeListRedeListScreen';
-import ViewUnidadeListUnidadeListScreen from './screens/ViewUnidadeListUnidadeListScreen';
-import ViewUsuarioCamposUsuarioTabViewListScreen from './screens/ViewUsuarioCamposUsuarioTabViewListScreen';
-import ViewUsuarioColunasUsuarioListScreen from './screens/ViewUsuarioColunasUsuarioListScreen';
-import ViewUsuarioFormUsuarioListScreen from './screens/ViewUsuarioFormUsuarioListScreen';
-import ViewUsuarioFormUsuarioRapidoListScreen from './screens/ViewUsuarioFormUsuarioRapidoListScreen';
-import ViewUsuarioListUsuarioListScreen from './screens/ViewUsuarioListUsuarioListScreen';
-import CadastroUsuarioScreen from './screens/CadastroUsuarioScreen';
-import ViewValorCursoColunasDescontoListScreen from './screens/ViewValorCursoColunasDescontoListScreen';
-import ViewValorCursoColunasRetencoesListScreen from './screens/ViewValorCursoColunasRetencoesListScreen';
-import ViewValorCursoColunasTaxaListScreen from './screens/ViewValorCursoColunasTaxaListScreen';
-import ViewValorCursoFormValorCursoListScreen from './screens/ViewValorCursoFormValorCursoListScreen';
-import ViewValorCursoListValorCursoListScreen from './screens/ViewValorCursoListValorCursoListScreen';
-import ViewValorProdutoFormValorProdutoListScreen from './screens/ViewValorProdutoFormValorProdutoListScreen';
-import ViewValorProdutoListValorProdutoListScreen from './screens/ViewValorProdutoListValorProdutoListScreen';
-import ViewTemaListTemasListScreen from './screens/ViewTemaListTemasListScreen';
-import AlunoDashboardScreen from './screens/AlunoDashboardScreen';
-import AlunoBoletimScreen from './screens/AlunoBoletimScreen';
-import AlunoFrequenciaScreen from './screens/AlunoFrequenciaScreen';
-import AlunoFinanceiroScreen from './screens/AlunoFinanceiroScreen';
-import AlunoAulasScreen from './screens/AlunoAulasScreen';
-import AlunoAvaliacoesScreen from './screens/AlunoAvaliacoesScreen';
-import AlunoAvaliacaoResponderScreen from './screens/AlunoAvaliacaoResponderScreen';
-import AulaContratoScreen from './screens/AulaContratoScreen';
-import AulaOferecimentoScreen from './screens/AulaOferecimentoScreen';
-import AulaOcorrenciaScreen from './screens/AulaOcorrenciaScreen';
-import AulaAulaScreen from './screens/AulaAulaScreen';
-import AulaAlunoScreen from './screens/AulaAlunoScreen';
-import MeusDadosScreen from './screens/MeusDadosScreen';
-import IconesListScreen from './screens/IconesListScreen';
-import AsaasCobrancasListScreen from './screens/AsaasCobrancasListScreen';
-import AsaasClientesListScreen from './screens/AsaasClientesListScreen';
-import AsaasParcelasListScreen from './screens/AsaasParcelasListScreen';
-import CurriculoVagaListScreen from './screens/CurriculoVagaListScreen';
-import CurriculoEmpresaListScreen from './screens/CurriculoEmpresaListScreen';
-import CurriculoEmpresaUnidadeListScreen from './screens/CurriculoEmpresaUnidadeListScreen';
-import CurriculoEntrevistaListScreen from './screens/CurriculoEntrevistaListScreen';
-import CurriculoTrabalhoListScreen from './screens/CurriculoTrabalhoListScreen';
-import CurriculoCampoListScreen from './screens/CurriculoCampoListScreen';
-import CurriculoConfiguracaoListScreen from './screens/CurriculoConfiguracaoListScreen';
-import AuditoriaScreen from './screens/AuditoriaScreen';
-import ViewConfiguracaoFinanceiraListConfiguracaoFinanceiraListScreen from './screens/ViewConfiguracaoFinanceiraListConfiguracaoFinanceiraListScreen';
-import ViewConfiguracaoFinanceiraFormConfiguracaoFinanceiraListScreen from './screens/ViewConfiguracaoFinanceiraFormConfiguracaoFinanceiraListScreen';
+import {
+    AuthProvider,
+    ThemeProvider,
+    AlertDialogProvider,
+    LoginScreen,
+    ProtectedRoute,
+    PermissionBridge,
+    ReportViewScreen,
+    ViewAcaoColunasAcaoCampoListScreen,
+    ViewAcaoColunasAcaoListScreen,
+    ViewAcaoFormAcaoListScreen,
+    ViewAcaoListAcaoListScreen,
+    ViewRegraNotificacaoListRegraListScreen,
+    ViewAgendaCalendarioAgendaListScreen,
+    ViewAgendaColunasListScreen,
+    ViewAgendaColunasUsuarioAgendaListScreen,
+    ViewAgendaFormAgendaListScreen,
+    ViewAgendaListAgendaListScreen,
+    ViewAgendaCompromissosScreen,
+    ViewAlterarSenhaAlterarSenhaListScreen,
+    ViewApresentacaoListApresentacaoListScreen,
+    ViewArquivoProconListArquivoProconListScreen,
+    ViewAtividadeComplementarFormAtividadeComplementarListScreen,
+    ViewAtividadeComplementarListAtividadeComplementarListScreen,
+    ViewAuditoriaFormAuditoriaHistoricoListScreen,
+    ViewAuditoriaListAuditoriaListScreen,
+    ViewAuditoriaListAuditoriaHistoricoListScreen,
+    ViewBairroFormBairroListScreen,
+    ViewBairroListBairroListScreen,
+    ViewBandeiraFormBandeiraListScreen,
+    ViewBandeiraListBandeiraListScreen,
+    ViewBaseTecnologicaColunasBaseTecnologicaListScreen,
+    ViewBaseTecnologicaFormBaseTecnologicaListScreen,
+    ViewBaseTecnologicaListBaseTecnologicaListScreen,
+    ViewCaixaFormCaixaListScreen,
+    ViewCaixaListCaixaListScreen,
+    ViewCampanhaColunasAcaoDeCampanhaListScreen,
+    ViewCampanhaColunasFiltroListScreen,
+    ViewCampanhaFormCampanhaListScreen,
+    ViewCampanhaFormDirecionamentoListScreen,
+    ViewCampanhaFormGerarPacotesListScreen,
+    ViewCampanhaListCampanhaListScreen,
+    ViewCampanhaNegociacaoFormCampanhaNegociacaoListScreen,
+    ViewCampanhaNegociacaoListCampanhaNegociacaoListScreen,
+    ViewCampoColunasCampoListScreen,
+    ViewCampoFormCampoListScreen,
+    ViewCampoListCampoListScreen,
+    ViewCancelamentoColunasPreCancelamentoListScreen,
+    ViewCargaFormCargaListScreen,
+    ViewCargaListCargaListScreen,
+    ViewCategoriaFormCategoriaListScreen,
+    ViewCategoriaListCategoriaListScreen,
+    ViewCategoriaCampoFormCategoriaCampoListScreen,
+    ViewCategoriaCampoListCategoriaCampoListScreen,
+    ViewCategoriaEstoqueListCategoriaListScreen,
+    ViewChamadaAssinadaListChamadaAssinadaListScreen,
+    ViewCidadeFormCidadeListScreen,
+    ViewCidadeListCidadeListScreen,
+    ViewCobrancaColunasCompromissoListScreen,
+    ViewCobrancaColunasEmailListScreen,
+    ViewCobrancaColunasLigacaoListScreen,
+    ViewCobrancaColunasParcelasListScreen,
+    ViewCobrancaColunasPrioritarioListScreen,
+    ViewCobrancaFormLigacaoCobrancaListScreen,
+    ViewCobrancaListGerirCobrancaListScreen,
+    ViewCobrancaListLigacaoCobrancaListScreen,
+    ViewCobrancaListLoteListScreen,
+    ViewComponenteCurricularColunasComponenteCurricularListScreen,
+    ViewComponenteCurricularFormComponenteCurricularListScreen,
+    ViewComponenteCurricularListComponenteCurricularListScreen,
+    ViewCompromissoAbasMatriculaListScreen,
+    ViewCompromissoColunasCompromissoListScreen,
+    ViewCompromissoFinalizarCompromissoListScreen,
+    ViewCompromissoFormCompromissoListScreen,
+    ViewCompromissoFormTipoCompromissoListScreen,
+    ViewCompromissoListCompromissoListScreen,
+    ViewCompromissoListTipoCompromissoListScreen,
+    ViewComunicacaoColunasComunicacaoListScreen,
+    ViewComunicacaoColunasComunicacaoMensagemListScreen,
+    ViewComunicacaoFormComunicacaoListScreen,
+    ViewComunicacaoFormComunicacaoMensagemListScreen,
+ViewComunicacaoListComunicacaoListScreen,
+    ViewComunicacaoListComunicacaoMensagemListScreen,
+    ViewConfiguracaoColunasMarketingCampoListScreen,
+    ViewConfiguracaoFormConfiguracaoListScreen,
+    ViewConfiguracaoFormConfiguracaoCaixaListScreen,
+    ViewConfiguracaoFormConfiguracaoEmailListScreen,
+    ViewConfiguracaoFormConfiguracaoEstoqueListScreen,
+    ViewConfiguracaoFormConfiguracaoParcelaListScreen,
+    ViewConfiguracaoFormLayoutListScreen,
+    ViewConfiguracaoListConfiguracaoListScreen,
+    ViewConfiguracaoListConfiguracaoCaixaListScreen,
+    ViewConfiguracaoListConfiguracaoEmailListScreen,
+    ViewConfiguracaoListConfiguracaoEstoqueListScreen,
+    ViewConfiguracaoListConfiguracaoMarketingListScreen,
+    ViewConfiguracaoListConfiguracaoParcelaListScreen,
+    ViewConfiguracaoListLayoutListScreen,
+    ViewConfiguracaoDocumentosListScreen,
+    ViewConsultorConsultorListScreen,
+    ViewConsultorFormConsultorListScreen,
+    ViewConsultorListConsultorListScreen,
+    ViewContaControlePagamentoListScreen,
+    ViewContaGestaoContaListScreen,
+    ViewContaCorrenteFormContaCorrenteListScreen,
+    ViewContaCorrenteListContaCorrenteListScreen,
+    ViewContratoColunasContratoListScreen,
+    ViewContratoFormContratoListScreen,
+    ViewContratoListContratoListScreen,
+    ViewCoordenadorColunasAdminListScreen,
+    ViewCoordenadorColunasOperadorListScreen,
+    ViewCoordenadorListCoordenadorListScreen,
+    ViewCorFormCoresListScreen,
+    ViewCorListCoresListScreen,
+    ViewCpfalunosFormCpfalunosListScreen,
+    ViewCpfalunosListCpfalunosListScreen,
+    ViewCriterioListCriterioFormScreen,
+    ViewCriterioListCriterioListScreen,
+    ViewCurriculoColunasListScreen,
+    ViewCurriculoColunasMatrizCurricularListScreen,
+    ViewCurriculoColunasRequisitoMatrizListScreen,
+    ViewCurriculoFormCurriculoListScreen,
+    ViewCurriculoListCurriculoListScreen,
+    ViewCursoFormCursoListScreen,
+    ViewCursoListCursoListScreen,
+    ViewCustoServicoFormCustoServicoListScreen,
+    ViewCustoServicoListCustoServicoListScreen,
+    ViewDesistenteFormDesistenteListScreen,
+    ViewDesistenteListDesistenteListScreen,
+    ViewDiaPagamentoFormDiaPagamentoListScreen,
+    ViewDiaPagamentoListDiaPagamentoListScreen,
+    ViewDiaSemanaColunasDiaSemanaListScreen,
+    ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScreen,
+    ViewDisponibilidadeProfessorListDisponibilidadeProfessorListScreen,
+    ViewDisponibilidadeSalaListDisponibilidadeSalaListScreen,
+    ViewEntregaFormEntregaListScreen,
+    ViewEntregaListEntregaListScreen,
+    ViewEscolaridadeFormEscolaridadeListScreen,
+    ViewEscolaridadeListEscolaridadeListScreen,
+    ViewEstadoFormEstadoListScreen,
+    ViewEstadoListEstadoListScreen,
+    ViewEstadoCivilFormEstadoCivilListScreen,
+    ViewEstadoCivilListEstadoCivilListScreen,
+    ViewEstoqueControleestoqueListScreen,
+    ViewEstoqueEstoqueprodutoListScreen,
+    ViewEstrategiaFormEstrategiaListScreen,
+    ViewEstrategiaListEstrategiaListScreen,
+    ViewEstruturaFormEstruturaListScreen,
+    ViewEstruturaListEstruturaListScreen,
+    ViewEtapasCobrancaColunasEtapasCobrancaListScreen,
+    ViewEtapasCobrancaFormEtapasCobrancaListScreen,
+    ViewEtapasCobrancaListEtapasCobrancaListScreen,
+    ViewEtapasNapColunasEtapasNapListScreen,
+    ViewEtapasNapFormEtapasNapListScreen,
+    ViewEtapasNapListEtapasNapListScreen,
+    ViewEtniaFormEtniaListScreen,
+    ViewEtniaListEtniaListScreen,
+    ViewFavoritoPerfilColunasFavoritoPerfilListScreen,
+    ViewFavoritoPerfilFormFavoritoPerfilListScreen,
+    ViewFavoritoPerfilListFavoritoPerfilListScreen,
+    ViewFavoritoUsuarioFormFavoritoUsuarioListScreen,
+    ViewFavoritoUsuarioListFavoritoUsuarioListScreen,
+    ViewFeriadoFormFeriadoListScreen,
+    ViewFeriadoListFeriadoListScreen,
+    ViewFiltrosColunasListScreen,
+    ViewFiltrosFormFiltrosListScreen,
+    ViewFiltrosListFiltrosListScreen,
+    ViewFornecedorColunasFornecedoresListScreen,
+    ViewFornecedorFormFornecedorListScreen,
+    ViewFornecedorListFornecedorListScreen,
+    ViewFuncaoFormFuncaoListScreen,
+    ViewFuncaoListFuncaoListScreen,
+    ViewGeneroListGeneroListScreen,
+    ViewGestaoAlunoColunasHistoricoAlunoListScreen,
+    ViewGestaoAlunoColunasParcelaListScreen,
+    ViewGestaoAlunoColunasParcelaAlterarListScreen,
+    ViewGestaoAlunoGestaoAlunoListScreen,
+    ViewGestaoAlunoListHistoricoAlunoListScreen,
+    ViewGestaoProfessorGestaoProfessorListScreen,
+    ViewCriarPerguntaScreen,
+    ViewGrauFormGrauListScreen,
+    ViewGrauListGrauListScreen,
+    ViewGrupoColunasListScreen,
+    ViewGrupoFormGrupoListScreen,
+    ViewGrupoListGrupoListScreen,
+    ViewHorarioFormHorarioListScreen,
+    ViewHorarioListHorarioListScreen,
+    ViewHorarioPeriodoFormHorarioPeriodoListScreen,
+    ViewHorarioPeriodoListHorarioPeriodoListScreen,
+    ViewImpressoraFormImpressoraListScreen,
+    ViewImpressoraListImpressoraListScreen,
+    ViewIndicadorFormIndicadorListScreen,
+    ViewIndicadorListIndicadorListScreen,
+    ViewLigacaoColunasLigacaoListScreen,
+    ViewLigacaoLigacaoListScreen,
+    ViewLoginLoginListScreen,
+    ViewLogradouroFormLogradouroListScreen,
+    ViewLogradouroListLogradouroListScreen,
+    ViewMarcaListMarcaListScreen,
+    ViewMatriculaAbasMatriculaListScreen,
+    ViewMatriculaColunasCentraisListScreen,
+    ViewMatriculaColunasContratoListScreen,
+    ViewMatriculaColunasPessoaListScreen,
+    ViewMatriculaFormMatriculaListScreen,
+    ViewMatriculaFormRematriculaListScreen,
+    ViewMatriculaWizardScreen,
+    ViewMatriculaListMatriculaListScreen,
+    ViewMatriculaListRematriculaListScreen,
+    ViewMatriculaMatriculaListScreen,
+    ViewMatriculaRematriculaListScreen,
+    ViewMensagemFormMensagemListScreen,
+    ViewMensagemListMensagemListScreen,
+    ViewMensagemMetaListMensagemMetaListScreen,
+    ViewMensagemCobrancaFormMensagemCobrancaListScreen,
+    ViewMensagemCobrancaListMensagemCobrancaListScreen,
+    ViewMensagemNapFormMensagemNapListScreen,
+    ViewMensagemNapListMensagemNapListScreen,
+    ViewMenuListMapaMenuListScreen,
+    ViewMetaFormMetaListScreen,
+    ViewMetaIndicadorMetaDinamicaListScreen,
+    ViewMetaListMetaListScreen,
+    ViewMetaListMetaDinamicaListScreen,
+    ViewModuloColunasModuloListScreen,
+    ViewModuloFormModuloListScreen,
+    ViewModuloListModuloListScreen,
+    ViewModuloListOrdemModuloListScreen,
+    ViewMotivoFormMotivoListScreen,
+    ViewMotivoListMotivoListScreen,
+    ViewMovimentacaoFormMovimentacaoEstoqueListScreen,
+    ViewMovimentacaoListMovimentacaoEstoqueListScreen,
+    ViewMovimentoFormMovimentoListScreen,
+    ViewMovimentoListMovimentoListScreen,
+    ViewNotificacaoListNotificacaoListScreen,
+    ViewNapAbasinfoListScreen,
+    ViewNapColunasCadernoListScreen,
+    ViewNapColunasCadernoPrioritariaListScreen,
+    ViewNapColunasCompromissoListScreen,
+    ViewNapColunasEmailListScreen,
+    ViewNapColunasLigacaoListScreen,
+    ViewNapColunasPrioritarioListScreen,
+    ViewNapFormLigacaoNapListScreen,
+    ViewNapListGerirNapListScreen,
+    ViewNapListLigacaoNapListScreen,
+    ViewNapListLoteListScreen,
+    ViewOferecimentoComponenteCurricularColunasDiaAulaListScreen,
+    ViewOferecimentoComponenteCurricularColunasInfoOcorrenciaListScreen,
+    ViewOferecimentoComponenteCurricularColunasOferecimentoListScreen,
+    ViewOferecimentoComponenteCurricularDisponibilidadeOferecimentoListScreen,
+    ViewOferecimentoComponenteCurricularFormOferecimentoComponenteCurricularListScreen,
+    ViewOferecimentoComponenteCurricularFormOferecimentoCursoListScreen,
+    ViewOferecimentoComponenteCurricularListOferecimentoComponenteCurricularListScreen,
+    ViewOferecimentoComponenteCurricularListOferecimentoCursoListScreen,
+    ViewOperacionalFormOperacionalListScreen,
+    ViewOperacionalListOperacionalListScreen,
+    ViewPacoteListPacoteListScreen,
+    ViewPagamentoAberturacaixaListScreen,
+    ViewPagamentoCaixaentradaListScreen,
+    ViewPagamentoCaixasaidaListScreen,
+    ViewPagamentoCodigoVerificadorListScreen,
+    ViewPagamentoEfetuarPagamentoListScreen,
+    ViewPagamentoFechamentoCaixaWizardScreen,
+    ViewPagamentoMovimentocaixaListScreen,
+    ViewPagamentoProdutoListScreen,
+    ViewPaisFormPaisListScreen,
+    ViewPaisListPaisListScreen,
+    ViewPerfilColunasPerfilListScreen,
+    ViewPerfilColunasPerfilModuloListScreen,
+    ViewPerfilFormPerfilListScreen,
+    ViewPerfilListPerfilListScreen,
+    ViewPeriodoFormPeriodoListScreen,
+    ViewPeriodoListPeriodoListScreen,
+    ViewPessoaColunasListScreen,
+    ViewPessoaColunasExibirPessoaFisicaListScreen,
+    ViewPessoaColunasExibirPessoaJuridicaListScreen,
+    ViewPessoaColunasPessoaFisicaListScreen,
+    ViewPessoaColunasPessoaJuridicaListScreen,
+    ViewPessoaFormPessoaFisicaListScreen,
+    ViewPessoaFormPessoaJuridicaListScreen,
+    ViewPessoaFormPessoaPessoaFisicaListScreen,
+    ViewPessoaFormPessoaPessoaJuridicaListScreen,
+    ViewPessoaFormPessoaPessoaUsuarioListScreen,
+    ViewPessoaListDisponibilidadePessoaListScreen,
+    ViewPessoaListPessoaListScreen,
+    ViewPessoaListPessoaFisicaListScreen,
+    ViewPessoaListPessoaJuridicaListScreen,
+    ViewPessoaPessoaDocumentoListScreen,
+    ViewProdutoColunasListScreen,
+    ViewProdutoColunasProdutoCampoListScreen,
+    ViewProdutoFormProdutoListScreen,
+    ViewProdutoListConfiguracaoProdutoListScreen,
+    ViewProdutoListProdutoListScreen,
+    ViewProfessorColunasListScreen,
+    ViewProfessorColunasDisponibilidadeProfessorListScreen,
+    ViewProfessorFormProfessorListScreen,
+    ViewProfessorListProfessorListScreen,
+    ViewProspectoCadastroProspectoListScreen,
+    ViewProspectoControleProspectoListScreen,
+    ViewProspectoEditProspectoListScreen,
+    ViewProspectoListProspectoListScreen,
+    ViewProspectoProspectoRadarListScreen,
+    ViewReferenciaBibliograficaColunasReferenciaBibliograficaListScreen,
+    ViewReferenciaBibliograficaFormReferenciaBibliograficaListScreen,
+    ViewReferenciaBibliograficaListReferenciaBibliograficaListScreen,
+    ViewRegiaoFormRegiaoListScreen,
+    ViewRegiaoListRegiaoListScreen,
+    ViewRelatoriosColunasDashboardListScreen,
+    ViewRelatoriosColunasGraficoListScreen,
+    ViewRelatoriosColunasMapaListScreen,
+    ViewRelatoriosColunasOrganogramaListScreen,
+    ViewRelatoriosColunasTabelaListScreen,
+    ViewRelatoriosDocumentosListScreen,
+    ViewRelatoriosExtratorListScreen,
+    ViewRelatoriosFormDashboardListScreen,
+    ViewRelatoriosFormGraficoListScreen,
+    ViewRelatoriosFormMapaListScreen,
+    ViewRelatoriosFormOrganogramaListScreen,
+    ViewRelatoriosFormTabelaListScreen,
+    ViewRelatoriosListDashboardListScreen,
+    ListGraficoScreen,
+    ListMapaScreen,
+    ListTabelaScreen,
+    ViewRelatoriosListOrganogramaListScreen,
+    ViewRelatoriosViewDashboardListScreen,
+    ViewRelatoriosViewGraficoBarrasHorizontalListScreen,
+    ViewRelatoriosViewGraficoBarrasVerticalListScreen,
+    ViewRelatoriosViewGraficoCircularListScreen,
+    ViewRelatoriosViewGraficoCombinadoListScreen,
+    ViewRelatoriosViewGraficoLinhasListScreen,
+    ViewRelatoriosViewGraficoPizzaListScreen,
+    ViewRelatoriosViewMapaListScreen,
+    ViewRelatoriosViewOrganogramaListScreen,
+    ViewRelatoriosViewTabelaListScreen,
+    ViewResultadoColunasResultadoListScreen,
+    ViewResultadoFormResultadoListScreen,
+    ViewResultadoListResultadoListScreen,
+    ViewResultadoCobrancaColunasListScreen,
+    ViewResultadoCobrancaFormResultadoCobrancaListScreen,
+    ViewResultadoCobrancaListResultadoCobrancaListScreen,
+    ViewResultadoContatoFormResultadoContatoListScreen,
+    ViewResultadoContatoListResultadoContatoListScreen,
+    ViewResultadoLigacaoNapColunasListScreen,
+    ViewResultadoLigacaoNapFormResultadoLigacaoNapListScreen,
+    ViewResultadoLigacaoNapListResultadoLigacaoNapListScreen,
+    ViewSalaFormSalaListScreen,
+    ViewSalaListSalaListScreen,
+    ViewStatusCompromissoColunasStatusCompromissoListScreen,
+    ViewStatusCompromissoColunasStatusModulosListScreen,
+    ViewStatusCompromissoFormStatusCompromissoListScreen,
+    ViewStatusCompromissoListStatusCompromissoListScreen,
+    ViewSubCategoriaFormSubCategoriaListScreen,
+    ViewSubCategoriaListSubCategoriaListScreen,
+    ViewSubcategoriaEstoqueListSubCategoriaListScreen,
+    ViewTelefoneColunasTelefoneListScreen,
+    ViewTelefoneFormTelefoneListScreen,
+    ViewTelefoneListTelefoneListScreen,
+    ViewTempoAulaFormTempoAulaListScreen,
+    ViewTempoAulaListTempoAulaListScreen,
+    ViewTipoAcaoFormTipoAcaoListScreen,
+    ViewTipoAcaoListTipoAcaoListScreen,
+    ViewTipoAgendaFormTipoAgendaListScreen,
+    ViewTipoAgendaListTipoAgendaListScreen,
+    ViewTipoAtividadeFormTipoAtividadeListScreen,
+    ViewTipoAtividadeListTipoAtividadeListScreen,
+    ViewTipoCanalFormTipoCanalListScreen,
+    ViewTipoCanalListTipoCanalListScreen,
+    ViewTipoContratoFormTipoContratoListScreen,
+    ViewTipoContratoListTipoContratoListScreen,
+    ViewTipoCursoColunasListScreen,
+    ViewTipoCursoFormTipoCursoListScreen,
+    ViewTipoCursoListTipoCursoListScreen,
+    ViewTipoHistoricoFormTipoHistoricoListScreen,
+    ViewTipoHistoricoListTipoHistoricoListScreen,
+    ViewTipoPagamentoColunasTipoPagamentoListScreen,
+    ViewTipoPagamentoFormTipoPagamentoListScreen,
+    ViewTipoPagamentoListTipoPagamentoListScreen,
+    ViewTipoPausaFormTipoPausaListScreen,
+    ViewTipoPausaListTipoPausaListScreen,
+    ViewTipoSalaFormTipoSalaListScreen,
+    ViewTipoSalaListTipoSalaListScreen,
+    ViewTipoTelefoneFormTipoTelefoneListScreen,
+    ViewTipoTelefoneListTipoTelefoneListScreen,
+    ViewTipoUnidadeFormTipoUnidadeListScreen,
+    ViewTipoUnidadeListTipoUnidadeListScreen,
+    ViewTurmaColunasTurmaListScreen,
+    ViewTurmaFormAjusteCalendarioListScreen,
+    ViewTurmaListTurmaListScreen,
+    ViewTurmaListTurmaFinalizandoListScreen,
+    ViewTurmaRecriarCalendarioAcademicoListScreen,
+    ViewTurnoFormTurnoListScreen,
+    ViewTurnoListTurnoListScreen,
+    ViewTurnoEducacaoColunasTurnoEducacaoListScreen,
+    ViewTurnoEducacaoFormTurnoEducacaoListScreen,
+    ViewTurnoEducacaoListTurnoEducacaoListScreen,
+    ViewTurnoFuncionarioFormTurnoFuncionarioListScreen,
+    ViewTurnoFuncionarioListTurnoFuncionarioListScreen,
+    ViewTurnoTrabalhoColunasTurnoTrabalhoListScreen,
+    ViewTurnoTrabalhoFormTurnoTrabalhoListScreen,
+    ViewTurnoTrabalhoListTurnoTrabalhoListScreen,
+    ViewTurnoUsuarioListTurnoUsuarioListScreen,
+    ViewUnidadeColunasListScreen,
+    ViewUnidadeColunasRedeListScreen,
+    ViewUnidadeFormRedeListScreen,
+    ViewUnidadeFormUnidadeListScreen,
+    ViewUnidadeListRedeListScreen,
+    ViewUnidadeListUnidadeListScreen,
+    ViewUsuarioCamposUsuarioTabViewListScreen,
+    ViewUsuarioColunasUsuarioListScreen,
+    ViewUsuarioFormUsuarioListScreen,
+    ViewUsuarioFormUsuarioRapidoListScreen,
+    ViewUsuarioListUsuarioListScreen,
+    CadastroUsuarioScreen,
+    ViewValorCursoColunasDescontoListScreen,
+    ViewValorCursoColunasRetencoesListScreen,
+    ViewValorCursoColunasTaxaListScreen,
+    ViewValorCursoFormValorCursoListScreen,
+    ViewValorCursoListValorCursoListScreen,
+    ViewValorProdutoFormValorProdutoListScreen,
+    ViewValorProdutoListValorProdutoListScreen,
+    ViewTemaListTemasListScreen,
+    AlunoDashboardScreen,
+    AlunoBoletimScreen,
+    AlunoFrequenciaScreen,
+    AlunoFinanceiroScreen,
+    AlunoAulasScreen,
+    AlunoAvaliacoesScreen,
+    AlunoAvaliacaoResponderScreen,
+    AulaContratoScreen,
+    AulaOferecimentoScreen,
+    AulaOcorrenciaScreen,
+    AulaAulaScreen,
+    AulaAlunoScreen,
+    MeusDadosScreen,
+    IconesListScreen,
+    AsaasCobrancasListScreen,
+    AsaasClientesListScreen,
+    AsaasParcelasListScreen,
+    CurriculoVagaListScreen,
+    CurriculoEmpresaListScreen,
+    CurriculoEmpresaUnidadeListScreen,
+    CurriculoEntrevistaListScreen,
+    CurriculoTrabalhoListScreen,
+    CurriculoCampoListScreen,
+    CurriculoConfiguracaoListScreen,
+    AuditoriaScreen,
+    ViewConfiguracaoFinanceiraListConfiguracaoFinanceiraListScreen,
+    ViewConfiguracaoFinanceiraFormConfiguracaoFinanceiraListScreen,
+} from './screens';
+
+import './shared/styles/colors.css';
 
 const q = new QueryClient();
 createRoot(document.getElementById('root')!).render(<QueryClientProvider

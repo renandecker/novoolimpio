@@ -1,13 +1,13 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import {Wizard, useWizardData} from '../Wizard';
-import {useApi} from '../api';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import {Wizard, useWizardData} from '../../shared/components/Wizard';
+import {useApi} from '../../shared/services/api';
 
 const CONTRATO_COLUMNS: DataTableColumn[] = [
     {key: 'pessoaId', label: 'Pessoa'},
     {key: 'curriculoId', label: 'Curso'},
     {key: 'unidadeId', label: 'Unidade'},
-    {key: 'unidadeResponsavelId', label: 'Unidade Responsável'},
+    {key: 'unidadeResponsavelId', label: 'Unidade ResponsÃ¡vel'},
     {key: 'valorParcelas', label: 'Valor'},
     {key: 'ativo', label: 'Ativo'},
     {key: 'data', label: 'Data'},
@@ -19,7 +19,7 @@ const MATRICULA_COLUMNS: DataTableColumn[] = [
     {key: 'formaPagamentoId', label: 'Forma de Pagamento'},
     {key: 'status', label: 'Status'},
     {key: 'data', label: 'Data'},
-    {key: 'mediaFinal', label: 'Média Final'},
+    {key: 'mediaFinal', label: 'MÃ©dia Final'},
 ];
 
 const MATERIAL_COLUMNS: DataTableColumn[] = [
@@ -37,7 +37,7 @@ const VALORES_COLUMNS: DataTableColumn[] = [
     {key: 'juros', label: 'Juros'},
     {key: 'multa', label: 'Multa'},
     {key: 'descontoCarne', label: 'Desconto Carne'},
-    {key: 'cobraRematricula', label: 'Cobra Rematrícula'},
+    {key: 'cobraRematricula', label: 'Cobra RematrÃ­cula'},
 ];
 
 interface RematriculaData {
@@ -80,7 +80,7 @@ export default function ViewMatriculaFormRematriculaListScreen() {
 
     const validateStep2 = async (currentData: RematriculaData) => {
         if (!currentData.ofertasSelecionadas || currentData.ofertasSelecionadas.length === 0) {
-            return 'Selecione pelo menos um oferecimento para a rematrícula';
+            return 'Selecione pelo menos um oferecimento para a rematrÃ­cula';
         }
         return true;
     };
@@ -100,10 +100,10 @@ export default function ViewMatriculaFormRematriculaListScreen() {
                 materialEscolar: formData.materialEscolar,
                 valores: formData.valores,
             });
-            alert('Rematrícula realizada com sucesso!');
+            alert('RematrÃ­cula realizada com sucesso!');
         } catch (error) {
             console.error('Erro ao salvar:', error);
-            alert('Erro ao realizar rematrícula');
+            alert('Erro ao realizar rematrÃ­cula');
         }
     };
 
@@ -112,7 +112,7 @@ export default function ViewMatriculaFormRematriculaListScreen() {
             <main>
                 <h1>Form Rematricula</h1>
                 <div className="div_form">
-                    <div className="form-title">Rematrícula</div>
+                    <div className="form-title">RematrÃ­cula</div>
                     <div className="table_form">
                         <Wizard
                             initialData={data}
@@ -126,7 +126,7 @@ export default function ViewMatriculaFormRematriculaListScreen() {
                                 },
                                 {
                                     key: 'tabMatricula',
-                                    label: 'Matrícula/Rematrícula',
+                                    label: 'MatrÃ­cula/RematrÃ­cula',
                                     content: <DataTable path="/api/educacao/matricula" columns={MATRICULA_COLUMNS}/>,
                                     validate: validateStep2,
                                 },

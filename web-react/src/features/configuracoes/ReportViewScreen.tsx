@@ -1,10 +1,10 @@
-import {useState, useEffect} from 'react';
+﻿import {useState, useEffect} from 'react';
 import {useNavigate, useParams, useSearchParams, useLocation} from 'react-router-dom';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {api} from '../api';
-import {abrirRelatorio, type RelatorioAberto} from '../relatorios';
-import {usePermissions} from '../permissions';
-import {ExportButton} from '../ExportButton';
+import {api} from '../../shared/services/api';
+import {abrirRelatorio, type RelatorioAberto} from '../../features/relatorios/relatorios';
+import {usePermissions} from '../../shared/services/permissions';
+import {ExportButton} from '../../shared/components/ExportButton';
 import './ReportView.css';
 
 const reportTypes = ['TABELA', 'GRAFICO', 'MAPA', 'ORGANOGRAMA', 'DASHBOARD', 'PIZZA', 'LINHA', 'COMBINADO', 'CIRCULAR', 'BARRA_VERTICAL', 'BARRA_HORIZONTAL'] as const;
@@ -61,15 +61,15 @@ const isObject = (v: unknown): v is Record<string, unknown> =>
     typeof v === 'object' && v !== null && !Array.isArray(v);
 
 const valueFor = (value: unknown): string => {
-    if (value === null || value === undefined || value === '') return '—';
-    if (typeof value === 'boolean') return value ? 'Sim' : 'Não';
+    if (value === null || value === undefined || value === '') return 'â€”';
+    if (typeof value === 'boolean') return value ? 'Sim' : 'NÃ£o';
     if (value instanceof Date) return value.toLocaleDateString('pt-BR');
     if (Array.isArray(value)) return `${value.length} item(s)`;
     if (isObject(value)) {
         if ('nome' in value && typeof value.nome === 'string') return value.nome;
         if ('id' in value && typeof value.id === 'number') return `#${value.id}`;
         const keys = Object.keys(value);
-        return keys.length > 0 ? keys.join(', ') : '—';
+        return keys.length > 0 ? keys.join(', ') : 'â€”';
     }
     return String(value);
 }
@@ -143,11 +143,11 @@ export default function ReportViewScreen() {
     });
 
     if (!reportType || !Number.isInteger(reportId) || reportId <= 0) {
-        return <main><h1>Relatório inválido</h1></main>;
+        return <main><h1>RelatÃ³rio invÃ¡lido</h1></main>;
     }
-    if (report.isLoading) return <main><p>Carregando relatório...</p></main>;
-    if (report.isError || !report.data) return <main><h1>Relatório indisponível</h1><p>Você não possui acesso a este
-        relatório ou ele não existe.</p></main>;
+    if (report.isLoading) return <main><p>Carregando relatÃ³rio...</p></main>;
+    if (report.isError || !report.data) return <main><h1>RelatÃ³rio indisponÃ­vel</h1><p>VocÃª nÃ£o possui acesso a este
+        relatÃ³rio ou ele nÃ£o existe.</p></main>;
 
     const canEdit = can('UPDATE', managementOutcome);
     const canDelete = can('DELETE', managementOutcome);
@@ -181,7 +181,7 @@ export default function ReportViewScreen() {
                 />
             ) : (
                 <section className="report-view-content">
-                    <h2>Relatório</h2>
+                    <h2>RelatÃ³rio</h2>
                     {data.tipo === 'TABELA' && dataPage && (
                         <div className="report-result">
                             <div className="report-export-actions">
@@ -193,7 +193,7 @@ export default function ReportViewScreen() {
                                 />
                             </div>
                             {dataPage.colunas.length === 0 ?
-                                <p>Este relatório ainda não possui colunas configuradas.</p> : (
+                                <p>Este relatÃ³rio ainda nÃ£o possui colunas configuradas.</p> : (
                                     <>
                                         <table>
                                             <thead>
@@ -215,13 +215,13 @@ export default function ReportViewScreen() {
                                                 <button onClick={() => setPage((p) => Math.max(0, p - 1))}
                                                         disabled={page === 0}>Anterior
                                                 </button>
-                                                <span>Página {page + 1} de {dataPage.totalPages}</span>
+                                                <span>PÃ¡gina {page + 1} de {dataPage.totalPages}</span>
                                                 <button
                                                     onClick={() => setPage((p) => Math.min(dataPage.totalPages - 1, p + 1))}
-                                                    disabled={page >= dataPage.totalPages - 1}>Próxima
+                                                    disabled={page >= dataPage.totalPages - 1}>PrÃ³xima
                                                 </button>
                                                 <label>
-                                                    Registros por página
+                                                    Registros por pÃ¡gina
                                                     <select value={fetchLimit} onChange={(e) => {
                                                         setFetchLimit(Number(e.target.value));
                                                         setPage(0);
@@ -256,9 +256,9 @@ export default function ReportViewScreen() {
             {confirmingDelete && (
                 <div className="modal-overlay" onClick={() => setConfirmingDelete(false)}>
                     <div className="modal" onClick={(event) => event.stopPropagation()}>
-                        <h3>Excluir relatório</h3>
+                        <h3>Excluir relatÃ³rio</h3>
                         <p>Deseja excluir "{data.nome}"?</p>
-                        {remove.isError && <p>Não foi possível excluir o relatório.</p>}
+                        {remove.isError && <p>NÃ£o foi possÃ­vel excluir o relatÃ³rio.</p>}
                         <div className="modal-actions">
                             <button className="btnblue" onClick={() => setConfirmingDelete(false)}>Cancelar</button>
                             <button className="btn-danger" disabled={remove.isPending}
@@ -289,7 +289,7 @@ function ReportEditor({type, id, initial, onClose, onSaved}: { type: ReportType;
 
     return (
         <section className="report-view-content">
-            <h2>Editar relatório</h2>
+            <h2>Editar relatÃ³rio</h2>
             <form className="report-edit-form" onSubmit={(event) => {
                 event.preventDefault();
                 save.mutate();
@@ -315,7 +315,7 @@ function ReportEditor({type, id, initial, onClose, onSaved}: { type: ReportType;
                         )}
                     </label>
                 ))}
-                {save.isError && <p>Não foi possível salvar as alterações.</p>}
+                {save.isError && <p>NÃ£o foi possÃ­vel salvar as alteraÃ§Ãµes.</p>}
                 <div className="modal-actions">
                     <button type="button" className="btnblue" onClick={onClose}>Cancelar</button>
                     <button type="submit" className="btngreen" disabled={save.isPending}>Salvar</button>

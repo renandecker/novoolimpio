@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import type {ApiItem} from '../types';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../features/auth/types';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -16,8 +16,8 @@ const COLUMNS: DataTableColumn[] = [
     {key: 'nome', label: 'Nome'},
     {key: 'coordenada', label: 'Coordenada'},
     {key: 'zoom', label: 'Coordenada'},
-    {key: 'data_atualizacao', label: 'Data Atualização', render: (item) => formatDate(asRecord(item).data_atualizacao)},
-    {key: 'email_descricao', label: 'Configuração Email'},
+    {key: 'data_atualizacao', label: 'Data AtualizaÃ§Ã£o', render: (item) => formatDate(asRecord(item).data_atualizacao)},
+    {key: 'email_descricao', label: 'ConfiguraÃ§Ã£o Email'},
 ];
 
 export default function ViewEstruturaListEstruturaListScreen() {

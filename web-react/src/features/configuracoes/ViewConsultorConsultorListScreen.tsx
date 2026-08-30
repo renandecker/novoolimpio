@@ -1,14 +1,14 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import {Tabs} from '../Tabs';
-import {Wizard} from '../Wizard';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import {Tabs} from '../../shared/components/Tabs';
+import {Wizard} from '../../shared/components/Wizard';
 import {useState} from 'react';
-import {api} from '../api';
+import {api} from '../../shared/services/api';
 import ViewConsultorMatriculaLayoutScreen from './ViewConsultorMatriculaLayoutScreen';
 
 const CONSULTOR_COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID'},
-    {key: 'usuario_login', label: 'Usuário'},
+    {key: 'usuario_login', label: 'UsuÃ¡rio'},
     {key: 'usuario_pessoa_telefone', label: 'Telefone'},
     {key: 'usuario_pessoa_email', label: 'E-mail'},
     {key: 'usuario_pessoa_pessoaFisica_nome', label: 'Nome'},
@@ -50,7 +50,7 @@ const VALORES_COLUMNS: DataTableColumn[] = [
     {key: 'juros', label: 'Juros'},
     {key: 'multa', label: 'Multa'},
     {key: 'descontoCarne', label: 'Desconto Carne'},
-    {key: 'cobraRematricula', label: 'Cobra Rematrícula'},
+    {key: 'cobraRematricula', label: 'Cobra RematrÃ­cula'},
 ];
 
 type MenuItem = 1 | 2 | 3 | 4 | 5 | null;
@@ -77,19 +77,19 @@ export default function ViewConsultorConsultorListScreen() {
                                 className={`sidebar-btn ${menu === 2 ? 'active' : ''}`}
                                 onClick={() => setMenu(2)}
                             >
-                                <i className="fa fa-user-plus"/> Matrícula
+                                <i className="fa fa-user-plus"/> MatrÃ­cula
                             </button>
                             <button
                                 className={`sidebar-btn ${menu === 3 ? 'active' : ''}`}
                                 onClick={() => setMenu(3)}
                             >
-                                <i className="fa fa-hand-pointer-o"/> Indicação
+                                <i className="fa fa-hand-pointer-o"/> IndicaÃ§Ã£o
                             </button>
                             <button
                                 className={`sidebar-btn ${menu === 4 ? 'active' : ''}`}
                                 onClick={() => setMenu(4)}
                             >
-                                <i className="fa fa-refresh"/> Rematrícula
+                                <i className="fa fa-refresh"/> RematrÃ­cula
                             </button>
                             <button
                                 className={`sidebar-btn ${menu === 5 ? 'active' : ''}`}
@@ -123,7 +123,7 @@ export default function ViewConsultorConsultorListScreen() {
                             <TrocaCursoWizardScreen />
                         )}
                         {menu === null && (
-                            <div className="empty-state">Selecione uma opção no menu</div>
+                            <div className="empty-state">Selecione uma opÃ§Ã£o no menu</div>
                         )}
                     </section>
                 </div>
@@ -135,7 +135,7 @@ export default function ViewConsultorConsultorListScreen() {
 function CursosScreen() {
     return (
         <div className="consultor-panel">
-            <h3>Cursos Disponíveis</h3>
+            <h3>Cursos DisponÃ­veis</h3>
             <DataTable path="/api/educacao/curriculo" columns={[]} hideCreate={true} />
         </div>
     );
@@ -144,7 +144,7 @@ function CursosScreen() {
 function MatriculaWizardScreen() {
     return (
         <div className="consultor-panel">
-            <h3>Matrícula</h3>
+            <h3>MatrÃ­cula</h3>
             <Wizard
                 steps={[
                     {
@@ -157,14 +157,14 @@ function MatriculaWizardScreen() {
                         label: 'Curso / Pessoa',
                         content: (
                             <div className="wizard-step-content">
-                                <h4>Seleção de Aluno e Curso</h4>
+                                <h4>SeleÃ§Ã£o de Aluno e Curso</h4>
                                 <DataTable path="/api/educacao/matricula" columns={MATRICULA_COLUMNS} hideCreate={true} />
                             </div>
                         ),
                     },
                     {
                         key: 'matricula',
-                        label: 'Matrícula',
+                        label: 'MatrÃ­cula',
                         content: <DataTable path="/api/educacao/matricula" columns={MATRICULA_COLUMNS} hideCreate={true} />,
                     },
                     {
@@ -187,8 +187,8 @@ function MatriculaWizardScreen() {
 function IndicacaoScreen() {
     return (
         <div className="consultor-panel">
-            <h3>Indicação</h3>
-            <p>Funcionalidade de indicação</p>
+            <h3>IndicaÃ§Ã£o</h3>
+            <p>Funcionalidade de indicaÃ§Ã£o</p>
         </div>
     );
 }
@@ -196,7 +196,7 @@ function IndicacaoScreen() {
 function RematriculaWizardScreen() {
     return (
         <div className="consultor-panel">
-            <h3>Rematrícula</h3>
+            <h3>RematrÃ­cula</h3>
             <Wizard
                 steps={[
                     {
@@ -206,7 +206,7 @@ function RematriculaWizardScreen() {
                     },
                     {
                         key: 'matricula',
-                        label: 'Matrícula / Rematrícula',
+                        label: 'MatrÃ­cula / RematrÃ­cula',
                         content: <DataTable path="/api/educacao/matricula" columns={MATRICULA_COLUMNS} hideCreate={true} />,
                     },
                     {
@@ -239,7 +239,7 @@ function TrocaCursoWizardScreen() {
                     },
                     {
                         key: 'matricula',
-                        label: 'Matrícula / Rematrícula',
+                        label: 'MatrÃ­cula / RematrÃ­cula',
                         content: <DataTable path="/api/educacao/matricula" columns={MATRICULA_COLUMNS} hideCreate={true} />,
                     },
                     {

@@ -1,7 +1,7 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {PermissionGate} from '../permissions';
-import {api} from '../api';
+import {PermissionGate} from '../../shared/services/permissions';
+import {api} from '../../shared/services/api';
 
 const API = '/api/financeiro/etapas-cobranca';
 
@@ -22,7 +22,7 @@ type EtapaRow = {
 const TIPOS_DOCUMENTO = [
     {value: '0', label: 'WORD'},
     {value: '1', label: 'PDF'},
-    {value: '2', label: 'IMPRESSÃO'},
+    {value: '2', label: 'IMPRESSÃƒO'},
 ];
 
 function asBool(value: unknown): boolean {
@@ -70,17 +70,17 @@ export default function ViewEtapasCobrancaFormEtapasCobrancaListScreen() {
                 setLocalDocumento(String(row.localDocumento ?? ''));
                 setNomeDocumento(String(row.nomeDocumento ?? ''));
             })
-            .catch((e: any) => setError(e?.response?.data?.error ?? e?.message ?? 'Erro ao carregar Etapa de Cobrança.'))
+            .catch((e: any) => setError(e?.response?.data?.error ?? e?.message ?? 'Erro ao carregar Etapa de CobranÃ§a.'))
             .finally(() => setLoading(false));
     }, [editingId, isEdit]);
 
     const validate = (): string | null => {
         const d = descricao.trim();
-        if (!d) return 'Descrição é obrigatória.';
-        if (d.length < 3) return 'Descrição deve ter no mínimo 3 caracteres.';
-        if (d.length > 255) return 'Descrição deve ter no máximo 255 caracteres.';
+        if (!d) return 'DescriÃ§Ã£o Ã© obrigatÃ³ria.';
+        if (d.length < 3) return 'DescriÃ§Ã£o deve ter no mÃ­nimo 3 caracteres.';
+        if (d.length > 255) return 'DescriÃ§Ã£o deve ter no mÃ¡ximo 255 caracteres.';
         const o = ordem.trim();
-        if (!o) return 'Ordem é obrigatória.';
+        if (!o) return 'Ordem Ã© obrigatÃ³ria.';
         if (!/^\d+$/.test(o)) return 'Ordem deve ser um inteiro positivo.';
         if (Number(o) < 0) return 'Ordem deve ser um inteiro positivo.';
         return null;
@@ -110,10 +110,10 @@ export default function ViewEtapasCobrancaFormEtapasCobrancaListScreen() {
         try {
             if (isEdit) {
                 await api.put(`${API}/${editingId}`, payload);
-                setSuccess('Etapa de Cobrança atualizada com sucesso.');
+                setSuccess('Etapa de CobranÃ§a atualizada com sucesso.');
             } else {
                 await api.post(API, payload);
-                setSuccess('Etapa de Cobrança criada com sucesso.');
+                setSuccess('Etapa de CobranÃ§a criada com sucesso.');
             }
             if (continueSaving) {
                 if (!isEdit) {
@@ -138,7 +138,7 @@ export default function ViewEtapasCobrancaFormEtapasCobrancaListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <div className="page-header" style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12}}>
-                    <h1 style={{margin: 0}}>{isEdit ? `Editar Etapa de Cobrança #${editingId}` : 'Nova Etapa de Cobrança'}</h1>
+                    <h1 style={{margin: 0}}>{isEdit ? `Editar Etapa de CobranÃ§a #${editingId}` : 'Nova Etapa de CobranÃ§a'}</h1>
                     <button type="button" className="btnblue" onClick={() => navigate('/view/etapasCobranca/listEtapasCobranca')}>
                         Voltar
                     </button>
@@ -155,28 +155,28 @@ export default function ViewEtapasCobrancaFormEtapasCobrancaListScreen() {
                         <label htmlFor="inputId:id" className="form-label" style={{fontWeight: 600}}>Id</label>
                         <input id="inputId:id" className="form-input inputTiny" value={isEdit ? String(editingId) : ''} disabled placeholder="(novo)" style={{width: 90, background: '#f3f4f6'}}/>
 
-                        <label htmlFor="inputDescricao:descricao" className="form-label" style={{fontWeight: 600}}>Descrição <span style={{color: '#C90000'}}>*</span></label>
-                        <input id="inputDescricao:descricao" className="form-input inputLarge" value={descricao} onChange={(e) => setDescricao(e.target.value)} maxLength={255} placeholder="Ex.: Documento de cobrança" required/>
+                        <label htmlFor="inputDescricao:descricao" className="form-label" style={{fontWeight: 600}}>DescriÃ§Ã£o <span style={{color: '#C90000'}}>*</span></label>
+                        <input id="inputDescricao:descricao" className="form-input inputLarge" value={descricao} onChange={(e) => setDescricao(e.target.value)} maxLength={255} placeholder="Ex.: Documento de cobranÃ§a" required/>
 
                         <label htmlFor="inputOrdem:ordem" className="form-label" style={{fontWeight: 600}}>Ordem <span style={{color: '#C90000'}}>*</span></label>
                         <input id="inputOrdem:ordem" className="form-input inputTiny" value={ordem} onChange={(e) => handleOrdemChange(e.target.value)} inputMode="numeric" placeholder="Ex.: 1" style={{width: 120}} required/>
 
-                        <label className="form-label" style={{fontWeight: 600}}>Todos usuários</label>
+                        <label className="form-label" style={{fontWeight: 600}}>Todos usuÃ¡rios</label>
                         <label style={{display: 'flex', alignItems: 'center', gap: 8}}>
                             <input type="checkbox" checked={usuario} onChange={(e) => setUsuario(e.target.checked)}/>
-                            {usuario ? 'Sim' : 'Não'}
+                            {usuario ? 'Sim' : 'NÃ£o'}
                         </label>
 
                         <label className="form-label" style={{fontWeight: 600}}>Todos perfis</label>
                         <label style={{display: 'flex', alignItems: 'center', gap: 8}}>
                             <input type="checkbox" checked={perfil} onChange={(e) => setPerfil(e.target.checked)}/>
-                            {perfil ? 'Sim' : 'Não'}
+                            {perfil ? 'Sim' : 'NÃ£o'}
                         </label>
 
                         <label className="form-label" style={{fontWeight: 600}}>Customizado</label>
                         <label style={{display: 'flex', alignItems: 'center', gap: 8}}>
                             <input type="checkbox" checked={customizado} onChange={(e) => setCustomizado(e.target.checked)}/>
-                            {customizado ? 'Sim' : 'Não'}
+                            {customizado ? 'Sim' : 'NÃ£o'}
                         </label>
 
                         {customizado && (
@@ -184,7 +184,7 @@ export default function ViewEtapasCobrancaFormEtapasCobrancaListScreen() {
                                 <label htmlFor="inputcampoCustomizado" className="form-label" style={{fontWeight: 600, alignSelf: 'start', paddingTop: 6}}>Campo de regras (SQL)</label>
                                 <textarea id="inputcampoCustomizado" className="form-input" rows={5} value={campoCustomizado} onChange={(e) => setCampoCustomizado(e.target.value)} placeholder="SELECT ..."/>
 
-                                <label htmlFor="inputcampoDetalhes" className="form-label" style={{fontWeight: 600, alignSelf: 'start', paddingTop: 6}}>Descrição na coluna detalhes (SQL)</label>
+                                <label htmlFor="inputcampoDetalhes" className="form-label" style={{fontWeight: 600, alignSelf: 'start', paddingTop: 6}}>DescriÃ§Ã£o na coluna detalhes (SQL)</label>
                                 <textarea id="inputcampoDetalhes" className="form-input" rows={5} value={campoDetalhes} onChange={(e) => setCampoDetalhes(e.target.value)} placeholder="SELECT ..."/>
                             </>
                         )}
@@ -193,7 +193,7 @@ export default function ViewEtapasCobrancaFormEtapasCobrancaListScreen() {
                     <div style={{border: '1px solid #e5e7eb', borderRadius: 6, marginTop: 16, padding: 12}}>
                         <div className="form-title" style={{fontWeight: 600, marginBottom: 10}}>Documento</div>
                         <div style={{display: 'grid', gridTemplateColumns: '180px 1fr', gap: '12px 16px', alignItems: 'center'}}>
-                            <label className="form-label" style={{fontWeight: 600}}>Tipo de exportação</label>
+                            <label className="form-label" style={{fontWeight: 600}}>Tipo de exportaÃ§Ã£o</label>
                             <div style={{display: 'flex', gap: 16}}>
                                 {TIPOS_DOCUMENTO.map((tipo) => (
                                     <label key={tipo.value} style={{display: 'flex', alignItems: 'center', gap: 6}}>

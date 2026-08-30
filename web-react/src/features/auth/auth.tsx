@@ -1,6 +1,6 @@
-import {createContext, useContext, useEffect, useMemo, useState, type ReactNode} from 'react';
-import {api} from './api';
-import type {ModulePermissions} from './types';
+﻿import {createContext, useContext, useEffect, useMemo, useState, type ReactNode} from 'react';
+import {api} from '../../shared/services/api';
+import type {ModulePermissions} from '../../features/auth/types';
 
 type Module = { id: number; antecessorId: number | null; rotulo: string; descricao: string; icone: string; ajuda: string; outcome: string; ordem: number };
 type Session = { accessToken: string; expiresAt: number; username: string; permissions: string[]; modules: Module[]; modulePermissions?: ModulePermissions; nome?: string; email?: string; cpf?: string; foto?: string; defaultOutcome?: string; hierarquia?: string };

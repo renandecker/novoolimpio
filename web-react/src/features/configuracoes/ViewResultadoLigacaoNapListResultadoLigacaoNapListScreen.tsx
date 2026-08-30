@@ -1,7 +1,7 @@
-import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
-import type {DataTableColumn} from '../DataTable';
-import type {ApiItem} from '../types';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {ModuleTabs} from '../../shared/components/ModuleTabs';
+import type {DataTableColumn} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../features/auth/types';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -15,7 +15,7 @@ const renderTela = (item: ApiItem) => {
 };
 
 const COLUMNS: DataTableColumn[] = [
-    {key: 'descricao', label: 'Descrição'},
+    {key: 'descricao', label: 'DescriÃ§Ã£o'},
     {key: 'tela', label: 'Tela', render: renderTela},
     {key: 'dias_retorno', label: 'Dias Retorno'},
     {key: 'ordem', label: 'Ordem'},
@@ -30,15 +30,15 @@ export default function ViewResultadoLigacaoNapListResultadoLigacaoNapListScreen
                     tabs={[
                         {
                             key: 'historicoDeLigacoes',
-                            label: 'Histórico de Ligações',
+                            label: 'HistÃ³rico de LigaÃ§Ãµes',
                             path: '/api/view/resultadoLigacaoNap/listResultadoLigacaoNap',
                             columns: COLUMNS,
                             maxMainColumns: COLUMNS.length,
                         },
                         {
                             key: 'retornoDeLigacoes',
-                            label: 'Retorno de Ligações',
-                            empty: 'Conteúdo de Retorno de Ligações.'
+                            label: 'Retorno de LigaÃ§Ãµes',
+                            empty: 'ConteÃºdo de Retorno de LigaÃ§Ãµes.'
                         },
                     ]}
                 />

@@ -1,8 +1,8 @@
-import {useState} from 'react';
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import {MasterDetail} from '../MasterDetail';
-import {Wizard, useWizardData} from '../Wizard';
+﻿import {useState} from 'react';
+import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import {MasterDetail} from '../../shared/components/MasterDetail';
+import {Wizard, useWizardData} from '../../shared/components/Wizard';
 import {
     USUARIO_SOURCE,
     USUARIO_COLUMNS,
@@ -13,13 +13,13 @@ import {
     TURNO_TRABALHO_SOURCE,
     TURNO_TRABALHO_COLUMNS,
     TURNO_TRABALHO_SEARCH,
-} from '../masterDetailSources';
-import type {ApiItem} from '../types';
-import {useApi} from '../api';
+} from '../../shared/services/masterDetailSources';
+import type {ApiItem} from '../../features/auth/types';
+import {useApi} from '../../shared/services/api';
 
 const CONSULTOR_COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID do Consultor'},
-    {key: 'usuarioId', label: 'Consultor/Usuário'},
+    {key: 'usuarioId', label: 'Consultor/UsuÃ¡rio'},
 ];
 
 interface ConsultorData {

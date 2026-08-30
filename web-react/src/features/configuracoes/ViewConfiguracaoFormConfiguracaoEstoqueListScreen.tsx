@@ -1,5 +1,5 @@
-import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {ModuleTabs} from '../../shared/components/ModuleTabs';
 
 export default function ViewConfiguracaoFormConfiguracaoEstoqueListScreen() {
     return (
@@ -9,7 +9,7 @@ export default function ViewConfiguracaoFormConfiguracaoEstoqueListScreen() {
                 <ModuleTabs
                     tabs={[
                         {key: 'campos', label: 'Campos', path: '/api/view/configuracao/formConfiguracaoEstoque'},
-                        {key: 'configuracoes', label: 'Configurações', empty: 'Conteúdo de Configurações.'},
+                        {key: 'configuracoes', label: 'ConfiguraÃ§Ãµes', empty: 'ConteÃºdo de ConfiguraÃ§Ãµes.'},
                     ]}
                 />
             </main>

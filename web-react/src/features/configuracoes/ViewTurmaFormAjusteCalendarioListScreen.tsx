@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {DataTable} from '../DataTable';
-import {Wizard} from '../Wizard';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable} from '../../shared/components/DataTable';
+import {Wizard} from '../../shared/components/Wizard';
 
 export default function ViewTurmaFormAjusteCalendarioListScreen() {
     return (
@@ -8,7 +8,7 @@ export default function ViewTurmaFormAjusteCalendarioListScreen() {
             <main>
                 <h1>Form Ajuste Calendario</h1>
                 <div className="div_form">
-                    <div className="form-title">Ajuste de Calendário</div>
+                    <div className="form-title">Ajuste de CalendÃ¡rio</div>
                     <div className="table_form">
                         <Wizard
                             steps={[
@@ -17,7 +17,7 @@ export default function ViewTurmaFormAjusteCalendarioListScreen() {
                                     label: 'Turma',
                                     content: (
                                         <>
-                                            <p className="master-detail-empty">Selecione a turma que terá o calendário
+                                            <p className="master-detail-empty">Selecione a turma que terÃ¡ o calendÃ¡rio
                                                 ajustado.</p>
                                             <DataTable path="/api/view/turma/formAjusteCalendario"/>
                                         </>
@@ -26,15 +26,15 @@ export default function ViewTurmaFormAjusteCalendarioListScreen() {
                                 {
                                     key: 'ajuste',
                                     label: 'Ajuste',
-                                    content: <p className="master-detail-empty">Informe os ajustes de dias e horários de
+                                    content: <p className="master-detail-empty">Informe os ajustes de dias e horÃ¡rios de
                                         aula.</p>,
                                 },
                                 {
                                     key: 'confirmacao',
-                                    label: 'Confirmação',
+                                    label: 'ConfirmaÃ§Ã£o',
                                     nextLabel: 'Aplicar',
                                     content: <p className="master-detail-empty">Revise e aplique o ajuste de
-                                        calendário.</p>,
+                                        calendÃ¡rio.</p>,
                                 },
                             ]}
                         />

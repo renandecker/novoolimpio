@@ -1,7 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 import {useNavigate} from 'react-router-dom';
-import {PermissionGate} from '../permissions';
-import {DataTable, DataTableRowAction} from '../DataTable';
+import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, DataTableRowAction} from '../../shared/components/DataTable';
 
 export default function ListGraficoScreen() {
     const navigate = useNavigate();
@@ -9,7 +9,7 @@ export default function ListGraficoScreen() {
     const extraRowActions: DataTableRowAction[] = [
         {
             key: 'acessar',
-            title: 'Acessar Relatório',
+            title: 'Acessar RelatÃ³rio',
             icon: <i className="fa fa-external-link" />,
             permission: 'EXECUTE',
             onClick: (item) => {
@@ -21,7 +21,7 @@ export default function ListGraficoScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>Relatórios - Gráfico</h1>
+                <h1>RelatÃ³rios - GrÃ¡fico</h1>
                 <DataTable
                     path="/api/relatorios/grafico"
                     extraRowActions={extraRowActions}

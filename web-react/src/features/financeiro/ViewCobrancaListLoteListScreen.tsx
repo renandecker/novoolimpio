@@ -1,9 +1,9 @@
-import {useState} from 'react';
+﻿import {useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {api} from '../api';
-import {PermissionGate} from '../permissions';
-import {Tabs} from '../Tabs';
-import {LoteEmailModal, LoteLigacaoModal, SITUACOES_COBRANCA} from '../LoteModals';
+import {api} from '../../shared/services/api';
+import {PermissionGate} from '../../shared/services/permissions';
+import {Tabs} from '../../shared/components/Tabs';
+import {LoteEmailModal, LoteLigacaoModal, SITUACOES_COBRANCA} from '../../shared/components/LoteModals';
 
 interface EtapaCobranca {
     id: number;

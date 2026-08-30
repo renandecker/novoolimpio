@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import type {ApiItem} from '../types';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../features/auth/types';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -14,7 +14,7 @@ const renderTela = (item: ApiItem) => {
 };
 
 const COLUMNS: DataTableColumn[] = [
-    {key: 'descricao', label: 'Descrição'},
+    {key: 'descricao', label: 'DescriÃ§Ã£o'},
     {key: 'tela', label: 'Tela', render: renderTela},
     {key: 'dias_retorno', label: 'Dias Retorno'},
     {key: 'ordem', label: 'Ordem'},

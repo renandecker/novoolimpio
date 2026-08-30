@@ -1,4 +1,4 @@
-import {useMemo, useState} from 'react';
+﻿import {useMemo, useState} from 'react';
 import type {ReactNode} from 'react';
 import {LISTA_ICONES, escopoPorClasse, type Icone} from './icones';
 import './IconPicker.css';

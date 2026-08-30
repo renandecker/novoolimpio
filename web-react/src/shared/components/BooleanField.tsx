@@ -1,4 +1,4 @@
-interface BooleanFieldProps {
+﻿interface BooleanFieldProps {
     value: boolean;
     onChange: (value: boolean) => void;
     onText?: string;

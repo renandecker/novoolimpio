@@ -1,4 +1,4 @@
-import {useRef} from 'react';
+﻿import {useRef} from 'react';
 
 interface Base64FileUploadProps {
     value: string;

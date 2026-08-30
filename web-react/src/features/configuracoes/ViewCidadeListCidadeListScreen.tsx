@@ -1,11 +1,11 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
 
 const COLUMNS: DataTableColumn[] = [
     {key: 'nome', label: 'Nome'},
     {key: 'estado_descricao', label: 'Estado'},
-    {key: 'praca', label: 'Praça'},
-    {key: 'area', label: 'Área'},
+    {key: 'praca', label: 'PraÃ§a'},
+    {key: 'area', label: 'Ãrea'},
     {key: 'cod_ibge', label: 'IBGE'},
 ];
 

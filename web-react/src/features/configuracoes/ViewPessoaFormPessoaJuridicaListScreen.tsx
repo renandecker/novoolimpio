@@ -1,15 +1,15 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {PermissionGate} from '../permissions';
-import {Tabs} from '../Tabs';
-import type {TabItem} from '../Tabs';
-import {MasterDetail} from '../MasterDetail';
-import {BooleanField} from '../BooleanField';
-import type {ApiItem} from '../types';
-import {api} from '../api';
-import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../masterDetailSources';
-import {EnderecoCampos} from '../EnderecoForm';
-import type {Endereco} from '../EnderecoForm';
+import {PermissionGate} from '../../shared/services/permissions';
+import {Tabs} from '../../shared/components/Tabs';
+import type {TabItem} from '../../shared/components/Tabs';
+import {MasterDetail} from '../../shared/components/MasterDetail';
+import {BooleanField} from '../../shared/components/BooleanField';
+import type {ApiItem} from '../../features/auth/types';
+import {api} from '../../shared/services/api';
+import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../../shared/services/masterDetailSources';
+import {EnderecoCampos} from '../../shared/components/EnderecoForm';
+import type {Endereco} from '../../shared/components/EnderecoForm';
 import {useQuery} from '@tanstack/react-query';
 
 interface FormState {
@@ -155,7 +155,7 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
                     }
                 }
             } catch (erro) {
-                console.error('Erro ao carregar pessoa jurídica:', erro);
+                console.error('Erro ao carregar pessoa jurÃ­dica:', erro);
                 alert('Erro ao carregar registro.');
             }
         })();
@@ -170,7 +170,7 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
 
     const salvar = async (voltarDepois: boolean) => {
         if (!form.razaoSocial.trim() || !form.cnpj.trim()) {
-            alert('Informe pelo menos Razão Social e CNPJ.');
+            alert('Informe pelo menos RazÃ£o Social e CNPJ.');
             return;
         }
         setSalvando(true);
@@ -225,7 +225,7 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
     const tabs: TabItem[] = [
         {
             key: 'identificacao',
-            label: 'Identificação',
+            label: 'IdentificaÃ§Ã£o',
             content: (
                 <div className="form-grid">
                     <label className="form-field">
@@ -234,8 +234,8 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
                                onChange={(e) => set('cnpj', e.target.value)}/>
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Razão Social *</span>
-                        <input className="form-input" placeholder="Razão Social" style={{gridColumn: 'span 3'}}
+                        <span className="form-label">RazÃ£o Social *</span>
+                        <input className="form-input" placeholder="RazÃ£o Social" style={{gridColumn: 'span 3'}}
                                value={form.razaoSocial} onChange={(e) => set('razaoSocial', e.target.value)}/>
                     </label>
                     <label className="form-field">
@@ -248,17 +248,17 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
         },
         {
             key: 'informacoesBasicas',
-            label: 'Informações Básicas',
+            label: 'InformaÃ§Ãµes BÃ¡sicas',
             content: (
                 <div className="form-grid">
                     <label className="form-field">
-                        <span className="form-label">Inscrição Municipal</span>
-                        <input className="form-input" placeholder="Inscrição Municipal"
+                        <span className="form-label">InscriÃ§Ã£o Municipal</span>
+                        <input className="form-input" placeholder="InscriÃ§Ã£o Municipal"
                                value={form.inscricaoMunicipal} onChange={(e) => set('inscricaoMunicipal', e.target.value)}/>
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Inscrição Estadual</span>
-                        <input className="form-input" placeholder="Inscrição Estadual"
+                        <span className="form-label">InscriÃ§Ã£o Estadual</span>
+                        <input className="form-input" placeholder="InscriÃ§Ã£o Estadual"
                                value={form.inscricaoEstadual} onChange={(e) => set('inscricaoEstadual', e.target.value)}/>
                     </label>
                     <label className="form-field">
@@ -303,7 +303,7 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
         },
         {
             key: 'endereco',
-            label: 'Endereço',
+            label: 'EndereÃ§o',
             content: (
                 <div className="form-grid">
                     <EnderecoCampos value={enderecos} onChange={setEnderecos}/>
@@ -331,12 +331,12 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
             content: (
                 <div className="form-grid">
                     <label className="form-field">
-                        <span className="form-label">Currículo / Banco de Talentos</span>
+                        <span className="form-label">CurrÃ­culo / Banco de Talentos</span>
                         <BooleanField value={curriculo} onChange={setCurriculo}/>
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Observação</span>
-                        <textarea className="form-input" placeholder="Observações" rows={5}
+                        <span className="form-label">ObservaÃ§Ã£o</span>
+                        <textarea className="form-input" placeholder="ObservaÃ§Ãµes" rows={5}
                                   style={{gridColumn: 'span 3', minHeight: '100px'}} value={form.observacao}
                                   onChange={(e) => set('observacao', e.target.value)}/>
                     </label>
@@ -348,9 +348,9 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>Cadastro de Pessoa Jurídica</h1>
+                <h1>Cadastro de Pessoa JurÃ­dica</h1>
                 <div className="div_form">
-                    <div className="form-title">{pjId ? `Pessoa Jurídica #${pjId}` : 'Pessoa Jurídica'}</div>
+                    <div className="form-title">{pjId ? `Pessoa JurÃ­dica #${pjId}` : 'Pessoa JurÃ­dica'}</div>
                     <div className="table_form">
                         <Tabs tabs={tabs} initial="identificacao"/>
                         <div className="form-buttons">

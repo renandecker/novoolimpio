@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { PermissionGate } from '../permissions';
-import { api } from '../api';
-import { useAuth } from '../auth';
-import { AutoComplete, type AutoCompleteOption } from '../AutoComplete';
+import { PermissionGate } from '../../shared/services/permissions';
+import { api } from '../../shared/services/api';
+import { useAuth } from '../../features/auth/auth';
+import { AutoComplete, type AutoCompleteOption } from '../../shared/components/AutoComplete';
 
 type CoordenadorRow = {
     id: number;
@@ -190,9 +190,9 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
         if (!selOperador || !selOperador2) { setNotice('Selecione Do e Para operador'); return; }
         try {
             await api.post('/api/central/coordenador/troca-prioritaria', null, { params: { de: selOperador.id, para: selOperador2.id } });
-            setNotice(`Fila prioritária transferida de ${selOperador.label} para ${selOperador2.label}`);
+            setNotice(`Fila prioritÃ¡ria transferida de ${selOperador.label} para ${selOperador2.label}`);
             setModal(null);
-        } catch (e: unknown) { const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? (e as Error).message; setNotice(`Erro troca prioritária: ${msg}`); }
+        } catch (e: unknown) { const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? (e as Error).message; setNotice(`Erro troca prioritÃ¡ria: ${msg}`); }
     };
     const handleRedistribuir = async () => {
         const opId = selOperador?.id ?? modalOperador?.id;
@@ -200,7 +200,7 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
         if (!opId) { setNotice('Selecione o operador'); return; }
         try {
             await api.post(`/api/central/coordenador/${opId}/redistribuir`);
-            setNotice(`Fila redistribuída para operador ${opLabel}`);
+            setNotice(`Fila redistribuÃ­da para operador ${opLabel}`);
             setModal(null);
         } catch (e: unknown) { const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? (e as Error).message; setNotice(`Erro redistribuir: ${msg}`); }
     };
@@ -228,14 +228,14 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
                 <h1 style={{ margin: '8px 0 12px', fontSize: 22 }}>Coordenador</h1>
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12, alignItems: 'center' }}>
-                    <button className="btnblue" onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('prioritariaCoord'); }} title="Detalhe Fila Prioritária" style={{ background: '#1976d2', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>★ Fila Prioritária</button>
-                    <button className="btnstop" onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('ligacaoCoord'); }} title="Detalhe Ligações" style={{ background: '#37474f', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>☎ Ligação</button>
-                    <button onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('ordem'); }} style={{ background: '#8d6e63', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>☰ Fila Pendente</button>
-                    <button onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('pausaCoord'); }} title="Detalhe Pausa" style={{ background: '#c62828', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>⏸ Pausa</button>
-                    <button onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('agend'); }} style={{ background: '#2e7d32', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>📅 Agendados</button>
-                    <button onClick={() => setModal('trocaLig')} style={{ background: '#f9a825', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>⇄ Redistribuir ligação</button>
-                    <button onClick={() => setModal('trocaPri')} style={{ background: '#212121', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>⇄ Troca prioritária</button>
-                    <button onClick={() => setShowFiltros(v => !v)} style={{ marginLeft: 'auto', background: '#607d8b', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>🔍 Filtros</button>
+                    <button className="btnblue" onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('prioritariaCoord'); }} title="Detalhe Fila PrioritÃ¡ria" style={{ background: '#1976d2', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>â˜… Fila PrioritÃ¡ria</button>
+                    <button className="btnstop" onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('ligacaoCoord'); }} title="Detalhe LigaÃ§Ãµes" style={{ background: '#37474f', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>â˜Ž LigaÃ§Ã£o</button>
+                    <button onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('ordem'); }} style={{ background: '#8d6e63', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>â˜° Fila Pendente</button>
+                    <button onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('pausaCoord'); }} title="Detalhe Pausa" style={{ background: '#c62828', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>â¸ Pausa</button>
+                    <button onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('agend'); }} style={{ background: '#2e7d32', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>ðŸ“… Agendados</button>
+                    <button onClick={() => setModal('trocaLig')} style={{ background: '#f9a825', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>â‡„ Redistribuir ligaÃ§Ã£o</button>
+                    <button onClick={() => setModal('trocaPri')} style={{ background: '#212121', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>â‡„ Troca prioritÃ¡ria</button>
+                    <button onClick={() => setShowFiltros(v => !v)} style={{ marginLeft: 'auto', background: '#607d8b', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>ðŸ” Filtros</button>
                 </div>
 
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
@@ -254,9 +254,9 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
                             <label>Data<input type="date" value={filtros.data} onChange={e => setFiltros(s => ({ ...s, data: e.target.value }))} style={{ width: '100%', padding: 6, borderRadius: 4, border: '1px solid #ccc' }} /></label>
                         </div>
                         <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                            <button onClick={() => { setPage(0); q.refetch(); }} style={{ padding: '6px 14px', background: '#1976d2', color: '#fff', border: 0, borderRadius: 4 }}>🔍 Pesquisar</button>
-                            <button onClick={() => { setFiltros({ operadorLogin: '', coordenadorLogin: '', data: '' }); setPage(0); }} style={{ padding: '6px 14px', background: '#ef6c00', color: '#fff', border: 0, borderRadius: 4 }}>✕ Limpar</button>
-                            <span style={{ marginLeft: 'auto', fontSize: 12, color: '#777', alignSelf: 'center' }}>Total: {totalElements} • Página {page + 1} de {totalPages}</span>
+                            <button onClick={() => { setPage(0); q.refetch(); }} style={{ padding: '6px 14px', background: '#1976d2', color: '#fff', border: 0, borderRadius: 4 }}>ðŸ” Pesquisar</button>
+                            <button onClick={() => { setFiltros({ operadorLogin: '', coordenadorLogin: '', data: '' }); setPage(0); }} style={{ padding: '6px 14px', background: '#ef6c00', color: '#fff', border: 0, borderRadius: 4 }}>âœ• Limpar</button>
+                            <span style={{ marginLeft: 'auto', fontSize: 12, color: '#777', alignSelf: 'center' }}>Total: {totalElements} â€¢ PÃ¡gina {page + 1} de {totalPages}</span>
                         </div>
                     </div>
                 )}
@@ -273,11 +273,11 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
                                 <th style={{ padding: '8px 10px' }}>Turno</th>
                                 <th style={{ padding: '8px 10px' }}>Meta</th>
                                 <th style={{ padding: '8px 10px' }}>Agendado</th>
-                                <th style={{ padding: '8px 10px' }}>Ligação</th>
+                                <th style={{ padding: '8px 10px' }}>LigaÃ§Ã£o</th>
                                 <th style={{ padding: '8px 10px' }}>Pausa</th>
-                                <th style={{ padding: '8px 10px' }}>Fila Prioritária</th>
-                                <th style={{ padding: '8px 10px' }}>Situação</th>
-                                <th style={{ padding: '8px 10px', minWidth: 200 }}>Ações</th>
+                                <th style={{ padding: '8px 10px' }}>Fila PrioritÃ¡ria</th>
+                                <th style={{ padding: '8px 10px' }}>SituaÃ§Ã£o</th>
+                                <th style={{ padding: '8px 10px', minWidth: 200 }}>AÃ§Ãµes</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -292,20 +292,20 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
                                         {isAdmin && <td style={{ padding: '8px 10px', whiteSpace: 'nowrap' }}>{row.coordenador_login}</td>}
                                         <td style={{ padding: '8px 10px', whiteSpace: 'nowrap' }} title={row.operador_descricao}>{row.operador_login}</td>
                                         <td style={{ padding: '8px 10px', textAlign: 'center' }}>{formatDate(row.data)}</td>
-                                        <td style={{ padding: '8px 10px', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={en.turno}>{en.turno || '—'}</td>
+                                        <td style={{ padding: '8px 10px', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={en.turno}>{en.turno || 'â€”'}</td>
                                         <td style={{ padding: '8px 10px', textAlign: 'center' }}>{row.meta ?? 0}</td>
                                         <td style={{ padding: '8px 10px', textAlign: 'center' }}>{row.agendado ?? 0}</td>
                                         <td style={{ padding: '8px 10px', textAlign: 'center' }}>{row.ligacao ?? 0}</td>
                                         <td style={{ padding: '8px 10px', textAlign: 'center' }}>{row.pausa ?? 0}</td>
                                         <td style={{ padding: '8px 10px', textAlign: 'center' }}>{row.prioritario ?? 0}</td>
-                                        <td style={{ padding: '8px 10px', textAlign: 'center' }}><span style={{ padding: '2px 6px', borderRadius: 10, fontSize: 11, background: en.situacao === 'Pausa' ? '#ffebee' : en.situacao === 'Acessando' ? '#e8f5e9' : en.situacao === 'Ausente' ? '#f5f5f5' : '#fff3e0', border: '1px solid #e0e0e0' }}>{en.situacao || '—'}</span></td>
+                                        <td style={{ padding: '8px 10px', textAlign: 'center' }}><span style={{ padding: '2px 6px', borderRadius: 10, fontSize: 11, background: en.situacao === 'Pausa' ? '#ffebee' : en.situacao === 'Acessando' ? '#e8f5e9' : en.situacao === 'Ausente' ? '#f5f5f5' : '#fff3e0', border: '1px solid #e0e0e0' }}>{en.situacao || 'â€”'}</span></td>
                                         <td style={{ padding: '6px 8px', display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                                            <button title="Resultados" onClick={() => handlePie(row)} style={{ background: '#7b1fa2', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px', cursor: 'pointer' }}>◉</button>
-                                            <button title="Fila Prioritária" onClick={() => { setModalOperador({ id: row.id_operador, login: row.operador_login }); setModal('prioritaria'); setModalOperadorOpt({ id: row.id_operador, label: row.operador_login }); }} style={{ background: '#1976d2', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}>★</button>
-                                            <button title="Ligações" onClick={() => { setModalOperador({ id: row.id_operador, login: row.operador_login }); setModal('ligacao'); setModalOperadorOpt({ id: row.id_operador, label: row.operador_login }); }} style={{ background: '#37474f', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}>☎</button>
-                                            <button title="Pausa" onClick={() => { setModalOperador({ id: row.id_operador, login: row.operador_login }); setModal('pausa'); setModalOperadorOpt({ id: row.id_operador, label: row.operador_login }); }} style={{ background: '#c62828', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}>⏸</button>
-                                            <button title="Agendamentos" onClick={() => { setModalOperador({ id: row.id_operador, login: row.operador_login }); setModal('agend'); setModalOperadorOpt({ id: row.id_operador, label: row.operador_login }); }} style={{ background: '#2e7d32', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}>📅</button>
-                                            <button title={en.situacao === 'Pausa' ? 'Despausar' : 'Pausar'} onClick={() => en.situacao === 'Pausa' ? handleDespausar(row) : handlePausar(row)} style={{ background: en.situacao === 'Pausa' ? '#1976d2' : '#c62828', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}>{en.situacao === 'Pausa' ? '▶' : '⏸'}</button>
+                                            <button title="Resultados" onClick={() => handlePie(row)} style={{ background: '#7b1fa2', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px', cursor: 'pointer' }}>â—‰</button>
+                                            <button title="Fila PrioritÃ¡ria" onClick={() => { setModalOperador({ id: row.id_operador, login: row.operador_login }); setModal('prioritaria'); setModalOperadorOpt({ id: row.id_operador, label: row.operador_login }); }} style={{ background: '#1976d2', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}>â˜…</button>
+                                            <button title="LigaÃ§Ãµes" onClick={() => { setModalOperador({ id: row.id_operador, login: row.operador_login }); setModal('ligacao'); setModalOperadorOpt({ id: row.id_operador, label: row.operador_login }); }} style={{ background: '#37474f', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}>â˜Ž</button>
+                                            <button title="Pausa" onClick={() => { setModalOperador({ id: row.id_operador, login: row.operador_login }); setModal('pausa'); setModalOperadorOpt({ id: row.id_operador, label: row.operador_login }); }} style={{ background: '#c62828', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}>â¸</button>
+                                            <button title="Agendamentos" onClick={() => { setModalOperador({ id: row.id_operador, login: row.operador_login }); setModal('agend'); setModalOperadorOpt({ id: row.id_operador, label: row.operador_login }); }} style={{ background: '#2e7d32', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}>ðŸ“…</button>
+                                            <button title={en.situacao === 'Pausa' ? 'Despausar' : 'Pausar'} onClick={() => en.situacao === 'Pausa' ? handleDespausar(row) : handlePausar(row)} style={{ background: en.situacao === 'Pausa' ? '#1976d2' : '#c62828', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}>{en.situacao === 'Pausa' ? 'â–¶' : 'â¸'}</button>
                                         </td>
                                     </tr>
                                 );
@@ -316,9 +316,9 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
 
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 10, flexWrap: 'wrap' }}>
                     <button disabled={page === 0} onClick={() => setPage(p => Math.max(0, p - 1))} style={{ padding: '6px 10px' }}>Anterior</button>
-                    <span style={{ fontSize: 13 }}>Página {page + 1} de {Math.max(1, totalPages)} • Total {totalElements}</span>
-                    <button disabled={page >= totalPages - 1} onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} style={{ padding: '6px 10px' }}>Próxima</button>
-                    <label style={{ marginLeft: 'auto', fontSize: 13 }}>Registros por página
+                    <span style={{ fontSize: 13 }}>PÃ¡gina {page + 1} de {Math.max(1, totalPages)} â€¢ Total {totalElements}</span>
+                    <button disabled={page >= totalPages - 1} onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} style={{ padding: '6px 10px' }}>PrÃ³xima</button>
+                    <label style={{ marginLeft: 'auto', fontSize: 13 }}>Registros por pÃ¡gina
                         <select value={size} onChange={e => { setSize(Number(e.target.value)); setPage(0); }} style={{ marginLeft: 6, padding: 4 }}>
                             {PAGE_SIZES.map(n => <option key={n} value={n}>{n}</option>)}
                         </select>
@@ -328,7 +328,7 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
                 {modal === 'pie' && (
                     <div className="modal-overlay" onClick={() => setModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
                         <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 8, padding: 16, minWidth: 360, maxWidth: 600 }}>
-                            <h3 style={{ margin: '0 0 10px' }}>Ligações de {modalOperador?.login}</h3>
+                            <h3 style={{ margin: '0 0 10px' }}>LigaÃ§Ãµes de {modalOperador?.login}</h3>
                             {!pieData ? <p>Carregando...</p> : (
                                 <div style={{ display: 'grid', gap: 6 }}>
                                     {Object.entries(pieData).filter(([k]) => k !== 'total').map(([k, v]) => (
@@ -343,7 +343,7 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
                 )}
 
                 {(modal === 'ligacao' || modal === 'ligacaoCoord') && (
-                    <DetailModal title={`Detalhes da ligação - ${modalOperador?.login ?? ''}`} onClose={() => setModal(null)}>
+                    <DetailModal title={`Detalhes da ligaÃ§Ã£o - ${modalOperador?.login ?? ''}`} onClose={() => setModal(null)}>
                         {modal === 'ligacaoCoord' && (
                             <div style={{ marginBottom: 10 }}>
                                 <AutoComplete value={modalOperadorOpt} onChange={syncModalOptToId} fetchOptions={fetchOperador} placeholder="Selecionar operador" />
@@ -368,7 +368,7 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
                                     ))}
                             </tbody>
                         </table>
-                        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}><button disabled={detailPage === 0} onClick={() => setDetailPage(p => Math.max(0, p - 1))}>Anterior</button><span style={{ fontSize: 12 }}>Pág {detailPage + 1}</span><button onClick={() => setDetailPage(p => p + 1)}>Próxima</button></div>
+                        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}><button disabled={detailPage === 0} onClick={() => setDetailPage(p => Math.max(0, p - 1))}>Anterior</button><span style={{ fontSize: 12 }}>PÃ¡g {detailPage + 1}</span><button onClick={() => setDetailPage(p => p + 1)}>PrÃ³xima</button></div>
                     </DetailModal>
                 )}
 
@@ -386,12 +386,12 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
                                     ))}
                             </tbody>
                         </table>
-                        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}><button disabled={detailPage === 0} onClick={() => setDetailPage(p => Math.max(0, p - 1))}>Anterior</button><span style={{ fontSize: 12 }}>Pág {detailPage + 1}</span><button onClick={() => setDetailPage(p => p + 1)}>Próxima</button></div>
+                        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}><button disabled={detailPage === 0} onClick={() => setDetailPage(p => Math.max(0, p - 1))}>Anterior</button><span style={{ fontSize: 12 }}>PÃ¡g {detailPage + 1}</span><button onClick={() => setDetailPage(p => p + 1)}>PrÃ³xima</button></div>
                     </DetailModal>
                 )}
 
                 {(modal === 'prioritaria' || modal === 'prioritariaCoord') && (
-                    <DetailModal title={`Fila prioritária - ${modalOperador?.login ?? ''}`} onClose={() => setModal(null)}>
+                    <DetailModal title={`Fila prioritÃ¡ria - ${modalOperador?.login ?? ''}`} onClose={() => setModal(null)}>
                         {modal === 'prioritariaCoord' && (
                             <div style={{ marginBottom: 10 }}>
                                 <AutoComplete value={modalOperadorOpt} onChange={syncModalOptToId} fetchOptions={fetchOperador} placeholder="Selecionar operador" />
@@ -413,7 +413,7 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
                                     ))}
                             </tbody>
                         </table>
-                        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}><button disabled={detailPage === 0} onClick={() => setDetailPage(p => Math.max(0, p - 1))}>Anterior</button><span style={{ fontSize: 12 }}>Pág {detailPage + 1}</span><button onClick={() => setDetailPage(p => p + 1)}>Próxima</button></div>
+                        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}><button disabled={detailPage === 0} onClick={() => setDetailPage(p => Math.max(0, p - 1))}>Anterior</button><span style={{ fontSize: 12 }}>PÃ¡g {detailPage + 1}</span><button onClick={() => setDetailPage(p => p + 1)}>PrÃ³xima</button></div>
                     </DetailModal>
                 )}
 
@@ -425,7 +425,7 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
                             </div>
                         )}
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-                            <thead><tr style={{ background: '#eceff1' }}><th style={{ padding: 6 }}>Quem pausou</th><th style={{ padding: 6 }}>Tipo Pausa</th><th style={{ padding: 6 }}>Inicio</th><th style={{ padding: 6 }}>Fim</th><th style={{ padding: 6 }}>Hora</th><th style={{ padding: 6 }}>Estorado</th><th style={{ padding: 6 }}>Observação</th></tr></thead>
+                            <thead><tr style={{ background: '#eceff1' }}><th style={{ padding: 6 }}>Quem pausou</th><th style={{ padding: 6 }}>Tipo Pausa</th><th style={{ padding: 6 }}>Inicio</th><th style={{ padding: 6 }}>Fim</th><th style={{ padding: 6 }}>Hora</th><th style={{ padding: 6 }}>Estorado</th><th style={{ padding: 6 }}>ObservaÃ§Ã£o</th></tr></thead>
                             <tbody>
                                 {(pausaQ.data as unknown[] ?? []).length === 0 ? <tr><td colSpan={7} style={{ padding: 12, textAlign: 'center', color: '#777' }}>{pausaQ.isLoading ? 'Carregando...' : 'Nenhum registro'}</td></tr> :
                                     (pausaQ.data as unknown as Record<string, unknown>[]).map((r: Record<string, unknown>, i: number) => (
@@ -435,20 +435,20 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
                                             <td style={{ padding: 6 }}>{formatDateTime(r.dataInicial)}</td>
                                             <td style={{ padding: 6 }}>{formatDateTime(r.dataFinal)}</td>
                                             <td style={{ padding: 6 }}>{String(r.dataInicial ?? '').slice(11, 16)}</td>
-                                            <td style={{ padding: 6 }}>{r.estorado ? 'Sim' : 'Não'}</td>
+                                            <td style={{ padding: 6 }}>{r.estorado ? 'Sim' : 'NÃ£o'}</td>
                                             <td style={{ padding: 6, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={String(r.observacao ?? '')}>{String(r.observacao ?? '')}</td>
                                         </tr>
                                     ))}
                             </tbody>
                         </table>
-                        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}><button disabled={detailPage === 0} onClick={() => setDetailPage(p => Math.max(0, p - 1))}>Anterior</button><span style={{ fontSize: 12 }}>Pág {detailPage + 1}</span><button onClick={() => setDetailPage(p => p + 1)}>Próxima</button></div>
+                        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}><button disabled={detailPage === 0} onClick={() => setDetailPage(p => Math.max(0, p - 1))}>Anterior</button><span style={{ fontSize: 12 }}>PÃ¡g {detailPage + 1}</span><button onClick={() => setDetailPage(p => p + 1)}>PrÃ³xima</button></div>
                     </DetailModal>
                 )}
 
                 {modal === 'agend' && (
                     <DetailModal title={`Agendamentos - ${modalOperador?.login ?? ''}`} onClose={() => setModal(null)}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-                            <thead><tr style={{ background: '#eceff1' }}><th style={{ padding: 6 }}>Descrição</th><th style={{ padding: 6 }}>Data</th><th style={{ padding: 6 }}>Status</th><th style={{ padding: 6 }}>Observação</th></tr></thead>
+                            <thead><tr style={{ background: '#eceff1' }}><th style={{ padding: 6 }}>DescriÃ§Ã£o</th><th style={{ padding: 6 }}>Data</th><th style={{ padding: 6 }}>Status</th><th style={{ padding: 6 }}>ObservaÃ§Ã£o</th></tr></thead>
                             <tbody>
                                 {(agendQ.data as unknown[] ?? []).length === 0 ? <tr><td colSpan={4} style={{ padding: 12, textAlign: 'center', color: '#777' }}>{agendQ.isLoading ? 'Carregando...' : 'Nenhum registro'}</td></tr> :
                                     (agendQ.data as unknown as Record<string, unknown>[]).map((r: Record<string, unknown>, i: number) => (
@@ -461,15 +461,15 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
                                     ))}
                             </tbody>
                         </table>
-                        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}><button disabled={detailPage === 0} onClick={() => setDetailPage(p => Math.max(0, p - 1))}>Anterior</button><span style={{ fontSize: 12 }}>Pág {detailPage + 1}</span><button onClick={() => setDetailPage(p => p + 1)}>Próxima</button></div>
+                        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}><button disabled={detailPage === 0} onClick={() => setDetailPage(p => Math.max(0, p - 1))}>Anterior</button><span style={{ fontSize: 12 }}>PÃ¡g {detailPage + 1}</span><button onClick={() => setDetailPage(p => p + 1)}>PrÃ³xima</button></div>
                     </DetailModal>
                 )}
 
                 {modal === 'trocaPri' && (
                     <div className="modal-overlay" onClick={() => setModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
                         <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 8, padding: 16, minWidth: 420, maxWidth: 500 }}>
-                            <h3>Troca da fila prioritária</h3>
-                            <p style={{ fontSize: 13, color: '#555' }}>Transferir toda fila prioritária de um operador para outro.</p>
+                            <h3>Troca da fila prioritÃ¡ria</h3>
+                            <p style={{ fontSize: 13, color: '#555' }}>Transferir toda fila prioritÃ¡ria de um operador para outro.</p>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 10 }}>
                                 <label>Do operador<div style={{ marginTop: 4 }}><AutoComplete value={selOperador} onChange={setSelOperador} fetchOptions={fetchOperador} placeholder="De" /></div></label>
                                 <label>Para operador<div style={{ marginTop: 4 }}><AutoComplete value={selOperador2} onChange={setSelOperador2} fetchOptions={fetchOperador} placeholder="Para" /></div></label>
@@ -485,8 +485,8 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
                 {modal === 'trocaLig' && (
                     <div className="modal-overlay" onClick={() => setModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
                         <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 8, padding: 16, minWidth: 420 }}>
-                            <h3>Redistribuir ligação - {selOperador?.label ?? modalOperador?.login ?? ''}</h3>
-                            <p style={{ fontSize: 13, color: '#555' }}>Distribui a fila de ligações pendentes do operador entre os demais operadores do coordenador.</p>
+                            <h3>Redistribuir ligaÃ§Ã£o - {selOperador?.label ?? modalOperador?.login ?? ''}</h3>
+                            <p style={{ fontSize: 13, color: '#555' }}>Distribui a fila de ligaÃ§Ãµes pendentes do operador entre os demais operadores do coordenador.</p>
                             <div style={{ marginTop: 10 }}>
                                 <label>Do operador<div style={{ marginTop: 4 }}><AutoComplete value={selOperador} onChange={setSelOperador} fetchOptions={fetchOperador} placeholder="Operador origem" /></div></label>
                             </div>
@@ -509,7 +509,7 @@ function DetailModal({ title, children, onClose }: { title: string; children: Re
             <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 8, padding: 16, width: 'min(1100px, 95vw)', maxHeight: '85vh', overflow: 'auto' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                     <h3 style={{ margin: 0, fontSize: 15 }}>{title}</h3>
-                    <button onClick={onClose} style={{ background: '#e0e0e0', border: 0, borderRadius: 4, padding: '4px 8px' }}>✕</button>
+                    <button onClick={onClose} style={{ background: '#e0e0e0', border: 0, borderRadius: 4, padding: '4px 8px' }}>âœ•</button>
                 </div>
                 {children}
             </div>

@@ -1,5 +1,5 @@
-import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {ModuleTabs} from '../../shared/components/ModuleTabs';
 
 export default function ViewCobrancaColunasLigacaoListScreen() {
     return (

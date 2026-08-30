@@ -1,5 +1,5 @@
-import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {ModuleTabs} from '../../shared/components/ModuleTabs';
 
 export default function ViewResultadoLigacaoNapColunasListScreen() {
     return (
@@ -10,13 +10,13 @@ export default function ViewResultadoLigacaoNapColunasListScreen() {
                     tabs={[
                         {
                             key: 'historicoDeLigacoes',
-                            label: 'Histórico de Ligações',
+                            label: 'HistÃ³rico de LigaÃ§Ãµes',
                             path: '/api/view/resultadoLigacaoNap/colunas'
                         },
                         {
                             key: 'retornoDeLigacoes',
-                            label: 'Retorno de Ligações',
-                            empty: 'Conteúdo de Retorno de Ligações.'
+                            label: 'Retorno de LigaÃ§Ãµes',
+                            empty: 'ConteÃºdo de Retorno de LigaÃ§Ãµes.'
                         },
                     ]}
                 />

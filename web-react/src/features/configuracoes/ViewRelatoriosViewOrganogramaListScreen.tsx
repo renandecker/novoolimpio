@@ -1,18 +1,18 @@
-import {useEffect, useMemo, useState} from 'react';
+﻿import {useEffect, useMemo, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
 import {AgCharts} from 'ag-charts-react';
 import type {AgChartOptions} from 'ag-charts-enterprise';
 import 'ag-charts-enterprise';
-import {PermissionGate} from '../permissions';
-import {api} from '../api';
+import {PermissionGate} from '../../shared/services/permissions';
+import {api} from '../../shared/services/api';
 
 // -----------------------------------------------------------------------------------------
-// Tela de visualização do Organograma (AG Charts Org Chart)
+// Tela de visualizaÃ§Ã£o do Organograma (AG Charts Org Chart)
 // https://www.ag-grid.com/charts/react/org-chart/
 //
-// Os dados (nós já com a cor por departamento) vêm prontos da API em tempo real:
+// Os dados (nÃ³s jÃ¡ com a cor por departamento) vÃªm prontos da API em tempo real:
 //   GET /api/relatorios/organograma/{id}/dados
-// Nada aqui é salvo no banco: direção, espaçamento e recolher/expandir são só de tela.
+// Nada aqui Ã© salvo no banco: direÃ§Ã£o, espaÃ§amento e recolher/expandir sÃ£o sÃ³ de tela.
 // -----------------------------------------------------------------------------------------
 
 interface OrganogramaNo {
@@ -94,7 +94,7 @@ export default function ViewRelatoriosViewOrganogramaListScreen() {
         };
     }, [id]);
 
-    // Ids que possuem ao menos um filho (só eles têm "expander" no gráfico).
+    // Ids que possuem ao menos um filho (sÃ³ eles tÃªm "expander" no grÃ¡fico).
     const idsComFilhos = useMemo(() => {
         if (!dados) return [] as string[];
         const pais = new Set<string>();
@@ -165,7 +165,7 @@ export default function ViewRelatoriosViewOrganogramaListScreen() {
                                 },
                             },
                         ],
-                        // Cor por departamento: já vem calculada pela API (campo "cor" da paleta de 40 cores).
+                        // Cor por departamento: jÃ¡ vem calculada pela API (campo "cor" da paleta de 40 cores).
                         itemStyler: ({datum}: any) => ({
                             fill: datum.cor,
                             fillOpacity: 0.2,
@@ -194,7 +194,7 @@ export default function ViewRelatoriosViewOrganogramaListScreen() {
                     <>
                         <div className="organograma-toolbar" style={{display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-end', margin: '12px 0 20px'}}>
                             <label>
-                                Direção
+                                DireÃ§Ã£o
                                 <select value={direcao} onChange={(e) => setDirecao(e.target.value)} style={{display: 'block'}}>
                                     {DIRECAO_OPTIONS.map((o) => (
                                         <option key={o.value} value={o.value}>{o.label}</option>
@@ -202,24 +202,24 @@ export default function ViewRelatoriosViewOrganogramaListScreen() {
                                 </select>
                             </label>
                             <label>
-                                Espaçamento entre irmãos ({innerSpacing}px)
+                                EspaÃ§amento entre irmÃ£os ({innerSpacing}px)
                                 <input type="range" min={0} max={80} value={innerSpacing}
                                        onChange={(e) => setInnerSpacing(Number(e.target.value))} style={{display: 'block'}}/>
                             </label>
                             <label>
-                                Espaçamento entre primos ({outerSpacing}px)
+                                EspaÃ§amento entre primos ({outerSpacing}px)
                                 <input type="range" min={0} max={120} value={outerSpacing}
                                        onChange={(e) => setOuterSpacing(Number(e.target.value))} style={{display: 'block'}}/>
                             </label>
                             <label>
-                                Espaçamento entre níveis ({depthSpacing}px)
+                                EspaÃ§amento entre nÃ­veis ({depthSpacing}px)
                                 <input type="range" min={20} max={140} value={depthSpacing}
                                        onChange={(e) => setDepthSpacing(Number(e.target.value))} style={{display: 'block'}}/>
                             </label>
                             <button type="button" className="btnblue" onClick={expandirTodos}>Expand All</button>
                             <button type="button" className="btnblue" onClick={recolherTodos}>Collapse All</button>
                             <label>
-                                Nó
+                                NÃ³
                                 <select value={noSelecionado} onChange={(e) => setNoSelecionado(e.target.value)} style={{display: 'block'}}>
                                     <option value="">Selecione...</option>
                                     {dados.nos.filter((no) => idsComFilhos.includes(String(no.id))).map((no) => (
@@ -239,7 +239,7 @@ export default function ViewRelatoriosViewOrganogramaListScreen() {
                         )}
 
                         {dados.nos.length === 0 && (
-                            <p>O SQL cadastrado não retornou nenhum registro.</p>
+                            <p>O SQL cadastrado nÃ£o retornou nenhum registro.</p>
                         )}
                     </>
                 )}

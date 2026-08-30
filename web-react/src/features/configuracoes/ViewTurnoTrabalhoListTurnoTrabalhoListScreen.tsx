@@ -1,24 +1,24 @@
-import { PermissionGate } from '../permissions';
-import { DataTable, type DataTableColumn } from '../DataTable';
+﻿import { PermissionGate } from '../../shared/services/permissions';
+import { DataTable, type DataTableColumn } from '../../shared/components/DataTable';
 
 /**
  * Tela /view/turnoTrabalho/listTurnoTrabalho
  * Replica po:crud do extracted_aceso/src/main/webapp/view/turnoTrabalho/listTurnoTrabalho.xhtml
  * e colunas de colunasTurnoTrabalho.xhtml:
  *  - Id (80px)
- *  - Descrição (sortBy descricao)
- *  - Início  (sortBy inicio)
+ *  - DescriÃ§Ã£o (sortBy descricao)
+ *  - InÃ­cio  (sortBy inicio)
  *  - Fim     (sortBy fim)
- *  - Dia Semana (sortBy diaSemana.nome — via id_dia_semana_descricao enriquecido pelo ViewService)
+ *  - Dia Semana (sortBy diaSemana.nome â€” via id_dia_semana_descricao enriquecido pelo ViewService)
  *
  * Filtros (TurnoTrabalhoController.getFilters()):
  *  id, id com intervalo, descricao, inicio, fim, diaSemana.nome
- * Controller: turnoTrabalhoController — colunas via colunasTurnoTrabalho.xhtml
+ * Controller: turnoTrabalhoController â€” colunas via colunasTurnoTrabalho.xhtml
  */
 const COLUMNS: DataTableColumn[] = [
   { key: 'id', label: 'Id' },
-  { key: 'descricao', label: 'Descrição' },
-  { key: 'inicio', label: 'Início' },
+  { key: 'descricao', label: 'DescriÃ§Ã£o' },
+  { key: 'inicio', label: 'InÃ­cio' },
   { key: 'fim', label: 'Fim' },
   {
     key: 'id_dia_semana',

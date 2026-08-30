@@ -1,10 +1,10 @@
-import {useEffect, useMemo, useState} from 'react';
+﻿import {useEffect, useMemo, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {PermissionGate} from '../permissions';
-import {MasterDetail} from '../MasterDetail';
-import {Tabs} from '../Tabs';
-import type {TabItem} from '../Tabs';
-import {useWizardData} from '../Wizard';
+import {PermissionGate} from '../../shared/services/permissions';
+import {MasterDetail} from '../../shared/components/MasterDetail';
+import {Tabs} from '../../shared/components/Tabs';
+import type {TabItem} from '../../shared/components/Tabs';
+import {useWizardData} from '../../shared/components/Wizard';
 import {
     BASE_TECNOLOGICA_SOURCE,
     BASE_TECNOLOGICA_COLUMNS,
@@ -12,9 +12,9 @@ import {
     REFERENCIA_BIBLIOGRAFICA_SOURCE,
     REFERENCIA_BIBLIOGRAFICA_COLUMNS,
     REFERENCIA_BIBLIOGRAFICA_SEARCH,
-} from '../masterDetailSources';
-import type {ApiItem} from '../types';
-import {api, useApi} from '../api';
+} from '../../shared/services/masterDetailSources';
+import type {ApiItem} from '../../shared/types/index';
+import {api, useApi} from '../../shared/services/api';
 
 interface CronogramaItem {
     key: string;

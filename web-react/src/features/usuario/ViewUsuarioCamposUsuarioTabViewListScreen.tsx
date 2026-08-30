@@ -1,17 +1,17 @@
-import {useState} from 'react';
-import {PermissionGate} from '../permissions';
-import {Tabs} from '../Tabs';
-import {MasterDetail} from '../MasterDetail';
-import {BooleanField} from '../BooleanField';
-import {EnderecoCampos} from '../EnderecoForm';
-import type {Endereco} from '../EnderecoForm';
-import type {ApiItem} from '../types';
+﻿import {useState} from 'react';
+import {PermissionGate} from '../../shared/services/permissions';
+import {Tabs} from '../../shared/components/Tabs';
+import {MasterDetail} from '../../shared/components/MasterDetail';
+import {BooleanField} from '../../shared/components/BooleanField';
+import {EnderecoCampos} from '../../shared/components/EnderecoForm';
+import type {Endereco} from '../../shared/components/EnderecoForm';
+import type {ApiItem} from '../../shared/types/index';
 import {
     TURNO_TRABALHO_SOURCE, TURNO_TRABALHO_COLUMNS, TURNO_TRABALHO_SEARCH,
     PERFIL_SOURCE, PERFIL_COLUMNS, PERFIL_SEARCH,
     AGENDA_SOURCE, AGENDA_COLUMNS, AGENDA_SEARCH,
     UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH,
-} from '../masterDetailSources';
+} from '../../shared/services/masterDetailSources';
 
 /**
  * ViewUsuarioCamposUsuarioTabView — espelha fielmente `camposUsuarioTabView.xhtml`

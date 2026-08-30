@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
-import type {DataTableColumn} from '../DataTable';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {ModuleTabs} from '../../shared/components/ModuleTabs';
+import type {DataTableColumn} from '../../shared/components/DataTable';
 import {
     CAMPO_SOURCE,
     CAMPO_COLUMNS,
@@ -11,10 +11,10 @@ import {
     UNIDADE_SOURCE,
     UNIDADE_COLUMNS,
     UNIDADE_SEARCH
-} from '../masterDetailSources';
+} from '../../shared/services/masterDetailSources';
 
 const CONFIGURACAO_PARCELA_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID da Configuração de Parcela'},
+    {key: 'id', label: 'ID da ConfiguraÃ§Ã£o de Parcela'},
     {key: 'unidade_descricao', label: 'Unidade'},
 ];
 
@@ -32,8 +32,8 @@ export default function ViewConfiguracaoListConfiguracaoParcelaListScreen() {
                             columns: CONFIGURACAO_PARCELA_COLUMNS,
                             maxMainColumns: CONFIGURACAO_PARCELA_COLUMNS.length
                         },
-                        {key: 'variaveis', label: 'Variáveis', empty: 'Conteúdo de Variáveis.'},
-                        {key: 'geral', label: 'Geral', empty: 'Conteúdo de Geral.'},
+                        {key: 'variaveis', label: 'VariÃ¡veis', empty: 'ConteÃºdo de VariÃ¡veis.'},
+                        {key: 'geral', label: 'Geral', empty: 'ConteÃºdo de Geral.'},
                         {
                             key: 'camposValor',
                             label: 'Campos valor',
@@ -45,21 +45,21 @@ export default function ViewConfiguracaoListConfiguracaoParcelaListScreen() {
                                 columns: CAMPO_COLUMNS
                             }
                         },
-                        {key: 'horasEAulas', label: 'Horas e aulas', empty: 'Conteúdo de Horas e aulas.'},
+                        {key: 'horasEAulas', label: 'Horas e aulas', empty: 'ConteÃºdo de Horas e aulas.'},
                         {
                             key: 'camposPresenca',
-                            label: 'Campos presença',
+                            label: 'Campos presenÃ§a',
                             masterDetail: {
-                                label: 'Campos presença',
+                                label: 'Campos presenÃ§a',
                                 source: CAMPO_SOURCE,
                                 valueKey: 'id',
                                 searchKeys: CAMPO_SEARCH,
                                 columns: CAMPO_COLUMNS
                             }
                         },
-                        {key: 'informacoes', label: 'Informações', empty: 'Conteúdo de Informações.'},
-                        {key: 'corpo', label: 'Corpo', empty: 'Conteúdo de Corpo.'},
-                        {key: 'condicao', label: 'Condição', empty: 'Conteúdo de Condição.'},
+                        {key: 'informacoes', label: 'InformaÃ§Ãµes', empty: 'ConteÃºdo de InformaÃ§Ãµes.'},
+                        {key: 'corpo', label: 'Corpo', empty: 'ConteÃºdo de Corpo.'},
+                        {key: 'condicao', label: 'CondiÃ§Ã£o', empty: 'ConteÃºdo de CondiÃ§Ã£o.'},
                         {
                             key: 'unidade',
                             label: 'Unidade',

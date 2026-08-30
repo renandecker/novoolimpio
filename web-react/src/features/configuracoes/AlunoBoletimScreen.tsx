@@ -1,12 +1,12 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
-import {alunoApi, Boletim, Grau, formatarNota, formatarPercentual} from '../aluno';
-import '../AlunoPortal.css';
+import {alunoApi, Boletim, Grau, formatarNota, formatarPercentual} from '../../features/aluno/aluno';
+import '../../features/aluno/alunoPortal.css';
 
 const STATUS_ROTULO: Record<string, string> = {
     APROVADO: 'Aprovado',
     'EM EXAME': 'Em exame',
-    'REPROVADO POR FREQUÊNCIA': 'Reprovado por frequência',
+    'REPROVADO POR FREQUÃŠNCIA': 'Reprovado por frequÃªncia',
     'SEM NOTAS': 'Sem notas',
 };
 
@@ -23,7 +23,7 @@ export default function AlunoBoletimScreen() {
                 if (active) setBoletins(data ?? []);
             })
             .catch((e: any) => {
-                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar o boletim.');
+                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'NÃ£o foi possÃ­vel carregar o boletim.');
             })
             .finally(() => {
                 if (active) setBusy(false);
@@ -45,7 +45,7 @@ export default function AlunoBoletimScreen() {
                         <div>
                             <h2>{b.matricula.componente || b.matricula.curso || 'Disciplina'}</h2>
                             <p className="aluno-portal-item-meta">
-                                {[b.matricula.curso, b.matricula.turma ? `Turma ${b.matricula.turma}` : null, b.matricula.periodo].filter(Boolean).join(' · ')}
+                                {[b.matricula.curso, b.matricula.turma ? `Turma ${b.matricula.turma}` : null, b.matricula.periodo].filter(Boolean).join(' Â· ')}
                             </p>
                         </div>
                         <span
@@ -58,12 +58,12 @@ export default function AlunoBoletimScreen() {
                         <div className="aluno-portal-grau" key={grau.id}>
                             <h3>{grau.descricao}</h3>
                             {grau.notas.length === 0 ? (
-                                <p className="aluno-portal-msg">Sem notas lançadas.</p>
+                                <p className="aluno-portal-msg">Sem notas lanÃ§adas.</p>
                             ) : (
                                 <table className="aluno-portal-tabela">
                                     <thead>
                                     <tr>
-                                        <th>Avaliação</th>
+                                        <th>AvaliaÃ§Ã£o</th>
                                         <th>Peso</th>
                                         <th>Nota</th>
                                     </tr>
@@ -73,7 +73,7 @@ export default function AlunoBoletimScreen() {
                                         <tr key={nota.id}>
                                             <td>
                                                 {nota.nome}
-                                                {nota.numeroNota ? ` (${nota.numeroNota}ª)` : ''}
+                                                {nota.numeroNota ? ` (${nota.numeroNota}Âª)` : ''}
                                             </td>
                                             <td>{nota.peso != null ? formatarNota(nota.peso) : '-'}</td>
                                             <td>{nota.nota != null ? formatarNota(nota.nota) : <em>pendente</em>}</td>
@@ -83,8 +83,8 @@ export default function AlunoBoletimScreen() {
                                 </table>
                             )}
                             {grau.mediaFinal != null && grau.mediaFinal !== grau.mediaSemExame && (
-                                <p className="aluno-portal-grau-rodape">Média para
-                                    aprovação: <strong>{formatarNota(grau.mediaFinal)}</strong></p>
+                                <p className="aluno-portal-grau-rodape">MÃ©dia para
+                                    aprovaÃ§Ã£o: <strong>{formatarNota(grau.mediaFinal)}</strong></p>
                             )}
                         </div>
                     ))}

@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
-import {COMPONENTE_SOURCE, COMPONENTE_COLUMNS, COMPONENTE_SEARCH} from '../masterDetailSources';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {ModuleTabs} from '../../shared/components/ModuleTabs';
+import {COMPONENTE_SOURCE, COMPONENTE_COLUMNS, COMPONENTE_SEARCH} from '../../shared/services/masterDetailSources';
 
 export default function ViewProfessorFormProfessorListScreen() {
     return (
@@ -9,8 +9,8 @@ export default function ViewProfessorFormProfessorListScreen() {
                 <h1>Form Professor</h1>
                 <ModuleTabs
                     tabs={[
-                        {key: 'informacoes', label: 'Informações', path: '/api/view/professor/formProfessor'},
-                        {key: 'disponibilidade', label: 'Disponibilidade', empty: 'Conteúdo de Disponibilidade.'},
+                        {key: 'informacoes', label: 'InformaÃ§Ãµes', path: '/api/view/professor/formProfessor'},
+                        {key: 'disponibilidade', label: 'Disponibilidade', empty: 'ConteÃºdo de Disponibilidade.'},
                         {
                             key: 'componenteCurricular',
                             label: 'Componente Curricular',

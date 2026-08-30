@@ -1,6 +1,6 @@
-import {useState} from 'react';
-import {Tabs} from '../Tabs';
-import type {TabItem} from '../Tabs';
+﻿import {useState} from 'react';
+import {Tabs} from '../../shared/components/Tabs';
+import type {TabItem} from '../../shared/components/Tabs';
 
 const tabs: TabItem[] = [
 

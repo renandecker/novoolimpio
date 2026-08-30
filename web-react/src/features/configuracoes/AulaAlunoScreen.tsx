@@ -1,7 +1,7 @@
-import {useCallback, useEffect, useState} from 'react';
+﻿import {useCallback, useEffect, useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
-import {aulaApi, Aula, AulaAnexo} from '../aula';
-import '../AlunoPortal.css';
+import {aulaApi, Aula, AulaAnexo} from '../../features/aluno/aluno';
+import '../../features/aluno/alunoPortal.css';
 
 export default function AulaAlunoScreen() {
     const {aulaId} = useParams<{ aulaId: string }>();
@@ -22,7 +22,7 @@ export default function AulaAlunoScreen() {
                 setJaAssistida(assistida);
             })
             .catch((e: any) => {
-                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar a aula.');
+                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'NÃ£o foi possÃ­vel carregar a aula.');
             })
             .finally(() => {
                 if (active) setBusy(false);
@@ -37,7 +37,7 @@ export default function AulaAlunoScreen() {
         aulaApi
             .marcarAssistida(Number(aulaId))
             .then(() => setJaAssistida(true))
-            .catch((e: any) => setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível marcar a aula como assistida.'))
+            .catch((e: any) => setError(e.response?.data?.error || e.response?.data?.message || 'NÃ£o foi possÃ­vel marcar a aula como assistida.'))
             .finally(() => setMarcando(false));
     }, [aulaId]);
 
@@ -45,7 +45,7 @@ export default function AulaAlunoScreen() {
     if (error) return <main><h1>Aula</h1>
         <div className="aluno-portal-error" role="alert">{error}</div>
     </main>;
-    if (!aula) return <main><h1>Aula</h1><p className="aluno-portal-msg">Aula não encontrada.</p></main>;
+    if (!aula) return <main><h1>Aula</h1><p className="aluno-portal-msg">Aula nÃ£o encontrada.</p></main>;
 
     const videos = anexos.filter(a => a.tipo === 'VIDEO');
     const documentos = anexos.filter(a => a.tipo === 'PDF' || a.tipo === 'IMAGEM');
@@ -87,7 +87,7 @@ export default function AulaAlunoScreen() {
 
             {aula.descricao && (
                 <section className="aluno-portal-item">
-                    <h3>Informações</h3>
+                    <h3>InformaÃ§Ãµes</h3>
                     <p className="aluno-portal-msg" style={{margin: 0}}>{aula.descricao}</p>
                 </section>
             )}

@@ -1,10 +1,10 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
 
 const COLUMNS: DataTableColumn[] = [
     {key: 'modulo_descricao', label: 'Antecessor'},
-    {key: 'rotulo', label: 'Rótulo'},
-    {key: 'descricao', label: 'Descrição'},
+    {key: 'rotulo', label: 'RÃ³tulo'},
+    {key: 'descricao', label: 'DescriÃ§Ã£o'},
     {key: 'outcome', label: 'Outcome'},
 ];
 

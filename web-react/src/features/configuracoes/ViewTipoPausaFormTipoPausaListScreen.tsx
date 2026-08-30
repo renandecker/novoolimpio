@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { PermissionGate } from '../permissions';
-import { api } from '../api';
+import { PermissionGate } from '../../shared/services/permissions';
+import { api } from '../../shared/services/api';
 
 /**
  * Tela /view/tipoPausa/formTipoPausa
  * Replica po:panelGrid do extracted_aceso/src/main/webapp/view/tipoPausa/formTipoPausa.xhtml
  * Layout: p:panelGrid columns=1 div_form width 26%, header vazio, table_form 2 colunas
  *   - Id: po:inputInteiro disabled true, style inputTiny
- *   - Descrição *: po:inputTexto required true, f:validateLength 3-255, style inputLarge
+ *   - DescriÃ§Ã£o *: po:inputTexto required true, f:validateLength 3-255, style inputLarge
  *   - Tempo pausa (segundos) *: p:inputText required true, requiredMessage "Insira o tempo intervalo", p:keyFilter mask=int
  *   - Footer: po:formButtons
  */
@@ -55,9 +55,9 @@ export default function ViewTipoPausaFormTipoPausaListScreen() {
 
     const validate = (): string | null => {
         const d = descricao.trim();
-        if (!d) return 'Descrição é obrigatória.';
-        if (d.length < 3) return 'Descrição deve ter no mínimo 3 caracteres.';
-        if (d.length > 255) return 'Descrição deve ter no máximo 255 caracteres.';
+        if (!d) return 'DescriÃ§Ã£o Ã© obrigatÃ³ria.';
+        if (d.length < 3) return 'DescriÃ§Ã£o deve ter no mÃ­nimo 3 caracteres.';
+        if (d.length > 255) return 'DescriÃ§Ã£o deve ter no mÃ¡ximo 255 caracteres.';
         const t = tempo.trim();
         if (!t) return 'Insira o tempo intervalo';
         if (!/^-?\d+$/.test(t)) return 'Tempo pausa deve ser um inteiro';
@@ -77,7 +77,7 @@ export default function ViewTipoPausaFormTipoPausaListScreen() {
         const body: Record<string, unknown> = {
             descricao: descricao.trim(),
             qtde_tempo: Number(tempo.trim()),
-            // também envia alias "tempo" para compatibilidade com /api/central/tipo-pausa
+            // tambÃ©m envia alias "tempo" para compatibilidade com /api/central/tipo-pausa
             tempo: Number(tempo.trim()),
         };
         try {
@@ -98,9 +98,9 @@ export default function ViewTipoPausaFormTipoPausaListScreen() {
     };
 
     const handleTempoChange = (v: string) => {
-        // p:keyFilter mask="int" — permite apenas dígitos e sinal negativo
+        // p:keyFilter mask="int" â€” permite apenas dÃ­gitos e sinal negativo
         const filtered = v.replace(/[^\d-]/g, '');
-        // mantém apenas um '-' no início
+        // mantÃ©m apenas um '-' no inÃ­cio
         const normalized = filtered.replace(/(?!^)-/g, '');
         setTempo(normalized);
     };
@@ -139,9 +139,9 @@ export default function ViewTipoPausaFormTipoPausaListScreen() {
                             style={{ width: 90, background: '#f3f4f6' }}
                         />
 
-                        {/* Descrição * */}
+                        {/* DescriÃ§Ã£o * */}
                         <label htmlFor="inputDescricao:descricao" className="form-label" style={{ fontWeight: 600 }}>
-                            Descrição <span style={{ color: '#C90000' }}>*</span>
+                            DescriÃ§Ã£o <span style={{ color: '#C90000' }}>*</span>
                         </label>
                         <input
                             id="inputDescricao:descricao"
@@ -149,7 +149,7 @@ export default function ViewTipoPausaFormTipoPausaListScreen() {
                             value={descricao}
                             onChange={(e) => setDescricao(e.target.value)}
                             maxLength={255}
-                            placeholder="Ex.: Almoço, Café, Banheiro…"
+                            placeholder="Ex.: AlmoÃ§o, CafÃ©, Banheiroâ€¦"
                             required
                         />
 
@@ -168,9 +168,9 @@ export default function ViewTipoPausaFormTipoPausaListScreen() {
                         />
                     </div>
 
-                    {/* hints de validação (f:validateLength / requiredMessage) */}
+                    {/* hints de validaÃ§Ã£o (f:validateLength / requiredMessage) */}
                     <div style={{ marginTop: 8, fontSize: 12, color: '#6b7280' }}>
-                        Descrição: 3 a 255 caracteres. Tempo: inteiro em segundos (obrigatório).
+                        DescriÃ§Ã£o: 3 a 255 caracteres. Tempo: inteiro em segundos (obrigatÃ³rio).
                     </div>
 
                     {/* po:formButtons */}

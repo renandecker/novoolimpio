@@ -1,16 +1,16 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
-import {PermissionGate} from '../permissions';
-import {MasterDetail} from '../MasterDetail';
-import {BooleanField} from '../BooleanField';
-import {Tabs} from '../Tabs';
-import type {ApiItem} from '../types';
-import {api} from '../api';
-import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../masterDetailSources';
-import {EnderecoCampos} from '../EnderecoForm';
-import type {Endereco} from '../EnderecoForm';
-import type {TipoPessoa} from '../cadastroUsuarioTypes';
+import {PermissionGate} from '../../shared/services/permissions';
+import {MasterDetail} from '../../shared/components/MasterDetail';
+import {BooleanField} from '../../shared/components/BooleanField';
+import {Tabs} from '../../shared/components/Tabs';
+import type {ApiItem} from '../../features/auth/types';
+import {api} from '../../shared/services/api';
+import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../../shared/services/masterDetailSources';
+import {EnderecoCampos} from '../../shared/components/EnderecoForm';
+import type {Endereco} from '../../shared/components/EnderecoForm';
+import type {TipoPessoa} from '../../features/auth/cadastroUsuarioTypes';
 import {
     GENEROS,
     formatCpf,
@@ -20,8 +20,8 @@ import {
     num,
     semId,
     toDateInput,
-} from '../cadastroUsuarioTypes';
-import '../AppLayout.css';
+} from '../../features/auth/cadastroUsuarioTypes';
+import '../../shared/components/AppLayout.css';
 
 interface Funcionario {
     id?: number;
@@ -135,7 +135,7 @@ export default function CadastroUsuarioScreen() {
                 const funcao = await api.get<Array<{id: number, descricao: string}>>('/api/basico/funcao');
                 setFuncaoOptions(funcao.data.map(e => ({value: String(e.id), label: e.descricao})));
             } catch (e) {
-                console.error('Erro ao carregar funções:', e);
+                console.error('Erro ao carregar funÃ§Ãµes:', e);
             }
         }
         fetchOptions();
@@ -226,7 +226,7 @@ export default function CadastroUsuarioScreen() {
                         setPjOriginal(pj);
                     } catch {
                         if (!ativo) return;
-                        alert('Registro não encontrado.');
+                        alert('Registro nÃ£o encontrado.');
                         return;
                     }
                 }
@@ -364,7 +364,7 @@ export default function CadastroUsuarioScreen() {
                             }));
                         }
                     } catch (e) {
-                        console.error('Erro ao carregar funcionário:', e);
+                        console.error('Erro ao carregar funcionÃ¡rio:', e);
                     }
 
                     // Load perfis
@@ -404,7 +404,7 @@ export default function CadastroUsuarioScreen() {
             }
         } else {
             if (!form.razaoSocial.trim() || !form.cnpj.trim()) {
-                setError('Informe pelo menos Razão Social e CNPJ.');
+                setError('Informe pelo menos RazÃ£o Social e CNPJ.');
                 return;
             }
         }
@@ -625,7 +625,7 @@ export default function CadastroUsuarioScreen() {
                             onChange={(e) => set('dataNascimento', e.target.value)} />
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Gênero</span>
+                        <span className="form-label">GÃªnero</span>
                         <select className="form-input form-select" value={form.generoId}
                             onChange={(e) => set('generoId', e.target.value)}>
                             <option value="">-- Selecione --</option>
@@ -663,10 +663,10 @@ export default function CadastroUsuarioScreen() {
                             placeholder="Nome do pai" />
                     </label>
                     <label className="form-field" style={{gridColumn: 'span 2'}}>
-                        <span className="form-label">Nome da Mãe *</span>
+                        <span className="form-label">Nome da MÃ£e *</span>
                         <input className="form-input" value={form.nomeMae}
                             onChange={(e) => set('nomeMae', e.target.value)}
-                            placeholder="Nome da mãe" />
+                            placeholder="Nome da mÃ£e" />
                     </label>
                 </>
             ) : (
@@ -678,10 +678,10 @@ export default function CadastroUsuarioScreen() {
                             placeholder="99.999.999/9999-99" maxLength={18} />
                     </label>
                     <label className="form-field" style={{gridColumn: 'span 3'}}>
-                        <span className="form-label">Razão Social *</span>
+                        <span className="form-label">RazÃ£o Social *</span>
                         <input className="form-input" value={form.razaoSocial}
                             onChange={(e) => set('razaoSocial', e.target.value)}
-                            placeholder="Razão social" />
+                            placeholder="RazÃ£o social" />
                     </label>
                     <label className="form-field" style={{gridColumn: 'span 4'}}>
                         <span className="form-label">Nome Fantasia</span>
@@ -690,28 +690,28 @@ export default function CadastroUsuarioScreen() {
                             placeholder="Nome fantasia" />
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Inscrição Municipal</span>
+                        <span className="form-label">InscriÃ§Ã£o Municipal</span>
                         <input className="form-input" value={form.inscricaoMunicipal}
                             onChange={(e) => set('inscricaoMunicipal', e.target.value)}
-                            placeholder="Inscrição municipal" />
+                            placeholder="InscriÃ§Ã£o municipal" />
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Inscrição Estadual</span>
+                        <span className="form-label">InscriÃ§Ã£o Estadual</span>
                         <input className="form-input" value={form.inscricaoEstadual}
                             onChange={(e) => set('inscricaoEstadual', e.target.value)}
-                            placeholder="Inscrição estadual" />
+                            placeholder="InscriÃ§Ã£o estadual" />
                     </label>
                 </>
             )}
 
             {tipoPessoa === 'FISICA' && (
                 <>
-                    <div style={sectionTitleStyle}>Referências</div>
+                    <div style={sectionTitleStyle}>ReferÃªncias</div>
                     <label className="form-field" style={{gridColumn: 'span 2'}}>
-                        <span className="form-label">Nome Referência 1 *</span>
+                        <span className="form-label">Nome ReferÃªncia 1 *</span>
                         <input className="form-input" value={form.nomeReferencia}
                             onChange={(e) => set('nomeReferencia', e.target.value)}
-                            placeholder="Nome referência" />
+                            placeholder="Nome referÃªncia" />
                     </label>
                     <label className="form-field">
                         <span className="form-label">Telefone</span>
@@ -726,10 +726,10 @@ export default function CadastroUsuarioScreen() {
                             placeholder="(99) 99999-9999" />
                     </label>
                     <label className="form-field" style={{gridColumn: 'span 2'}}>
-                        <span className="form-label">Nome Referência 2</span>
+                        <span className="form-label">Nome ReferÃªncia 2</span>
                         <input className="form-input" value={form.nomeReferencia2}
                             onChange={(e) => set('nomeReferencia2', e.target.value)}
-                            placeholder="Nome referência 2" />
+                            placeholder="Nome referÃªncia 2" />
                     </label>
                     <label className="form-field">
                         <span className="form-label">Telefone</span>
@@ -750,7 +750,7 @@ export default function CadastroUsuarioScreen() {
 
     const abaEndereco = (
         <div className="form-grid">
-            <div style={sectionTitleStyle}>Endereço</div>
+            <div style={sectionTitleStyle}>EndereÃ§o</div>
             <div style={{gridColumn: '1 / -1'}}>
                 <EnderecoCampos value={enderecos} onChange={setEnderecos} />
             </div>
@@ -837,10 +837,10 @@ export default function CadastroUsuarioScreen() {
                     placeholder="Carteira de Trabalho" />
             </label>
             <label className="form-field">
-                <span className="form-label">Série *</span>
+                <span className="form-label">SÃ©rie *</span>
                 <input className="form-input" value={form.serie}
                     onChange={(e) => set('serie', e.target.value)}
-                    placeholder="Série" />
+                    placeholder="SÃ©rie" />
             </label>
             <label className="form-field">
                 <span className="form-label">PIS *</span>
@@ -849,10 +849,10 @@ export default function CadastroUsuarioScreen() {
                     placeholder="999.9999.999-9" />
             </label>
             <label className="form-field">
-                <span className="form-label">Título Eleitor</span>
+                <span className="form-label">TÃ­tulo Eleitor</span>
                 <input className="form-input" value={form.tituloEleitor}
                     onChange={(e) => set('tituloEleitor', e.target.value)}
-                    placeholder="Título de Eleitor" />
+                    placeholder="TÃ­tulo de Eleitor" />
             </label>
             <label className="form-field">
                 <span className="form-label">Zona</span>
@@ -861,10 +861,10 @@ export default function CadastroUsuarioScreen() {
                     placeholder="Zona Eleitoral" />
             </label>
             <label className="form-field">
-                <span className="form-label">Seção</span>
+                <span className="form-label">SeÃ§Ã£o</span>
                 <input className="form-input" value={form.secao}
                     onChange={(e) => set('secao', e.target.value)}
-                    placeholder="Seção Eleitoral" />
+                    placeholder="SeÃ§Ã£o Eleitoral" />
             </label>
             <label className="form-field">
                 <span className="form-label">Carteira Reservista</span>
@@ -880,8 +880,8 @@ export default function CadastroUsuarioScreen() {
             </label>
             <div style={{gridColumn: '1 / -1', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '6px', color: '#666', marginTop: '16px'}}>
                 <p style={{margin: 0}}>
-                    Upload de arquivos (Foto 3x4, CTPS, RG, CPF, Comprovante de Residência, etc.) será adicionado em
-                    versões futuras.
+                    Upload de arquivos (Foto 3x4, CTPS, RG, CPF, Comprovante de ResidÃªncia, etc.) serÃ¡ adicionado em
+                    versÃµes futuras.
                 </p>
             </div>
         </div>
@@ -891,7 +891,7 @@ export default function CadastroUsuarioScreen() {
         <div className="form-grid">
             <div style={sectionTitleStyle}>Trabalho</div>
             <label className="form-field">
-                <span className="form-label">Função *</span>
+                <span className="form-label">FunÃ§Ã£o *</span>
                 <select className="form-input form-select" value={form.funcaoId}
                     onChange={(e) => set('funcaoId', e.target.value)}>
                     <option value="">-- Selecione --</option>
@@ -899,7 +899,7 @@ export default function CadastroUsuarioScreen() {
                 </select>
             </label>
             <label className="form-field">
-                <span className="form-label">Data Admissão</span>
+                <span className="form-label">Data AdmissÃ£o</span>
                 <input className="form-input" type="date" value={form.dataAdmissao}
                     onChange={(e) => set('dataAdmissao', e.target.value)} />
             </label>
@@ -909,12 +909,12 @@ export default function CadastroUsuarioScreen() {
                     onChange={(e) => set('mensalista', e.target.value)}>
                     <option value="">-- Selecione --</option>
                     <option value="true">Sim</option>
-                    <option value="false">Não</option>
+                    <option value="false">NÃ£o</option>
                 </select>
             </label>
             <label className="form-field" style={{gridColumn: '1 / -1'}}>
-                <span className="form-label">Observação</span>
-                <textarea className="form-input" placeholder="Observações" rows={4}
+                <span className="form-label">ObservaÃ§Ã£o</span>
+                <textarea className="form-input" placeholder="ObservaÃ§Ãµes" rows={4}
                     style={{minHeight: '80px'}}
                     value={form.observacao}
                     onChange={(e) => set('observacao', e.target.value)} />
@@ -960,7 +960,7 @@ export default function CadastroUsuarioScreen() {
                         <span className="form-label">Login *</span>
                         <input className="form-input" value={form.login}
                             onChange={(e) => set('login', e.target.value)}
-                            placeholder="Login do usuário" />
+                            placeholder="Login do usuÃ¡rio" />
                     </label>
                     <label className="form-field">
                         <span className="form-label">Senha</span>
@@ -969,7 +969,7 @@ export default function CadastroUsuarioScreen() {
                             placeholder="Senha" />
                     </label>
 
-                    <div style={sectionTitleStyle}>Currículo / Banco de Talentos</div>
+                    <div style={sectionTitleStyle}>CurrÃ­culo / Banco de Talentos</div>
                     <label className="form-field">
                         <BooleanField value={curriculo} onChange={setCurriculo} />
                     </label>
@@ -999,7 +999,7 @@ export default function CadastroUsuarioScreen() {
                             valueKey="id"
                             searchKeys={['descricao']}
                             columns={[
-                                {key: 'descricao', header: 'Descrição'}
+                                {key: 'descricao', header: 'DescriÃ§Ã£o'}
                             ]}
                             items={perfis}
                             onChange={setPerfis}
@@ -1018,7 +1018,7 @@ export default function CadastroUsuarioScreen() {
                             valueKey="id"
                             searchKeys={['descricao']}
                             columns={[
-                                {key: 'descricao', header: 'Descrição'},
+                                {key: 'descricao', header: 'DescriÃ§Ã£o'},
                                 {key: 'agendar', header: 'Agendar', type: 'boolean'},
                                 {key: 'alterar', header: 'Alterar', type: 'boolean'},
                                 {key: 'fechar', header: 'Fechar', type: 'boolean'},
@@ -1036,7 +1036,7 @@ export default function CadastroUsuarioScreen() {
 
     const abas = [
         {key: 'pessoal' as const, label: 'Pessoal', content: abaPessoal},
-        {key: 'endereco' as const, label: 'Endereço', content: abaEndereco},
+        {key: 'endereco' as const, label: 'EndereÃ§o', content: abaEndereco},
         {key: 'contato' as const, label: 'Contato', content: abaContato},
         {key: 'documentos' as const, label: 'Documentos', content: abaDocumentos},
         {key: 'trabalho' as const, label: 'Trabalho', content: abaTrabalho},
@@ -1051,7 +1051,7 @@ export default function CadastroUsuarioScreen() {
                         <nav className="breadcrumb" aria-label="Breadcrumb">
                             <div className="breadcrumb-group">
                                 <span className="breadcrumb-item breadcrumb-current">
-                                    Cadastro de Usuário
+                                    Cadastro de UsuÃ¡rio
                                 </span>
                             </div>
                         </nav>
@@ -1067,14 +1067,14 @@ export default function CadastroUsuarioScreen() {
                             style={toggleBtnStyle(tipoPessoa === 'FISICA')}
                             onClick={() => setTipoPessoa('FISICA')}
                         >
-                            Pessoa Física
+                            Pessoa FÃ­sica
                         </button>
                         <button
                             type="button"
                             style={toggleBtnStyle(tipoPessoa === 'JURIDICA')}
                             onClick={() => setTipoPessoa('JURIDICA')}
                         >
-                            Pessoa Jurídica
+                            Pessoa JurÃ­dica
                         </button>
                     </div>
 

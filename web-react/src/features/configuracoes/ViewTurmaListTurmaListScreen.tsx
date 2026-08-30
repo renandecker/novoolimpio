@@ -1,10 +1,10 @@
-import {useState, useEffect} from 'react';
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import {MasterDetail} from '../MasterDetail';
-import {Tabs} from '../Tabs';
-import {Wizard} from '../Wizard';
-import {api} from '../api';
+﻿import {useState, useEffect} from 'react';
+import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import {MasterDetail} from '../../shared/components/MasterDetail';
+import {Tabs} from '../../shared/components/Tabs';
+import {Wizard} from '../../shared/components/Wizard';
+import {api} from '../../shared/services/api';
 import {
     UNIDADE_SOURCE,
     UNIDADE_COLUMNS,
@@ -12,8 +12,8 @@ import {
     COMPONENTE_SOURCE,
     COMPONENTE_COLUMNS,
     COMPONENTE_SEARCH,
-} from '../masterDetailSources';
-import type {ApiItem} from '../types';
+} from '../../shared/services/masterDetailSources';
+import type {ApiItem} from '../../features/auth/types';
 
 const TURMA_COLUMNS: DataTableColumn[] = [
     {key: 'nome', label: 'Nome'},
@@ -60,11 +60,11 @@ const DIAS_AULA_COLUMNS: DataTableColumn[] = [
 const PROFESSOR_COLUMNS: DataTableColumn[] = [
     {key: 'pessoaId', label: 'Pessoa'},
     {key: 'ativo', label: 'Ativo'},
-    {key: 'dataInicio', label: 'Início'},
+    {key: 'dataInicio', label: 'InÃ­cio'},
     {key: 'dataFim', label: 'Fim'},
 ];
 
-/** <p:dialog id="dialogo" header="Finalizando Turma"><p:tabView> — plain tabs, not a wizard. */
+/** <p:dialog id="dialogo" header="Finalizando Turma"><p:tabView> â€” plain tabs, not a wizard. */
 function FinalizarTurmaModal({turma, onClose}: { turma: ApiItem | null; onClose: () => void }) {
     const [notas, setNotas] = useState<NotasResponse | null>(null);
     const [presencas, setPresencas] = useState<PresencasResponse | null>(null);
@@ -103,7 +103,7 @@ function FinalizarTurmaModal({turma, onClose}: { turma: ApiItem | null; onClose:
     const renderNotas = () => {
         if (loadingNotas) return <p className="master-detail-empty">Carregando notas...</p>;
         if (!notas) return <p className="master-detail-empty">Erro ao carregar notas.</p>;
-        if (!notas.alunos?.length) return <p className="master-detail-empty">Nenhuma nota lançada.</p>;
+        if (!notas.alunos?.length) return <p className="master-detail-empty">Nenhuma nota lanÃ§ada.</p>;
         return (
             <div style={{overflowX: 'auto'}}>
                 <table className="aluno-portal-tabela">
@@ -130,9 +130,9 @@ function FinalizarTurmaModal({turma, onClose}: { turma: ApiItem | null; onClose:
     };
 
     const renderPresencas = () => {
-        if (loadingPresencas) return <p className="master-detail-empty">Carregando presenças...</p>;
-        if (!presencas) return <p className="master-detail-empty">Erro ao carregar presenças.</p>;
-        if (!presencas.alunos?.length) return <p className="master-detail-empty">Nenhuma presença registrada.</p>;
+        if (loadingPresencas) return <p className="master-detail-empty">Carregando presenÃ§as...</p>;
+        if (!presencas) return <p className="master-detail-empty">Erro ao carregar presenÃ§as.</p>;
+        if (!presencas.alunos?.length) return <p className="master-detail-empty">Nenhuma presenÃ§a registrada.</p>;
         return (
             <div style={{overflowX: 'auto'}}>
                 <table className="aluno-portal-tabela">
@@ -166,11 +166,11 @@ function FinalizarTurmaModal({turma, onClose}: { turma: ApiItem | null; onClose:
                     tabs={[
                         {
                             key: 'matriculas',
-                            label: 'Matrículas',
+                            label: 'MatrÃ­culas',
                             content: <DataTable path="/api/educacao/matricula" columns={MATRICULA_COLUMNS} params={{turmaId: turma?.id}} />,
                         },
                         {key: 'notas', label: 'Notas', content: renderNotas()},
-                        {key: 'presencas', label: 'Presenças', content: renderPresencas()},
+                        {key: 'presencas', label: 'PresenÃ§as', content: renderPresencas()},
                     ]}
                     activeKey={activeTab}
                     onChange={setActiveTab}
@@ -190,7 +190,7 @@ function formatarData(valor: string | null | undefined): string {
     return `${dia}/${mes}/${ano}`;
 }
 
-/** <p:dialog id="dialogProrrogando" widgetVar="prorrogando"><p:wizard> — Dias Aula / Comparativo Aula / Professor. */
+/** <p:dialog id="dialogProrrogando" widgetVar="prorrogando"><p:wizard> â€” Dias Aula / Comparativo Aula / Professor. */
 function ProrrogarTurmaModal({onClose}: { onClose: () => void }) {
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -224,7 +224,7 @@ function ProrrogarTurmaModal({onClose}: { onClose: () => void }) {
     );
 }
 
-/** <p:dialog header="Trocar aluno da turma"><p:wizard id="wizardtroca" showNavBar="false"> — Selecionando Aluno / Nova Turma. */
+/** <p:dialog header="Trocar aluno da turma"><p:wizard id="wizardtroca" showNavBar="false"> â€” Selecionando Aluno / Nova Turma. */
 function TrocarTurmaModal({onClose}: { onClose: () => void }) {
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -237,13 +237,13 @@ function TrocarTurmaModal({onClose}: { onClose: () => void }) {
                         {
                             key: 'selecionarAluno',
                             label: 'Selecionando Aluno',
-                            content: <p className="master-detail-empty">Seleção de aluno.</p>
+                            content: <p className="master-detail-empty">SeleÃ§Ã£o de aluno.</p>
                         },
                         {
                             key: 'novaTurma',
                             label: 'Selecionando nova Turma',
                             nextLabel: 'Finalizar',
-                            content: <p className="master-detail-empty">Seleção de nova turma.</p>
+                            content: <p className="master-detail-empty">SeleÃ§Ã£o de nova turma.</p>
                         },
                     ]}
                 />
@@ -288,8 +288,8 @@ export default function ViewTurmaListTurmaListScreen() {
                     </div>
                 </div>
 
-                {/* Cada botão abaixo corresponde a um <p:menuitem>/<p:dialog> independente em
-            listTurma.xhtml — não são etapas de um único wizard de página. */}
+                {/* Cada botÃ£o abaixo corresponde a um <p:menuitem>/<p:dialog> independente em
+            listTurma.xhtml â€” nÃ£o sÃ£o etapas de um Ãºnico wizard de pÃ¡gina. */}
                 <div className="modal-actions" style={{margin: '0.5rem 0'}}>
                     <button type="button" className="btnblack" onClick={() => setFinalizarAberto(true)}>
                         Finalizar Turma

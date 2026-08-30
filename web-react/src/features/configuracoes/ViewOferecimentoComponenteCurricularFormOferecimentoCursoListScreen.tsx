@@ -1,9 +1,9 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+﻿import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
-import {api} from '../api';
-import {PermissionGate} from '../permissions';
-import {AutoComplete, type AutoCompleteOption} from '../AutoComplete';
+import {api} from '../../shared/services/api';
+import {PermissionGate} from '../../shared/services/permissions';
+import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
 import './OferecimentoCurso.css';
 
 type Opcao = {id: number; label: string};
@@ -377,8 +377,8 @@ useEffect(() => {
 
                 // Load ocorrencias for each turma (new endpoint with full objects)
                 let ocorrenciasPorTurma: Record<number, OcorrenciaItem[]> = {};
-                // Reconstruir os dias de aula a partir das ocorrências persistidas quando o
-                // grupo não retornar os dias (join table vazia), garantindo a pré-visualização
+                // Reconstruir os dias de aula a partir das ocorrÃªncias persistidas quando o
+                // grupo nÃ£o retornar os dias (join table vazia), garantindo a prÃ©-visualizaÃ§Ã£o
                 // correta das aulas ao editar.
                 let diasAulaFinal = [...diasAulaLoaded];
                 try {
@@ -512,12 +512,12 @@ useEffect(() => {
                     }
 
                     if (inconsistencies.length > 0) {
-                        setMensagem(`Atenção: As turmas deste grupo têm valores diferentes para: ${inconsistencies.join(', ')}. O formulário usa os valores da primeira turma.`);
+                        setMensagem(`AtenÃ§Ã£o: As turmas deste grupo tÃªm valores diferentes para: ${inconsistencies.join(', ')}. O formulÃ¡rio usa os valores da primeira turma.`);
                     }
                 };
                 checkInconsistencies();
             } catch {
-                setErro('Não foi possível carregar o oferecimento para edição.');
+                setErro('NÃ£o foi possÃ­vel carregar o oferecimento para ediÃ§Ã£o.');
             }
         })();
     }, [emEdicao, id]);
@@ -561,8 +561,8 @@ useEffect(() => {
 
     const gerarPreview = useCallback(() => {
         if (!data.dataInicio || data.diasAula.length === 0) {
-            // Em edição, preserva as aulas (ocorrências) já persistidas no banco em vez de
-            // apagá-las quando ainda não há data inicial/dias de aula informados.
+            // Em ediÃ§Ã£o, preserva as aulas (ocorrÃªncias) jÃ¡ persistidas no banco em vez de
+            // apagÃ¡-las quando ainda nÃ£o hÃ¡ data inicial/dias de aula informados.
             if (!emEdicao) {
                 setTurmas((prev) => prev.map((t) => ({...t, ocorrencias: []})));
             }
@@ -602,7 +602,7 @@ useEffect(() => {
                 cursor += 86400000;
             }
             if (calculoDia <= quantidadeAulas) {
-                invalidas.push({data: brDate(new Date(cursor - 86400000).toISOString().slice(0, 10)), motivo: `Não foi possível gerar todas as aulas de ${turma.descricao} na janela de busca.`});
+                invalidas.push({data: brDate(new Date(cursor - 86400000).toISOString().slice(0, 10)), motivo: `NÃ£o foi possÃ­vel gerar todas as aulas de ${turma.descricao} na janela de busca.`});
             }
             return {...turma, ocorrencias};
         }));
@@ -643,7 +643,7 @@ useEffect(() => {
             return;
         }
         if (diasAula.some((d) => d.diaSemanaId === novoDiaDiaSemana && d.turnoEducacaoId === novoDiaTurno && d.tempoAulaId === novoDiaTempoAula)) {
-            setMensagem('Este Dia da Semana com o turno e tempo já existe.');
+            setMensagem('Este Dia da Semana com o turno e tempo jÃ¡ existe.');
             return;
         }
         setMensagem(null);
@@ -666,7 +666,7 @@ useEffect(() => {
     const alterarDataOcorrencia = (componenteId: number, chave: string, novaData: string) => {
         const conflito = turmas.some((t) => t.ocorrencias.some((o) => o.key !== chave && o.data === novaData));
         if (conflito) {
-            setDatasInvalidas((prev) => [...prev, {data: brDate(novaData), motivo: 'Já existe aula deste grupo nesta data.'}]);
+            setDatasInvalidas((prev) => [...prev, {data: brDate(novaData), motivo: 'JÃ¡ existe aula deste grupo nesta data.'}]);
             return;
         }
         setTurmas((prev) => prev.map((t) => t.componenteCurricularId !== componenteId ? t : ({
@@ -719,7 +719,7 @@ useEffect(() => {
             setOferecimentosConsulta(ofs ?? []);
             setDialogOferecimentos(true);
         } catch {
-            setErro('Não foi possível consultar os oferecimentos.');
+            setErro('NÃ£o foi possÃ­vel consultar os oferecimentos.');
         }
     };
 
@@ -732,7 +732,7 @@ useEffect(() => {
             } else if (!data.grupoId) { setMensagem('Selecione o grupo'); return false; }
         }
         if (targetTab === 'tabProfessor') {
-            if (data.vagas <= 0) { setMensagem('O número de vagas não pode ser 0.'); return false; }
+            if (data.vagas <= 0) { setMensagem('O nÃºmero de vagas nÃ£o pode ser 0.'); return false; }
             if (data.diasAula.length === 0) { setMensagem('Marque pelo menos um Dia da Semana.'); return false; }
             if (!data.dataInicio) { setMensagem('Informe uma data para criar os dias de aula.'); return false; }
             const semAulas = turmas.every((t) => t.ocorrencias.length === 0);
@@ -847,7 +847,7 @@ useEffect(() => {
             <p className="step-description">
                 {emEdicao
                     ? 'Edite os dados do oferecimento do curso.'
-                    : 'Informe a unidade e o curso. Você pode criar uma nova sequência ou selecionar um grupo existente.'}
+                    : 'Informe a unidade e o curso. VocÃª pode criar uma nova sequÃªncia ou selecionar um grupo existente.'}
             </p>
 
             {!emEdicao && (
@@ -859,7 +859,7 @@ useEffect(() => {
                             disabled={(gruposDisponiveis.length === 0 && !data.novoGrupo)}
                             onChange={(e) => updateFields({novoGrupo: e.target.checked, grupoId: null})}
                         />
-                        Criar nova sequência
+                        Criar nova sequÃªncia
                     </label>
                 </div>
             )}
@@ -872,7 +872,7 @@ useEffect(() => {
                             id="ofc-grupo-nome"
                             className="form-input"
                             value={data.grupoNome}
-                            placeholder="Nome do grupo / sequência"
+                            placeholder="Nome do grupo / sequÃªncia"
                             onChange={(e) => updateField('grupoNome', e.target.value)}
                         />
                     ) : (
@@ -947,7 +947,7 @@ useEffect(() => {
                                 checked={data.registraFrequencia}
                                 onChange={(e) => updateField('registraFrequencia', e.target.checked)}
                             />
-                            Registra Frequência
+                            Registra FrequÃªncia
                         </label>
                         <label className="ofc-checkbox">
                             <input
@@ -955,12 +955,12 @@ useEffect(() => {
                                 checked={data.possuiAvaliacao}
                                 onChange={(e) => updateField('possuiAvaliacao', e.target.checked)}
                             />
-                            Possui Avaliação
+                            Possui AvaliaÃ§Ã£o
                         </label>
                     </div>
                     <div className="field-row">
                         <div className="field-group">
-                            <label htmlFor="ofc-data-cancelamento" title="Após esta data se a turma continuar pendente ela será cancelada">
+                            <label htmlFor="ofc-data-cancelamento" title="ApÃ³s esta data se a turma continuar pendente ela serÃ¡ cancelada">
                                 Data Cancelamento
                             </label>
                             <input
@@ -995,7 +995,7 @@ useEffect(() => {
                             value={data.replicar ? 'sim' : 'nao'}
                             onChange={(e) => updateField('replicar', e.target.value === 'sim')}
                         >
-                            <option value="nao">Não</option>
+                            <option value="nao">NÃ£o</option>
                             <option value="sim">Sim</option>
                         </select>
                     </div>
@@ -1005,17 +1005,17 @@ useEffect(() => {
             {data.curriculoId && (
                 <div className="field-row">
                     <div className="field-group">
-                        <label>Critério de Curso</label>
+                        <label>CritÃ©rio de Curso</label>
                         <div className="ofc-hint">
                             {data.criterio ? (
                                 <>
-                                    Turmas máximas abertas: {data.criterio.qtdTurmaAbertas ?? 'Não definido'}<br />
-                                    Período: {data.criterio.periodo ?? 'Não definido'}<br />
-                                    {data.criterio.dataInicio && `Início válido a partir de: ${brDate(data.criterio.dataInicio)}`}<br />
-                                    {data.criterio.dataFim && `Término até: ${brDate(data.criterio.dataFim)}`}
+                                    Turmas mÃ¡ximas abertas: {data.criterio.qtdTurmaAbertas ?? 'NÃ£o definido'}<br />
+                                    PerÃ­odo: {data.criterio.periodo ?? 'NÃ£o definido'}<br />
+                                    {data.criterio.dataInicio && `InÃ­cio vÃ¡lido a partir de: ${brDate(data.criterio.dataInicio)}`}<br />
+                                    {data.criterio.dataFim && `TÃ©rmino atÃ©: ${brDate(data.criterio.dataFim)}`}
                                 </>
                             ) : (
-                                'Nenhum critério específico definido para esta unidade/curso.'
+                                'Nenhum critÃ©rio especÃ­fico definido para esta unidade/curso.'
                             )}
                         </div>
                     </div>
@@ -1025,8 +1025,8 @@ useEffect(() => {
             <div className="field-row">
                 <AutoComplete
                     id="ofc-responsavel"
-                    label="Responsável"
-                    placeholder="Digite para buscar o usuário..."
+                    label="ResponsÃ¡vel"
+                    placeholder="Digite para buscar o usuÃ¡rio..."
                     value={null}
                     onChange={(opt) => {
                         if (opt && !data.responsaveis.some((r) => r.id === opt.id)) {
@@ -1037,7 +1037,7 @@ useEffect(() => {
                     minChars={2}
                 />
                 <div className="ofc-chips">
-                    {data.responsaveis.length === 0 && <span className="ofc-chips-vazio">Nenhum responsável adicionado.</span>}
+                    {data.responsaveis.length === 0 && <span className="ofc-chips-vazio">Nenhum responsÃ¡vel adicionado.</span>}
                     {data.responsaveis.map((r) => (
                         <span key={r.id} className="ofc-chip">
                             {r.label}
@@ -1046,7 +1046,7 @@ useEffect(() => {
                                 title="Remover"
                                 onClick={() => updateField('responsaveis', data.responsaveis.filter((x) => x.id !== r.id))}
                             >
-                                ✕
+                                âœ•
                             </button>
                         </span>
                     ))}
@@ -1062,7 +1062,7 @@ useEffect(() => {
             <section className="tab-content">
                 <p className="step-description">
                     Defina sala, vagas, data inicial e os dias de aula (dia da semana, turno e tempo).
-                    As aulas são geradas automaticamente por componente curricular.
+                    As aulas sÃ£o geradas automaticamente por componente curricular.
                 </p>
 
                 <div className="field-row">
@@ -1098,13 +1098,13 @@ useEffect(() => {
                             <small className="ofc-hint">
                                 Capacidade: {salaSelecionada.qtd_alunos ?? 0} alunos
                                 {curriculoSelecionado && (curriculoSelecionado.qtd_maxima_alunos ?? 0) > 0
-                                    ? ` · Máximo do curso: ${curriculoSelecionado.qtd_maxima_alunos}`
+                                    ? ` Â· MÃ¡ximo do curso: ${curriculoSelecionado.qtd_maxima_alunos}`
                                     : ''}
                             </small>
                         )}
                     </div>
                     <div className="field-group">
-                        <label htmlFor="ofc-qtde-sequencia">Qtde Sequência</label>
+                        <label htmlFor="ofc-qtde-sequencia">Qtde SequÃªncia</label>
                         <input
                             id="ofc-qtde-sequencia"
                             type="number"
@@ -1214,7 +1214,7 @@ useEffect(() => {
                                         <td>{tempo?.descricao || `#${item.tempoAulaId}`}</td>
                                         <td>
                                             <button type="button" className="ofc-btn-remove" title="Remover"
-                                                    onClick={() => removerDiaAula(indice)}>✕
+                                                    onClick={() => removerDiaAula(indice)}>âœ•
                                             </button>
                                         </td>
                                     </tr>
@@ -1238,10 +1238,10 @@ useEffect(() => {
                             className="ofc-card-header"
                             onClick={() => setExpandido(expandido === turma.componenteCurricularId ? null : turma.componenteCurricularId)}
                         >
-                            <span className="ofc-card-toggle">{expandido === turma.componenteCurricularId ? '▾' : '▸'}</span>
+                            <span className="ofc-card-toggle">{expandido === turma.componenteCurricularId ? 'â–¾' : 'â–¸'}</span>
                             <span className="ofc-card-title">{turma.descricao}</span>
                             <span className="ofc-card-meta">
-                                Carga horária: {turma.cargaHoraria}h · {turma.ocorrencias.length} aula(s)
+                                Carga horÃ¡ria: {turma.cargaHoraria}h Â· {turma.ocorrencias.length} aula(s)
                             </span>
                         </button>
                         {expandido === turma.componenteCurricularId && (
@@ -1282,7 +1282,7 @@ useEffect(() => {
                                             <td>{turma.descricao}</td>
                                             <td>{salaSelecionada ? (salaSelecionada.numero ? `Sala ${salaSelecionada.numero}` : salaSelecionada.sucinto || '') : '-'}</td>
                                             <td>{dia?.nome || '-'}</td>
-                                            <td>{turno?.descricao || '-'}{turno ? ` (${String(turno.inicio ?? '').slice(0, 5)} às ${String(turno.fim ?? '').slice(0, 5)})` : ''}</td>
+                                            <td>{turno?.descricao || '-'}{turno ? ` (${String(turno.inicio ?? '').slice(0, 5)} Ã s ${String(turno.fim ?? '').slice(0, 5)})` : ''}</td>
                                             <td>{tempo?.descricao || '-'}</td>
                                             <td>
                                                 <button
@@ -1290,7 +1290,7 @@ useEffect(() => {
                                                     className={`ofc-toggle ${ocorrencia.aulaPresencial ? 'ofc-toggle-on' : ''}`}
                                                     onClick={() => alternarPresencial(turma.componenteCurricularId, ocorrencia.key)}
                                                 >
-                                                    {ocorrencia.aulaPresencial ? 'Sim' : 'Não'}
+                                                    {ocorrencia.aulaPresencial ? 'Sim' : 'NÃ£o'}
                                                 </button>
                                             </td>
                                         </tr>
@@ -1304,11 +1304,11 @@ useEffect(() => {
 
                 {datasInvalidas.length > 0 && (
                     <>
-                        <h3 className="ofc-subtitulo ofc-subtitulo-erro">Datas Inválidas</h3>
+                        <h3 className="ofc-subtitulo ofc-subtitulo-erro">Datas InvÃ¡lidas</h3>
                         <table className="ofc-table ofc-table-invalidas">
                             <thead>
                             <tr>
-                                <th style={{width: 130}}>Data Inválida</th>
+                                <th style={{width: 130}}>Data InvÃ¡lida</th>
                                 <th>Motivo</th>
                             </tr>
                             </thead>
@@ -1354,7 +1354,7 @@ useEffect(() => {
                 </div>
                 <p className="step-description">Selecione os professores de cada Componente Curricular.</p>
                 {turmas.length === 0 ? (
-                    <p className="ofc-aviso">Nenhum componente curricular disponível. Volte e selecione o curso.</p>
+                    <p className="ofc-aviso">Nenhum componente curricular disponÃ­vel. Volte e selecione o curso.</p>
                 ) : (
                     <table className="ofc-table">
                         <thead>
@@ -1409,7 +1409,7 @@ useEffect(() => {
                 {erro && <div className="data-table-notice ofc-notice-erro">{erro}</div>}
 
                 <div className="div_form">
-                    <div className="form-title">{emEdicao ? `Editar Oferecimento de Curso${data.grupoNome ? ` — ${data.grupoNome}` : ''}` : 'Novo Oferecimento de Curso'}</div>
+                    <div className="form-title">{emEdicao ? `Editar Oferecimento de Curso${data.grupoNome ? ` â€” ${data.grupoNome}` : ''}` : 'Novo Oferecimento de Curso'}</div>
                     
                     <div className="ofc-tabs">
                         <nav className="ofc-tabs-nav" role="tablist" aria-label="Abas do oferecimento de curso">
@@ -1473,7 +1473,7 @@ useEffect(() => {
                                 }}
                                 disabled={salvando}
                             >
-                                {salvando ? 'Salvando...' : activeTab === 'tabProfessor' ? 'Salvar' : 'Próximo'}
+                                {salvando ? 'Salvando...' : activeTab === 'tabProfessor' ? 'Salvar' : 'PrÃ³ximo'}
                             </button>
                         </div>
                     </div>
@@ -1492,7 +1492,7 @@ useEffect(() => {
                                             <th>Componente Curricular</th>
                                             <th>Sala</th>
                                             <th>Professor</th>
-                                            <th>Início</th>
+                                            <th>InÃ­cio</th>
                                             <th>Fim</th>
                                         </tr>
                                         </thead>
@@ -1529,6 +1529,6 @@ useEffect(() => {
     );
 }
 
-function opçãoFilterGuard(_id: number): number {
+function opcaoFilterGuard(_id: number): number {
     return _id;
 }

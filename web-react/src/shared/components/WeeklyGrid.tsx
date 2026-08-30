@@ -1,4 +1,4 @@
-export interface ScheduleEventData {
+﻿export interface ScheduleEventData {
     id?: string | number;
     title: string;
     start: string;

@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import type {ApiItem} from '../types';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../features/auth/types';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -15,28 +15,28 @@ const COLUMNS: DataTableColumn[] = [
     {key: 'nome', label: 'Nome'},
     {
         key: 'data_criacao',
-        label: 'Data Criação',
+        label: 'Data CriaÃ§Ã£o',
         render: (item) => formatDate(asRecord(item).data_criacao),
     },
     {
         key: 'fl_ano',
         label: 'Ano',
-        render: (item) => (asRecord(item).fl_ano ? 'Sim' : 'Não'),
+        render: (item) => (asRecord(item).fl_ano ? 'Sim' : 'NÃ£o'),
     },
     {
         key: 'fl_mes',
-        label: 'Mês',
-        render: (item) => (asRecord(item).fl_mes ? 'Sim' : 'Não'),
+        label: 'MÃªs',
+        render: (item) => (asRecord(item).fl_mes ? 'Sim' : 'NÃ£o'),
     },
     {
         key: 'fl_semana',
         label: 'Semana',
-        render: (item) => (asRecord(item).fl_semana ? 'Sim' : 'Não'),
+        render: (item) => (asRecord(item).fl_semana ? 'Sim' : 'NÃ£o'),
     },
     {
         key: 'fl_dia',
         label: 'Dia',
-        render: (item) => (asRecord(item).fl_dia ? 'Sim' : 'Não'),
+        render: (item) => (asRecord(item).fl_dia ? 'Sim' : 'NÃ£o'),
     },
 ];
 

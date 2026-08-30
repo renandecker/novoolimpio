@@ -1,9 +1,9 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {PermissionGate} from '../permissions';
-import {api} from '../api';
-import {AutoComplete} from '../AutoComplete';
-import type {AutoCompleteOption} from '../AutoComplete';
+import {PermissionGate} from '../../shared/services/permissions';
+import {api} from '../../shared/services/api';
+import {AutoComplete} from '../../shared/components/AutoComplete';
+import type {AutoCompleteOption} from '../../shared/components/AutoComplete';
 
 const apiErrorMessage = (error: unknown): string =>
     (error as { response?: { data?: { error?: string } } })?.response?.data?.error
@@ -59,11 +59,11 @@ export default function ViewFeriadoFormFeriadoListScreen() {
                 setTodosCursos(Boolean(ent.fl_tipo_curso ?? false));
                 setFeriadoFixo(Boolean(ent.fl_feriado_fixo ?? false));
 
-                // Carregar tipoCursos e unidades associadas se necessário
+                // Carregar tipoCursos e unidades associadas se necessÃ¡rio
                 // TODO: implementar busca de relacionamentos se houver endpoints
             } catch (erro) {
                 console.error('Erro ao carregar feriado:', erro);
-                alert('Não foi possível carregar o feriado para edição');
+                alert('NÃ£o foi possÃ­vel carregar o feriado para ediÃ§Ã£o');
             } finally {
                 if (ativo) setCarregando(false);
             }
@@ -155,7 +155,7 @@ export default function ViewFeriadoFormFeriadoListScreen() {
                                        }}/>
                             </label>
                             <label className="form-field">
-                                <span className="form-label">Descrição *</span>
+                                <span className="form-label">DescriÃ§Ã£o *</span>
                                 <textarea className="form-input" rows={4} value={descricao}
                                           onChange={(event) => setDescricao(event.target.value)}/>
                             </label>
@@ -172,7 +172,7 @@ export default function ViewFeriadoFormFeriadoListScreen() {
                                 <span className="form-label">Feriado Fixo</span>
                                 <select className="form-input" value={feriadoFixo ? 'true' : 'false'}
                                         onChange={(event) => setFeriadoFixo(event.target.value === 'true')}>
-                                    <option value="false">Não</option>
+                                    <option value="false">NÃ£o</option>
                                     <option value="true">Sim</option>
                                 </select>
                             </label>
@@ -183,7 +183,7 @@ export default function ViewFeriadoFormFeriadoListScreen() {
                                             setNacional(event.target.value === 'true');
                                             if (event.target.value === 'true') setUnidades([]);
                                         }}>
-                                    <option value="false">Não</option>
+                                    <option value="false">NÃ£o</option>
                                     <option value="true">Sim</option>
                                 </select>
                             </label>
@@ -194,7 +194,7 @@ export default function ViewFeriadoFormFeriadoListScreen() {
                                             setTodosCursos(event.target.value === 'true');
                                             if (event.target.value === 'true') setTipoCursos([]);
                                         }}>
-                                    <option value="false">Não</option>
+                                    <option value="false">NÃ£o</option>
                                     <option value="true">Sim</option>
                                 </select>
                             </label>
@@ -204,7 +204,7 @@ export default function ViewFeriadoFormFeriadoListScreen() {
                                     <label className="form-field">
                                         <span className="form-label">Tipo Cursos</span>
                                         <AutoComplete
-                                            placeholder="Digite para buscar (mínimo 3 caracteres)"
+                                            placeholder="Digite para buscar (mÃ­nimo 3 caracteres)"
                                             value={tipoCursos}
                                             onChange={setTipoCursos}
                                             fetchOptions={buscarTipoCursos}
@@ -218,7 +218,7 @@ export default function ViewFeriadoFormFeriadoListScreen() {
                                     <label className="form-field">
                                         <span className="form-label">Unidade</span>
                                         <AutoComplete
-                                            placeholder="Digite para buscar (mínimo 3 caracteres)"
+                                            placeholder="Digite para buscar (mÃ­nimo 3 caracteres)"
                                             value={unidades}
                                             onChange={setUnidades}
                                             fetchOptions={buscarUnidades}

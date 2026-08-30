@@ -1,9 +1,9 @@
 import {useEffect, useRef, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
-import {listarRelatoriosDisponiveis, type RelatorioDisponivel} from './relatorios';
-import {useAuth} from './auth';
-import {usePermissions} from './permissions';
+import {listarRelatoriosDisponiveis, type RelatorioDisponivel} from './features/relatorios/relatorios';
+import {useAuth} from './features/auth/auth';
+import {usePermissions} from './shared/services/permissions';
 
 const ReportIcon = () => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">

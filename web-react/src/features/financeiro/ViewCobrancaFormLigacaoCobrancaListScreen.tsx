@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {DataTable} from '../DataTable';
-import {Wizard} from '../Wizard';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable} from '../../shared/components/DataTable';
+import {Wizard} from '../../shared/components/Wizard';
 
 export default function ViewCobrancaFormLigacaoCobrancaListScreen() {
     return (

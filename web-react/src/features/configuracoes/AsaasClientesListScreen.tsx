@@ -1,5 +1,5 @@
-import {PermissionGate} from '../permissions';
-import {DataTable} from '../DataTable';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable} from '../../shared/components/DataTable';
 
 export default function AsaasClientesListScreen() {
     return <PermissionGate permission="READ">
@@ -13,6 +13,6 @@ export default function AsaasClientesListScreen() {
                                                 }, {key: 'phone', label: 'Telefone'}, {
                                                     key: 'cityName',
                                                     label: 'Cidade'
-                                                }, {key: 'deleted', label: 'Excluído'}]}/></main>
+                                                }, {key: 'deleted', label: 'ExcluÃ­do'}]}/></main>
     </PermissionGate>
 }

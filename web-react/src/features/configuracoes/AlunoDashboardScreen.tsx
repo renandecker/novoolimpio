@@ -1,12 +1,12 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
-import {alunoApi, AulaAluno, BoletimResumo, formatarNota, formatarPercentual} from '../aluno';
-import '../AlunoPortal.css';
+import {alunoApi, AulaAluno, BoletimResumo, formatarNota, formatarPercentual} from '../../features/aluno/aluno';
+import '../../features/aluno/alunoPortal.css';
 
 const STATUS_ROTULO: Record<string, string> = {
     APROVADO: 'Aprovado',
     'EM EXAME': 'Em exame',
-    'REPROVADO POR FREQUÊNCIA': 'Reprovado por frequência',
+    'REPROVADO POR FREQUÃŠNCIA': 'Reprovado por frequÃªncia',
     'SEM NOTAS': 'Sem notas',
 };
 
@@ -27,7 +27,7 @@ export default function AlunoDashboardScreen() {
                 setChamadas(chamadasData ?? []);
             })
             .catch((e: any) => {
-                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar o painel do aluno.');
+                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'NÃ£o foi possÃ­vel carregar o painel do aluno.');
             })
             .finally(() => {
                 if (active) setBusy(false);
@@ -47,12 +47,12 @@ export default function AlunoDashboardScreen() {
     return (
         <main className="aluno-portal">
             <h1>Portal do Aluno</h1>
-            <p className="aluno-portal-saudacao">Olá, <strong>{nome}</strong>! Este é o seu painel acadêmico.</p>
+            <p className="aluno-portal-saudacao">OlÃ¡, <strong>{nome}</strong>! Este Ã© o seu painel acadÃªmico.</p>
 
             <div className="aluno-portal-cards">
                 <div className="aluno-portal-card">
                     <span className="aluno-portal-card-valor">{boletins.length}</span>
-                    <span className="aluno-portal-card-rotulo">Matrículas</span>
+                    <span className="aluno-portal-card-rotulo">MatrÃ­culas</span>
                 </div>
                 <div className="aluno-portal-card">
                     <span className="aluno-portal-card-valor">{aprovadas}</span>
@@ -60,7 +60,7 @@ export default function AlunoDashboardScreen() {
                 </div>
             </div>
 
-            {boletins.length === 0 && <p className="aluno-portal-msg">Nenhuma matrícula encontrada.</p>}
+            {boletins.length === 0 && <p className="aluno-portal-msg">Nenhuma matrÃ­cula encontrada.</p>}
 
             <div className="aluno-portal-boletim-lista">
                 {boletins.map(b => (
@@ -69,7 +69,7 @@ export default function AlunoDashboardScreen() {
                             <div>
                                 <h2>{b.matricula.componente || b.matricula.curso || 'Disciplina'}</h2>
                                 <p className="aluno-portal-item-meta">
-                                    {[b.matricula.curso, b.matricula.turma ? `Turma ${b.matricula.turma}` : null, b.matricula.periodo].filter(Boolean).join(' · ')}
+                                    {[b.matricula.curso, b.matricula.turma ? `Turma ${b.matricula.turma}` : null, b.matricula.periodo].filter(Boolean).join(' Â· ')}
                                 </p>
                             </div>
                             <span
@@ -78,14 +78,14 @@ export default function AlunoDashboardScreen() {
               </span>
                         </div>
                         <div className="aluno-portal-item-dados">
-                            <span><strong>Média:</strong> {formatarNota(b.media)}</span>
-                            <span><strong>Frequência:</strong> {formatarPercentual(b.frequenciaPerc)}</span>
+                            <span><strong>MÃ©dia:</strong> {formatarNota(b.media)}</span>
+                            <span><strong>FrequÃªncia:</strong> {formatarPercentual(b.frequenciaPerc)}</span>
                         </div>
                         <div className="aluno-portal-item-acoes">
                             <Link to="/aluno/boletim">Ver boletim</Link>
-                            <Link to="/aluno/frequencia">Ver frequência</Link>
+                            <Link to="/aluno/frequencia">Ver frequÃªncia</Link>
                             <Link to="/aluno/aulas">Ver aulas</Link>
-                            <Link to="/aluno/avaliacoes">Ver avaliações</Link>
+                            <Link to="/aluno/avaliacoes">Ver avaliaÃ§Ãµes</Link>
                         </div>
                     </section>
                 ))}

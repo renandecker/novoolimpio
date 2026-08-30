@@ -1,10 +1,10 @@
-import {useState} from 'react';
+﻿import {useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {api} from '../api';
-import {PermissionGate} from '../permissions';
-import {ScheduleWeekView, mondayOf, toIsoDate} from '../WeeklyGrid';
-import type {ScheduleEventData} from '../WeeklyGrid';
-import '../Disponibilidade.css';
+import {api} from '../../shared/services/api';
+import {PermissionGate} from '../../shared/services/permissions';
+import {ScheduleWeekView, mondayOf, toIsoDate} from '../../shared/components/WeeklyGrid';
+import type {ScheduleEventData} from '../../shared/components/WeeklyGrid';
+import '../../features/professor/Disponibilidade.css';
 
 interface UnidadeRow {
     id: number;

@@ -1,11 +1,11 @@
-import {useState} from 'react';
-import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
-import type {DataTableColumn} from '../DataTable';
-import type {ApiItem} from '../types';
-import {api} from '../api';
-import {AutoComplete} from '../AutoComplete';
-import type {AutoCompleteOption} from '../AutoComplete';
+﻿import {useState} from 'react';
+import {PermissionGate} from '../../shared/services/permissions';
+import {ModuleTabs} from '../../shared/components/ModuleTabs';
+import type {DataTableColumn} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../features/auth/types';
+import {api} from '../../shared/services/api';
+import {AutoComplete} from '../../shared/components/AutoComplete';
+import type {AutoCompleteOption} from '../../shared/components/AutoComplete';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -23,7 +23,7 @@ const apiErrorMessage = (error: unknown): string =>
 
 const FERIADO_COLUMNS: DataTableColumn[] = [
     {key: 'nome', label: 'Nome'},
-    {key: 'descricao', label: 'Descrição'},
+    {key: 'descricao', label: 'DescriÃ§Ã£o'},
     {
         key: 'dt_feriado',
         label: 'Data',
@@ -32,17 +32,17 @@ const FERIADO_COLUMNS: DataTableColumn[] = [
     {
         key: 'fl_feriado_fixo',
         label: 'Fixo',
-        render: (item) => (asRecord(item).fl_feriado_fixo ? 'Sim' : 'Não'),
+        render: (item) => (asRecord(item).fl_feriado_fixo ? 'Sim' : 'NÃ£o'),
     },
     {
         key: 'fl_tipo_curso',
         label: 'Todos Cursos',
-        render: (item) => (asRecord(item).fl_tipo_curso ? 'Sim' : 'Não'),
+        render: (item) => (asRecord(item).fl_tipo_curso ? 'Sim' : 'NÃ£o'),
     },
     {
         key: 'fl_nacional',
         label: 'Nacional',
-        render: (item) => (asRecord(item).fl_nacional ? 'Sim' : 'Não'),
+        render: (item) => (asRecord(item).fl_nacional ? 'Sim' : 'NÃ£o'),
     },
 ];
 
@@ -100,17 +100,17 @@ export default function ViewFeriadoListFeriadoListScreen() {
                                 },
                             ],
                         },
-                        {key: 'calendario', label: 'Calendário', empty: 'Conteúdo de Calendário.'},
+                        {key: 'calendario', label: 'CalendÃ¡rio', empty: 'ConteÃºdo de CalendÃ¡rio.'},
                         {
                             key: 'ajusteFeriadoOferecimento',
                             label: 'Ajuste Feriado Oferecimento',
-                            empty: 'Conteúdo de Ajuste Feriado Oferecimento.'
+                            empty: 'ConteÃºdo de Ajuste Feriado Oferecimento.'
                         },
-                        {key: 'feriadoAjuste', label: 'Feriado Ajuste', empty: 'Conteúdo de Feriado Ajuste.'},
+                        {key: 'feriadoAjuste', label: 'Feriado Ajuste', empty: 'ConteÃºdo de Feriado Ajuste.'},
                         {
                             key: 'feriadoNaoAjustar',
-                            label: 'Feriado Não Ajustar',
-                            empty: 'Conteúdo de Feriado Não Ajustar.'
+                            label: 'Feriado NÃ£o Ajustar',
+                            empty: 'ConteÃºdo de Feriado NÃ£o Ajustar.'
                         },
                     ]}
                 />
@@ -125,7 +125,7 @@ export default function ViewFeriadoListFeriadoListScreen() {
     );
 }
 
-/** Espelha o diálogo p:dialog widgetVar="trocaFeriado" do listFeriado.xhtml. */
+/** Espelha o diÃ¡logo p:dialog widgetVar="trocaFeriado" do listFeriado.xhtml. */
 function TrocaFeriadoDialog({entity, onClose}: { entity: ApiItem; onClose: () => void }) {
     const record = asRecord(entity);
     const destinoId = Number(record.id);
@@ -164,7 +164,7 @@ function TrocaFeriadoDialog({entity, onClose}: { entity: ApiItem; onClose: () =>
         setSalvando(true);
         setErro('');
         try {
-            // TODO: Endpoint /api/basico/feriado/trocar-feriados não existe no backend ainda
+            // TODO: Endpoint /api/basico/feriado/trocar-feriados nÃ£o existe no backend ainda
             // await api.post('/api/basico/feriado/trocar-feriados', {
             //     destinoId,
             //     origemIds: lista.map((item) => item.id),
@@ -182,7 +182,7 @@ function TrocaFeriadoDialog({entity, onClose}: { entity: ApiItem; onClose: () =>
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal form-modal" onClick={(event) => event.stopPropagation()}>
                 <div className="div_form">
-                    <div className="form-title">Troca e remoção feriado</div>
+                    <div className="form-title">Troca e remoÃ§Ã£o feriado</div>
                     <div className="table_form">
                         <div className="form-grid">
                             <div className="form-field">
@@ -199,7 +199,7 @@ function TrocaFeriadoDialog({entity, onClose}: { entity: ApiItem; onClose: () =>
                             </div>
                             <div className="form-field">
                                 <span className="form-label">Nacional</span>
-                                <span>{record.fl_nacional === true ? 'Sim' : 'Não'}</span>
+                                <span>{record.fl_nacional === true ? 'Sim' : 'NÃ£o'}</span>
                             </div>
                         </div>
 
@@ -210,7 +210,7 @@ function TrocaFeriadoDialog({entity, onClose}: { entity: ApiItem; onClose: () =>
                                 <div style={{display: 'flex', gap: '8px', width: '100%'}}>
                                     <div style={{flex: 1}}>
                                         <AutoComplete
-                                            placeholder="Digite para buscar (mínimo 3 caracteres)"
+                                            placeholder="Digite para buscar (mÃ­nimo 3 caracteres)"
                                             value={selecao}
                                             onChange={setSelecao}
                                             fetchOptions={buscarOpcoes}
@@ -239,7 +239,7 @@ function TrocaFeriadoDialog({entity, onClose}: { entity: ApiItem; onClose: () =>
                                             <td>
                                                 <button type="button" className="btn-action btnred" title="Remover"
                                                         onClick={() => remover(item.id)}>
-                                                    ×
+                                                    Ã—
                                                 </button>
                                             </td>
                                         </tr>

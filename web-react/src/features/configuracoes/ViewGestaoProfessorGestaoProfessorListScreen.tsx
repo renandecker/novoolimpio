@@ -1,10 +1,10 @@
-import {useRef, useState, useEffect} from 'react';
-import {api} from '../api';
-import {PermissionGate, usePermissions} from '../permissions';
-import {useAuth} from '../auth';
-import {Tabs} from '../Tabs';
-import {AutoComplete, type AutoCompleteOption} from '../AutoComplete';
-import {legacyClassName} from '../DataTable';
+﻿import {useRef, useState, useEffect} from 'react';
+import {api} from '../../shared/services/api';
+import {PermissionGate, usePermissions} from '../../shared/services/permissions';
+import {useAuth} from '../../features/auth/auth';
+import {Tabs} from '../../shared/components/Tabs';
+import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
+import {legacyClassName} from '../../shared/components/DataTable';
 import '../GestaoProfessor.css';
 
 type Turma = {
@@ -86,7 +86,7 @@ type AnexoForm = { nome: string; anexo: string; tipo: string };
 const PRESENCAS: Record<string, { titulo: string; cor: string }> = {
     n: {titulo: 'Sem Registro', cor: '#000000'},
     p: {titulo: 'Presente', cor: '#32CD32'},
-    m: {titulo: 'Meia Presença', cor: '#FFD700'},
+    m: {titulo: 'Meia PresenÃ§a', cor: '#FFD700'},
     a: {titulo: 'Ausente', cor: '#FF0000'},
     t: {titulo: 'Atestado', cor: '#0000CD'},
     c: {titulo: 'Cancelado', cor: '#FFA500'},
@@ -120,7 +120,7 @@ function Painel({
         <div className="gp-panel">
             <div className="gp-panel-header" onClick={onToggle}>
                 <span className="gp-panel-titulo">{titulo}</span>
-                <span className="gp-panel-setinha">{colapsado ? '▸' : '▾'}</span>
+                <span className="gp-panel-setinha">{colapsado ? 'â–¸' : 'â–¾'}</span>
             </div>
             {!colapsado && <div className="gp-panel-body">{children}</div>}
         </div>
@@ -161,10 +161,10 @@ function Aviso({tipo, texto}: { tipo: 'erro' | 'sucesso'; texto: string }) {
 export default function ViewGestaoProfessorGestaoProfessorListScreen() {
     return (
         <main className="gestao-professor">
-            <h1>Gestão do Professor</h1>
+            <h1>GestÃ£o do Professor</h1>
             <Tabs
                 tabs={[
-                    {key: 'gestao', label: 'Gestão', content: <GestaoTab/>},
+                    {key: 'gestao', label: 'GestÃ£o', content: <GestaoTab/>},
                     {key: 'disponibilidade', label: 'Disponibilidade do Professor', content: <DisponibilidadeTab/>},
                 ]}
             />
@@ -292,9 +292,9 @@ function GestaoTab() {
                 params: {oferecimentoId: turma.id},
             });
             setOcorrenciasAula(data);
-            if (data.length === 0) notificar('erro', 'Nenhuma ocorrência encontrada para esta turma.');
+            if (data.length === 0) notificar('erro', 'Nenhuma ocorrÃªncia encontrada para esta turma.');
         } catch (e) {
-            notificar('erro', 'Erro ao carregar as ocorrências da turma.');
+            notificar('erro', 'Erro ao carregar as ocorrÃªncias da turma.');
         }
     }
 
@@ -306,7 +306,7 @@ function GestaoTab() {
             const {data} = await api.get<AulaItem[]>('/api/professor/aula/por-ocorrencia', {params: {ocorrenciaId}});
             setAulasDaOcorrencia(data);
         } catch (e) {
-            notificar('erro', 'Erro ao carregar as aulas da ocorrência.');
+            notificar('erro', 'Erro ao carregar as aulas da ocorrÃªncia.');
         }
     }
 
@@ -330,7 +330,7 @@ function GestaoTab() {
             await api.delete(`/api/professor/aula/${aula.id}`);
             setAulasDaOcorrencia((prev) => prev.filter((a) => a.id !== aula.id));
             if (aulaForm.id === aula.id) setAulaForm({id: null, nome: '', descricao: '', anexos: []});
-            notificar('sucesso', 'Aula excluída com sucesso.');
+            notificar('sucesso', 'Aula excluÃ­da com sucesso.');
         } catch (e) {
             notificar('erro', 'Erro ao excluir a aula.');
         }
@@ -377,7 +377,7 @@ function GestaoTab() {
             const {data} = await api.get<AulaAnexoItem[]>('/api/professor/aula-anexo/por-aula', {params: {aulaId}});
             setAnexosDaAula((prev) => ({...prev, [aulaId]: data}));
         } catch (e) {
-            // silencioso: apenas anexos são recarregados
+            // silencioso: apenas anexos sÃ£o recarregados
         }
     }
 
@@ -430,7 +430,7 @@ function GestaoTab() {
             }
         }
         if (alteradas.length === 0) {
-            notificar('erro', 'Nenhuma presença foi alterada.');
+            notificar('erro', 'Nenhuma presenÃ§a foi alterada.');
             return;
         }
         setSalvando(true);
@@ -550,7 +550,7 @@ function GestaoTab() {
                             <th>Curso</th>
                             <th>Componente Curricular</th>
                             <th>Status</th>
-                            <th>Ações</th>
+                            <th>AÃ§Ãµes</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -570,25 +570,25 @@ function GestaoTab() {
                                     <>
                                         <button className="gp-btn gp-btn-acoes btnstop" title="Caderno chamada"
                                                 onClick={() => abrirCaderno(t)}>
-                                            📖
+                                            ðŸ“–
                                         </button>
                                         <button className="gp-btn gp-btn-acoes btngreen" title="Notas"
                                                 onClick={() => abrirNotas(t)}>
-                                            ✏️
+                                            âœï¸
                                         </button>
                                         <button className="gp-btn gp-btn-acoes btnblack" title="Registros de aula"
                                                 onClick={() => abrirRegistro(t)}>
-                                            📄
+                                            ðŸ“„
                                         </button>
                                         <button className="gp-btn gp-btn-acoes" title="Aulas"
                                                 onClick={() => abrirAula(t)}>
-                                            🎬
+                                            ðŸŽ¬
                                         </button>
                                     </>
                                 )}
-                                <button className="gp-btn gp-btn-acoes btnyellow" title="Informações"
+                                <button className="gp-btn gp-btn-acoes btnyellow" title="InformaÃ§Ãµes"
                                         onClick={() => window.open(`/api/educacao/professor/${t.id}/informacoes`, '_blank')}>
-                                    ℹ️
+                                    â„¹ï¸
                                 </button>
                             </td>
                             </tr>
@@ -649,7 +649,7 @@ function GestaoTab() {
                                         const v = Number(e.target.value);
                                         setQtdDias(Number.isNaN(v) ? 0 : Math.max(0, Math.min(caderno.ocorrencias.length, v)));
                                     }}
-                                    title={`Máximo de aulas ${caderno.ocorrencias.length}`}
+                                    title={`MÃ¡ximo de aulas ${caderno.ocorrencias.length}`}
                                 />
                             </div>
                             <div className="gp-control-group">
@@ -731,17 +731,17 @@ function GestaoTab() {
 <InfoTurma turma={notas.turma}/>
                         <div className="gp-media">
                             <div>
-                                <b>Média aprovação sem exame: </b>
+                                <b>MÃ©dia aprovaÃ§Ã£o sem exame: </b>
                                 <span>{notas.mediaSemExame ?? '-'}</span>
                             </div>
                             {notas.recuperacao && (
                                 <div>
-                                    <b>Média aprovação com exame: </b>
+                                    <b>MÃ©dia aprovaÃ§Ã£o com exame: </b>
                                     <span>{notas.mediaFinal ?? '-'}</span>
                                 </div>
                             )}
                             <div>
-                                <b>Nota máxima: </b>
+                                <b>Nota mÃ¡xima: </b>
                                 <span>{notas.notaMaxima ?? '-'}</span>
                             </div>
                         </div>
@@ -890,12 +890,12 @@ function GestaoTab() {
                     <InfoTurma turma={turmaSelecionada}/>
                     <div className="gp-controls">
                         <div className="gp-control-group gp-control-group-stretch">
-                            <span className="gp-control-label">Ocorrência:</span>
+                            <span className="gp-control-label">OcorrÃªncia:</span>
                             <select
                                 value={ocorrenciaAulaSel ?? ''}
                                 onChange={(e) => e.target.value && selecionarOcorrenciaAula(Number(e.target.value))}
                             >
-                                <option value="">Selecione a ocorrência...</option>
+                                <option value="">Selecione a ocorrÃªncia...</option>
                                 {ocorrenciasAula.map((o) => (
                                     <option key={o.id} value={o.id}>
                                         {o.data}
@@ -920,12 +920,12 @@ function GestaoTab() {
                                     />
                                 </label>
                                 <label className="gp-aula-label">
-                                    Descrição
+                                    DescriÃ§Ã£o
                                     <textarea
                                         rows={3}
                                         value={aulaForm.descricao}
                                         onChange={(e) => setAulaForm((f) => ({...f, descricao: e.target.value}))}
-                                        placeholder="Descrição / conteúdo da aula"
+                                        placeholder="DescriÃ§Ã£o / conteÃºdo da aula"
                                     />
                                 </label>
                                 <div className="gp-aula-anexos">
@@ -972,7 +972,7 @@ function GestaoTab() {
                                                     }))
                                                 }
                                             >
-                                                <option value="VIDEO">Vídeo</option>
+                                                <option value="VIDEO">VÃ­deo</option>
                                                 <option value="PDF">Documento (PDF)</option>
                                                 <option value="IMAGEM">Imagem</option>
                                             </select>
@@ -986,7 +986,7 @@ function GestaoTab() {
                                                     }))
                                                 }
                                             >
-                                                ✖
+                                                âœ–
                                             </button>
                                         </div>
                                     ))}
@@ -997,7 +997,7 @@ function GestaoTab() {
                                             anexos: [...f.anexos, {nome: '', anexo: '', tipo: 'VIDEO'}]
                                         }))}
                                     >
-                                        ➕ Anexo
+                                        âž• Anexo
                                     </button>
                                 </div>
                                 <div className="gp-rodape">
@@ -1025,9 +1025,9 @@ function GestaoTab() {
                                     <thead>
                                     <tr>
                                         <th>Nome</th>
-                                        <th>Descrição</th>
+                                        <th>DescriÃ§Ã£o</th>
                                         <th>Anexos</th>
-                                        <th>Ações</th>
+                                        <th>AÃ§Ãµes</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -1042,16 +1042,16 @@ function GestaoTab() {
                                                     </span>
                                                 ))}
                                                 {(anexosDaAula[aula.id] ?? []).length === 0 &&
-                                                <span className="gp-vazio">—</span>}
+                                                <span className="gp-vazio">â€”</span>}
                                             </td>
                                             <td className="gp-acoes">
                                                 <button className="gp-btn gp-btn-acoes" title="Editar"
                                                         onClick={() => editarAula(aula)}>
-                                                    ✏️
+                                                    âœï¸
                                                 </button>
                                                 <button className="gp-btn gp-btn-acoes" title="Excluir"
                                                         onClick={() => excluirAula(aula)}>
-                                                    🗑️
+                                                    ðŸ—‘ï¸
                                                 </button>
                                             </td>
                                         </tr>
@@ -1059,7 +1059,7 @@ function GestaoTab() {
                                     {aulasDaOcorrencia.length === 0 && (
                                         <tr>
                                             <td colSpan={4} className="gp-vazio">
-                                                Nenhuma aula registrada nesta ocorrência.
+                                                Nenhuma aula registrada nesta ocorrÃªncia.
                                             </td>
                                         </tr>
                                     )}
@@ -1068,7 +1068,7 @@ function GestaoTab() {
                             </div>
                         </div>
                     )}
-                    {ocorrenciasAula.length === 0 && <div className="gp-vazio">Nenhuma ocorrência encontrada.</div>}
+                    {ocorrenciasAula.length === 0 && <div className="gp-vazio">Nenhuma ocorrÃªncia encontrada.</div>}
                 </Painel>
             )}
         </div>
@@ -1097,7 +1097,7 @@ function DisponibilidadeTab() {
         <div className="gp-disponibilidade">
             <div className="gp-legenda">
         <span className="gp-legenda-item">
-          <span className="gp-dot" style={{background: '#32CD32'}}/> Esta disponível
+          <span className="gp-dot" style={{background: '#32CD32'}}/> Esta disponÃ­vel
         </span>
                 <span className="gp-legenda-item">
           <span className="gp-dot" style={{background: '#FFD700'}}/> Aula coringa
@@ -1106,16 +1106,16 @@ function DisponibilidadeTab() {
           <span className="gp-dot" style={{background: '#000000'}}/> Aula normal
         </span>
                 <span className="gp-legenda-item">
-          <span className="gp-dot" style={{background: '#FF0000'}}/> Recuperação aula
+          <span className="gp-dot" style={{background: '#FF0000'}}/> RecuperaÃ§Ã£o aula
         </span>
                 <span className="gp-legenda-item">
           <span className="gp-dot" style={{background: '#0000CD'}}/> Feriado
         </span>
             </div>
             <p>
-                A agenda de disponibilidade do professor é exibida a partir do usuário logado no sistema legado. Para
-                visualizá-la
-                aqui, informe o professor acima e utilize a grade de horários (requer integração com o contexto de
+                A agenda de disponibilidade do professor Ã© exibida a partir do usuÃ¡rio logado no sistema legado. Para
+                visualizÃ¡-la
+                aqui, informe o professor acima e utilize a grade de horÃ¡rios (requer integraÃ§Ã£o com o contexto de
                 login).
             </p>
         </div>

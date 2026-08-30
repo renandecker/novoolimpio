@@ -1,9 +1,9 @@
-import {useState} from 'react';
+﻿import {useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {api} from '../api';
-import {PermissionGate} from '../permissions';
-import {Tabs, type TabItem} from '../Tabs';
-import {ExportDropdown} from '../ExportDropdown';
+import {api} from '../../shared/services/api';
+import {PermissionGate} from '../../shared/services/permissions';
+import {Tabs, type TabItem} from '../../shared/components/Tabs';
+import {ExportDropdown} from '../../shared/components/ExportDropdown';
 
 interface UnidadeRow {
     id: number;
@@ -120,8 +120,8 @@ function ProdutosEstoqueCentralTab({unidadeId}: { unidadeId: string }) {
                 <span className="legenda-yellow">Solicitado</span>
                 <span className="legenda-orange">Defeito</span>
                 <span className="legenda-red">Falta</span>
-                <span className="legenda-blue">Não encontrado</span>
-                <span className="legenda-green">Previsão Entrega</span>
+                <span className="legenda-blue">NÃ£o encontrado</span>
+                <span className="legenda-green">PrevisÃ£o Entrega</span>
                 <span className="legenda-black">Reservado</span>
             </div>
             <div className="estoque-cards">
@@ -145,7 +145,7 @@ function ProdutosEstoqueCentralTab({unidadeId}: { unidadeId: string }) {
                         </div>
                         <div className="estoque-card-actions">
                             <button className="btnblue" title="Entrada Produto">Entrada</button>
-                            <button className="btngreen" title="Saída Produto">Saída</button>
+                            <button className="btngreen" title="SaÃ­da Produto">SaÃ­da</button>
                         </div>
                     </div>
                 ))}
@@ -183,18 +183,18 @@ function SolicitacoesTab({unidadeId}: { unidadeId: string }) {
         {key: 'excel', label: 'Excel', icon: <i className="fa fa-file-excel-o"/>, onClick: () => handleExport('excel')},
     ];
 
-    if (!unidadeId) return <p className="disp-aviso">Selecione uma unidade para visualizar as solicitações.</p>;
+    if (!unidadeId) return <p className="disp-aviso">Selecione uma unidade para visualizar as solicitaÃ§Ãµes.</p>;
     if (isLoading) return <p>Carregando...</p>;
-    if (itens.length === 0) return <p>Nenhuma solicitação encontrada.</p>;
+    if (itens.length === 0) return <p>Nenhuma solicitaÃ§Ã£o encontrada.</p>;
 
     return (
         <div>
             <div className="estoque-legends">
-                <span className="legenda-blue">Não encontrado</span>
+                <span className="legenda-blue">NÃ£o encontrado</span>
                 <span className="legenda-yellow">Solicitado</span>
                 <span className="legenda-red">Falta</span>
                 <span className="legenda-black">Reservado</span>
-                <span className="legenda-purple">Aprovado não entregue</span>
+                <span className="legenda-purple">Aprovado nÃ£o entregue</span>
             </div>
             <div className="data-table-toolbar" style={{marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px'}}>
                 <ExportDropdown options={exportOptions} triggerLabel="Exportar" triggerIcon={<i className="fa fa-download"/>}/>
@@ -203,14 +203,14 @@ function SolicitacoesTab({unidadeId}: { unidadeId: string }) {
                 <thead>
                 <tr>
                     <th>Id</th>
-                    <th>Usuário</th>
+                    <th>UsuÃ¡rio</th>
                     <th>Produto</th>
                     <th>Categoria</th>
-                    <th>Data Solicitação</th>
+                    <th>Data SolicitaÃ§Ã£o</th>
                     <th>Valor</th>
                     <th>Qtde Solicitada</th>
                     <th>Motivo</th>
-                    <th>Ações</th>
+                    <th>AÃ§Ãµes</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -225,8 +225,8 @@ function SolicitacoesTab({unidadeId}: { unidadeId: string }) {
                         <td>{item.quantidade}</td>
                         <td>{item.motivo || '-'}</td>
                         <td>
-                            <button className="btnblue" title="Aprovar Solicitação">Aprovar</button>
-                            <button className="btnred" title="Negar Solicitação">Negar</button>
+                            <button className="btnblue" title="Aprovar SolicitaÃ§Ã£o">Aprovar</button>
+                            <button className="btnred" title="Negar SolicitaÃ§Ã£o">Negar</button>
                         </td>
                     </tr>
                 ))}
@@ -251,7 +251,7 @@ function PedidosTab({unidadeId}: { unidadeId: string }) {
     return (
         <div>
             <div className="estoque-legends">
-                <span className="legenda-yellow">Previsão</span>
+                <span className="legenda-yellow">PrevisÃ£o</span>
                 <span className="legenda-black">Entregue</span>
                 <span className="legenda-red">Negados</span>
                 <span className="legenda-blue">Aprovados</span>
@@ -265,10 +265,10 @@ function PedidosTab({unidadeId}: { unidadeId: string }) {
                 <thead>
                 <tr>
                     <th>Id</th>
-                    <th>Usuário</th>
+                    <th>UsuÃ¡rio</th>
                     <th>Produto</th>
-                    <th>Data Aprovação</th>
-                    <th>Data Previsão</th>
+                    <th>Data AprovaÃ§Ã£o</th>
+                    <th>Data PrevisÃ£o</th>
                     <th>Data Entrega</th>
                     <th>Quantidade</th>
                     <th>Aprovado</th>
@@ -284,7 +284,7 @@ function PedidosTab({unidadeId}: { unidadeId: string }) {
                         <td>{formatDateTime(item.dataPrevisao)}</td>
                         <td>{formatDateTime(item.dataEntrega)}</td>
                         <td>{item.quantidade}</td>
-                        <td>{item.aprovado ? 'Sim' : 'Não'}</td>
+                        <td>{item.aprovado ? 'Sim' : 'NÃ£o'}</td>
                     </tr>
                 ))}
                 </tbody>
@@ -315,9 +315,9 @@ function EntregasTab({unidadeId}: { unidadeId: string }) {
                     <th>Entrega</th>
                     <th>Quantidade</th>
                     <th>Status</th>
-                    <th>Data Saída</th>
+                    <th>Data SaÃ­da</th>
                     <th>Rastreio</th>
-                    <th>Usuário</th>
+                    <th>UsuÃ¡rio</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -357,8 +357,8 @@ function ProdutosUnidadeTab({unidadeId}: { unidadeId: string }) {
                 <span className="legenda-yellow">Solicitado</span>
                 <span className="legenda-orange">Defeito</span>
                 <span className="legenda-red">Falta</span>
-                <span className="legenda-blue">Não encontrado</span>
-                <span className="legenda-green">Previsão Entrega</span>
+                <span className="legenda-blue">NÃ£o encontrado</span>
+                <span className="legenda-green">PrevisÃ£o Entrega</span>
                 <span className="legenda-black">Reservado</span>
             </div>
             <table className="data-table">
@@ -371,7 +371,7 @@ function ProdutosUnidadeTab({unidadeId}: { unidadeId: string }) {
                     <th>Solicitado</th>
                     <th>Defeito</th>
                     <th>Falta</th>
-                    <th>Não Encontrado</th>
+                    <th>NÃ£o Encontrado</th>
                     <th>Reservado</th>
                     <th>Aprovado N. Entregue</th>
                 </tr>
@@ -417,7 +417,7 @@ export default function ViewEstoqueControleestoqueListScreen() {
             label: 'Produtos Estoque Central',
             content: <ProdutosEstoqueCentralTab unidadeId={unidadeId}/>
         },
-        {key: 'solicitacoes', label: 'Solicitações', content: <SolicitacoesTab unidadeId={unidadeId}/>},
+        {key: 'solicitacoes', label: 'SolicitaÃ§Ãµes', content: <SolicitacoesTab unidadeId={unidadeId}/>},
         {key: 'pedidos', label: 'Pedidos', content: <PedidosTab unidadeId={unidadeId}/>},
         {key: 'entregas', label: 'Entregas', content: <EntregasTab unidadeId={unidadeId}/>},
         {key: 'produtosUnidade', label: 'Produtos Unidade', content: <ProdutosUnidadeTab unidadeId={unidadeId}/>},

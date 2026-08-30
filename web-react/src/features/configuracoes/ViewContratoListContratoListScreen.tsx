@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import type {ApiItem} from '../types';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../features/auth/types';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -22,7 +22,7 @@ const renderStatus = (item: ApiItem) => {
         label = `Cancelado ${formatDate(record.data_cancelamento)}`;
         className = 'statusCANCELADA';
     } else if (record.inscricao !== true) {
-        label = 'Ativo sem inscrição';
+        label = 'Ativo sem inscriÃ§Ã£o';
         className = 'statusPENDENTE';
     } else {
         label = 'Ativo';
@@ -35,7 +35,7 @@ const COLUMNS: DataTableColumn[] = [
     {key: 'pessoa', label: 'Aluno'},
     {key: 'curso', label: 'Curso'},
     {key: 'unidade', label: 'Id_unidade'},
-    {key: 'unidadeResponsavel', label: 'Unidade Responsável'},
+    {key: 'unidadeResponsavel', label: 'Unidade ResponsÃ¡vel'},
     {key: 'status', label: 'Status', render: renderStatus},
     {key: 'data', label: 'Data', render: (item) => formatDate(asRecord(item).data)},
 ];

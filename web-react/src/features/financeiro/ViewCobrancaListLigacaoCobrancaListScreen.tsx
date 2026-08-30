@@ -1,9 +1,9 @@
-import {useQuery} from '@tanstack/react-query';
-import {api} from '../api';
-import {PermissionGate, useCurrentOutcome} from '../permissions';
-import {DataTable, type DataTableColumn, type DataTableRowAction} from '../DataTable';
-import {Tabs} from '../Tabs';
-import type {ApiItem} from '../types';
+﻿import {useQuery} from '@tanstack/react-query';
+import {api} from '../../shared/services/api';
+import {PermissionGate, useCurrentOutcome} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn, type DataTableRowAction} from '../../shared/components/DataTable';
+import {Tabs} from '../../shared/components/Tabs';
+import type {ApiItem} from '../../shared/types/index';
 import {executeAction} from '../actions';
 
 interface EtapaCobranca {

@@ -1,5 +1,5 @@
-import {useState, useEffect, useCallback} from 'react';
-import {api} from '../services/api';
+﻿import {useState, useEffect, useCallback} from 'react';
+import {api} from '../../shared/services/api';
 
 export interface Icone {
     id: number;

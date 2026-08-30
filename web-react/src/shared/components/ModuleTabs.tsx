@@ -1,4 +1,4 @@
-import {DataTable} from './DataTable';
+﻿import {DataTable} from './DataTable';
 import type {DataTableColumn} from './DataTable';
 import {MasterDetail} from './MasterDetail';
 import type {MasterDetailColumn} from './MasterDetail';

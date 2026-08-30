@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import type {ApiItem} from '../types';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../features/auth/types';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -10,7 +10,7 @@ const COLUMNS: DataTableColumn[] = [
         label: 'Periodicidade Carga',
         render: (item) => {
             const value = asRecord(item).tipo;
-            if (value === 1) return 'Diária';
+            if (value === 1) return 'DiÃ¡ria';
             if (value === 2) return 'Semanal';
             if (value === 3) return 'Mensal';
             return String(value ?? '');

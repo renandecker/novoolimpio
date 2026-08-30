@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import type {ApiItem} from '../types';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../features/auth/types';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -12,14 +12,14 @@ const formatDate = (value: unknown): string => {
 };
 
 const COLUMNS: DataTableColumn[] = [
-    {key: 'dt_inicio', label: 'Data Início', render: (item) => formatDate(asRecord(item).dt_inicio)},
+    {key: 'dt_inicio', label: 'Data InÃ­cio', render: (item) => formatDate(asRecord(item).dt_inicio)},
     {key: 'dt_fim', label: 'Data Fim', render: (item) => formatDate(asRecord(item).dt_fim)},
     {key: 'pessoa_descricao', label: 'Nome'},
-    {key: 'fl_ativo', label: 'Ativo', render: (item) => (asRecord(item).fl_ativo ? 'Sim' : 'Não')},
+    {key: 'fl_ativo', label: 'Ativo', render: (item) => (asRecord(item).fl_ativo ? 'Sim' : 'NÃ£o')},
     {
         key: 'caderno_bola',
         label: 'Caderno Chamada Interativo',
-        render: (item) => (asRecord(item).caderno_bola ? 'Sim' : 'Não'),
+        render: (item) => (asRecord(item).caderno_bola ? 'Sim' : 'NÃ£o'),
     },
 ];
 

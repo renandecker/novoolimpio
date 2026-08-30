@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
-import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../masterDetailSources';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {ModuleTabs} from '../../shared/components/ModuleTabs';
+import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../../shared/services/masterDetailSources';
 
 export default function ViewProdutoFormProdutoListScreen() {
     return (
@@ -11,7 +11,7 @@ export default function ViewProdutoFormProdutoListScreen() {
                     tabs={[
                         {
                             key: 'informacoesBasicas',
-                            label: 'Informações básicas',
+                            label: 'InformaÃ§Ãµes bÃ¡sicas',
                             path: '/api/view/produto/formProduto'
                         },
                         {
@@ -25,7 +25,7 @@ export default function ViewProdutoFormProdutoListScreen() {
                                 columns: UNIDADE_COLUMNS
                             }
                         },
-                        {key: 'fornecedores', label: 'Fornecedores', empty: 'Conteúdo de Fornecedores.'},
+                        {key: 'fornecedores', label: 'Fornecedores', empty: 'ConteÃºdo de Fornecedores.'},
                     ]}
                 />
             </main>

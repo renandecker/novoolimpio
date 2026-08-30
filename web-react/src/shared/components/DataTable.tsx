@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+﻿import {useState, useEffect} from 'react';
 import type {ReactNode} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
@@ -877,6 +877,15 @@ function RecordModal({
                                                     }))}
                                                 />
                                             ) : isFile ? (
+                                                <input
+                                                    className="form-input"
+                                                    value={String(values[field.key] ?? '')}
+                                                    onChange={(event) => setValues((prev) => ({
+                                                        ...prev,
+                                                        [field.key]: event.target.value
+                                                    }))}
+                                                />
+                                            ) : (
                                                 <input
                                                     className="form-input"
                                                     value={String(values[field.key] ?? '')}

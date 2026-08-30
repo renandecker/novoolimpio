@@ -1,23 +1,23 @@
-import {useEffect, useState} from 'react';
-import {PermissionGate} from '../permissions';
-import {MasterDetail} from '../MasterDetail';
-import {Tabs} from '../Tabs';
-import type {ApiItem} from '../types';
+﻿import {useEffect, useState} from 'react';
+import {PermissionGate} from '../../shared/services/permissions';
+import {MasterDetail} from '../../shared/components/MasterDetail';
+import {Tabs} from '../../shared/components/Tabs';
+import type {ApiItem} from '../../features/auth/types';
 
 const CAMPO_COLUMNS = [
-    {key: 'rotulo', label: 'Rótulo'},
+    {key: 'rotulo', label: 'RÃ³tulo'},
     {key: 'nome', label: 'Nome'},
     {key: 'tipo', label: 'Tipo de Campo'},
     {key: 'categoria', label: 'Categoria de Campo'},
-    {key: 'obrigatorio', label: 'Obrigatório'},
-    {key: 'permitirHistorico', label: 'Permitir Histórico'},
+    {key: 'obrigatorio', label: 'ObrigatÃ³rio'},
+    {key: 'permitirHistorico', label: 'Permitir HistÃ³rico'},
     {key: 'ordem', label: 'Ordem'},
 ];
 
 const UNIDADE_COLUMNS = [
     {key: 'id', label: 'Id_unidade'},
     {key: 'sucinto', label: 'Sucinto'},
-    {key: 'razaoSocial', label: 'Razão Social'},
+    {key: 'razaoSocial', label: 'RazÃ£o Social'},
     {key: 'nomeFantasia', label: 'Nome Fantasia'},
     {key: 'CNPJ', label: 'CNPJ'},
     {key: 'ativo', label: 'Ativo'},
@@ -51,11 +51,11 @@ export default function ViewAcaoFormAcaoListScreen() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (formData.descricao.trim().length < 3) {
-            alert('Descrição deve ter pelo menos 3 caracteres');
+            alert('DescriÃ§Ã£o deve ter pelo menos 3 caracteres');
             return;
         }
         if (!formData.responsavelId || !formData.tipoAcaoId) {
-            alert('Contratante e Tipo Ação são obrigatórios');
+            alert('Contratante e Tipo AÃ§Ã£o sÃ£o obrigatÃ³rios');
             return;
         }
         if (unidades.length === 0) {
@@ -73,11 +73,11 @@ export default function ViewAcaoFormAcaoListScreen() {
             }
         }
         if (formData.dataInicial && formData.dataFinalCaptacao && formData.dataFinalCaptacao < formData.dataInicial) {
-            alert('A data final de captação não pode ser anterior a data inicial');
+            alert('A data final de captaÃ§Ã£o nÃ£o pode ser anterior a data inicial');
             return;
         }
         if (formData.dataFinal && formData.dataFinalCaptacao && formData.dataFinal < formData.dataFinalCaptacao) {
-            alert('A data final de Cadastro não pode ser anterior a data final de Captação');
+            alert('A data final de Cadastro nÃ£o pode ser anterior a data final de CaptaÃ§Ã£o');
             return;
         }
         try {
@@ -94,10 +94,10 @@ export default function ViewAcaoFormAcaoListScreen() {
                 })
             });
             if (res.ok) {
-                alert('Ação salva com sucesso!');
+                alert('AÃ§Ã£o salva com sucesso!');
             } else {
                 const txt = await res.text();
-                alert('Erro ao salvar ação: ' + txt);
+                alert('Erro ao salvar aÃ§Ã£o: ' + txt);
             }
         } catch (err) {
             console.error(err);
@@ -107,15 +107,15 @@ export default function ViewAcaoFormAcaoListScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>Form Ação</h1>
+                <h1>Form AÃ§Ã£o</h1>
                 <div className="div_form">
-                    <div className="form-title">Ação</div>
+                    <div className="form-title">AÃ§Ã£o</div>
                     <form onSubmit={handleSubmit} className="table_form">
                         <Tabs
                             tabs={[
                                 {
                                     key: 'acao',
-                                    label: 'Ação',
+                                    label: 'AÃ§Ã£o',
                                     content: (
                                         <div style={{display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', padding: '10px'}}>
                                             <div>
@@ -125,7 +125,7 @@ export default function ViewAcaoFormAcaoListScreen() {
                                             <div style={{gridColumn: 'span 3'}}></div>
 
                                             <div style={{gridColumn: 'span 4'}}>
-                                                <label>Descrição *</label>
+                                                <label>DescriÃ§Ã£o *</label>
                                                 <input
                                                     type="text"
                                                     required
@@ -136,12 +136,12 @@ export default function ViewAcaoFormAcaoListScreen() {
                                             </div>
 
                                             <div style={{gridColumn: 'span 2'}}>
-                                                <label>Contratante (Responsável) *</label>
+                                                <label>Contratante (ResponsÃ¡vel) *</label>
                                                 <div style={{display: 'flex', gap: '5px'}}>
                                                     <input
                                                         type="text"
                                                         required
-                                                        placeholder="ID Responsável"
+                                                        placeholder="ID ResponsÃ¡vel"
                                                         value={formData.responsavelId}
                                                         onChange={e => setFormData({...formData, responsavelId: e.target.value})}
                                                         style={{flex: 1}}
@@ -162,7 +162,7 @@ export default function ViewAcaoFormAcaoListScreen() {
                                             <div style={{gridColumn: 'span 3'}}></div>
 
                                             <div>
-                                                <label>Data Inicial Captação</label>
+                                                <label>Data Inicial CaptaÃ§Ã£o</label>
                                                 <input
                                                     type="date"
                                                     value={formData.dataInicial}
@@ -170,7 +170,7 @@ export default function ViewAcaoFormAcaoListScreen() {
                                                 />
                                             </div>
                                             <div>
-                                                <label>Data Final Captação</label>
+                                                <label>Data Final CaptaÃ§Ã£o</label>
                                                 <input
                                                     type="date"
                                                     value={formData.dataFinalCaptacao}
@@ -178,7 +178,7 @@ export default function ViewAcaoFormAcaoListScreen() {
                                                 />
                                             </div>
                                             <div>
-                                                <label>Tipo Ação *</label>
+                                                <label>Tipo AÃ§Ã£o *</label>
                                                 <select
                                                     required
                                                     value={formData.tipoAcaoId}
@@ -267,7 +267,7 @@ export default function ViewAcaoFormAcaoListScreen() {
                     }}>
                         <div style={{backgroundColor: 'white', padding: '20px', borderRadius: '5px', width: '500px'}}>
                             <h3>Cadastro de Aluno / Pessoa</h3>
-                            <p>Modal de cadastro rápido de pessoa física.</p>
+                            <p>Modal de cadastro rÃ¡pido de pessoa fÃ­sica.</p>
                             <button type="button" onClick={() => setShowPessoaModal(false)}>Fechar</button>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-import type {ReactNode} from 'react';
+﻿import type {ReactNode} from 'react';
 import {useAuth} from './auth';
 import {NotificationBell} from './NotificationBell';
 import {ReportButton} from './ReportButton';

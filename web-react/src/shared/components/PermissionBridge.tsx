@@ -1,4 +1,4 @@
-import type {ReactNode} from 'react';
+﻿import type {ReactNode} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {useAuth} from './auth';
 import {api} from './api';

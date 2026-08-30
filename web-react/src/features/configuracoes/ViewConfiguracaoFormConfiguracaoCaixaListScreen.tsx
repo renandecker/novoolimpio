@@ -1,7 +1,7 @@
-import {PermissionGate} from '../permissions';
-import {FormLayout} from '../FormLayout';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {FormLayout} from '../../shared/components/FormLayout';
 import {useState} from 'react';
-import {api} from '../api';
+import {api} from '../../shared/services/api';
 import {useNavigate} from 'react-router-dom';
 
 export default function ViewConfiguracaoFormConfiguracaoCaixaListScreen() {
@@ -22,7 +22,7 @@ export default function ViewConfiguracaoFormConfiguracaoCaixaListScreen() {
             });
             navigate('/view/configuracao/listConfiguracaoCaixa');
         } catch (err: any) {
-            setError(err?.response?.data?.error || err.message || 'Erro ao salvar configuração de caixa');
+            setError(err?.response?.data?.error || err.message || 'Erro ao salvar configuraÃ§Ã£o de caixa');
         } finally {
             setSaving(false);
         }
@@ -32,7 +32,7 @@ export default function ViewConfiguracaoFormConfiguracaoCaixaListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <FormLayout
-                    title="Cadastro / Edição - Configuração de Caixa"
+                    title="Cadastro / EdiÃ§Ã£o - ConfiguraÃ§Ã£o de Caixa"
                     saving={saving}
                     error={error}
                     onSubmit={handleSubmit}
@@ -46,13 +46,13 @@ export default function ViewConfiguracaoFormConfiguracaoCaixaListScreen() {
                             fields: [
                                 {name: 'id', label: 'ID', type: 'number', readOnly: true, span: 1},
                                 {name: 'unidadeId', label: 'Unidade', type: 'select', required: true, options: [], span: 1},
-                                {name: 'usuarioId', label: 'Usuário', type: 'select', required: true, options: [], span: 1},
-                                {name: 'responsavelId', label: 'Autorizador / Responsável', type: 'select', required: true, options: [], span: 1},
+                                {name: 'usuarioId', label: 'UsuÃ¡rio', type: 'select', required: true, options: [], span: 1},
+                                {name: 'responsavelId', label: 'Autorizador / ResponsÃ¡vel', type: 'select', required: true, options: [], span: 1},
                                 {name: 'email', label: 'E-mail', type: 'email', required: true, placeholder: 'email@exemplo.com', span: 2},
-                                {name: 'dias', label: 'Dias (Validade 2ª via)', type: 'number', required: true, placeholder: '5', span: 1},
-                                {name: 'impressao', label: 'Impressão / Cota', type: 'number', required: true, placeholder: '1', span: 1},
+                                {name: 'dias', label: 'Dias (Validade 2Âª via)', type: 'number', required: true, placeholder: '5', span: 1},
+                                {name: 'impressao', label: 'ImpressÃ£o / Cota', type: 'number', required: true, placeholder: '1', span: 1},
                                 {name: 'fundoCaixa', label: 'Fundo de Caixa', type: 'number', required: true, placeholder: '0.00', span: 1},
-                                {name: 'pagPropriaUnid', label: 'Pagamento Própria Unidade', type: 'select', options: [{value: 'true', label: 'Sim'}, {value: 'false', label: 'Não'}], span: 1},
+                                {name: 'pagPropriaUnid', label: 'Pagamento PrÃ³pria Unidade', type: 'select', options: [{value: 'true', label: 'Sim'}, {value: 'false', label: 'NÃ£o'}], span: 1},
                             ]
                         },
                         {
@@ -70,7 +70,7 @@ export default function ViewConfiguracaoFormConfiguracaoCaixaListScreen() {
                                             <select className="form-input form-select" name="tipoModeloCaixa">
                                                 <option value="0">WORD</option>
                                                 <option value="1">PDF</option>
-                                                <option value="2">IMPRESSÃO</option>
+                                                <option value="2">IMPRESSÃƒO</option>
                                             </select>
                                         </label>
                                         <label className="form-field">

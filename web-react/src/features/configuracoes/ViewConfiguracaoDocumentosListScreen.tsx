@@ -1,14 +1,14 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {api} from '../api';
-import {DataTable, type DataTableProps} from '../DataTable';
-import type {ApiItem} from '../types';
-import {useModulePaged} from '../useModulePaged';
+import {api} from '../../shared/services/api';
+import {DataTable, type DataTableProps} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../features/auth/types';
+import {useModulePaged} from '../../shared/hooks/useModulePaged';
 
 const DOCUMENTOS_COLUMNS = [
     {key: 'nome', label: 'Nome'},
-    {key: 'descricao', label: 'Descrição'},
-    {key: 'tipoRelatorio', label: 'Tipo de Relatório'},
+    {key: 'descricao', label: 'DescriÃ§Ã£o'},
+    {key: 'tipoRelatorio', label: 'Tipo de RelatÃ³rio'},
     {key: 'ativo', label: 'Ativo'},
 ];
 

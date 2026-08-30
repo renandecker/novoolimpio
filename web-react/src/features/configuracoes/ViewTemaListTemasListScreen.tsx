@@ -1,5 +1,5 @@
-import {PermissionGate} from '../permissions';
-import {DataTable} from '../DataTable';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable} from '../../shared/components/DataTable';
 
 const COLOR_COLUMNS = [
     'corPrimaria',
@@ -45,7 +45,7 @@ const themePreview = (values: Record<string, unknown>) => {
             <div className="tema-preview-topbar"
                  style={{backgroundColor: barra, color: texto, justifyContent: barraPos, borderBottom: `${espessuraBorda} solid ${corBordaPrimaria}`}}>
                 <span className="tema-preview-logo" style={{backgroundColor: primaria, color: '#ffffff'}}>O</span>
-                <span className="tema-preview-title">Olímpio</span>
+                <span className="tema-preview-title">OlÃ­mpio</span>
             </div>
             <div className="tema-preview-body">
                 <div className="tema-preview-sidebar" style={{
@@ -54,19 +54,19 @@ const themePreview = (values: Record<string, unknown>) => {
                     textAlign: logoPos as 'left' | 'right' | 'center',
                     borderRight: `${espessuraBorda} solid ${corBordaPrimaria}`
                 }}>
-                    <span style={{color: textoSelecionado}}>Início (selecionado)</span>
-                    <span style={{color: textoNaoSelecionado}}>Configurações</span>
+                    <span style={{color: textoSelecionado}}>InÃ­cio (selecionado)</span>
+                    <span style={{color: textoNaoSelecionado}}>ConfiguraÃ§Ãµes</span>
                     <span style={{color: textoNaoSelecionado}}>Temas</span>
                 </div>
                 <div className="tema-preview-content" style={{backgroundColor: fundo, color: texto}}>
-                    <p>Exemplo de conteúdo com a cor de destaque no botão.</p>
+                    <p>Exemplo de conteÃºdo com a cor de destaque no botÃ£o.</p>
                     <button type="button" className="tema-preview-btn"
                             style={{backgroundColor: destaque, color: '#ffffff', border: `${espessuraBorda} solid ${corBordaSecundaria}`}}>
                         Salvar
                     </button>
-                    <p style={{color: secundaria, marginTop: 8}}>Cor secundária: {secundaria}</p>
-                    <p style={{color: corBordaPrimaria, marginTop: 4}}>Borda primária: {corBordaPrimaria} ({espessuraBorda})</p>
-                    <p style={{color: corBordaSecundaria, marginTop: 4}}>Borda secundária: {corBordaSecundaria} ({espessuraBorda})</p>
+                    <p style={{color: secundaria, marginTop: 8}}>Cor secundÃ¡ria: {secundaria}</p>
+                    <p style={{color: corBordaPrimaria, marginTop: 4}}>Borda primÃ¡ria: {corBordaPrimaria} ({espessuraBorda})</p>
+                    <p style={{color: corBordaSecundaria, marginTop: 4}}>Borda secundÃ¡ria: {corBordaSecundaria} ({espessuraBorda})</p>
                 </div>
             </div>
             <div className="tema-preview-banner" style={{height: '30px', backgroundImage: bannerRodape ? `url(${bannerRodape})` : 'none', backgroundRepeat: 'repeat-x', backgroundSize: 'cover', borderTop: `${espessuraBorda} solid ${corBordaPrimaria}`}}></div>

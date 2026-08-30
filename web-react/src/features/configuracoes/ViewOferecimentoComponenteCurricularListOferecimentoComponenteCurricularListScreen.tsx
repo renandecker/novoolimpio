@@ -1,12 +1,12 @@
-import {useState, useEffect} from 'react';
-import {PermissionGate, usePermissions, useCurrentOutcome} from '../permissions';
-import {api} from '../api';
-import {useModulePaged} from '../useModulePaged';
-import type {ApiItem} from '../types';
-import {legacyClassName} from '../DataTable';
-import {PAGE_SIZES} from '../DataTable';
-import {RowMenu, type RowMenuItem} from '../RowMenu';
-import {ExportDropdown} from '../ExportDropdown';
+﻿import {useState, useEffect} from 'react';
+import {PermissionGate, usePermissions, useCurrentOutcome} from '../../shared/services/permissions';
+import {api} from '../../shared/services/api';
+import {useModulePaged} from '../../shared/hooks/useModulePaged';
+import type {ApiItem} from '../../features/auth/types';
+import {legacyClassName} from '../../shared/components/DataTable';
+import {PAGE_SIZES} from '../../shared/components/DataTable';
+import {RowMenu, type RowMenuItem} from '../../shared/components/RowMenu';
+import {ExportDropdown} from '../../shared/components/ExportDropdown';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -39,7 +39,7 @@ const renderValue = (item: ApiItem, key: string) => {
         if (ACTIVE_COLUMN_RE.test(key)) {
             return boolVal ? 'ATIVO' : 'INATIVO';
         } else {
-            return boolVal ? 'SIM' : 'NÃO';
+            return boolVal ? 'SIM' : 'NÃƒO';
         }
     }
     return String(value);
@@ -61,12 +61,12 @@ const OFERECIMENTO_COLUMNS = [
         },
     },
     {key: 'professor_nome', label: 'Professor'},
-    {key: 'data_inicio', label: 'Data Início', render: (item) => formatDate(asRecord(item).data_inicio)},
+    {key: 'data_inicio', label: 'Data InÃ­cio', render: (item) => formatDate(asRecord(item).data_inicio)},
     {key: 'data_fim', label: 'Data Fim', render: (item) => formatDate(asRecord(item).data_fim)},
     {
         key: 'replicar',
         label: 'Replicar',
-        render: (item) => (asRecord(item).replicar ? 'Sim' : 'Não'),
+        render: (item) => (asRecord(item).replicar ? 'Sim' : 'NÃ£o'),
     },
     {
         key: 'status',
@@ -114,7 +114,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
                 const response = await api.get(`/api/permissao/permissoes?caminho=${outcome}`);
                 setPerfilModuloPermissions(response.data);
             } catch (error) {
-                console.error('Erro ao carregar permissões do perfil-modulo:', error);
+                console.error('Erro ao carregar permissÃµes do perfil-modulo:', error);
             } finally {
                 setPerfilModuloLoading(false);
             }
@@ -154,7 +154,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
             setReplicarDialog({open: false, entity: null, action: 'ativar'});
             q.refetch();
         } catch (e) {
-            alert('Erro ao alterar replicação');
+            alert('Erro ao alterar replicaÃ§Ã£o');
         }
     };
 
@@ -183,7 +183,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
                 });
                 setMovimentacoes(prev => ({...prev, [id]: data ?? []}));
             } catch (e) {
-                console.error('Erro ao carregar ocorrências:', e);
+                console.error('Erro ao carregar ocorrÃªncias:', e);
                 setMovimentacoes(prev => ({...prev, [id]: []}));
             } finally {
                 setLoadingMov(prev => ({...prev, [id]: false}));
@@ -239,7 +239,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
                                 {OFERECIMENTO_COLUMNS.map((column) => (
                                     <th key={column.key}>{column.label}</th>
                                 ))}
-                                <th className="col-actions">Ações</th>
+                                <th className="col-actions">AÃ§Ãµes</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -264,7 +264,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
                                     const relatoriosItems: RowMenuItem[] = [
                                         {
                                             key: 'info',
-                                            label: 'Informações',
+                                            label: 'InformaÃ§Ãµes',
                                             className: 'btnyellow',
                                             onSelect: () => handleInfo(record),
                                         },
@@ -273,7 +273,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
                                     const editarItems: RowMenuItem[] = [
                                         {
                                             key: replicar ? 'desativarReplicar' : 'ativarReplicar',
-                                            label: replicar ? 'Desativar Replicação' : 'Ativar Replicação',
+                                            label: replicar ? 'Desativar ReplicaÃ§Ã£o' : 'Ativar ReplicaÃ§Ã£o',
                                             className: replicar ? 'btnorange' : 'btnblue',
                                             onSelect: () => handleReplicar(record, replicar ? 'desativar' : 'ativar'),
                                         },
@@ -311,7 +311,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
                                                 <div className="row-actions-menu">
                                                     {acessoRelatorios && (
                                                         <RowMenu icon={<i className="fa fa-info-circle"/>}
-                                                                 className="btnyellow" title="Relatórios"
+                                                                 className="btnyellow" title="RelatÃ³rios"
                                                                  items={relatoriosItems}/>
                                                     )}
                                                     {acessoEditar && (
@@ -332,9 +332,9 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
                                                 <td colSpan={OFERECIMENTO_COLUMNS.length + 1}>
                                                     <div className="master-detail-content">
                                                         {loading ? (
-                                                            <p>Carregando ocorrências...</p>
+                                                            <p>Carregando ocorrÃªncias...</p>
                                                         ) : movs.length === 0 ? (
-                                                            <p className="master-detail-empty">Nenhuma ocorrência encontrada.</p>
+                                                            <p className="master-detail-empty">Nenhuma ocorrÃªncia encontrada.</p>
                                                         ) : (
                                                             <table className="master-detail-table">
                                                                 <thead>
@@ -355,7 +355,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
                                                                         <td>{mov.diaAula?.turnoEducacao?.descricao ?? ''}</td>
                                                                         <td>{mov.diaAula?.tempoAula?.descricao ?? ''}</td>
                                                                         <td>{mov.sala?.numero ?? mov.sala?.descricao ?? ''}</td>
-                                                                        <td>{mov.aulaPresencial ? 'Sim' : 'Não'}</td>
+                                                                        <td>{mov.aulaPresencial ? 'Sim' : 'NÃ£o'}</td>
                                                                     </tr>
                                                                 ))}
                                                                 </tbody>
@@ -375,12 +375,12 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
                                     <button onClick={() => setPage(current => Math.max(0, current - 1))} disabled={page === 0 || q.isFetching}>
                                         Anterior
                                     </button>
-                                    <span>Página {page + 1} de {totalPages}</span>
+                                    <span>PÃ¡gina {page + 1} de {totalPages}</span>
                                     <button onClick={() => setPage(current => Math.min(totalPages - 1, current + 1))} disabled={page >= totalPages - 1 || q.isFetching}>
-                                        Próxima
+                                        PrÃ³xima
                                     </button>
                                     <label>
-                                        Registros por página
+                                        Registros por pÃ¡gina
                                         <select value={size} onChange={e => { setSize(Number(e.target.value)); setPage(0); }}>
                                             {PAGE_SIZES.map(option => <option key={option} value={option}>{option}</option>)}
                                         </select>
@@ -397,7 +397,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
                         <div className="modal-overlay" onClick={() => setInfoDialog({open: false, entity: null})}>
                             <div className="modal form-modal" onClick={e => e.stopPropagation()}>
                                 <div className="div_form">
-                                    <div className="form-title">Informações do Oferecimento</div>
+                                    <div className="form-title">InformaÃ§Ãµes do Oferecimento</div>
                                     <div className="table_form">
                                         <div style={{display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '16px'}}>
                                             <div><strong>Oferecimento:</strong> {infoDialog.entity.id}</div>
@@ -434,12 +434,12 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
                         <div className="modal-overlay" onClick={() => setReplicarDialog({open: false, entity: null, action: 'ativar'})}>
                             <div className="modal form-modal" onClick={e => e.stopPropagation()}>
                                 <div className="div_form">
-                                    <div className="form-title">{replicarDialog.action === 'ativar' ? 'Ativar Replicação' : 'Desativar Replicação'}</div>
+                                    <div className="form-title">{replicarDialog.action === 'ativar' ? 'Ativar ReplicaÃ§Ã£o' : 'Desativar ReplicaÃ§Ã£o'}</div>
                                     <div className="table_form">
-                                        <p>Deseja {replicarDialog.action === 'ativar' ? 'ativar' : 'desativar'} a replicação?</p>
+                                        <p>Deseja {replicarDialog.action === 'ativar' ? 'ativar' : 'desativar'} a replicaÃ§Ã£o?</p>
                                         <div className="form-footer" style={{marginTop: '16px'}}>
                                             <button type="button" className="btn-form-save" onClick={confirmReplicar}>Sim</button>
-                                            <button type="button" className="btn-form-back" onClick={() => setReplicarDialog({open: false, entity: null, action: 'ativar'})}>Não</button>
+                                            <button type="button" className="btn-form-back" onClick={() => setReplicarDialog({open: false, entity: null, action: 'ativar'})}>NÃ£o</button>
                                         </div>
                                     </div>
                                 </div>
@@ -452,12 +452,12 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
                         <div className="modal-overlay" onClick={() => setDeleteDialog({open: false, entity: null})}>
                             <div className="modal form-modal" onClick={e => e.stopPropagation()}>
                                 <div className="div_form">
-                                    <div className="form-title">Confirmação</div>
+                                    <div className="form-title">ConfirmaÃ§Ã£o</div>
                                     <div className="table_form">
                                         <p>Tem certeza que deseja excluir este oferecimento?</p>
                                         <div className="form-footer" style={{marginTop: '16px'}}>
                                             <button type="button" className="btnred" onClick={confirmDelete}>Sim</button>
-                                            <button type="button" className="btn-form-back" onClick={() => setDeleteDialog({open: false, entity: null})}>Não</button>
+                                            <button type="button" className="btn-form-back" onClick={() => setDeleteDialog({open: false, entity: null})}>NÃ£o</button>
                                         </div>
                                     </div>
                                 </div>

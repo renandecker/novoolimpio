@@ -1,12 +1,12 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {PermissionGate} from '../permissions';
-import {FormLayout, FormTabConfig} from '../FormLayout';
-import {MasterDetail} from '../MasterDetail';
-import type {ApiItem} from '../types';
-import {api} from '../api';
-import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../masterDetailSources';
-import {AutoComplete, AutoCompleteOption} from '../AutoComplete';
+import {PermissionGate} from '../../shared/services/permissions';
+import {FormLayout, FormTabConfig} from '../../shared/components/FormLayout';
+import {MasterDetail} from '../../shared/components/MasterDetail';
+import type {ApiItem} from '../../features/auth/types';
+import {api} from '../../shared/services/api';
+import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../../shared/services/masterDetailSources';
+import {AutoComplete, AutoCompleteOption} from '../../shared/components/AutoComplete';
 import {useQuery} from '@tanstack/react-query';
 
 const toDateInput = (v: unknown): string => {
@@ -96,7 +96,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
     const buscarCep = async () => {
         const clean = cep.replace(/\D/g,'');
-        if(clean.length!==8){ setEnderecoAviso('CEP deve ter 8 dígitos'); return; }
+        if(clean.length!==8){ setEnderecoAviso('CEP deve ter 8 dÃ­gitos'); return; }
         setBuscandoCep(true); setEnderecoAviso('');
         try{
             // tenta via logradouroController/buscarEndereco primeiro
@@ -121,7 +121,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                     setBairroOpt(resp.bairro ? {id: -1, label: resp.bairro}: null);
                     setLogradouroOpt(resp.logradouro ? {id: -1, label: resp.logradouro}: null);
                     setCep(formatCep(resp.cep ?? clean));
-                } else setEnderecoAviso('CEP não encontrado');
+                } else setEnderecoAviso('CEP nÃ£o encontrado');
             }
         } finally { setBuscandoCep(false); }
     };
@@ -157,7 +157,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                 if(pf.estadoCivilId) fetchEstadoCivilById(Number(pf.estadoCivilId)).then(o=>o&&setEstadoCivilOpt(o));
                 if(pf.escolaridadeId) fetchEscolaridadeById(Number(pf.escolaridadeId)).then(o=>o&&setEscolaridadeOpt(o));
 
-                // Endereco - carrega dados da edição fiel ao colunasPessoaFisica.xhtml (logradouroController)
+                // Endereco - carrega dados da ediÃ§Ã£o fiel ao colunasPessoaFisica.xhtml (logradouroController)
                 if(pes){
                     const cepVal = str(pes.cep);
                     const numVal = str(pes.numero);
@@ -182,7 +182,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                             setCep(formatCep(cepVal));
                         }
                     } else if(cepVal) setCep(formatCep(cepVal));
-                    // Documentos - carrega lista vinculada à pessoa
+                    // Documentos - carrega lista vinculada Ã  pessoa
                     if(pes.id){
                         try{
                             const ids = (await api.get<number[]>(`/api/basico/pessoa-documento/buscar-pessoa-documento`,{params:{pessoaId: pes.id}})).data;
@@ -202,7 +202,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                         try{ const ids=(await api.get<number[]>(`/api/basico/pessoa/buscar-unidades`,{params:{entityId: pes.id}})).data; if(ids?.length){const s=new Set(ids.map(String)); setUnidades(allUnidades.filter(u=> s.has(String((u as any).id))));}}catch{}
                     }
                 }
-            }catch(e){ console.error(e); alert('Erro ao carregar pessoa física');}
+            }catch(e){ console.error(e); alert('Erro ao carregar pessoa fÃ­sica');}
         })();
         return ()=>{ativo=false;};
     },[idParam, allUnidades]);
@@ -218,7 +218,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
     const tabs: FormTabConfig[] = [
         {
-            key:'identificacao', label:'Identificação',
+            key:'identificacao', label:'IdentificaÃ§Ã£o',
             content:(
                 <div className="form-grid" style={{gridTemplateColumns:'1fr 1fr'}}>
                     <label className="form-field"><span className="form-label">CPF *</span><input className="form-input" placeholder="999.999.999-99" value={str(initialValues.cpf)} onChange={e=>setInitialValues(p=>({...p, cpf:e.target.value}))}/></label>
@@ -229,7 +229,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
             )
         },
         {
-            key:'informacoesBasicas', label:'Informações Básicas',
+            key:'informacoesBasicas', label:'InformaÃ§Ãµes BÃ¡sicas',
             content:(
                 <div style={{display:'flex', gap:'24px', flexWrap:'wrap'}}>
                     <div className="form-grid" style={{flex:'1 1 520px', gridTemplateColumns:'1fr 1fr'}}>
@@ -240,7 +240,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                             <AutoComplete placeholder="Digite 3 letras..." value={cidadeOrigemOpt} onChange={setCidadeOrigemOpt} fetchOptions={fetchCidade} fetchById={fetchCidadeById} />
                         </label>
                         <label className="form-field" style={fullRow}>
-                            <span className="form-label">Gênero</span>
+                            <span className="form-label">GÃªnero</span>
                             <AutoComplete placeholder="Selecione" value={generoOpt} onChange={setGeneroOpt} fetchOptions={fetchGenero} fetchById={fetchGeneroById} />
                         </label>
                         <label className="form-field" style={fullRow}>
@@ -255,15 +255,15 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                             <span className="form-label">Escolaridade *</span>
                             <AutoComplete placeholder="Digite 3 letras..." value={escolaridadeOpt} onChange={setEscolaridadeOpt} fetchOptions={fetchEscolaridade} fetchById={fetchEscolaridadeById} />
                         </label>
-                        {/* Referências - layout fiel ao xhtml: nome + telefone/celular na mesma linha */}
-                        <label className="form-field" style={fullRow}><span className="form-label">Nome Referência *</span><input className="form-input" placeholder="Nome da referência" value={str(initialValues.nomeReferencia)} onChange={e=>setInitialValues(p=>({...p, nomeReferencia:e.target.value}))}/></label>
-                        <label className="form-field"><span className="form-label">Telefone Referência</span><input className="form-input" placeholder="99-99999999" value={str(initialValues.telefoneReferencia)} onChange={e=>setInitialValues(p=>({...p, telefoneReferencia:e.target.value}))}/></label>
-                        <label className="form-field"><span className="form-label">Celular Referência</span><input className="form-input" placeholder="99-999999999" value={str(initialValues.celularReferencia)} onChange={e=>setInitialValues(p=>({...p, celularReferencia:e.target.value}))}/></label>
-                        <label className="form-field" style={fullRow}><span className="form-label">Nome Referência 2</span><input className="form-input" placeholder="Nome da referência 2" value={str(initialValues.nomeReferencia2)} onChange={e=>setInitialValues(p=>({...p, nomeReferencia2:e.target.value}))}/></label>
-                        <label className="form-field"><span className="form-label">Telefone Referência 2</span><input className="form-input" placeholder="99-99999999" value={str(initialValues.telefoneReferencia2)} onChange={e=>setInitialValues(p=>({...p, telefoneReferencia2:e.target.value}))}/></label>
-                        <label className="form-field"><span className="form-label">Celular Referência 2</span><input className="form-input" placeholder="99-999999999" value={str(initialValues.celularReferencia2)} onChange={e=>setInitialValues(p=>({...p, celularReferencia2:e.target.value}))}/></label>
+                        {/* ReferÃªncias - layout fiel ao xhtml: nome + telefone/celular na mesma linha */}
+                        <label className="form-field" style={fullRow}><span className="form-label">Nome ReferÃªncia *</span><input className="form-input" placeholder="Nome da referÃªncia" value={str(initialValues.nomeReferencia)} onChange={e=>setInitialValues(p=>({...p, nomeReferencia:e.target.value}))}/></label>
+                        <label className="form-field"><span className="form-label">Telefone ReferÃªncia</span><input className="form-input" placeholder="99-99999999" value={str(initialValues.telefoneReferencia)} onChange={e=>setInitialValues(p=>({...p, telefoneReferencia:e.target.value}))}/></label>
+                        <label className="form-field"><span className="form-label">Celular ReferÃªncia</span><input className="form-input" placeholder="99-999999999" value={str(initialValues.celularReferencia)} onChange={e=>setInitialValues(p=>({...p, celularReferencia:e.target.value}))}/></label>
+                        <label className="form-field" style={fullRow}><span className="form-label">Nome ReferÃªncia 2</span><input className="form-input" placeholder="Nome da referÃªncia 2" value={str(initialValues.nomeReferencia2)} onChange={e=>setInitialValues(p=>({...p, nomeReferencia2:e.target.value}))}/></label>
+                        <label className="form-field"><span className="form-label">Telefone ReferÃªncia 2</span><input className="form-input" placeholder="99-99999999" value={str(initialValues.telefoneReferencia2)} onChange={e=>setInitialValues(p=>({...p, telefoneReferencia2:e.target.value}))}/></label>
+                        <label className="form-field"><span className="form-label">Celular ReferÃªncia 2</span><input className="form-input" placeholder="99-999999999" value={str(initialValues.celularReferencia2)} onChange={e=>setInitialValues(p=>({...p, celularReferencia2:e.target.value}))}/></label>
                         <label className="form-field" style={fullRow}><span className="form-label">Nome do Pai</span><input className="form-input" placeholder="Nome do pai" value={str(initialValues.nomePai)} onChange={e=>setInitialValues(p=>({...p, nomePai:e.target.value}))}/></label>
-                        <label className="form-field" style={fullRow}><span className="form-label">Nome da Mãe *</span><input className="form-input" placeholder="Nome da mãe" value={str(initialValues.nomeMae)} onChange={e=>setInitialValues(p=>({...p, nomeMae:e.target.value}))}/></label>
+                        <label className="form-field" style={fullRow}><span className="form-label">Nome da MÃ£e *</span><input className="form-input" placeholder="Nome da mÃ£e" value={str(initialValues.nomeMae)} onChange={e=>setInitialValues(p=>({...p, nomeMae:e.target.value}))}/></label>
                     </div>
                     <div style={{width:'260px', flex:'0 0 260px'}}>
                         <div style={{border:'1px solid #ddd', borderRadius:'6px', padding:'12px', textAlign:'center'}}>
@@ -291,7 +291,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
             )
         },
         {
-            key:'endereco', label:'Endereço',
+            key:'endereco', label:'EndereÃ§o',
             content:(
                 <div className="form-grid" style={{gridTemplateColumns:'1fr 1fr'}}>
                     <label className="form-field"><span className="form-label">CEP</span>
@@ -315,7 +315,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                         <span className="form-label">Logradouro</span>
                         <AutoComplete placeholder="Digite 3 letras..." value={logradouroOpt} onChange={o=>{ setLogradouroOpt(o); if(o) setLogradouroId(o.id);}} fetchOptions={fetchLogradouros} />
                     </label>
-                    <label className="form-field"><span className="form-label">Número *</span><input className="form-input" placeholder="Número" value={numero} onChange={e=>setNumero(e.target.value)}/></label>
+                    <label className="form-field"><span className="form-label">NÃºmero *</span><input className="form-input" placeholder="NÃºmero" value={numero} onChange={e=>setNumero(e.target.value)}/></label>
                     <label className="form-field" style={fullRowTop}><span className="form-label">Complemento</span><textarea className="form-input" placeholder="Complemento" rows={3} style={{minHeight:'80px'}} value={complemento} onChange={e=>setComplemento(e.target.value)}/></label>
                 </div>
             )
@@ -326,7 +326,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                 <div style={{display:'flex', flexDirection:'column', gap:'12px'}}>
                     <div className="form-grid" style={{gridTemplateColumns:'1fr 1fr'}}>
                         <label className="form-field"><span className="form-label">Nome Documento</span><input className="form-input" placeholder="Ex: RG frente" value={docNome} onChange={e=>setDocNome(e.target.value)}/></label>
-                        <label className="form-field"><span className="form-label">Documento</span><input className="form-input" placeholder="Número / arquivo" value={docNumero} onChange={e=>setDocNumero(e.target.value)}/></label>
+                        <label className="form-field"><span className="form-label">Documento</span><input className="form-input" placeholder="NÃºmero / arquivo" value={docNumero} onChange={e=>setDocNumero(e.target.value)}/></label>
                     </div>
                     <button type="button" className="btnblue" onClick={async()=>{
                         if(!docNome || !docNumero){ alert('Informe nome e documento'); return; }
@@ -335,10 +335,10 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                     }}>Adicionar Documento</button>
                     {documentos.length>0 ? (
                         <table className="master-detail-table" style={{width:'100%', borderCollapse:'collapse'}}>
-                            <thead><tr><th style={{border:'1px solid #ddd', padding:'8px'}}>Nome</th><th style={{border:'1px solid #ddd', padding:'8px'}}>Documento</th><th style={{border:'1px solid #ddd', padding:'8px'}}>Ações</th></tr></thead>
+                            <thead><tr><th style={{border:'1px solid #ddd', padding:'8px'}}>Nome</th><th style={{border:'1px solid #ddd', padding:'8px'}}>Documento</th><th style={{border:'1px solid #ddd', padding:'8px'}}>AÃ§Ãµes</th></tr></thead>
                             <tbody>{documentos.map((d:any)=><tr key={d.id}><td style={{border:'1px solid #ddd', padding:'8px'}}>{d.nome}</td><td style={{border:'1px solid #ddd', padding:'8px'}}>{d.documento}</td><td style={{border:'1px solid #ddd', padding:'8px'}}><button type="button" className="btnstop" onClick={async()=>{ try{await api.delete(`/api/basico/pessoa-documento/${d.id}`); setDocumentos(documentos.filter((x:any)=>x.id!==d.id));}catch{alert('Erro ao remover');}}}>Remover</button></td></tr>)}</tbody>
                         </table>
-                    ): <small style={{color:'#666'}}>Nenhum documento cadastrado. Os documentos da edição aparecerão aqui.</small>}
+                    ): <small style={{color:'#666'}}>Nenhum documento cadastrado. Os documentos da ediÃ§Ã£o aparecerÃ£o aqui.</small>}
                 </div>
             )
         },
@@ -347,7 +347,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
             key:'outros', label:'Outros',
             content:(
                 <div className="form-grid">
-                    <label className="form-field" style={fullRowTop}><span className="form-label">Observação</span><textarea className="form-input" placeholder="Observações" rows={5} style={{width:'100%', minHeight:'100px'}} value={str(initialValues.observacao)} onChange={e=>setInitialValues(p=>({...p, observacao:e.target.value}))}/></label>
+                    <label className="form-field" style={fullRowTop}><span className="form-label">ObservaÃ§Ã£o</span><textarea className="form-input" placeholder="ObservaÃ§Ãµes" rows={5} style={{width:'100%', minHeight:'100px'}} value={str(initialValues.observacao)} onChange={e=>setInitialValues(p=>({...p, observacao:e.target.value}))}/></label>
                 </div>
             )
         },
@@ -374,7 +374,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <FormLayout title="Pessoa Física" tabs={tabs} initialValues={initialValues} onSubmit={()=>salvar(false)} onCancel={voltar} submitLabel="Salvar" cancelLabel="Voltar" saving={salvando} error={error} />
+                <FormLayout title="Pessoa FÃ­sica" tabs={tabs} initialValues={initialValues} onSubmit={()=>salvar(false)} onCancel={voltar} submitLabel="Salvar" cancelLabel="Voltar" saving={salvando} error={error} />
             </main>
         </PermissionGate>
     );

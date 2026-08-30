@@ -1,13 +1,13 @@
-import {useState} from 'react';
-import {PermissionGate} from '../permissions';
-import {DataTable} from '../DataTable';
-import {MasterDetail} from '../MasterDetail';
+﻿import {useState} from 'react';
+import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable} from '../../shared/components/DataTable';
+import {MasterDetail} from '../../shared/components/MasterDetail';
 import {
     ETAPAS_SOURCE,
     ETAPAS_COLUMNS,
     ETAPAS_SEARCH,
-} from '../masterDetailSources';
-import type {ApiItem} from '../types';
+} from '../../shared/services/masterDetailSources';
+import type {ApiItem} from '../../features/auth/types';
 
 export default function ViewResultadoCobrancaFormResultadoCobrancaListScreen() {
     const [etapas, setEtapas] = useState<ApiItem[]>([]);
@@ -17,7 +17,7 @@ export default function ViewResultadoCobrancaFormResultadoCobrancaListScreen() {
             <main>
                 <h1>Form Resultado Cobranca</h1>
                 <div className="div_form">
-                    <div className="form-title">Motivo da Ligação</div>
+                    <div className="form-title">Motivo da LigaÃ§Ã£o</div>
                     <div className="table_form">
                         <MasterDetail
                             label="Etapas"

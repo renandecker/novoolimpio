@@ -1,7 +1,7 @@
-import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
-import type {DataTableColumn} from '../DataTable';
-import type {ApiItem} from '../types';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {ModuleTabs} from '../../shared/components/ModuleTabs';
+import type {DataTableColumn} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../features/auth/types';
 import {
     COMPONENTE_SOURCE,
     COMPONENTE_COLUMNS,
@@ -9,7 +9,7 @@ import {
     TURMA_SOURCE,
     TURMA_COLUMNS,
     TURMA_SEARCH
-} from '../masterDetailSources';
+} from '../../shared/services/masterDetailSources';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -47,20 +47,20 @@ export default function ViewTurmaListTurmaFinalizandoListScreen() {
                     tabs={[
                         {
                             key: 'matriculas',
-                            label: 'Matrículas',
+                            label: 'MatrÃ­culas',
                             path: '/api/view/turma/listTurmaFinalizando',
                             columns: TURMA_FINALIZANDO_COLUMNS,
                             maxMainColumns: TURMA_FINALIZANDO_COLUMNS.length,
                         },
-                        {key: 'notas', label: 'Notas', empty: 'Conteúdo de Notas.'},
-                        {key: 'presencas', label: 'Presenças', empty: 'Conteúdo de Presenças.'},
-                        {key: 'diasAula', label: 'Dias Aula', empty: 'Conteúdo de Dias Aula.'},
-                        {key: 'comparativoAula', label: 'Comparativo Aula', empty: 'Conteúdo de Comparativo Aula.'},
-                        {key: 'professor', label: 'Professor', empty: 'Conteúdo de Professor.'},
+                        {key: 'notas', label: 'Notas', empty: 'ConteÃºdo de Notas.'},
+                        {key: 'presencas', label: 'PresenÃ§as', empty: 'ConteÃºdo de PresenÃ§as.'},
+                        {key: 'diasAula', label: 'Dias Aula', empty: 'ConteÃºdo de Dias Aula.'},
+                        {key: 'comparativoAula', label: 'Comparativo Aula', empty: 'ConteÃºdo de Comparativo Aula.'},
+                        {key: 'professor', label: 'Professor', empty: 'ConteÃºdo de Professor.'},
                         {
                             key: 'selecionandoAluno',
                             label: 'Selecionando Aluno',
-                            empty: 'Conteúdo de Selecionando Aluno.'
+                            empty: 'ConteÃºdo de Selecionando Aluno.'
                         },
                         {
                             key: 'selecionandoNovaTurma',
@@ -73,8 +73,8 @@ export default function ViewTurmaListTurmaFinalizandoListScreen() {
                                 columns: TURMA_COLUMNS
                             }
                         },
-                        {key: 'informacoes', label: 'Informações', empty: 'Conteúdo de Informações.'},
-                        {key: 'disponibilidade', label: 'Disponibilidade', empty: 'Conteúdo de Disponibilidade.'},
+                        {key: 'informacoes', label: 'InformaÃ§Ãµes', empty: 'ConteÃºdo de InformaÃ§Ãµes.'},
+                        {key: 'disponibilidade', label: 'Disponibilidade', empty: 'ConteÃºdo de Disponibilidade.'},
                         {
                             key: 'componenteCurricular',
                             label: 'Componente Curricular',

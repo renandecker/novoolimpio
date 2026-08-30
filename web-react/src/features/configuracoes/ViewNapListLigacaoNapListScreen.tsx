@@ -1,10 +1,10 @@
-import {useQuery} from '@tanstack/react-query';
-import {api} from '../api';
-import {PermissionGate, useCurrentOutcome} from '../permissions';
-import {DataTable, type DataTableColumn, type DataTableRowAction} from '../DataTable';
-import {Tabs} from '../Tabs';
-import {executeAction} from '../actions';
-import type {ApiItem} from '../types';
+﻿import {useQuery} from '@tanstack/react-query';
+import {api} from '../../shared/services/api';
+import {PermissionGate, useCurrentOutcome} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn, type DataTableRowAction} from '../../shared/components/DataTable';
+import {Tabs} from '../../shared/components/Tabs';
+import {executeAction} from '../../shared/services/actions';
+import type {ApiItem} from '../../features/auth/types';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -14,14 +14,14 @@ interface EtapaNap {
 }
 
 const NAP_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID da Ligação NAP'},
-    {key: 'usuarioId', label: 'Usuário ligou'},
-    {key: 'dataInicial', label: 'Data início'},
+    {key: 'id', label: 'ID da LigaÃ§Ã£o NAP'},
+    {key: 'usuarioId', label: 'UsuÃ¡rio ligou'},
+    {key: 'dataInicial', label: 'Data inÃ­cio'},
     {key: 'dataFinal', label: 'Data fim'},
     {key: 'compromissoId', label: 'Compromisso'},
-    {key: 'resultadoLigacaoNapId', label: 'Resultado ligação NAP'},
+    {key: 'resultadoLigacaoNapId', label: 'Resultado ligaÃ§Ã£o NAP'},
     {key: 'telefone', label: 'Telefone'},
-    {key: 'observacao', label: 'Observação'},
+    {key: 'observacao', label: 'ObservaÃ§Ã£o'},
 ];
 
 const extraRowActions: DataTableRowAction[] = [
@@ -45,7 +45,7 @@ const extraRowActions: DataTableRowAction[] = [
     },
     {
         key: 'ligacao',
-        title: 'Ligação',
+        title: 'LigaÃ§Ã£o',
         icon: <i className="fa fa-phone"/>,
         permission: 'EXECUTE',
         onClick: async (item) => {
@@ -74,7 +74,7 @@ export default function ViewNapListLigacaoNapListScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>Ligação NAP</h1>
+                <h1>LigaÃ§Ã£o NAP</h1>
                 {etapasQuery.isLoading && etapas.length === 0 ? (
                     <p>Carregando etapas...</p>
                 ) : (

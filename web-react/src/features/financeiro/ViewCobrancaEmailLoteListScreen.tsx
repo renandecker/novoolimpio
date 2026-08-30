@@ -1,7 +1,7 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import {Wizard, useWizardData} from '../Wizard';
-import {useApi} from '../api';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import {Wizard, useWizardData} from '../../shared/components/Wizard';
+import {useApi} from '../../shared/services/api';
 
 const MODELO_EMAIL_COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID do Modelo de Email'},

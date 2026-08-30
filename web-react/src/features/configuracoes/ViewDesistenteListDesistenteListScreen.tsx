@@ -1,8 +1,8 @@
-import {useState} from 'react';
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import type {ApiItem} from '../types';
-import {CancelamentoModal} from '../CancelamentoModal';
+﻿import {useState} from 'react';
+import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../features/auth/types';
+import {CancelamentoModal} from '../../shared/components/CancelamentoModal';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -18,7 +18,7 @@ const DESISTENTE_COLUMNS: DataTableColumn[] = [
     {key: 'data_criacao', label: 'Data Desistente', render: (item) => formatDate(asRecord(item).data_criacao)},
     {key: 'id_contrato', label: 'Contrato'},
     {key: 'pessoa_aluno_descricao', label: 'Nome Aluno'},
-    {key: 'pessoa_notificou_descricao', label: 'Nome Funcionário'},
+    {key: 'pessoa_notificou_descricao', label: 'Nome FuncionÃ¡rio'},
     {key: 'motivo_descricao', label: 'Motivo'},
 ];
 

@@ -1,12 +1,12 @@
-import {useEffect, useMemo, useState} from 'react';
+﻿import {useEffect, useMemo, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
-import {PermissionGate} from '../permissions';
-import {BooleanField} from '../BooleanField';
-import {MasterDetail} from '../MasterDetail';
-import type {MasterDetailColumn} from '../MasterDetail';
-import type {ApiItem} from '../types';
-import {api} from '../api';
+import {PermissionGate} from '../../shared/services/permissions';
+import {BooleanField} from '../../shared/components/BooleanField';
+import {MasterDetail} from '../../shared/components/MasterDetail';
+import type {MasterDetailColumn} from '../../shared/components/MasterDetail';
+import type {ApiItem} from '../../shared/types/index';
+import {api} from '../../shared/services/api';
 
 interface FormState {
     descricao: string;

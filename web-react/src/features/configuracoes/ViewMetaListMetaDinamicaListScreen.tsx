@@ -1,7 +1,7 @@
-import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
-import type {DataTableColumn} from '../DataTable';
-import type {ApiItem} from '../types';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {ModuleTabs} from '../../shared/components/ModuleTabs';
+import type {DataTableColumn} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../features/auth/types';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -16,10 +16,10 @@ const COLUMNS: DataTableColumn[] = [
     {key: 'indicador_descricao', label: 'Indicador'},
     {key: 'unidade_descricao', label: 'Unidade'},
     {key: 'ano', label: 'Ano'},
-    {key: 'mes', label: 'Mês'},
+    {key: 'mes', label: 'MÃªs'},
     {
         key: 'data_atualizacao',
-        label: 'Data Atualização',
+        label: 'Data AtualizaÃ§Ã£o',
         render: (item) => formatDate(asRecord(item).data_atualizacao),
     },
 ];
@@ -38,8 +38,8 @@ export default function ViewMetaListMetaDinamicaListScreen() {
                             columns: COLUMNS,
                             maxMainColumns: COLUMNS.length,
                         },
-                        {key: 'item2', label: 'Item 2', empty: 'Conteúdo de Item 2.'},
-                        {key: 'listagem', label: 'Listagem', empty: 'Conteúdo de Listagem.'},
+                        {key: 'item2', label: 'Item 2', empty: 'ConteÃºdo de Item 2.'},
+                        {key: 'listagem', label: 'Listagem', empty: 'ConteÃºdo de Listagem.'},
                     ]}
                 />
             </main>

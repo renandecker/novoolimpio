@@ -1,10 +1,10 @@
-import {PermissionGate} from '../permissions';
-import {DataTable} from '../DataTable';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable} from '../../shared/components/DataTable';
 
 export default function AsaasCobrancasListScreen() {
     return <PermissionGate permission="READ">
-        <main><h1>Cobranças Asaas</h1><DataTable path="/api/asaas/cobrancas" module="asaas"
-                                                 columns={[{key: 'id', label: 'ID da Cobrança Asaas'}, {
+        <main><h1>CobranÃ§as Asaas</h1><DataTable path="/api/asaas/cobrancas" module="asaas"
+                                                 columns={[{key: 'id', label: 'ID da CobranÃ§a Asaas'}, {
                                                      key: 'customer',
                                                      label: 'Cliente'
                                                  }, {key: 'value', label: 'Valor'}, {
@@ -13,6 +13,6 @@ export default function AsaasCobrancasListScreen() {
                                                  }, {key: 'status', label: 'Status'}, {
                                                      key: 'dueDate',
                                                      label: 'Vencimento'
-                                                 }, {key: 'description', label: 'Descrição'}]}/></main>
+                                                 }, {key: 'description', label: 'DescriÃ§Ã£o'}]}/></main>
     </PermissionGate>
 }

@@ -1,15 +1,15 @@
-import {useState, useCallback} from 'react';
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn, type DataTableRowAction} from '../DataTable';
-import {api} from '../api';
-import {Modal} from '../Modal';
-import type {ApiItem} from '../types';
+﻿import {useState, useCallback} from 'react';
+import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn, type DataTableRowAction} from '../../shared/components/DataTable';
+import {api} from '../../shared/services/api';
+import {Modal} from '../../shared/components/Modal';
+import type {ApiItem} from '../../features/auth/types';
 
 const COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID'},
     {key: 'pacote_descricao', label: 'Pacote'},
     {key: 'quantidade_prospecto', label: 'Qtd Prospectos'},
-    {key: 'pacote_data_criacao', label: 'Data Criação'},
+    {key: 'pacote_data_criacao', label: 'Data CriaÃ§Ã£o'},
     {key: 'acao_data_final', label: 'Data Fim'},
     {key: 'status', label: 'Status'},
     {key: 'direcionamento', label: 'Direcionamento'},
@@ -55,7 +55,7 @@ export default function ViewOperacionalListOperacionalListScreen() {
     const [ligacaoUsuarios, setLigacaoUsuarios] = useState<UsuarioItem[]>([]);
     const [ligacaoUsuarioSelecionado, setLigacaoUsuarioSelecionado] = useState<number | null>(null);
     const [pieData, setPieData] = useState<LigacaoPieData[]>([]);
-    const [pieTitle, setPieTitle] = useState('Ligações de Todos Operadores');
+    const [pieTitle, setPieTitle] = useState('LigaÃ§Ãµes de Todos Operadores');
     const [loading, setLoading] = useState(false);
 
     const openVerFiltros = useCallback(async (item: ApiItem) => {
@@ -88,10 +88,10 @@ export default function ViewOperacionalListOperacionalListScreen() {
             ]);
             setLigacaoUsuarios(users.data ?? []);
             setPieData(pie.data ?? []);
-            setPieTitle('Ligações de Todos Operadores');
+            setPieTitle('LigaÃ§Ãµes de Todos Operadores');
             setLigacaoUsuarioSelecionado(null);
         } catch (e) {
-            console.error('Erro ao buscar ligações', e);
+            console.error('Erro ao buscar ligaÃ§Ãµes', e);
         } finally {
             setLoading(false);
             setVerLigacoesOpen(true);
@@ -107,14 +107,14 @@ export default function ViewOperacionalListOperacionalListScreen() {
                 const pie = await api.get<LigacaoPieData[]>(`/api/central/operacional/${selectedOperacional.id}/ligacoes/pie?usuarioId=${usuarioId}`);
                 setPieData(pie.data ?? []);
                 const user = ligacaoUsuarios.find(u => u.id === usuarioId);
-                setPieTitle(user ? `Ligações do(a): ${user.login}` : 'Ligações de Todos Operadores');
+                setPieTitle(user ? `LigaÃ§Ãµes do(a): ${user.login}` : 'LigaÃ§Ãµes de Todos Operadores');
             } else {
                 const pie = await api.get<LigacaoPieData[]>(`/api/central/operacional/${selectedOperacional.id}/ligacoes/pie`);
                 setPieData(pie.data ?? []);
-                setPieTitle('Ligações de Todos Operadores');
+                setPieTitle('LigaÃ§Ãµes de Todos Operadores');
             }
         } catch (e) {
-            console.error('Erro ao buscar ligações por usuário', e);
+            console.error('Erro ao buscar ligaÃ§Ãµes por usuÃ¡rio', e);
         } finally {
             setLoading(false);
         }
@@ -158,37 +158,37 @@ export default function ViewOperacionalListOperacionalListScreen() {
             key: 'verFiltros',
             title: 'Ver Filtros',
             className: 'btnpurple',
-            icon: '🔍',
+            icon: 'ðŸ”',
             onClick: openVerFiltros,
         },
         {
             key: 'verLigacoes',
             title: 'Resultados Prospectos',
             className: 'btnblue',
-            icon: '📊',
+            icon: 'ðŸ“Š',
             onClick: openVerLigacoes,
         },
         {
             key: 'verProspectos',
             title: 'Prospectos Filtrados',
             className: 'btnorange',
-            icon: '👥',
+            icon: 'ðŸ‘¥',
             onClick: openDialogProspectos,
         },
         {
             key: 'removerProspectos',
-            title: 'Prospectos sem Ligação',
+            title: 'Prospectos sem LigaÃ§Ã£o',
             className: 'btnblack',
-            icon: '🗑️',
+            icon: 'ðŸ—‘ï¸',
             onClick: openConfirmRemover,
         },
     ];
 
     const tipoFiltroLabels: Record<number, string> = {
-        1: 'Resultado ligação',
-        2: 'Quantidade ligação',
-        3: 'Estar no período ligação',
-        4: 'Somente no período ligação',
+        1: 'Resultado ligaÃ§Ã£o',
+        2: 'Quantidade ligaÃ§Ã£o',
+        3: 'Estar no perÃ­odo ligaÃ§Ã£o',
+        4: 'Somente no perÃ­odo ligaÃ§Ã£o',
     };
 
     return (
@@ -209,7 +209,7 @@ export default function ViewOperacionalListOperacionalListScreen() {
                         <div>
                             <h4>Filtro Campo</h4>
                             <table className="data-table" style={{width: '100%', fontSize: '12px'}}>
-                                <thead><tr><th>Rótulo</th></tr></thead>
+                                <thead><tr><th>RÃ³tulo</th></tr></thead>
                                 <tbody>
                                     {filtroPacotes.map(f => (
                                         <tr key={f.id}><td>{f.rotulo}</td></tr>
@@ -219,9 +219,9 @@ export default function ViewOperacionalListOperacionalListScreen() {
                             </table>
                         </div>
                         <div>
-                            <h4>Filtro Ação</h4>
+                            <h4>Filtro AÃ§Ã£o</h4>
                             <table className="data-table" style={{width: '100%', fontSize: '12px'}}>
-                                <thead><tr><th>Ação</th></tr></thead>
+                                <thead><tr><th>AÃ§Ã£o</th></tr></thead>
                                 <tbody>
                                     {filtrosAcao.map(f => (
                                         <tr key={f.id}><td>{f.descricao}</td></tr>
@@ -231,9 +231,9 @@ export default function ViewOperacionalListOperacionalListScreen() {
                             </table>
                         </div>
                         <div>
-                            <h4>Filtro Ligação</h4>
+                            <h4>Filtro LigaÃ§Ã£o</h4>
                             <table className="data-table" style={{width: '100%', fontSize: '12px'}}>
-                                <thead><tr><th>Tipo Filtro</th><th>Rótulo</th></tr></thead>
+                                <thead><tr><th>Tipo Filtro</th><th>RÃ³tulo</th></tr></thead>
                                 <tbody>
                                     {filtrosLigacao.map(f => (
                                         <tr key={f.id}>
@@ -248,7 +248,7 @@ export default function ViewOperacionalListOperacionalListScreen() {
                     </div>
                 </Modal>
 
-                {/* Modal Ver Ligações / Pie Chart */}
+                {/* Modal Ver LigaÃ§Ãµes / Pie Chart */}
                 <Modal open={verLigacoesOpen} onClose={() => setVerLigacoesOpen(false)} title="Resultados Prospectos" size="large">
                     {loading && <p style={{textAlign: 'center', padding: '20px'}}>Carregando...</p>}
                     <div style={{textAlign: 'center'}}>
@@ -290,7 +290,7 @@ export default function ViewOperacionalListOperacionalListScreen() {
                                 ))}
                             </div>
                         ) : (
-                            <p style={{color: '#666', marginTop: '20px'}}>Nenhum dado de ligação encontrado.</p>
+                            <p style={{color: '#666', marginTop: '20px'}}>Nenhum dado de ligaÃ§Ã£o encontrado.</p>
                         )}
                     </div>
                 </Modal>
@@ -332,19 +332,19 @@ export default function ViewOperacionalListOperacionalListScreen() {
                 </Modal>
 
                 {/* Modal Confirm Remover Prospectos */}
-                <Modal open={confirmRemoverOpen} onClose={() => setConfirmRemoverOpen(false)} title="Atenção!" size="small">
+                <Modal open={confirmRemoverOpen} onClose={() => setConfirmRemoverOpen(false)} title="AtenÃ§Ã£o!" size="small">
                     <div style={{display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px'}}>
-                        <div style={{fontSize: '32px', color: '#C90000'}}>⚠️</div>
+                        <div style={{fontSize: '32px', color: '#C90000'}}>âš ï¸</div>
                         <div>
-                            <strong>Confirma a remoção dos prospectos do pacote?</strong>
+                            <strong>Confirma a remoÃ§Ã£o dos prospectos do pacote?</strong>
                             <p style={{margin: '8px 0 0', color: '#666', fontSize: '13px'}}>
-                                Esta ação definirá o status do operacional como CONCLUÍDO e removerá os prospectos associados.
+                                Esta aÃ§Ã£o definirÃ¡ o status do operacional como CONCLUÃDO e removerÃ¡ os prospectos associados.
                             </p>
                         </div>
                     </div>
                     <div style={{display: 'flex', justifyContent: 'flex-end', gap: '8px'}}>
                         <button className="btnblue" onClick={() => setConfirmRemoverOpen(false)} disabled={loading}>
-                            Não
+                            NÃ£o
                         </button>
                         <button className="btnred" onClick={handleRemoverProspectos} disabled={loading}>
                             {loading ? 'Removendo...' : 'Sim'}

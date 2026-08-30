@@ -1,9 +1,9 @@
-import {useState} from 'react';
+﻿import {useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {api} from '../api';
-import {PermissionGate} from '../permissions';
-import {Tabs, type TabItem} from '../Tabs';
-import {ExportDropdown} from '../ExportDropdown';
+import {api} from '../../shared/services/api';
+import {PermissionGate} from '../../shared/services/permissions';
+import {Tabs, type TabItem} from '../../shared/components/Tabs';
+import {ExportDropdown} from '../../shared/components/ExportDropdown';
 
 interface UnidadeRow {
     id: number;
@@ -83,7 +83,7 @@ function ProdutosEstoqueTab({unidadeId}: { unidadeId: string }) {
                 <span className="legenda-yellow">Solicitado</span>
                 <span className="legenda-orange">Defeito</span>
                 <span className="legenda-red">Falta</span>
-                <span className="legenda-blue">Não encontrado</span>
+                <span className="legenda-blue">NÃ£o encontrado</span>
                 <span className="legenda-green">Encaminhando produto</span>
                 <span className="legenda-black">Reservado</span>
             </div>
@@ -109,7 +109,7 @@ function ProdutosEstoqueTab({unidadeId}: { unidadeId: string }) {
                                     <span className="legenda-orange">{item.qtdeDefeito} Defeito</span>}
                                     {item.qtdeFalta > 0 && <span className="legenda-red">{item.qtdeFalta} Falta</span>}
                                     {item.qtdeNaoEncontrado > 0 &&
-                                    <span className="legenda-blue">{item.qtdeNaoEncontrado} Não Encontrado</span>}
+                                    <span className="legenda-blue">{item.qtdeNaoEncontrado} NÃ£o Encontrado</span>}
                                     {item.qtdeAprovadoNaoEntregue > 0 && <span
                                         className="legenda-green">{item.qtdeAprovadoNaoEntregue} Aprovado N. Entregue</span>}
                                     {item.qtdeReservado > 0 &&
@@ -158,9 +158,9 @@ function PendenciaVendaTab({unidadeId}: { unidadeId: string }) {
         {key: 'excel', label: 'Excel', icon: <i className="fa fa-file-excel-o"/>, onClick: () => handleExport('excel')},
     ];
 
-    if (!unidadeId) return <p className="disp-aviso">Selecione uma unidade para visualizar as pendências.</p>;
+    if (!unidadeId) return <p className="disp-aviso">Selecione uma unidade para visualizar as pendÃªncias.</p>;
     if (isLoading) return <p>Carregando...</p>;
-    if (itens.length === 0) return <p>Nenhuma pendência de venda encontrada.</p>;
+    if (itens.length === 0) return <p>Nenhuma pendÃªncia de venda encontrada.</p>;
 
     return (
         <div>
@@ -176,7 +176,7 @@ function PendenciaVendaTab({unidadeId}: { unidadeId: string }) {
                 <th>Valor</th>
                 <th>Qtde</th>
                 <th>Aluno</th>
-                <th>Ações</th>
+                <th>AÃ§Ãµes</th>
             </tr>
             </thead>
             <tbody>
@@ -200,7 +200,7 @@ function PendenciaVendaTab({unidadeId}: { unidadeId: string }) {
                     <td>
                         <button
                             className="btnblue"
-                            title="Entregar Pendência Produto"
+                            title="Entregar PendÃªncia Produto"
                             disabled={!!item.dataEntrega}
                         >
                             Entregar
@@ -226,7 +226,7 @@ export default function ViewEstoqueEstoqueprodutoListScreen() {
 
     const tabs: TabItem[] = [
         {key: 'produtosEstoque', label: 'Produtos Estoque', content: <ProdutosEstoqueTab unidadeId={unidadeId}/>},
-        {key: 'pendenciaVenda', label: 'Pendência Venda', content: <PendenciaVendaTab unidadeId={unidadeId}/>},
+        {key: 'pendenciaVenda', label: 'PendÃªncia Venda', content: <PendenciaVendaTab unidadeId={unidadeId}/>},
     ];
 
     return (

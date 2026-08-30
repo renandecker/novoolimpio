@@ -1,12 +1,12 @@
-import {useEffect, useState} from 'react';
-import {PermissionGate, usePermissions, useCurrentOutcome} from '../permissions';
-import {api} from '../api';
-import {useModulePaged} from '../useModulePaged';
-import type {ApiItem} from '../types';
-import {legacyClassName} from '../DataTable';
-import {PAGE_SIZES} from '../DataTable';
-import {RowMenu, type RowMenuItem} from '../RowMenu';
-import {ExportDropdown} from '../ExportDropdown';
+﻿import {useEffect, useState} from 'react';
+import {PermissionGate, usePermissions, useCurrentOutcome} from '../../shared/services/permissions';
+import {api} from '../../shared/services/api';
+import {useModulePaged} from '../../shared/hooks/useModulePaged';
+import type {ApiItem} from '../../features/auth/types';
+import {legacyClassName} from '../../shared/components/DataTable';
+import {PAGE_SIZES} from '../../shared/components/DataTable';
+import {RowMenu, type RowMenuItem} from '../../shared/components/RowMenu';
+import {ExportDropdown} from '../../shared/components/ExportDropdown';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -51,7 +51,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                 const response = await api.get(`/api/permissao/permissoes?caminho=${outcome}`);
                 setPerfilModuloPermissions(response.data);
             } catch (error) {
-                console.error('Erro ao carregar permissões do perfil-modulo:', error);
+                console.error('Erro ao carregar permissÃµes do perfil-modulo:', error);
             } finally {
                 setPerfilModuloLoading(false);
             }
@@ -151,7 +151,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                                 {COLUMNS.map((column) => (
                                     <th key={column.key}>{column.label}</th>
                                 ))}
-                                <th className="col-actions">Ações</th>
+                                <th className="col-actions">AÃ§Ãµes</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -171,7 +171,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                                     const relatoriosItems: RowMenuItem[] = [
                                         {
                                             key: 'info',
-                                            label: 'Informações',
+                                            label: 'InformaÃ§Ãµes',
                                             className: 'btnyellow',
                                             onSelect: () => handleInfo(record),
                                         },
@@ -212,7 +212,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                                                 <div className="row-actions-menu">
                                                     {acessoRelatorios && (
                                                         <RowMenu icon={<i className="fa fa-info-circle"/>}
-                                                                 className="btnyellow" title="Relatórios"
+                                                                 className="btnyellow" title="RelatÃ³rios"
                                                                  items={relatoriosItems}/>
                                                     )}
                                                     {acessoEditar && (
@@ -238,12 +238,12 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                                     <button onClick={() => setPage(current => Math.max(0, current - 1))} disabled={page === 0 || q.isFetching}>
                                         Anterior
                                     </button>
-                                    <span>Página {page + 1} de {totalPages}</span>
+                                    <span>PÃ¡gina {page + 1} de {totalPages}</span>
                                     <button onClick={() => setPage(current => Math.min(totalPages - 1, current + 1))} disabled={page >= totalPages - 1 || q.isFetching}>
-                                        Próxima
+                                        PrÃ³xima
                                     </button>
                                     <label>
-                                        Registros por página
+                                        Registros por pÃ¡gina
                                         <select value={size} onChange={e => { setSize(Number(e.target.value)); setPage(0); }}>
                                             {PAGE_SIZES.map(option => <option key={option} value={option}>{option}</option>)}
                                         </select>
@@ -260,7 +260,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                         <div className="modal-overlay" onClick={() => setInfoDialog({open: false, entity: null})}>
                             <div className="modal form-modal" onClick={e => e.stopPropagation()}>
                                 <div className="div_form">
-                                    <div className="form-title">Informações do Oferecimento de Curso</div>
+                                    <div className="form-title">InformaÃ§Ãµes do Oferecimento de Curso</div>
                                     <div className="table_form">
                                         <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '16px'}}>
                                             <div><strong>Grupo:</strong> {infoDialog.entity.nome}</div>
@@ -279,7 +279,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                                         <h4 style={{marginTop: '16px'}}>Componentes Curriculares</h4>
                                         <table className="master-detail-table">
                                             <thead>
-                                            <tr><th>Componente Curricular</th><th>Sala</th><th>Professor</th><th>Início</th><th>Fim</th></tr>
+                                            <tr><th>Componente Curricular</th><th>Sala</th><th>Professor</th><th>InÃ­cio</th><th>Fim</th></tr>
                                             </thead>
                                             <tbody>
                                             <tr><td colspan="5" style="text-align:center;color:#666">Componentes carregados do servidor</td></tr>
@@ -294,12 +294,12 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                         </div>
                     )}
 
-                    {/* Seleção Dialog */}
+                    {/* SeleÃ§Ã£o Dialog */}
                     {selecaoDialog.open && selecaoDialog.entity && (
                         <div className="modal-overlay" onClick={() => setSelecaoDialog({open: false, entity: null})}>
                             <div className="modal form-modal" style={{maxWidth: '900px'}} onClick={e => e.stopPropagation()}>
                                 <div className="div_form">
-                                    <div className="form-title">Selecione oferecimentos para edição</div>
+                                    <div className="form-title">Selecione oferecimentos para ediÃ§Ã£o</div>
                                     <div className="table_form">
                                         <table className="master-detail-table">
                                             <thead>
@@ -309,7 +309,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                                                 <th>Componente Curricular</th>
                                                 <th>Sala</th>
                                                 <th>Inscritos / Vagas</th>
-                                                <th>Data Início</th>
+                                                <th>Data InÃ­cio</th>
                                                 <th>Data Fim</th>
                                                 <th>Data Cancelamento</th>
                                                 <th>Professor</th>
@@ -339,13 +339,13 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                                             </tbody>
                                         </table>
                                         <div className="form-footer" style={{marginTop: '16px', display: 'flex', gap: '8px', justifyContent: 'flex-end'}}>
-                                            <button type="button" className="btnblue" onClick={() => alert('Ordem pelo início do oferecimento - implementar ordenação')}>
-                                                Ordem pelo início oferecimento
+                                            <button type="button" className="btnblue" onClick={() => alert('Ordem pelo inÃ­cio do oferecimento - implementar ordenaÃ§Ã£o')}>
+                                                Ordem pelo inÃ­cio oferecimento
                                             </button>
-                                            <button type="button" className="btnstop" onClick={() => alert('Ordem pela listagem tabela - implementar ordenação')}>
+                                            <button type="button" className="btnstop" onClick={() => alert('Ordem pela listagem tabela - implementar ordenaÃ§Ã£o')}>
                                                 Ordem pela listagem tabela
                                             </button>
-                                            <button type="button" className="btngreen" onClick={() => alert('Ordem conforme selecionando - implementar ordenação')}>
+                                            <button type="button" className="btngreen" onClick={() => alert('Ordem conforme selecionando - implementar ordenaÃ§Ã£o')}>
                                                 Ordem conforme selecionando
                                             </button>
                                             <button type="button" className="btn-form-back" onClick={() => { setSelecaoDialog({open: false, entity: null}); setSelecionados([]); }}>
@@ -363,12 +363,12 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                         <div className="modal-overlay" onClick={() => setDeleteDialog({open: false, entity: null})}>
                             <div className="modal form-modal" onClick={e => e.stopPropagation()}>
                                 <div className="div_form">
-                                    <div className="form-title">Confirmação</div>
+                                    <div className="form-title">ConfirmaÃ§Ã£o</div>
                                     <div className="table_form">
                                         <p>Tem certeza que deseja excluir este oferecimento de curso?</p>
                                         <div className="form-footer" style={{marginTop: '16px'}}>
                                             <button type="button" className="btnred" onClick={confirmDelete}>Sim</button>
-                                            <button type="button" className="btn-form-back" onClick={() => setDeleteDialog({open: false, entity: null})}>Não</button>
+                                            <button type="button" className="btn-form-back" onClick={() => setDeleteDialog({open: false, entity: null})}>NÃ£o</button>
                                         </div>
                                     </div>
                                 </div>

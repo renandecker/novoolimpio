@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
-import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../masterDetailSources';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {ModuleTabs} from '../../shared/components/ModuleTabs';
+import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../../shared/services/masterDetailSources';
 
 export default function ViewUnidadeFormRedeListScreen() {
     return (
@@ -21,7 +21,7 @@ export default function ViewUnidadeFormRedeListScreen() {
                                 columns: UNIDADE_COLUMNS
                             }
                         },
-                        {key: 'pessoal', label: 'Pessoal', empty: 'Conteúdo de Pessoal.'},
+                        {key: 'pessoal', label: 'Pessoal', empty: 'ConteÃºdo de Pessoal.'},
                         {
                             key: 'unidade2',
                             label: 'Unidade 2',

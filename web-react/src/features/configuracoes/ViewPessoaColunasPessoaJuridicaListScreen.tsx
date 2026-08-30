@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
-import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../masterDetailSources';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {ModuleTabs} from '../../shared/components/ModuleTabs';
+import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../../shared/services/masterDetailSources';
 
 export default function ViewPessoaColunasPessoaJuridicaListScreen() {
     return (
@@ -9,14 +9,14 @@ export default function ViewPessoaColunasPessoaJuridicaListScreen() {
                 <h1>Colunas Pessoa Juridica</h1>
                 <ModuleTabs
                     tabs={[
-                        {key: 'identificacao', label: 'Identificação', path: '/api/view/pessoa/colunasPessoaJuridica'},
+                        {key: 'identificacao', label: 'IdentificaÃ§Ã£o', path: '/api/view/pessoa/colunasPessoaJuridica'},
                         {
                             key: 'informacoesBasicas',
-                            label: 'Informações Básicas',
-                            empty: 'Conteúdo de Informações Básicas.'
+                            label: 'InformaÃ§Ãµes BÃ¡sicas',
+                            empty: 'ConteÃºdo de InformaÃ§Ãµes BÃ¡sicas.'
                         },
-                        {key: 'contato', label: 'Contato', empty: 'Conteúdo de Contato.'},
-                        {key: 'endereco', label: 'Endereço', empty: 'Conteúdo de Endereço.'},
+                        {key: 'contato', label: 'Contato', empty: 'ConteÃºdo de Contato.'},
+                        {key: 'endereco', label: 'EndereÃ§o', empty: 'ConteÃºdo de EndereÃ§o.'},
                         {
                             key: 'unidades',
                             label: 'Unidades',
@@ -28,7 +28,7 @@ export default function ViewPessoaColunasPessoaJuridicaListScreen() {
                                 columns: UNIDADE_COLUMNS
                             }
                         },
-                        {key: 'outros', label: 'Outros', empty: 'Conteúdo de Outros.'},
+                        {key: 'outros', label: 'Outros', empty: 'ConteÃºdo de Outros.'},
                     ]}
                 />
             </main>

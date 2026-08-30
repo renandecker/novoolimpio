@@ -1,17 +1,17 @@
-import {useState} from 'react';
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import {MasterDetail} from '../MasterDetail';
-import {Tabs} from '../Tabs';
-import {useApi} from '../api';
-import {useModulePaged} from '../useModulePaged';
-import type {ApiItem} from '../types';
+﻿import {useState} from 'react';
+import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import {MasterDetail} from '../../shared/components/MasterDetail';
+import {Tabs} from '../../shared/components/Tabs';
+import {useApi} from '../../shared/services/api';
+import {useModulePaged} from '../../shared/hooks/useModulePaged';
+import type {ApiItem} from '../../features/auth/types';
 
 const VAGA_COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID'},
     {key: 'nome', label: 'Nome'},
-    {key: 'descricao', label: 'Descrição'},
-    {key: 'data_inicio', label: 'Data Início', render: (item) => item.data_inicio ? new Date(item.data_inicio).toLocaleDateString('pt-BR') : ''},
+    {key: 'descricao', label: 'DescriÃ§Ã£o'},
+    {key: 'data_inicio', label: 'Data InÃ­cio', render: (item) => item.data_inicio ? new Date(item.data_inicio).toLocaleDateString('pt-BR') : ''},
     {key: 'data_fim', label: 'Data Fim', render: (item) => item.data_fim ? new Date(item.data_fim).toLocaleDateString('pt-BR') : ''},
     {key: 'vagas', label: 'Vagas'},
     {key: 'fl_ativo', label: 'Ativo'},
@@ -42,11 +42,11 @@ interface VagaFormData {
 }
 
 const PERFIL_SOURCE = '/api/view/perfil/listPerfil';
-const PERFIL_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'descricao', label: 'Descrição'}];
+const PERFIL_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'descricao', label: 'DescriÃ§Ã£o'}];
 const PERFIL_SEARCH = ['descricao'];
 
 const UNIDADE_SOURCE = '/api/view/unidade/listUnidade';
-const UNIDADE_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'sucinto', label: 'Sucinto'}, {key: 'razaoSocial', label: 'Razão Social'}, {key: 'nomeFantasia', label: 'Nome Fantasia'}];
+const UNIDADE_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'sucinto', label: 'Sucinto'}, {key: 'razaoSocial', label: 'RazÃ£o Social'}, {key: 'nomeFantasia', label: 'Nome Fantasia'}];
 const UNIDADE_SEARCH = ['sucinto', 'razaoSocial', 'nomeFantasia'];
 
 const EMPRESA_SOURCE = '/api/curriculo/empresa/refs?id_pessoa=0'; // will use refs
@@ -58,15 +58,15 @@ const USUARIO_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'login', label: 'Login'
 const USUARIO_SEARCH = ['login', 'nome'];
 
 const OFERECIMENTO_SOURCE = '/api/educacao/oferecimento-componente-curricular';
-const OFERECIMENTO_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'descricao', label: 'Descrição'}];
+const OFERECIMENTO_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'descricao', label: 'DescriÃ§Ã£o'}];
 const OFERECIMENTO_SEARCH = ['descricao'];
 
 const COMPONENTE_SOURCE = '/api/educacao/componente-curricular';
-const COMPONENTE_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'descricao', label: 'Descrição'}, {key: 'sucinto', label: 'Sucinto'}];
+const COMPONENTE_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'descricao', label: 'DescriÃ§Ã£o'}, {key: 'sucinto', label: 'Sucinto'}];
 const COMPONENTE_SEARCH = ['descricao', 'sucinto'];
 
 const CURRICULO_SOURCE = '/api/educacao/curriculo';
-const CURRICULO_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'sucinto', label: 'Sucinto'}, {key: 'descricao', label: 'Descrição'}];
+const CURRICULO_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'sucinto', label: 'Sucinto'}, {key: 'descricao', label: 'DescriÃ§Ã£o'}];
 const CURRICULO_SEARCH = ['sucinto', 'descricao'];
 
 const GRUPO_SOURCE = '/api/educacao/grupo';
@@ -118,10 +118,10 @@ export default function CurriculoVagaListScreen() {
 
     const validateForm = (): boolean => {
         const newErrors: Record<string, string> = {};
-        if (!formData.nome?.trim()) newErrors.nome = 'Nome é obrigatório';
-        if (!formData.descricao?.trim()) newErrors.descricao = 'Descrição é obrigatória';
+        if (!formData.nome?.trim()) newErrors.nome = 'Nome Ã© obrigatÃ³rio';
+        if (!formData.descricao?.trim()) newErrors.descricao = 'DescriÃ§Ã£o Ã© obrigatÃ³ria';
         if (formData.data_inicio && formData.data_fim && formData.data_fim < formData.data_inicio) {
-            newErrors.data_fim = 'Data fim não pode ser anterior à data início';
+            newErrors.data_fim = 'Data fim nÃ£o pode ser anterior Ã  data inÃ­cio';
         }
         if (formData.vagas !== null && formData.vagas < 0) newErrors.vagas = 'Vagas deve ser >= 0';
         setErrors(newErrors);
@@ -243,12 +243,12 @@ export default function CurriculoVagaListScreen() {
                     {errors.nome && <span className="form-erro">{errors.nome}</span>}
                 </label>
                 <label className="form-field" style={{gridColumn: 'span 3'}}>
-                    <span className="form-label">Descrição *</span>
+                    <span className="form-label">DescriÃ§Ã£o *</span>
                     <textarea className="form-input" rows={4} value={formData.descricao} onChange={e => updateField('descricao', e.target.value)} />
                     {errors.descricao && <span className="form-erro">{errors.descricao}</span>}
                 </label>
                 <label className="form-field">
-                    <span className="form-label">Data Início</span>
+                    <span className="form-label">Data InÃ­cio</span>
                     <input type="date" className="form-input" value={formData.data_inicio} onChange={e => updateField('data_inicio', e.target.value)} />
                 </label>
                 <label className="form-field">
@@ -265,20 +265,20 @@ export default function CurriculoVagaListScreen() {
                     <span className="form-label">Ativo</span>
                     <select className="form-select" value={String(formData.fl_ativo)} onChange={e => updateField('fl_ativo', e.target.value === 'true')}>
                         <option value="true">Sim</option>
-                        <option value="false">Não</option>
+                        <option value="false">NÃ£o</option>
                     </select>
                 </label>
                 <label className="form-field">
                     <span className="form-label">Exibir Vaga</span>
                     <select className="form-select" value={String(formData.fl_exibir_vaga)} onChange={e => updateField('fl_exibir_vaga', e.target.value === 'true')}>
                         <option value="true">Sim</option>
-                        <option value="false">Não</option>
+                        <option value="false">NÃ£o</option>
                     </select>
                 </label>
                 <label className="form-field">
-                    <span className="form-label">Usuário Responsável</span>
+                    <span className="form-label">UsuÃ¡rio ResponsÃ¡vel</span>
                     <MasterDetail
-                        label="Usuário"
+                        label="UsuÃ¡rio"
                         source={USUARIO_SOURCE}
                         valueKey="id"
                         searchKeys={USUARIO_SEARCH}
@@ -298,11 +298,11 @@ export default function CurriculoVagaListScreen() {
                     <span className="form-label">Enviar por E-mail</span>
                     <select className="form-select" value={String(formData.fl_email)} onChange={e => updateField('fl_email', e.target.value === 'true')}>
                         <option value="true">Sim</option>
-                        <option value="false">Não</option>
+                        <option value="false">NÃ£o</option>
                     </select>
                 </label>
                 <label className="form-field" style={{gridColumn: 'span 3'}}>
-                    <span className="form-label">Título do E-mail</span>
+                    <span className="form-label">TÃ­tulo do E-mail</span>
                     <input className="form-input" value={formData.titulo_email} onChange={e => updateField('titulo_email', e.target.value)} />
                 </label>
                 <label className="form-field" style={{gridColumn: 'span 3'}}>
@@ -318,11 +318,11 @@ export default function CurriculoVagaListScreen() {
             <Tabs tabs={[
                 {key: 'unidades', label: 'Unidades', content: <MasterDetail label="Unidade" source={UNIDADE_SOURCE} valueKey="id" searchKeys={UNIDADE_SEARCH} columns={UNIDADE_COLUMNS} items={formData.unidades} onChange={items => updateField('unidades', items)} />},
                 {key: 'perfis', label: 'Perfis', content: <MasterDetail label="Perfil" source={PERFIL_SOURCE} valueKey="id" searchKeys={PERFIL_SEARCH} columns={PERFIL_COLUMNS} items={formData.perfis} onChange={items => updateField('perfis', items)} />},
-                {key: 'empresas', label: 'Empresas', content: <MasterDetail label="Empresa" source="/api/curriculo/empresa" valueKey="id" searchKeys={['pessoa_nomeFantasia', 'pessoa_razaoSocial', 'pessoa_cnpj']} columns={[{key: 'pessoa_nomeFantasia', label: 'Nome Fantasia'}, {key: 'pessoa_razaoSocial', label: 'Razão Social'}, {key: 'pessoa_cnpj', label: 'CNPJ'}]} items={formData.empresas} onChange={items => updateField('empresas', items)} />},
-                {key: 'usuarios', label: 'Usuários', content: <MasterDetail label="Usuário" source={USUARIO_SOURCE} valueKey="id" searchKeys={USUARIO_SEARCH} columns={USUARIO_COLUMNS} items={formData.usuarios} onChange={items => updateField('usuarios', items)} />},
+                {key: 'empresas', label: 'Empresas', content: <MasterDetail label="Empresa" source="/api/curriculo/empresa" valueKey="id" searchKeys={['pessoa_nomeFantasia', 'pessoa_razaoSocial', 'pessoa_cnpj']} columns={[{key: 'pessoa_nomeFantasia', label: 'Nome Fantasia'}, {key: 'pessoa_razaoSocial', label: 'RazÃ£o Social'}, {key: 'pessoa_cnpj', label: 'CNPJ'}]} items={formData.empresas} onChange={items => updateField('empresas', items)} />},
+                {key: 'usuarios', label: 'UsuÃ¡rios', content: <MasterDetail label="UsuÃ¡rio" source={USUARIO_SOURCE} valueKey="id" searchKeys={USUARIO_SEARCH} columns={USUARIO_COLUMNS} items={formData.usuarios} onChange={items => updateField('usuarios', items)} />},
                 {key: 'oferecimentos', label: 'Turmas/Oferecimentos', content: <MasterDetail label="Oferecimento" source={OFERECIMENTO_SOURCE} valueKey="id" searchKeys={OFERECIMENTO_SEARCH} columns={OFERECIMENTO_COLUMNS} items={formData.oferecimentos} onChange={items => updateField('oferecimentos', items)} />},
                 {key: 'componentes', label: 'Componentes', content: <MasterDetail label="Componente" source={COMPONENTE_SOURCE} valueKey="id" searchKeys={COMPONENTE_SEARCH} columns={COMPONENTE_COLUMNS} items={formData.componentes} onChange={items => updateField('componentes', items)} />},
-                {key: 'curriculos', label: 'Cursos/Currículos', content: <MasterDetail label="Currículo" source={CURRICULO_SOURCE} valueKey="id" searchKeys={CURRICULO_SEARCH} columns={CURRICULO_COLUMNS} items={formData.curriculos} onChange={items => updateField('curriculos', items)} />},
+                {key: 'curriculos', label: 'Cursos/CurrÃ­culos', content: <MasterDetail label="CurrÃ­culo" source={CURRICULO_SOURCE} valueKey="id" searchKeys={CURRICULO_SEARCH} columns={CURRICULO_COLUMNS} items={formData.curriculos} onChange={items => updateField('curriculos', items)} />},
                 {key: 'grupos', label: 'Grupos', content: <MasterDetail label="Grupo" source={GRUPO_SOURCE} valueKey="id" searchKeys={GRUPO_SEARCH} columns={GRUPO_COLUMNS} items={formData.grupos} onChange={items => updateField('grupos', items)} />},
             ]} initial={activeTab} onChange={setActiveTab} />
         </div>

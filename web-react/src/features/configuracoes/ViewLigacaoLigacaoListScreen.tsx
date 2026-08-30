@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { PermissionGate } from '../permissions';
-import { api } from '../api';
-import { AutoComplete, type AutoCompleteOption } from '../AutoComplete';
+import { PermissionGate } from '../../shared/services/permissions';
+import { api } from '../../shared/services/api';
+import { AutoComplete, type AutoCompleteOption } from '../../shared/components/AutoComplete';
 
 type UnidadeInfo = {
     sucinto?: string;
@@ -56,7 +56,7 @@ export default function ViewLigacaoLigacaoListScreen() {
     const [pronto, setPronto] = useState<boolean | null>(null);
     const [validacoes, setValidacoes] = useState<{ op: boolean; meta: boolean; turno: boolean; agenda: boolean }>({ op: true, meta: true, turno: true, agenda: true });
     
-    // Estados da tela de operação
+    // Estados da tela de operaÃ§Ã£o
     const [unidade, setUnidade] = useState<UnidadeInfo | null>(null);
     const [operacional, setOperacional] = useState<OperacionalItem | null>(null);
     const [prioritaria, setPrioritaria] = useState<boolean>(false);
@@ -79,7 +79,7 @@ export default function ViewLigacaoLigacaoListScreen() {
     const [tempoAtual, setTempoAtual] = useState<number>(0);
     const [isTimerPaused, setIsTimerPaused] = useState<boolean>(false);
 
-    // Histórico e Fila Prioritária (Aba)
+    // HistÃ³rico e Fila PrioritÃ¡ria (Aba)
     const [historico, setHistorico] = useState<HistoricoItem[]>([]);
     const [filaRetorno, setFilaRetorno] = useState<RetornoFilaItem[]>([]);
     const [activeTab, setActiveTab] = useState<'historico' | 'retorno'>('historico');
@@ -100,7 +100,7 @@ export default function ViewLigacaoLigacaoListScreen() {
     const [modalInfo, setModalInfo] = useState(false);
     const [infoDyna, setInfoDyna] = useState<any>(null);
 
-    // Modais de Resultado (Compromisso / Fila Prioritária / Bloqueio)
+    // Modais de Resultado (Compromisso / Fila PrioritÃ¡ria / Bloqueio)
     const [modalCompromisso, setModalCompromisso] = useState(false);
     const [modalFilaPri, setModalFilaPri] = useState(false);
     const [telaBloqueada, setTelaBloqueada] = useState(false);
@@ -117,7 +117,7 @@ export default function ViewLigacaoLigacaoListScreen() {
     const [descComp, setDescComp] = useState('');
     const [obsComp, setObsComp] = useState('');
 
-    // Carregar dados iniciais da ligação
+    // Carregar dados iniciais da ligaÃ§Ã£o
     const carregarEstadoLigacao = async () => {
         try {
             const res = await api.get('/api/central/ligacao/estado');
@@ -138,17 +138,17 @@ export default function ViewLigacaoLigacaoListScreen() {
             setHistorico(d.historicoLigacoes ?? []);
             setFilaRetorno(d.filaPrioritariaTodosProspectos ?? []);
         } catch {
-            // Fallback mock para protótipo totalmente funcional
+            // Fallback mock para protÃ³tipo totalmente funcional
             setPronto(true);
             setUnidade({
                 sucinto: 'Unidade Central SP',
                 telefones: [{ numero: '(11) 3222-1000' }],
-                logradouro: { descricao: 'Av. Paulista, 1000', bairro: { cidade: { nome: 'São Paulo' } } },
+                logradouro: { descricao: 'Av. Paulista, 1000', bairro: { cidade: { nome: 'SÃ£o Paulo' } } },
                 numero: '1000',
                 responsavel: { pessoaFisica: { nome: 'Coordenador Master' } },
-                pontoReferencia: 'Próximo ao Metrô Trianon'
+                pontoReferencia: 'PrÃ³ximo ao MetrÃ´ Trianon'
             });
-            setOperacional({ operacional: { id: 1, pacote: { id: 10, descricao: 'Campanha Vestibular 2026', acaoDeCampanha: { estrategia: { descricao: 'Estratégia de Captação Ativa' } } } } });
+            setOperacional({ operacional: { id: 1, pacote: { id: 10, descricao: 'Campanha Vestibular 2026', acaoDeCampanha: { estrategia: { descricao: 'EstratÃ©gia de CaptaÃ§Ã£o Ativa' } } } } });
             setProxProspectoNome('Carlos Alberto da Silva');
             setTelefonesDiscar(['(11) 99111-2222', '(11) 3344-5566']);
             setTelefoneDiscado('(11) 99111-2222');
@@ -162,7 +162,7 @@ export default function ViewLigacaoLigacaoListScreen() {
                 { dataInicial: '2026-08-29T10:30:00', resultadoContato: { descricao: 'Contato Efetuado' }, telefoneDiscado: '(11) 99111-2222', relato: 'Demonstrou interesse no curso de Engenharia.' }
             ]);
             setFilaRetorno([
-                { id: 1, data: '2026-08-30T14:00:00', ligacao: { telefoneDiscado: '(11) 98888-1111', relato: 'Ligar à tarde', ordemLigacao: { prospecto: { nome: 'Mariana Souza' } } } }
+                { id: 1, data: '2026-08-30T14:00:00', ligacao: { telefoneDiscado: '(11) 98888-1111', relato: 'Ligar Ã  tarde', ordemLigacao: { prospecto: { nome: 'Mariana Souza' } } } }
             ]);
         }
 
@@ -170,16 +170,16 @@ export default function ViewLigacaoLigacaoListScreen() {
             const resRes = await api.get('/api/central/resultado-contato/all');
             setResultados(resRes.data ?? [
                 { id: 1, descricao: 'Contato Efetuado - Agendar', tela: 1 },
-                { id: 2, descricao: 'Retornar Ligação (Fila Prioritária)', tela: 2 },
+                { id: 2, descricao: 'Retornar LigaÃ§Ã£o (Fila PrioritÃ¡ria)', tela: 2 },
                 { id: 3, descricao: 'Sem Interesse', tela: 0 },
-                { id: 4, descricao: 'Número Inexistente / Caixa Postal', tela: 0 }
+                { id: 4, descricao: 'NÃºmero Inexistente / Caixa Postal', tela: 0 }
             ]);
         } catch {
             setResultados([
                 { id: 1, descricao: 'Contato Efetuado - Agendar', tela: 1 },
-                { id: 2, descricao: 'Retornar Ligação (Fila Prioritária)', tela: 2 },
+                { id: 2, descricao: 'Retornar LigaÃ§Ã£o (Fila PrioritÃ¡ria)', tela: 2 },
                 { id: 3, descricao: 'Sem Interesse', tela: 0 },
-                { id: 4, descricao: 'Número Inexistente / Caixa Postal', tela: 0 }
+                { id: 4, descricao: 'NÃºmero Inexistente / Caixa Postal', tela: 0 }
             ]);
         }
     };
@@ -194,9 +194,9 @@ export default function ViewLigacaoLigacaoListScreen() {
             const timer = setInterval(() => {
                 setTempoAtual(prev => {
                     if (prev >= tempoTotal) {
-                        // Tempo esgotado! Bloquear tela ou disparar ação
+                        // Tempo esgotado! Bloquear tela ou disparar aÃ§Ã£o
                         setTelaBloqueada(true);
-                        setBlocoMotivo('Você esgotou seu tempo de ligação');
+                        setBlocoMotivo('VocÃª esgotou seu tempo de ligaÃ§Ã£o');
                         return prev;
                     }
                     return prev + 1;
@@ -233,7 +233,7 @@ export default function ViewLigacaoLigacaoListScreen() {
                 relato
             });
         } catch {}
-        // Resetar para próxima ligação
+        // Resetar para prÃ³xima ligaÃ§Ã£o
         setResultadoSelecionado(null);
         setRelato('');
         setTempoAtual(0);
@@ -248,7 +248,7 @@ export default function ViewLigacaoLigacaoListScreen() {
             const r = await api.get('/api/central/tipo-pausa/all');
             setTiposPausa(r.data ?? []);
         } catch {
-            setTiposPausa([{ id: 1, descricao: 'Almoço' }, { id: 2, descricao: 'Banheiro' }, { id: 3.2, descricao: 'Reunião' }]);
+            setTiposPausa([{ id: 1, descricao: 'AlmoÃ§o' }, { id: 2, descricao: 'Banheiro' }, { id: 3.2, descricao: 'ReuniÃ£o' }]);
         }
         setModalPausa(true);
     };
@@ -267,7 +267,7 @@ export default function ViewLigacaoLigacaoListScreen() {
             const r = await api.get('/api/central/pacotes/disponiveis');
             setListaPacotes(r.data ?? []);
         } catch {
-            setListaPacotes([{ operacional: { id: 101, pacote: { descricao: 'Campanha Especial Matrículas' }, dataCriacao: '2026-08-01' } }]);
+            setListaPacotes([{ operacional: { id: 101, pacote: { descricao: 'Campanha Especial MatrÃ­culas' }, dataCriacao: '2026-08-01' } }]);
         }
         setModalPacotes(true);
     };
@@ -313,49 +313,49 @@ export default function ViewLigacaoLigacaoListScreen() {
             <main style={{ padding: '12px 16px', background: '#f5f6f8', minHeight: 'calc(100vh - 60px)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                     <h1 style={{ fontSize: 22, margin: 0, color: '#2c3e50', display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span>🎧</span> Tela de Ligação (Central de Atendimento)
+                        <span>ðŸŽ§</span> Tela de LigaÃ§Ã£o (Central de Atendimento)
                     </h1>
                 </div>
 
-                {/* Aviso se não pronto para trabalhar */}
+                {/* Aviso se nÃ£o pronto para trabalhar */}
                 {pronto === false && (
                     <div style={{ background: '#fff', border: '1px solid #ffccbc', padding: 24, borderRadius: 8, textAlign: 'center', maxWidth: 600, margin: '40px auto' }}>
                         <h2 style={{ color: '#d32f2f', marginBottom: 16 }}>Aviso Operacional</h2>
-                        {!validacoes.op && <p>Você não possui pacotes para trabalhar.</p>}
-                        {!validacoes.meta && <p>A sua meta diária ainda não foi cadastrada.</p>}
-                        {!validacoes.turno && <p>O seu turno de trabalho ainda não foi cadastrado.</p>}
-                        {!validacoes.agenda && <p>Você não possui acesso à agenda de nenhuma unidade.</p>}
+                        {!validacoes.op && <p>VocÃª nÃ£o possui pacotes para trabalhar.</p>}
+                        {!validacoes.meta && <p>A sua meta diÃ¡ria ainda nÃ£o foi cadastrada.</p>}
+                        {!validacoes.turno && <p>O seu turno de trabalho ainda nÃ£o foi cadastrado.</p>}
+                        {!validacoes.agenda && <p>VocÃª nÃ£o possui acesso Ã  agenda de nenhuma unidade.</p>}
                         <p style={{ fontWeight: 'bold', marginTop: 20 }}>Por favor, chame o seu coordenador.</p>
                     </div>
                 )}
 
                 {pronto === true && (
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' }}>
-                        {/* COLUNA ESQUERDA: Unidade, Pacote, Cronômetro, Prospecto e Formulário de Ligação */}
+                        {/* COLUNA ESQUERDA: Unidade, Pacote, CronÃ´metro, Prospecto e FormulÃ¡rio de LigaÃ§Ã£o */}
                         <div style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, padding: 16, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                             
                             {/* Accordion Unidade */}
                             <details style={{ border: '1px solid #cfd8dc', borderRadius: 6, marginBottom: 12, background: '#fafafa' }}>
                                 <summary style={{ padding: '10px 14px', fontWeight: 600, cursor: 'pointer', background: '#eceff1', borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>
-                                    🏢 Unidade: {unidade?.sucinto ?? 'Carregando...'}
+                                    ðŸ¢ Unidade: {unidade?.sucinto ?? 'Carregando...'}
                                 </summary>
                                 <div style={{ padding: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 13 }}>
                                     <div><strong>Unidade:</strong> {unidade?.sucinto}</div>
                                     <div><strong>Telefone:</strong> {unidade?.telefones?.[0]?.numero}</div>
                                     <div><strong>Cidade:</strong> {unidade?.logradouro?.bairro?.cidade?.nome}</div>
-                                    <div><strong>Endereço:</strong> {unidade?.logradouro?.descricao}, {unidade?.numero}</div>
+                                    <div><strong>EndereÃ§o:</strong> {unidade?.logradouro?.descricao}, {unidade?.numero}</div>
                                     <div><strong>Contratante:</strong> {unidade?.responsavel?.pessoaFisica?.nome}</div>
                                     <div><strong>Ponto de Ref.:</strong> {unidade?.pontoReferencia}</div>
                                 </div>
                             </details>
 
-                            {/* Pacote e Estratégia */}
+                            {/* Pacote e EstratÃ©gia */}
                             <div style={{ background: '#f5f5f5', padding: 10, borderRadius: 6, marginBottom: 12, fontSize: 13, borderLeft: '4px solid #1976d2' }}>
-                                <div><strong>📦 Pacote:</strong> {operacional?.operacional?.id} - {operacional?.operacional?.pacote?.descricao}</div>
-                                <div style={{ marginTop: 4 }}><strong>🎯 Estratégia:</strong> {operacional?.operacional?.pacote?.acaoDeCampanha?.estrategia?.descricao}</div>
+                                <div><strong>ðŸ“¦ Pacote:</strong> {operacional?.operacional?.id} - {operacional?.operacional?.pacote?.descricao}</div>
+                                <div style={{ marginTop: 4 }}><strong>ðŸŽ¯ EstratÃ©gia:</strong> {operacional?.operacional?.pacote?.acaoDeCampanha?.estrategia?.descricao}</div>
                             </div>
 
-                            {/* Cronômetro e Dados da Ligação Atual */}
+                            {/* CronÃ´metro e Dados da LigaÃ§Ã£o Atual */}
                             <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: 16, alignItems: 'center', background: '#fafafa', padding: 12, borderRadius: 6, marginBottom: 12 }}>
                                 <div style={{ textAlign: 'center' }}>
                                     {/* Knob / Timer visual */}
@@ -363,13 +363,13 @@ export default function ViewLigacaoLigacaoListScreen() {
                                         <span style={{ fontSize: 20, fontWeight: 700 }}>{Math.floor(tempoAtual / 60)}:{String(tempoAtual % 60).padStart(2, '0')}</span>
                                         <span style={{ fontSize: 10, color: '#b0bec5' }}>de {Math.floor(tempoTotal / 60)}m</span>
                                     </div>
-                                    <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>Tempo Ligação</div>
+                                    <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>Tempo LigaÃ§Ã£o</div>
                                 </div>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                         <strong>Nome:</strong>
-                                        {prioritaria && <span title="Ligação Prioritária" style={{ background: '#ffa000', color: '#fff', padding: '1px 6px', borderRadius: 4, fontSize: 11 }}>★ Prioritária</span>}
+                                        {prioritaria && <span title="LigaÃ§Ã£o PrioritÃ¡ria" style={{ background: '#ffa000', color: '#fff', padding: '1px 6px', borderRadius: 4, fontSize: 11 }}>â˜… PrioritÃ¡ria</span>}
                                         <span style={{ fontSize: 15, fontWeight: 600, color: '#1976d2' }}>{proxProspectoNome}</span>
                                     </div>
 
@@ -401,30 +401,30 @@ export default function ViewLigacaoLigacaoListScreen() {
 
                                     <div>
                                         <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 2 }}>Relato:</label>
-                                        <textarea rows={2} value={relato} onChange={e => setRelato(e.target.value)} disabled={resultadoSelecionado?.tela === 1 || resultadoSelecionado?.tela === 2} placeholder="Digite o relato da ligação..." style={{ width: '100%', padding: 6, borderRadius: 4, border: '1px solid #ccc' }} />
+                                        <textarea rows={2} value={relato} onChange={e => setRelato(e.target.value)} disabled={resultadoSelecionado?.tela === 1 || resultadoSelecionado?.tela === 2} placeholder="Digite o relato da ligaÃ§Ã£o..." style={{ width: '100%', padding: 6, borderRadius: 4, border: '1px solid #ccc' }} />
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Botões de Ação Inferiores */}
+                            {/* BotÃµes de AÃ§Ã£o Inferiores */}
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 10 }}>
-                                <button onClick={abrirPausa} style={{ background: '#fbc02d', color: '#000', border: 0, padding: '8px 4px', borderRadius: 4, fontWeight: 600, cursor: 'pointer', fontSize: 12 }}>⏸ Pause</button>
-                                <button onClick={() => setModalRetorno(true)} style={{ background: '#388e3c', color: '#fff', border: 0, padding: '8px 4px', borderRadius: 4, fontWeight: 600, cursor: 'pointer', fontSize: 12 }}>🔄 Retorno</button>
-                                <button onClick={abrirInfo} style={{ background: '#d32f2f', color: '#fff', border: 0, padding: '8px 4px', borderRadius: 4, fontWeight: 600, cursor: 'pointer', fontSize: 12 }}>ℹ Informações</button>
-                                <button onClick={abrirPacotes} style={{ background: '#757575', color: '#fff', border: 0, padding: '8px 4px', borderRadius: 4, fontWeight: 600, cursor: 'pointer', fontSize: 12 }}>📂 Pacotes</button>
+                                <button onClick={abrirPausa} style={{ background: '#fbc02d', color: '#000', border: 0, padding: '8px 4px', borderRadius: 4, fontWeight: 600, cursor: 'pointer', fontSize: 12 }}>â¸ Pause</button>
+                                <button onClick={() => setModalRetorno(true)} style={{ background: '#388e3c', color: '#fff', border: 0, padding: '8px 4px', borderRadius: 4, fontWeight: 600, cursor: 'pointer', fontSize: 12 }}>ðŸ”„ Retorno</button>
+                                <button onClick={abrirInfo} style={{ background: '#d32f2f', color: '#fff', border: 0, padding: '8px 4px', borderRadius: 4, fontWeight: 600, cursor: 'pointer', fontSize: 12 }}>â„¹ InformaÃ§Ãµes</button>
+                                <button onClick={abrirPacotes} style={{ background: '#757575', color: '#fff', border: 0, padding: '8px 4px', borderRadius: 4, fontWeight: 600, cursor: 'pointer', fontSize: 12 }}>ðŸ“‚ Pacotes</button>
                             </div>
 
                             <button onClick={finalizarLigacao} style={{ width: '100%', background: '#c62828', color: '#fff', border: 0, padding: 12, borderRadius: 6, fontWeight: 700, fontSize: 16, cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
-                                ✔ Finalizar Ligação
+                                âœ” Finalizar LigaÃ§Ã£o
                             </button>
                         </div>
 
-                        {/* COLUNA DIREITA: Metas e Abas (Histórico e Retornos) */}
+                        {/* COLUNA DIREITA: Metas e Abas (HistÃ³rico e Retornos) */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                             
                             {/* Painel Metas */}
                             <div style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, padding: 16 }}>
-                                <h3 style={{ margin: '0 0 10px 0', fontSize: 15, color: '#37474f', borderBottom: '1px solid #eee', paddingBottom: 6 }}>📊 Minhas Metas de Hoje</h3>
+                                <h3 style={{ margin: '0 0 10px 0', fontSize: 15, color: '#37474f', borderBottom: '1px solid #eee', paddingBottom: 6 }}>ðŸ“Š Minhas Metas de Hoje</h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, textAlign: 'center', marginBottom: 12 }}>
                                     <div style={{ background: '#f5f5f5', padding: 8, borderRadius: 6 }}>
                                         <div style={{ fontSize: 11, color: '#666' }}>DIA</div>
@@ -449,14 +449,14 @@ export default function ViewLigacaoLigacaoListScreen() {
                                 </div>
                             </div>
 
-                            {/* Abas: Histórico e Fila Prioritária */}
+                            {/* Abas: HistÃ³rico e Fila PrioritÃ¡ria */}
                             <div style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, overflow: 'hidden' }}>
                                 <div style={{ display: 'flex', background: '#eceff1', borderBottom: '1px solid #d0d7de' }}>
                                     <button onClick={() => setActiveTab('historico')} style={{ flex: 1, padding: '10px', background: activeTab === 'historico' ? '#fff' : 'transparent', border: 0, fontWeight: 600, cursor: 'pointer', borderBottom: activeTab === 'historico' ? '2px solid #1976d2' : 'none' }}>
-                                        Histórico de Últimas Ligações
+                                        HistÃ³rico de Ãšltimas LigaÃ§Ãµes
                                     </button>
                                     <button onClick={() => setActiveTab('retorno')} style={{ flex: 1, padding: '10px', background: activeTab === 'retorno' ? '#fff' : 'transparent', border: 0, fontWeight: 600, cursor: 'pointer', borderBottom: activeTab === 'retorno' ? '2px solid #1976d2' : 'none' }}>
-                                        Retorno de Ligações (Fila Prioritária)
+                                        Retorno de LigaÃ§Ãµes (Fila PrioritÃ¡ria)
                                     </button>
                                 </div>
 
@@ -493,7 +493,7 @@ export default function ViewLigacaoLigacaoListScreen() {
                                                     <th style={{ padding: 6 }}>Prospecto</th>
                                                     <th style={{ padding: 6 }}>Telefone</th>
                                                     <th style={{ padding: 6 }}>Data Retorno</th>
-                                                    <th style={{ padding: 6, textAlign: 'center' }}>Ação</th>
+                                                    <th style={{ padding: 6, textAlign: 'center' }}>AÃ§Ã£o</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -505,7 +505,7 @@ export default function ViewLigacaoLigacaoListScreen() {
                                                         <td style={{ padding: 6 }}>{f.ligacao?.telefoneDiscado}</td>
                                                         <td style={{ padding: 6 }}>{new Date(f.data).toLocaleString('pt-BR')}</td>
                                                         <td style={{ padding: 6, textAlign: 'center' }}>
-                                                            <button title="Retornar ligação" style={{ background: '#388e3c', color: '#fff', border: 0, padding: '4px 8px', borderRadius: 4, cursor: 'pointer' }}>➔</button>
+                                                            <button title="Retornar ligaÃ§Ã£o" style={{ background: '#388e3c', color: '#fff', border: 0, padding: '4px 8px', borderRadius: 4, cursor: 'pointer' }}>âž”</button>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -523,7 +523,7 @@ export default function ViewLigacaoLigacaoListScreen() {
                 {modalPausa && (
                     <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
                         <div style={{ background: '#fff', borderRadius: 8, padding: 20, maxWidth: '90%', width: 450 }}>
-                            <h3>Solicitação de Intervalo (Pausa)</h3>
+                            <h3>SolicitaÃ§Ã£o de Intervalo (Pausa)</h3>
                             <div style={{ margin: '15px 0' }}>
                                 <label style={{ display: 'block', marginBottom: 4, fontWeight: 600 }}>Motivo:</label>
                                 <select value={tipoPausaSel?.id ?? ''} onChange={e => setTipoPausaSel(tiposPausa.find(t => t.id === Number(e.target.value)))} style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc' }}>
@@ -534,7 +534,7 @@ export default function ViewLigacaoLigacaoListScreen() {
                                 </select>
                             </div>
                             <div style={{ margin: '15px 0' }}>
-                                <label style={{ display: 'block', marginBottom: 4, fontWeight: 600 }}>Observação:</label>
+                                <label style={{ display: 'block', marginBottom: 4, fontWeight: 600 }}>ObservaÃ§Ã£o:</label>
                                 <textarea rows={3} value={obsPausa} onChange={e => setObsPausa(e.target.value)} style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc' }} />
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
@@ -545,13 +545,13 @@ export default function ViewLigacaoLigacaoListScreen() {
                     </div>
                 )}
 
-                {/* MODAL: RETORNO DE LIGAÇÃO */}
+                {/* MODAL: RETORNO DE LIGAÃ‡ÃƒO */}
                 {modalRetorno && (
                     <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
                         <div style={{ background: '#fff', borderRadius: 8, padding: 20, width: 400 }}>
-                            <h3>Retorno de Ligação</h3>
+                            <h3>Retorno de LigaÃ§Ã£o</h3>
                             <div style={{ display: 'flex', gap: 8, margin: '15px 0' }}>
-                                <input value={numRetorno} onChange={e => setNumRetorno(e.target.value)} placeholder="Número (ex: 99-99999999)" style={{ flex: 1, padding: 8, borderRadius: 4, border: '1px solid #ccc' }} />
+                                <input value={numRetorno} onChange={e => setNumRetorno(e.target.value)} placeholder="NÃºmero (ex: 99-99999999)" style={{ flex: 1, padding: 8, borderRadius: 4, border: '1px solid #ccc' }} />
                                 <button onClick={pesquisarRetornoNum} style={{ padding: '8px 12px', background: '#1976d2', color: '#fff', border: 0, borderRadius: 4, cursor: 'pointer' }}>Pesquisar</button>
                             </div>
                             {retornoPesq && (
@@ -577,8 +577,8 @@ export default function ViewLigacaoLigacaoListScreen() {
                                 <thead>
                                     <tr style={{ background: '#f5f5f5', textAlign: 'left' }}>
                                         <th style={{ padding: 8 }}>ID</th>
-                                        <th style={{ padding: 8 }}>Descrição</th>
-                                        <th style={{ padding: 8, textAlign: 'center' }}>Ação</th>
+                                        <th style={{ padding: 8 }}>DescriÃ§Ã£o</th>
+                                        <th style={{ padding: 8, textAlign: 'center' }}>AÃ§Ã£o</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -600,11 +600,11 @@ export default function ViewLigacaoLigacaoListScreen() {
                     </div>
                 )}
 
-                {/* MODAL: INFORMAÇÕES PROSPECTO */}
+                {/* MODAL: INFORMAÃ‡Ã•ES PROSPECTO */}
                 {modalInfo && (
                     <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
                         <div style={{ background: '#fff', borderRadius: 8, padding: 20, width: 500, maxWidth: '90%' }}>
-                            <h3>Informações do Prospecto</h3>
+                            <h3>InformaÃ§Ãµes do Prospecto</h3>
                             <div style={{ margin: '15px 0', fontSize: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
                                 <div><strong>Nome:</strong> {infoDyna?.nome}</div>
                                 <div><strong>Documento:</strong> {infoDyna?.documento}</div>
@@ -629,7 +629,7 @@ export default function ViewLigacaoLigacaoListScreen() {
                                         {agendasList.map(a => (<option key={a.id} value={a.id}>{a.descricao}</option>))}
                                     </select>
                                 </label>
-                                <label style={{ gridColumn: 'span 2' }}>Tipo Horário:
+                                <label style={{ gridColumn: 'span 2' }}>Tipo HorÃ¡rio:
                                     <div style={{ display: 'flex', gap: 16, marginTop: 4 }}>
                                         <label><input type="radio" value="2" checked={tipoHorario === '2'} onChange={e => setTipoHorario(e.target.value)} /> Pessoa</label>
                                         <label><input type="radio" value="1" checked={tipoHorario === '1'} onChange={e => setTipoHorario(e.target.value)} /> Unidade</label>
@@ -638,7 +638,7 @@ export default function ViewLigacaoLigacaoListScreen() {
                                 <label>Data:
                                     <input type="date" value={dataComp} onChange={e => setDataComp(e.target.value)} style={{ width: '100%', marginTop: 4, padding: 6 }} />
                                 </label>
-                                <label>Horário:
+                                <label>HorÃ¡rio:
                                     <select value={horarioSel} onChange={e => setHorarioSel(e.target.value)} style={{ width: '100%', marginTop: 4, padding: 6 }}>
                                         <option value="">Selecione...</option>
                                         <option value="09:00">09:00</option>
@@ -646,10 +646,10 @@ export default function ViewLigacaoLigacaoListScreen() {
                                         <option value="16:30">16:30</option>
                                     </select>
                                 </label>
-                                <label style={{ gridColumn: 'span 2' }}>Compromisso / Descrição:
+                                <label style={{ gridColumn: 'span 2' }}>Compromisso / DescriÃ§Ã£o:
                                     <input value={descComp} onChange={e => setDescComp(e.target.value)} style={{ width: '100%', marginTop: 4, padding: 6 }} />
                                 </label>
-                                <label style={{ gridColumn: 'span 2' }}>Observação:
+                                <label style={{ gridColumn: 'span 2' }}>ObservaÃ§Ã£o:
                                     <textarea rows={2} value={obsComp} onChange={e => setObsComp(e.target.value)} style={{ width: '100%', marginTop: 4, padding: 6 }} />
                                 </label>
                             </div>
@@ -661,14 +661,14 @@ export default function ViewLigacaoLigacaoListScreen() {
                     </div>
                 )}
 
-                {/* MODAL: FILA PRIORITÁRIA (Resultado 2) */}
+                {/* MODAL: FILA PRIORITÃRIA (Resultado 2) */}
                 {modalFilaPri && (
                     <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
                         <div style={{ background: '#fff', borderRadius: 8, padding: 20, width: 450 }}>
-                            <h3>Retorno Fila Prioritária</h3>
+                            <h3>Retorno Fila PrioritÃ¡ria</h3>
                             <div style={{ margin: '15px 0', fontSize: 13, display: 'flex', flexDirection: 'column', gap: 10 }}>
                                 <label>Data de Retorno: <input type="date" style={{ width: '100%', padding: 6, marginTop: 4 }} /></label>
-                                <label>Horário de Retorno: <input type="time" style={{ width: '100%', padding: 6, marginTop: 4 }} /></label>
+                                <label>HorÃ¡rio de Retorno: <input type="time" style={{ width: '100%', padding: 6, marginTop: 4 }} /></label>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
                                 <button onClick={() => setModalFilaPri(false)} style={{ padding: '8px 16px', background: '#e0e0e0', border: 0, borderRadius: 4 }}>Cancelar</button>
@@ -682,7 +682,7 @@ export default function ViewLigacaoLigacaoListScreen() {
                 {telaBloqueada && (
                     <div style={{ position: 'fixed', inset: 0, background: 'rgba(38,50,56,0.92)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                         <div style={{ background: '#37474f', padding: 30, borderRadius: 8, textAlign: 'center', maxWidth: 450, width: '90%', border: '2px solid #546e7a' }}>
-                            <h2 style={{ color: '#ffb74d', marginBottom: 12 }}>🔒 Tela Bloqueada</h2>
+                            <h2 style={{ color: '#ffb74d', marginBottom: 12 }}>ðŸ”’ Tela Bloqueada</h2>
                             <p style={{ fontSize: 16, marginBottom: 20 }}>{blocoMotivo}</p>
                             
                             <div style={{ margin: '15px 0', textAlign: 'left' }}>
@@ -691,7 +691,7 @@ export default function ViewLigacaoLigacaoListScreen() {
                             </div>
 
                             <button onClick={destravarTela} style={{ width: '100%', background: '#2e7d32', color: '#fff', border: 0, padding: 12, borderRadius: 6, fontWeight: 700, fontSize: 15, cursor: 'pointer', marginTop: 10 }}>
-                                ▶ Desbloquear / Continuar Trabalho
+                                â–¶ Desbloquear / Continuar Trabalho
                             </button>
                         </div>
                     </div>

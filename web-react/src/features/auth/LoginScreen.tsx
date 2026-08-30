@@ -1,8 +1,8 @@
-import {FormEvent, useState} from 'react';
+﻿import {FormEvent, useState} from 'react';
 import {Navigate, useLocation} from 'react-router-dom';
-import {api} from './api';
+import {api} from '../../shared/services/api';
 import {useAuth} from './auth';
-import {normalizeOutcome} from './permissions';
+import {normalizeOutcome} from '../../shared/services/permissions';
 import './LoginScreen.css';
 
 function ensureLeadingSlash(path: string): string {

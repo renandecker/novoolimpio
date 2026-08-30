@@ -1,13 +1,13 @@
-import {useState} from 'react';
-import {PermissionGate} from '../permissions';
-import {DataTable} from '../DataTable';
-import {MasterDetail} from '../MasterDetail';
+﻿import {useState} from 'react';
+import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable} from '../../shared/components/DataTable';
+import {MasterDetail} from '../../shared/components/MasterDetail';
 import {
     TURNO_TRABALHO_SOURCE,
     TURNO_TRABALHO_COLUMNS,
     TURNO_TRABALHO_SEARCH,
-} from '../masterDetailSources';
-import type {ApiItem} from '../types';
+} from '../../shared/services/masterDetailSources';
+import type {ApiItem} from '../../features/auth/types';
 
 export default function ViewTurnoFuncionarioFormTurnoFuncionarioListScreen() {
     const [turnosTrabalho, setTurnosTrabalho] = useState<ApiItem[]>([]);
@@ -17,7 +17,7 @@ export default function ViewTurnoFuncionarioFormTurnoFuncionarioListScreen() {
             <main>
                 <h1>Form Turno Funcionario</h1>
                 <div className="div_form">
-                    <div className="form-title">Turno Funcionário</div>
+                    <div className="form-title">Turno FuncionÃ¡rio</div>
                     <div className="table_form">
                         <MasterDetail
                             label="Turno Trabalho"

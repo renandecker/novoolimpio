@@ -1,11 +1,11 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {PermissionGate} from '../permissions';
-import {FormLayout, FormTabConfig} from '../FormLayout';
-import {MasterDetail} from '../MasterDetail';
-import type {ApiItem} from '../types';
-import {api} from '../api';
-import {TURNO_TRABALHO_SOURCE, TURNO_TRABALHO_COLUMNS, TURNO_TRABALHO_SEARCH} from '../masterDetailSources';
+import {PermissionGate} from '../../shared/services/permissions';
+import {FormLayout, FormTabConfig} from '../../shared/components/FormLayout';
+import {MasterDetail} from '../../shared/components/MasterDetail';
+import type {ApiItem} from '../../features/auth/types';
+import {api} from '../../shared/services/api';
+import {TURNO_TRABALHO_SOURCE, TURNO_TRABALHO_COLUMNS, TURNO_TRABALHO_SEARCH} from '../../shared/services/masterDetailSources';
 import {useQuery} from '@tanstack/react-query';
 
 const TIPO_UNIDADE_OPTIONS = [
@@ -53,15 +53,15 @@ export default function ViewUnidadeFormUnidadeListScreen() {
             fields: [
                 {name: 'id', label: 'ID', type: 'text', readOnly: true, span: 1},
                 {name: 'sucinto', label: 'Sucinto', required: true, span: 2},
-                {name: 'razaoSocial', label: 'Razão Social', required: true, span: 3},
+                {name: 'razaoSocial', label: 'RazÃ£o Social', required: true, span: 3},
                 {name: 'nomeFantasia', label: 'Nome Fantasia', required: true, span: 3},
                 {name: 'CNPJ', label: 'CNPJ', type: 'mask', mask: '99.999.999/9999-99', required: true, span: 2},
-                {name: 'inscricaoEstadual', label: 'Inscrição Estadual', required: true, span: 3},
+                {name: 'inscricaoEstadual', label: 'InscriÃ§Ã£o Estadual', required: true, span: 3},
                 {name: 'layout', label: 'Layout', type: 'autoComplete', autoCompleteSource: '/api/educacao/layout', span: 3},
-                {name: 'responsavel', label: 'Responsável', type: 'autoComplete', autoCompleteSource: '/api/basico/pessoa-fisica/autoCompleteAcao', span: 3},
+                {name: 'responsavel', label: 'ResponsÃ¡vel', type: 'autoComplete', autoCompleteSource: '/api/basico/pessoa-fisica/autoCompleteAcao', span: 3},
                 {name: 'email', label: 'E-mail', type: 'email', required: true, span: 3},
                 {name: 'tipoUnidade', label: 'Tipo Unidade', type: 'select', options: TIPO_UNIDADE_OPTIONS, required: true, span: 2},
-                {name: 'ativo', label: 'Ativo', type: 'select', options: [{value: 'true', label: 'Sim'}, {value: 'false', label: 'Não'}], span: 1},
+                {name: 'ativo', label: 'Ativo', type: 'select', options: [{value: 'true', label: 'Sim'}, {value: 'false', label: 'NÃ£o'}], span: 1},
                 {name: 'emailRH', label: 'E-mail RH', type: 'email', span: 3},
                 {name: 'diretorEnsino', label: 'Diretor de Ensino', span: 3},
                 {name: 'coordenador', label: 'Coordenador', span: 3},
@@ -80,7 +80,7 @@ export default function ViewUnidadeFormUnidadeListScreen() {
                     columns={[
                         {key: 'id', label: 'ID'},
                         {key: 'ddd', label: 'DDD'},
-                        {key: 'numero', label: 'Número'},
+                        {key: 'numero', label: 'NÃºmero'},
                         {key: 'tipo', label: 'Tipo'},
                     ]}
                     items={telefones}
@@ -90,16 +90,16 @@ export default function ViewUnidadeFormUnidadeListScreen() {
         },
         {
             key: 'endereco',
-            label: 'Endereço',
+            label: 'EndereÃ§o',
             fields: [
                 {name: 'cep', label: 'CEP', type: 'mask', mask: '99.999-999', required: true, span: 1},
                 {name: 'cidade', label: 'Cidade', type: 'autoComplete', autoCompleteSource: '/api/basico/cidade/autoComplete', required: true, span: 2},
                 {name: 'bairro', label: 'Bairro', type: 'autoComplete', autoCompleteSource: '/api/basico/bairro/autoComplete', required: true, span: 2},
                 {name: 'logradouro', label: 'Logradouro', type: 'autoComplete', autoCompleteSource: '/api/basico/logradouro/autoComplete', required: true, span: 3},
-                {name: 'numero', label: 'Número', type: 'number', required: true, span: 1},
-                {name: 'regiao', label: 'Região', type: 'autoComplete', autoCompleteSource: '/api/basico/regiao/listAll', required: true, span: 2},
-                {name: 'pontoReferencia', label: 'Ponto de Referência', span: 3},
-                {name: 'area', label: 'Área', span: 3},
+                {name: 'numero', label: 'NÃºmero', type: 'number', required: true, span: 1},
+                {name: 'regiao', label: 'RegiÃ£o', type: 'autoComplete', autoCompleteSource: '/api/basico/regiao/listAll', required: true, span: 2},
+                {name: 'pontoReferencia', label: 'Ponto de ReferÃªncia', span: 3},
+                {name: 'area', label: 'Ãrea', span: 3},
             ],
         },
         {
@@ -188,7 +188,7 @@ export default function ViewUnidadeFormUnidadeListScreen() {
     const salvar = async (voltarDepois: boolean) => {
         const vals = initialValues;
         if (!vals.sucinto || !vals.razaoSocial || !vals.nomeFantasia || !vals.CNPJ) {
-            setError('Informe pelo menos Sucinto, Razão Social, Nome Fantasia e CNPJ.');
+            setError('Informe pelo menos Sucinto, RazÃ£o Social, Nome Fantasia e CNPJ.');
             return;
         }
         setSalvando(true);

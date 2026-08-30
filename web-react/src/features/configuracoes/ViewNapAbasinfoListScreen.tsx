@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {DataTable} from '../DataTable';
-import {Tabs} from '../Tabs';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable} from '../../shared/components/DataTable';
+import {Tabs} from '../../shared/components/Tabs';
 
 export default function ViewNapAbasinfoListScreen() {
     return (
@@ -19,13 +19,13 @@ export default function ViewNapAbasinfoListScreen() {
                                 },
                                 {
                                     key: 'responsavel',
-                                    label: 'Responsável',
-                                    content: <p className="master-detail-empty">Dados do responsável.</p>
+                                    label: 'ResponsÃ¡vel',
+                                    content: <p className="master-detail-empty">Dados do responsÃ¡vel.</p>
                                 },
                                 {
                                     key: 'matricula',
-                                    label: 'Matrícula',
-                                    content: <p className="master-detail-empty">Dados da matrícula.</p>
+                                    label: 'MatrÃ­cula',
+                                    content: <p className="master-detail-empty">Dados da matrÃ­cula.</p>
                                 },
                                 {
                                     key: 'caderno',
@@ -44,8 +44,8 @@ export default function ViewNapAbasinfoListScreen() {
                                 },
                                 {
                                     key: 'ligacao',
-                                    label: 'Ligação',
-                                    content: <p className="master-detail-empty">Ligações realizadas.</p>
+                                    label: 'LigaÃ§Ã£o',
+                                    content: <p className="master-detail-empty">LigaÃ§Ãµes realizadas.</p>
                                 },
                                 {
                                     key: 'email',
@@ -55,7 +55,7 @@ export default function ViewNapAbasinfoListScreen() {
                                 {
                                     key: 'chamada',
                                     label: 'Chamada',
-                                    content: <p className="master-detail-empty">Chamada de presença.</p>
+                                    content: <p className="master-detail-empty">Chamada de presenÃ§a.</p>
                                 },
                             ]}
                         />

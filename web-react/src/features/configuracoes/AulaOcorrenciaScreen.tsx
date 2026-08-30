@@ -1,7 +1,7 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
-import {aulaApi, formatarDataAula, OcorrenciaAula} from '../aula';
-import '../AlunoPortal.css';
+import {aulaApi, formatarDataAula, OcorrenciaAula} from '../../features/aluno/aluno';
+import '../../features/aluno/alunoPortal.css';
 
 export default function AulaOcorrenciaScreen() {
     const {oferecimentoId} = useParams<{ oferecimentoId: string }>();
@@ -17,7 +17,7 @@ export default function AulaOcorrenciaScreen() {
                 if (active) setOcorrencias(data ?? []);
             })
             .catch((e: any) => {
-                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar as ocorrências.');
+                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'NÃ£o foi possÃ­vel carregar as ocorrÃªncias.');
             })
             .finally(() => {
                 if (active) setBusy(false);
@@ -37,7 +37,7 @@ export default function AulaOcorrenciaScreen() {
             <p className="aluno-portal-item-acoes"><Link to="/aluno/aula">Voltar Cursos</Link></p>
             <h1>Aulas</h1>
             <p className="aluno-portal-saudacao">Selecione a data da aula:</p>
-            {ocorrencias.length === 0 && <p className="aluno-portal-msg">Nenhuma ocorrência encontrada.</p>}
+            {ocorrencias.length === 0 && <p className="aluno-portal-msg">Nenhuma ocorrÃªncia encontrada.</p>}
             <div className="aluno-portal-boletim-lista">
                 {ocorrencias.map(o => (
                     <Link

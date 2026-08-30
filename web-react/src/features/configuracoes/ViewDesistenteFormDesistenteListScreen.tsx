@@ -1,13 +1,13 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import {useApi} from '../api';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import {useApi} from '../../shared/services/api';
 
 const DESISTENTE_COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID do Desistente'},
-    {key: 'matriculaId', label: 'Matrícula'},
+    {key: 'matriculaId', label: 'MatrÃ­cula'},
     {key: 'motivoId', label: 'Motivo'},
     {key: 'data', label: 'Data'},
-    {key: 'observacao', label: 'Observação'},
+    {key: 'observacao', label: 'ObservaÃ§Ã£o'},
     {key: 'status', label: 'Status'},
 ];
 

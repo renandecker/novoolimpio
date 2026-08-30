@@ -1,5 +1,5 @@
-import {PermissionGate} from '../permissions';
-import {DataTable} from '../DataTable';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable} from '../../shared/components/DataTable';
 
 export default function ViewProspectoProspectoRadarListScreen() {
     return <PermissionGate permission="READ">

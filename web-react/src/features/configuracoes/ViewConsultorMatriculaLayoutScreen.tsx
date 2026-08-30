@@ -1,8 +1,8 @@
-import {PermissionGate} from '../permissions';
-import {api} from '../api';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {api} from '../../shared/services/api';
 import {useState, useEffect, useCallback} from 'react';
-import {AutoComplete, type AutoCompleteOption} from '../AutoComplete';
-import {Tabs} from '../Tabs';
+import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
+import {Tabs} from '../../shared/components/Tabs';
 
 interface ContratoAutoCompleteResponse {
     id: number;
@@ -111,7 +111,7 @@ export default function ViewConsultorMatriculaLayoutScreen() {
             const response = await api.get<CurriculoResponse[]>('/api/educacao/curriculo/auto-complete-full', { params: { query } });
             return response.data.map(toAutoCompleteOption);
         } catch (e) {
-            console.error('Erro ao buscar currículos:', e);
+            console.error('Erro ao buscar currÃ­culos:', e);
             return [];
         }
     }, []);
@@ -131,7 +131,7 @@ export default function ViewConsultorMatriculaLayoutScreen() {
             const response = await api.get<PessoaFisicaResponse[]>('/api/basico/pessoa-fisica/auto-complete-todos', { params: { query } });
             return response.data.map(toAutoCompleteOption);
         } catch (e) {
-            console.error('Erro ao buscar pessoas físicas:', e);
+            console.error('Erro ao buscar pessoas fÃ­sicas:', e);
             return [];
         }
     }, []);
@@ -142,7 +142,7 @@ export default function ViewConsultorMatriculaLayoutScreen() {
             const response = await api.get<PessoaJuridicaResponse[]>('/api/basico/pessoa-juridica/auto-complete-todos', { params: { query } });
             return response.data.map(toAutoCompleteOption);
         } catch (e) {
-            console.error('Erro ao buscar pessoas jurídicas:', e);
+            console.error('Erro ao buscar pessoas jurÃ­dicas:', e);
             return [];
         }
     }, []);
@@ -272,19 +272,19 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                 <div className="info-panel">
                     <h4>Financeiro</h4>
                     <span className={`status ${contrato.financeiro ? 'PENDENTE' : 'EM_ANDAMENTO'}`}>
-                        {contrato.financeiro ? 'COM DÍVIDAS' : 'SEM DÍVIDAS'}
+                        {contrato.financeiro ? 'COM DÃVIDAS' : 'SEM DÃVIDAS'}
                     </span>
                 </div>
                 <div className="info-panel">
                     <h4>Aluno</h4>
                     <span className={`status ${contrato.aluno ? 'EM_ANDAMENTO' : 'PENDENTE'}`}>
-                        {contrato.aluno ? 'SIM' : 'NÃO'}
+                        {contrato.aluno ? 'SIM' : 'NÃƒO'}
                     </span>
                 </div>
                 <div className="info-panel">
                     <h4>Atualizar Dados</h4>
                     <span className={`status ${contrato.dados ? 'PENDENTE' : 'EM_ANDAMENTO'}`}>
-                        {contrato.dados ? 'SIM' : 'NÃO'}
+                        {contrato.dados ? 'SIM' : 'NÃƒO'}
                     </span>
                 </div>
             </div>
@@ -319,8 +319,8 @@ export default function ViewConsultorMatriculaLayoutScreen() {
             <div className="form-section">
                 <h3>Tipo de Contratante</h3>
                 <div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
-                    <label><input type="radio" name="tipoContratante" value="fisica" checked={contrato.tipoContratante === 'fisica'} onChange={() => setContrato(prev => ({ ...prev, tipoContratante: 'fisica' }))} /> Pessoa Física</label>
-                    <label><input type="radio" name="tipoContratante" value="juridica" checked={contrato.tipoContratante === 'juridica'} onChange={() => setContrato(prev => ({ ...prev, tipoContratante: 'juridica' }))} /> Pessoa Jurídica</label>
+                    <label><input type="radio" name="tipoContratante" value="fisica" checked={contrato.tipoContratante === 'fisica'} onChange={() => setContrato(prev => ({ ...prev, tipoContratante: 'fisica' }))} /> Pessoa FÃ­sica</label>
+                    <label><input type="radio" name="tipoContratante" value="juridica" checked={contrato.tipoContratante === 'juridica'} onChange={() => setContrato(prev => ({ ...prev, tipoContratante: 'juridica' }))} /> Pessoa JurÃ­dica</label>
                 </div>
                 <div className="table_form" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
                     <div>
@@ -388,7 +388,7 @@ export default function ViewConsultorMatriculaLayoutScreen() {
     const renderMatriculaTab = () => (
         <div className="matricula-tab">
             <div className="curso-info" style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: '20px', alignItems: 'center' }}>
-                <div><strong>Curso:</strong> {contrato.curriculo ? (contrato.curriculo as AutoCompleteOption).label : 'Não selecionado'}</div>
+                <div><strong>Curso:</strong> {contrato.curriculo ? (contrato.curriculo as AutoCompleteOption).label : 'NÃ£o selecionado'}</div>
                 <button className="btnyellow" style={{ marginLeft: 'auto' }}>
                     <i className="fa fa-calculator"/> Matriz Curricular
                 </button>
@@ -488,7 +488,7 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                                 <th style={{ padding: '8px', textAlign: 'left' }}>Sala</th>
                                 <th style={{ padding: '8px', textAlign: 'left' }}>Componente Curricular</th>
                                 <th style={{ padding: '8px', textAlign: 'left' }}>C.H.</th>
-                                <th style={{ padding: '8px', textAlign: 'left' }}>Data Início - Fim</th>
+                                <th style={{ padding: '8px', textAlign: 'left' }}>Data InÃ­cio - Fim</th>
                                 <th style={{ padding: '8px', textAlign: 'left' }}>Professor</th>
                             </tr>
                         </thead>
@@ -515,10 +515,10 @@ export default function ViewConsultorMatriculaLayoutScreen() {
         <div className="material-tab" style={{ padding: '20px' }}>
             <h3>Material Escolar</h3>
             <div style={{ display: 'flex', gap: '15px', marginBottom: '15px', fontSize: '14px' }}>
-                <span style={{ color: '#000', fontWeight: 'bold' }}>■ Fornecido</span>
-                <span style={{ color: '#0275d8', fontWeight: 'bold' }}>■ Compra</span>
-                <span style={{ color: '#5cb85c', fontWeight: 'bold' }}>■ Estoque</span>
-                <span style={{ color: '#f0ad4e', fontWeight: 'bold' }}>■ Solicitado</span>
+                <span style={{ color: '#000', fontWeight: 'bold' }}>â–  Fornecido</span>
+                <span style={{ color: '#0275d8', fontWeight: 'bold' }}>â–  Compra</span>
+                <span style={{ color: '#5cb85c', fontWeight: 'bold' }}>â–  Estoque</span>
+                <span style={{ color: '#f0ad4e', fontWeight: 'bold' }}>â–  Solicitado</span>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '15px' }}>
@@ -568,7 +568,7 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                 <Tabs
                     tabs={[
                         { key: 'contrato', label: 'Contrato', content: renderContratoTab() },
-                        { key: 'matricula', label: 'Matrícula', content: renderMatriculaTab() },
+                        { key: 'matricula', label: 'MatrÃ­cula', content: renderMatriculaTab() },
                         { key: 'material', label: 'Material', content: renderMaterialTab() },
                     ]}
                     activeKey={activeTab}

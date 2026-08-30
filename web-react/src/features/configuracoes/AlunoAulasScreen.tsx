@@ -1,7 +1,7 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
-import {alunoApi, AulaAluno, formatarData} from '../aluno';
-import '../AlunoPortal.css';
+import {alunoApi, AulaAluno, formatarData} from '../../features/aluno/aluno';
+import '../../features/aluno/alunoPortal.css';
 
 export default function AlunoAulasScreen() {
     const [aulas, setAulas] = useState<AulaAluno[]>([]);
@@ -17,7 +17,7 @@ export default function AlunoAulasScreen() {
                 setAulas(data ?? []);
             })
             .catch((e: any) => {
-                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar as chamadas.');
+                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'NÃ£o foi possÃ­vel carregar as chamadas.');
             })
             .finally(() => {
                 if (active) setBusy(false);
@@ -46,10 +46,10 @@ export default function AlunoAulasScreen() {
                         <th>Componente Curricular</th>
                         <th>Turma</th>
                         <th>Aula</th>
-                        <th>Descrição</th>
+                        <th>DescriÃ§Ã£o</th>
                         <th>Data da Aula</th>
                         <th>Data Assistida</th>
-                        <th>Situação</th>
+                        <th>SituaÃ§Ã£o</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -62,7 +62,7 @@ export default function AlunoAulasScreen() {
                             <td>{formatarData(a.dataAula)}</td>
                             <td>{formatarData(a.dataAssistida)}</td>
                             <td>
-                                {a.dataAssistida ? 'Assistida' : 'Não assistida'}
+                                {a.dataAssistida ? 'Assistida' : 'NÃ£o assistida'}
                             </td>
                         </tr>
                     ))}

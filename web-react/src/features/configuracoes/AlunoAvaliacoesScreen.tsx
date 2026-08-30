@@ -1,7 +1,7 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
-import {alunoApi, AvaliacaoAluno, formatarData} from '../aluno';
-import '../AlunoPortal.css';
+import {alunoApi, AvaliacaoAluno, formatarData} from '../../features/aluno/aluno';
+import '../../features/aluno/alunoPortal.css';
 
 export default function AlunoAvaliacoesScreen() {
     const [avaliacoes, setAvaliacoes] = useState<AvaliacaoAluno[]>([]);
@@ -17,7 +17,7 @@ export default function AlunoAvaliacoesScreen() {
                 setAvaliacoes(data ?? []);
             })
             .catch((e: any) => {
-                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar as avaliações.');
+                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'NÃ£o foi possÃ­vel carregar as avaliaÃ§Ãµes.');
             })
             .finally(() => {
                 if (active) setBusy(false);
@@ -27,36 +27,36 @@ export default function AlunoAvaliacoesScreen() {
         };
     }, []);
 
-    if (busy) return <main><h1>Avaliações do Aluno</h1><p className="aluno-portal-msg">Carregando...</p></main>;
-    if (error) return <main><h1>Avaliações do Aluno</h1>
+    if (busy) return <main><h1>AvaliaÃ§Ãµes do Aluno</h1><p className="aluno-portal-msg">Carregando...</p></main>;
+    if (error) return <main><h1>AvaliaÃ§Ãµes do Aluno</h1>
         <div className="aluno-portal-error" role="alert">{error}</div>
     </main>;
 
     return (
         <main className="aluno-portal">
-            <h1>Avaliações do Aluno</h1>
-            <p className="aluno-portal-msg">Total de avaliações: {avaliacoes.length}</p>
+            <h1>AvaliaÃ§Ãµes do Aluno</h1>
+            <p className="aluno-portal-msg">Total de avaliaÃ§Ãµes: {avaliacoes.length}</p>
 
-            {avaliacoes.length === 0 && <p className="aluno-portal-msg">Nenhuma avaliação encontrada.</p>}
+            {avaliacoes.length === 0 && <p className="aluno-portal-msg">Nenhuma avaliaÃ§Ã£o encontrada.</p>}
 
             <div className="aluno-portal-avaliacoes-lista">
                 {avaliacoes.map(a => (
                     <section className="aluno-portal-item" key={a.id}>
                         <div className="aluno-portal-item-cabecalho">
                             <div>
-                                <h2>{a.nome || `Avaliação ${a.id}`}</h2>
+                                <h2>{a.nome || `AvaliaÃ§Ã£o ${a.id}`}</h2>
                                 <p className="aluno-portal-item-meta">
                                     {[a.componente, a.turma ? 'Turma ' + a.turma : '', a.descricao]
-                                        .filter(Boolean).join(' • ')}
+                                        .filter(Boolean).join(' â€¢ ')}
                                 </p>
                             </div>
                             <span className={`aluno-portal-situacao ${a.respondida ? 'ok' : a.ativa ? 'pendente' : 'fechada'}`}>
-                                {a.respondida ? 'Respondida' : a.ativa ? 'Disponível' : 'Fechada'}
+                                {a.respondida ? 'Respondida' : a.ativa ? 'DisponÃ­vel' : 'Fechada'}
                             </span>
                         </div>
 
                         <div className="aluno-portal-item-dados">
-                            <p><strong>Início:</strong> {formatarData(a.dataInicial)}</p>
+                            <p><strong>InÃ­cio:</strong> {formatarData(a.dataInicial)}</p>
                             <p><strong>Fim:</strong> {formatarData(a.dataFinal)}</p>
                         </div>
 

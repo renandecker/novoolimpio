@@ -1,5 +1,5 @@
-import {PermissionGate} from '../permissions';
-import {DataTable} from '../DataTable';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable} from '../../shared/components/DataTable';
 
 export default function ViewCategoriaCampoListCategoriaCampoListScreen() {
     return <PermissionGate permission="READ">
@@ -9,7 +9,7 @@ export default function ViewCategoriaCampoListCategoriaCampoListScreen() {
                 path="/api/view/categoriaCampo/listCategoriaCampo" 
                 columns={[
                     {key: 'id', label: 'ID'},
-                    {key: 'descricao', label: 'Descrição'}
+                    {key: 'descricao', label: 'DescriÃ§Ã£o'}
                 ]}
             />
         </main>

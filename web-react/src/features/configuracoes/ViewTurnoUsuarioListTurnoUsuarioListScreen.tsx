@@ -1,11 +1,11 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PermissionGate } from '../permissions';
-import { AutoComplete, type AutoCompleteOption } from '../AutoComplete';
-import { MasterDetail } from '../MasterDetail';
-import { TURNO_TRABALHO_SOURCE, TURNO_TRABALHO_COLUMNS, TURNO_TRABALHO_SEARCH } from '../masterDetailSources';
-import { api } from '../api';
-import type { ApiItem } from '../types';
+import { PermissionGate } from '../../shared/services/permissions';
+import { AutoComplete, type AutoCompleteOption } from '../../shared/components/AutoComplete';
+import { MasterDetail } from '../../shared/components/MasterDetail';
+import { TURNO_TRABALHO_SOURCE, TURNO_TRABALHO_COLUMNS, TURNO_TRABALHO_SEARCH } from '../../shared/services/masterDetailSources';
+import { api } from '../../shared/services/api';
+import type { ApiItem } from '../../features/auth/types';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -144,7 +144,7 @@ export default function ViewTurnoUsuarioListTurnoUsuarioListScreen() {
                 setListaTurnos(filtrados);
             }
         } catch (e: unknown) {
-            const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? (e as Error)?.message ?? 'Erro ao carregar turnos do usuário';
+            const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? (e as Error)?.message ?? 'Erro ao carregar turnos do usuÃ¡rio';
             setNotice({ type: 'error', detail: msg });
         } finally {
             setLoadingTurnos(false);
@@ -162,7 +162,7 @@ export default function ViewTurnoUsuarioListTurnoUsuarioListScreen() {
     };
 
     const handleTurnosChange = (next: ApiItem[]) => {
-        // reinitTurno: valida adição (legado TurnoUsuarioController.reinitTurno)
+        // reinitTurno: valida adiÃ§Ã£o (legado TurnoUsuarioController.reinitTurno)
         if (next.length > listaTurnos.length) {
             const added = next.find((n) => !listaTurnos.some((o) => String(asRecord(o).id ?? (o as unknown as Record<string, unknown>).id) === String(asRecord(n).id ?? (n as unknown as Record<string, unknown>).id)));
             if (added) {
@@ -185,17 +185,17 @@ export default function ViewTurnoUsuarioListTurnoUsuarioListScreen() {
                     }
                 }
                 if (conflito) {
-                    setNotice({ type: 'warn', detail: 'Existe Conflito de horário entre os turnos' });
+                    setNotice({ type: 'warn', detail: 'Existe Conflito de horÃ¡rio entre os turnos' });
                     return;
                 }
                 if (num >= 2) {
-                    setNotice({ type: 'warn', detail: 'Não é possível utilizar mais de dois turnos no mesmo dia para um Operador' });
+                    setNotice({ type: 'warn', detail: 'NÃ£o Ã© possÃ­vel utilizar mais de dois turnos no mesmo dia para um Operador' });
                     return;
                 }
                 setNotice(null);
             }
         } else {
-            // remoção: limpa aviso de conflito se houver
+            // remoÃ§Ã£o: limpa aviso de conflito se houver
             if (notice?.type === 'warn') setNotice(null);
         }
         setListaTurnos(next);
@@ -216,7 +216,7 @@ export default function ViewTurnoUsuarioListTurnoUsuarioListScreen() {
             const turnoTrabalhoIds = listaTurnos.map((t) => Number((asRecord(t).id ?? (t as unknown as Record<string, unknown>).id) as number)).filter((n) => !Number.isNaN(n));
             await api.post('/api/central/turno-usuario/salvar', { usuarioId: operador.id, turnoTrabalhoIds });
             setNotice({ type: 'success', detail: 'Turnos salvos com sucesso.' });
-            // init() legado: limpa form após salvar
+            // init() legado: limpa form apÃ³s salvar
             setOperador(null);
             setListaTurnos([]);
         } catch (e: unknown) {
@@ -232,7 +232,7 @@ export default function ViewTurnoUsuarioListTurnoUsuarioListScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1 className="cabecario">Inserir Turno Usuário</h1>
+                <h1 className="cabecario">Inserir Turno UsuÃ¡rio</h1>
                 <hr id="separator" style={{ width: '99%' }} />
 
                 {/* growl autoUpdate showDetail sticky life 50000 */}
@@ -250,14 +250,14 @@ export default function ViewTurnoUsuarioListTurnoUsuarioListScreen() {
                             color: notice.type === 'error' ? '#721c24' : notice.type === 'warn' ? '#856404' : notice.type === 'success' ? '#155724' : '#0c5460',
                         }}
                     >
-                        <strong>{notice.type === 'error' ? 'Erro' : notice.type === 'warn' ? 'Atenção' : notice.type === 'success' ? 'Sucesso' : 'Informação'}: </strong>
+                        <strong>{notice.type === 'error' ? 'Erro' : notice.type === 'warn' ? 'AtenÃ§Ã£o' : notice.type === 'success' ? 'Sucesso' : 'InformaÃ§Ã£o'}: </strong>
                         <span>{notice.detail}</span>
                     </div>
                 )}
 
                 <div className="div_form" style={{ width: '30%', minWidth: 420, margin: '16px auto', padding: 16, border: '1px solid #e0e0e0', borderRadius: 6, background: '#fff' }}>
                     <div className="form-title" style={{ fontWeight: 700, marginBottom: 12 }}>
-                        Turno Usuário
+                        Turno UsuÃ¡rio
                     </div>
 
                     <div className="table_form" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

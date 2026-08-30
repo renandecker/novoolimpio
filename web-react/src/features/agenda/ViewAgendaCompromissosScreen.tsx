@@ -1,14 +1,14 @@
-import {useState, useCallback, useMemo} from 'react';
+﻿import {useState, useCallback, useMemo} from 'react';
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
-import {api} from '../api';
-import {PermissionGate} from '../permissions';
-import {ScheduleWeekView, mondayOf, toIsoDate, type ScheduleEventData} from '../WeeklyGrid';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import {Tabs} from '../Tabs';
-import {Modal} from '../Modal';
-import {AutoComplete} from '../AutoComplete';
+import {api} from '../../shared/services/api';
+import {PermissionGate} from '../../shared/services/permissions';
+import {ScheduleWeekView, mondayOf, toIsoDate, type ScheduleEventData} from '../../shared/components/WeeklyGrid';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import {Tabs} from '../../shared/components/Tabs';
+import {Modal} from '../../shared/components/Modal';
+import {AutoComplete} from '../../shared/components/AutoComplete';
 import {format} from 'date-fns';
-import '../Disponibilidade.css';
+import '../../features/professor/Disponibilidade.css';
 import './ViewAgendaCompromissosScreen.css';
 
 interface Compromisso {

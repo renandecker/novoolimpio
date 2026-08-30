@@ -1,7 +1,7 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
-import {aulaApi, Aula} from '../aula';
-import '../AlunoPortal.css';
+import {aulaApi, Aula} from '../../features/aluno/aluno';
+import '../../features/aluno/alunoPortal.css';
 
 export default function AulaAulaScreen() {
     const {ocorrenciaId} = useParams<{ ocorrenciaId: string }>();
@@ -17,7 +17,7 @@ export default function AulaAulaScreen() {
                 if (active) setAulas(data ?? []);
             })
             .catch((e: any) => {
-                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar as aulas.');
+                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'NÃ£o foi possÃ­vel carregar as aulas.');
             })
             .finally(() => {
                 if (active) setBusy(false);

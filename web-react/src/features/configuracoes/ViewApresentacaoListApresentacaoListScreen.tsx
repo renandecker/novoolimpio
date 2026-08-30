@@ -1,5 +1,5 @@
-import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {ModuleTabs} from '../../shared/components/ModuleTabs';
 
 export default function ViewApresentacaoListApresentacaoListScreen() {
     return (
@@ -13,16 +13,16 @@ export default function ViewApresentacaoListApresentacaoListScreen() {
                             label: 'Imagens',
                             path: '/api/educacao/apresentacao/paged',
                             columns: [
-                                {key: 'ordem', label: 'Slide Número'},
+                                {key: 'ordem', label: 'Slide NÃºmero'},
                                 {key: 'local', label: 'Local'},
                             ]
                         },
                         {
                             key: 'videos',
-                            label: 'Vídeos',
+                            label: 'VÃ­deos',
                             path: '/api/educacao/apresentacaovideo/paged',
                             columns: [
-                                {key: 'titulo', label: 'Título'},
+                                {key: 'titulo', label: 'TÃ­tulo'},
                                 {key: 'local', label: 'Local'},
                             ]
                         },

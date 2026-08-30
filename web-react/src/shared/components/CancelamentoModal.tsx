@@ -1,4 +1,4 @@
-import {DataTable, type DataTableColumn} from './DataTable';
+﻿import {DataTable, type DataTableColumn} from './DataTable';
 import {Wizard} from './Wizard';
 
 const REGRA_COLUMNS: DataTableColumn[] = [

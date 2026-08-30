@@ -1,4 +1,4 @@
-import {ReactNode, useEffect, useState} from 'react';
+﻿import {ReactNode, useEffect, useState} from 'react';
 import {Tabs} from './Tabs';
 import type {TabItem} from './Tabs';
 

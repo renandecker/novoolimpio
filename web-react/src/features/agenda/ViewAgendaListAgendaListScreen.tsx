@@ -1,12 +1,12 @@
-import {useEffect, useMemo, useState} from 'react';
+﻿import {useEffect, useMemo, useState} from 'react';
 import type {ReactNode} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {PermissionGate} from '../permissions';
-import {DataTable} from '../DataTable';
-import type {DataTableColumn} from '../DataTable';
-import type {ApiItem} from '../types';
-import {api} from '../api';
-import {USUARIO_SOURCE} from '../masterDetailSources';
+import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable} from '../../shared/components/DataTable';
+import type {DataTableColumn} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../shared/types/index';
+import {api} from '../../shared/services/api';
+import {USUARIO_SOURCE} from '../../shared/services/masterDetailSources';
 
 const SIM = 'Sim';
 const NAO = 'Não';

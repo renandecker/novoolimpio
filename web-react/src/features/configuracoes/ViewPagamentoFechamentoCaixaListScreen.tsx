@@ -1,11 +1,11 @@
-import {useEffect, useState} from 'react';
-import {api} from '../api';
-import {useAuth} from '../auth';
-import {PermissionGate} from '../permissions';
-import '../Wizard.css';
+﻿import {useEffect, useState} from 'react';
+import {api} from '../../shared/services/api';
+import {useAuth} from '../../features/auth/auth';
+import {PermissionGate} from '../../shared/services/permissions';
+import '../../shared/components/Wizard.css';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 
-// ==== Tipos espelhando os DTOs REST de financeiro.zip (módulo caixa) ====
+// ==== Tipos espelhando os DTOs REST de financeiro.zip (mÃ³dulo caixa) ====
 type Caixa = {
     id: number; data: string; dataFechamento: string | null; usuarioId: number; fundoCaixa: number;
     impressoraId: number | null; unidadeId: number; idCaixaUnidade: number; documento: string | null;
@@ -13,9 +13,9 @@ type Caixa = {
 
 type TipoPagamento = 'DINHEIRO' | 'CHEQUE' | 'CARTAO' | 'BOLETO' | 'PIX' | 'TRANFERENCIA' | 'DEPOSITO';
 const TIPOS_PAGAMENTO: { value: TipoPagamento; label: string }[] = [
-    {value: 'DINHEIRO', label: 'Dinheiro'}, {value: 'CHEQUE', label: 'Cheque'}, {value: 'CARTAO', label: 'Cartão'},
-    {value: 'BOLETO', label: 'Boleto'}, {value: 'PIX', label: 'Pix'}, {value: 'TRANFERENCIA', label: 'Transferência'},
-    {value: 'DEPOSITO', label: 'Depósito'},
+    {value: 'DINHEIRO', label: 'Dinheiro'}, {value: 'CHEQUE', label: 'Cheque'}, {value: 'CARTAO', label: 'CartÃ£o'},
+    {value: 'BOLETO', label: 'Boleto'}, {value: 'PIX', label: 'Pix'}, {value: 'TRANFERENCIA', label: 'TransferÃªncia'},
+    {value: 'DEPOSITO', label: 'DepÃ³sito'},
 ];
 
 type FormaPagamentoLinha = { tipoPagamento: TipoPagamento; valor: string; documento: string };
@@ -30,8 +30,8 @@ const money = (v: number | undefined | null) =>
     (v ?? 0).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
 
 const STEPS = [
-    {key: 'configuracao', label: 'Configurações impressora'},
-    {key: 'movimentacao', label: 'Movimentação Financeira'},
+    {key: 'configuracao', label: 'ConfiguraÃ§Ãµes impressora'},
+    {key: 'movimentacao', label: 'MovimentaÃ§Ã£o Financeira'},
     {key: 'fechamento', label: 'Fechamento Caixa'},
 ] as
 const ;
@@ -41,8 +41,8 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
     void session;
     const queryClient = useQueryClient();
 
-    // Sessão ainda não carrega usuarioId/unidadeId (ver auth.tsx) - mantidos editáveis até que o
-    // módulo básico exponha esses campos no token/sessão.
+    // SessÃ£o ainda nÃ£o carrega usuarioId/unidadeId (ver auth.tsx) - mantidos editÃ¡veis atÃ© que o
+    // mÃ³dulo bÃ¡sico exponha esses campos no token/sessÃ£o.
     const [usuarioId, setUsuarioId] = useState<string>('');
     const [unidadeId, setUnidadeId] = useState<string>('');
     const [impressoraId, setImpressoraId] = useState<number | null>(null);
@@ -117,7 +117,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
     const [erro, setErro] = useState<string | null>(null);
     const [mensagem, setMensagem] = useState<string | null>(null);
 
-    // ---- Passo 1: Configurações impressora / abertura de caixa ----
+    // ---- Passo 1: ConfiguraÃ§Ãµes impressora / abertura de caixa ----
     const [fundoCaixa, setFundoCaixa] = useState('');
 
     useEffect(() => {
@@ -136,7 +136,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                 });
                 if (sugerido != null) setFundoCaixa(String(sugerido));
             } catch {
-                // Sem caixa aberto ainda / configuração não encontrada - segue no fluxo de abertura.
+                // Sem caixa aberto ainda / configuraÃ§Ã£o nÃ£o encontrada - segue no fluxo de abertura.
             }
         })();
     }, [usuarioId, unidadeId]);
@@ -174,7 +174,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
         }
     }
 
-    // ---- Passo 2: Movimentação Financeira ----
+    // ---- Passo 2: MovimentaÃ§Ã£o Financeira ----
     const [movSubTab, setMovSubTab] = useState<'parcela' | 'extra' | 'sangria'>('parcela');
 
     // Pagamento de parcela (equivalente a EfetuarPagamentoController)
@@ -211,7 +211,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
             });
             setCalculo(data);
         } catch {
-            setErro('Não foi possível calcular os valores da parcela.');
+            setErro('NÃ£o foi possÃ­vel calcular os valores da parcela.');
         }
     }
 
@@ -254,13 +254,13 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
             setCalculo(null);
             setFormasPagamento([{tipoPagamento: 'DINHEIRO', valor: '', documento: ''}]);
         } catch (e: any) {
-            setErro(e?.response?.data?.message ?? 'Ocorreu um erro ao registrar esta movimentação!');
+            setErro(e?.response?.data?.message ?? 'Ocorreu um erro ao registrar esta movimentaÃ§Ã£o!');
         } finally {
             setLoading(false);
         }
     }
 
-    // Movimentação extra (entrada/saída manual - equivalente a CaixaController.salvar)
+    // MovimentaÃ§Ã£o extra (entrada/saÃ­da manual - equivalente a CaixaController.salvar)
     const [historico, setHistorico] = useState('');
     const [valorExtra, setValorExtra] = useState('');
     const [movimentoId, setMovimentoId] = useState('');
@@ -275,12 +275,12 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                 historico, valor: Number(valorExtra || 0), movimentoId: Number(movimentoId),
                 tipoPagamento: tipoPagamentoExtra, caixaId: caixa.id, usuarioId: Number(usuarioId), valorTroco: 0,
             });
-            setMensagem('Movimentação registrada com sucesso!');
+            setMensagem('MovimentaÃ§Ã£o registrada com sucesso!');
             setHistorico('');
             setValorExtra('');
             setMovimentoId('');
         } catch (e: any) {
-            setErro(e?.response?.data?.message ?? 'Ocorreu um erro ao registrar esta movimentação!');
+            setErro(e?.response?.data?.message ?? 'Ocorreu um erro ao registrar esta movimentaÃ§Ã£o!');
         } finally {
             setLoading(false);
         }
@@ -316,7 +316,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
             const {data} = await api.get<FechamentoCaixaTotais>(`/api/financeiro/caixa/${caixa.id}/totais-fechamento`);
             setTotais(data);
         } catch {
-            setErro('Não foi possível carregar os totais do caixa.');
+            setErro('NÃ£o foi possÃ­vel carregar os totais do caixa.');
         } finally {
             setLoading(false);
         }
@@ -344,7 +344,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
 
     function goToStep(index: number) {
         if (index === 1 && !caixa) {
-            setErro('Você precisa configurar uma impressora e o fundo de caixa antes!');
+            setErro('VocÃª precisa configurar uma impressora e o fundo de caixa antes!');
             return;
         }
         setErro(null);
@@ -376,9 +376,9 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                     <div className="wizard-content">
                         {step === 0 && (
                             <section>
-                                <p>Informe o usuário e a unidade para localizar (ou abrir) o caixa do dia.</p>
+                                <p>Informe o usuÃ¡rio e a unidade para localizar (ou abrir) o caixa do dia.</p>
                                 <div style={{display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 12}}>
-                                    <label>Usuário <select
+                                    <label>UsuÃ¡rio <select
                                         value={usuarioId}
                                         onChange={(e) => setUsuarioId(e.target.value)}
                                         disabled={loadingUsuario}
@@ -404,7 +404,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                                     <div>
                                         <p>
                                             Caixa <strong>#{caixa.idCaixaUnidade}</strong> aberto
-                                            em {new Date(caixa.data).toLocaleString('pt-BR')} —{' '}
+                                            em {new Date(caixa.data).toLocaleString('pt-BR')} â€”{' '}
                                             {caixa.dataFechamento ?
                                                 <strong style={{color: '#b00020'}}>Fechado</strong> :
                                                 <strong style={{color: '#2e7d32'}}>Aberto</strong>}
@@ -417,7 +417,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                                     </div>
                                 ) : (
                                     <div>
-                                        <p>Nenhum caixa aberto hoje para este usuário/unidade. Configure a impressora e
+                                        <p>Nenhum caixa aberto hoje para este usuÃ¡rio/unidade. Configure a impressora e
                                             o fundo de caixa para abrir um novo caixa.</p>
                                         <div style={{display: 'flex', gap: 12, flexWrap: 'wrap'}}>
                                             <label>Impressora <select
@@ -451,7 +451,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                                         onClick={() => setMovSubTab('parcela')}>Pagamento de Parcela
                                     </div>
                                     <div className={`wizard-step ${movSubTab === 'extra' ? 'wizard-step-active' : ''}`}
-                                         onClick={() => setMovSubTab('extra')}>Movimentação Extra
+                                         onClick={() => setMovSubTab('extra')}>MovimentaÃ§Ã£o Extra
                                     </div>
                                     <div
                                         className={`wizard-step ${movSubTab === 'sangria' ? 'wizard-step-active' : ''}`}
@@ -462,13 +462,13 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                                 {movSubTab === 'parcela' && (
                                     <div>
                                         <div style={{display: 'flex', gap: 12, flexWrap: 'wrap'}}>
-                                            <label>Nº da Parcela <input value={parcelaId}
+                                            <label>NÂº da Parcela <input value={parcelaId}
                                                                         onChange={(e) => setParcelaId(e.target.value)}/></label>
                                             <label>Valor <input value={valorParcela}
                                                                 onChange={(e) => setValorParcela(e.target.value)}/></label>
                                             <label>Vencimento <input type="date" value={dataVencimento}
                                                                      onChange={(e) => setDataVencimento(e.target.value)}/></label>
-                                            <label>Nº Parcela (0 = entrada) <input value={parcelaSequencia}
+                                            <label>NÂº Parcela (0 = entrada) <input value={parcelaSequencia}
                                                                                    onChange={(e) => setParcelaSequencia(e.target.value)}/></label>
                                         </div>
                                         <div style={{display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 8}}>
@@ -478,7 +478,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                                                                   onChange={(e) => setPercentualMulta(e.target.value)}/></label>
                                             <label>% Juros a.m. <input value={percentualJuros}
                                                                        onChange={(e) => setPercentualJuros(e.target.value)}/></label>
-                                            <label>Dias tolerância <input value={diasTolerancia}
+                                            <label>Dias tolerÃ¢ncia <input value={diasTolerancia}
                                                                           onChange={(e) => setDiasTolerancia(e.target.value)}/></label>
                                         </div>
                                         <button onClick={calcularValores} style={{marginTop: 8}}>Calcular valores
@@ -519,7 +519,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                                                 <input placeholder="Valor" value={f.valor}
                                                        onChange={(e) => updateFormaPagamento(idx, {valor: e.target.value})}/>
                                                 {f.tipoPagamento !== 'DINHEIRO' && (
-                                                    <input placeholder="Documento / nº" value={f.documento}
+                                                    <input placeholder="Documento / nÂº" value={f.documento}
                                                            onChange={(e) => updateFormaPagamento(idx, {documento: e.target.value})}/>
                                                 )}
                                                 <button onClick={() => removeFormaPagamento(idx)}
@@ -530,7 +530,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                                         <button onClick={addFormaPagamento}>+ Adicionar forma de pagamento</button>
 
                                         <p>Valor
-                                            recebido: <strong>{money(valorRecebido)}</strong>{calculo && troco > 0 && ` — Troco: ${money(troco)}`}
+                                            recebido: <strong>{money(valorRecebido)}</strong>{calculo && troco > 0 && ` â€” Troco: ${money(troco)}`}
                                         </p>
 
                                         <button
@@ -546,7 +546,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                                 {movSubTab === 'extra' && (
                                     <div>
                                         <div style={{display: 'flex', gap: 12, flexWrap: 'wrap'}}>
-                                            <label>Descrição <input value={historico}
+                                            <label>DescriÃ§Ã£o <input value={historico}
                                                                     onChange={(e) => setHistorico(e.target.value)}/></label>
                                             <label>Valor <input value={valorExtra}
                                                                 onChange={(e) => setValorExtra(e.target.value)}/></label>
@@ -562,7 +562,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                                             </label>
                                         </div>
                                         <button className="wizard-btn-next" onClick={registrarMovimentacaoExtra}
-                                                disabled={loading}>Registrar Movimentação
+                                                disabled={loading}>Registrar MovimentaÃ§Ã£o
                                         </button>
                                     </div>
                                 )}
@@ -606,7 +606,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                                             <td>{money(totais.totalCheque)}</td>
                                         </tr>
                                         <tr>
-                                            <td>Cartão</td>
+                                            <td>CartÃ£o</td>
                                             <td>{money(totais.totalCartao)}</td>
                                         </tr>
                                         <tr>
@@ -614,11 +614,11 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                                             <td>{money(totais.totalBoleto)}</td>
                                         </tr>
                                         <tr>
-                                            <td>Transferência</td>
+                                            <td>TransferÃªncia</td>
                                             <td>{money(totais.totalTransferencia)}</td>
                                         </tr>
                                         <tr>
-                                            <td>Depósito</td>
+                                            <td>DepÃ³sito</td>
                                             <td>{money(totais.totalDeposito)}</td>
                                         </tr>
                                         <tr>

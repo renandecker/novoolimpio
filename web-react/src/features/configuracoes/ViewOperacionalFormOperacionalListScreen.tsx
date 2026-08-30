@@ -1,9 +1,9 @@
-import {useEffect, useState, useCallback} from 'react';
+﻿import {useEffect, useState, useCallback} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {PermissionGate} from '../permissions';
-import {api} from '../api';
-import {AutoComplete} from '../AutoComplete';
-import type {ApiItem} from '../types';
+import {PermissionGate} from '../../shared/services/permissions';
+import {api} from '../../shared/services/api';
+import {AutoComplete} from '../../shared/components/AutoComplete';
+import type {ApiItem} from '../../features/auth/types';
 
 type StatusPacote = 'INICIADO' | 'AGUARDANDO' | 'CONCLUIDO' | 'EXPIRADO' | 'PENDENTE';
 type Direcionamento = 'INTERNO';
@@ -43,7 +43,7 @@ export default function ViewOperacionalFormOperacionalListScreen() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    // Load pacotes disponíveis
+    // Load pacotes disponÃ­veis
     useEffect(() => {
         let alive = true;
         const loadPacotes = async () => {
@@ -110,12 +110,12 @@ export default function ViewOperacionalFormOperacionalListScreen() {
         // For existing entity, call delete API
         api.delete(`/api/central/operacional-usuario/${ou.id}`)
             .then(() => setOperacionalUsuarios(prev => prev.filter((_, i) => i !== index)))
-            .catch(e => setError(e?.response?.data?.error ?? 'Erro ao remover usuário'));
+            .catch(e => setError(e?.response?.data?.error ?? 'Erro ao remover usuÃ¡rio'));
     }, [isEdit, operacionalUsuarios]);
 
     const validate = useCallback((): string | null => {
-        if (!pacoteId) return 'Pacote é obrigatório.';
-        if (!direcionamento) return 'Direcionamento é obrigatório.';
+        if (!pacoteId) return 'Pacote Ã© obrigatÃ³rio.';
+        if (!direcionamento) return 'Direcionamento Ã© obrigatÃ³rio.';
         if (operacionalUsuarios.length === 0) return 'Selecione uma equipe de trabalho.';
         return null;
     }, [pacoteId, direcionamento, operacionalUsuarios]);
@@ -309,7 +309,7 @@ export default function ViewOperacionalFormOperacionalListScreen() {
                                 style={{flex: 1, maxWidth: 300}}
                             />
                             <button type="button" className="btnblue" onClick={handleAddUsuario} disabled={!usuarioSelecionado} title="Adicionar operador">
-                                ➕
+                                âž•
                             </button>
                         </div>
                         <table className="data-table" style={{width: '100%', fontSize: '13px'}}>
@@ -327,10 +327,10 @@ export default function ViewOperacionalFormOperacionalListScreen() {
                                     <tr key={ou.id}>
                                         <td>{ou.operador.login}</td>
                                         <td>{ou.operador.pessoa?.pessoaFisica?.nome ?? ''}</td>
-                                        <td>{ou.ativo ? 'Sim' : 'Não'}</td>
+                                        <td>{ou.ativo ? 'Sim' : 'NÃ£o'}</td>
                                         <td>{ou.status}</td>
                                         <td>
-                                            <button type="button" className="btnred" onClick={() => handleRemoveUsuario(idx)} title="Remover">✕</button>
+                                            <button type="button" className="btnred" onClick={() => handleRemoveUsuario(idx)} title="Remover">âœ•</button>
                                         </td>
                                     </tr>
                                 ))}
@@ -342,7 +342,7 @@ export default function ViewOperacionalFormOperacionalListScreen() {
                     </div>
 
                     <div style={{marginTop: 8, fontSize: 12, color: '#6b7280'}}>
-                        Campos com <span style={{color: '#C90000'}}>*</span> são obrigatórios. Selecione pelo menos um operador.
+                        Campos com <span style={{color: '#C90000'}}>*</span> sÃ£o obrigatÃ³rios. Selecione pelo menos um operador.
                     </div>
 
                     <div className="form-footer" style={{display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20, paddingTop: 12, borderTop: '1px solid #e5e7eb'}}>

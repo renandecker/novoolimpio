@@ -1,7 +1,7 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
-import {aulaApi, ContratoAula} from '../aula';
-import '../AlunoPortal.css';
+import {aulaApi, ContratoAula} from '../../features/aluno/aluno';
+import '../../features/aluno/alunoPortal.css';
 
 export default function AulaContratoScreen() {
     const [contratos, setContratos] = useState<ContratoAula[]>([]);
@@ -16,7 +16,7 @@ export default function AulaContratoScreen() {
                 if (active) setContratos(data ?? []);
             })
             .catch((e: any) => {
-                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar os cursos.');
+                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'NÃ£o foi possÃ­vel carregar os cursos.');
             })
             .finally(() => {
                 if (active) setBusy(false);

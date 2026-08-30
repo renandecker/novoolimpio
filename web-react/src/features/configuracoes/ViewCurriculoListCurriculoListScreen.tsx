@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import type {ApiItem} from '../types';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../features/auth/types';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -12,7 +12,7 @@ const formatDate = (value: unknown): string => {
 };
 
 const COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID do Currículo'},
+    {key: 'id', label: 'ID do CurrÃ­culo'},
     {key: 'curso', label: 'Curso'},
     {key: 'sucinto', label: 'Sucinto'},
     {key: 'tipoCurso', label: 'Tipo Curso'},
@@ -27,7 +27,7 @@ export default function ViewCurriculoListCurriculoListScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>Currículo do Curso</h1>
+                <h1>CurrÃ­culo do Curso</h1>
                 <DataTable path="/api/educacao/curriculo" columns={COLUMNS} maxMainColumns={COLUMNS.length}
                            editNavigateTo="/view/curriculo/formCurriculo"
                            createNavigateTo="/view/curriculo/formCurriculo"/>

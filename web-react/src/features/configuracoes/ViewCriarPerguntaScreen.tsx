@@ -1,10 +1,10 @@
-import {useState} from 'react';
-import {api} from '../api';
-import {PermissionGate} from '../permissions';
-import {useAuth} from '../auth';
-import {Tabs} from '../Tabs';
-import {AutoComplete} from '../AutoComplete';
-import {ExportDropdown} from '../ExportDropdown';
+﻿import {useState} from 'react';
+import {api} from '../../shared/services/api';
+import {PermissionGate} from '../../shared/services/permissions';
+import {useAuth} from '../../features/auth/auth';
+import {Tabs} from '../../shared/components/Tabs';
+import {AutoComplete} from '../../shared/components/AutoComplete';
+import {ExportDropdown} from '../../shared/components/ExportDropdown';
 
 type RespostaTipo = 'SELECAO' | 'ESCOLHA' | 'TEXTO' | 'ARQUIVO';
 
@@ -21,8 +21,8 @@ type AvaliacaoPergunta = {
 };
 
 const tiposOpcoes: Record<RespostaTipo, string> = {
-    SELECAO: 'Seleção Múltipla',
-    ESCOLHA: 'Escolha Única',
+    SELECAO: 'SeleÃ§Ã£o MÃºltipla',
+    ESCOLHA: 'Escolha Ãšnica',
     TEXTO: 'Texto Livre',
     ARQUIVO: 'Arquivo',
 };
@@ -130,8 +130,8 @@ function CriarPergunta() {
                         value={tipo}
                         onChange={(e) => setTipo(e.target.value as RespostaTipo)}
                     >
-                        <option value="SELECAO">Seleção Múltipla</option>
-                        <option value="ESCOLHA">Escolha Única</option>
+                        <option value="SELECAO">SeleÃ§Ã£o MÃºltipla</option>
+                        <option value="ESCOLHA">Escolha Ãšnica</option>
                         <option value="TEXTO">Texto Livre</option>
                         <option value="ARQUIVO">Arquivo</option>
                     </select>
@@ -150,7 +150,7 @@ function CriarPergunta() {
 
             {(tipo === 'SELECAO' || tipo === 'ESCOLHA') && (
                 <div className="gp-control-group">
-                    <span className="gp-control-label">Opções de Resposta</span>
+                    <span className="gp-control-label">OpÃ§Ãµes de Resposta</span>
                     {opcoes.map((opcao, idx) => (
                         <div key={idx} className="gp-opcao-linha">
                             {tipo === 'ESCOLHA' && (
@@ -176,9 +176,9 @@ function CriarPergunta() {
                             <button
                                 className="gp-btn gp-btn-acoes"
                                 onClick={() => removerOpcao(opcao.id)}
-                                title="Remover opção"
+                                title="Remover opÃ§Ã£o"
                             >
-                                ✖
+                                âœ–
                             </button>
                         </div>
                     ))}
@@ -190,14 +190,14 @@ function CriarPergunta() {
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') adicionarOpcao();
                             }}
-                            placeholder="Nova opção"
+                            placeholder="Nova opÃ§Ã£o"
                         />
                         <button
                             className="gp-btn gp-btn-acoes"
                             onClick={adicionarOpcao}
-                            title="Adicionar opção"
+                            title="Adicionar opÃ§Ã£o"
                         >
-                            ➕
+                            âž•
                         </button>
                     </div>
                 </div>
@@ -226,7 +226,7 @@ function CriarPergunta() {
                 <div className="gp-control-group">
                     <span className="gp-control-label">Anexos</span>
                     <button className="gp-btn gp-btn-acoes" onClick={adicionarAnexo} title="Adicionar anexo">
-                        ➕ Anexo
+                        âž• Anexo
                     </button>
                     {anexos.map((a, idx) => (
                         <div key={idx} className="gp-anexo-chip">
@@ -236,7 +236,7 @@ function CriarPergunta() {
                                 onClick={() => removerAnexo(a.id)}
                                 title="Remover anexo"
                             >
-                                ✖
+                                âœ–
                             </button>
                         </div>
                     ))}
@@ -320,9 +320,9 @@ function ListarPerguntas() {
                             <th>ID</th>
                             <th>Pergunta</th>
                             <th>Tipo</th>
-                            <th>Opções</th>
+                            <th>OpÃ§Ãµes</th>
                             <th>Anexos</th>
-                            <th>Ações</th>
+                            <th>AÃ§Ãµes</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -346,8 +346,8 @@ function ListarPerguntas() {
                                     ))}
                                 </td>
                                 <td>
-                                    <button className="gp-btn gp-btn-acoes" title="Editar">✏️</button>
-                                    <button className="gp-btn gp-btn-acoes" title="Excluir">🗑️</button>
+                                    <button className="gp-btn gp-btn-acoes" title="Editar">âœï¸</button>
+                                    <button className="gp-btn gp-btn-acoes" title="Excluir">ðŸ—‘ï¸</button>
                                 </td>
                             </tr>
                         ))}

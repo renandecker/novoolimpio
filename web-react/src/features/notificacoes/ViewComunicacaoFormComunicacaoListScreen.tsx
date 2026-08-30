@@ -1,8 +1,8 @@
-import {useState} from 'react';
-import {PermissionGate} from '../permissions';
-import {DataTable} from '../DataTable';
-import {MasterDetail} from '../MasterDetail';
-import {Tabs} from '../Tabs';
+﻿import {useState} from 'react';
+import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable} from '../../shared/components/DataTable';
+import {MasterDetail} from '../../shared/components/MasterDetail';
+import {Tabs} from '../../shared/components/Tabs';
 import {
     UNIDADE_SOURCE,
     UNIDADE_COLUMNS,
@@ -31,8 +31,8 @@ import {
     GRUPO_SOURCE,
     GRUPO_COLUMNS,
     GRUPO_SEARCH,
-} from '../masterDetailSources';
-import type {ApiItem} from '../types';
+} from '../../shared/services/masterDetailSources';
+import type {ApiItem} from '../../shared/types/index';
 
 export default function ViewComunicacaoFormComunicacaoListScreen() {
     const [unidades, setUnidades] = useState<ApiItem[]>([]);

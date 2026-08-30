@@ -1,7 +1,7 @@
-import {useMemo, useState} from 'react';
-import {PermissionGate} from '../permissions';
-import {LISTA_ICONES, escopoPorClasse, type Icone} from '../icones';
-import IconPicker, {IconPreview} from '../IconPicker';
+﻿import {useMemo, useState} from 'react';
+import {PermissionGate} from '../../shared/services/permissions';
+import {LISTA_ICONES, escopoPorClasse, type Icone} from '../../shared/utils/icones';
+import IconPicker, {IconPreview} from '../../shared/components/IconPicker';
 import './IconesListScreen.css';
 
 export default function IconesListScreen() {
@@ -38,26 +38,26 @@ export default function IconesListScreen() {
             <main>
                 <div className="icones-screen">
                     <div className="div_form">
-                        <div className="form-title">Ícones Disponíveis</div>
+                        <div className="form-title">Ãcones DisponÃ­veis</div>
 
                         <div className="icones-toolbar">
                             <input
                                 type="text"
                                 className="icones-search"
-                                placeholder="Buscar ícone (ex.: home, user, menu, calendar)..."
+                                placeholder="Buscar Ã­cone (ex.: home, user, menu, calendar)..."
                                 value={search}
                                 onChange={(event) => setSearch(event.target.value)}
                             />
                             <span className="icones-count">
-                {filtered.length} {filtered.length === 1 ? 'ícone' : 'ícones'}
+                {filtered.length} {filtered.length === 1 ? 'Ã­cone' : 'Ã­cones'}
               </span>
                             <select
                                 className="icones-versao"
                                 value={versao}
                                 onChange={(event) => setVersao(event.target.value as Icone['versao'] | 'todas')}
-                                aria-label="Filtrar por versão"
+                                aria-label="Filtrar por versÃ£o"
                             >
-                                <option value="todas">Todas as versões</option>
+                                <option value="todas">Todas as versÃµes</option>
                                 <option value="4.x">Font Awesome 4.x</option>
                                 <option value="5.x">Font Awesome 5.x</option>
                                 <option value="6.x">Font Awesome 6.x</option>
@@ -69,7 +69,7 @@ export default function IconesListScreen() {
 
                         {selected && (
                             <div className="icones-selected">
-                                <span className="icones-selected-label">Ícone selecionado:</span>
+                                <span className="icones-selected-label">Ãcone selecionado:</span>
                                 <IconPreview classe={selected.classe}/>
                                 {copied === selected.icon && <span className="icones-copied">Copiado!</span>}
                             </div>
@@ -83,7 +83,7 @@ export default function IconesListScreen() {
                                         key={`${icone.versao}-${icone.classe}`}
                                         type="button"
                                         className={`icones-item ${selected?.classe === icone.classe ? 'selected' : ''}`}
-                                        title={`${icone.icon} · Font Awesome ${icone.versao}`}
+                                        title={`${icone.icon} Â· Font Awesome ${icone.versao}`}
                                         onClick={() => copyIcon(icone)}
                                     >
                                         <span className="icones-versao-badge">{icone.versao.slice(0, 1)}</span>
@@ -95,7 +95,7 @@ export default function IconesListScreen() {
                         </div>
 
                         {filtered.length === 0 && (
-                            <p className="icones-empty">Nenhum ícone encontrado para "{search}".</p>
+                            <p className="icones-empty">Nenhum Ã­cone encontrado para "{search}".</p>
                         )}
                     </div>
                 </div>

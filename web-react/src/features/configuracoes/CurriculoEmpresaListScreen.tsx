@@ -1,5 +1,5 @@
-import {PermissionGate} from '../permissions';
-import {DataTable} from '../DataTable';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable} from '../../shared/components/DataTable';
 
 export default function CurriculoEmpresaListScreen() {
     return (
@@ -11,7 +11,7 @@ export default function CurriculoEmpresaListScreen() {
                     module="curriculo"
                     columns={[
                         {key: 'id_pessoa', label: 'Pessoa'},
-                        {key: 'dt_inicio', label: 'Data Início'},
+                        {key: 'dt_inicio', label: 'Data InÃ­cio'},
                         {key: 'dt_fim', label: 'Data Fim'},
                         {key: 'fl_ativo', label: 'Ativo'},
                     ]}

@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import {Tabs} from '../Tabs';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import {Tabs} from '../../shared/components/Tabs';
 
 const COMPROMISSO_COLUMNS: DataTableColumn[] = [
     {key: 'descricao', label: 'Descrição'},

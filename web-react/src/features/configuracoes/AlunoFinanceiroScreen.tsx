@@ -1,7 +1,7 @@
-import {useEffect, useState} from 'react';
-import {alunoApi, ContratoFinanceiro, Financeiro, formatarData, formatarMoeda, Parcela} from '../aluno';
-import {PixQrCodeModal} from '../GestaoAlunoModais';
-import '../AlunoPortal.css';
+﻿import {useEffect, useState} from 'react';
+import {alunoApi, ContratoFinanceiro, Financeiro, formatarData, formatarMoeda, Parcela} from '../../features/aluno/aluno';
+import {PixQrCodeModal} from '../../features/professor/GestaoAlunoModais';
+import '../../features/aluno/alunoPortal.css';
 
 function ParcelasTabela({parcelas, titulo, pessoaId}: { parcelas: Parcela[]; titulo: string; pessoaId: number }) {
     if (parcelas.length === 0) return null;
@@ -26,13 +26,13 @@ function ParcelasTabela({parcelas, titulo, pessoaId}: { parcelas: Parcela[]; tit
                 <table className="aluno-portal-tabela">
                     <thead>
                     <tr>
-                        <th>Descrição</th>
+                        <th>DescriÃ§Ã£o</th>
                         <th>Parcela</th>
                         <th>Vencimento</th>
                         <th>Valor</th>
                         <th>Valor pago</th>
-                        <th>Situação</th>
-                        <th>Ações</th>
+                        <th>SituaÃ§Ã£o</th>
+                        <th>AÃ§Ãµes</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -59,7 +59,7 @@ function ParcelasTabela({parcelas, titulo, pessoaId}: { parcelas: Parcela[]; tit
                                         onClick={() => handlePixClick(p)}
                                         title={p.idParcelaPix ? 'Ver PIX gerado / Enviar por e-mail' : 'Gerar QR Code PIX'}
                                     >
-                                        {p.idParcelaPix ? '📱 PIX' : '📱 Gerar PIX'}
+                                        {p.idParcelaPix ? 'ðŸ“± PIX' : 'ðŸ“± Gerar PIX'}
                                     </button>
                                 )}
                             </td>
@@ -99,7 +99,7 @@ export default function AlunoFinanceiroScreen() {
                 if (active) setFinanceiro(data);
             })
             .catch((e: any) => {
-                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar o financeiro.');
+                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'NÃ£o foi possÃ­vel carregar o financeiro.');
             })
             .finally(() => {
                 if (active) setBusy(false);
@@ -132,7 +132,7 @@ export default function AlunoFinanceiroScreen() {
               </span>
             </span>
                         <span className="aluno-portal-card-rotulo">
-              {resumo.situacao === 'Atraso' && resumo.diasAtraso ? `com ${resumo.diasAtraso} dia(s) de atraso` : 'Situação do contrato'}
+              {resumo.situacao === 'Atraso' && resumo.diasAtraso ? `com ${resumo.diasAtraso} dia(s) de atraso` : 'SituaÃ§Ã£o do contrato'}
             </span>
                     </div>
                     <div className="aluno-portal-card">
@@ -159,11 +159,11 @@ export default function AlunoFinanceiroScreen() {
                             <th>Contrato</th>
                             <th>Curso</th>
                             <th>Unidade</th>
-                            <th>Unidade responsável</th>
+                            <th>Unidade responsÃ¡vel</th>
                             <th>Status</th>
                             <th>Qtd reparcelamento</th>
-                            <th>Próxima parcela</th>
-                            <th>Última parcela</th>
+                            <th>PrÃ³xima parcela</th>
+                            <th>Ãšltima parcela</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -177,12 +177,12 @@ export default function AlunoFinanceiroScreen() {
                                 <td>{c.qtdeReparcelamento ?? 0}</td>
                                 <td>
                                     {c.proximaParcelaSequencia != null
-                                        ? `${c.proximaParcelaSequencia}ª · ${formatarData(c.proximaParcelaData)} · ${formatarMoeda(c.proximaParcelaValor)}`
+                                        ? `${c.proximaParcelaSequencia}Âª Â· ${formatarData(c.proximaParcelaData)} Â· ${formatarMoeda(c.proximaParcelaValor)}`
                                         : '-'}
                                 </td>
                                 <td>
                                     {c.ultimaParcelaSequencia != null
-                                        ? `${c.ultimaParcelaSequencia}ª · ${formatarData(c.ultimaParcelaData)} · ${formatarMoeda(c.ultimaParcelaValor)}`
+                                        ? `${c.ultimaParcelaSequencia}Âª Â· ${formatarData(c.ultimaParcelaData)} Â· ${formatarMoeda(c.ultimaParcelaValor)}`
                                         : '-'}
                                 </td>
                             </tr>
@@ -194,8 +194,8 @@ export default function AlunoFinanceiroScreen() {
 
             {financeiro && pessoaId && (
                 <>
-                    <ParcelasTabela titulo="Parcelas deste mês / em atraso" parcelas={financeiro.parcelasMes} pessoaId={pessoaId}/>
-                    <ParcelasTabela titulo="Matrícula" parcelas={financeiro.parcelasMatricula} pessoaId={pessoaId}/>
+                    <ParcelasTabela titulo="Parcelas deste mÃªs / em atraso" parcelas={financeiro.parcelasMes} pessoaId={pessoaId}/>
+                    <ParcelasTabela titulo="MatrÃ­cula" parcelas={financeiro.parcelasMatricula} pessoaId={pessoaId}/>
                     <ParcelasTabela titulo="Produtos" parcelas={financeiro.parcelasProdutos} pessoaId={pessoaId}/>
                     <ParcelasTabela titulo="Canceladas" parcelas={financeiro.parcelasCanceladas} pessoaId={pessoaId}/>
                 </>

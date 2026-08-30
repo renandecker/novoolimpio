@@ -1,9 +1,9 @@
-import {useEffect, useState} from 'react';
-import {useAuth} from '../auth';
-import {alunoApi, formatarData} from '../aluno';
-import {api} from '../api';
-import {Base64FileUpload} from '../Base64FileUpload';
-import '../MeusDados.css';
+﻿import {useEffect, useState} from 'react';
+import {useAuth} from '../../features/auth/auth';
+import {alunoApi, formatarData} from '../../features/aluno/aluno';
+import {api} from '../../shared/services/api';
+import {Base64FileUpload} from '../../shared/components/Base64FileUpload';
+import '../../features/usuario/MeusDados.css';
 
 type MeusDados = {
     username: string;
@@ -92,7 +92,7 @@ export default function MeusDadosScreen() {
                 if (perfil.foto) setFoto(perfil.foto);
             })
             .catch(() => {
-                /* mantém os dados da sessão quando o perfil não está disponível */
+                /* mantÃ©m os dados da sessÃ£o quando o perfil nÃ£o estÃ¡ disponÃ­vel */
             })
             .finally(() => {
                 if (active) setBusy(false);
@@ -123,7 +123,7 @@ export default function MeusDadosScreen() {
             setSaved(true);
         } catch (e) {
             const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error;
-            setError(msg || 'Não foi possível salvar a foto.');
+            setError(msg || 'NÃ£o foi possÃ­vel salvar a foto.');
         } finally {
             setSaving(false);
         }
@@ -131,7 +131,7 @@ export default function MeusDadosScreen() {
 
     if (busy) return <main><h1>Meus dados</h1><p className="meus-dados-msg">Carregando...</p></main>;
 
-    const nomeExibido = dados.nome || dados.username || 'Usuário';
+    const nomeExibido = dados.nome || dados.username || 'UsuÃ¡rio';
     const inicial = (dados.nome || dados.username || '?').charAt(0).toUpperCase();
 
     return (
@@ -153,68 +153,68 @@ export default function MeusDadosScreen() {
 
                     <dl className="meus-dados-grid">
                         <div className="meus-dados-item">
-                            <dt>Usuário</dt>
-                            <dd>{dados.username || 'Não informado'}</dd>
+                            <dt>UsuÃ¡rio</dt>
+                            <dd>{dados.username || 'NÃ£o informado'}</dd>
                         </div>
                         <div className="meus-dados-item">
                             <dt>CPF</dt>
-                            <dd>{dados.cpf || 'Não informado'}</dd>
+                            <dd>{dados.cpf || 'NÃ£o informado'}</dd>
                         </div>
                         <div className="meus-dados-item">
                             <dt>RG</dt>
-                            <dd>{dados.rg || 'Não informado'}</dd>
+                            <dd>{dados.rg || 'NÃ£o informado'}</dd>
                         </div>
                         <div className="meus-dados-item">
                             <dt>Data de nascimento</dt>
                             <dd>{formatarData(dados.dataNascimento)}</dd>
                         </div>
                         <div className="meus-dados-item">
-                            <dt>Gênero</dt>
-                            <dd>{dados.genero || 'Não informado'}</dd>
+                            <dt>GÃªnero</dt>
+                            <dd>{dados.genero || 'NÃ£o informado'}</dd>
                         </div>
                         <div className="meus-dados-item">
                             <dt>Etnia</dt>
-                            <dd>{dados.etnia || 'Não informado'}</dd>
+                            <dd>{dados.etnia || 'NÃ£o informado'}</dd>
                         </div>
                         <div className="meus-dados-item">
                             <dt>Estado civil</dt>
-                            <dd>{dados.estadoCivil || 'Não informado'}</dd>
+                            <dd>{dados.estadoCivil || 'NÃ£o informado'}</dd>
                         </div>
                         <div className="meus-dados-item">
                             <dt>Escolaridade</dt>
-                            <dd>{dados.escolaridade || 'Não informado'}</dd>
+                            <dd>{dados.escolaridade || 'NÃ£o informado'}</dd>
                         </div>
                         <div className="meus-dados-item">
                             <dt>E-mail</dt>
-                            <dd>{dados.email || 'Não informado'}</dd>
+                            <dd>{dados.email || 'NÃ£o informado'}</dd>
                         </div>
                         <div className="meus-dados-item">
                             <dt>Telefone</dt>
-                            <dd>{dados.telefone || 'Não informado'}</dd>
+                            <dd>{dados.telefone || 'NÃ£o informado'}</dd>
                         </div>
                         <div className="meus-dados-item">
                             <dt>Celular</dt>
-                            <dd>{dados.celular || 'Não informado'}</dd>
+                            <dd>{dados.celular || 'NÃ£o informado'}</dd>
                         </div>
                         <div className="meus-dados-item">
                             <dt>Telefone comercial</dt>
-                            <dd>{dados.telefoneComercial || 'Não informado'}</dd>
+                            <dd>{dados.telefoneComercial || 'NÃ£o informado'}</dd>
                         </div>
                         <div className="meus-dados-item">
                             <dt>Nome do pai</dt>
-                            <dd>{dados.nomePai || 'Não informado'}</dd>
+                            <dd>{dados.nomePai || 'NÃ£o informado'}</dd>
                         </div>
                         <div className="meus-dados-item">
-                            <dt>Nome da mãe</dt>
-                            <dd>{dados.nomeMae || 'Não informado'}</dd>
+                            <dt>Nome da mÃ£e</dt>
+                            <dd>{dados.nomeMae || 'NÃ£o informado'}</dd>
                         </div>
                         <div className="meus-dados-item">
-                            <dt>Contato de referência</dt>
-                            <dd>{dados.nomeReferencia || 'Não informado'}</dd>
+                            <dt>Contato de referÃªncia</dt>
+                            <dd>{dados.nomeReferencia || 'NÃ£o informado'}</dd>
                         </div>
                         <div className="meus-dados-item">
                             <dt>Telefone do contato</dt>
-                            <dd>{dados.telefoneReferencia || 'Não informado'}</dd>
+                            <dd>{dados.telefoneReferencia || 'NÃ£o informado'}</dd>
                         </div>
                         {dados.facebook && (
                             <div className="meus-dados-item">
@@ -239,7 +239,7 @@ export default function MeusDadosScreen() {
                                 setError('');
                             }}
                             accept="image/*"
-                            label="Foto do perfil (JPG/PNG, máx. 5 MB)"
+                            label="Foto do perfil (JPG/PNG, mÃ¡x. 5 MB)"
                             onError={(m) => setError(m)}
                         />
                         <button

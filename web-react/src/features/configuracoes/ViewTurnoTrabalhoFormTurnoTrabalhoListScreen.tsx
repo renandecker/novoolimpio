@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { PermissionGate } from '../permissions';
-import { api } from '../api';
-import { MasterDetail } from '../MasterDetail';
-import { UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH } from '../masterDetailSources';
-import type { ApiItem } from '../types';
+import { PermissionGate } from '../../shared/services/permissions';
+import { api } from '../../shared/services/api';
+import { MasterDetail } from '../../shared/components/MasterDetail';
+import { UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH } from '../../shared/services/masterDetailSources';
+import type { ApiItem } from '../../features/auth/types';
 
 /**
  * Tela /view/turnoTrabalho/formTurnoTrabalho
@@ -15,17 +15,17 @@ import type { ApiItem } from '../types';
  *  - p:panelGrid columns="1" div_form width 40% + header vazio + footer po:formButtons
  *    - h:panelGrid columns="2" table_form:
  *      - Id: po:inputInteiro disabled true inputTiny
- *      - Descrição *: po:inputTexto required 3-255 inputMedium
- *      - Início *: p:inputMask mask 99:99 required inputTiny
+ *      - DescriÃ§Ã£o *: po:inputTexto required 3-255 inputMedium
+ *      - InÃ­cio *: p:inputMask mask 99:99 required inputTiny
  *      - Fim *: p:inputMask mask 99:99 required inputTiny
  *      - Dia Semana *: po:inputSelecioneUm required listValue diaSemanaService.findAll() converter diaSemanaConverter
  *    - h:panelGrid width 100% columns 1 table_form:
  *      - Unidades: po:inputMestreDetalheAutoComplete detailLabel id+sucinto, converter unidadeConverter, targetList unidades
  *
  * Regras (TurnoTrabalhoController.saveOrUpdate + TurnoTrabalhoService.save):
- *  - descricao 3-255 obrigatório
+ *  - descricao 3-255 obrigatÃ³rio
  *  - inicio/fim formato HH:mm (HorarioUtil.verificarHoraValida) e inicio < fim
- *  - diaSemana obrigatório
+ *  - diaSemana obrigatÃ³rio
  *  - pelo menos uma unidade selecionada
  *  - removeUnidade respeita franquia (simplificado no front: permite remover)
  */
@@ -39,13 +39,13 @@ const maskHora = (v: string) => {
 };
 
 const validarHora = (hhmm: string): string | null => {
-  if (!hhmm || hhmm.length !== 5) return 'Hora deve ter 5 dígitos. Ex.: 08:30';
-  if (!hhmm.includes(':')) return 'Hora deve seguir o padrão Ex.: 08:30';
+  if (!hhmm || hhmm.length !== 5) return 'Hora deve ter 5 dÃ­gitos. Ex.: 08:30';
+  if (!hhmm.includes(':')) return 'Hora deve seguir o padrÃ£o Ex.: 08:30';
   const [h, m] = hhmm.split(':');
-  if (h.length !== 2 || m.length !== 2) return 'Hora deve seguir o padrão Ex.: 08:30';
+  if (h.length !== 2 || m.length !== 2) return 'Hora deve seguir o padrÃ£o Ex.: 08:30';
   const hi = Number(h);
   const mi = Number(m);
-  if (Number.isNaN(hi) || Number.isNaN(mi)) return 'Hora deve seguir o padrão Ex.: 08:30';
+  if (Number.isNaN(hi) || Number.isNaN(mi)) return 'Hora deve seguir o padrÃ£o Ex.: 08:30';
   if (hi < 0 || hi >= 24) return 'Hora deve estar no intervalo de 0 a 23h. Ex.: 08:30';
   if (mi < 0 || mi >= 60) return 'O minuto deve estar no intervalo de 0 a 59m. Ex.: 08:30';
   return null;
@@ -84,14 +84,14 @@ export default function ViewTurnoTrabalhoFormTurnoTrabalhoListScreen() {
         setDiaSemanaOpts(res.data ?? []);
       })
       .catch(async () => {
-        // fallback: tenta via ViewService se central não responder (ex.: dev sem microservice)
+        // fallback: tenta via ViewService se central nÃ£o responder (ex.: dev sem microservice)
         try {
           const v = await api.get<any[]>('/api/view/diaSemana/listDiaSemana');
           if (alive && Array.isArray(v.data)) {
             setDiaSemanaOpts(v.data.map((r: any) => ({ id: Number(r.id), nome: String(r.nome ?? r.descricao ?? '') })));
           }
         } catch {
-          // mantém vazio — mostra mensagem no form
+          // mantÃ©m vazio â€” mostra mensagem no form
         }
       });
     return () => {
@@ -99,7 +99,7 @@ export default function ViewTurnoTrabalhoFormTurnoTrabalhoListScreen() {
     };
   }, []);
 
-  // carrega dados para edição (replica turnoTrabalhoController.setEntity + buscarTurnoTrabalhoComUnidades)
+  // carrega dados para ediÃ§Ã£o (replica turnoTrabalhoController.setEntity + buscarTurnoTrabalhoComUnidades)
   useEffect(() => {
     if (!isEdit || editingId === null) return;
     let alive = true;
@@ -122,7 +122,7 @@ export default function ViewTurnoTrabalhoFormTurnoTrabalhoListScreen() {
             try {
               const u = (await api.get<any>(`/api/view/unidade/listUnidade/${uid}`)).data;
               us.push({ id: Number(u.id), nome: String(u.sucinto ?? u.razao_social ?? `#${uid}`), dadosJson: JSON.stringify(u) } as any);
-              // também tenta enriquecer com dados completos para MasterDetail columns
+              // tambÃ©m tenta enriquecer com dados completos para MasterDetail columns
               (us[us.length - 1] as any).sucinto = u.sucinto;
               (us[us.length - 1] as any).razaoSocial = u.razao_social ?? u.razaoSocial;
               (us[us.length - 1] as any).nomeFantasia = u.nome_fantasia ?? u.nomeFantasia;
@@ -178,19 +178,19 @@ export default function ViewTurnoTrabalhoFormTurnoTrabalhoListScreen() {
 
   const validate = (): string | null => {
     const d = descricao.trim();
-    if (!d) return 'Descrição é obrigatória.';
-    if (d.length < 3) return 'Descrição deve ter no mínimo 3 caracteres.';
-    if (d.length > 255) return 'Descrição deve ter no máximo 255 caracteres.';
+    if (!d) return 'DescriÃ§Ã£o Ã© obrigatÃ³ria.';
+    if (d.length < 3) return 'DescriÃ§Ã£o deve ter no mÃ­nimo 3 caracteres.';
+    if (d.length > 255) return 'DescriÃ§Ã£o deve ter no mÃ¡ximo 255 caracteres.';
     const ini = inicio.trim();
     const f = fim.trim();
-    if (!ini) return 'Início é obrigatório (formato 99:99).';
-    if (!f) return 'Fim é obrigatório (formato 99:99).';
+    if (!ini) return 'InÃ­cio Ã© obrigatÃ³rio (formato 99:99).';
+    if (!f) return 'Fim Ã© obrigatÃ³rio (formato 99:99).';
     const e1 = validarHora(ini);
     if (e1) return e1;
     const e2 = validarHora(f);
     if (e2) return e2;
-    if (toMinutes(f) - toMinutes(ini) <= 0) return 'A hora de início deve ser inferior à hora final.';
-    if (!diaSemanaId) return 'Dia da semana é obrigatório.';
+    if (toMinutes(f) - toMinutes(ini) <= 0) return 'A hora de inÃ­cio deve ser inferior Ã  hora final.';
+    if (!diaSemanaId) return 'Dia da semana Ã© obrigatÃ³rio.';
     if (!unidades || unidades.length === 0) return 'Selecione pelo menos uma unidade';
     return null;
   };
@@ -211,7 +211,7 @@ export default function ViewTurnoTrabalhoFormTurnoTrabalhoListScreen() {
       diaSemanaId: Number(diaSemanaId),
       unidadeIds: unidades.map((u) => (u as any).id ?? (u as any).value ?? u),
     };
-    // compatibilidade ViewService: também envia aliases
+    // compatibilidade ViewService: tambÃ©m envia aliases
     (body as any).id_dia_semana = Number(diaSemanaId);
     try {
       if (isEdit && editingId !== null) {
@@ -221,8 +221,8 @@ export default function ViewTurnoTrabalhoFormTurnoTrabalhoListScreen() {
         await api.post('/api/central/turno-trabalho', body);
         setSuccess('Turno de Trabalho criado com sucesso.');
       }
-      // também tenta gravar via ViewService para manter /api/view consistente quando central está fora
-      // (ignora erro — central é fonte da verdade para unidades)
+      // tambÃ©m tenta gravar via ViewService para manter /api/view consistente quando central estÃ¡ fora
+      // (ignora erro â€” central Ã© fonte da verdade para unidades)
       if (!continuar) {
         setTimeout(() => navigate('/view/turnoTrabalho/listTurnoTrabalho'), 800);
       } else if (!isEdit) {
@@ -306,9 +306,9 @@ export default function ViewTurnoTrabalhoFormTurnoTrabalhoListScreen() {
             </label>
             <input id="inputId:id" className="form-input inputTiny" value={isEdit ? String(editingId) : ''} disabled placeholder="(novo)" style={{ width: 90, background: '#f3f4f6' }} />
 
-            {/* Descrição * */}
+            {/* DescriÃ§Ã£o * */}
             <label htmlFor="inputDescricao:descricao" className="form-label" style={{ fontWeight: 600 }}>
-              Descrição <span style={{ color: '#C90000' }}>*</span>
+              DescriÃ§Ã£o <span style={{ color: '#C90000' }}>*</span>
             </label>
             <input
               id="inputDescricao:descricao"
@@ -316,13 +316,13 @@ export default function ViewTurnoTrabalhoFormTurnoTrabalhoListScreen() {
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               maxLength={255}
-              placeholder="Ex.: Manhã, Tarde, Noite…"
+              placeholder="Ex.: ManhÃ£, Tarde, Noiteâ€¦"
               required
             />
 
-            {/* Início * mask 99:99 */}
+            {/* InÃ­cio * mask 99:99 */}
             <label htmlFor="inputInicio" className="form-label" style={{ fontWeight: 600 }}>
-              Início <span style={{ color: '#C90000' }}>*</span>
+              InÃ­cio <span style={{ color: '#C90000' }}>*</span>
             </label>
             <input
               id="inputInicio"
@@ -381,7 +381,7 @@ export default function ViewTurnoTrabalhoFormTurnoTrabalhoListScreen() {
             )}
           </div>
 
-          {/* h:panelGrid width 100% columns 1 — MestreDetalhe Unidades */}
+          {/* h:panelGrid width 100% columns 1 â€” MestreDetalhe Unidades */}
           <div style={{ marginTop: 16 }}>
             <MasterDetail
               label="Unidade"
@@ -392,11 +392,11 @@ export default function ViewTurnoTrabalhoFormTurnoTrabalhoListScreen() {
               items={unidades}
               onChange={setUnidades}
             />
-            <div style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>Selecione pelo menos uma unidade. Use o campo acima para buscar por sucinto/razão social.</div>
+            <div style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>Selecione pelo menos uma unidade. Use o campo acima para buscar por sucinto/razÃ£o social.</div>
           </div>
 
           <div style={{ marginTop: 8, fontSize: 12, color: '#6b7280' }}>
-            Campos com <span style={{ color: '#C90000' }}>*</span> são obrigatórios. Descrição 3–255 caracteres. Horários no formato 99:99 e início &lt; fim.
+            Campos com <span style={{ color: '#C90000' }}>*</span> sÃ£o obrigatÃ³rios. DescriÃ§Ã£o 3â€“255 caracteres. HorÃ¡rios no formato 99:99 e inÃ­cio &lt; fim.
           </div>
 
           {/* po:formButtons */}

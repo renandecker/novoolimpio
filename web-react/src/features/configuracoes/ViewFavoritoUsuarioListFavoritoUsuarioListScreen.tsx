@@ -1,9 +1,9 @@
-import {useState} from 'react';
+﻿import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useQuery, keepPreviousData} from '@tanstack/react-query';
-import {api} from '../api';
-import type {PagedResponse} from '../types';
-import {PermissionGate} from '../permissions';
+import {api} from '../../shared/services/api';
+import type {PagedResponse} from '../../features/auth/types';
+import {PermissionGate} from '../../shared/services/permissions';
 
 type FavoritoDisponivel = {
     id: number;
@@ -64,7 +64,7 @@ export default function ViewFavoritoUsuarioListFavoritoUsuarioListScreen() {
                             <thead>
                                 <tr>
                                     <th>Nome</th>
-                                    <th>Ícone</th>
+                                    <th>Ãcone</th>
                                     <th className="col-actions">Acessar</th>
                                 </tr>
                             </thead>
@@ -104,15 +104,15 @@ export default function ViewFavoritoUsuarioListFavoritoUsuarioListScreen() {
                                         >
                                             Anterior
                                         </button>
-                                        <span>Página {page + 1} de {totalPages}</span>
+                                        <span>PÃ¡gina {page + 1} de {totalPages}</span>
                                         <button
                                             onClick={() => setPage((current) => Math.min(totalPages - 1, current + 1))}
                                             disabled={page >= totalPages - 1 || isLoading}
                                         >
-                                            Próxima
+                                            PrÃ³xima
                                         </button>
                                         <label>
-                                            Registros por página
+                                            Registros por pÃ¡gina
                                             <select
                                                 value={size}
                                                 onChange={(event) => {

@@ -1,6 +1,6 @@
-import {FormEvent, useState} from 'react';
-import {api} from '../api';
-import {useAuth} from '../auth';
+﻿import {FormEvent, useState} from 'react';
+import {api} from '../../shared/services/api';
+import {useAuth} from './auth';
 import '../AlterarSenha.css';
 
 export default function ViewAlterarSenhaAlterarSenhaListScreen() {

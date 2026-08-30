@@ -1,6 +1,6 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import {api} from '../api';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import {api} from '../../shared/services/api';
 import {useState} from 'react';
 
 const MATRICULA_COLUMNS: DataTableColumn[] = [
@@ -16,7 +16,7 @@ const MATRICULA_COLUMNS: DataTableColumn[] = [
 const exportarDocumento = async (item: Record<string, unknown>, tipo: 'CONTRATO' | 'PROMISSORIA', formato: 'PDF' | 'DOCX' | 'EXCEL') => {
     const contratoId = item.contratoId;
     if (!contratoId) {
-        alert('ID do contrato não encontrado');
+        alert('ID do contrato nÃ£o encontrado');
         return;
     }
 
@@ -79,26 +79,26 @@ const ContratoActions: DataTableColumn = {
 
 const PromissoriaActions: DataTableColumn = {
     key: 'promissoria',
-    label: 'Promissória',
+    label: 'PromissÃ³ria',
     render: (item) => (
         <div className="row-actions-export">
             <button
                 className="btn-action btnyellow"
-                title="Gerar Promissória PDF"
+                title="Gerar PromissÃ³ria PDF"
                 onClick={() => exportarDocumento(item as Record<string, unknown>, 'PROMISSORIA', 'PDF')}
             >
                 <i className="fa fa-file-pdf-o"/> PDF
             </button>
             <button
                 className="btn-action btnyellow"
-                title="Gerar Promissória DOCX"
+                title="Gerar PromissÃ³ria DOCX"
                 onClick={() => exportarDocumento(item as Record<string, unknown>, 'PROMISSORIA', 'DOCX')}
             >
                 <i className="fa fa-file-word-o"/> DOCX
             </button>
             <button
                 className="btn-action btnyellow"
-                title="Gerar Promissória Excel"
+                title="Gerar PromissÃ³ria Excel"
                 onClick={() => exportarDocumento(item as Record<string, unknown>, 'PROMISSORIA', 'EXCEL')}
             >
                 <i className="fa fa-file-excel-o"/> Excel
@@ -110,7 +110,7 @@ const PromissoriaActions: DataTableColumn = {
 export default function ViewMatriculaMatriculaListScreen() {
     return <PermissionGate permission="READ">
         <main>
-            <h1>Matrícula</h1>
+            <h1>MatrÃ­cula</h1>
             <DataTable
                 path="/api/view/matricula/matricula"
                 columns={[...MATRICULA_COLUMNS, ContratoActions, PromissoriaActions]}

@@ -1,6 +1,6 @@
 import {Navigate, Outlet, useLocation} from 'react-router-dom';
-import {useAuth} from './auth';
-import AppLayout from './AppLayout';
+import {useAuth} from './features/auth/auth';
+import AppLayout from './shared/components/AppLayout';
 
 export default function ProtectedRoute() {
     const {session} = useAuth();

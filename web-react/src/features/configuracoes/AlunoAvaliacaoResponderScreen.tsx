@@ -1,7 +1,7 @@
-import {useEffect, useState} from 'react';
+﻿import {useEffect, useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
-import {alunoApi, AvaliacaoDetalhe, AvaliacaoRespostaEnvio} from '../aluno';
-import '../AlunoPortal.css';
+import {alunoApi, AvaliacaoDetalhe, AvaliacaoRespostaEnvio} from '../../features/aluno/aluno';
+import '../../features/aluno/alunoPortal.css';
 
 export default function AlunoAvaliacaoResponderScreen() {
     const {id} = useParams();
@@ -18,7 +18,7 @@ export default function AlunoAvaliacaoResponderScreen() {
         let active = true;
         if (!Number.isFinite(avaliacaoId) || avaliacaoId <= 0) {
             setBusy(false);
-            setError('Avaliação inválida.');
+            setError('AvaliaÃ§Ã£o invÃ¡lida.');
             return () => {
                 active = false;
             };
@@ -38,7 +38,7 @@ export default function AlunoAvaliacaoResponderScreen() {
                 setTextos(tx);
             })
             .catch((e: any) => {
-                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar a avaliação.');
+                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'NÃ£o foi possÃ­vel carregar a avaliaÃ§Ã£o.');
             })
             .finally(() => {
                 if (active) setBusy(false);
@@ -48,10 +48,10 @@ export default function AlunoAvaliacaoResponderScreen() {
         };
     }, [avaliacaoId]);
 
-    if (busy) return <main><h1>Avaliação</h1><p className="aluno-portal-msg">Carregando...</p></main>;
-    if (error && !avaliacao) return <main><h1>Avaliação</h1>
+    if (busy) return <main><h1>AvaliaÃ§Ã£o</h1><p className="aluno-portal-msg">Carregando...</p></main>;
+    if (error && !avaliacao) return <main><h1>AvaliaÃ§Ã£o</h1>
         <div className="aluno-portal-error" role="alert">{error}</div>
-        <p><Link to="/aluno/avaliacoes">Voltar para avaliações</Link></p>
+        <p><Link to="/aluno/avaliacoes">Voltar para avaliaÃ§Ãµes</Link></p>
     </main>;
     if (!avaliacao) return null;
 
@@ -68,7 +68,7 @@ export default function AlunoAvaliacaoResponderScreen() {
             await alunoApi.responderAvaliacao(avaliacaoId, respostas);
             setMsg('Respostas salvas com sucesso.');
         } catch (e: any) {
-            setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível salvar as respostas.');
+            setError(e.response?.data?.error || e.response?.data?.message || 'NÃ£o foi possÃ­vel salvar as respostas.');
         } finally {
             setSalvando(false);
         }
@@ -76,15 +76,15 @@ export default function AlunoAvaliacaoResponderScreen() {
 
     return (
         <main className="aluno-portal">
-            <h1>{avaliacao.nome || 'Avaliação'}</h1>
+            <h1>{avaliacao.nome || 'AvaliaÃ§Ã£o'}</h1>
             {avaliacao.descricao && <p className="aluno-portal-msg">{avaliacao.descricao}</p>}
-            {!avaliacao.ativa && <p className="aluno-portal-msg">Esta avaliação está fechada. Você pode consultar suas respostas.</p>}
+            {!avaliacao.ativa && <p className="aluno-portal-msg">Esta avaliaÃ§Ã£o estÃ¡ fechada. VocÃª pode consultar suas respostas.</p>}
 
             {error && <div className="aluno-portal-error" role="alert">{error}</div>}
             {msg && <div className="aluno-portal-msg" role="status">{msg}</div>}
 
             {(avaliacao.perguntas ?? []).length === 0 && (
-                <p className="aluno-portal-msg">Nenhuma pergunta cadastrada nesta avaliação.</p>
+                <p className="aluno-portal-msg">Nenhuma pergunta cadastrada nesta avaliaÃ§Ã£o.</p>
             )}
 
             <div className="aluno-portal-avaliacoes-lista">

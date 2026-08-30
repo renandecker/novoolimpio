@@ -1,5 +1,5 @@
-import {PermissionGate} from '../permissions';
-import {FormLayout, FormTabConfig} from '../FormLayout';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {FormLayout, FormTabConfig} from '../../shared/components/FormLayout';
 
 const tipoCursoTabs: FormTabConfig[] = [
     {

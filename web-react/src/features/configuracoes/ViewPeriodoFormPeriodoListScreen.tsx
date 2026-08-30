@@ -1,13 +1,13 @@
-import {useState} from 'react';
-import {PermissionGate} from '../permissions';
-import {DataTable} from '../DataTable';
-import {MasterDetail} from '../MasterDetail';
+﻿import {useState} from 'react';
+import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable} from '../../shared/components/DataTable';
+import {MasterDetail} from '../../shared/components/MasterDetail';
 import {
     UNIDADE_SOURCE,
     UNIDADE_COLUMNS,
     UNIDADE_SEARCH,
-} from '../masterDetailSources';
-import type {ApiItem} from '../types';
+} from '../../shared/services/masterDetailSources';
+import type {ApiItem} from '../../features/auth/types';
 
 export default function ViewPeriodoFormPeriodoListScreen() {
     const [unidades, setUnidades] = useState<ApiItem[]>([]);
@@ -17,7 +17,7 @@ export default function ViewPeriodoFormPeriodoListScreen() {
             <main>
                 <h1>Form Periodo</h1>
                 <div className="div_form">
-                    <div className="form-title">Período</div>
+                    <div className="form-title">PerÃ­odo</div>
                     <div className="table_form">
                         <MasterDetail
                             label="Unidade"

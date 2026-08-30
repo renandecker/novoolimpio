@@ -1,7 +1,7 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import {Wizard, useWizardData} from '../Wizard';
-import {useApi} from '../api';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import {Wizard, useWizardData} from '../../shared/components/Wizard';
+import {useApi} from '../../shared/services/api';
 
 const MATRICULA_COLUMNS: DataTableColumn[] = [
     {key: 'contratoId', label: 'Contrato'},
@@ -9,13 +9,13 @@ const MATRICULA_COLUMNS: DataTableColumn[] = [
     {key: 'formaPagamentoId', label: 'Forma de Pagamento'},
     {key: 'status', label: 'Status'},
     {key: 'data', label: 'Data'},
-    {key: 'mediaFinal', label: 'Média Final'},
-    {key: 'percentualPresenca', label: '% Presença'},
+    {key: 'mediaFinal', label: 'MÃ©dia Final'},
+    {key: 'percentualPresenca', label: '% PresenÃ§a'},
 ];
 
 const MATERIAL_COLUMNS: DataTableColumn[] = [
     {key: 'controleEstoqueId', label: 'Controle Estoque'},
-    {key: 'matriculaId', label: 'Matrícula'},
+    {key: 'matriculaId', label: 'MatrÃ­cula'},
     {key: 'quantidadeCurso', label: 'Qtd. Curso'},
     {key: 'quantidadeCompra', label: 'Qtd. Compra'},
 ];
@@ -26,7 +26,7 @@ const VALORES_COLUMNS: DataTableColumn[] = [
     {key: 'juros', label: 'Juros'},
     {key: 'multa', label: 'Multa'},
     {key: 'descontoCarne', label: 'Desconto Carne'},
-    {key: 'cobraRematricula', label: 'Cobra Rematrícula'},
+    {key: 'cobraRematricula', label: 'Cobra RematrÃ­cula'},
     {key: 'data', label: 'Data'},
 ];
 
@@ -86,10 +86,10 @@ export default function ViewMatriculaFormMatriculaListScreen() {
                 materialEscolar: formData.materialEscolar,
                 valores: formData.valores,
             });
-            alert('Matrícula realizada com sucesso!');
+            alert('MatrÃ­cula realizada com sucesso!');
         } catch (error) {
             console.error('Erro ao salvar:', error);
-            alert('Erro ao realizar matrícula');
+            alert('Erro ao realizar matrÃ­cula');
         }
     };
 
@@ -98,7 +98,7 @@ export default function ViewMatriculaFormMatriculaListScreen() {
             <main>
                 <h1>Form Matricula</h1>
                 <div className="div_form">
-                    <div className="form-title">Matrícula</div>
+                    <div className="form-title">MatrÃ­cula</div>
                     <div className="table_form">
                         <Wizard
                             initialData={data}
@@ -106,7 +106,7 @@ export default function ViewMatriculaFormMatriculaListScreen() {
                             steps={[
                                 {
                                     key: 'tabMatricula',
-                                    label: 'Matrícula',
+                                    label: 'MatrÃ­cula',
                                     content: (
                                         <div>
                                             <DataTable path="/api/educacao/matricula" columns={MATRICULA_COLUMNS}/>

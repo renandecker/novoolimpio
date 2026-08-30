@@ -1,5 +1,5 @@
-import {PermissionGate} from '../permissions';
-import {ModuleTabs} from '../ModuleTabs';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {ModuleTabs} from '../../shared/components/ModuleTabs';
 import {
     AGENDA_SOURCE,
     AGENDA_COLUMNS,
@@ -28,7 +28,7 @@ import {
     USUARIO_SOURCE,
     USUARIO_COLUMNS,
     USUARIO_SEARCH
-} from '../masterDetailSources';
+} from '../../shared/services/masterDetailSources';
 
 export default function ViewComunicacaoFormComunicacaoMensagemListScreen() {
     return (

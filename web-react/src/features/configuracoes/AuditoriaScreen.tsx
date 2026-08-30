@@ -1,8 +1,8 @@
-import {useState} from 'react';
+﻿import {useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {PermissionGate} from '../permissions';
-import {Tabs} from '../Tabs';
-import {auditoriaApi, type AuditoriaItem} from '../auditoria';
+import {PermissionGate} from '../../shared/services/permissions';
+import {Tabs} from '../../shared/components/Tabs';
+import {auditoriaApi, type AuditoriaItem} from '../../features/auditoria/Auditoria';
 
 const PAGE_SIZES = [10, 20, 50, 100];
 
@@ -22,7 +22,7 @@ const formatData = (data: number | string | null | undefined): string => {
 
 const formatValor = (valor: unknown): string => {
     if (valor === null || valor === undefined) return '-';
-    if (typeof valor === 'boolean') return valor ? 'Sim' : 'Não';
+    if (typeof valor === 'boolean') return valor ? 'Sim' : 'NÃ£o';
     return String(valor);
 };
 
@@ -55,8 +55,8 @@ function AuditTable({entidade, titulo}: { entidade: string; titulo: string }) {
                         <th className="col-id">Id</th>
                         <th>Rev</th>
                         <th>Data</th>
-                        <th>Usuário</th>
-                        <th>Ação</th>
+                        <th>UsuÃ¡rio</th>
+                        <th>AÃ§Ã£o</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -81,7 +81,7 @@ function AuditTable({entidade, titulo}: { entidade: string; titulo: string }) {
                                             title={isOpen ? 'Recolher' : 'Expandir'}
                                             onClick={() => toggle(item)}
                                         >
-                                            {isOpen ? '▾' : '▸'}
+                                            {isOpen ? 'â–¾' : 'â–¸'}
                                         </button>
                                     </td>
                                     <td className="col-id">{item.id}</td>
@@ -125,16 +125,16 @@ function AuditTable({entidade, titulo}: { entidade: string; titulo: string }) {
                                 Anterior
                             </button>
                             <span>
-                  Página {page + 1} de {totalPages}
+                  PÃ¡gina {page + 1} de {totalPages}
                 </span>
                             <button
                                 onClick={() => setPage((current) => Math.min(totalPages - 1, current + 1))}
                                 disabled={page >= totalPages - 1 || query.isFetching}
                             >
-                                Próxima
+                                PrÃ³xima
                             </button>
                             <label>
-                                Registros por página
+                                Registros por pÃ¡gina
                                 <select
                                     value={size}
                                     onChange={(event) => {
@@ -168,8 +168,8 @@ export default function AuditoriaScreen() {
                     tabs={[
                         {
                             key: 'matricula',
-                            label: 'Matrícula',
-                            content: <AuditTable entidade="matricula" titulo="Matrícula"/>
+                            label: 'MatrÃ­cula',
+                            content: <AuditTable entidade="matricula" titulo="MatrÃ­cula"/>
                         },
                         {
                             key: 'oferecimento',

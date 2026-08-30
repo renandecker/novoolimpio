@@ -1,9 +1,9 @@
-import {PermissionGate} from '../permissions';
-import {DataTable, type DataTableColumn} from '../DataTable';
+﻿import {PermissionGate} from '../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
 
 const COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID da Escolaridade'},
-    {key: 'descricao', label: 'Descrição'},
+    {key: 'descricao', label: 'DescriÃ§Ã£o'},
     {key: 'ordem', label: 'Ordem'},
 ];
 

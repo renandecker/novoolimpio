@@ -1,10 +1,10 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+﻿import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {PermissionGate} from '../permissions';
-import {BooleanField} from '../BooleanField';
-import {MasterDetail} from '../MasterDetail';
-import {useWizardData} from '../Wizard';
-import {Tabs, type TabItem} from '../Tabs';
+import {PermissionGate} from '../../shared/services/permissions';
+import {BooleanField} from '../../shared/components/BooleanField';
+import {MasterDetail} from '../../shared/components/MasterDetail';
+import {useWizardData} from '../../shared/components/Wizard';
+import {Tabs, type TabItem} from '../../shared/components/Tabs';
 import {
     UNIDADE_SOURCE,
     UNIDADE_COLUMNS,
@@ -15,9 +15,9 @@ import {
     ATIVIDADE_COMPLEMENTAR_SOURCE,
     ATIVIDADE_COMPLEMENTAR_COLUMNS,
     ATIVIDADE_COMPLEMENTAR_SEARCH,
-} from '../masterDetailSources';
-import type {ApiItem} from '../types';
-import {api, useApi} from '../api';
+} from '../../shared/services/masterDetailSources';
+import type {ApiItem} from '../../features/auth/types';
+import {api, useApi} from '../../shared/services/api';
 
 interface MaterialEscolarItem {
     key: string;
@@ -103,7 +103,7 @@ const semId = (obj: Record<string, unknown> | null): Record<string, unknown> => 
 };
 
 const TIPOS_CURSO = [
-    {id: 1, descricao: 'Técnico'},
+    {id: 1, descricao: 'TÃ©cnico'},
     {id: 2, descricao: 'Superior'},
     {id: 3, descricao: 'Livre'},
     {id: 4, descricao: 'Profissionalizante'},
@@ -111,19 +111,19 @@ const TIPOS_CURSO = [
 
 const GRAUS = [
     {id: 1, descricao: 'Fundamental'},
-    {id: 2, descricao: 'Médio'},
-    {id: 3, descricao: 'Superior de Graduação'},
-    {id: 4, descricao: 'Pós-Graduação'},
+    {id: 2, descricao: 'MÃ©dio'},
+    {id: 3, descricao: 'Superior de GraduaÃ§Ã£o'},
+    {id: 4, descricao: 'PÃ³s-GraduaÃ§Ã£o'},
 ];
 
 const ESCOLARIDADES = [
     {id: 1, descricao: 'Ensino Fundamental Incompleto'},
     {id: 2, descricao: 'Ensino Fundamental Completo'},
-    {id: 3, descricao: 'Ensino Médio Incompleto'},
-    {id: 4, descricao: 'Ensino Médio Completo'},
+    {id: 3, descricao: 'Ensino MÃ©dio Incompleto'},
+    {id: 4, descricao: 'Ensino MÃ©dio Completo'},
     {id: 5, descricao: 'Superior Incompleto'},
     {id: 6, descricao: 'Superior Completo'},
-    {id: 7, descricao: 'Pós-Graduação'},
+    {id: 7, descricao: 'PÃ³s-GraduaÃ§Ã£o'},
 ];
 
 export default function ViewCurriculoFormCurriculoListScreen() {
@@ -139,7 +139,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
     const [novoMaterialObrigatorio, setNovoMaterialObrigatorio] = useState(true);
     const [novoRequisitoDescricao, setNovoRequisitoDescricao] = useState('');
     const [novoRequisitoComponenteId, setNovoRequisitoComponenteId] = useState<number | ''>('');
-    const [novoRequisitoTipo, setNovoRequisitoTipo] = useState('PRÉ-REQUISITO');
+    const [novoRequisitoTipo, setNovoRequisitoTipo] = useState('PRÃ‰-REQUISITO');
     const [novoRequisitoCarga, setNovoRequisitoCarga] = useState<number | ''>('');
     const [novoRequisitoMedia, setNovoRequisitoMedia] = useState<number | ''>('');
     const [salvando, setSalvando] = useState(false);
@@ -215,14 +215,14 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                 id: r.id,
                                 descricao: r.nome ?? r.descricao,
                                 componenteCurricularId: r.componenteCurricularId ?? r.componente_curricular_id,
-                                tipoRequisito: r.tipoRequisito ?? r.tipo_requisito ?? 'PRÉ-REQUISITO',
+                                tipoRequisito: r.tipoRequisito ?? r.tipo_requisito ?? 'PRÃ‰-REQUISITO',
                                 cargaHorariaMinima: r.cargaHorariaMinima ?? r.carga_horaria_minima,
                                 mediaMinima: r.mediaMinima ?? r.media_minima,
                             })));
                         } catch { setRequisitos([]); }
                     } catch (erro) {
-                        console.error('Erro ao carregar currículo:', erro);
-                        alert('Não foi possível carregar o currículo para edição');
+                        console.error('Erro ao carregar currÃ­culo:', erro);
+                        alert('NÃ£o foi possÃ­vel carregar o currÃ­culo para ediÃ§Ã£o');
                     }
                 }
             } finally {
@@ -233,31 +233,31 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
     const validateStep1 = useCallback(async (currentData: CurriculoData) => {
         if (!currentData.entity.descricao || currentData.entity.descricao.trim().length < 3) {
-            return 'Descrição deve ter pelo menos 3 caracteres';
+            return 'DescriÃ§Ã£o deve ter pelo menos 3 caracteres';
         }
         if (!currentData.entity.sucinto || currentData.entity.sucinto.trim().length < 1) {
-            return 'Informe o sucinto do currículo';
+            return 'Informe o sucinto do currÃ­culo';
         }
         if (currentData.entity.idadeMaxima && currentData.entity.idadeMinima &&
             currentData.entity.idadeMaxima < currentData.entity.idadeMinima) {
-            return 'A idade mínima não pode ser maior que a idade máxima';
+            return 'A idade mÃ­nima nÃ£o pode ser maior que a idade mÃ¡xima';
         }
         if (currentData.entity.qtdMaximaAlunos !== undefined && currentData.entity.qtdMaximaAlunos < 0) {
-            return 'A quantidade máxima de alunos não pode ser negativa';
+            return 'A quantidade mÃ¡xima de alunos nÃ£o pode ser negativa';
         }
         return true;
     }, []);
 
     const validateStep3 = useCallback(async (currentData: CurriculoData) => {
         if (!currentData.matrizCurricular || currentData.matrizCurricular.length === 0) {
-            return 'Adicione pelo menos um componente curricular à matriz';
+            return 'Adicione pelo menos um componente curricular Ã  matriz';
         }
         return true;
     }, []);
 
     const validateStep5 = useCallback(async (currentData: CurriculoData) => {
         if (!currentData.unidades || currentData.unidades.length === 0) {
-            return 'Selecione pelo menos uma unidade para o currículo';
+            return 'Selecione pelo menos uma unidade para o currÃ­culo';
         }
         return true;
     }, []);
@@ -286,7 +286,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
     }, []);
 
     const adicionarRequisito = useCallback(() => {
-        if (!novoRequisitoDescricao.trim()) { alert('Informe a descrição do requisito'); return; }
+        if (!novoRequisitoDescricao.trim()) { alert('Informe a descriÃ§Ã£o do requisito'); return; }
         setRequisitos((prev) => [
             ...prev,
             {
@@ -300,7 +300,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
         ]);
         setNovoRequisitoDescricao('');
         setNovoRequisitoComponenteId('');
-        setNovoRequisitoTipo('PRÉ-REQUISITO');
+        setNovoRequisitoTipo('PRÃ‰-REQUISITO');
         setNovoRequisitoCarga('');
         setNovoRequisitoMedia('');
     }, [novoRequisitoDescricao, novoRequisitoComponenteId, novoRequisitoTipo, novoRequisitoCarga, novoRequisitoMedia]);
@@ -321,7 +321,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                 ? await curriculoApi.put(idEdicao, payload)
                 : await curriculoApi.post(payload);
             const id = (salvo as any)?.id ?? idEdicao;
-            if (!id) { alert('Currículo salvo, mas o identificador não foi retornado.'); return; }
+            if (!id) { alert('CurrÃ­culo salvo, mas o identificador nÃ£o foi retornado.'); return; }
 
             try {
                 const {data: atuaisMatriz} = await api.get<any[]>('/api/educacao/matriz-curricular', {params: {curriculoId: id}});
@@ -400,11 +400,11 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                 }
             } catch (e) { console.warn('Falha ao salvar requisitos:', e); }
 
-            alert('Currículo salvo com sucesso!');
+            alert('CurrÃ­culo salvo com sucesso!');
             navigate('/view/curriculo/listCurriculo');
         } catch (error) {
             console.error('Erro ao salvar:', error);
-            alert('Erro ao salvar currículo');
+            alert('Erro ao salvar currÃ­culo');
         } finally {
             setSalvando(false);
         }
@@ -423,7 +423,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                         <input className="form-input" value={data.entity.id ?? ''} disabled/>
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Descrição *</span>
+                        <span className="form-label">DescriÃ§Ã£o *</span>
                         <input className="form-input" value={data.entity.descricao ?? ''}
                                onChange={(e) => updateField('entity', {...data.entity, descricao: e.target.value})}/>
                     </label>
@@ -482,7 +482,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                         </select>
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Carga Horária</span>
+                        <span className="form-label">Carga HorÃ¡ria</span>
                         <input className="form-input" type="number" min={0}
                                value={data.entity.qtdeIniciando === undefined ? '' : data.entity.qtdeIniciando}
                                onChange={(e) => updateField('entity', {
@@ -491,7 +491,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                })}/>
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Qtd. Máxima Alunos</span>
+                        <span className="form-label">Qtd. MÃ¡xima Alunos</span>
                         <input className="form-input" type="number" min={0}
                                value={data.entity.qtdMaximaAlunos ?? ''}
                                onChange={(e) => updateField('entity', {
@@ -500,7 +500,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                })}/>
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Idade Mínima</span>
+                        <span className="form-label">Idade MÃ­nima</span>
                         <input className="form-input" type="number" min={0}
                                value={data.entity.idadeMinima ?? ''}
                                onChange={(e) => updateField('entity', {
@@ -509,7 +509,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                })}/>
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Idade Máxima</span>
+                        <span className="form-label">Idade MÃ¡xima</span>
                         <input className="form-input" type="number" min={0}
                                value={data.entity.idadeMaxima ?? ''}
                                onChange={(e) => updateField('entity', {
@@ -524,7 +524,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                onChange={(e) => updateField('entity', {...data.entity, dataCancelamento: e.target.value})}/>
                     </label>
                     <div className="form-field">
-                        <span className="form-label">Possui Rematrícula</span>
+                        <span className="form-label">Possui RematrÃ­cula</span>
                         <BooleanField value={!!data.entity.possuiRematricula}
                                       onChange={(v) => updateField('entity', {...data.entity, possuiRematricula: v})}/>
                     </div>
@@ -533,16 +533,16 @@ export default function ViewCurriculoFormCurriculoListScreen() {
         },
         {
             key: 'licenca',
-            label: 'Licença',
+            label: 'LicenÃ§a',
             content: (
                 <div className="form-grid">
                     <label className="form-field">
-                        <span className="form-label">Número do Parecer</span>
+                        <span className="form-label">NÃºmero do Parecer</span>
                         <input className="form-input" value={data.entity.numeroParecer ?? ''}
                                onChange={(e) => updateField('entity', {...data.entity, numeroParecer: e.target.value})}/>
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Licença</span>
+                        <span className="form-label">LicenÃ§a</span>
                         <input className="form-input" value={data.entity.licenca ?? ''}
                                onChange={(e) => updateField('entity', {...data.entity, licenca: e.target.value})}/>
                     </label>
@@ -552,13 +552,13 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                onChange={(e) => updateField('entity', {...data.entity, reconhecimento: e.target.value})}/>
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Descrição Diploma</span>
+                        <span className="form-label">DescriÃ§Ã£o Diploma</span>
                         <input className="form-input" style={{gridColumn: 'span 3'}}
                                value={data.entity.descricaoDiploma ?? ''}
                                onChange={(e) => updateField('entity', {...data.entity, descricaoDiploma: e.target.value})}/>
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Escolaridade Mínima</span>
+                        <span className="form-label">Escolaridade MÃ­nima</span>
                         <select className="form-input form-select"
                                 value={data.entity.escolaridadeId ?? ''}
                                 onChange={(e) => updateField('entity', {
@@ -618,7 +618,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                     </label>
                                 )}
                                 <div className="form-field">
-                                    <span className="form-label">Habilitar Aula Complementar na Criação</span>
+                                    <span className="form-label">Habilitar Aula Complementar na CriaÃ§Ã£o</span>
                                     <BooleanField value={!!data.entity.aulaComplementarCriacao}
                                                   onChange={(v) => updateField('entity', {
                                                       ...data.entity,
@@ -644,7 +644,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                                            ...data.entity,
                                                            ordemAulaComplemnetar: 0,
                                                        })}/>
-                                                Existente / Criação
+                                                Existente / CriaÃ§Ã£o
                                             </label>
                                             <label style={{display: 'flex', gap: '4px', alignItems: 'center'}}>
                                                 <input type="radio" name="ordemAulaComplemnetar"
@@ -653,7 +653,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                                            ...data.entity,
                                                            ordemAulaComplemnetar: 1,
                                                        })}/>
-                                                Criação / Existente
+                                                CriaÃ§Ã£o / Existente
                                             </label>
                                         </div>
                                     </div>
@@ -708,7 +708,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                     <legend>Requisitos da Matriz</legend>
                     <div className="form-grid">
                         <label className="form-field" style={{gridColumn: 'span 2'}}>
-                            <span className="form-label">Descrição *</span>
+                            <span className="form-label">DescriÃ§Ã£o *</span>
                             <input className="form-input" value={novoRequisitoDescricao}
                                    onChange={(e) => setNovoRequisitoDescricao(e.target.value)}/>
                         </label>
@@ -716,7 +716,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                             <span className="form-label">Tipo</span>
                             <select className="form-input form-select" value={novoRequisitoTipo}
                                     onChange={(e) => setNovoRequisitoTipo(e.target.value)}>
-                                <option value="PRÉ-REQUISITO">Pré-Requisito</option>
+                                <option value="PRÃ‰-REQUISITO">PrÃ©-Requisito</option>
                                 <option value="CO-REQUISITO">Co-Requisito</option>
                                 <option value="EQUIVALENTE">Equivalente</option>
                             </select>
@@ -737,7 +737,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                             </select>
                         </label>
                         <label className="form-field">
-                            <span className="form-label">Carga Horária Mínima</span>
+                            <span className="form-label">Carga HorÃ¡ria MÃ­nima</span>
                             <input className="form-input" type="number" min={0}
                                    value={novoRequisitoCarga}
                                    onChange={(e) => setNovoRequisitoCarga(
@@ -745,7 +745,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                    )}/>
                         </label>
                         <label className="form-field">
-                            <span className="form-label">Média Mínima</span>
+                            <span className="form-label">MÃ©dia MÃ­nima</span>
                             <input className="form-input" type="number" min={0} step={0.1}
                                    value={novoRequisitoMedia}
                                    onChange={(e) => setNovoRequisitoMedia(
@@ -762,11 +762,11 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                         <table className="data-table" style={{marginTop: 14, width: '100%'}}>
                             <thead>
                             <tr>
-                                <th>Descrição</th>
+                                <th>DescriÃ§Ã£o</th>
                                 <th>Tipo</th>
                                 <th>Componente</th>
-                                <th>C.H. Mín.</th>
-                                <th>Média Mín.</th>
+                                <th>C.H. MÃ­n.</th>
+                                <th>MÃ©dia MÃ­n.</th>
                                 <th style={{width: 50}}></th>
                             </tr>
                             </thead>
@@ -782,7 +782,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                         <td>{r.mediaMinima ?? '-'}</td>
                                         <td>
                                             <button type="button" className="btn-action btnred" title="Remover"
-                                                    onClick={() => removerRequisito(r.key)}>✕
+                                                    onClick={() => removerRequisito(r.key)}>âœ•
                                             </button>
                                         </td>
                                     </tr>
@@ -838,7 +838,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                    )}/>
                         </label>
                         <label className="form-field">
-                            <span className="form-label">Valor Unitário</span>
+                            <span className="form-label">Valor UnitÃ¡rio</span>
                             <input className="form-input" type="number" min={0} step={0.01}
                                    value={novoMaterialValor}
                                    onChange={(e) => setNovoMaterialValor(
@@ -846,7 +846,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                    )}/>
                         </label>
                         <div className="form-field">
-                            <span className="form-label">Obrigatório</span>
+                            <span className="form-label">ObrigatÃ³rio</span>
                             <BooleanField value={novoMaterialObrigatorio} onChange={setNovoMaterialObrigatorio}/>
                         </div>
                     </div>
@@ -861,8 +861,8 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                             <tr>
                                 <th>Material</th>
                                 <th>Quantidade</th>
-                                <th>Valor Unitário</th>
-                                <th>Obrigatório</th>
+                                <th>Valor UnitÃ¡rio</th>
+                                <th>ObrigatÃ³rio</th>
                                 <th style={{width: 50}}></th>
                             </tr>
                             </thead>
@@ -872,10 +872,10 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                     <td>{m.produtoDescricao ?? '-'}</td>
                                     <td>{m.quantidade ?? '-'}</td>
                                     <td>{m.valorUnitario !== undefined ? m.valorUnitario.toFixed(2) : '-'}</td>
-                                    <td>{m.obrigatorio ? 'Sim' : 'Não'}</td>
+                                    <td>{m.obrigatorio ? 'Sim' : 'NÃ£o'}</td>
                                     <td>
                                         <button type="button" className="btn-action btnred" title="Remover"
-                                                onClick={() => removerMaterial(m.key)}>✕
+                                                onClick={() => removerMaterial(m.key)}>âœ•
                                         </button>
                                     </td>
                                 </tr>
@@ -905,7 +905,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                    })}/>
                         </label>
                         <label className="form-field">
-                            <span className="form-label">Tipo Modelo Promissória</span>
+                            <span className="form-label">Tipo Modelo PromissÃ³ria</span>
                             <input className="form-input" type="number" min={0}
                                    value={data.entity.tipoModeloPromissoria ?? ''}
                                    onChange={(e) => updateField('entity', {
@@ -953,7 +953,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                       onChange={(e) => updateField('entity', {...data.entity, templateBoletim: e.target.value})}/>
                         </label>
                         <label className="form-field" style={{gridColumn: 'span 4'}}>
-                            <span className="form-label">Template Promissória</span>
+                            <span className="form-label">Template PromissÃ³ria</span>
                             <textarea className="form-input" rows={4}
                                       style={{minHeight: 80}}
                                       value={data.entity.templatePromissoria ?? ''}
@@ -969,7 +969,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
         return (
             <PermissionGate permission="READ">
                 <main>
-                    <h1>Currículo do Curso</h1>
+                    <h1>CurrÃ­culo do Curso</h1>
                     <div className="div_form">
                         <p className="master-detail-empty">Carregando...</p>
                     </div>
@@ -981,10 +981,10 @@ export default function ViewCurriculoFormCurriculoListScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>{idEdicao ? `Editar Currículo #${idEdicao}` : 'Currículo do Curso'}</h1>
+                <h1>{idEdicao ? `Editar CurrÃ­culo #${idEdicao}` : 'CurrÃ­culo do Curso'}</h1>
                 <div className="div_form">
                     <div className="form-title">
-                        {idEdicao ? `Currículo #${idEdicao}` : 'Novo Currículo'}
+                        {idEdicao ? `CurrÃ­culo #${idEdicao}` : 'Novo CurrÃ­culo'}
                     </div>
                     <div className="table_form">
                         <Tabs tabs={tabs} initial="curso"/>

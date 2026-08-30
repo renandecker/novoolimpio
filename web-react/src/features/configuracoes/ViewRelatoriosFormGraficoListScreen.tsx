@@ -1,10 +1,10 @@
-import {useState, useEffect} from 'react';
-import {PermissionGate} from '../permissions';
-import {MasterDetail} from '../MasterDetail';
-import {Tabs} from '../Tabs';
-import {Wizard, useWizardData} from '../Wizard';
-import {DataTable, type DataTableColumn} from '../DataTable';
-import {AutoComplete} from '../AutoComplete';
+﻿import {useState, useEffect} from 'react';
+import {PermissionGate} from '../../shared/services/permissions';
+import {MasterDetail} from '../../shared/components/MasterDetail';
+import {Tabs} from '../../shared/components/Tabs';
+import {Wizard, useWizardData} from '../../shared/components/Wizard';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import {AutoComplete} from '../../shared/components/AutoComplete';
 import {
     PERFIL_SOURCE,
     PERFIL_COLUMNS,
@@ -27,10 +27,10 @@ import {
     FILTRO_SOURCE,
     FILTRO_COLUMNS,
     FILTRO_SEARCH,
-} from '../masterDetailSources';
-import type {ApiItem} from '../types';
-import {useApi} from '../api';
-import {FormLayout, FormTabConfig} from '../FormLayout';
+} from '../../shared/services/masterDetailSources';
+import type {ApiItem} from '../../features/auth/types';
+import {useApi} from '../../shared/services/api';
+import {FormLayout, FormTabConfig} from '../../shared/components/FormLayout';
 
 const TIPO_GRAFICO_OPTIONS = [
     {value: 'BARRA_VERTICAL', label: 'Barra Vertical'},
@@ -56,13 +56,13 @@ const POSICAO_LEGENDA_OPTIONS = [
 
 const FORMATO_DATA_OPTIONS = [
     {value: 'DATA', label: 'Data'},
-    {value: 'DIARIO', label: 'Diário'},
+    {value: 'DIARIO', label: 'DiÃ¡rio'},
     {value: 'SEMANAL', label: 'Semanal'},
     {value: 'MENSAL', label: 'Mensal'},
     {value: 'TRIMESTRAL', label: 'Trimestral'},
     {value: 'SEMESTRAL', label: 'Semestral'},
     {value: 'ANUAL', label: 'Anual'},
-    {value: 'DIARIO/ANUAL', label: 'Diário / Anual'},
+    {value: 'DIARIO/ANUAL', label: 'DiÃ¡rio / Anual'},
     {value: 'SEMANAL/ANUAL', label: 'Semanal / Anual'},
     {value: 'MENSAL/ANUAL', label: 'Mensal / Anual'},
     {value: 'TRIMESTRAL/ANUAL', label: 'Trimestral / Anual'},
@@ -70,9 +70,9 @@ const FORMATO_DATA_OPTIONS = [
 ];
 
 const GRAFICO_EIXO_COLUMNS: DataTableColumn[] = [
-    {key: 'dimensaoNome', label: 'Dimensão Informação', width: '30%'},
-    {key: 'dimensaoTipo', label: 'Dimensão Tipo', width: '20%'},
-    {key: 'medidaNome', label: 'Medida Informação', width: '30%'},
+    {key: 'dimensaoNome', label: 'DimensÃ£o InformaÃ§Ã£o', width: '30%'},
+    {key: 'dimensaoTipo', label: 'DimensÃ£o Tipo', width: '20%'},
+    {key: 'medidaNome', label: 'Medida InformaÃ§Ã£o', width: '30%'},
     {key: 'medidaTipo', label: 'Medida Tipo', width: '20%'},
 ];
 
@@ -211,10 +211,10 @@ export default function ViewRelatoriosFormGraficoListScreen() {
                 graficoEixos: formData.graficoEixos,
                 filtros: formData.filtros,
             });
-            alert('Gráfico salvo com sucesso!');
+            alert('GrÃ¡fico salvo com sucesso!');
         } catch (error) {
-            console.error('Erro ao salvar gráfico:', error);
-            alert('Erro ao salvar gráfico');
+            console.error('Erro ao salvar grÃ¡fico:', error);
+            alert('Erro ao salvar grÃ¡fico');
         }
     };
 
@@ -224,7 +224,7 @@ export default function ViewRelatoriosFormGraficoListScreen() {
 
     const addFiltro = async () => {
         if (!filtroNome.trim() || !filtroDimensao) {
-            alert('Informe nome e dimensão para o filtro');
+            alert('Informe nome e dimensÃ£o para o filtro');
             return;
         }
         try {
@@ -269,7 +269,7 @@ export default function ViewRelatoriosFormGraficoListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <div className="div_form">
-                    <div className="form-title">Cadastro / Edição de Relatório de Gráfico</div>
+                    <div className="form-title">Cadastro / EdiÃ§Ã£o de RelatÃ³rio de GrÃ¡fico</div>
                     <div className="table_form">
                         <Wizard
                             initialData={data}
@@ -277,14 +277,14 @@ export default function ViewRelatoriosFormGraficoListScreen() {
                             steps={[
                                 {
                                     key: 'definicao',
-                                    label: 'Definição',
+                                    label: 'DefiniÃ§Ã£o',
                                     content: (
                                         <div>
                                             <div style={{display: 'flex', gap: '20px', flexWrap: 'wrap'}}>
                                                 {/* Left column */}
                                                 <div style={{flex: 1, minWidth: '400px'}}>
                                                     <FormLayout
-                                                        title="Configuração Principal"
+                                                        title="ConfiguraÃ§Ã£o Principal"
                                                         tabs={[
                                                             {
                                                                 key: 'principal',
@@ -292,9 +292,9 @@ export default function ViewRelatoriosFormGraficoListScreen() {
                                                                 fields: [
                                                                     {name: 'nome', label: 'Nome', required: true, span: 3},
                                                                     {name: 'estruturaId', label: 'Estrutura', type: 'autoComplete', autoCompleteSource: ESTRUTURA_SOURCE, autoCompleteSearchKeys: ESTRUTURA_SEARCH, autoCompleteColumns: ESTRUTURA_COLUMNS, span: 3},
-                                                                    {name: 'tipo', label: 'Tipo Gráfico', type: 'select', options: TIPO_GRAFICO_OPTIONS, required: true, onChange: handleTipoGraficoChange},
-                                                                    {name: 'ordemGrafico', label: 'Ordenação', type: 'select', options: TIPO_ORDEM_OPTIONS},
-                                                                    {name: 'limite', label: 'Limite Gráfico', type: 'number', min: 1, max: 50, help: 'Limite máximo de 50 registros para exibir no gráfico'},
+                                                                    {name: 'tipo', label: 'Tipo GrÃ¡fico', type: 'select', options: TIPO_GRAFICO_OPTIONS, required: true, onChange: handleTipoGraficoChange},
+                                                                    {name: 'ordemGrafico', label: 'OrdenaÃ§Ã£o', type: 'select', options: TIPO_ORDEM_OPTIONS},
+                                                                    {name: 'limite', label: 'Limite GrÃ¡fico', type: 'number', min: 1, max: 50, help: 'Limite mÃ¡ximo de 50 registros para exibir no grÃ¡fico'},
                                                                     {name: 'tipoEixo', label: 'Tipo Eixo', type: 'select', options: [
                                                                         {value: '0', label: 'Simples'},
                                                                         {value: '1', label: 'Multi Eixo'},
@@ -305,20 +305,20 @@ export default function ViewRelatoriosFormGraficoListScreen() {
                                                                 key: 'eixoSimples',
                                                                 label: 'Eixo Simples',
                                                                 fields: [
-                                                                    {name: 'dimensaoReferenciaId', label: 'Dimensão Referência', type: 'autoComplete', autoCompleteSource: DIMENSAO_SOURCE, autoCompleteSearchKeys: DIMENSAO_SEARCH, autoCompleteColumns: DIMENSAO_COLUMNS, filterParams: {estruturaId: data.entity.estruturaId}},
-                                                                    {name: 'medidaInformacaoId', label: 'Medida Informação', type: 'autoComplete', autoCompleteSource: MEDIDA_SOURCE, autoCompleteSearchKeys: MEDIDA_SEARCH, autoCompleteColumns: MEDIDA_COLUMNS, filterParams: {estruturaId: data.entity.estruturaId}},
-                                                                    {name: 'dimensaoCombinadoId', label: 'Dimensão Combinado', type: 'autoComplete', autoCompleteSource: DIMENSAO_SOURCE, autoCompleteSearchKeys: DIMENSAO_SEARCH, autoCompleteColumns: DIMENSAO_COLUMNS, filterParams: {estruturaId: data.entity.estruturaId}, conditional: isCombinado},
+                                                                    {name: 'dimensaoReferenciaId', label: 'DimensÃ£o ReferÃªncia', type: 'autoComplete', autoCompleteSource: DIMENSAO_SOURCE, autoCompleteSearchKeys: DIMENSAO_SEARCH, autoCompleteColumns: DIMENSAO_COLUMNS, filterParams: {estruturaId: data.entity.estruturaId}},
+                                                                    {name: 'medidaInformacaoId', label: 'Medida InformaÃ§Ã£o', type: 'autoComplete', autoCompleteSource: MEDIDA_SOURCE, autoCompleteSearchKeys: MEDIDA_SEARCH, autoCompleteColumns: MEDIDA_COLUMNS, filterParams: {estruturaId: data.entity.estruturaId}},
+                                                                    {name: 'dimensaoCombinadoId', label: 'DimensÃ£o Combinado', type: 'autoComplete', autoCompleteSource: DIMENSAO_SOURCE, autoCompleteSearchKeys: DIMENSAO_SEARCH, autoCompleteColumns: DIMENSAO_COLUMNS, filterParams: {estruturaId: data.entity.estruturaId}, conditional: isCombinado},
                                                                     {name: 'medidaCombinadoId', label: 'Medida Combinado', type: 'autoComplete', autoCompleteSource: MEDIDA_SOURCE, autoCompleteSearchKeys: MEDIDA_SEARCH, autoCompleteColumns: MEDIDA_COLUMNS, filterParams: {estruturaId: data.entity.estruturaId}, conditional: isCombinado},
-                                                                    {name: 'exibirValor', label: 'Exibir Valor', type: 'boolean', booleanLabels: {on: 'Sim', off: 'Não'}},
-                                                                    {name: 'exibirLegenda', label: 'Exibir Legenda', type: 'boolean', booleanLabels: {on: 'Sim', off: 'Não'}},
-                                                                    {name: 'exibirPercentual', label: 'Exibir Percentual', type: 'boolean', booleanLabels: {on: 'Sim', off: 'Não'}, conditional: isPizzaOuCircular},
-                                                                    {name: 'valorAcumulado', label: 'Acumulado', type: 'boolean', booleanLabels: {on: 'Sim', off: 'Não'}, conditional: isBarra},
-                                                                    {name: 'posicao', label: 'Posição Legenda', type: 'select', options: POSICAO_LEGENDA_OPTIONS, conditional: data.entity.exibirLegenda},
+                                                                    {name: 'exibirValor', label: 'Exibir Valor', type: 'boolean', booleanLabels: {on: 'Sim', off: 'NÃ£o'}},
+                                                                    {name: 'exibirLegenda', label: 'Exibir Legenda', type: 'boolean', booleanLabels: {on: 'Sim', off: 'NÃ£o'}},
+                                                                    {name: 'exibirPercentual', label: 'Exibir Percentual', type: 'boolean', booleanLabels: {on: 'Sim', off: 'NÃ£o'}, conditional: isPizzaOuCircular},
+                                                                    {name: 'valorAcumulado', label: 'Acumulado', type: 'boolean', booleanLabels: {on: 'Sim', off: 'NÃ£o'}, conditional: isBarra},
+                                                                    {name: 'posicao', label: 'PosiÃ§Ã£o Legenda', type: 'select', options: POSICAO_LEGENDA_OPTIONS, conditional: data.entity.exibirLegenda},
                                                                     {name: 'colunaLegenda', label: 'Coluna Legenda', type: 'number', conditional: data.entity.exibirLegenda},
-                                                                    {name: 'coluna', label: 'Coluna Gráfico', type: 'number', conditional: isPizzaOuCircular},
-                                                                    {name: 'altura', label: 'Altura Gráfico', type: 'number'},
-                                                                    {name: 'diametro', label: 'Diâmetro', type: 'number', conditional: data.entity.tipo === 'PIZZA'},
-                                                                    {name: 'margem', label: 'Margem Separação', type: 'number', conditional: data.entity.tipo === 'CIRCULAR'},
+                                                                    {name: 'coluna', label: 'Coluna GrÃ¡fico', type: 'number', conditional: isPizzaOuCircular},
+                                                                    {name: 'altura', label: 'Altura GrÃ¡fico', type: 'number'},
+                                                                    {name: 'diametro', label: 'DiÃ¢metro', type: 'number', conditional: data.entity.tipo === 'PIZZA'},
+                                                                    {name: 'margem', label: 'Margem SeparaÃ§Ã£o', type: 'number', conditional: data.entity.tipo === 'CIRCULAR'},
                                                                     {name: 'formatoData', label: 'Formato Data', type: 'select', options: FORMATO_DATA_OPTIONS, conditional: showFormatoData},
                                                                 ],
                                                             },
@@ -332,17 +332,17 @@ export default function ViewRelatoriosFormGraficoListScreen() {
                                                 </div>
                                                 {/* Right column - Eixos when multi-eixo */}
                                                 <div style={{flex: 1, minWidth: '400px'}} conditional={data.entity.tipoEixo === 1 && !isCombinado}>
-                                                    <h3>Eixos do Gráfico</h3>
+                                                    <h3>Eixos do GrÃ¡fico</h3>
                                                     <div style={{marginBottom: '15px'}}>
                                                         <AutoComplete
-                                                            label="Dimensão Informação"
+                                                            label="DimensÃ£o InformaÃ§Ã£o"
                                                             source={DIMENSAO_SOURCE}
                                                             searchKeys={DIMENSAO_SEARCH}
                                                             columns={DIMENSAO_COLUMNS}
                                                             filterParams={{estruturaId: data.entity.estruturaId}}
                                                         />
                                                         <AutoComplete
-                                                            label="Medida Informação"
+                                                            label="Medida InformaÃ§Ã£o"
                                                             source={MEDIDA_SOURCE}
                                                             searchKeys={MEDIDA_SEARCH}
                                                             columns={MEDIDA_COLUMNS}
@@ -369,21 +369,21 @@ export default function ViewRelatoriosFormGraficoListScreen() {
                                     validate: async (d) => {
                                         if (!d.entity.nome || d.entity.nome.length < 3) return 'Nome deve ter pelo menos 3 caracteres';
                                         if (!d.entity.estruturaId) return 'Selecione uma estrutura';
-                                        if (isTipoEixoSimples && !d.entity.dimensaoReferenciaId) return 'Selecione a dimensão de referência';
-                                        if (isTipoEixoSimples && !d.entity.medidaInformacaoId) return 'Selecione a medida de informação';
-                                        if (isCombinado && (!d.entity.dimensaoCombinadoId || !d.entity.medidaCombinadoId)) return 'Para tipo Combinado, selecione dimensão e medida combinados';
+                                        if (isTipoEixoSimples && !d.entity.dimensaoReferenciaId) return 'Selecione a dimensÃ£o de referÃªncia';
+                                        if (isTipoEixoSimples && !d.entity.medidaInformacaoId) return 'Selecione a medida de informaÃ§Ã£o';
+                                        if (isCombinado && (!d.entity.dimensaoCombinadoId || !d.entity.medidaCombinadoId)) return 'Para tipo Combinado, selecione dimensÃ£o e medida combinados';
                                         return true;
                                     },
                                 },
                                 {
                                     key: 'permissao',
-                                    label: 'Permissão',
+                                    label: 'PermissÃ£o',
                                     content: (
                                         <div>
                                             <div style={{marginBottom: '20px'}}>
-                                                <h3>Usuários</h3>
+                                                <h3>UsuÃ¡rios</h3>
                                                 <MasterDetail
-                                                    label="Usuário"
+                                                    label="UsuÃ¡rio"
                                                     source={USUARIO_SOURCE}
                                                     valueKey="id"
                                                     searchKeys={USUARIO_SEARCH}
@@ -434,7 +434,7 @@ export default function ViewRelatoriosFormGraficoListScreen() {
                                                             label: '',
                                                             fields: [
                                                                 {name: 'nome', label: 'Nome *', required: true, span: 2},
-                                                                {name: 'dimensaoId', label: 'Dimensão', type: 'autoComplete', autoCompleteSource: DIMENSAO_SOURCE, autoCompleteSearchKeys: DIMENSAO_SEARCH, autoCompleteColumns: DIMENSAO_COLUMNS, span: 2},
+                                                                {name: 'dimensaoId', label: 'DimensÃ£o', type: 'autoComplete', autoCompleteSource: DIMENSAO_SOURCE, autoCompleteSearchKeys: DIMENSAO_SEARCH, autoCompleteColumns: DIMENSAO_COLUMNS, span: 2},
                                                             ],
                                                         },
                                                     ]}
@@ -453,7 +453,7 @@ export default function ViewRelatoriosFormGraficoListScreen() {
                                                     {key: 'id', label: 'ID', width: '80px'},
                                                     {key: 'nome', label: 'Nome'},
                                                     {key: 'estruturaNome', label: 'Estrutura'},
-                                                    {key: 'dimensaoNome', label: 'Dimensão'},
+                                                    {key: 'dimensaoNome', label: 'DimensÃ£o'},
                                                 ]}
                                                 actions={[
                                                     {key: 'remove', label: 'Remover', icon: 'trash', className: 'btnred', onClick: removeFiltro},
