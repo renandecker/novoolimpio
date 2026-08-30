@@ -15,7 +15,7 @@ import {
     AGENDA_SOURCE, AGENDA_COLUMNS, AGENDA_SEARCH,
     TURNO_TRABALHO_SOURCE, TURNO_TRABALHO_COLUMNS, TURNO_TRABALHO_SEARCH,
 } from '../../shared/services/masterDetailSources';
-import {GENEROS, ETNIAS, ESTADOS_CIVIS, ESCOLARIDADES, formatCpf, formatPhone, str, num, semId, toDateInput} from '../cadastroUsuarioTypes';
+import {GENEROS, ETNIAS, ESTADOS_CIVIS, ESCOLARIDADES, formatCpf, formatPhone, str, num, semId, toDateInput} from '../../features/auth/cadastroUsuarioTypes';
 
 // ── helpers ──────────────────────────────────────────────────────────
 const requiredMark = <span style={{color:'#C90000',marginLeft:4}}>*</span>;

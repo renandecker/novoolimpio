@@ -1,7 +1,7 @@
 ﻿import {FormEvent, useState} from 'react';
 import {api} from '../../shared/services/api';
 import {useAuth} from './auth';
-import '../AlterarSenha.css';
+import './AlterarSenha.css';
 
 export default function ViewAlterarSenhaAlterarSenhaListScreen() {
     const {refreshSession} = useAuth();

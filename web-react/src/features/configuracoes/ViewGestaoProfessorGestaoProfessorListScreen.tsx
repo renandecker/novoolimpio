@@ -5,7 +5,7 @@ import {useAuth} from '../../features/auth/auth';
 import {Tabs} from '../../shared/components/Tabs';
 import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
 import {legacyClassName} from '../../shared/components/DataTable';
-import '../GestaoProfessor.css';
+import '../../features/professor/GestaoProfessor.css';
 
 type Turma = {
     id: number;

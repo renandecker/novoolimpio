@@ -4,7 +4,7 @@ import {PermissionGate, useCurrentOutcome} from '../../shared/services/permissio
 import {DataTable, type DataTableColumn, type DataTableRowAction} from '../../shared/components/DataTable';
 import {Tabs} from '../../shared/components/Tabs';
 import type {ApiItem} from '../../shared/types/index';
-import {executeAction} from '../actions';
+import {executeAction} from '../../shared/services/actions';
 
 interface EtapaCobranca {
     id: number;

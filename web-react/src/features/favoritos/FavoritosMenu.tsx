@@ -2,7 +2,7 @@
 import {useNavigate, Link} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
 import {listarFavoritos, type FavoritoDisponivel} from './favoritos';
-import {normalizeOutcome} from './permissions';
+import {normalizeOutcome} from '../../shared/services/permissions';
 
 const StarIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">

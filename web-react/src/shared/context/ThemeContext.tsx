@@ -1,6 +1,6 @@
-import {createContext, useContext, useEffect, useMemo, useState, type ReactNode} from 'react';
-import {api} from './api';
-import {useAuth} from './auth';
+﻿import {createContext, useContext, useEffect, useMemo, useState, type ReactNode} from 'react';
+import {api} from '../services/api';
+import {useAuth} from '../../features/auth/auth';
 
 export type TemaConfig = {
     id?: number;
