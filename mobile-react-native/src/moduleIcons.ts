@@ -1,3 +1,6 @@
+import {useCallback, useMemo} from 'react';
+import {useMenuIcon} from './hooks/useIcones';
+
 const normalizeName = (value: string) =>
     value
         .toLowerCase()
@@ -5,7 +8,7 @@ const normalizeName = (value: string) =>
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9]/g, '');
 
-const ICON_RULES: Array<[RegExp, string]> = [
+const FALLBACK_ICON_RULES: Array<[RegExp, string]> = [
     [/^paginainicial$/, '🏠'],
     [/^callcenter$/, '☎️'],
     [/^centraldeservico$/, '🛎️'],
@@ -69,10 +72,26 @@ const ICON_RULES: Array<[RegExp, string]> = [
     [/^avaliacao|^atividade$/, '📝'],
 ];
 
+function fallbackIcon(rotulo: string): string {
+    const name = normalizeName(rotulo);
+    for (const [rule, emoji] of FALLBACK_ICON_RULES) if (rule.test(name)) return emoji;
+    return '📁';
+}
+
 export function moduleIcon(rotulo: string, icone?: string): string {
     const stored = (icone ?? '').trim();
     if (stored && !stored.startsWith('ui-icon') && !stored.startsWith('fa ')) return stored;
     const name = normalizeName(rotulo);
-    for (const [rule, emoji] of ICON_RULES) if (rule.test(name)) return emoji;
+    for (const [rule, emoji] of FALLBACK_ICON_RULES) if (rule.test(name)) return emoji;
     return '📁';
+}
+
+export function useModuleIcon() {
+    const {menuIcon} = useMenuIcon();
+    
+    const getIcon = useCallback((rotulo: string, icone?: string): string => {
+        return menuIcon(rotulo, icone);
+    }, [menuIcon]);
+    
+    return {getIcon};
 }

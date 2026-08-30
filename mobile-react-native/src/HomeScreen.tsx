@@ -12,7 +12,7 @@ import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {useAuth} from './auth';
 import {countNaoLidas, subscribeNotificacoesStream} from './notificacoes';
-import {moduleIcon} from './moduleIcons';
+import {useModuleIcon} from './moduleIcons';
 import {can} from './permissions';
 import {ReportButton} from './ReportButton';
 import {FavoritosButton} from './FavoritosButton';
@@ -36,6 +36,8 @@ export default function HomeScreen({navigation}: NativeStackScreenProps<ParamLis
     const [search, setSearch] = useState('');
     const [openGroups, setOpenGroups] = useState<Record<number, boolean>>({});
     const [portalOpen, setPortalOpen] = useState(true);
+
+    const {getIcon} = useModuleIcon();
 
     const bellCount = useQuery({
         queryKey: ['notificacoes', 'nao-lidas'],
@@ -126,7 +128,7 @@ export default function HomeScreen({navigation}: NativeStackScreenProps<ParamLis
         const isFav = 'outcome' in item;
         const key = isFav ? normalizeOutcome(item.outcome) : item.key;
         const label = isFav ? item.nome : item.label;
-        const icon = isFav ? moduleIcon(item.nome, item.icon) : item.icon;
+        const icon = isFav ? getIcon(item.nome, item.icon) : item.icon;
         const parent = isFav ? null : item.parent;
 
         return (

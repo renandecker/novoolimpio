@@ -8,7 +8,7 @@ DELETE FROM public.bas_modulo WHERE outcome = '/view/relatorios/listOrganograma.
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
 SELECT nextval('public.bas_modulo_id_seq'),
        (SELECT m.id FROM public.bas_modulo m WHERE m.rotulo = 'Tipos Relatórios' LIMIT 1),
-       'Organograma', 'Cadastro e visualização de organogramas', '📊', '/view/relatorios/listOrganograma', 'CRUD de organogramas (estrutura organizacional)', 10
+       'Organograma', 'Cadastro e visualização de organogramas', '🌳', '/view/relatorios/listOrganograma', 'CRUD de organogramas (estrutura organizacional)', 10
 WHERE NOT EXISTS (
     SELECT 1 FROM public.bas_modulo WHERE outcome = '/view/relatorios/listOrganograma'
     AND id_modulo = (SELECT id FROM public.bas_modulo WHERE rotulo = 'Tipos Relatórios' LIMIT 1)
