@@ -34,4 +34,19 @@ public class CampanhaNegociacao extends PanacheEntity {
     public boolean ativo;
     @Column(name = "data_fim")
     public Date dataFim;
+
+    @Column(name = "tipo_campanha")
+    public String tipoCampanha;
+
+    @Column(name = "objetivo")
+    public String objetivo;
+
+    @Column(name = "condicao_especial")
+    public String condicaoEspecial;
+
+    @Column(name = "beneficio_proximo_mes")
+    public Boolean beneficioProximoMes;
+
+    @Column(name = "tipo_oferta")
+    public String tipoOferta;
 }

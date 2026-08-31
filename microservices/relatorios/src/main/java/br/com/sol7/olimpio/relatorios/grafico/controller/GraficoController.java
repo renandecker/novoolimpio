@@ -1,6 +1,7 @@
 package br.com.sol7.olimpio.relatorios.grafico;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.relatorios.grafico.dto.GraficoDadosResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -31,6 +32,12 @@ public class GraficoController {
     @Path("/{id}")
     public Uni<GraficoResponse> find(@PathParam("id") Long id) {
         return service.find(id);
+    }
+
+    @GET
+    @Path("/{id}/dados")
+    public Uni<GraficoDadosResponse> dados(@PathParam("id") Long id) {
+        return service.dados(id);
     }
 
     @POST

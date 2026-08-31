@@ -421,6 +421,7 @@ ViewComunicacaoListComunicacaoListScreen,
     ViewValorProdutoFormValorProdutoListScreen,
     ViewValorProdutoListValorProdutoListScreen,
     ViewTemaListTemasListScreen,
+    CurriculumAttachmentModal,
     AlunoDashboardScreen,
     AlunoBoletimScreen,
     AlunoFrequenciaScreen,
@@ -464,14 +465,15 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/aluno/boletim" element={<AlunoBoletimScreen/>}/>
     <Route path="/aluno/frequencia" element={<AlunoFrequenciaScreen/>}/>
     <Route path="/aluno/financeiro" element={<AlunoFinanceiroScreen/>}/>
-    <Route path="/aluno/aulas" element={<AlunoAulasScreen/>}/>
+<Route path="/aluno/aulas" element={<AlunoAulasScreen/>}/>
     <Route path="/aluno/avaliacoes" element={<AlunoAvaliacoesScreen/>}/>
     <Route path="/aluno/avaliacao/:id" element={<AlunoAvaliacaoResponderScreen/>}/>
     <Route path="/aluno/aula" element={<AulaContratoScreen/>}/>
     <Route path="/aluno/aula/oferecimentos/:contratoId" element={<AulaOferecimentoScreen/>}/>
     <Route path="/aluno/aula/ocorrencias/:oferecimentoId" element={<AulaOcorrenciaScreen/>}/>
-    <Route path="/aluno/aula/aulas/:ocorrenciaId" element={<AulaAulaScreen/>}/>
+    <Route path="/aluno/aula/aulas/:ocorrenciaId" element={<AulaAlunoScreen/>}/>
     <Route path="/aluno/aula/aula/:aulaId" element={<AulaAlunoScreen/>}/>
+    <Route path="/aluno/curriculo-anexo" element={<AlunoDashboardScreen/>}/>
     <Route path="/meus-dados" element={<MeusDadosScreen/>}/>
     <Route path="/view/acao/colunasAcaoCampo" element={<ViewAcaoColunasAcaoCampoListScreen/>}/>
     <Route path="/view/acao/formAcao" element={<ViewAcaoFormAcaoListScreen/>}/>
@@ -768,7 +770,6 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/pagamento/caixaentrada" element={<ViewPagamentoCaixaentradaListScreen/>}/>
     <Route path="/view/pagamento/caixasaida" element={<ViewPagamentoCaixasaidaListScreen/>}/>
     <Route path="/view/pagamento/codigoVerificador" element={<ViewPagamentoCodigoVerificadorListScreen/>}/>
-    <Route path="/view/pagamento/efetuarPagamento" element={<ViewPagamentoEfetuarPagamentoListScreen/>}/>
     <Route path="/view/pagamento/fechamentoCaixa" element={<ViewPagamentoFechamentoCaixaWizardScreen/>}/>
     <Route path="/view/pagamento/movimentocaixa" element={<ViewPagamentoMovimentocaixaListScreen/>}/>
     <Route path="/view/pagamento/produto" element={<ViewPagamentoProdutoListScreen/>}/>
@@ -899,10 +900,6 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/tipoCurso/listTipoCurso" element={<ViewTipoCursoListTipoCursoListScreen/>}/>
     <Route path="/view/tipoHistorico/formTipoHistorico" element={<ViewTipoHistoricoFormTipoHistoricoListScreen/>}/>
     <Route path="/view/tipoHistorico/listTipoHistorico" element={<ViewTipoHistoricoListTipoHistoricoListScreen/>}/>
-    <Route path="/view/tipoPagamento/colunasTipoPagamento"
-           element={<ViewTipoPagamentoColunasTipoPagamentoListScreen/>}/>
-    <Route path="/view/tipoPagamento/formTipoPagamento" element={<ViewTipoPagamentoFormTipoPagamentoListScreen/>}/>
-    <Route path="/view/tipoPagamento/listTipoPagamento" element={<ViewTipoPagamentoListTipoPagamentoListScreen/>}/>
     <Route path="/view/tipoPausa/formTipoPausa" element={<ViewTipoPausaFormTipoPausaListScreen/>}/>
     <Route path="/view/tipoPausa/listTipoPausa" element={<ViewTipoPausaListTipoPausaListScreen/>}/>
     <Route path="/view/tipoSala/formTipoSala" element={<ViewTipoSalaFormTipoSalaListScreen/>}/>

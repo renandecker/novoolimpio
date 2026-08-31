@@ -13,6 +13,6 @@ export default function AsaasCobrancasListScreen() {
                                                  }, {key: 'status', label: 'Status'}, {
                                                      key: 'dueDate',
                                                      label: 'Vencimento'
-                                                 }, {key: 'description', label: 'DescriÃ§Ã£o'}]}/></main>
+                                                 }, {key: 'description', label: 'Descrição'}]}/></main>
     </PermissionGate>
 }

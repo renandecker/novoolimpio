@@ -58,13 +58,12 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                 const {data} = await api.get('/api/view/usuario/listUsuario');
                 setUsuarioOptions(data.map((u: any) => ({id: u.id, nome: u.nome})));
             } catch {
-                setUsuarioOptions([]);
+                setUsuarioOptions([])
             }
             finally {
                 setLoadingUsuario(false);
             }
         },
-        enabled: false,
     });
     // Combo search for Unidade
     const [unidadeOptions, setUnidadeOptions] = useState<Array<{ id: number; nome: string }>>([]);
@@ -130,6 +129,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                 if (caixaId) {
                     const {data} = await api.get<Caixa>(`/api/financeiro/caixa/${caixaId}`);
                     setCaixa(data);
+                    setImpressoraId(data.impressoraId ?? null);
                 }
                 const {data: sugerido} = await api.get<number | null>('/api/financeiro/caixa/fundo-caixa-sugerido', {
                     params: {usuarioId, unidadeId},

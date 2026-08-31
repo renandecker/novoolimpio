@@ -68,4 +68,10 @@ public class CurriculoTrabalhoController {
     public Uni<Void> delete(@PathParam("id") Long id) {
         return service.delete(id);
     }
+
+    @PUT
+    @Path("/{id}/curriculo-base64")
+    public Uni<CurriculoTrabalhoResponse> atualizarCurriculoBase64(@PathParam("id") Long id, String curriculoBase64) {
+        return service.atualizarCurriculoBase64(id, curriculoBase64);
+    }
 }

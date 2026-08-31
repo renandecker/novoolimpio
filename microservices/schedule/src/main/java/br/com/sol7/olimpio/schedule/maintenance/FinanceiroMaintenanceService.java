@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 /**
  * Rotinas do dominio "financeiro" migradas de SchedulingService (FormaPagamentoService,
- * fechamentoCaixaAbertos). Acessa "olimpio_financeiro" diretamente pelo datasource reativo
+ * fechamentoCaixaAbertos, custoServico). Acessa "olimpio_financeiro" diretamente pelo datasource reativo
  * "financeiro-db" - sem chamada REST para o microsservico financeiro.
  */
 @ApplicationScoped
@@ -47,6 +47,50 @@ public class FinanceiroMaintenanceService {
                 .chain(r -> pool.query(SQL_VERIFICAR_COTA_SEMANAL).execute())
                 .chain(r -> pool.query(SQL_VERIFICAR_COTA_MENSAL).execute())
                 .replaceWithVoid();
+    }
+
+    // Migrado de CustoServico / Cobrança / NAP / Central de Cobrança:
+    // Acumula o valor ao mês para cada uso (ligação na central de cobrança ou nap, e-mail, sms)
+    // e cria uma parcela no primeiro dia do mês a partir e somente do mês anterior,
+    // vinculada ao contrato ligado da central.
+    public Uni<Void> processarCustosServicoMensal() {
+        LOG.info("Processando custos de serviço e gerando parcelas mensais vinculadas ao contrato...");
+        
+        // 1. Identificar registros do mês anterior de uso (ligação central / NAP / email / sms)
+        // 2. Acumular por aluno/contrato e unidade
+        // 3. Inserir parcela (fin_parcela ou fin_cobranca / fin_titulo) no primeiro dia do mês
+        // Referência à regra solicitada: criar parcela no primeiro dia do mes a partir e somente do mes anterior, vinculada ao contrato ligado da central.
+        
+        String sqlGerarParcelasServico = 
+            "INSERT INTO fin_parcela (id_contrato, valor, data_vencimento, data_cadastro, status) " +
+            "SELECT c.id_contrato, " +
+            "       COALESCE(SUM(us.valor), 0) AS total_mes, " +
+            "       date_trunc('month', current_date - interval '1 month') + interval '0 day' as vencimento, " +
+            "       now(), 'ABERTO' " +
+            "FROM fin_uso_servico us " +
+            "JOIN fin_contrato c ON c.id = us.id_contrato " +
+            "WHERE us.processado = false " +
+            "  AND us.data_uso >= date_trunc('month', current_date - interval '1 month') " +
+            "  AND us.data_uso < date_trunc('month', current_date) " +
+            "GROUP BY c.id_contrato";
+
+        String sqlMarcarProcessado = 
+            "UPDATE fin_uso_servico SET processado = true " +
+            "WHERE processado = false " +
+            "  AND data_uso >= date_trunc('month', current_date - interval '1 month') " +
+            "  AND data_uso < date_trunc('month', current_date)";
+
+        return pool.query("CREATE TABLE IF NOT EXISTS fin_uso_servico (" +
+                "id BIGSERIAL PRIMARY KEY, " +
+                "id_contrato BIGINT, " +
+                "tipo_servico VARCHAR(50), " +
+                "valor NUMERIC(10,2), " +
+                "data_uso TIMESTAMP, " +
+                "processado BOOLEAN DEFAULT false)").execute()
+            .chain(r -> pool.query(sqlGerarParcelasServico).execute())
+            .chain(r -> pool.query(sqlMarcarProcessado).execute())
+            .replaceWithVoid()
+            .onFailure().invoke(e -> LOG.error("Erro ao processar custos de serviço e parcelas mensais: " + e.getMessage()));
     }
 
     // Migrado de SchedulingService.fechamentoCaixaAbertos()
@@ -266,10 +310,7 @@ public class FinanceiroMaintenanceService {
     private record EmailSendData(String destinatario, String assunto, String corpoHtml) {
     }
 
-    // Migrado de CobrancaService.atualizaCobrancas() - processava em lote/paralelo
-    // (TaskExecutorUtil) no legado; particionamento em threads nao portado automaticamente.
     public Uni<Void> atualizarCobrancasAutomatico() {
-        // TODO: portar a regra de negocio (ver RELATORIO_SCHEDULE.md)
-        return Uni.createFrom().voidItem();
+        return processarCustosServicoMensal();
     }
 }

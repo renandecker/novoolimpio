@@ -33,10 +33,20 @@ export default function ViewProspectoControleProspectoListScreen() {
     const [prospectosSimilares, setProspectosSimilares] = useState<ControleProspectoItem[]>([]);
     const [selectedProspectosIds, setSelectedProspectosIds] = useState<number[]>([]);
 
+    const safeJson = async (res: Response) => {
+        const ct = res.headers.get('content-type') || '';
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!ct.includes('application/json')) {
+            const t = await res.text();
+            throw new Error(`Resposta nao-JSON: ${t.slice(0,120)}`);
+        }
+        return res.json();
+    };
+
     useEffect(() => {
         // Fetch Campos for AutoComplete
         fetch('/api/comercial/campo')
-            .then(res => res.json())
+            .then(safeJson)
             .then(data => {
                 if (Array.isArray(data)) setCampos(data);
             })
@@ -47,7 +57,7 @@ export default function ViewProspectoControleProspectoListScreen() {
         setSelectedCampo(campo);
         setLoading(true);
         fetch(`/api/comercial/controle-prospecto?campoId=${campo.id}`)
-            .then(res => res.json())
+            .then(safeJson)
             .then(data => {
                 if (Array.isArray(data)) setItems(data);
                 setLoading(false);
@@ -94,7 +104,7 @@ export default function ViewProspectoControleProspectoListScreen() {
     const handleOpenAjustarSelecionar = (item: ControleProspectoItem) => {
         setAjustarItem(item);
         fetch(`/api/comercial/controle-prospecto/carregar-outros-prospecto?id=${item.id}&valor=${encodeURIComponent(item.valor || '')}`)
-            .then(res => res.json())
+            .then(safeJson)
             .then(data => {
                 setProspectosSimilares(Array.isArray(data) ? data : []);
                 setSelectedProspectosIds([]);

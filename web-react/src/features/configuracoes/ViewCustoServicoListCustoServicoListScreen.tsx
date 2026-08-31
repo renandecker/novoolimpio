@@ -11,7 +11,7 @@ const formatDate = (value: unknown): string => {
     return `${match[3]}/${match[2]}/${match[1]}`;
 };
 
-const TIPOS = ['Por Contato', 'Por Minuto', 'Por Dia', 'Por Semana', 'Por MÃªs', 'Por Ano'];
+const TIPOS = ['Por Contato', 'Por Minuto', 'Por Dia', 'Por Semana', 'Por Mês', 'Por Ano'];
 
 const renderTipo = (key: string) => (item: ApiItem) => {
     const value = asRecord(item)[key];
@@ -22,11 +22,13 @@ const renderTipo = (key: string) => (item: ApiItem) => {
 const renderValor = (key: string) => (item: ApiItem) => `R$ ${Number(asRecord(item)[key] ?? 0).toFixed(2)}`;
 
 const COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'ID do Custo de ServiÃ§o'},
+    {key: 'id', label: 'ID do Custo de Serviço'},
     {key: 'valor_email', label: 'Valor Email', render: renderValor('valor_email')},
-    {key: 'tipo_email', label: 'Tipo ServiÃ§o Email', render: renderTipo('tipo_email')},
-    {key: 'valor_ligacao', label: 'Valor LigaÃ§Ã£o', render: renderValor('valor_ligacao')},
-    {key: 'tipo_ligacao', label: 'Tipo ServiÃ§o LigaÃ§Ã£o', render: renderTipo('tipo_ligacao')},
+    {key: 'tipo_email', label: 'Tipo Serviço Email', render: renderTipo('tipo_email')},
+    {key: 'valor_sms', label: 'Valor SMS', render: renderValor('valor_sms')},
+    {key: 'tipo_sms', label: 'Tipo Serviço SMS', render: renderTipo('tipo_sms')},
+    {key: 'valor_ligacao', label: 'Valor Ligação', render: renderValor('valor_ligacao')},
+    {key: 'tipo_ligacao', label: 'Tipo Serviço Ligação', render: renderTipo('tipo_ligacao')},
     {key: 'data_alteracao', label: 'Data', render: (item) => formatDate(asRecord(item).data_alteracao)},
 ];
 
@@ -34,7 +36,7 @@ export default function ViewCustoServicoListCustoServicoListScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>Custo Servico</h1>
+                <h1>Custo Serviço</h1>
                 <DataTable path="/api/view/custoServico/listCustoServico" columns={COLUMNS}
                            maxMainColumns={COLUMNS.length}/>
             </main>

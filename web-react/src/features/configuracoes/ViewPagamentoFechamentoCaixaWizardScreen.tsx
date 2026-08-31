@@ -214,6 +214,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                         updateField('caixaAberto', true);
                         updateField('caixaId', caixaData.id);
                         updateField('fundoCaixa', String(caixaData.fundoCaixa));
+                        updateField('impressoraId', String(caixaData.impressoraId ?? ''));
                     }
                 }
                 if (!cancelled && !caixaId) {
@@ -484,11 +485,11 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                     </p>
 
                                     <div className="field-row">
-                                        <AutoComplete
+<AutoComplete
                                             id="usuario"
-                                            label="UsuÃ¡rio *"
+                                            label="Usuário *"
                                             placeholder="Digite para buscar..."
-                                            value={data.usuarioId ? {id: Number(data.usuarioId), label: ''} : null}
+                                            value={data.usuarioId ? {id: Number(data.usuarioId)} : null}
                                             onChange={(opt) => updateField('usuarioId', opt ? String(opt.id) : '')}
                                             fetchOptions={fetchUsuario}
                                             fetchById={fetchUsuarioById}
@@ -498,7 +499,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                             id="unidade"
                                             label="Unidade *"
                                             placeholder="Digite para buscar..."
-                                            value={data.unidadeId ? {id: Number(data.unidadeId), label: ''} : null}
+                                            value={data.unidadeId ? {id: Number(data.unidadeId)} : null}
                                             onChange={(opt) => updateField('unidadeId', opt ? String(opt.id) : '')}
                                             fetchOptions={fetchUnidade}
                                             fetchById={fetchUnidadeById}

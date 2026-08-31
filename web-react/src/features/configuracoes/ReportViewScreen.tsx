@@ -2,13 +2,16 @@
 import {useNavigate, useParams, useSearchParams, useLocation} from 'react-router-dom';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {api} from '../../shared/services/api';
-import {abrirRelatorio, type RelatorioAberto} from '../../features/relatorios/relatorios';
+import {abrirRelatorio, type RelatorioAberto, type LinhaGrafico} from '../../features/relatorios/relatorios';
 import {usePermissions} from '../../shared/services/permissions';
 import {ExportButton} from '../../shared/components/ExportButton';
+import GraficoChart from './GraficoChart';
 import './ReportView.css';
 
 const reportTypes = ['TABELA', 'GRAFICO', 'MAPA', 'ORGANOGRAMA', 'DASHBOARD', 'PIZZA', 'LINHA', 'COMBINADO', 'CIRCULAR', 'BARRA_VERTICAL', 'BARRA_HORIZONTAL'] as const;
 type ReportType = (typeof reportTypes)[number];
+
+const graphTypes = new Set<ReportType>(['GRAFICO', 'PIZZA', 'LINHA', 'COMBINADO', 'CIRCULAR', 'BARRA_VERTICAL', 'BARRA_HORIZONTAL']);
 
 const routeFor: Record<ReportType, string> = {
     TABELA: 'listTabela',
@@ -152,6 +155,15 @@ export default function ReportViewScreen() {
     const canEdit = can('UPDATE', managementOutcome);
     const canDelete = can('DELETE', managementOutcome);
     const data = report.data;
+    const dadosGrafico = {
+        linhas: (data.dados && 'linhas' in data.dados ? data.dados.linhas : []) as LinhaGrafico[],
+        linhasCombinado: (data.dados && 'linhasCombinado' in data.dados ? data.dados.linhasCombinado : []) as LinhaGrafico[],
+        exibirPercentual: (data.dados && 'exibirPercentual' in data.dados ? data.dados.exibirPercentual : false) as boolean,
+        exibirLegenda: (data.dados && 'exibirLegenda' in data.dados ? data.dados.exibirLegenda : true) as boolean,
+        exibirValor: (data.dados && 'exibirValor' in data.dados ? data.dados.exibirValor : false) as boolean,
+        valorAcumulado: (data.dados && 'valorAcumulado' in data.dados ? data.dados.valorAcumulado : false) as boolean,
+        posicao: (data.dados && 'posicao' in data.dados ? data.dados.posicao : '') as string,
+    };
 
     return (
         <main className="report-view">
@@ -241,6 +253,18 @@ export default function ReportViewScreen() {
                         <div className="report-result">
                             <p>Nenhum registro encontrado.</p>
                         </div>
+                    )}
+                    {graphTypes.has(data.tipo as ReportType) && (
+                        <GraficoChart
+                            tipo={data.tipo}
+                            linhas={dadosGrafico.linhas}
+                            linhasCombinado={dadosGrafico.linhasCombinado}
+                            exibirLegenda={dadosGrafico.exibirLegenda}
+                            exibirValor={dadosGrafico.exibirValor}
+                            exibirPercentual={dadosGrafico.exibirPercentual}
+                            valorAcumulado={dadosGrafico.valorAcumulado}
+                            posicao={dadosGrafico.posicao}
+                        />
                     )}
                     <dl className="report-details">
                         {Object.entries(data.configuracao)

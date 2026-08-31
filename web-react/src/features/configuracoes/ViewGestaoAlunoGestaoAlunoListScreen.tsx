@@ -136,6 +136,8 @@ const STATUS_MATRICULA_CLASS: Record<string, string> = {
     REPROVADO: 'statusPENDENTE',
     PENDENTE: 'statusLOTADA',
     CURSANDO: 'statusLIBERADA',
+    FINALIZADA: 'statusCONCLUIDA',
+    CANCELADO: 'statusCANCELADA',
 };
 
 const statusTurmaClass = (status: string) => (status ? `status${status}` : '');

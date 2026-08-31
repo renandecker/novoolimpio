@@ -1,6 +1,6 @@
 ﻿import {useEffect, useState} from 'react';
 import {alunoApi, Frequencia, formatarData, formatarPercentual, Matricula} from '../../features/aluno/aluno';
-import '../../features/aluno/alunoPortal.css';
+import '../../features/aluno/AlunoPortal.css';
 
 const STATUS_ROTULO: Record<string, string> = {
     PRESENTE: 'Presente',

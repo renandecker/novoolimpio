@@ -61,16 +61,14 @@ public class CustoServicoService {
         e.valorEmail = r.valorEmail();
         e.valorSms = r.valorSms();
         e.valorLigacao = r.valorLigacao();
-        e.valorCarta = r.valorCarta();
         e.dataAlteracao = r.dataAlteracao();
         e.tipoSms = r.tipoSms();
         e.tipoLigacao = r.tipoLigacao();
-        e.tipoCarta = r.tipoCarta();
         e.tipoEmail = r.tipoEmail();
     }
 
     private CustoServicoResponse toResponse(CustoServico e) {
-        return new CustoServicoResponse(e.id, e.valorEmail, e.valorSms, e.valorLigacao, e.valorCarta, e.dataAlteracao, e.tipoSms, e.tipoLigacao, e.tipoCarta, e.tipoEmail);
+        return new CustoServicoResponse(e.id, e.valorEmail, e.valorSms, e.valorLigacao, e.dataAlteracao, e.tipoSms, e.tipoLigacao, e.tipoEmail);
     }
 
 

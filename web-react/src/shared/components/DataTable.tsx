@@ -94,6 +94,9 @@ export const formatTableCellValue = (key: string, value: unknown): string => {
     if (value === null || value === undefined) return '';
     if (typeof value === 'object') return JSON.stringify(value);
 
+    // Skip boolean conversion for ID fields - display raw value
+    if (key.startsWith('id_')) return String(value);
+
     let boolVal: boolean | null = null;
     if (typeof value === 'boolean') {
         boolVal = value;

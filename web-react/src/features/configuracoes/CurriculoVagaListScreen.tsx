@@ -10,7 +10,7 @@ import type {ApiItem} from '../../features/auth/types';
 const VAGA_COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID'},
     {key: 'nome', label: 'Nome'},
-    {key: 'descricao', label: 'DescriÃ§Ã£o'},
+{key: 'descricao', label: 'Descrição'},
     {key: 'data_inicio', label: 'Data InÃ­cio', render: (item) => item.data_inicio ? new Date(item.data_inicio).toLocaleDateString('pt-BR') : ''},
     {key: 'data_fim', label: 'Data Fim', render: (item) => item.data_fim ? new Date(item.data_fim).toLocaleDateString('pt-BR') : ''},
     {key: 'vagas', label: 'Vagas'},

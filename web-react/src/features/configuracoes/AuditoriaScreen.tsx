@@ -2,7 +2,7 @@
 import {useQuery} from '@tanstack/react-query';
 import {PermissionGate} from '../../shared/services/permissions';
 import {Tabs} from '../../shared/components/Tabs';
-import {auditoriaApi, type AuditoriaItem} from '../../features/auditoria/Auditoria';
+import {auditoriaApi, type AuditoriaItem} from '../../features/auditoria/auditoria';
 
 const PAGE_SIZES = [10, 20, 50, 100];
 

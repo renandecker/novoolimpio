@@ -120,7 +120,7 @@ export default function ViewLigacaoLigacaoListScreen() {
     // Carregar dados iniciais da ligaÃ§Ã£o
     const carregarEstadoLigacao = async () => {
         try {
-            const res = await api.get('/api/central/ligacao/estado');
+            const res = await api.get('/api/central/ligacao/dados-tela/1/1').catch(() => api.get('/api/central/ligacao/estado'));
             const d = res.data ?? {};
             setPronto(d.pronto ?? true);
             setUnidade(d.unidade ?? null);
@@ -167,7 +167,7 @@ export default function ViewLigacaoLigacaoListScreen() {
         }
 
         try {
-            const resRes = await api.get('/api/central/resultado-contato/all');
+            const resRes = await api.get('/api/central/resultado-contato').catch(() => api.get('/api/central/resultado-contato/all'));
             setResultados(resRes.data ?? [
                 { id: 1, descricao: 'Contato Efetuado - Agendar', tela: 1 },
                 { id: 2, descricao: 'Retornar LigaÃ§Ã£o (Fila PrioritÃ¡ria)', tela: 2 },

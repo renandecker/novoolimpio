@@ -40,7 +40,17 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                 },
                 {key: 'material', label: 'Material', path: '/api/educacao/material-escolar-curso'},
                 {
-                    key: 'contrato',
+                    key: 'presencas',
+                    label: 'Presenças',
+                    empty: 'Dados de frequência e presença do aluno.',
+                },
+                {
+                    key: 'notas',
+                    label: 'Notas',
+                    empty: 'Matriz de notas e conceitos por grau.',
+                },
+                {
+                    key: 'documentos',
                     label: 'Documentos',
                     empty: 'Contratos, promissórias, certificados e boletins.',
                     nextLabel: 'Salvar'

@@ -102,11 +102,11 @@ public class GerirCobrancaService {
                     return Uni.join().all(diasUnis).andFailFast()
                             .map(lista -> {
                                 List<CobrancaDia> cobrancas = lista.stream()
-                                        .filter(c -> c.qtdLigacoes() > 0 || c.qtdEmails() > 0 || c.qtdCartas() > 0)
+                                        .filter(c -> c.qtdLigacoes() > 0 || c.qtdEmails() > 0)
                                         .collect(Collectors.toList());
 
                                 boolean semValor = custo == null ||
-                                        (custo.valorLigacao() == null && custo.valorEmail() == null && custo.valorCarta() == null);
+                                        (custo.valorLigacao() == null && custo.valorEmail() == null);
 
                                 BigDecimal valorTotal = cobrancas.stream()
                                         .map(CobrancaDia::valorTotal)
@@ -114,11 +114,10 @@ public class GerirCobrancaService {
 
                                 long totalLigacoes = cobrancas.stream().mapToLong(CobrancaDia::qtdLigacoes).sum();
                                 long totalEmails = cobrancas.stream().mapToLong(CobrancaDia::qtdEmails).sum();
-                                long totalCartas = cobrancas.stream().mapToLong(CobrancaDia::qtdCartas).sum();
 
                                 return new RelatorioCobranca(
                                         unidadeId, mes, ano, cobrancas, valorTotal,
-                                        totalLigacoes, totalEmails, totalCartas, semValor
+                                        totalLigacoes, totalEmails, semValor
                                 );
                             });
                 });
@@ -140,10 +139,9 @@ public class GerirCobrancaService {
                                 List<CobrancaPessoa> pessoasCobranca = new ArrayList<>(lista);
                                 long qtdLigacoes = pessoasCobranca.stream().mapToLong(CobrancaPessoa::qtdLigacoes).sum();
                                 long qtdEmails = pessoasCobranca.stream().mapToLong(CobrancaPessoa::qtdEmails).sum();
-                                long qtdCartas = pessoasCobranca.stream().mapToLong(CobrancaPessoa::qtdCartas).sum();
-                                BigDecimal valorTotal = calcularValorTotal(qtdLigacoes, qtdEmails, qtdCartas, custo);
+                                BigDecimal valorTotal = calcularValorTotal(qtdLigacoes, qtdEmails, custo);
 
-                                return new CobrancaDia(dia, pessoasCobranca, qtdLigacoes, qtdEmails, qtdCartas, valorTotal);
+                                return new CobrancaDia(dia, pessoasCobranca, qtdLigacoes, qtdEmails, valorTotal);
                             });
                 });
     }
@@ -156,31 +154,28 @@ public class GerirCobrancaService {
         ).asTuple().map(t -> {
             long qtdLigacoes = t.getItem1();
             long qtdEmails = t.getItem2();
-            long qtdCartas = 0; // não implementado
-            BigDecimal valorTotal = calcularValorTotalPessoa(qtdLigacoes, qtdEmails, qtdCartas, custo);
+            BigDecimal valorTotal = calcularValorTotalPessoa(qtdLigacoes, qtdEmails, custo);
 
-            return new CobrancaPessoa(dia, qtdLigacoes, qtdEmails, qtdCartas, pessoaId, valorTotal);
+            return new CobrancaPessoa(dia, qtdLigacoes, qtdEmails, pessoaId, valorTotal);
         });
     }
 
     // Calcula valor total para uma pessoa
-    private BigDecimal calcularValorTotalPessoa(long qtdLigacoes, long qtdEmails, long qtdCartas, CustoServicoResponse custo) {
+    private BigDecimal calcularValorTotalPessoa(long qtdLigacoes, long qtdEmails, CustoServicoResponse custo) {
         if (custo == null) {
             return BigDecimal.ZERO;
         }
         BigDecimal valorLigacao = custo.valorLigacao() != null ? custo.valorLigacao() : BigDecimal.ZERO;
         BigDecimal valorEmail = custo.valorEmail() != null ? custo.valorEmail() : BigDecimal.ZERO;
-        BigDecimal valorCarta = custo.valorCarta() != null ? custo.valorCarta() : BigDecimal.ZERO;
 
         return valorLigacao.multiply(BigDecimal.valueOf(qtdLigacoes))
                 .add(valorEmail.multiply(BigDecimal.valueOf(qtdEmails)))
-                .add(valorCarta.multiply(BigDecimal.valueOf(qtdCartas)))
                 .setScale(2, RoundingMode.HALF_DOWN);
     }
 
     // Calcula valor total para um dia
-    private BigDecimal calcularValorTotal(long qtdLigacoes, long qtdEmails, long qtdCartas, CustoServicoResponse custo) {
-        return calcularValorTotalPessoa(qtdLigacoes, qtdEmails, qtdCartas, custo);
+    private BigDecimal calcularValorTotal(long qtdLigacoes, long qtdEmails, CustoServicoResponse custo) {
+        return calcularValorTotalPessoa(qtdLigacoes, qtdEmails, custo);
     }
 
     // Lista todos os dias do mês
@@ -232,20 +227,6 @@ public class GerirCobrancaService {
                 });
     }
 
-    public Uni<String> calcularTotalCartas(Long unidadeId, int mes, int ano) {
-        return carregarCobrancas(unidadeId, mes, ano)
-                .map(r -> {
-                    CustoServicoResponse custo = custoServicoService.buscarCustoServicoPorUnidade(unidadeId)
-                            .flatMap(id -> id != null ? custoServicoService.find(id) : Uni.createFrom().item(null))
-                            .await().indefinitely();
-                    if (custo != null && custo.valorCarta() != null) {
-                        BigDecimal valor = custo.valorCarta().multiply(BigDecimal.valueOf(r.totalCartas()));
-                        return r.totalCartas() + " (R$ " + valor.setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",") + ")";
-                    }
-                    return String.valueOf(r.totalCartas());
-                });
-    }
-
     // Records para resposta
     public record RelatorioCobranca(
             Long unidadeId,
@@ -255,7 +236,6 @@ public class GerirCobrancaService {
             BigDecimal valorTotal,
             long totalLigacoes,
             long totalEmails,
-            long totalCartas,
             boolean semValor
     ) {
     }
@@ -265,7 +245,6 @@ public class GerirCobrancaService {
             List<CobrancaPessoa> pessoas,
             long qtdLigacoes,
             long qtdEmails,
-            long qtdCartas,
             BigDecimal valorTotal
     ) {
     }
@@ -274,7 +253,6 @@ public class GerirCobrancaService {
             Date data,
             long qtdLigacoes,
             long qtdEmails,
-            long qtdCartas,
             Long pessoaId,
             BigDecimal valorTotal
     ) {

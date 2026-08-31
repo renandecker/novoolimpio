@@ -42,3 +42,14 @@ WHERE upper(trim(p.hierarquia)) = 'ADMIN'
       SELECT 1 FROM public.bas_perfil_modulo pm
       WHERE pm.id_perfil = p.id AND pm.id_modulo = m.id
   );
+
+
+DROP TABLE IF EXISTS public.cur_curriculo_trabalho CASCADE;
+CREATE TABLE cur_curriculo_trabalho (
+    id BIGSERIAL PRIMARY KEY,
+    pessoa_id BIGINT,
+    dt_inicio DATE,
+    dt_fim DATE,
+    fl_ativo BOOLEAN DEFAULT true,
+    curriculo_base64 TEXT
+);

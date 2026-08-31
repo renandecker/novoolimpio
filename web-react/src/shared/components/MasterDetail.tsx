@@ -51,6 +51,9 @@ const formatTableCellValue = (key: string, value: unknown): string => {
         return flat.join(' - ');
     }
 
+    // Skip boolean conversion for ID fields - display raw value
+    if (key.startsWith('id_')) return String(value);
+
     let boolVal: boolean | null = null;
     if (typeof value === 'boolean') {
         boolVal = value;

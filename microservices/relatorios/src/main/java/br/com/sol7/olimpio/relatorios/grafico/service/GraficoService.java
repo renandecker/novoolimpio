@@ -1,14 +1,24 @@
 package br.com.sol7.olimpio.relatorios.grafico;
 
+import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.relatorios.grafico.dto.GraficoDadosResponse;
 
 import io.smallrye.mutiny.Uni;
+import io.vertx.mutiny.sqlclient.Pool;
+import io.vertx.mutiny.sqlclient.Row;
+import io.vertx.mutiny.sqlclient.RowSet;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 @ApplicationScoped
 @WithTransaction
@@ -16,6 +26,15 @@ public class GraficoService {
 
     @Inject
     GraficoRepository repository;
+
+    @Inject
+    Pool pool;
+
+    private static final Pattern COMANDOS_BLOQUEADOS = Pattern.compile(
+            "(?i)\\b(insert|update|delete|drop|alter|truncate|grant|revoke|create|exec|execute|call|copy|merge|vacuum|do|comment)\\b");
+    private static final Pattern INICIA_COM_SELECT = Pattern.compile("(?is)^\\s*(with|select)\\b");
+
+    private static final int LIMITE_MAXIMO = 500;
 
     public Uni<List<GraficoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -88,6 +107,151 @@ public class GraficoService {
         return new GraficoResponse(e.id, e.nome, e.todosUnidades, e.todosPerfis, e.todosUsuarios, e.formatoData, e.dataAlteracao, e.tipo, e.ordemGrafico, e.exibirPercentual, e.exibirLegenda, e.colunaLegenda, e.limite, e.coluna, e.altura, e.margem, e.diametro, e.exibirValor, e.valorAcumulado, e.tipoEixo, e.posicao, e.estruturaId, e.dimensaoReferenciaId, e.dimensaoInformacaoId, e.medidaInformacaoId, e.dimensaoCombinadoId, e.medidaCombinadoId);
     }
 
+
+    public Uni<GraficoDadosResponse> dados(Long id) {
+        return repository.findById(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Grafico not found"))
+                .chain(grafico -> {
+                    int limite = grafico.limite != null && !grafico.limite.isBlank()
+                            ? Math.min(Integer.parseInt(grafico.limite), LIMITE_MAXIMO) : LIMITE_MAXIMO;
+                    return montarResposta(grafico, limite);
+                });
+    }
+
+    private Uni<GraficoDadosResponse> montarResposta(Grafico grafico, int limite) {
+        return buscarEstruturaTabela(grafico.estruturaId).chain(tabela ->
+                buscarEstruturaCondicao(grafico.estruturaId).chain(condicao ->
+                        buscarDimensaoColuna(grafico.dimensaoReferenciaId).chain(dimColuna ->
+                                buscarMedidaColuna(grafico.medidaInformacaoId).chain(medColuna ->
+                                        buscarMedidaTipoInfo(grafico.medidaInformacaoId).chain(medTipoInfo ->
+                                                montarRespostaComDados(grafico, limite, tabela, condicao, dimColuna, medColuna, medTipoInfo))))));
+    }
+
+    private Uni<GraficoDadosResponse> montarRespostaComDados(Grafico grafico, int limite, String tabela, String condicao, String dimColuna, String medColuna, String medTipoInfo) {
+        if (tabela == null || tabela.isBlank())
+            return Uni.createFrom().failure(new BadRequestException("Estrutura do grafico sem tabela definida"));
+        if (dimColuna == null || dimColuna.isBlank())
+            return Uni.createFrom().failure(new BadRequestException("Dimensao de referencia sem coluna definida"));
+        if (medColuna == null || medColuna.isBlank())
+            return Uni.createFrom().failure(new BadRequestException("Medida de informacao sem coluna definida"));
+
+        String sqlPrincipal = montarSql(grafico.tipo, grafico.ordemGrafico, limite, tabela, condicao, dimColuna, medColuna, medTipoInfo);
+        return executarSql(sqlPrincipal).chain(dadosL -> montarCombinado(grafico, limite, tabela, condicao, dadosL));
+    }
+
+    private Uni<GraficoDadosResponse> montarCombinado(Grafico grafico, int limite, String tabela, String condicao, List<Map<String, Object>> dadosL) {
+        Uni<List<Map<String, Object>>> combinado;
+        if ("COMBINADO".equalsIgnoreCase(grafico.tipo) && grafico.dimensaoCombinadoId != null && grafico.medidaCombinadoId != null) {
+            combinado = buscarDimensaoColuna(grafico.dimensaoCombinadoId).chain(dimComb ->
+                            buscarMedidaColuna(grafico.medidaCombinadoId).chain(medComb ->
+                                    buscarMedidaTipoInfo(grafico.medidaCombinadoId).map(medCombTipo ->
+                                            montarSql(grafico.tipo, grafico.ordemGrafico, limite, tabela, condicao, dimComb, medComb, medCombTipo))))
+                    .chain(sqlComb -> executarSql(sqlComb));
+        } else {
+            combinado = Uni.createFrom().item(List.of());
+        }
+        return combinado.map(combL -> new GraficoDadosResponse(
+                grafico.id, grafico.nome, grafico.tipo, grafico.ordemGrafico,
+                grafico.exibirPercentual, grafico.exibirLegenda, grafico.exibirValor, grafico.valorAcumulado,
+                limite, grafico.posicao, dadosL, combL));
+    }
+
+    private String montarSql(String tipo, String ordemGrafico, int limite, String tabela, String condicao, String dimensaoColuna, String medidaColuna, String medidaTipoInfo) {
+        String medidaSql;
+        if ("CONTAGEM-DISTINTA".equalsIgnoreCase(medidaTipoInfo)) {
+            medidaSql = "count(DISTINCT " + medidaColuna + ")";
+        } else if ("CONTAGEM".equalsIgnoreCase(medidaTipoInfo)) {
+            medidaSql = "count(" + medidaColuna + ")";
+        } else {
+            medidaSql = "sum(" + medidaColuna + ")";
+        }
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT ").append(dimensaoColuna).append(" AS categoria, ").append(medidaSql).append(" AS valor");
+        sql.append(" FROM ").append(tabela);
+
+        if (condicao != null && !condicao.isBlank()) {
+            sql.append(" ").append(condicao);
+        }
+
+        sql.append(" GROUP BY 1 ORDER BY 2");
+
+        String ordem = ordemGrafico != null ? ordemGrafico.trim().toUpperCase() : "DESC";
+        if ("ASC".equals(ordem) || "DESC".equals(ordem)) {
+            sql.append(" ").append(ordem);
+        }
+
+        sql.append(" LIMIT ").append(limite);
+
+        return sql.toString();
+    }
+
+    private Uni<List<Map<String, Object>>> executarSql(String sql) {
+        validarSql(sql);
+        return pool.query(sql).execute().map(rowSet -> {
+            List<String> nomes = rowSet.columnsNames();
+            List<Map<String, Object>> linhas = new ArrayList<>();
+            for (Row row : rowSet) {
+                Map<String, Object> linha = new LinkedHashMap<>();
+                for (int i = 0; i < nomes.size(); i++) {
+                    String nome = nomes.get(i);
+                    Object valor = row.getValue(i);
+                    if (valor != null && !(valor instanceof Number) && !(valor instanceof String) && !(valor instanceof Boolean)) {
+                        valor = String.valueOf(valor);
+                    }
+                    linha.put(nome == null || nome.isBlank() ? "coluna" + i : nome, valor);
+                }
+                linhas.add(linha);
+            }
+            return linhas;
+        });
+    }
+
+    private void validarSql(String sql) {
+        if (sql == null || sql.isBlank()) throw new BadRequestException("SQL do grafico vazio.");
+        if (!INICIA_COM_SELECT.matcher(sql).find()) throw new BadRequestException("SQL deve iniciar com SELECT.");
+        if (COMANDOS_BLOQUEADOS.matcher(sql).find()) throw new BadRequestException("SQL contem comando nao permitido.");
+    }
+
+    private Uni<String> buscarEstruturaTabela(Long estruturaId) {
+        return Panache.getSession().chain(session ->
+                session.createNativeQuery("SELECT tabela FROM rel_estrutura WHERE id = ?1")
+                        .setParameter(1, estruturaId)
+                        .getSingleResultOrNull())
+                .map(r -> r == null ? null : r.toString().trim());
+    }
+
+    private Uni<String> buscarEstruturaCondicao(Long estruturaId) {
+        return Panache.getSession().chain(session ->
+                session.createNativeQuery("SELECT condicao FROM rel_estrutura WHERE id = ?1")
+                        .setParameter(1, estruturaId)
+                        .getSingleResultOrNull())
+                .map(r -> r == null ? null : r.toString().trim());
+    }
+
+    private Uni<String> buscarDimensaoColuna(Long dimensaoId) {
+        return Panache.getSession().chain(session ->
+                session.createNativeQuery("SELECT d.coluna FROM rel_dimensao d WHERE d.id = ?1")
+                        .setParameter(1, dimensaoId)
+                        .getSingleResultOrNull())
+                .map(r -> r == null ? null : r.toString().trim());
+    }
+
+    private Uni<String> buscarMedidaColuna(Long medidaId) {
+        return Panache.getSession().chain(session ->
+                session.createNativeQuery("SELECT m.coluna FROM rel_medida m WHERE m.id = ?1")
+                        .setParameter(1, medidaId)
+                        .getSingleResultOrNull())
+                .map(r -> r == null ? null : r.toString().trim());
+    }
+
+    private Uni<String> buscarMedidaTipoInfo(Long medidaId) {
+        return Panache.getSession().chain(session ->
+                session.createNativeQuery("SELECT m.tipo_info_medida FROM rel_medida m WHERE m.id = ?1")
+                        .setParameter(1, medidaId)
+                        .getSingleResultOrNull())
+                .map(r -> r == null ? null : r.toString().trim());
+    }
 
     // Migrado de GraficoController.autoCompleteDimensao (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/GraficoController.java:215, camada controller)
     // Logica original (adaptar):

@@ -1,7 +1,7 @@
 ﻿import {useEffect, useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
 import {alunoApi, AvaliacaoDetalhe, AvaliacaoRespostaEnvio} from '../../features/aluno/aluno';
-import '../../features/aluno/alunoPortal.css';
+import '../../features/aluno/AlunoPortal.css';
 
 export default function AlunoAvaliacaoResponderScreen() {
     const {id} = useParams();

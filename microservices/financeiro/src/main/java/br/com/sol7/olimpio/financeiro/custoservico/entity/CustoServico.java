@@ -18,16 +18,12 @@ public class CustoServico extends PanacheEntity {
     public BigDecimal valorSms;
     @Column(name = "valor_ligacao")
     public BigDecimal valorLigacao;
-    @Column(name = "valor_carta")
-    public BigDecimal valorCarta;
     @Column(name = "data_alteracao")
     public Date dataAlteracao;
     @Column(name = "tipo_sms")
     public int tipoSms;
     @Column(name = "tipo_ligacao")
     public int tipoLigacao;
-    @Column(name = "tipo_carta")
-    public int tipoCarta;
     @Column(name = "tipo_email")
     public int tipoEmail;
 }

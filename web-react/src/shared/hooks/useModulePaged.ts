@@ -14,15 +14,17 @@ export const useModulePaged = (path: string, page: number, size: number, params?
     const paramsKey = params ? JSON.stringify(params) : '';
     const filtersKey = filters ? JSON.stringify(filters) : '';
     const hasFilters = filters && Object.keys(filters).length > 0;
+    // Normalize path to avoid double /paged or /search (e.g. caller passed "/api/.../paged")
+    const basePath = path.replace(/\/paged\/?$/, '').replace(/\/search\/?$/, '');
     const query = useQuery({
         queryKey: [path, hasFilters ? 'search' : 'paged', page, size, paramsKey, filtersKey],
         queryFn: async () => {
             if (hasFilters) {
-                return (await api.post<PagedResponse<ApiItem>>(`${path}/search`, filters, {
+                return (await api.post<PagedResponse<ApiItem>>(`${basePath}/search`, filters, {
                     params: {page, size, ...params}
                 })).data;
             }
-            return (await api.get<PagedResponse<ApiItem>>(`${path}/paged`, {
+            return (await api.get<PagedResponse<ApiItem>>(`${basePath}/paged`, {
                 params: {page, size, ...params}
             })).data;
         },
@@ -31,15 +33,15 @@ export const useModulePaged = (path: string, page: number, size: number, params?
     const invalidate = () => queryClient.invalidateQueries({queryKey: [path, 'paged']});
     const invalidateSearch = () => queryClient.invalidateQueries({queryKey: [path, 'search']});
     const create = useMutation({
-        mutationFn: (body: ApiRequest) => api.post(path, body),
+        mutationFn: (body: ApiRequest) => api.post(basePath, body),
         onSuccess: () => { invalidate(); invalidateSearch(); },
     });
     const update = useMutation({
-        mutationFn: ({id, body}: { id: number; body: ApiRequest }) => api.put(`${path}/${id}`, body),
+        mutationFn: ({id, body}: { id: number; body: ApiRequest }) => api.put(`${basePath}/${id}`, body),
         onSuccess: () => { invalidate(); invalidateSearch(); },
     });
     const remove = useMutation({
-        mutationFn: (id: number) => api.delete(`${path}/${id}`),
+        mutationFn: (id: number) => api.delete(`${basePath}/${id}`),
         onSuccess: () => { invalidate(); invalidateSearch(); },
     });
     return {...query, create, update, remove};

@@ -1,7 +1,7 @@
 ﻿import {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 import {alunoApi, AulaAluno, formatarData} from '../../features/aluno/aluno';
-import '../../features/aluno/alunoPortal.css';
+import '../../features/aluno/AlunoPortal.css';
 
 export default function AlunoAulasScreen() {
     const [aulas, setAulas] = useState<AulaAluno[]>([]);
@@ -46,7 +46,7 @@ export default function AlunoAulasScreen() {
                         <th>Componente Curricular</th>
                         <th>Turma</th>
                         <th>Aula</th>
-                        <th>DescriÃ§Ã£o</th>
+                        <th>Descrição</th>
                         <th>Data da Aula</th>
                         <th>Data Assistida</th>
                         <th>SituaÃ§Ã£o</th>

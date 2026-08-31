@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {alunoApi, BoletimResumo, formatarNota, formatarPercentual} from '../aluno';
+import {CurriculumAttachment} from '../shared/components/CurriculumAttachment';
 import type {ParamList} from '../HomeScreen';
 
 const STATUS_ROTULO: Record<string, string> = {
@@ -23,6 +24,9 @@ export default function AlunoDashboardScreen({navigation}: NativeStackScreenProp
     const [boletins, setBoletins] = useState<BoletimResumo[]>([]);
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(true);
+    const [showCurriculoAttachment, setShowCurriculoAttachment] = useState(false);
+    const [curriculoFileName, setCurriculoFileName] = useState<string>('');
+    const [curriculoFileBase64, setCurriculoFileBase64] = useState<string | null>(null);
 
     useEffect(() => {
         let active = true;
@@ -82,6 +86,18 @@ export default function AlunoDashboardScreen({navigation}: NativeStackScreenProp
 
             {boletins.length === 0 && <Text style={styles.empty}>Nenhuma matrícula encontrada.</Text>}
 
+            <CurriculumAttachment
+                visible={showCurriculoAttachment}
+                onClose={() => setShowCurriculoAttachment(false)}
+                onAttachmentUpdate={(fileBase64, fileName) => {
+                    setCurriculoFileBase64(fileBase64);
+                    setCurriculoFileName(fileName);
+                    Alert.alert('Sucesso', 'Currículo anexado com sucesso!', [{text: 'OK', onPress: () => setShowCurriculoAttachment(false)}]);
+                }}
+                currentFileName={curriculoFileName}
+                currentFileBase64={curriculoFileBase64}
+            />
+
             {boletins.map((b) => (
                 <View style={styles.item} key={b.matricula.id}>
                     <View style={styles.itemHeader}>
@@ -110,6 +126,9 @@ export default function AlunoDashboardScreen({navigation}: NativeStackScreenProp
                         </Text>
                     </View>
                     <View style={styles.itemActions}>
+                        <Pressable onPress={() => setShowCurriculoAttachment(true)}>
+                            <Text style={styles.link}>Anexar currículo</Text>
+                        </Pressable>
                         <Pressable onPress={() => navigation.navigate('aluno/boletim')}>
                             <Text style={styles.link}>Ver boletim</Text>
                         </Pressable>

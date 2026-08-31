@@ -89,6 +89,13 @@ public class CurriculoTrabalhoService {
                         .chain(v -> repository.delete(entity)));
     }
 
+    public Uni<CurriculoTrabalhoResponse> atualizarCurriculoBase64(Long id, String curriculoBase64) {
+        return repository.findById(id)
+                .onItem().ifNull().failWith(() -> new NotFoundException("CurriculoTrabalho não encontrado: " + id))
+                .invoke(e -> e.curriculoBase64 = curriculoBase64)
+                .onItem().transformToUni(this::toResponse);
+    }
+
     public Uni<Map<String, List<RefOption>>> refs() {
         return refService.resolve(Map.of(
                 "id_pessoa",

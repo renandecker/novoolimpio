@@ -1,7 +1,7 @@
 ﻿import {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 import {alunoApi, AvaliacaoAluno, formatarData} from '../../features/aluno/aluno';
-import '../../features/aluno/alunoPortal.css';
+import '../../features/aluno/AlunoPortal.css';
 
 export default function AlunoAvaliacoesScreen() {
     const [avaliacoes, setAvaliacoes] = useState<AvaliacaoAluno[]>([]);

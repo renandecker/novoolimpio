@@ -503,21 +503,7 @@ const [carregando, setCarregando] = useState(true);
         <PermissionGate permission="READ">
             <main>
                 <h1>Oferecimento Componente Curricular</h1>
-                <div style={{display: 'flex', width: '100%', gap: '16px', marginTop: '16px'}}>
-                    <div style={{width: '20%', minWidth: '200px'}}>
-                        <div className="div_form" style={{padding: '12px'}}>
-                            <div className="form-title" style={{fontSize: '14px', marginBottom: '12px'}}>OpÃ§Ãµes</div>
-                            <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                                <button type="button" className="btn-action btnblack" style={{width: '100%', textAlign: 'left'}} onClick={() => navigate('/view/oferecimentoComponenteCurricular/formOferecimentoComponenteCurricular')}>Novo Oferecimento</button>
-                                <button type="button" className="btn-action btnyellow" style={{width: '100%', textAlign: 'left'}} onClick={() => navigate('/view/oferecimentoComponenteCurricular/listOferecimentoComponenteCurricular')}>Listar Oferecimentos</button>
-                                <button type="button" className="btn-action btnblue" style={{width: '100%', textAlign: 'left'}} onClick={() => window.open(`/api/educacao/disponibilidade-sala/schedule-events?unidadeId=${data.entity.unidadeId}`, '_blank')}>Disponibilidade Salas</button>
-                                <button type="button" className="btn-action btnpurple" style={{width: '100%', textAlign: 'left'}} onClick={() => window.open(`/api/educacao/disponibilidade-professor/schedule-events?unidadeId=${data.entity.unidadeId}`, '_blank')}>Disponibilidade Professores</button>
-                                <button type="button" className="btn-action btnstop" style={{width: '100%', textAlign: 'left'}} onClick={() => navigate('/view/oferecimentoComponenteCurricular/listOferecimentoCurso')}>Oferecimentos Curso</button>
-                                <button type="button" className="btn-action btnred" style={{width: '100%', textAlign: 'left'}} onClick={voltarAbaOuLista}>Voltar</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div style={{width: '80%'}}>
+<div style={{width: '100%'}}>
                         <div className="div_form">
                             <div className="form-title">Oferecimento Componente Curricular</div>
                             <div className="ofc-tabs">
@@ -676,7 +662,6 @@ const [carregando, setCarregando] = useState(true);
                             </div>
                         </div>
                     </div>
-                </div>
             </main>
         </PermissionGate>
     );

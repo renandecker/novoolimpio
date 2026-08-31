@@ -1,12 +1,14 @@
 ﻿import {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 import {alunoApi, AulaAluno, BoletimResumo, formatarNota, formatarPercentual} from '../../features/aluno/aluno';
-import '../../features/aluno/alunoPortal.css';
+import {Base64FileUpload} from '../../shared/components/Base64FileUpload';
+import {CurriculumAttachmentModal} from './CurriculumAttachmentModal';
+import '../../features/aluno/AlunoPortal.css';
 
 const STATUS_ROTULO: Record<string, string> = {
     APROVADO: 'Aprovado',
     'EM EXAME': 'Em exame',
-    'REPROVADO POR FREQUÃŠNCIA': 'Reprovado por frequÃªncia',
+    'REPROVADO POR FREQUÊNCIA': 'Reprovado por frequência',
     'SEM NOTAS': 'Sem notas',
 };
 
@@ -16,6 +18,9 @@ export default function AlunoDashboardScreen() {
     const [chamadas, setChamadas] = useState<AulaAluno[]>([]);
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(true);
+    const [showCurriculoAttachment, setShowCurriculoAttachment] = useState(false);
+    const [curriculoFileName, setCurriculoFileName] = useState<string>('');
+    const [curriculoFileBase64, setCurriculoFileBase64] = useState<string | null>(null);
 
     useEffect(() => {
         let active = true;
@@ -81,11 +86,12 @@ export default function AlunoDashboardScreen() {
                             <span><strong>MÃ©dia:</strong> {formatarNota(b.media)}</span>
                             <span><strong>FrequÃªncia:</strong> {formatarPercentual(b.frequenciaPerc)}</span>
                         </div>
-                        <div className="aluno-portal-item-acoes">
+<div className="aluno-portal-item-acoes">
                             <Link to="/aluno/boletim">Ver boletim</Link>
-                            <Link to="/aluno/frequencia">Ver frequÃªncia</Link>
+                            <Link to="/aluno/frequencia">Ver frequência</Link>
                             <Link to="/aluno/aulas">Ver aulas</Link>
-                            <Link to="/aluno/avaliacoes">Ver avaliaÃ§Ãµes</Link>
+                            <Link to="/aluno/avaliacoes">Ver avaliações</Link>
+                            <Link to="/aluno/curriculo-anexo">Anexar currículo</Link>
                         </div>
                     </section>
                 ))}
@@ -106,6 +112,32 @@ export default function AlunoDashboardScreen() {
                     </ul>
                 </div>
             )}
+
+            <div style={{marginTop: 32, padding: 16, background: '#f8f9fa', borderRadius: 8}}>
+                <h3>Anexar Currículo</h3>
+                <p style={{color: '#666', marginBottom: 16}}>Upload de documento de currículo do aluno.</p>
+                <Base64FileUpload
+                    value={curriculoFileBase64 || ''}
+                    onChange={(dataUrl) => setCurriculoFileBase64(dataUrl)}
+                    accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    label="Documento de Currículo"
+                />
+                {curriculoFileBase64 && (
+                    <p style={{color: '#2a5a88', marginTop: 8}}>Documento anexado com sucesso.</p>
+                )}
+            </div>
+
+            <CurriculumAttachmentModal
+                visible={showCurriculoAttachment}
+                onClose={() => setShowCurriculoAttachment(false)}
+                onAttachmentUpdate={(fileBase64, fileName) => {
+                    setCurriculoFileBase64(fileBase64);
+                    setCurriculoFileName(fileName);
+                    alert('Currículo anexado com sucesso!');
+                }}
+                currentFileName={curriculoFileName}
+                currentFileBase64={curriculoFileBase64}
+            />
         </main>
     );
 }

@@ -10,7 +10,7 @@ export default function ViewTipoCanalListTipoCanalListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <h1>Tipo Canal</h1>
-                <DataTable path="/api/comercial/tipo-canal/paged" columns={COLUMNS} maxMainColumns={COLUMNS.length}/>
+                <DataTable path="/api/comercial/tipo-canal" columns={COLUMNS} maxMainColumns={COLUMNS.length}/>
             </main>
         </PermissionGate>
     );

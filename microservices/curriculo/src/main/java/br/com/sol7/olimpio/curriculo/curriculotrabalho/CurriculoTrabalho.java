@@ -26,4 +26,7 @@ public class CurriculoTrabalho extends PanacheEntity {
 
     @Column(name = "fl_ativo")
     public Boolean flAtivo;
+
+    @Column(name = "curriculo_base64")
+    public String curriculoBase64;
 }

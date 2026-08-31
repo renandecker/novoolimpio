@@ -30,8 +30,10 @@ public class AsaasAuth {
     /**
      * Busca o token Asaas para uma unidade especifica.
      * Se unidadeId for null, usa variavel de ambiente.
+     * Nome diferente de token() para não ambiguar o @ClientHeaderParam
+     * (ver CobrancasAsaasClient:25) que resolve por nome do método.
      */
-    public String token(Long unidadeId) {
+    public String tokenForUnidade(Long unidadeId) {
         if (unidadeId == null) {
             return token();
         }

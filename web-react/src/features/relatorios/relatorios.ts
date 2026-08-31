@@ -12,7 +12,27 @@ export type RelatorioAberto = {
     nome: string;
     tipo: string;
     configuracao: Record<string, unknown>;
-    dados: { colunas: string[]; linhas: Record<string, unknown>[] } | null;
+    dados: RelatorioDados | null;
+};
+
+export type LinhaGrafico = {
+    categoria?: string;
+    valor?: number;
+    [key: string]: unknown;
+};
+
+export type RelatorioDados = {
+    colunas?: string[];
+    linhas?: Record<string, unknown>[];
+    id?: number;
+    ordemGrafico?: string;
+    exibirPercentual?: boolean;
+    exibirLegenda?: boolean;
+    exibirValor?: boolean;
+    valorAcumulado?: boolean;
+    limite?: number;
+    posicao?: string;
+    linhasCombinado?: LinhaGrafico[];
 };
 
 export const listarRelatoriosDisponiveis = async (page = 0, size = 10, busca?: string): Promise<PagedResponse<RelatorioDisponivel>> =>

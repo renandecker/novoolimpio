@@ -1,7 +1,7 @@
 ﻿import {useEffect, useState} from 'react';
 import {alunoApi, ContratoFinanceiro, Financeiro, formatarData, formatarMoeda, Parcela} from '../../features/aluno/aluno';
 import {PixQrCodeModal} from '../../features/professor/GestaoAlunoModais';
-import '../../features/aluno/alunoPortal.css';
+import '../../features/aluno/AlunoPortal.css';
 
 function ParcelasTabela({parcelas, titulo, pessoaId}: { parcelas: Parcela[]; titulo: string; pessoaId: number }) {
     if (parcelas.length === 0) return null;
@@ -26,12 +26,12 @@ function ParcelasTabela({parcelas, titulo, pessoaId}: { parcelas: Parcela[]; tit
                 <table className="aluno-portal-tabela">
                     <thead>
                     <tr>
-                        <th>DescriÃ§Ã£o</th>
+                        <th>Descrição</th>
                         <th>Parcela</th>
                         <th>Vencimento</th>
                         <th>Valor</th>
                         <th>Valor pago</th>
-                        <th>SituaÃ§Ã£o</th>
+                        <th>Situação</th>
                         <th>AÃ§Ãµes</th>
                     </tr>
                     </thead>

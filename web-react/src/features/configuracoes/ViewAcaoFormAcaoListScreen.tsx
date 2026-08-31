@@ -42,7 +42,14 @@ export default function ViewAcaoFormAcaoListScreen() {
     const [showPessoaModal, setShowPessoaModal] = useState(false);
 
     useEffect(() => {
-        fetch('/api/comercial/tipo-acao').then(r => r.json()).then(data => {
+        fetch('/api/comercial/tipo-acao').then(async r => {
+            const ct = r.headers.get('content-type') || '';
+            if (!r.ok || !ct.includes('application/json')) {
+                const t = await r.text();
+                throw new Error(`API /tipo-acao retornou ${r.status} non-JSON: ${t.slice(0,80)}`);
+            }
+            return r.json();
+        }).then(data => {
             const list = Array.isArray(data) ? data : (data.content || data.items || []);
             setTipoAcoes(list);
         }).catch(() => {});

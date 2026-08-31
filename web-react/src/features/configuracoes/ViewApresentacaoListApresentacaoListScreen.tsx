@@ -11,7 +11,7 @@ export default function ViewApresentacaoListApresentacaoListScreen() {
                         {
                             key: 'imagens',
                             label: 'Imagens',
-                            path: '/api/educacao/apresentacao/paged',
+                            path: '/api/educacao/apresentacao',
                             columns: [
                                 {key: 'ordem', label: 'Slide NÃºmero'},
                                 {key: 'local', label: 'Local'},
@@ -20,7 +20,7 @@ export default function ViewApresentacaoListApresentacaoListScreen() {
                         {
                             key: 'videos',
                             label: 'VÃ­deos',
-                            path: '/api/educacao/apresentacaovideo/paged',
+                            path: '/api/educacao/apresentacaovideo',
                             columns: [
                                 {key: 'titulo', label: 'TÃ­tulo'},
                                 {key: 'local', label: 'Local'},

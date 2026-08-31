@@ -9,7 +9,7 @@ export default function ViewTipoAcaoListTipoAcaoListScreen() {
                 path="/api/view/tipoAcao/listTipoAcao"
                 columns={[
                     {key: 'id', label: 'Id'},
-                    {key: 'descricao', label: 'DescriÃ§Ã£o'}
+                    {key: 'descricao', label: 'Descrição'}
                 ]}
             />
         </main>

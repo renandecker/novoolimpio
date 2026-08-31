@@ -1,7 +1,7 @@
 ﻿import {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 import {alunoApi, Boletim, Grau, formatarNota, formatarPercentual} from '../../features/aluno/aluno';
-import '../../features/aluno/alunoPortal.css';
+import '../../features/aluno/AlunoPortal.css';
 
 const STATUS_ROTULO: Record<string, string> = {
     APROVADO: 'Aprovado',

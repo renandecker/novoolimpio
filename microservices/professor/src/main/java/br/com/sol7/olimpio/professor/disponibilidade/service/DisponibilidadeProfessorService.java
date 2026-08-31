@@ -24,6 +24,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 @WithTransaction
@@ -48,10 +50,10 @@ public class DisponibilidadeProfessorService {
                     " WHERE f.fl_nacional = true AND f.dt_feriado >= ?1 AND f.dt_feriado < ?2 " +
                     " ORDER BY f.dt_feriado";
 
-    private static final String SQL_FERIADOS_UNIDADES =
+    private static final String SQL_FERIADOS_UNIDADES_BASE =
             "SELECT DISTINCT f.nome, f.dt_feriado FROM bas_feriado f " +
                     " LEFT JOIN bas_feriado_unidade fu ON fu.id_feriado = f.id " +
-                    " WHERE (f.fl_nacional = true OR fu.id_unidade IN (?1)) AND f.dt_feriado >= ?2 AND f.dt_feriado < ?3 " +
+                    " WHERE (f.fl_nacional = true OR fu.id_unidade IN ({placeholders})) AND f.dt_feriado >= ?{dateStart} AND f.dt_feriado < ?{dateEnd} " +
                     " ORDER BY f.dt_feriado";
 
     private static final String SQL_OCORRENCIAS_PROFESSOR =
@@ -131,9 +133,23 @@ public class DisponibilidadeProfessorService {
         return nativeQuery(SQL_UNIDADES_PROFESSOR, professorId).map(rows -> rows.stream()
                 .map(r -> toLong(r[0])).toList())
                 .chain(unidades -> {
-                    Uni<List<Object[]>> feriados = unidades.isEmpty()
-                            ? nativeQuery(SQL_FERIADOS_NACIONAIS, toDate(first), toDate(last.plusDays(1)))
-                            : nativeQuery(SQL_FERIADOS_UNIDADES, unidades, toDate(first), toDate(last.plusDays(1)));
+                    Uni<List<Object[]>> feriados;
+                    if (unidades.isEmpty()) {
+                        feriados = nativeQuery(SQL_FERIADOS_NACIONAIS, toDate(first), toDate(last.plusDays(1)));
+                    } else {
+                        String placeholders = unidades.stream().map(u -> "?").collect(Collectors.joining(","));
+                        int unitCount = unidades.size();
+                        int dateStartIdx = unitCount + 1;
+                        int dateEndIdx = unitCount + 2;
+                        String sql = SQL_FERIADOS_UNIDADES_BASE
+                                .replace("{placeholders}", placeholders)
+                                .replace("{dateStart}", String.valueOf(dateStartIdx))
+                                .replace("{dateEnd}", String.valueOf(dateEndIdx));
+                        List<Object> params = new ArrayList<>(unidades);
+                        params.add(toDate(first));
+                        params.add(toDate(last.plusDays(1)));
+                        feriados = nativeQuery(sql, params.toArray());
+                    }
                     return Uni.combine().all().unis(ocorrencias, disponibilidades, turnos, feriados).asTuple()
                             .map(t -> buildSchedule(t.getItem1(), t.getItem2(), t.getItem3(), t.getItem4(), first, last));
                 });

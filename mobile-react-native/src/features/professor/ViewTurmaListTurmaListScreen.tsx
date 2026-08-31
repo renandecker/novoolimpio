@@ -77,7 +77,7 @@ function ProrrogarTurmaModal({visible, onClose}: { visible: boolean; onClose: ()
                                 key: 'selecioneProfessor',
                                 label: 'Professor',
                                 nextLabel: 'Salvar',
-                                content: <ModuleList path="/api/professor/professor"/>
+                                content: <ModuleList path="/api/view/professor/listProfessor"/>
                             },
                         ]}
                     />
