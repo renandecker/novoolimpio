@@ -17,7 +17,7 @@ export default function ViewTurnoFuncionarioFormTurnoFuncionarioListScreen() {
             <main>
                 <h1>Form Turno Funcionario</h1>
                 <div className="div_form">
-                    <div className="form-title">Turno FuncionÃ¡rio</div>
+                    <div className="form-title">Turno Funcionário</div>
                     <div className="table_form">
                         <MasterDetail
                             label="Turno Trabalho"

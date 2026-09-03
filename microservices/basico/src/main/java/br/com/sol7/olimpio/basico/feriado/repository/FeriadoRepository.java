@@ -122,6 +122,34 @@ public class FeriadoRepository implements PanacheRepository<Feriado> {
     }
 
 
+    // Migrado da troca de feriados (TrocaFeriadoDialog do listFeriado.xhtml) - reatribui as
+    // unidades dos feriados de origem para o feriado de destino antes de removê-los.
+    public static final String SQL_TROCAR_UNIDADE =
+            "UPDATE bas_feriado_unidade SET id_feriado = :destino WHERE id_feriado = :origem";
+    public static final String SQL_REMOVER_FERIADO =
+            "DELETE FROM bas_feriado WHERE id = :origem";
+
+    public Uni<Void> trocarFeriado(Long destinoId, Long origemId) {
+        final String SQL_TROCAR_TIPO_CURSO =
+                "UPDATE bas_feriado_tipo_curso SET id_feriado = :destino WHERE id_feriado = :origem";
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_TROCAR_UNIDADE)
+                        .setParameter("destino", destinoId)
+                        .setParameter("origem", origemId)
+                        .executeUpdate())
+                .chain(r -> io.quarkus.hibernate.reactive.panache.Panache.getSession())
+                .chain(session -> session.createNativeQuery(SQL_TROCAR_TIPO_CURSO)
+                        .setParameter("destino", destinoId)
+                        .setParameter("origem", origemId)
+                        .executeUpdate())
+                .chain(r -> io.quarkus.hibernate.reactive.panache.Panache.getSession())
+                .chain(session -> session.createNativeQuery(SQL_REMOVER_FERIADO)
+                        .setParameter("origem", origemId)
+                        .executeUpdate())
+                .replaceWithVoid();
+    }
+
+
     // Migrado de FeriadoRepository.buscarFeriadosComUnidadeData (legado) - HQL original:
     // Select f from Feriado f left join f.unidade u left join f.tipoCurso tc where (u = (?1) or f.nacional = true) and f.dataFeriado = ?2 and tc is null
     public static final String SQL_BUSCAR_FERIADOS_COM_UNIDADE_DATA =

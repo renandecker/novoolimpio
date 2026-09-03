@@ -23,6 +23,8 @@ const ETNIAS=[{value:'1',label:'Branca'},{value:'2',label:'Preta'},{value:'3',la
 const ESTADOS_CIVIS=[{value:'1',label:'Solteiro(a)'},{value:'2',label:'Casado(a)'},{value:'3',label:'Divorciado(a)'},{value:'4',label:'Viúvo(a)'},{value:'5',label:'União Estável'}];
 const ESCOLARIDADES=[{value:'1',label:'Ensino Fundamental Incompleto'},{value:'2',label:'Ensino Fundamental Completo'},{value:'3',label:'Ensino Médio Incompleto'},{value:'4',label:'Ensino Médio Completo'},{value:'5',label:'Superior Incompleto'},{value:'6',label:'Superior Completo'},{value:'7',label:'Pós-Graduação'}];
 
+type OptionItem={value:string;label:string};
+
 type Endereco={id?:number; cep:string; cidade:string; bairro:string; logradouro:string; numero:string; complemento:string};
 
 async function buscarCepViaCep(cep:string):Promise<Partial<Endereco>|null>{
@@ -148,6 +150,18 @@ export default function ViewUsuarioFormUsuarioListScreen(){
         try{ const r=await api.get<any[]>('/api/basico/funcao'); const arr=Array.isArray(r.data)?r.data:(r.data as any)?.content??[]; setFuncoes(arr.map((x:any)=>({id:x.id,label:x.descricao??x.nome??String(x.id)}))); }catch{}
     })();},[]);
 
+    // ── Opções carregadas por API (gênero, etnia, estado civil, escolaridade) ──
+    const [generoOptions,setGeneroOptions]=useState<OptionItem[]>(GENEROS);
+    const [etniaOptions,setEtniaOptions]=useState<OptionItem[]>(ETNIAS);
+    const [estadoCivilOptions,setEstadoCivilOptions]=useState<OptionItem[]>(ESTADOS_CIVIS);
+    const [escolaridadeOptions,setEscolaridadeOptions]=useState<OptionItem[]>(ESCOLARIDADES);
+    useEffect(()=>{(async()=>{
+        try{ const r=await api.get<any[]>('/api/basico/genero/list'); const arr=Array.isArray(r.data)?r.data:(r.data as any)?.content??[]; if(arr.length) setGeneroOptions(arr.map((x:any)=>({value:String(x.id),label:x.descricao??x.nome??String(x.id)}))); }catch{}
+        try{ const r=await api.get<any[]>('/api/basico/etnia'); const arr=Array.isArray(r.data)?r.data:(r.data as any)?.content??[]; if(arr.length) setEtniaOptions(arr.map((x:any)=>({value:String(x.id),label:x.descricao??x.nome??String(x.id)}))); }catch{}
+        try{ const r=await api.get<any[]>('/api/basico/estado-civil'); const arr=Array.isArray(r.data)?r.data:(r.data as any)?.content??[]; if(arr.length) setEstadoCivilOptions(arr.map((x:any)=>({value:String(x.id),label:x.descricao??x.nome??String(x.id)}))); }catch{}
+        try{ const r=await api.get<any[]>('/api/basico/escolaridade'); const arr=Array.isArray(r.data)?r.data:(r.data as any)?.content??[]; if(arr.length) setEscolaridadeOptions(arr.map((x:any)=>({value:String(x.id),label:x.descricao??x.nome??String(x.id)}))); }catch{}
+    })();},[]);
+
     const [unidadesAcesso,setUnidadesAcesso]=useState<ApiItem[]>([]);
     const [unidadeDefaultId,setUnidadeDefaultId]=useState('');
     const [perfis,setPerfis]=useState<ApiItem[]>([]);
@@ -232,10 +246,10 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                         <Field label="Nome Referência 2" value={f.nomeReferencia2} onChange={v=>upd('nomeReferencia2',v)} placeholder="Nome referência 2" />
                         <Field label="Telefone Referência 2" value={f.telefoneReferencia2} onChange={v=>upd('telefoneReferencia2',formatPhone(v))} placeholder="(99) 9999-9999" keyboardType="phone-pad" />
                         <Field label="Celular Referência 2" value={f.celularReferencia2} onChange={v=>upd('celularReferencia2',formatPhone(v))} placeholder="(99) 99999-9999" keyboardType="phone-pad" />
-                        <SelectField label="Gênero" value={f.generoId} onChange={v=>upd('generoId',v)} options={GENEROS} />
-                        <SelectField label="Etnia" value={f.etniaId} onChange={v=>upd('etniaId',v)} options={ETNIAS} />
-                        <SelectField label="Estado Civil" required value={f.estadoCivilId} onChange={v=>upd('estadoCivilId',v)} options={ESTADOS_CIVIS} />
-                        <SelectField label="Escolaridade" required value={f.escolaridadeId} onChange={v=>upd('escolaridadeId',v)} options={ESCOLARIDADES} />
+                        <SelectField label="Gênero" value={f.generoId} onChange={v=>upd('generoId',v)} options={generoOptions} />
+                        <SelectField label="Etnia" value={f.etniaId} onChange={v=>upd('etniaId',v)} options={etniaOptions} />
+                        <SelectField label="Estado Civil" required value={f.estadoCivilId} onChange={v=>upd('estadoCivilId',v)} options={estadoCivilOptions} />
+                        <SelectField label="Escolaridade" required value={f.escolaridadeId} onChange={v=>upd('escolaridadeId',v)} options={escolaridadeOptions} />
                     </View>
                 )}
 

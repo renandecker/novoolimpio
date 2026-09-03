@@ -52,8 +52,8 @@ public class ResultadoLigacaoCobrancaController {
 
     @GET
     @Path("/auto-complete-com-etapa")
-    public Uni<List<Long>> autoCompleteComEtapa(@QueryParam("query") String query) {
-        return service.autoCompleteComEtapa(query);
+    public Uni<List<Long>> autoCompleteComEtapa(@QueryParam("query") String query, @QueryParam("etapasCobrancaId") Long etapasCobrancaId) {
+        return service.autoCompleteComEtapa(query, etapasCobrancaId);
     }
 
 

@@ -9,8 +9,8 @@ export default function ViewProfessorFormProfessorListScreen() {
                 <h1>Form Professor</h1>
                 <ModuleTabs
                     tabs={[
-                        {key: 'informacoes', label: 'InformaÃ§Ãµes', path: '/api/view/professor/formProfessor'},
-                        {key: 'disponibilidade', label: 'Disponibilidade', empty: 'ConteÃºdo de Disponibilidade.'},
+                        {key: 'informacoes', label: 'Informações', path: '/api/view/professor/formProfessor'},
+                        {key: 'disponibilidade', label: 'Disponibilidade', empty: 'Conteúdo de Disponibilidade.'},
                         {
                             key: 'componenteCurricular',
                             label: 'Componente Curricular',

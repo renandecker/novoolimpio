@@ -22,7 +22,7 @@ const COLUMNS: DataTableColumn[] = [
     {key: 'categoria_descricao', label: 'Categoria'},
     {key: 'valor', label: 'Valor', render: formatValor},
     {key: 'quantidade', label: 'Quantidade'},
-    {key: 'ativo', label: 'Ativo', render: (item) => (asRecord(item).ativo ? 'Sim' : 'NÃ£o')},
+    {key: 'ativo', label: 'Ativo', render: (item) => (asRecord(item).ativo ? 'Sim' : 'Não')},
     {key: 'dt_cadastrado', label: 'Data Cadastro', render: (item) => formatDate(asRecord(item).dt_cadastrado)},
 ];
 

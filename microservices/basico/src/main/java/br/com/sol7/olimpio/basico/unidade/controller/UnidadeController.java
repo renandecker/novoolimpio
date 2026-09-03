@@ -1,5 +1,6 @@
 package br.com.sol7.olimpio.basico.unidade.controller;
 
+import br.com.sol7.olimpio.basico.usuario.service.UsuarioService;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
@@ -19,6 +20,8 @@ import br.com.sol7.olimpio.basico.unidade.service.UnidadeService;
 public class UnidadeController {
     @Inject
     UnidadeService service;
+    @Inject
+    UsuarioService usuarioService;
 
     @GET
     public Uni<List<UnidadeResponse>> list() {
@@ -147,8 +150,9 @@ public class UnidadeController {
 
     @GET
     @Path("/auto-complete-unidade-usuario")
-    public Uni<List<Long>> autoCompleteUnidadeUsuario(@QueryParam("query") String query) {
-        return service.autoCompleteUnidadeUsuario(query);
+    public Uni<List<Long>> autoCompleteUnidadeUsuario(@HeaderParam("X-Authenticated-Username") String username, @QueryParam("query") String query) {
+        return usuarioService.buscarUnidadesDisponiveisPorUsername(username)
+                .onItem().transformToUni(unidadesIds -> service.autoCompleteUnidadeUsuario(query, unidadesIds));
     }
 
 
@@ -161,8 +165,9 @@ public class UnidadeController {
 
     @GET
     @Path("/buscar-unidade-com-turnos-dia-semana")
-    public Uni<List<Long>> buscarUnidadeComTurnosDiaSemana(@QueryParam("diaSemana") Integer diaSemana) {
-        return service.buscarUnidadeComTurnosDiaSemana(diaSemana);
+    public Uni<List<Long>> buscarUnidadeComTurnosDiaSemana(@HeaderParam("X-Authenticated-Username") String username, @QueryParam("diaSemana") Integer diaSemana) {
+        return usuarioService.buscarUsuarioIdPorUsername(username)
+                .onItem().transformToUni(usuarioId -> service.buscarUnidadeComTurnosDiaSemana(diaSemana, usuarioId));
     }
 
 

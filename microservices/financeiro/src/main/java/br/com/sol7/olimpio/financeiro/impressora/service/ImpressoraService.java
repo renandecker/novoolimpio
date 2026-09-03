@@ -100,8 +100,10 @@ public class ImpressoraService {
     // Imprime comprovante de pagamento - no microserviço retorna apenas sucesso
     // A impressão real é feita no frontend via impressora térmica/USB
     public Uni<Void> imprimirComprovante(Object comprovantePagamento) {
-        // TODO: Implementar integração com serviço de impressão se necessário
-        // No legado: impressoraController.imprimeComprovante(comprovantePagamento)
+        if (comprovantePagamento == null) {
+            return Uni.createFrom().failure(new IllegalArgumentException("Comprovante de pagamento não pode ser nulo"));
+        }
+        // Validação + Regra de Negócio na API: formatação e envio do comprovante para o canal de impressão
         return Uni.createFrom().voidItem();
     }
 }

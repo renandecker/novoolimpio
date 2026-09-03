@@ -7,8 +7,8 @@ import {useModulePaged} from '../../shared/hooks/useModulePaged';
 
 const DOCUMENTOS_COLUMNS = [
     {key: 'nome', label: 'Nome'},
-    {key: 'descricao', label: 'DescriÃ§Ã£o'},
-    {key: 'tipoRelatorio', label: 'Tipo de RelatÃ³rio'},
+    {key: 'descricao', label: 'Descrição'},
+    {key: 'tipoRelatorio', label: 'Tipo de Relatório'},
     {key: 'ativo', label: 'Ativo'},
 ];
 

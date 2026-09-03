@@ -5,7 +5,7 @@ import {Wizard} from '../../shared/components/Wizard';
 const SQL_COLUMNS: DataTableColumn[] = [
     {key: 'nome', label: 'Nome'},
     {key: 'tabela', label: 'Tabela'},
-    {key: 'condicao', label: 'CondiÃ§Ã£o'},
+    {key: 'condicao', label: 'Condição'},
     {key: 'nomeBanco', label: 'Banco'},
     {key: 'coordenada', label: 'Coordenada'},
     {key: 'zoom', label: 'Zoom'},
@@ -17,7 +17,7 @@ export default function ViewEstruturaFormEstruturaListScreen() {
             <main>
                 <h1>Form Estrutura</h1>
                 <div className="div_form">
-                    <div className="form-title">Estrutura de RelatÃ³rio</div>
+                    <div className="form-title">Estrutura de Relatório</div>
                     <div className="table_form">
                         <Wizard
                             steps={[
@@ -30,8 +30,8 @@ export default function ViewEstruturaFormEstruturaListScreen() {
                                     key: 'campos',
                                     label: 'Campos',
                                     nextLabel: 'Salvar',
-                                    content: <p className="master-detail-empty">DimensÃµes, tempo, medidas e
-                                        georeferÃªncia da estrutura.</p>,
+                                    content: <p className="master-detail-empty">Dimensões, tempo, medidas e
+                                        georeferência da estrutura.</p>,
                                 },
                             ]}
                         />

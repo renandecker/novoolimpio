@@ -30,6 +30,7 @@ import {
 } from '../../shared/services/masterDetailSources';
 import type {ApiItem} from '../../features/auth/types';
 import {useApi} from '../../shared/services/api';
+import {API_PATHS} from '../../shared/services/apiPaths';
 import {FormLayout, FormTabConfig} from '../../shared/components/FormLayout';
 
 const TABELA_COLS: DataTableColumn[] = [
@@ -49,7 +50,7 @@ const MAPA_COLS: DataTableColumn[] = [
 ];
 
 const PAINEL_COLUMNS: DataTableColumn[] = [
-    {key: 'relatorioNome', label: 'RelatÃ³rio', width: '60%'},
+    {key: 'relatorioNome', label: 'Relatório', width: '60%'},
     {key: 'tipo', label: 'Tipo', width: '20%'},
     {key: 'ordem', label: 'Ordem', width: '50px'},
 ];
@@ -93,15 +94,15 @@ export default function ViewRelatoriosFormDashboardListScreen() {
         filtros: [],
     });
 
-    const {post: saveDashboard} = useApi('/api/relatorios/dashboard');
-    const {get: loadTabelas} = useApi('/api/relatorios/tabela');
-    const {get: loadGraficos} = useApi('/api/relatorios/grafico');
-    const {get: loadMapas} = useApi('/api/relatorios/mapa');
-    const {get: loadFiltros} = useApi('/api/relatorios/filtro');
-    const {post: saveFiltro} = useApi('/api/relatorios/filtro');
-    const {delete: deleteFiltro} = useApi('/api/relatorios/filtro');
-    const {post: savePainel} = useApi('/api/relatorios/painel-painel');
-    const {delete: deletePainel} = useApi('/api/relatorios/painel-painel');
+    const {post: saveDashboard} = useApi(API_PATHS.relatorios.dashboard);
+    const {get: loadTabelas} = useApi(API_PATHS.relatorios.tabela);
+    const {get: loadGraficos} = useApi(API_PATHS.relatorios.grafico);
+    const {get: loadMapas} = useApi(API_PATHS.relatorios.mapa);
+    const {get: loadFiltros} = useApi(API_PATHS.relatorios.filtro);
+    const {post: saveFiltro} = useApi(API_PATHS.relatorios.filtro);
+    const {delete: deleteFiltro} = useApi(API_PATHS.relatorios.filtro);
+    const {post: savePainel} = useApi(API_PATHS.relatorios.painelPainel);
+    const {delete: deletePainel} = useApi(API_PATHS.relatorios.painelPainel);
 
     const [entity, setEntity] = useState({nome: '', descricao: ''});
 
@@ -190,7 +191,7 @@ export default function ViewRelatoriosFormDashboardListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <div className="div_form">
-                    <div className="form-title">Cadastro / EdiÃ§Ã£o de RelatÃ³rio de Dashboard</div>
+                    <div className="form-title">Cadastro / Edição de Relatório de Dashboard</div>
                     <div className="table_form">
                         <Wizard
                             initialData={data}
@@ -198,18 +199,18 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                             steps={[
                                 {
                                     key: 'definicao',
-                                    label: 'DefiniÃ§Ã£o',
+                                    label: 'Definição',
                                     content: (
                                         <div>
                                             <FormLayout
-                                                title="ConfiguraÃ§Ã£o"
+                                                title="Configuração"
                                                 tabs={[
                                                     {
                                                         key: 'principal',
                                                         label: 'Principal',
                                                         fields: [
                                                             {name: 'nome', label: 'Nome', required: true, span: 4},
-                                                            {name: 'descricao', label: 'DescriÃ§Ã£o', type: 'textarea', span: 4},
+                                                            {name: 'descricao', label: 'Descrição', type: 'textarea', span: 4},
                                                         ],
                                                     },
                                                 ]}
@@ -245,11 +246,11 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                                     },
                                                     {
                                                         key: 'grafico',
-                                                        label: 'GrÃ¡fico',
+                                                        label: 'Gráfico',
                                                         content: (
                                                             <div>
                                                                 <AutoComplete
-                                                                    label="Adicionar GrÃ¡fico"
+                                                                    label="Adicionar Gráfico"
                                                                     source={GRAFICO_SOURCE}
                                                                     searchKeys={GRAFICO_SEARCH}
                                                                     columns={GRAFICO_COLUMNS}
@@ -290,7 +291,7 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                                 ]} />
                                             </div>
                                             <div style={{marginTop: '20px'}}>
-                                                <h4>PainÃ©is do Dashboard</h4>
+                                                <h4>Painéis do Dashboard</h4>
                                                 <div style={{display: 'flex', gap: '10px', marginBottom: '10px', flexWrap: 'wrap'}}>
                                                     <AutoComplete
                                                         label="Tabela"
@@ -301,7 +302,7 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                                         onSelect={(item) => addPainel({tabelaId: item.id, ordem: painelPainels.length + 1})}
                                                     />
                                                     <AutoComplete
-                                                        label="GrÃ¡fico"
+                                                        label="Gráfico"
                                                         source={GRAFICO_SOURCE}
                                                         searchKeys={GRAFICO_SEARCH}
                                                         columns={GRAFICO_COLUMNS}
@@ -333,13 +334,13 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                 },
                                 {
                                     key: 'permissao',
-                                    label: 'PermissÃ£o',
+                                    label: 'Permissão',
                                     content: (
                                         <div>
                                             <div style={{marginBottom: '20px'}}>
-                                                <h3>UsuÃ¡rios</h3>
+                                                <h3>Usuários</h3>
                                                 <MasterDetail
-                                                    label="UsuÃ¡rio"
+                                                    label="Usuário"
                                                     source={USUARIO_SOURCE}
                                                     valueKey="id"
                                                     searchKeys={USUARIO_SEARCH}
@@ -386,7 +387,7 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                                     {key: 'id', label: 'ID'},
                                                     {key: 'nome', label: 'Nome'},
                                                     {key: 'estruturaNome', label: 'Estrutura'},
-                                                    {key: 'dimensaoNome', label: 'DimensÃ£o'},
+                                                    {key: 'dimensaoNome', label: 'Dimensão'},
                                                 ]}
                                                 selectionMode="multiple"
                                                 selectedItems={filtroSelecionados}

@@ -2,12 +2,13 @@
 import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
 import {Wizard, useWizardData} from '../../shared/components/Wizard';
 import {useApi} from '../../shared/services/api';
+import {API_PATHS} from '../../shared/services/apiPaths';
 
 const CANCELAMENTO_REGRA_COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID da Regra de Cancelamento'},
     {key: 'nome', label: 'Nome'},
     {key: 'tipo', label: 'Tipo'},
-    {key: 'descricao', label: 'DescriÃ§Ã£o'},
+    {key: 'descricao', label: 'Descrição'},
 ];
 
 const CANCELAMENTO_COLUMNS: DataTableColumn[] = [
@@ -65,8 +66,8 @@ export default function ViewFinanceiroFormCancelamentoListScreen() {
         parcelas: [],
     });
 
-    const {get: getRegras} = useApi('/api/financeiro/regra-cancelamento');
-    const {post: saveCancelamento} = useApi('/api/financeiro/cancelamento');
+    const {get: getRegras} = useApi(API_PATHS.financeiro.regraCancelamento);
+    const {post: saveCancelamento} = useApi(API_PATHS.financeiro.cancelamento);
 
     const validateStep1 = async (currentData: CancelamentoData) => {
         if (!currentData.regraSelecionada) return 'Selecione uma regra de cancelamento';

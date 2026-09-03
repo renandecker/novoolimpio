@@ -3,8 +3,8 @@ import {DataTable, type DataTableColumn} from '../../shared/components/DataTable
 
 const COLUMNS: DataTableColumn[] = [
     {key: 'modulo_descricao', label: 'Antecessor'},
-    {key: 'rotulo', label: 'RÃ³tulo'},
-    {key: 'descricao', label: 'DescriÃ§Ã£o'},
+    {key: 'rotulo', label: 'Rótulo'},
+    {key: 'descricao', label: 'Descrição'},
     {key: 'outcome', label: 'Outcome'},
 ];
 

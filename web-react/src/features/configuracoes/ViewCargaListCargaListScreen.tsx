@@ -10,7 +10,7 @@ const COLUMNS: DataTableColumn[] = [
         label: 'Periodicidade Carga',
         render: (item) => {
             const value = asRecord(item).tipo;
-            if (value === 1) return 'DiÃ¡ria';
+            if (value === 1) return 'Diária';
             if (value === 2) return 'Semanal';
             if (value === 3) return 'Mensal';
             return String(value ?? '');

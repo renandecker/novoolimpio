@@ -1,6 +1,7 @@
 package br.com.sol7.olimpio.financeiro.caixa;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
+import io.quarkus.hibernate.reactive.panache.Panache;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.financeiro.caixa.dto.CalculoValorParcelaRequest;
 import br.com.sol7.olimpio.financeiro.caixa.dto.CalculoValorParcelaResponse;
@@ -9,6 +10,7 @@ import br.com.sol7.olimpio.financeiro.caixa.dto.RegistrarPagamentoParcelaRequest
 import br.com.sol7.olimpio.financeiro.caixa.entity.Caixa;
 import br.com.sol7.olimpio.financeiro.configuracaocaixa.ConfiguracaoCaixaService;
 import br.com.sol7.olimpio.financeiro.configuracaocaixa.ConfiguracaoCaixaResponse;
+import br.com.sol7.olimpio.financeiro.shared.VerificarSenhaService;
 import br.com.sol7.olimpio.financeiro.movimentacaofinanceira.service.MovimentacaoFinanceiraService;
 import br.com.sol7.olimpio.financeiro.movimentacaofinanceira.dto.MovimentacaoFinanceiraResponse;
 import br.com.sol7.olimpio.financeiro.movimentacaofinanceira.repository.MovimentacaoFinanceiraRepository;
@@ -16,6 +18,7 @@ import br.com.sol7.olimpio.financeiro.sangria.service.SangriaService;
 import br.com.sol7.olimpio.financeiro.sangria.dto.SangriaResponse;
 import br.com.sol7.olimpio.financeiro.sangria.dto.SangriaRequest;
 import br.com.sol7.olimpio.financeiro.impressora.ImpressoraService;
+import br.com.sol7.olimpio.financeiro.controleimpressao.service.ControleImpressaoService;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -42,8 +45,11 @@ public class CaixaService {
     ConfiguracaoCaixaService configuracaoCaixaService;
     @Inject
     ImpressoraService impressoraService;
+    @Inject
+    VerificarSenhaService verificarSenhaService;
+    @Inject
+    ControleImpressaoService controleImpressaoService;
     // @Inject UsuarioService usuarioService; // Cross-service
-    // @Inject ControleImpressaoService controleImpressaoService; // Não existe ainda
     // @Inject ParcelaService parcelaService; // Cross-service (comercial)
 
     // Migrado de SchedulingService.fechamentoCaixaAbertos() (legado)
@@ -119,8 +125,28 @@ public class CaixaService {
 
     // Migrado de CaixaController.autoCompleteAlunoPagamentoPendente
     public Uni<List<Long>> autoCompleteAlunoPagamentoPendente(String query) {
-        // Obs: depende do microservico comercial (contratoService.autoCompleteAlunoPagamentoPendente / autoCompleteAlunoPagamentoPendenteUnidade)
-        return Uni.createFrom().item(java.util.List.of());
+        if (query == null || query.isBlank()) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        // SQL nativo replica de ContratoRepository.autoCompleteAlunoPagamentoPendente (educacao):
+        // busca ids de pessoa (bas_pessoa) com parcela em aberto. Retorna apenas o id, ja que o
+        // nome/CPF sao resolvidos no DTO de pessoa (cross-service basico).
+        final String sql = "SELECT DISTINCT p.id FROM edc_contrato c " +
+                "INNER JOIN bas_pessoa p ON p.id = c.id_pessoa " +
+                "INNER JOIN bas_pessoa_unidade p_u_jt ON p_u_jt.id_pessoa = p.id " +
+                "INNER JOIN bas_unidade u ON u.id = p_u_jt.id_unidade " +
+                "LEFT JOIN bas_unidade j_c_unidade ON j_c_unidade.id = c.id_unidade " +
+                "LEFT JOIN bas_unidade j_c_unidadeResponsavel ON j_c_unidadeResponsavel.id = c.id_unidade_resposavel " +
+                "LEFT JOIN bas_pessoa_fisica j_p_pessoaFisica ON j_p_pessoaFisica.id_pessoa = p.id " +
+                "WHERE j_c_unidade.fl_ativo = true and j_c_unidadeResponsavel.fl_ativo = true " +
+                "and (lower(j_p_pessoaFisica.nome) like '%' || ?1 || '%' OR (j_p_pessoaFisica.cpf) like '%' || ?1 || '%') " +
+                "and exists(select par from fin_parcela par where par.data_pagamento is null and par.data_cancelamento is null and par.id_contrato = c.id) " +
+                "LIMIT 10";
+        return Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql)
+                        .setParameter(1, query.toLowerCase())
+                        .getResultList())
+                .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
     // Migrado de CaixaController.buscarDetalheCaixaParcelas
@@ -130,9 +156,22 @@ public class CaixaService {
     }
 
     // Migrado de CaixaController.autoCompleteMovimento
-    public Uni<List<Long>> autoCompleteMovimento(String query) {
-        // Obs: depende do estado de UI (categoriaFinanceira.getId()) nao disponivel na assinatura
-        return Uni.createFrom().item(java.util.List.of());
+    // Obs: no legado depende de categoriaFinanceira.getId() (id de fin_tipo_movimento) - agora recebido como parametro
+    public Uni<List<Long>> autoCompleteMovimento(String query, Long tipoMovimentoId) {
+        if (query == null || query.isBlank() || tipoMovimentoId == null) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        // Migrado de MovimentoRepository.autoCompleteComTipo (legado) - JPQL original:
+        // select distinct m from Movimento m where m.tipoMovimento = ?2 and (lower(m.descricaoCompleta) like '%' || ?1 || '%' or str(m.id) = ?1)
+        final String sql = "SELECT DISTINCT m.id FROM fin_movimento m " +
+                "WHERE m.id_tipo_movimento = ?2 AND (lower(m.descricaocompleta) like '%' || ?1 || '%' OR CAST(m.id AS text) = ?1) " +
+                "ORDER BY m.descricao LIMIT 10";
+        return Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql)
+                        .setParameter(1, query.toLowerCase())
+                        .setParameter(2, tipoMovimentoId)
+                        .getResultList())
+                .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
     // ===== MÉTODOS MIGRADOS DO CAIXACONTROLLER/CAIXASERVICE ORIGINAL =====
@@ -140,7 +179,7 @@ public class CaixaService {
     // Migrado de CaixaController.verificarSenhaResponsavel
     // Verifica senha do responsável configurado no caixa
     public Uni<Boolean> verificarSenhaResponsavel(Long configuracaoCaixaId, String senha) {
-        if (configuracaoCaixaId == null) {
+        if (configuracaoCaixaId == null || senha == null || senha.isBlank()) {
             return Uni.createFrom().item(false);
         }
         return configuracaoCaixaService.find(configuracaoCaixaId)
@@ -148,16 +187,14 @@ public class CaixaService {
                     if (config.responsavelId() == null) {
                         return Uni.createFrom().item(false);
                     }
-                    // TODO: Chamar microserviço básico para verificar senha
-                    // return usuarioService.verificarSenha(config.responsavelId(), senha);
-                    return Uni.createFrom().item(false); // Stub
+                    return verificarSenhaService.verificar(config.responsavelId(), senha);
                 });
     }
 
     // Migrado de CaixaController.verificarSenhaOperador
     // Verifica senha do operador configurado no caixa
     public Uni<Boolean> verificarSenhaOperador(Long configuracaoCaixaId, String senha) {
-        if (configuracaoCaixaId == null) {
+        if (configuracaoCaixaId == null || senha == null || senha.isBlank()) {
             return Uni.createFrom().item(false);
         }
         return configuracaoCaixaService.find(configuracaoCaixaId)
@@ -165,9 +202,7 @@ public class CaixaService {
                     if (config.usuarioId() == null) {
                         return Uni.createFrom().item(false);
                     }
-                    // TODO: Chamar microserviço básico para verificar senha
-                    // return usuarioService.verificarSenha(config.usuarioId(), senha);
-                    return Uni.createFrom().item(false); // Stub
+                    return verificarSenhaService.verificar(config.usuarioId(), senha);
                 });
     }
 
@@ -297,9 +332,19 @@ public class CaixaService {
 
     // Registra pagamento de parcela criando movimentações financeiras
     public Uni<Void> registrarPagamentoParcela(RegistrarPagamentoParcelaRequest request) {
-        // TODO: Implementar criação de movimentações financeiras para o pagamento
-        // Por enquanto retorna vazio para compatibilidade
-        return Uni.createFrom().voidItem();
+        if (request == null || request.caixaId() == null || request.valorCobrado() == null) {
+            return Uni.createFrom().failure(new IllegalArgumentException("Dados de pagamento de parcela inválidos"));
+        }
+        // Validação + Regra de Negócio na API: Criação da movimentação financeira correspondente
+        var movimentacaoReq = new br.com.sol7.olimpio.financeiro.movimentacaofinanceira.dto.MovimentacaoFinanceiraRequest(
+            new Date(), "Pagamento de Parcela", null, request.valorCobrado(),
+            null, BigDecimal.ONE, null, BigDecimal.ZERO,
+            request.caixaId(), null, null, null,
+            br.com.sol7.olimpio.financeiro.movimentacaofinanceira.entity.TipoPagamento.DINHEIRO,
+            request.usuarioId(), request.parcelaId(),
+            request.desconto(), request.multaJuros()
+        );
+        return movimentacaoFinanceiraService.create(movimentacaoReq).replaceWithVoid();
     }
 
     // Retorna totais para fechamento de caixa no formato de response
@@ -357,11 +402,7 @@ public class CaixaService {
                 .chain(mov -> {
                     ComprovantePagamento comprovante = gerarComprovantePagamento(mov);
                     return impressoraService.imprimirComprovante(comprovante)
-                            .chain(v -> {
-                                // TODO: Registrar controle de impressão
-                                // return controleImpressaoService.registrarImpressao(movimentacaoFinanceiraId, usuarioId);
-                                return Uni.createFrom().voidItem();
-                            });
+                            .chain(v -> controleImpressaoService.registrarImpressao(movimentacaoFinanceiraId, usuarioId));
                 });
     }
 
@@ -373,13 +414,93 @@ public class CaixaService {
     // Migrado de CaixaController.buscarNumeroParcela
     // Busca parcela por número (ID) e valida se pertence à unidade do caixa
     public Uni<ParcelaResponse> buscarNumeroParcela(Long numeroLancamento, Long caixaId, boolean caixaUnico) {
-        // TODO: Chamar microserviço comercial (parcelaService)
-        // if (caixaUnico) {
-        //     return parcelaService.obterParcelaDaUnidade(numeroLancamento, caixa.unidadeId);
-        // } else {
-        //     return parcelaService.findById(numeroLancamento);
-        // }
-        return Uni.createFrom().item(null); // Stub
+        if (numeroLancamento == null || caixaId == null) {
+            return Uni.createFrom().item(null);
+        }
+        return find(caixaId)
+                .onItem().transformToUni(caixa -> {
+                    if (caixaUnico) {
+                        return buscarParcelaDaUnidade(numeroLancamento, caixa.unidadeId());
+                    }
+                    return buscarParcelaPorId(numeroLancamento);
+                });
+    }
+
+    // Migrado de ParcelaRepository.obterParcelaDaunidade (legado) - HQL original:
+    // select p from Parcela p left join p.contrato c where p.contrato.unidade.ativo = true
+    // and p.id = ?1 and c.unidadeResponsavel.id = ?2 and p.dataCancelamento is null
+    private Uni<ParcelaResponse> buscarParcelaDaUnidade(Long parcelaId, Long unidadeId) {
+        final String sql = "SELECT p.id AS id, c.id AS contrato_id, p.id_pessoa AS pessoa_id, " +
+                "p.parcela AS parcela, p.data_vencimento AS data_vencimento, p.valor AS valor, " +
+                "p.valor_pago AS valor_pago, p.valor_desconto AS valor_desconto, " +
+                "p.valor_multa_juros AS valor_multa_juros, p.data_pagamento AS data_pagamento " +
+                "FROM fin_parcela p LEFT JOIN edc_contrato c ON c.id = p.id_contrato " +
+                "LEFT JOIN bas_unidade u ON u.id = c.id_unidade " +
+                "WHERE p.id = ?1 AND c.id_unidade_resposavel = ?2 AND p.data_cancelamento IS NULL AND u.fl_ativo = true";
+        return Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql)
+                        .setParameter(1, parcelaId)
+                        .setParameter(2, unidadeId)
+                        .getSingleResult())
+                .map(this::rowToParcelaResponse);
+    }
+
+    private Uni<ParcelaResponse> buscarParcelaPorId(Long parcelaId) {
+        final String sql = "SELECT p.id AS id, c.id AS contrato_id, p.id_pessoa AS pessoa_id, " +
+                "p.parcela AS parcela, p.data_vencimento AS data_vencimento, p.valor AS valor, " +
+                "p.valor_pago AS valor_pago, p.valor_desconto AS valor_desconto, " +
+                "p.valor_multa_juros AS valor_multa_juros, p.data_pagamento AS data_pagamento " +
+                "FROM fin_parcela p LEFT JOIN edc_contrato c ON c.id = p.id_contrato " +
+                "WHERE p.id = ?1";
+        return Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql)
+                        .setParameter(1, parcelaId)
+                        .getSingleResult())
+                .map(this::rowToParcelaResponse);
+    }
+
+    @SuppressWarnings("unchecked")
+    private ParcelaResponse rowToParcelaResponse(Object row) {
+        if (row == null) {
+            return null;
+        }
+        Object[] o = (Object[]) row;
+        return new ParcelaResponse(
+                toLong(o[0]),
+                toLong(o[1]),
+                toLong(o[2]),
+                o[3] != null ? ((Number) o[3]).intValue() : null,
+                toDate(o[4]),
+                toBigDecimal(o[5]),
+                toBigDecimal(o[6]),
+                toBigDecimal(o[7]),
+                toBigDecimal(o[8]),
+                toDate(o[9])
+        );
+    }
+
+    private Long toLong(Object v) {
+        return v == null ? null : ((Number) v).longValue();
+    }
+
+    private java.math.BigDecimal toBigDecimal(Object v) {
+        return v == null ? null : new java.math.BigDecimal(v.toString());
+    }
+
+    private Date toDate(Object v) {
+        if (v == null) {
+            return null;
+        }
+        if (v instanceof Date d) {
+            return d;
+        }
+        if (v instanceof java.sql.Timestamp ts) {
+            return new Date(ts.getTime());
+        }
+        if (v instanceof java.sql.Date d) {
+            return new Date(d.getTime());
+        }
+        return null;
     }
 
     // Versão sem parâmetros para compatibilidade com controller

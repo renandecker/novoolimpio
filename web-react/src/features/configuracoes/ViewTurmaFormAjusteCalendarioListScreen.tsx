@@ -8,7 +8,7 @@ export default function ViewTurmaFormAjusteCalendarioListScreen() {
             <main>
                 <h1>Form Ajuste Calendario</h1>
                 <div className="div_form">
-                    <div className="form-title">Ajuste de CalendÃ¡rio</div>
+                    <div className="form-title">Ajuste de Calendário</div>
                     <div className="table_form">
                         <Wizard
                             steps={[
@@ -17,7 +17,7 @@ export default function ViewTurmaFormAjusteCalendarioListScreen() {
                                     label: 'Turma',
                                     content: (
                                         <>
-                                            <p className="master-detail-empty">Selecione a turma que terÃ¡ o calendÃ¡rio
+                                            <p className="master-detail-empty">Selecione a turma que terá o calendário
                                                 ajustado.</p>
                                             <DataTable path="/api/view/turma/formAjusteCalendario"/>
                                         </>
@@ -26,15 +26,15 @@ export default function ViewTurmaFormAjusteCalendarioListScreen() {
                                 {
                                     key: 'ajuste',
                                     label: 'Ajuste',
-                                    content: <p className="master-detail-empty">Informe os ajustes de dias e horÃ¡rios de
+                                    content: <p className="master-detail-empty">Informe os ajustes de dias e horários de
                                         aula.</p>,
                                 },
                                 {
                                     key: 'confirmacao',
-                                    label: 'ConfirmaÃ§Ã£o',
+                                    label: 'Confirmação',
                                     nextLabel: 'Aplicar',
                                     content: <p className="master-detail-empty">Revise e aplique o ajuste de
-                                        calendÃ¡rio.</p>,
+                                        calendário.</p>,
                                 },
                             ]}
                         />

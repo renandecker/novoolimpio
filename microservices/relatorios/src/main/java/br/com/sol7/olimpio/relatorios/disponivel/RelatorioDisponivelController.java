@@ -63,8 +63,8 @@ public class RelatorioDisponivelController {
                         case "GRAFICO", "PIZZA", "LINHA", "COMBINADO", "CIRCULAR", "BARRA_VERTICAL", "BARRA_HORIZONTAL" ->graficoService.find(id)
                                 .chain(r -> graficoService.dados(id)
                                         .map(dados -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, dados)));
-                        case "MAPA" ->mapaService.find(id)
-                                .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, null));
+                        case "MAPA" ->mapaService.buscarPontos(id)
+                                .map(dados -> new RelatorioAbertoResponse(id, null, tipoNormalizado, null, dados));
                         case "ORGANOGRAMA" ->organogramaService.find(id)
                                 .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, null));
                         case "DASHBOARD" ->painelService.find(id)

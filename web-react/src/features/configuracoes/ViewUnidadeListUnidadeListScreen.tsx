@@ -6,10 +6,10 @@ const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
 const COLUMNS: DataTableColumn[] = [
     {key: 'sucinto', label: 'Sucinto'},
-    {key: 'razao_social', label: 'RazÃ£o Social'},
+    {key: 'razao_social', label: 'Razão Social'},
     {key: 'nome_fantasia', label: 'Nome Fantasia'},
     {key: 'cnpj', label: 'CNPJ'},
-    {key: 'fl_ativo', label: 'Ativo', render: (item) => (asRecord(item).fl_ativo ? 'Sim' : 'NÃ£o')},
+    {key: 'fl_ativo', label: 'Ativo', render: (item) => (asRecord(item).fl_ativo ? 'Sim' : 'Não')},
 ];
 
 export default function ViewUnidadeListUnidadeListScreen() {

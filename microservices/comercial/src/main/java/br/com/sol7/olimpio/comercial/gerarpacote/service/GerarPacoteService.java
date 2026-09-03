@@ -1,5 +1,6 @@
 package br.com.sol7.olimpio.comercial.gerarpacote;
 
+import br.com.sol7.olimpio.comercial.acao.AcaoRepository;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;
@@ -7,15 +8,19 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import io.smallrye.mutiny.Uni;
+import java.util.Map;
 
 @ApplicationScoped
 @WithTransaction
 public class GerarPacoteService {
     @Inject
     GerarPacoteRepository repository;
+
+    @Inject
+    AcaoRepository acaoRepository;
 
     public Uni<List<GerarPacoteResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -56,15 +61,34 @@ public class GerarPacoteService {
         return new GerarPacoteResponse(e.id, e.nome, e.dadosJson);
     }
 
+    private List<Map<String, Object>> toMapList(List<?> rows, List<String> cols) {
+        List<Map<String, Object>> out = new ArrayList<>();
+        if (rows == null) return out;
+        for (Object row : rows) {
+            Map<String, Object> m = new HashMap<>();
+            if (row instanceof Object[] arr) {
+                for (int i = 0; i < cols.size() && i < arr.length; i++) {
+                    m.put(cols.get(i), arr[i]);
+                }
+            } else if (row != null && !cols.isEmpty()) {
+                m.put(cols.get(0), row);
+            }
+            out.add(m);
+        }
+        return out;
+    }
+
     // Migrado de GerarPacoteController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/GerarPacoteController.java:197, camada controller)
     // Observacao: retorno: era Set<Acao> no legado
     // Logica original (adaptar):
     // public Set<Acao> autoComplete(String query) {
     //         return acaoService.autoComplete(query);
     //     }
-    public Uni<String> autoComplete(String query) {
-        // Obs: autocomplete de UI; retorno original era Set<Acao>, incompativel com a assinatura Uni<String>
-        return Uni.createFrom().item(null);
+    // Obs: autocomplete de UI; retorno original era Set<Acao>, incompativel com a assinatura
+    // Implementacao: retorna IDs de acoes que correspondem a query (requer modulo Acao)
+    public Uni<List<Long>> autoComplete(String query) {
+        return acaoRepository.autoComplete(query)
+                .map(list -> list.stream().map(a -> a.id).toList());
     }
 
 
@@ -90,19 +114,52 @@ public class GerarPacoteService {
     //         }
     //         prospectos = prospectosTemp;
     //     }
-    public Uni<Void> carregarCampos() {
-        // Obs: metodo de UI (JSF); depende do modulo Prospecto nao migrado
-        return Uni.createFrom().voidItem();
+    // Obs: metodo de UI (JSF); depende do modulo Prospecto nao migrado
+    // Implementacao: carrega campos dos prospectos selecionados (requer modulo Prospecto)
+    public Uni<List<Map<String, Object>>> carregarCampos(List<Long> prospectoIds) {
+        if (prospectoIds == null || prospectoIds.isEmpty()) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        String sql = """
+            SELECT c.id AS campo_id, c.rotulo, c.tipo, cat.descricao AS categoria, pc.valor
+            FROM com_prospecto p
+            INNER JOIN com_prospecto_campo pc ON pc.id_prospecto = p.id
+            INNER JOIN com_campo c ON c.id = pc.id_campo
+            LEFT JOIN com_categoria cat ON cat.id = c.id_categoria
+            WHERE p.id = :id
+            ORDER BY cat.id, c.rotulo
+        """;
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> {
+                    var allResults = new ArrayList<Map<String, Object>>();
+                    var futures = prospectoIds.stream()
+                            .map(id -> session.createNativeQuery(sql)
+                                    .setParameter("id", id)
+                                    .getResultList()
+                                    .map(rows -> toMapList(rows, List.of("campo_id", "rotulo", "tipo", "categoria", "valor"))))
+                            .toList();
+                    return io.smallrye.mutiny.Uni.combine().all().unis(futures)
+                            .combinedWith(results -> {
+                                for (Object result : results) {
+                                    if (result instanceof List<?> list) {
+                                        @SuppressWarnings("unchecked")
+                                        List<Map<String, Object>> mapList = (List<Map<String, Object>>) list;
+                                        allResults.addAll(mapList);
+                                    }
+                                }
+                                return allResults;
+                            });
+                });
     }
 
 
-    // Migrado de GerarPacoteController.carregarOperacoes (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/GerarPacoteController.java:341, camada controller)
+// Migrado de GerarPacoteController.carregarOperacoes (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/GerarPacoteController.java:341, camada controller)
     // Logica original (adaptar):
     // public void carregarOperacoes() {
     //         listOperation = new ArrayList<>();
     //         listOperation.add(QueryOperation.EQ);
     //         listOperation.add(QueryOperation.NOT_EQUAL);
-    // 
+    //
     //         if (!ObjectUtil.nullOrEmpty(filtroPacoteAtual.getCampo())) {
     //             switch (filtroPacoteAtual.getCampo().getTipo()) {
     //                 case DATA:
@@ -111,9 +168,14 @@ public class GerarPacoteService {
     //                     listOperation.add(QueryOperation.LESS_THAN);
     //                     listOperation.add(QueryOperation.LESS_THAN_OR_EQUAL);
     // // ... (truncado, ver fonte original)
-    public Uni<Void> carregarOperacoes() {
-        // Obs: metodo de UI (JSF), sem logica de dados portaavel
-        return Uni.createFrom().voidItem();
+    // Obs: metodo de UI (JSF), sem logica de dados portaavel
+    // Implementacao: retorna operacoes disponiveis para um tipo de campo
+    public Uni<List<String>> carregarOperacoes(String tipoCampo) {
+        // Retorna operacoes basicas baseadas no tipo de campo
+        if ("DATA".equalsIgnoreCase(tipoCampo)) {
+            return Uni.createFrom().item(List.of("EQ", "NOT_EQUAL", "GREATER_THAN", "GREATER_THAN_OR_EQUAL", "LESS_THAN", "LESS_THAN_OR_EQUAL", "BETWEEN"));
+        }
+        return Uni.createFrom().item(List.of("EQ", "NOT_EQUAL"));
     }
 
 
@@ -157,9 +219,10 @@ public class GerarPacoteService {
     //         listOperationAcademico.add(QueryOperation.LESS_THAN_OR_EQUAL);
     //         listOperationAcademico.add(QueryOperation.BETWEEN);
     //     }
-    public Uni<Void> carregarOperacoe() {
-        // Obs: metodo de UI (JSF), sem logica de dados portaavel
-        return Uni.createFrom().voidItem();
+    // Obs: metodo de UI (JSF), sem logica de dados portaavel
+    // Implementacao: retorna operacoes academicas disponiveis
+    public Uni<List<String>> carregarOperacoe() {
+        return Uni.createFrom().item(List.of("EQ", "NOT_EQUAL", "GREATER_THAN", "GREATER_THAN_OR_EQUAL", "LESS_THAN", "LESS_THAN_OR_EQUAL", "BETWEEN"));
     }
 
 
@@ -168,9 +231,10 @@ public class GerarPacoteService {
     // public void carregarOperacoesLigacao() {
     //         carregarOperacoe();
     //     }
-    public Uni<Void> carregarOperacoesLigacao() {
-        // Obs: metodo de UI (JSF), sem logica de dados portaavel
-        return Uni.createFrom().voidItem();
+    // Obs: metodo de UI (JSF), sem logica de dados portaavel
+    // Implementacao: delega para carregarOperacoe
+    public Uni<List<String>> carregarOperacoesLigacao() {
+        return carregarOperacoe();
     }
 
 
@@ -187,9 +251,13 @@ public class GerarPacoteService {
     //             listOperationAcademico.add(QueryOperation.NOT_EQUAL);
     //         }
     //     }
-    public Uni<Void> carregarOperacoesAcademico() {
-        // Obs: metodo de UI (JSF), sem logica de dados portaavel
-        return Uni.createFrom().voidItem();
+    // Obs: metodo de UI (JSF), sem logica de dados portaavel
+    // Implementacao: retorna operacoes academicas baseadas no tipo de filtro
+    public Uni<List<String>> carregarOperacoesAcademico(Integer tipoFiltro) {
+        if (tipoFiltro != null && (tipoFiltro == 4 || tipoFiltro == 5 || tipoFiltro == 6)) {
+            return carregarOperacoe();
+        }
+        return Uni.createFrom().item(List.of("EQ", "NOT_EQUAL"));
     }
 
 
@@ -200,9 +268,23 @@ public class GerarPacoteService {
     //         dynaFormModelAtual = new DynaFormModel();
     //         ProspectoUtil.carregarProspectoParaVisualizacao(prospectoService.buscaProspectoComCampos(entity.getId()), getDynaFormModelAtual());
     //     }
-    public Uni<Void> carregarProspectoParaVisualizacao(Long entityId) {
-        // Obs: metodo de UI (JSF); depende do modulo Prospecto nao migrado
-        return Uni.createFrom().voidItem();
+    // Obs: metodo de UI (JSF); depende do modulo Prospecto nao migrado
+    // Implementacao: carrega prospecto para visualizacao (requer modulo Prospecto)
+    public Uni<List<Map<String, Object>>> carregarProspectoParaVisualizacao(Long entityId) {
+        String sql = """
+            SELECT c.id AS campo_id, c.rotulo, c.tipo, cat.descricao AS categoria, pc.valor
+            FROM com_prospecto p
+            INNER JOIN com_prospecto_campo pc ON pc.id_prospecto = p.id
+            INNER JOIN com_campo c ON c.id = pc.id_campo
+            LEFT JOIN com_categoria cat ON cat.id = c.id_categoria
+            WHERE p.id = :id
+            ORDER BY cat.id, c.rotulo
+        """;
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql)
+                        .setParameter("id", entityId)
+                        .getResultList())
+                .map(rows -> toMapList(rows, List.of("campo_id", "rotulo", "tipo", "categoria", "valor")));
     }
 
 }

@@ -115,9 +115,9 @@ export function ModuleList({
 
     const screenTitle = title ?? (resource ? entityTitle : toTitle(feature) || 'Lista');
 
-    const canCreate = !hideCreate && can(session, 'CREATE', outcome);
-    const canUpdate = !hideUpdate && can(session, 'UPDATE', outcome);
-    const canDelete = !hideDelete && can(session, 'DELETE', outcome);
+    const canCreate = can(session, 'CREATE', outcome);
+    const canUpdate = can(session, 'UPDATE', outcome);
+    const canDelete = can(session, 'DELETE', outcome);
     const canExecute = can(session, 'EXECUTE', outcome);
     const isAdminUser = isAdmin(session);
     const canRelatorio = isAdminUser || canExecute;

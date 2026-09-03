@@ -8,16 +8,16 @@ export default function ViewNapFormLigacaoNapListScreen() {
             <main>
                 <h1>Form Ligacao Nap</h1>
                 <div className="div_form">
-                    <div className="form-title">LigaÃ§Ã£o NAP</div>
+                    <div className="form-title">Ligação NAP</div>
                     <div className="table_form">
                         <Wizard
                             steps={[
                                 {
                                     key: 'ligacao',
-                                    label: 'Dados da LigaÃ§Ã£o',
+                                    label: 'Dados da Ligação',
                                     content: (
                                         <>
-                                            <p className="master-detail-empty">InformaÃ§Ãµes do contato e da ligaÃ§Ã£o.</p>
+                                            <p className="master-detail-empty">Informações do contato e da ligação.</p>
                                             <DataTable path="/api/view/nap/formLigacaoNap"/>
                                         </>
                                     ),
@@ -25,13 +25,13 @@ export default function ViewNapFormLigacaoNapListScreen() {
                                 {
                                     key: 'resultado',
                                     label: 'Resultado',
-                                    content: <p className="master-detail-empty">Resultado da ligaÃ§Ã£o NAP.</p>,
+                                    content: <p className="master-detail-empty">Resultado da ligação NAP.</p>,
                                 },
                                 {
                                     key: 'historico',
-                                    label: 'HistÃ³rico',
+                                    label: 'Histórico',
                                     nextLabel: 'Salvar',
-                                    content: <p className="master-detail-empty">HistÃ³rico de ligaÃ§Ãµes do contato.</p>,
+                                    content: <p className="master-detail-empty">Histórico de ligações do contato.</p>,
                                 },
                             ]}
                         />

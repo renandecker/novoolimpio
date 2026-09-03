@@ -23,7 +23,7 @@ const COLUMNS: DataTableColumn[] = [
         label: 'Data Cadastro',
         render: (item) => formatDate(asRecord(item).data_cadastramento)
     },
-    {key: 'data_alteracao', label: 'Data AlteraÃ§Ã£o', render: (item) => formatDate(asRecord(item).data_alteracao)},
+    {key: 'data_alteracao', label: 'Data Alteração', render: (item) => formatDate(asRecord(item).data_alteracao)},
 ];
 
 export default function ViewProspectoListProspectoListScreen() {
@@ -75,14 +75,14 @@ export default function ViewProspectoListProspectoListScreen() {
     const extraActions: DataTableRowAction[] = [
         {
             key: 'historicoLigacao',
-            title: 'HistÃ³rico LigaÃ§Ã£o',
+            title: 'Histórico Ligação',
             className: 'btnblue',
             icon: <i className="fa fa-star"/>,
             onClick: (item) => carregarHistoricoLigacao(item),
         },
         {
             key: 'quantidadeLigacao',
-            title: 'Quantidade LigaÃ§Ã£o por Resultado',
+            title: 'Quantidade Ligação por Resultado',
             className: 'btnstop',
             icon: <i className="fa fa-phone"/>,
             onClick: (item) => carregarQuantidadeLigacao(item),
@@ -93,7 +93,7 @@ export default function ViewProspectoListProspectoListScreen() {
             className: 'btnblack',
             icon: <i className="fa fa-ban"/>,
             onClick: async (item) => {
-                if (window.confirm('Ao desativar ele nÃ£o estarÃ¡ no radar e nas ligaÃ§Ãµes. Deseja continuar?')) {
+                if (window.confirm('Ao desativar ele não estará no radar e nas ligações. Deseja continuar?')) {
                     await api.post(`/api/comercial/prospecto-list/inativar?id=${item.id}`);
                 }
             },
@@ -121,7 +121,7 @@ export default function ViewProspectoListProspectoListScreen() {
                 {historicoLigacaoModal && (
                     <div className="modal-overlay" onClick={() => setHistoricoLigacaoModal(null)}>
                         <div className="modal" onClick={e => e.stopPropagation()} style={{width: '600px'}}>
-                            <h3>HistÃ³rico LigaÃ§Ãµes</h3>
+                            <h3>Histórico Ligações</h3>
                             <p><strong>{historicoLigacaoModal.prospectoName}</strong></p>
                             <table style={{width: '100%', marginTop: '10px'}}>
                                 <thead>
@@ -157,12 +157,12 @@ export default function ViewProspectoListProspectoListScreen() {
                 {quantidadeLigacaoModal && (
                     <div className="modal-overlay" onClick={() => setQuantidadeLigacaoModal(null)}>
                         <div className="modal" onClick={e => e.stopPropagation()} style={{width: '450px'}}>
-                            <h3>Quantidade ligaÃ§Ã£o por resultado</h3>
+                            <h3>Quantidade ligação por resultado</h3>
                             <p><strong>{quantidadeLigacaoModal.prospectoName}</strong></p>
                             <table style={{width: '100%', marginTop: '10px'}}>
                                 <thead>
                                 <tr>
-                                    <th>Resultado LigaÃ§Ã£o</th>
+                                    <th>Resultado Ligação</th>
                                     <th>Quantidade</th>
                                 </tr>
                                 </thead>
@@ -191,17 +191,17 @@ export default function ViewProspectoListProspectoListScreen() {
                         <div className="modal" onClick={e => e.stopPropagation()} style={{width: '700px'}}>
                             <h3>Gerador de link para cadastro</h3>
                             <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px'}}>
-                                <label>AÃ§Ã£o *<input type="text" value={linkForm.acao} onChange={e => setLinkForm({...linkForm, acao: e.target.value})} style={{width: '100%'}}/></label>
+                                <label>Ação *<input type="text" value={linkForm.acao} onChange={e => setLinkForm({...linkForm, acao: e.target.value})} style={{width: '100%'}}/></label>
                                 <label>Unidade *<input type="text" value={linkForm.unidade} onChange={e => setLinkForm({...linkForm, unidade: e.target.value})} style={{width: '100%'}}/></label>
-                                <label>UsuÃ¡rio *<input type="text" value={linkForm.usuario} onChange={e => setLinkForm({...linkForm, usuario: e.target.value})} style={{width: '100%'}}/></label>
+                                <label>Usuário *<input type="text" value={linkForm.usuario} onChange={e => setLinkForm({...linkForm, usuario: e.target.value})} style={{width: '100%'}}/></label>
                             </div>
                             <button className="btnstop" onClick={salvarLink}>Selecionar</button>
                             <table style={{width: '100%', marginTop: '15px'}}>
                                 <thead>
                                 <tr>
-                                    <th>AÃ§Ã£o</th>
+                                    <th>Ação</th>
                                     <th>Unidade</th>
-                                    <th>UsuÃ¡rio</th>
+                                    <th>Usuário</th>
                                     <th>Ativo</th>
                                 </tr>
                                 </thead>
@@ -214,7 +214,7 @@ export default function ViewProspectoListProspectoListScreen() {
                                             <td>{l.acao}</td>
                                             <td>{l.unidade}</td>
                                             <td>{l.usuario}</td>
-                                            <td>{l.ativo ? 'Sim' : 'NÃ£o'}</td>
+                                            <td>{l.ativo ? 'Sim' : 'Não'}</td>
                                         </tr>
                                     ))
                                 )}

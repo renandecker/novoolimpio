@@ -39,7 +39,7 @@ export default function ViewNapListLoteListScreen() {
                                             @ E-mail
                                         </button>
                                         <button className="btnblue" onClick={() => setLigacaoEtapa(etapa)}>
-                                            LigaÃ§Ã£o
+                                            Ligação
                                         </button>
                                     </div>
                                 </div>

@@ -15,7 +15,7 @@ const renderTela = (item: ApiItem) => {
 };
 
 const COLUMNS: DataTableColumn[] = [
-    {key: 'descricao', label: 'DescriÃ§Ã£o'},
+    {key: 'descricao', label: 'Descrição'},
     {key: 'tela', label: 'Tela', render: renderTela},
     {key: 'dias_retorno', label: 'Dias Retorno'},
     {key: 'ordem', label: 'Ordem'},
@@ -30,15 +30,15 @@ export default function ViewResultadoLigacaoNapListResultadoLigacaoNapListScreen
                     tabs={[
                         {
                             key: 'historicoDeLigacoes',
-                            label: 'HistÃ³rico de LigaÃ§Ãµes',
+                            label: 'Histórico de Ligações',
                             path: '/api/view/resultadoLigacaoNap/listResultadoLigacaoNap',
                             columns: COLUMNS,
                             maxMainColumns: COLUMNS.length,
                         },
                         {
                             key: 'retornoDeLigacoes',
-                            label: 'Retorno de LigaÃ§Ãµes',
-                            empty: 'ConteÃºdo de Retorno de LigaÃ§Ãµes.'
+                            label: 'Retorno de Ligações',
+                            empty: 'Conteúdo de Retorno de Ligações.'
                         },
                     ]}
                 />

@@ -86,4 +86,12 @@ public class LigacaoCobrancaRepository implements io.quarkus.hibernate.reactive.
                         .getSingleResult())
                 .map(o -> ((Number) o).longValue());
     }
+
+    public Uni<Long> countByContratoId(Long contratoId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery("SELECT COUNT(*) FROM fin_ligacao_cobranca WHERE id_contrato = ?1")
+                        .setParameter(1, contratoId)
+                        .getSingleResult())
+                .map(o -> ((Number) o).longValue());
+    }
 }

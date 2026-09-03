@@ -132,6 +132,7 @@ services:
       psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0052__create_bas_icone_table.sql
       psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0050__create_bas_icone_table.sql
       psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0051__populate_bas_icone.sql
+      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0053__campanha_negociacao_tipos.sql
       echo "[restore] Restore concluido."
 
   # Broker Kafka (KRaft). O schedule publica os triggers de rotina e o basico
@@ -163,7 +164,9 @@ services:
       start_period: 30s
 
   basico:
-    build: ./microservices/basico
+    build:
+      context: ./microservices
+      dockerfile: basico/Dockerfile
     container_name: olimpio-basico
     restart: unless-stopped
     environment:
@@ -212,7 +215,9 @@ services:
         condition: service_healthy
 
   central:
-    build: ./microservices/central
+    build:
+      context: ./microservices
+      dockerfile: central/Dockerfile
     container_name: olimpio-central
     restart: unless-stopped
     environment:
@@ -233,12 +238,15 @@ services:
         condition: service_healthy
 
   comercial:
-    build: ./microservices/comercial
+    build:
+      context: ./microservices
+      dockerfile: comercial/Dockerfile
     container_name: olimpio-comercial
     restart: unless-stopped
     environment:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
     - "8084:8084"
     healthcheck:
@@ -250,6 +258,8 @@ services:
     depends_on:
       restore:
         condition: service_completed_successfully
+      kafka:
+        condition: service_healthy
       login:
         condition: service_healthy
 
@@ -299,7 +309,9 @@ services:
         condition: service_healthy
 
   financeiro:
-    build: ./microservices/financeiro
+    build:
+      context: ./microservices
+      dockerfile: financeiro/Dockerfile
     container_name: olimpio-financeiro
     restart: unless-stopped
     environment:
@@ -323,7 +335,9 @@ services:
         condition: service_healthy
 
   relatorios:
-    build: ./microservices/relatorios
+    build:
+      context: ./microservices
+      dockerfile: relatorios/Dockerfile
     container_name: olimpio-relatorios
     restart: unless-stopped
     environment:

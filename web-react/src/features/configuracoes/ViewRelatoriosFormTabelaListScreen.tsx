@@ -30,6 +30,7 @@ import {
 } from '../../shared/services/masterDetailSources';
 import type {ApiItem} from '../../features/auth/types';
 import {useApi} from '../../shared/services/api';
+import {API_PATHS} from '../../shared/services/apiPaths';
 import {FormLayout, FormTabConfig} from '../../shared/components/FormLayout';
 
 const TABELA_COLUMNS: DataTableColumn[] = [
@@ -40,12 +41,12 @@ const TABELA_COLUMNS: DataTableColumn[] = [
 
 const DIMENSAO_DESC_COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID'},
-    {key: 'nomeVisualizacao', label: 'DimensÃ£o Descritiva'},
+    {key: 'nomeVisualizacao', label: 'Dimensão Descritiva'},
 ];
 
 const DIMENSAO_TEMPO_COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID'},
-    {key: 'nomeVisualizacao', label: 'DimensÃ£o Tempo'},
+    {key: 'nomeVisualizacao', label: 'Dimensão Tempo'},
 ];
 
 const MEDIDA_COLUMNS: DataTableColumn[] = [
@@ -54,9 +55,9 @@ const MEDIDA_COLUMNS: DataTableColumn[] = [
 ];
 
 const TABELA_COLUNAS_COLUMNS: DataTableColumn[] = [
-    {key: 'dimensaoNome', label: 'DimensÃ£o', width: '30%'},
+    {key: 'dimensaoNome', label: 'Dimensão', width: '30%'},
     {key: 'medidaNome', label: 'Medida', width: '30%'},
-    {key: 'dimensaoTipo', label: 'Tipo DimensÃ£o', width: '20%'},
+    {key: 'dimensaoTipo', label: 'Tipo Dimensão', width: '20%'},
     {key: 'medidaTipo', label: 'Tipo Medida', width: '20%'},
 ];
 
@@ -99,13 +100,13 @@ export default function ViewRelatoriosFormTabelaListScreen() {
         filtros: [],
     });
 
-    const {post: saveTabela} = useApi('/api/relatorios/tabela');
-    const {get: loadEstrutura} = useApi('/api/relatorios/estrutura');
-    const {get: loadDimensoes} = useApi('/api/relatorios/dimensao');
-    const {get: loadMedidas} = useApi('/api/relatorios/medida');
-    const {get: loadFiltros} = useApi('/api/relatorios/filtro');
-    const {post: saveFiltro} = useApi('/api/relatorios/filtro');
-    const {delete: deleteFiltro} = useApi('/api/relatorios/filtro');
+    const {post: saveTabela} = useApi(API_PATHS.relatorios.tabela);
+    const {get: loadEstrutura} = useApi(API_PATHS.relatorios.estrutura);
+    const {get: loadDimensoes} = useApi(API_PATHS.relatorios.dimensao);
+    const {get: loadMedidas} = useApi(API_PATHS.relatorios.medida);
+    const {get: loadFiltros} = useApi(API_PATHS.relatorios.filtro);
+    const {post: saveFiltro} = useApi(API_PATHS.relatorios.filtro);
+    const {delete: deleteFiltro} = useApi(API_PATHS.relatorios.filtro);
 
     useEffect(() => {
         if (data.entity.estruturaId && data.entity.estruturaId !== estruturaSelecionada?.id) {
@@ -202,7 +203,7 @@ export default function ViewRelatoriosFormTabelaListScreen() {
 
     const addFiltro = async () => {
         if (!filtroNome.trim() || !filtroDimensao) {
-            alert('Informe nome e dimensÃ£o para o filtro');
+            alert('Informe nome e dimensão para o filtro');
             return;
         }
         try {
@@ -249,7 +250,7 @@ export default function ViewRelatoriosFormTabelaListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <div className="div_form">
-                    <div className="form-title">Cadastro / EdiÃ§Ã£o de RelatÃ³rio de Tabela</div>
+                    <div className="form-title">Cadastro / Edição de Relatório de Tabela</div>
                     <div className="table_form">
                         <Wizard
                             initialData={data}
@@ -257,11 +258,11 @@ export default function ViewRelatoriosFormTabelaListScreen() {
                             steps={[
                                 {
                                     key: 'definicao',
-                                    label: 'DefiniÃ§Ã£o',
+                                    label: 'Definição',
                                     content: (
                                         <div>
                                             <FormLayout
-                                                title="DefiniÃ§Ã£o"
+                                                title="Definição"
                                                 tabs={definicaoTabs}
                                                 initialValues={data.entity}
                                                 onSubmit={(vals) => updateFields({entity: {...data.entity, ...vals}})}
@@ -273,11 +274,11 @@ export default function ViewRelatoriosFormTabelaListScreen() {
                                                 <Tabs tabs={[
                                                     {
                                                         key: 'descritiva',
-                                                        label: 'DimensÃ£o Descritiva',
+                                                        label: 'Dimensão Descritiva',
                                                         content: (
                                                             <div>
                                                                 <AutoComplete
-                                                                    label="Adicionar DimensÃ£o Descritiva"
+                                                                    label="Adicionar Dimensão Descritiva"
                                                                     source={DIMENSAO_SOURCE}
                                                                     searchKeys={DIMENSAO_SEARCH}
                                                                     columns={DIMENSAO_COLUMNS}
@@ -298,11 +299,11 @@ export default function ViewRelatoriosFormTabelaListScreen() {
                                                     },
                                                     {
                                                         key: 'tempo',
-                                                        label: 'DimensÃ£o Tempo',
+                                                        label: 'Dimensão Tempo',
                                                         content: (
                                                             <div>
                                                                 <AutoComplete
-                                                                    label="Adicionar DimensÃ£o Tempo"
+                                                                    label="Adicionar Dimensão Tempo"
                                                                     source={DIMENSAO_SOURCE}
                                                                     searchKeys={DIMENSAO_SEARCH}
                                                                     columns={DIMENSAO_COLUMNS}
@@ -349,7 +350,7 @@ export default function ViewRelatoriosFormTabelaListScreen() {
                                                         label: 'Colunas da Tabela',
                                                         content: (
                                                             <div>
-                                                                <p className="master-detail-empty">ConfiguraÃ§Ã£o de colunas (dimensÃ£o + medida + ordem)</p>
+                                                                <p className="master-detail-empty">Configuração de colunas (dimensão + medida + ordem)</p>
                                                                 <DataTable
                                                                     data={tabelaColunas}
                                                                     columns={TABELA_COLUNAS_COLUMNS}
@@ -370,13 +371,13 @@ export default function ViewRelatoriosFormTabelaListScreen() {
                                 },
                                 {
                                     key: 'permissao',
-                                    label: 'PermissÃ£o',
+                                    label: 'Permissão',
                                     content: (
                                         <div>
                                             <div style={{marginBottom: '20px'}}>
-                                                <h3>UsuÃ¡rios</h3>
+                                                <h3>Usuários</h3>
                                                 <MasterDetail
-                                                    label="UsuÃ¡rio"
+                                                    label="Usuário"
                                                     source={USUARIO_SOURCE}
                                                     valueKey="id"
                                                     searchKeys={USUARIO_SEARCH}
@@ -427,7 +428,7 @@ export default function ViewRelatoriosFormTabelaListScreen() {
                                                             label: '',
                                                             fields: [
                                                                 {name: 'nome', label: 'Nome *', required: true, span: 2},
-                                                                {name: 'dimensaoId', label: 'DimensÃ£o', type: 'autoComplete', autoCompleteSource: DIMENSAO_SOURCE, autoCompleteSearchKeys: DIMENSAO_SEARCH, autoCompleteColumns: DIMENSAO_COLUMNS, span: 2},
+                                                                {name: 'dimensaoId', label: 'Dimensão', type: 'autoComplete', autoCompleteSource: DIMENSAO_SOURCE, autoCompleteSearchKeys: DIMENSAO_SEARCH, autoCompleteColumns: DIMENSAO_COLUMNS, span: 2},
                                                             ],
                                                         },
                                                     ]}
@@ -447,7 +448,7 @@ export default function ViewRelatoriosFormTabelaListScreen() {
                                                     {key: 'id', label: 'ID', width: '80px'},
                                                     {key: 'nome', label: 'Nome'},
                                                     {key: 'estruturaNome', label: 'Estrutura'},
-                                                    {key: 'dimensaoNome', label: 'DimensÃ£o'},
+                                                    {key: 'dimensaoNome', label: 'Dimensão'},
                                                 ]}
                                                 actions={[
                                                     {key: 'remove', label: 'Remover', icon: 'trash', className: 'btnred', onClick: removeFiltro},

@@ -49,4 +49,11 @@ public class TipoPausaController {
     public Uni<Void> delete(@PathParam("id") Long id) {
         return service.delete(id);
     }
+
+    @GET
+    @Path("/all")
+    public Uni<List<TipoPausaResponse>> all() {
+        return service.list();
+    }
+
 }

@@ -68,21 +68,21 @@ public class TabelaController {
 
     @GET
     @Path("/buscar-medidas")
-    public Uni<Void> buscarMedidas(@QueryParam("fatoId") Long fatoId) {
+    public Uni<List<Long>> buscarMedidas(@QueryParam("fatoId") Long fatoId) {
         return service.buscarMedidas(fatoId);
     }
 
 
     @GET
     @Path("/buscar-dimensoes-descritivo")
-    public Uni<Void> buscarDimensoesDescritivo(@QueryParam("fatoId") Long fatoId) {
+    public Uni<List<Long>> buscarDimensoesDescritivo(@QueryParam("fatoId") Long fatoId) {
         return service.buscarDimensoesDescritivo(fatoId);
     }
 
 
     @GET
     @Path("/buscar-dimensoes-tempo")
-    public Uni<Void> buscarDimensoesTempo(@QueryParam("fatoId") Long fatoId) {
+    public Uni<List<Long>> buscarDimensoesTempo(@QueryParam("fatoId") Long fatoId) {
         return service.buscarDimensoesTempo(fatoId);
     }
 

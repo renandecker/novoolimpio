@@ -16,10 +16,10 @@ const COLUMNS: DataTableColumn[] = [
     {key: 'indicador_descricao', label: 'Indicador'},
     {key: 'unidade_descricao', label: 'Unidade'},
     {key: 'ano', label: 'Ano'},
-    {key: 'mes', label: 'MÃªs'},
+    {key: 'mes', label: 'Mês'},
     {
         key: 'data_atualizacao',
-        label: 'Data AtualizaÃ§Ã£o',
+        label: 'Data Atualização',
         render: (item) => formatDate(asRecord(item).data_atualizacao),
     },
 ];
@@ -38,8 +38,8 @@ export default function ViewMetaListMetaDinamicaListScreen() {
                             columns: COLUMNS,
                             maxMainColumns: COLUMNS.length,
                         },
-                        {key: 'item2', label: 'Item 2', empty: 'ConteÃºdo de Item 2.'},
-                        {key: 'listagem', label: 'Listagem', empty: 'ConteÃºdo de Listagem.'},
+                        {key: 'item2', label: 'Item 2', empty: 'Conteúdo de Item 2.'},
+                        {key: 'listagem', label: 'Listagem', empty: 'Conteúdo de Listagem.'},
                     ]}
                 />
             </main>

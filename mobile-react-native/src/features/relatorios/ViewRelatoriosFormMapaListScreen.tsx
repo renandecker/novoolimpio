@@ -27,7 +27,8 @@ import {
     FILTRO_COLUMNS,
     FILTRO_SEARCH,
 } from '../masterDetailSources';
-import {useApi} from '../api';
+import {useApi} from '../../shared/services/api';
+import {API_PATHS} from '../../shared/services/apiPaths';
 import {DataTable} from '../DataTable';
 import {MasterDetail} from '../MasterDetail';
 import type {ApiItem} from '../types';
@@ -93,13 +94,13 @@ export default function ViewRelatoriosFormMapaListScreen() {
     });
     const [showRegraForm, setShowRegraForm] = useState(false);
 
-    const {post: saveMapa} = useApi('/api/relatorios/mapa');
-    const {get: loadEstrutura} = useApi('/api/relatorios/estrutura');
-    const {get: loadFiltros} = useApi('/api/relatorios/filtro');
-    const {post: saveFiltro} = useApi('/api/relatorios/filtro');
-    const {delete: deleteFiltro} = useApi('/api/relatorios/filtro');
-    const {post: saveRegra} = useApi('/api/relatorios/mapa-regra');
-    const {delete: deleteRegra} = useApi('/api/relatorios/mapa-regra');
+    const {post: saveMapa} = useApi(API_PATHS.relatorios.mapa);
+    const {get: loadEstrutura} = useApi(API_PATHS.relatorios.estrutura);
+    const {get: loadFiltros} = useApi(API_PATHS.relatorios.filtro);
+    const {post: saveFiltro} = useApi(API_PATHS.relatorios.filtro);
+    const {delete: deleteFiltro} = useApi(API_PATHS.relatorios.filtro);
+    const {post: saveRegra} = useApi(API_PATHS.relatorios.mapaRegra);
+    const {delete: deleteRegra} = useApi(API_PATHS.relatorios.mapaRegra);
 
     const [entity, setEntity] = useState({
         nome: '',

@@ -13,9 +13,9 @@ const formatDate = (value: unknown): string => {
 
 const COLUMNS: DataTableColumn[] = [
     {key: 'produto_descricao', label: 'Produto'},
-    {key: 'usuario_descricao', label: 'UsuÃ¡rio'},
+    {key: 'usuario_descricao', label: 'Usuário'},
     {key: 'unidade_descricao', label: 'Unidade'},
-    {key: 'tipo', label: 'Tipo MovimentaÃ§Ã£o'},
+    {key: 'tipo', label: 'Tipo Movimentação'},
     {
         key: 'dt_movimento',
         label: 'Data Movimento',

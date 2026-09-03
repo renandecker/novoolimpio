@@ -1,21 +1,38 @@
 .autocomplete {
     display: inline-flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
     position: relative;
     min-width: 240px;
 }
 
 .autocomplete-label {
+    flex: 0 0 140px;
     color: #333;
     font-size: 13px;
     font-weight: bold;
-    margin-bottom: 3px;
+    margin-bottom: 0;
 }
 
 .autocomplete-input-wrap {
     display: flex;
     align-items: center;
     position: relative;
+    flex: 1;
+    min-width: 0;
+}
+
+@media (max-width: 900px) {
+    .autocomplete {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+    }
+
+    .autocomplete-label {
+        flex: none;
+    }
 }
 
 .autocomplete-input {

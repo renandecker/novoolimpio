@@ -78,7 +78,7 @@ export default function ViewProspectoControleProspectoListScreen() {
                 setLoading(false);
             })
             .catch(() => {
-                setDetailHtml('<p>InformaÃ§Ãµes detalhadas do prospecto.</p>');
+                setDetailHtml('<p>Informações detalhadas do prospecto.</p>');
                 setDetailModalOpen(true);
                 setLoading(false);
             });
@@ -159,7 +159,7 @@ export default function ViewProspectoControleProspectoListScreen() {
                             <th style={{ padding: '10px', width: '20%' }}>ID</th>
                             <th style={{ padding: '10px', width: '40%' }}>Nome</th>
                             <th style={{ padding: '10px', width: '30%' }}>Valor</th>
-                            <th style={{ padding: '10px', width: '10%' }}>AÃ§Ãµes</th>
+                            <th style={{ padding: '10px', width: '10%' }}>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -177,7 +177,7 @@ export default function ViewProspectoControleProspectoListScreen() {
                                     <td style={{ padding: '10px' }}>{item.valor}</td>
                                     <td style={{ padding: '10px', display: 'flex', gap: '5px' }}>
                                         <button
-                                            title="Mais informaÃ§Ãµes"
+                                            title="Mais informações"
                                             style={{ background: '#f0ad4e', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '3px', cursor: 'pointer' }}
                                             onClick={() => handleCarregarDetalhes(item.id)}
                                         >
@@ -213,7 +213,7 @@ export default function ViewProspectoControleProspectoListScreen() {
                     {ajustarItem && (
                         <div>
                             <p style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                                VocÃª tem certeza que deseja Ajustar o prospecto {ajustarItem.nome}?
+                                Você tem certeza que deseja Ajustar o prospecto {ajustarItem.nome}?
                             </p>
                             <p style={{ margin: '15px 0', color: '#555' }}>{ajustarItem.outro}</p>
                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
@@ -227,7 +227,7 @@ export default function ViewProspectoControleProspectoListScreen() {
                                     style={{ background: '#d9534f', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer' }}
                                     onClick={() => setAjustarModalOpen(false)}
                                 >
-                                    NÃ£o
+                                    Não
                                 </button>
                             </div>
                         </div>
@@ -239,7 +239,7 @@ export default function ViewProspectoControleProspectoListScreen() {
                     {ajustarItem && (
                         <div>
                             <p style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                                VocÃª tem certeza que deseja Ajustar o prospecto {ajustarItem.nome}?
+                                Você tem certeza que deseja Ajustar o prospecto {ajustarItem.nome}?
                             </p>
                             <div style={{ margin: '10px 0' }}>
                                 <strong>Nome:</strong> {ajustarItem.nome}
@@ -290,7 +290,7 @@ export default function ViewProspectoControleProspectoListScreen() {
                                     style={{ background: '#d9534f', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer' }}
                                     onClick={() => setAjustarSelecionarModalOpen(false)}
                                 >
-                                    NÃ£o
+                                    Não
                                 </button>
                             </div>
                         </div>
@@ -298,7 +298,7 @@ export default function ViewProspectoControleProspectoListScreen() {
                 </Modal>
 
                 {/* Modal Detalhes Prospecto */}
-                <Modal isOpen={detailModalOpen} onClose={() => setDetailModalOpen(false)} title="InformaÃ§Ãµes Prospecto">
+                <Modal isOpen={detailModalOpen} onClose={() => setDetailModalOpen(false)} title="Informações Prospecto">
                     <div dangerouslySetInnerHTML={{ __html: detailHtml }} />
                 </Modal>
             </main>

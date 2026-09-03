@@ -59,36 +59,36 @@ public class OperacionalController {
 
     @GET
     @Path("/buscar-filtros")
-    public Uni<Void> buscarFiltros(@QueryParam("operacionalId") Long operacionalId) {
+    public Uni<List<Long>> buscarFiltros(@QueryParam("operacionalId") Long operacionalId) {
         return service.buscarFiltros(operacionalId);
     }
 
 
     @GET
     @Path("/buscar-todos")
-    public Uni<Void> buscarTodos() {
+    public Uni<List<Long>> buscarTodos() {
         return service.buscarTodos();
     }
 
 
     @GET
     @Path("/buscar-prospectos")
-    public Uni<Void> buscarProspectos(@QueryParam("opId") Long opId) {
+    public Uni<List<Long>> buscarProspectos(@QueryParam("opId") Long opId) {
         return service.buscarProspectos(opId);
     }
 
 
     @GET
     @Path("/buscar-ligacoes")
-    public Uni<Void> buscarLigacoes(@QueryParam("opId") Long opId) {
+    public Uni<List<Long>> buscarLigacoes(@QueryParam("opId") Long opId) {
         return service.buscarLigacoes(opId);
     }
 
 
     @GET
     @Path("/buscar-ligacoes-com-usuario")
-    public Uni<Void> buscarLigacoesComUsuario() {
-        return service.buscarLigacoesComUsuario();
+    public Uni<List<Long>> buscarLigacoesComUsuario(@QueryParam("usuarioId") Long usuarioId) {
+        return service.buscarLigacoesComUsuario(usuarioId);
     }
 
 

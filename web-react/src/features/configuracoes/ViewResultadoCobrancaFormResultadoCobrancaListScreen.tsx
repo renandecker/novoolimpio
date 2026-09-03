@@ -17,7 +17,7 @@ export default function ViewResultadoCobrancaFormResultadoCobrancaListScreen() {
             <main>
                 <h1>Form Resultado Cobranca</h1>
                 <div className="div_form">
-                    <div className="form-title">Motivo da LigaÃ§Ã£o</div>
+                    <div className="form-title">Motivo da Ligação</div>
                     <div className="table_form">
                         <MasterDetail
                             label="Etapas"

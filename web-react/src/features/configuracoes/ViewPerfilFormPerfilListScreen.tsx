@@ -14,9 +14,9 @@ export default function ViewPerfilFormPerfilListScreen() {
                             tabs={[
                                 {
                                     key: 'config',
-                                    label: 'ConfiguraÃ§Ãµes Gerais',
-                                    content: <p className="master-detail-empty">Dados do perfil e permissÃµes por
-                                        mÃ³dulo.</p>
+                                    label: 'Configurações Gerais',
+                                    content: <p className="master-detail-empty">Dados do perfil e permissões por
+                                        módulo.</p>
                                 },
                                 {
                                     key: 'favoritos',

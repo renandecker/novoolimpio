@@ -2,6 +2,7 @@
 import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
 import {Wizard, useWizardData} from '../../shared/components/Wizard';
 import {useApi} from '../../shared/services/api';
+import {API_PATHS} from '../../shared/services/apiPaths';
 
 const MODELO_EMAIL_COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID do Modelo de Email'},
@@ -37,9 +38,9 @@ export default function ViewCobrancaEmailLoteListScreen() {
         selectLote: [],
     });
 
-    const {get: getModelosEmail} = useApi('/api/cobranca/modelo-email');
-    const {get: getAlunos} = useApi('/api/educacao/aluno-contrato');
-    const {post: sendEmail} = useApi('/api/cobranca/enviar-email-lote');
+    const {get: getModelosEmail} = useApi(API_PATHS.financeiro.modeloEmail);
+    const {get: getAlunos} = useApi(API_PATHS.basico.alunoContrato);
+    const {post: sendEmail} = useApi(API_PATHS.financeiro.enviarEmailLote);
 
     const validateStep1 = async (currentData: EmailLoteData) => {
         if (!currentData.targetModelEmail) return 'Selecione o modelo de email';

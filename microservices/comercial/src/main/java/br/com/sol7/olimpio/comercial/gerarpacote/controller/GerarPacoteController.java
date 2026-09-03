@@ -8,6 +8,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Path("/api/comercial/gerar-pacote")
 @Produces(MediaType.APPLICATION_JSON)
@@ -52,7 +53,7 @@ public class GerarPacoteController {
 
     @GET
     @Path("/auto-complete")
-    public Uni<String> autoComplete(@QueryParam("query") String query) {
+    public Uni<List<Long>> autoComplete(@QueryParam("query") String query) {
         return service.autoComplete(query);
     }
 
@@ -66,15 +67,15 @@ public class GerarPacoteController {
 
     @GET
     @Path("/carregar-campos")
-    public Uni<Void> carregarCampos() {
-        return service.carregarCampos();
+    public Uni<List<Map<String, Object>>> carregarCampos(@QueryParam("prospectoIds") List<Long> prospectoIds) {
+        return service.carregarCampos(prospectoIds);
     }
 
 
     @GET
     @Path("/carregar-operacoes")
-    public Uni<Void> carregarOperacoes() {
-        return service.carregarOperacoes();
+    public Uni<List<String>> carregarOperacoes(@QueryParam("tipoCampo") String tipoCampo) {
+        return service.carregarOperacoes(tipoCampo);
     }
 
 
@@ -94,28 +95,28 @@ public class GerarPacoteController {
 
     @GET
     @Path("/carregar-operacoe")
-    public Uni<Void> carregarOperacoe() {
+    public Uni<List<String>> carregarOperacoe() {
         return service.carregarOperacoe();
     }
 
 
     @GET
     @Path("/carregar-operacoes-ligacao")
-    public Uni<Void> carregarOperacoesLigacao() {
+    public Uni<List<String>> carregarOperacoesLigacao() {
         return service.carregarOperacoesLigacao();
     }
 
 
     @GET
     @Path("/carregar-operacoes-academico")
-    public Uni<Void> carregarOperacoesAcademico() {
-        return service.carregarOperacoesAcademico();
+    public Uni<List<String>> carregarOperacoesAcademico(@QueryParam("tipoFiltro") Integer tipoFiltro) {
+        return service.carregarOperacoesAcademico(tipoFiltro);
     }
 
 
     @GET
     @Path("/carregar-prospecto-para-visualizacao")
-    public Uni<Void> carregarProspectoParaVisualizacao(@QueryParam("entityId") Long entityId) {
+    public Uni<List<Map<String, Object>>> carregarProspectoParaVisualizacao(@QueryParam("entityId") Long entityId) {
         return service.carregarProspectoParaVisualizacao(entityId);
     }
 

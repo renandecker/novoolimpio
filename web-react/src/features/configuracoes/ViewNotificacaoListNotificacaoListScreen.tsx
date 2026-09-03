@@ -41,13 +41,13 @@ export default function ViewNotificacaoListNotificacaoListScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>NotificaÃ§Ãµes</h1>
+                <h1>Notificações</h1>
                 <div className="notificacao-list">
                     {query.isLoading && items.length === 0 ? (
                         <p className="notificacao-empty">Carregando...</p>
                     ) : items.length === 0 ? (
                         <div className="notificacao-empty">
-                            <p>Nenhuma notificaÃ§Ã£o no momento.</p>
+                            <p>Nenhuma notificação no momento.</p>
                         </div>
                     ) : (
                         items.map((notification) => (
@@ -64,7 +64,7 @@ export default function ViewNotificacaoListNotificacaoListScreen() {
                                         <span
                                             className="notificacao-item-time">{formatTime(notification.createdAt)}</span>
                                         {!notification.lida &&
-                                        <span className="notificacao-item-unread-tag">nÃ£o lida</span>}
+                                        <span className="notificacao-item-unread-tag">não lida</span>}
                                     </div>
                                 </div>
                                 <div className="notificacao-item-actions">
@@ -96,16 +96,16 @@ export default function ViewNotificacaoListNotificacaoListScreen() {
                                 Anterior
                             </button>
                             <span>
-                PÃ¡gina {page + 1} de {totalPages}
+                Página {page + 1} de {totalPages}
               </span>
                             <button
                                 onClick={() => setPage((current) => Math.min(totalPages - 1, current + 1))}
                                 disabled={page >= totalPages - 1 || query.isFetching}
                             >
-                                PrÃ³xima
+                                Próxima
                             </button>
                             <label>
-                                Por pÃ¡gina
+                                Por página
                                 <select
                                     value={size}
                                     onChange={(event) => {

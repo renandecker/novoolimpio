@@ -52,8 +52,8 @@ public class AcaoController {
 
     @GET
     @Path("/auto-complete-em-aberto")
-    public Uni<List<Long>> autoCompleteEmAberto(@QueryParam("query") String query) {
-        return service.autoCompleteEmAberto(query);
+    public Uni<List<Long>> autoCompleteEmAberto(@QueryParam("query") String query, @QueryParam("unidades") List<Long> unidades) {
+        return service.autoCompleteEmAberto(query, unidades);
     }
 
 

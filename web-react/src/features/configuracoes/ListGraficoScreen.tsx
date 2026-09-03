@@ -9,7 +9,7 @@ export default function ListGraficoScreen() {
     const extraRowActions: DataTableRowAction[] = [
         {
             key: 'acessar',
-            title: 'Acessar RelatÃ³rio',
+            title: 'Acessar Relatório',
             icon: <i className="fa fa-external-link" />,
             permission: 'EXECUTE',
             onClick: (item) => {
@@ -21,7 +21,7 @@ export default function ListGraficoScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>RelatÃ³rios - GrÃ¡fico</h1>
+                <h1>Relatórios - Gráfico</h1>
                 <DataTable
                     path="/api/relatorios/grafico"
                     extraRowActions={extraRowActions}

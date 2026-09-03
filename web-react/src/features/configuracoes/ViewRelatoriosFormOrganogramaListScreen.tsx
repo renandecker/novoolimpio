@@ -3,8 +3,9 @@ import {useNavigate, useSearchParams} from 'react-router-dom';
 import {PermissionGate} from '../../shared/services/permissions';
 import {FormLayout, FormTabConfig} from '../../shared/components/FormLayout';
 import {api} from '../../shared/services/api';
+import {API_PATHS} from '../../shared/services/apiPaths';
 
-// Mesmas 3 opÃ§Ãµes de direÃ§Ã£o do AG Charts Org Chart (ver tela de visualizaÃ§Ã£o).
+// Mesmas 3 opções de direção do AG Charts Org Chart (ver tela de visualização).
 const DIRECAO_OPTIONS = [
     {value: 'HORIZONTAL', label: 'Horizontal'},
     {value: 'VERTICAL', label: 'Vertical'},
@@ -16,18 +17,18 @@ const str = (v: unknown): string => (v === null || v === undefined ? '' : String
 const tabs: FormTabConfig[] = [
     {
         key: 'definicao',
-        label: 'DefiniÃ§Ã£o',
+        label: 'Definição',
         fields: [
             {name: 'id', label: 'ID', readOnly: true, span: 1},
             {name: 'nome', label: 'Nome', required: true, span: 3},
-            {name: 'direcao', label: 'DireÃ§Ã£o', type: 'select', options: DIRECAO_OPTIONS, required: true, span: 1},
+            {name: 'direcao', label: 'Direção', type: 'select', options: DIRECAO_OPTIONS, required: true, span: 1},
             {
                 name: 'sql',
                 label: 'SQL',
                 type: 'textarea',
                 required: true,
                 span: 4,
-                placeholder: 'select id, parentId, name, job, department, location, status, avatar from <Tabela> where <condiÃ§Ã£o>',
+                placeholder: 'select id, parentId, name, job, department, location, status, avatar from <Tabela> where <condição>',
             },
         ],
     },
@@ -48,7 +49,7 @@ export default function ViewRelatoriosFormOrganogramaListScreen() {
         let ativo = true;
         (async () => {
             try {
-                const resp = await api.get<Record<string, unknown>>(`/api/relatorios/organograma/${idParam}`);
+                const resp = await api.get<Record<string, unknown>>(`${API_PATHS.relatorios.organograma}/${idParam}`);
                 if (!ativo) return;
                 const organograma = resp.data;
                 setOrganogramaId(organograma.id as number);
@@ -84,8 +85,8 @@ export default function ViewRelatoriosFormOrganogramaListScreen() {
                 sql: vals.sql,
             };
             const resposta = organogramaId
-                ? await api.put(`/api/relatorios/organograma/${organogramaId}`, body)
-                : await api.post('/api/relatorios/organograma', body);
+                ? await api.put(`${API_PATHS.relatorios.organograma}/${organogramaId}`, body)
+                : await api.post(API_PATHS.relatorios.organograma, body);
             const novoId = (resposta.data as Record<string, unknown>)?.id ?? organogramaId;
             alert('Organograma salvo com sucesso.');
             navigate(`/view/relatorios/formOrganograma?id=${novoId}`);

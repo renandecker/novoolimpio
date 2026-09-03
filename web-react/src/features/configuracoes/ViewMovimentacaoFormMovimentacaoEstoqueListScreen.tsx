@@ -8,7 +8,7 @@ const MOVIMENTACAO_COLUMNS: DataTableColumn[] = [
     {key: 'dataMovimento', label: 'Data'},
     {key: 'produtoId', label: 'Produto'},
     {key: 'unidadeId', label: 'Unidade'},
-    {key: 'usuarioId', label: 'UsuÃ¡rio'},
+    {key: 'usuarioId', label: 'Usuário'},
     {key: 'vendaProdutoId', label: 'Venda Produto'},
     {key: 'fornecedorId', label: 'Fornecedor'},
     {key: 'central', label: 'Central'},

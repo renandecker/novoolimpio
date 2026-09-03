@@ -4,7 +4,7 @@ import {DataTable} from '../../shared/components/DataTable';
 export default function ViewTipoAcaoListTipoAcaoListScreen() {
     return <PermissionGate permission="READ">
         <main>
-            <h1>Tipo de AÃ§Ã£o</h1>
+            <h1>Tipo de Ação</h1>
             <DataTable
                 path="/api/view/tipoAcao/listTipoAcao"
                 columns={[

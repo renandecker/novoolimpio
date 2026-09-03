@@ -73,15 +73,15 @@ public class ChamadaAssinadaImpressaController {
 
     @POST
     @Path("/gerar-chamada-assinada-retrato")
-    public Uni<String> gerarChamadaAssinadaRetrato(@QueryParam("ccId") Long ccId) {
-        return service.gerarChamadaAssinadaRetrato(ccId);
+    public Uni<String> gerarChamadaAssinadaRetrato(@QueryParam("ccId") Long ccId, @QueryParam("usuarioId") Long usuarioId) {
+        return service.gerarChamadaAssinadaRetrato(ccId, usuarioId);
     }
 
 
     @POST
     @Path("/gerar-chamada-assinada-paisagem")
-    public Uni<String> gerarChamadaAssinadaPaisagem(@QueryParam("ccId") Long ccId) {
-        return service.gerarChamadaAssinadaPaisagem(ccId);
+    public Uni<String> gerarChamadaAssinadaPaisagem(@QueryParam("ccId") Long ccId, @QueryParam("usuarioId") Long usuarioId) {
+        return service.gerarChamadaAssinadaPaisagem(ccId, usuarioId);
     }
 
 

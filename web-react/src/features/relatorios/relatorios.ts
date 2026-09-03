@@ -7,12 +7,35 @@ export type RelatorioDisponivel = {
     tipo: 'TABELA' | 'GRAFICO' | 'MAPA' | 'ORGANOGRAMA' | 'DASHBOARD' | 'PIZZA' | 'LINHA' | 'COMBINADO' | 'CIRCULAR' | 'BARRA_VERTICAL' | 'BARRA_HORIZONTAL';
 };
 
+export type Marcador = {
+    latitude: string;
+    longitude: string;
+    popup: string;
+    valorFormatado: string;
+};
+
+export type RegraPontos = {
+    regraId: number;
+    descricao: string;
+    cor: string;
+    markerTamanho: number;
+    marcadores: Marcador[];
+};
+
+export type MapaPontosResponse = {
+    coordenadaCentro: string;
+    zoom: string;
+    altura: number;
+    markerTamanho: number;
+    regras: RegraPontos[];
+};
+
 export type RelatorioAberto = {
     id: number;
     nome: string;
     tipo: string;
     configuracao: Record<string, unknown>;
-    dados: RelatorioDados | null;
+    dados: RelatorioDados | MapaPontosResponse | null;
 };
 
 export type LinhaGrafico = {

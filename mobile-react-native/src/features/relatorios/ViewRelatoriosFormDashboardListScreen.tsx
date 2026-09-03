@@ -24,7 +24,8 @@ import {
     PAINEL_PAINEL_COLUMNS,
     PAINEL_PAINEL_SEARCH,
 } from '../masterDetailSources';
-import {useApi} from '../api';
+import {useApi} from '../../shared/services/api';
+import {API_PATHS} from '../../shared/services/apiPaths';
 import {DataTable} from '../DataTable';
 import {MasterDetail} from '../MasterDetail';
 import type {ApiItem} from '../types';
@@ -78,12 +79,12 @@ export default function ViewRelatoriosFormDashboardListScreen() {
     const [filtros, setFiltros] = useState<any[]>([]);
     const [filtroSelecionados, setFiltroSelecionados] = useState<any[]>([]);
 
-    const {post: saveDashboard} = useApi('/api/relatorios/dashboard');
-    const {get: loadFiltros} = useApi('/api/relatorios/filtro');
-    const {post: saveFiltro} = useApi('/api/relatorios/filtro');
-    const {delete: deleteFiltro} = useApi('/api/relatorios/filtro');
-    const {post: savePainel} = useApi('/api/relatorios/painel-painel');
-    const {delete: deletePainel} = useApi('/api/relatorios/painel-painel');
+    const {post: saveDashboard} = useApi(API_PATHS.relatorios.dashboard);
+    const {get: loadFiltros} = useApi(API_PATHS.relatorios.filtro);
+    const {post: saveFiltro} = useApi(API_PATHS.relatorios.filtro);
+    const {delete: deleteFiltro} = useApi(API_PATHS.relatorios.filtro);
+    const {post: savePainel} = useApi(API_PATHS.relatorios.painelPainel);
+    const {delete: deletePainel} = useApi(API_PATHS.relatorios.painelPainel);
 
     const [entity, setEntity] = useState({nome: '', descricao: ''});
 

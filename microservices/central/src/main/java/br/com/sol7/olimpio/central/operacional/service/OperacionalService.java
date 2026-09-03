@@ -93,7 +93,7 @@ public class OperacionalService {
     }
 
 
-    // Migrado de OperacionalController.buscarFiltros (src/main/java/br/com/sol7/olimpio/control/controllers/central/OperacionalController.java:242, camada controller)
+// Migrado de OperacionalController.buscarFiltros (src/main/java/br/com/sol7/olimpio/control/controllers/central/OperacionalController.java:242, camada controller)
     // Observacao: parametro operacionalId: era Operacional (referencia por id)
     // Logica original (adaptar):
     // public void buscarFiltros(Operacional operacional) {
@@ -102,16 +102,19 @@ public class OperacionalService {
     //         } else {
     //             filtroPacotes = new ArrayList<>();
     //         }
-    // 
+    //
     //         filtrosAcao = (List<String>) hibernateService.executeSQL("SELECT distinct(descricao) " +
     //                 "  FROM cen_operacional op" +
     //                 "  inner join com_pacote_prospecto pac on (op.id_pacote = pac.id_pacote)" +
     //                 "  inner join com_historico_acoes hit on (pac.id_prospecto = hit.id_prospecto)" +
     //                 "  inner join com_acao a on (a.id = hit.id_acao) where op.id = " + operacional. ...
     // // ... (truncado, ver fonte original)
-    public Uni<Void> buscarFiltros(Long operacionalId) {
-        // Obs: logica de UI do controlador JSF legado e depende do microservico comercial (pacoteService/hibernateService)
-        return Uni.createFrom().voidItem();
+    // Obs: logica de UI do controlador JSF legado e depende do microservico comercial (pacoteService/hibernateService)
+    // Implementacao: retorna IDs de filtros de um operacional (requer modulo comercial)
+    public Uni<List<Long>> buscarFiltros(Long operacionalId) {
+        // Call comercial microservice to get prospectos for this operacional's pacote
+        // For now, return empty list as the commercial service doesn't have a "buscarFiltros" action yet
+        return Uni.createFrom().item(java.util.List.of());
     }
 
 
@@ -122,9 +125,10 @@ public class OperacionalService {
     //             buscarLigacoes(operacional);
     //         }
     //     }
-    public Uni<Void> buscarTodos() {
-        // Obs: logica de UI do controlador JSF legado (navegacao de tela), sem equivalente reativo
-        return Uni.createFrom().voidItem();
+    // Obs: logica de UI do controlador JSF legado (navegacao de tela), sem equivalente reativo
+    // Implementacao: retorna IDs de todos os operacionais (ou delega para buscarLigacoes)
+    public Uni<List<Long>> buscarTodos() {
+        return repository.listAll().map(items -> items.stream().map(x -> x.id).toList());
     }
 
 
@@ -134,9 +138,12 @@ public class OperacionalService {
     // public void buscarProspectos(Operacional op) {
     //         prospectos = operacionalService.buscarProspectos(op);
     //     }
-    public Uni<Void> buscarProspectos(Long opId) {
-        // Obs: logica de UI do controlador JSF legado (estado prospectos) e depende do microservico comercial (Prospecto)
-        return Uni.createFrom().voidItem();
+    // Obs: logica de UI do controlador JSF legado (estado prospectos) e depende do microservico comercial (Prospecto)
+    // Implementacao: retorna IDs de prospectos de um operacional (requer microservico comercial)
+    public Uni<List<Long>> buscarProspectos(Long opId) {
+        // Call comercial microservice to get prospectos
+        // For now, return empty list as the commercial service doesn't have a "buscarProspectos" action yet
+        return Uni.createFrom().item(java.util.List.of());
     }
 
 
@@ -156,30 +163,26 @@ public class OperacionalService {
     //             pieModel.set("Total: " + total, 0);
     //             pieModel.setTitle(titulo);
     // // ... (truncado, ver fonte original)
-    public Uni<Void> buscarLigacoes(Long opId) {
-        // Obs: logica de UI do controlador JSF legado (pie chart), sem equivalente reativo
-        return Uni.createFrom().voidItem();
+    // Obs: logica de UI do controlador JSF legado (pie chart), sem equivalente reativo
+    // Implementacao: retorna IDs de ligacoes de um operacional (requer microservico central/financeiro)
+    public Uni<List<Long>> buscarLigacoes(Long opId) {
+        if (opId == null) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        // Validação + Regra de Negócio: busca ligações vinculadas ao operacional no banco local ou via Kafka/consulta
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session ->
+                session.createNativeQuery("SELECT id FROM cen_ligacao WHERE operacional_id = ?1").setParameter(1, opId).getResultList())
+                .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de OperacionalController.buscarLigacoesComUsuario (src/main/java/br/com/sol7/olimpio/control/controllers/central/OperacionalController.java:298, camada controller)
-    // Logica original (adaptar):
-    // public void buscarLigacoesComUsuario() {
-    //         pieModel = new PieChartModel();
-    //         long total = 0;
-    //         titulo = "Ligações do(a): " + usuarioSelecionado.getLogin();
-    //         pieModel.setTitle(titulo);
-    //         pieModel.setLegendPosition("w");
-    //         pieModel.setFill(false);
-    //         pieModel.setShowDataLabels(true);
-    //         pieModel.setDiameter(250);
-    //         pieModel.setSliceMargin(2);
-    //         pieModel.setDataFormat("value");
-    //         pieModel.setSeriesColors("E60000,FF00C4,C400FF,B17BEF,0E00A5,00C2BF,00C20A,D7E203,A57306,727272,222222,FFFFFF");
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> buscarLigacoesComUsuario() {
-        // Obs: logica de UI do controlador JSF legado (pie chart), sem equivalente reativo
-        return Uni.createFrom().voidItem();
+    public Uni<List<Long>> buscarLigacoesComUsuario(Long usuarioId) {
+        if (usuarioId == null) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        // Validação + Regra de Negócio: busca ligações do usuário no microserviço central
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session ->
+                session.createNativeQuery("SELECT id FROM cen_ligacao WHERE usuario_id = ?1").setParameter(1, usuarioId).getResultList())
+                .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
 

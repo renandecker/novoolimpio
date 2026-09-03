@@ -22,6 +22,10 @@ public class FinanceiroKafkaProducer {
     @Channel("fechamento-caixa-manual-out")
     MutinyEmitter<String> fechamentoCaixaEmitter;
 
+    @Inject
+    @Channel("financeiro-maintenance-out")
+    MutinyEmitter<String> maintenanceEmitter;
+
     public Uni<Void> enviarTriggerEmailCobranca(String payload) {
         Log.infof("FinanceiroKafkaProducer - enviando trigger email cobranca para o schedule: %s", payload);
         return emailCobrancaEmitter.send(payload)
@@ -33,6 +37,13 @@ public class FinanceiroKafkaProducer {
         Log.infof("FinanceiroKafkaProducer - enviando trigger fechamento caixa para o schedule: %s", payload);
         return fechamentoCaixaEmitter.send(payload)
                 .onFailure().invoke(err -> Log.warnf("FinanceiroKafkaProducer - falha ao enviar trigger fechamento caixa: %s", err.getMessage()))
+                .onFailure().recoverWithNull();
+    }
+
+    public Uni<Void> enviarTriggerManutencao(String action) {
+        Log.infof("FinanceiroKafkaProducer - enviando trigger manutencao para o schedule: %s", action);
+        return maintenanceEmitter.send(action)
+                .onFailure().invoke(err -> Log.warnf("FinanceiroKafkaProducer - falha ao enviar trigger manutencao: %s", err.getMessage()))
                 .onFailure().recoverWithNull();
     }
 }

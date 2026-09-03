@@ -89,24 +89,32 @@
 }
 
 .login-box-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     vertical-align: middle;
     font-size: 12px;
-    padding: 5px;
+    padding: 5px 5%;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .login-box-input label {
+    flex: 0 0 auto;
     display: block;
     color: #616161;
     font-weight: bold;
     font-size: 15px;
-    margin: 6px 0 2px 50px;
+    margin: 0;
+    white-space: nowrap;
 }
 
 .login-box-input input {
-    width: 90%;
+    flex: 1;
+    min-width: 0;
+    width: auto;
     display: block;
-    margin-left: 5%;
+    margin-left: 0;
     padding: 10px;
     font-size: 15px;
     font-family: 'Segoe UI', Arial, sans-serif;
@@ -120,15 +128,27 @@
     outline: none;
 }
 
+@media (max-width: 480px) {
+    .login-box-input {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+    }
+
+    .login-box-input input {
+        width: 100%;
+    }
+}
+
 .login-box-input input:focus {
     border-color: #c2aa3c;
 }
 
 .login-box-input .login-button {
     margin-top: 20px;
-    margin-left: 5%;
+    margin-left: 0;
     padding: 5px;
-    width: 90%;
+    width: 100%;
     border: none;
     cursor: pointer;
     color: #ffffff;

@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class ViewService {
 
     private static final List<String> TABLE_PREFIXES = List.of("", "bas_", "est_", "fin_", "cen_", "com_", "edc_", "rel_", "bib_");
-    private static final List<String> VERB_PREFIXES = List.of("list", "form", "colunas", "alterar", "finalizar", "efetuar",
+    private static final List<String> VERB_PREFIXES = List.of("list", "view", "form", "colunas", "alterar", "finalizar", "efetuar",
             "gerar", "gestao", "consultor", "manter", "abas", "movimentacao", "controle", "criar", "recriar", "buscar",
             "acompanhar", "enviar", "receber", "visualizar", "montar", "parametro", "arquivo", "disponibilidade",
             "detalhe", "cadastro", "verificar", "salvar", "editar", "excluir", "importar", "exportar", "abrir", "fechar");
@@ -61,7 +61,9 @@ public class ViewService {
             Map.entry("tipoPausa/listTipoPausa", "cen_tipo_pausa"),
             Map.entry("tipoPausa/formTipoPausa", "cen_tipo_pausa"),
             Map.entry("categoriaCampo/listCategoriaCampo", "com_categoria"),
-            Map.entry("categoriaCampo/formCategoriaCampo", "com_categoria"));
+            Map.entry("categoriaCampo/formCategoriaCampo", "com_categoria"),
+            Map.entry("resultadoCobranca/listResultadoCobranca", "fin_resultado_ligacao_cobranca"),
+            Map.entry("resultadoCobranca/formResultadoCobranca", "fin_resultado_ligacao_cobranca"));
 
     // Consultas com JOIN para telas que exibem colunas de relacionamentos aninhados
     // (ex.: logradouro -> bairro -> cidade -> estado), como no listLogradouro.xhtml legado.

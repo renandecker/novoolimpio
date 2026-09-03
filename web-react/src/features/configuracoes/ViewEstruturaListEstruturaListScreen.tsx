@@ -16,8 +16,8 @@ const COLUMNS: DataTableColumn[] = [
     {key: 'nome', label: 'Nome'},
     {key: 'coordenada', label: 'Coordenada'},
     {key: 'zoom', label: 'Coordenada'},
-    {key: 'data_atualizacao', label: 'Data AtualizaÃ§Ã£o', render: (item) => formatDate(asRecord(item).data_atualizacao)},
-    {key: 'email_descricao', label: 'ConfiguraÃ§Ã£o Email'},
+    {key: 'data_atualizacao', label: 'Data Atualização', render: (item) => formatDate(asRecord(item).data_atualizacao)},
+    {key: 'email_descricao', label: 'Configuração Email'},
 ];
 
 export default function ViewEstruturaListEstruturaListScreen() {

@@ -18,14 +18,25 @@
 
 .disp-filtro {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
 }
 
 .disp-filtro label {
+    flex: 0 0 auto;
     color: #333;
     font-size: 13px;
     font-weight: bold;
+    white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    .disp-filtro {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+    }
 }
 
 .disp-select {

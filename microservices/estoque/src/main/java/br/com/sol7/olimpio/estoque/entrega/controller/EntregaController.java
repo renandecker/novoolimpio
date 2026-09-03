@@ -52,8 +52,8 @@ public class EntregaController {
 
     @GET
     @Path("/auto-complete-controle-entrega")
-    public Uni<List<Long>> autoCompleteControleEntrega(@QueryParam("query") String query) {
-        return service.autoCompleteControleEntrega(query);
+    public Uni<List<Long>> autoCompleteControleEntrega(@QueryParam("query") String query, @QueryParam("unidadeId") Long unidadeId) {
+        return service.autoCompleteControleEntrega(query, unidadeId);
     }
 
 }

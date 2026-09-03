@@ -11,15 +11,15 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                     tabs={[
                         {
                             key: 'digitalizacaoDeContratos',
-                            label: 'DigitalizaÃ§Ã£o de Contratos',
+                            label: 'Digitalização de Contratos',
                             path: '/api/view/digitalizacaoDocumento/digitalizacaoDocumento'
                         },
-                        {key: 'chamadaAssinada', label: 'Chamada Assinada', empty: 'ConteÃºdo de Chamada Assinada.'},
-                        {key: 'arquivosAluno', label: 'Arquivos Aluno', empty: 'ConteÃºdo de Arquivos Aluno.'},
+                        {key: 'chamadaAssinada', label: 'Chamada Assinada', empty: 'Conteúdo de Chamada Assinada.'},
+                        {key: 'arquivosAluno', label: 'Arquivos Aluno', empty: 'Conteúdo de Arquivos Aluno.'},
                         {
                             key: 'digitalizacaoDeChamada',
-                            label: 'DigitalizaÃ§Ã£o de Chamada',
-                            empty: 'ConteÃºdo de DigitalizaÃ§Ã£o de Chamada.'
+                            label: 'Digitalização de Chamada',
+                            empty: 'Conteúdo de Digitalização de Chamada.'
                         },
                         {
                             key: 'turma',

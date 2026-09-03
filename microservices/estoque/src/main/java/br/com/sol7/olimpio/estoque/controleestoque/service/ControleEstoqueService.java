@@ -1,19 +1,23 @@
 package br.com.sol7.olimpio.estoque.controleestoque;
 
+import br.com.sol7.olimpio.estoque.controleentrega.ControleEntregaService;
+import br.com.sol7.olimpio.estoque.entrega.EntregaRepository;
+import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.estoque.produto.ProdutoRepository;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
 @WithTransaction
@@ -23,6 +27,10 @@ public class ControleEstoqueService {
     ControleEstoqueRepository repository;
     @Inject
     ProdutoRepository produtoRepository;
+    @Inject
+    ControleEntregaService controleEntregaService;
+    @Inject
+    EntregaRepository entregaRepository;
 
     private final Map<Long, String> unidadeCache = new ConcurrentHashMap<>();
     private final Map<Long, String> usuarioCache = new ConcurrentHashMap<>();
@@ -119,13 +127,18 @@ public class ControleEstoqueService {
     //             return controleEstoqueService.autoComplete(query, unidade);
     //         }
     //     }
-    public Uni<List<Long>> autoComplete(String query) {
-        // Obs: depende do usuario logado (unidade selecionada) para escolher entre autoCompleteComUnidade e autoComplete
-        return Uni.createFrom().item(java.util.List.of());
+    public Uni<List<Long>> autoComplete(String query, Long unidadesId) {
+        if (unidadesId == null) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        if (query == null || query.isBlank()) {
+            return repository.find("unidadeId = ?1 order by produto.id", unidadesId).list().map(list -> list.stream().map(x -> x.id).toList());
+        }
+        return repository.autoComplete(query.toLowerCase(), unidadesId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
-    // Migrado de ControleEstoqueController.carregarMapa (src/main/java/br/com/sol7/olimpio/control/controllers/estoque/ControleEstoqueController.java:344, camada controller)
+// Migrado de ControleEstoqueController.carregarMapa (src/main/java/br/com/sol7/olimpio/control/controllers/estoque/ControleEstoqueController.java:344, camada controller)
     // Observacao: parametro controleEntregaId: era ControleEntrega (referencia por id)
     // Logica original (adaptar):
     // public void carregarMapa(ControleEntrega controleEntrega) {
@@ -134,16 +147,34 @@ public class ControleEstoqueService {
     //         if (controleEntrega != null) {
     //             verificaMapa = true;
     //             advancedModel = new DefaultMapModel();
-    // 
+    //
     //             if (configuracaoEstoqueService.findAll().size() != 0) {
     //                 configuracaoEstoque = configuracaoEstoqueService.findAll().get(0);
     //                 unidadeCentral = configuracaoEstoque.getUnidade();
     //                 int countAcentos = 0;
     //                 String longitude = "";
     // // ... (truncado, ver fonte original)
-    public Uni<Void> carregarMapa(Long controleEntregaId) {
-        // Obs: logica de UI do controlador JSF legado (mapa PrimeFaces/DefaultMapModel), sem equivalente reativo
-        return Uni.createFrom().voidItem();
+    public Uni<Map<String, Object>> carregarMapa(Long controleEntregaId) {
+        return controleEntregaService.find(controleEntregaId)
+                .onItem().ifNull().failWith(() -> new NotFoundException("ControleEntrega not found: " + controleEntregaId))
+                .chain(controleEntrega -> {
+                    if (controleEntrega.entregaId() == null) {
+                        return Uni.createFrom().item(Map.of("error", "Entrega não associada"));
+                    }
+                    return entregaRepository.findById(controleEntrega.entregaId())
+                            .onItem().ifNull().failWith(() -> new NotFoundException("Entrega not found: " + controleEntrega.entregaId()))
+                            .map(entrega -> {
+                                Map<String, Object> mapData = new HashMap<>();
+                                mapData.put("controleEntregaId", controleEntregaId);
+                                mapData.put("entregaDescricao", entrega.descricao);
+                                mapData.put("entregaArea", entrega.area);
+                                mapData.put("entregaZoom", entrega.zoom);
+                                mapData.put("entregaLongitude", entrega.longitude);
+                                mapData.put("entregaLatitude", entrega.latitude);
+                                mapData.put("verificaMapa", true);
+                                return mapData;
+                            });
+                });
     }
 
 
@@ -157,14 +188,51 @@ public class ControleEstoqueService {
     //         cal.setTime(new Date());
     //         cal.add(Calendar.DAY_OF_YEAR, 10);
     //         Date fim = DateUtil.somarDias(DateUtil.getUltimoDiaDoMes(new Date()), 10);
-    // 
+    //
     //         Long quantidadeSolicitacaoExistente = new Long(0);
     //         quantidadeSolicitacaoExistente = controlePedidosService.listarSolicitacaoUnidadesQtde(usuarioLogadoController.getUnidadesDisponiveis());
-    // 
+    //
     // // ... (truncado, ver fonte original)
-    public Uni<Void> buscarEstoque() {
-        // Obs: logica de UI do controlador JSF legado (alerta) e depende do servico de ControlePedidos (nao portado)
-        return Uni.createFrom().voidItem();
+    public Uni<Map<String, Object>> buscarEstoque(Long unidadeId) {
+        String sql = """
+            SELECT ce.*, p.nome as produto_nome, p.valor as produto_valor
+            FROM est_controle_estoque ce
+            INNER JOIN est_produto p ON p.id = ce.produto_id
+            WHERE ce.unidade_id = ?
+            ORDER BY p.nome
+            """;
+
+        return Panache.getSession()
+                .chain(s -> s.createNativeQuery(sql)
+                        .setParameter(1, unidadeId)
+                        .getResultList())
+                .map(rows -> {
+                    List<Map<String, Object>> itens = new ArrayList<>();
+                    for (Object row : rows) {
+                        Object[] cols = (Object[]) row;
+                        Map<String, Object> item = new HashMap<>();
+                        item.put("id", cols[0]);
+                        item.put("valor", cols[1]);
+                        item.put("quantidade", cols[2]);
+                        item.put("qtdeSolicitado", cols[3]);
+                        item.put("qtdeDefeito", cols[4]);
+                        item.put("qtdeFalta", cols[5]);
+                        item.put("qtdeNaoEncontrado", cols[6]);
+                        item.put("qtdeReservado", cols[7]);
+                        item.put("qtdeAprovadoNaoEntregue", cols[8]);
+                        item.put("produtoId", cols[9]);
+                        item.put("unidadeId", cols[10]);
+                        item.put("produtoNome", cols[11]);
+                        item.put("produtoValor", cols[12]);
+                        itens.add(item);
+                    }
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("unidadeId", unidadeId);
+                    result.put("itens", itens);
+                    result.put("alerta", itens.stream()
+                            .anyMatch(i -> ((Number) i.get("quantidade")).intValue() < ((Number) i.get("qtdeSolicitado")).intValue()));
+                    return result;
+                });
     }
 
 

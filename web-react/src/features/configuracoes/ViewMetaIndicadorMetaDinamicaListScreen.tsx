@@ -9,8 +9,8 @@ export default function ViewMetaIndicadorMetaDinamicaListScreen() {
                 <ModuleTabs
                     tabs={[
                         {key: 'meta', label: 'Meta', path: '/api/view/meta/indicadorMetaDinamica'},
-                        {key: 'item2', label: 'Item 2', empty: 'ConteÃºdo de Item 2.'},
-                        {key: 'listagem', label: 'Listagem', empty: 'ConteÃºdo de Listagem.'},
+                        {key: 'item2', label: 'Item 2', empty: 'Conteúdo de Item 2.'},
+                        {key: 'listagem', label: 'Listagem', empty: 'Conteúdo de Listagem.'},
                     ]}
                 />
             </main>

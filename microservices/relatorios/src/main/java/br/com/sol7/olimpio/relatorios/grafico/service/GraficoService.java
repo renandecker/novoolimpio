@@ -231,7 +231,7 @@ public class GraficoService {
 
     private Uni<String> buscarDimensaoColuna(Long dimensaoId) {
         return Panache.getSession().chain(session ->
-                session.createNativeQuery("SELECT d.coluna FROM rel_dimensao d WHERE d.id = ?1")
+                session.createNativeQuery("SELECT c.coluna FROM rel_dimensao d INNER JOIN rel_coluna c ON c.id = d.id_coluna WHERE d.id = ?1")
                         .setParameter(1, dimensaoId)
                         .getSingleResultOrNull())
                 .map(r -> r == null ? null : r.toString().trim());
@@ -239,7 +239,7 @@ public class GraficoService {
 
     private Uni<String> buscarMedidaColuna(Long medidaId) {
         return Panache.getSession().chain(session ->
-                session.createNativeQuery("SELECT m.coluna FROM rel_medida m WHERE m.id = ?1")
+                session.createNativeQuery("SELECT c.coluna FROM rel_medida m INNER JOIN rel_coluna c ON c.id = m.id_coluna WHERE m.id = ?1")
                         .setParameter(1, medidaId)
                         .getSingleResultOrNull())
                 .map(r -> r == null ? null : r.toString().trim());

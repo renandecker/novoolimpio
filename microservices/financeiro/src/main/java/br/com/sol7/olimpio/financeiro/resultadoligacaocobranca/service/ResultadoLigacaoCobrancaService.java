@@ -78,9 +78,8 @@ public class ResultadoLigacaoCobrancaService {
     //         }
     //         return new ArrayList<>();
     //     }
-    public Uni<List<Long>> autoCompleteComEtapa(String query) {
-        // Obs: depende do estado de UI (etapasCobranca do CobrancaController) nao disponivel na assinatura
-        return Uni.createFrom().item(java.util.List.of());
+    public Uni<List<Long>> autoCompleteComEtapa(String query, Long etapasCobrancaId) {
+        return repository.autoCompleteComEtapa(query.toLowerCase().trim(), etapasCobrancaId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 

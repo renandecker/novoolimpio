@@ -2,7 +2,7 @@
 import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
 
 const COLUMNS: DataTableColumn[] = [
-    {key: 'descricao', label: 'DescriÃ§Ã£o'},
+    {key: 'descricao', label: 'Descrição'},
 ];
 
 export default function ViewTipoCanalListTipoCanalListScreen() {

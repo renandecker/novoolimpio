@@ -212,9 +212,17 @@ public class UsuarioService {
     //         }
     //         if (query.equals("") && !usuarioLo ...
     // // ... (truncado, ver fonte original)
-    public Uni<List<Long>> autoComplete(String query) {
-        // Obs: depende do usuario logado (hierarquia ADMIN) para escolher entre buscaTodos, autoComplete e autoCompleteComUnidade
-        return Uni.createFrom().item(java.util.List.of());
+    public Uni<List<Long>> autoComplete(String query, Boolean isAdmin, List<Long> unidadesIds) {
+        if (isAdmin != null && isAdmin) {
+            if (query == null || query.isBlank()) {
+                return repository.buscaTodos().map(list -> list.stream().map(x -> x.id).toList());
+            }
+            return repository.autoComplete(query.toLowerCase().trim()).map(list -> list.stream().map(x -> x.id).toList());
+        }
+        if (unidadesIds != null && !unidadesIds.isEmpty()) {
+            return repository.autoCompleteComUnidade(query.toLowerCase().trim(), unidadesIds).map(list -> list.stream().map(x -> x.id).toList());
+        }
+        return repository.autoCompleteUsuario(query.toLowerCase().trim(), unidadesIds != null && !unidadesIds.isEmpty() ? unidadesIds.get(0) : null).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -346,6 +354,18 @@ public class UsuarioService {
         return repository.buscarUnidadesDisponiveis(usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
+    public Uni<List<Long>> buscarUnidadesDisponiveisPorUsername(String username) {
+        return repository.buscarPorLogin(username)
+                .onItem().ifNull().failWith(() -> new jakarta.ws.rs.NotFoundException("Usuario not found: " + username))
+                .chain(usuario -> buscarUnidadesDisponiveis(usuario.id));
+    }
+
+    public Uni<Long> buscarUsuarioIdPorUsername(String username) {
+        return repository.buscarPorLogin(username)
+                .onItem().ifNull().failWith(() -> new jakarta.ws.rs.NotFoundException("Usuario not found: " + username))
+                .map(usuario -> usuario.id);
+    }
+
 
     // Migrado de UsuarioService.buscarUnidadesDisponiveisRede (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:189, camada service)
     // Observacao: parametro usuarioId: era Usuario (referencia por id)
@@ -471,9 +491,14 @@ public class UsuarioService {
     //         }
     //         return getRepository().autoCompleteComUnidadeDiaSemana(query.toLowerCase().trim(), usuarioLogadoController.getUnidadesDisponiveis(), diaSemana);
     //     }
-    public Uni<List<Long>> autoCompleteComUnidadeDiaSemanaAgenda(String query, Integer diaSemana, Long agendaId) {
-        // Obs: depende do usuario logado (unidades disponiveis) - repository.autoCompleteComUnidadeDiaSemanaAgenda / autoCompleteComUnidadeDiaSemana
-        return Uni.createFrom().item(java.util.List.of());
+    public Uni<List<Long>> autoCompleteComUnidadeDiaSemanaAgenda(String query, Integer diaSemana, Long agendaId, List<Long> unidadesIds) {
+        if (unidadesIds == null || unidadesIds.isEmpty() || diaSemana == null) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        if (agendaId != null) {
+            return repository.autoCompleteComUnidadeDiaSemanaAgenda(query.toLowerCase().trim(), unidadesIds, diaSemana, agendaId).map(list -> list.stream().map(x -> x.id).toList());
+        }
+        return repository.autoCompleteComUnidadeDiaSemana(query.toLowerCase().trim(), unidadesIds, diaSemana).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -486,9 +511,14 @@ public class UsuarioService {
     //         }
     //         return getRepository().autoCompleteComUnidadeDiaSemanaComPerfil(query.toLowerCase().trim(), usuarioLogadoController.getUnidadesDisponiveis(), diaSemana, perfil);
     //     }
-    public Uni<List<Long>> autoCompleteComUnidadeDiaSemanaAgendaComPerfil(String query, Integer diaSemana, Long agendaId, Long perfilId) {
-        // Obs: depende do usuario logado (unidades disponiveis) - repository.autoCompleteComUnidadeDiaSemanaAgendaComPerfil / autoCompleteComUnidadeDiaSemanaComPerfil
-        return Uni.createFrom().item(java.util.List.of());
+    public Uni<List<Long>> autoCompleteComUnidadeDiaSemanaAgendaComPerfil(String query, Integer diaSemana, Long agendaId, Long perfilId, List<Long> unidadesIds) {
+        if (unidadesIds == null || unidadesIds.isEmpty() || diaSemana == null) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        if (agendaId != null) {
+            return repository.autoCompleteComUnidadeDiaSemanaAgendaComPerfil(query.toLowerCase().trim(), unidadesIds, diaSemana, agendaId, perfilId).map(list -> list.stream().map(x -> x.id).toList());
+        }
+        return repository.autoCompleteComUnidadeDiaSemanaComPerfil(query.toLowerCase().trim(), unidadesIds, diaSemana, perfilId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -498,9 +528,11 @@ public class UsuarioService {
     // public List<Usuario> autoCompleteComUnidadeDiaSemana(String query, int diaSemana) {
     //         return getRepository().autoCompleteComUnidadeDiaSemana(query.toLowerCase().trim(), usuarioLogadoController.getUnidadesDisponiveis(), diaSemana);
     //     }
-    public Uni<List<Long>> autoCompleteComUnidadeDiaSemana(String query, Integer diaSemana) {
-        // Obs: depende do usuario logado (unidades disponiveis) - repository.autoCompleteComUnidadeDiaSemana
-        return Uni.createFrom().item(java.util.List.of());
+    public Uni<List<Long>> autoCompleteComUnidadeDiaSemana(String query, Integer diaSemana, List<Long> unidadesIds) {
+        if (unidadesIds == null || unidadesIds.isEmpty() || diaSemana == null) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        return repository.autoCompleteComUnidadeDiaSemana(query.toLowerCase().trim(), unidadesIds, diaSemana).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 }

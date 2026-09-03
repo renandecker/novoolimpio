@@ -130,8 +130,10 @@ public class UsuarioController {
 
     @GET
     @Path("/auto-complete")
-    public Uni<List<Long>> autoComplete(@QueryParam("query") String query) {
-        return service.autoComplete(query);
+    public Uni<List<Long>> autoComplete(@HeaderParam("X-Authenticated-Username") String username, @QueryParam("query") String query) {
+        return service.buscarUsuarioIdPorUsername(username)
+                .chain(usuarioId -> service.buscarUnidadesDisponiveis(usuarioId))
+                .chain(unidadesIds -> service.autoComplete(query, true, unidadesIds));
     }
 
 
@@ -277,22 +279,25 @@ public class UsuarioController {
 
     @GET
     @Path("/auto-complete-com-unidade-dia-semana-agenda")
-    public Uni<List<Long>> autoCompleteComUnidadeDiaSemanaAgenda(@QueryParam("query") String query, @QueryParam("diaSemana") Integer diaSemana, @QueryParam("agendaId") Long agendaId) {
-        return service.autoCompleteComUnidadeDiaSemanaAgenda(query, diaSemana, agendaId);
+    public Uni<List<Long>> autoCompleteComUnidadeDiaSemanaAgenda(@HeaderParam("X-Authenticated-Username") String username, @QueryParam("query") String query, @QueryParam("diaSemana") Integer diaSemana, @QueryParam("agendaId") Long agendaId) {
+        return service.buscarUnidadesDisponiveisPorUsername(username)
+                .chain(unidadesIds -> service.autoCompleteComUnidadeDiaSemanaAgenda(query, diaSemana, agendaId, unidadesIds));
     }
 
 
     @GET
     @Path("/auto-complete-com-unidade-dia-semana-agenda-com-perfil")
-    public Uni<List<Long>> autoCompleteComUnidadeDiaSemanaAgendaComPerfil(@QueryParam("query") String query, @QueryParam("diaSemana") Integer diaSemana, @QueryParam("agendaId") Long agendaId, @QueryParam("perfilId") Long perfilId) {
-        return service.autoCompleteComUnidadeDiaSemanaAgendaComPerfil(query, diaSemana, agendaId, perfilId);
+    public Uni<List<Long>> autoCompleteComUnidadeDiaSemanaAgendaComPerfil(@HeaderParam("X-Authenticated-Username") String username, @QueryParam("query") String query, @QueryParam("diaSemana") Integer diaSemana, @QueryParam("agendaId") Long agendaId, @QueryParam("perfilId") Long perfilId) {
+        return service.buscarUnidadesDisponiveisPorUsername(username)
+                .chain(unidadesIds -> service.autoCompleteComUnidadeDiaSemanaAgendaComPerfil(query, diaSemana, agendaId, perfilId, unidadesIds));
     }
 
 
     @GET
     @Path("/auto-complete-com-unidade-dia-semana")
-    public Uni<List<Long>> autoCompleteComUnidadeDiaSemana(@QueryParam("query") String query, @QueryParam("diaSemana") Integer diaSemana) {
-        return service.autoCompleteComUnidadeDiaSemana(query, diaSemana);
+    public Uni<List<Long>> autoCompleteComUnidadeDiaSemana(@HeaderParam("X-Authenticated-Username") String username, @QueryParam("query") String query, @QueryParam("diaSemana") Integer diaSemana) {
+        return service.buscarUnidadesDisponiveisPorUsername(username)
+                .chain(unidadesIds -> service.autoCompleteComUnidadeDiaSemana(query, diaSemana, unidadesIds));
     }
 
 }

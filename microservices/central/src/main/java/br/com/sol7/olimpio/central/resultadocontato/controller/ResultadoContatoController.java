@@ -63,4 +63,10 @@ public class ResultadoContatoController {
         return service.buscarResultadosOrdenadoLigacao();
     }
 
+    @GET
+    @Path("/all")
+    public Uni<List<ResultadoContatoResponse>> all() {
+        return service.list();
+    }
+
 }

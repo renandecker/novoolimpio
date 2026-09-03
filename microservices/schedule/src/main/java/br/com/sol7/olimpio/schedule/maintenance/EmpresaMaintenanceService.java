@@ -6,11 +6,15 @@ import io.vertx.mutiny.sqlclient.Row;
 import io.vertx.mutiny.sqlclient.Tuple;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import io.quarkus.mailer.reactive.ReactiveMailer;
+import io.quarkus.mailer.Mail;
 
 /**
  * Rotinas do dominio "empresa" migradas de VagaService (criarEntrevistas, enviarVagasAlunos).
@@ -28,6 +32,12 @@ public class EmpresaMaintenanceService {
 
     @Inject
     Pool pool;
+
+    @Inject
+    ReactiveMailer mailer;
+
+    @ConfigProperty(name = "schedule.email.enabled", defaultValue = "true")
+    boolean emailEnabled;
 
     // Migrado de VagaService.criarEntrevistas() - desativa vagas expiradas e cria as entrevistas
     // dos usuarios alcancados pelas associacoes (perfil/unidade/componente/oferecimento/
@@ -162,8 +172,32 @@ public class EmpresaMaintenanceService {
                     long lastId = candidatos.stream()
                             .map(c -> (Long) c[0]).max(Long::compare).orElse(ultimoId);
                     for (Object[] cand : candidatos) {
-                        LOG.infof("Vaga %s: envio de e-mail para [%s] <%s> (titulo=%s) - envio real de e-mail nao portado",
-                                cand[3], cand[1], cand[2], cand[4]);
+                        String email = (String) cand[2];
+                        String vagaNome = (String) cand[3];
+                        String tituloEmail = (String) cand[4];
+                        String login = (String) cand[1];
+                        
+                        if (emailEnabled && email != null && !email.isBlank()) {
+                            String assunto = tituloEmail != null ? tituloEmail : "Nova vaga disponível: " + vagaNome;
+                            String corpoHtml = String.format("""
+                                <html>
+                                <body>
+                                    <p>Olá %s,</p>
+                                    <p>Uma nova vaga está disponível: <strong>%s</strong></p>
+                                    <p>Por favor, acesse o sistema para mais detalhes.</p>
+                                    <p>Atenciosamente,<br>Equipe OlimpIO</p>
+                                </body>
+                                </html>
+                                """, login, vagaNome);
+                            
+                            mailer.send(Mail.withHtml(email, assunto, corpoHtml))
+                                    .onItem().invoke(() -> LOG.infof("E-mail de vaga enviado para %s <%s>", login, email))
+                                    .onFailure().invoke(e -> LOG.errorf(e, "Falha ao enviar e-mail de vaga para %s <%s>", login, email))
+                                    .subscribe().with(v -> {}); // Fire and forget
+                        } else {
+                            LOG.infof("Vaga %s: envio de e-mail para [%s] <%s> (titulo=%s) - e-mail desabilitado ou destinatário vazio",
+                                    vagaNome, login, email, tituloEmail);
+                        }
                     }
                     return atualizarConfig("ID_VAGA_ALUNO", lastId)
                             .chain(v -> processarLote(total + candidatos.size(), round + 1, lastId));

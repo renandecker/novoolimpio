@@ -1,5 +1,7 @@
 package br.com.sol7.olimpio.estoque.entrega;
 
+import br.com.sol7.olimpio.estoque.controleentrega.ControleEntregaService;
+import br.com.sol7.olimpio.estoque.controleentrega.ControleEntregaResponse;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -16,6 +18,9 @@ public class EntregaService {
 
     @Inject
     EntregaRepository repository;
+
+    @Inject
+    ControleEntregaService controleEntregaService;
 
     public Uni<List<EntregaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -84,9 +89,25 @@ public class EntregaService {
     //             } else {
     //                 return controleEntregaService.controleEntregaComUnidades(usuarioLogadoController.getUnidadesDisponiveis());
     // // ... (truncado, ver fonte original)
-    public Uni<List<Long>> autoCompleteControleEntrega(String query) {
-        // Obs: depende do microservico estoque (ControleEntrega, nao portado) e do usuario logado (unidades disponiveis)
-        return Uni.createFrom().item(java.util.List.of());
+    public Uni<List<Long>> autoCompleteControleEntrega(String query, Long unidadeId) {
+        if (unidadeId != null) {
+            if (query != null && !query.isBlank()) {
+                return controleEntregaService.autoCompleteComUnidade(query, unidadeId)
+                        .map(list -> list.stream().map(ControleEntregaResponse::id).toList());
+            } else {
+                return controleEntregaService.controleEntregaComUnidade(unidadeId)
+                        .map(list -> list.stream().map(ControleEntregaResponse::id).toList());
+            }
+        } else {
+            // Sem unidade específica - buscar todas as unidades disponíveis (simplificado)
+            if (query != null && !query.isBlank()) {
+                return controleEntregaService.autoComplete(query)
+                        .map(list -> list.stream().map(ControleEntregaResponse::id).toList());
+            } else {
+                return controleEntregaService.list()
+                        .map(list -> list.stream().map(ControleEntregaResponse::id).toList());
+            }
+        }
     }
 
 }

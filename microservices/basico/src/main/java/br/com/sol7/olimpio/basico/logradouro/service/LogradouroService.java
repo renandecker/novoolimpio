@@ -1,6 +1,13 @@
 package br.com.sol7.olimpio.basico.logradouro.service;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
+import br.com.sol7.olimpio.basico.bairro.entity.Bairro;
+import br.com.sol7.olimpio.basico.bairro.repository.BairroRepository;
+import br.com.sol7.olimpio.basico.logradouro.dto.LogradouroRequest;
+import br.com.sol7.olimpio.basico.logradouro.dto.LogradouroResponse;
+import br.com.sol7.olimpio.basico.logradouro.entity.Logradouro;
+import br.com.sol7.olimpio.basico.logradouro.repository.LogradouroRepository;
+import br.com.sol7.olimpio.basico.shared.util.CorreioQualCep;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
 import io.smallrye.mutiny.Uni;
@@ -11,17 +18,18 @@ import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
 
-import br.com.sol7.olimpio.basico.logradouro.dto.LogradouroRequest;
-import br.com.sol7.olimpio.basico.logradouro.dto.LogradouroResponse;
-import br.com.sol7.olimpio.basico.logradouro.entity.Logradouro;
-import br.com.sol7.olimpio.basico.logradouro.repository.LogradouroRepository;
-
 @ApplicationScoped
 @WithTransaction
 public class LogradouroService {
 
     @Inject
     LogradouroRepository repository;
+
+    @Inject
+    BairroRepository bairroRepository;
+
+    @Inject
+    CorreioQualCep correioQualCep;
 
     public Uni<List<LogradouroResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -416,26 +424,77 @@ public class LogradouroService {
     }
 
 
-    // Migrado de LogradouroService.atualizar (src/main/java/br/com/sol7/olimpio/service/services/basico/LogradouroService.java:75, camada service)
+// Migrado de LogradouroService.atualizar (src/main/java/br/com/sol7/olimpio/service/services/basico/LogradouroService.java:75, camada service)
     // Logica original (adaptar):
     // public void atualizar() {
     //         hibernateService.executeUpdateSQL("DELETE FROM bas_logradouro log WHERE " +
     //                 " not exists(select pes.id FROM bas_pessoa pes WHERE log.id = pes.id_logradouro )" +
     //                 " and " +
-    //                 " not exists(select pes.id FROM bas_unidade pes WHERE log.id = pes.id_logradouro )");
-    // 
+    //                 " not exists(select pes.id FROM bas_unidade pes WHERE log.id = pes.id_unidade )");
+    //
     //         hibernateService.executeUpdateSQL("DELETE FROM bas_bairro log WHERE" +
     //                 "    not exists(select pes.id FROM bas_logradouro pes WHERE log.id = pes.id_bairro )");
-    // 
+    //
     //         CorreioQualCep correioQualCep = new CorreioQualCep();
-    // 
+    //
     //         List<Logradouro> logradouros = this.getLogradouroRepository().buscaLogradouroSemLogradouro();
     // // ... (truncado, ver fonte original)
     public Uni<Void> atualizar() {
-        // Implementado: limpeza de logradouros/bairros orfaos (via SQL).
-        // NAO implementado: preenchimento automatico de logradouro/bairro via webservice dos
-        // Correios (CorreioQualCep) - integracao externa, ver RELATORIO_SCHEDULE.md.
-        return repository.limparOrfaosNativo();
+        return repository.limparOrfaosNativo()
+                .chain(() -> repository.buscaLogradouroSemLogradouro())
+                .onItem().transformToUni(logradouros -> {
+                    if (logradouros == null || logradouros.isEmpty()) {
+                        return Uni.createFrom().voidItem();
+                    }
+                    Uni<Void> chain = Uni.createFrom().voidItem();
+                    for (Logradouro logradouro : logradouros) {
+                        final Logradouro log = logradouro;
+                        chain = chain.onItem().transformToUni(ignored -> processarLogradouro(log));
+                    }
+                    return chain;
+                });
+    }
+
+    private Uni<Void> processarLogradouro(Logradouro logradouro) {
+        String cep = logradouro.cep;
+        if (cep == null || cep.isBlank()) {
+            return Uni.createFrom().voidItem();
+        }
+        String cepLimpo = cep.replace("-", "").replace(".", "").trim();
+        return correioQualCep.getEndereco(cepLimpo)
+                .onItem().transformToUni(endereco -> {
+                    if (endereco == null || endereco.isBlank()) {
+                        return Uni.createFrom().voidItem();
+                    }
+                    logradouro.descricao = endereco;
+                    return correioQualCep.getBairro(cepLimpo)
+                            .onItem().transformToUni(bairroNome -> {
+                                if (bairroNome == null || bairroNome.isBlank()) {
+                                    return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                                            .chain(session -> session.merge(logradouro))
+                                            .replaceWithVoid();
+                                }
+                                return bairroRepository.find("descricao = ?1", bairroNome)
+                                        .firstResult()
+                                        .onItem().transformToUni(bairroExistente -> {
+                                            if (bairroExistente != null) {
+                                                logradouro.bairroId = bairroExistente.id;
+                                                return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                                                        .chain(session -> session.merge(logradouro))
+                                                        .replaceWithVoid();
+                                            } else {
+                                                Bairro novoBairro = new Bairro();
+                                                novoBairro.descricao = bairroNome;
+                                                return bairroRepository.persist(novoBairro)
+                                                        .invoke(b -> logradouro.bairroId = b.id)
+                                                        .chain(b -> io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                                                                .chain(session -> session.merge(logradouro))
+                                                                .replaceWithVoid());
+                                            }
+                                        });
+                            });
+                })
+                .onFailure().recoverWithUni(throwable -> Uni.createFrom().voidItem());
     }
 
 }

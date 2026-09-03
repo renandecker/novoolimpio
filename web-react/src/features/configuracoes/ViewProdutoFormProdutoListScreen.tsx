@@ -11,7 +11,7 @@ export default function ViewProdutoFormProdutoListScreen() {
                     tabs={[
                         {
                             key: 'informacoesBasicas',
-                            label: 'InformaÃ§Ãµes bÃ¡sicas',
+                            label: 'Informações básicas',
                             path: '/api/view/produto/formProduto'
                         },
                         {
@@ -25,7 +25,7 @@ export default function ViewProdutoFormProdutoListScreen() {
                                 columns: UNIDADE_COLUMNS
                             }
                         },
-                        {key: 'fornecedores', label: 'Fornecedores', empty: 'ConteÃºdo de Fornecedores.'},
+                        {key: 'fornecedores', label: 'Fornecedores', empty: 'Conteúdo de Fornecedores.'},
                     ]}
                 />
             </main>

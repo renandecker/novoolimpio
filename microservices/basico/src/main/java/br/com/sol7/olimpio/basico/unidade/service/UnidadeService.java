@@ -270,9 +270,11 @@ public class UnidadeService {
     //         }
     //         return getUnidadeRepository().autoCompleteComUnidades(query.toLowerCase().trim(), unidades);
     //     }
-    public Uni<List<Long>> autoCompleteUnidadeUsuario(String query) {
-        // Obs: depende do usuario logado (unidades disponiveis) - repository.autoCompleteComUnidades
-        return Uni.createFrom().item(java.util.List.of());
+    public Uni<List<Long>> autoCompleteUnidadeUsuario(String query, List<Long> unidadesIds) {
+        if (unidadesIds == null || unidadesIds.isEmpty()) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        return repository.autoCompleteComUnidades(query.toLowerCase().trim(), unidadesIds).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -293,9 +295,11 @@ public class UnidadeService {
     // public List<Unidade> buscarUnidadeComTurnosDiaSemana(int diaSemana) {
     //         return getUnidadeRepository().buscarUnidadeComTurnosDiaSemana(diaSemana, usuarioLogadoController.getUsuario());
     //     }
-    public Uni<List<Long>> buscarUnidadeComTurnosDiaSemana(Integer diaSemana) {
-        // Obs: depende do usuario logado (getUsuario()) - repository.buscarUnidadeComTurnosDiaSemana
-        return Uni.createFrom().item(java.util.List.of());
+    public Uni<List<Long>> buscarUnidadeComTurnosDiaSemana(Integer diaSemana, Long usuarioId) {
+        if (diaSemana == null || usuarioId == null) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        return repository.buscarUnidadeComTurnosDiaSemana(diaSemana, usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 

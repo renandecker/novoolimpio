@@ -27,6 +27,30 @@ const formatCurrency = (value: unknown): string => {
     return num.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
 };
 
+const toMovimentacao = (raw: Record<string, unknown>): Movimentacao => {
+    const movimentoId = raw.movimentoId != null ? Number(raw.movimentoId) : 0;
+    const tipoMovimento = movimentoId === 3 ? 'SANGRIA' : (movimentoId === 2 ? 'SAIDA' : 'ENTRADA');
+    const valor = Number(raw.valor) || 0;
+    const desconto = Number(raw.desconto) || 0;
+    const multaJuros = Number(raw.multaJuros) || 0;
+    return {
+        id: Number(raw.id) || 0,
+        parcelaId: raw.parcelaId != null ? Number(raw.parcelaId) : 0,
+        contratoId: raw.caixaId != null ? Number(raw.caixaId) : 0,
+        aluno: String(raw.historico ?? ''),
+        parcelaSequencia: raw.parcelaId != null ? Number(raw.parcelaId) : 0,
+        dataMovimento: String(raw.dataMovimento ?? ''),
+        vencimento: raw.vencimento != null ? String(raw.vencimento) : '',
+        formaPagamento: raw.tipoPagamento != null ? String(raw.tipoPagamento) : '',
+        valor,
+        desconto,
+        multaJuros,
+        troco: Number(raw.valorTroco) || 0,
+        total: valor - desconto + multaJuros,
+        tipoMovimento,
+    };
+};
+
 const formatDateTime = (value: unknown): string => {
     if (value === null || value === undefined) return '';
     const str = String(value);
@@ -178,8 +202,8 @@ export default function ViewCaixaListCaixaListScreen() {
         if (!isOpen && !movimentacoes[id] && !loadingMovimentacoes[id]) {
             setLoadingMovimentacoes(prev => ({...prev, [id]: true}));
             try {
-                const {data} = await api.get<Movimentacao[]>(`/api/financeiro/caixa/${id}/movimentacoes`);
-                setMovimentacoes(prev => ({...prev, [id]: data ?? []}));
+                const {data} = await api.get<Record<string, unknown>[]>(`/api/financeiro/caixa/${id}/movimentacoes`);
+                setMovimentacoes(prev => ({...prev, [id]: (data ?? []).map(toMovimentacao)}));
             } catch (e) {
                 console.error('Erro ao carregar movimentações:', e);
                 setMovimentacoes(prev => ({...prev, [id]: []}));

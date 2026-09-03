@@ -8,7 +8,7 @@ export default function ViewConfiguracaoFormConfiguracaoParcelaListScreen() {
             <main>
                 <h1>Form Configuracao Parcela</h1>
                 <div className="div_form">
-                    <div className="form-title">ConfiguraÃ§Ã£o Parcela</div>
+                    <div className="form-title">Configuração Parcela</div>
                     <div className="table_form">
                         <Tabs
                             tabs={[

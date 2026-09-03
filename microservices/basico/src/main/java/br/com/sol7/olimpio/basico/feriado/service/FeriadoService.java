@@ -64,6 +64,29 @@ public class FeriadoService {
                         : Uni.createFrom().failure(new NotFoundException("Feriado not found")));
     }
 
+    // Migrado da troca de feriados (TrocaFeriadoDialog do listFeriado.xhtml) - reatribui as
+    // unidades/tipos de curso dos feriados de origem para o feriado de destino e remove os origens.
+    // Padrão replicado de LogradouroService.trocarLogradouros.
+    public Uni<Void> trocarFeriados(Long destinoId, List<Long> origemIds) {
+        if (destinoId == null || origemIds == null || origemIds.isEmpty()) {
+            return Uni.createFrom().failure(new jakarta.ws.rs.BadRequestException(
+                    "Informe o feriado de destino e ao menos um feriado para trocar"));
+        }
+        List<Long> origens = origemIds.stream()
+                .filter(id -> id != null && !destinoId.equals(id))
+                .distinct()
+                .toList();
+        if (origens.isEmpty()) {
+            return Uni.createFrom().failure(new jakarta.ws.rs.BadRequestException("Nenhum feriado valido para trocar"));
+        }
+        Uni<Void> cadeia = Uni.createFrom().voidItem();
+        for (Long origemId : origens) {
+            final long origem = origemId;
+            cadeia = cadeia.onItem().transformToUni(ignored -> repository.trocarFeriado(destinoId, origem));
+        }
+        return cadeia;
+    }
+
     private void apply(Feriado e, FeriadoRequest r) {
         e.nome = r.nome();
         e.descricao = r.descricao();

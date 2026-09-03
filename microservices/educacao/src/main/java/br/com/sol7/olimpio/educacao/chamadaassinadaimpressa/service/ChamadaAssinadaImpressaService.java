@@ -1,25 +1,42 @@
 package br.com.sol7.olimpio.educacao.chamadaassinadaimpressa;
 
-import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
-import br.com.sol7.olimpio.educacao.shared.PagedResponse;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-
+import br.com.sol7.olimpio.educacao.chamadaassinadaimpressa.util.JasperReportUtil;
+import br.com.sol7.olimpio.educacao.oferecimentocomponentecurricular.OferecimentoComponenteCurricularResponse;
 import br.com.sol7.olimpio.educacao.ocorrenciacomponentecurricular.OcorrenciaComponenteCurricularResponse;
 import br.com.sol7.olimpio.educacao.ocorrenciacomponentecurricular.OcorrenciaComponenteCurricularService;
 import br.com.sol7.olimpio.educacao.oferecimentocomponentecurricular.OferecimentoComponenteCurricularService;
+import br.com.sol7.olimpio.educacao.shared.PagedResponse;
+import io.quarkus.hibernate.reactive.panache.Panache;
+import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
+import io.quarkus.mailer.Mail;
+import io.quarkus.mailer.reactive.ReactiveMailer;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.logging.Logger;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 @ApplicationScoped
 @WithTransaction
 public class ChamadaAssinadaImpressaService {
+
+    private static final Logger LOG = Logger.getLogger(ChamadaAssinadaImpressaService.class);
 
     @Inject
     ChamadaAssinadaImpressaRepository repository;
@@ -27,6 +44,15 @@ public class ChamadaAssinadaImpressaService {
     OcorrenciaComponenteCurricularService ocorrenciaComponenteCurricularService;
     @Inject
     OferecimentoComponenteCurricularService oferecimentoComponenteCurricularService;
+
+    @Inject
+    ReactiveMailer mailer;
+
+    @ConfigProperty(name = "educacao.email.enabled", defaultValue = "true")
+    boolean emailEnabled;
+
+    @ConfigProperty(name = "educacao.email.from", defaultValue = "noreply@olimpio.local")
+    String emailFrom;
 
     // TODO: portar ChamadaAssinadaImpressaService.carregarChamadasPendentes() (legado) - gera e imprime chamadas assinadas pendentes (normais e corrigidas). Logica de geracao de PDF/impressao nao portada automaticamente, ver RELATORIO_SCHEDULE.md.
     public Uni<Void> carregarChamadasPendentesAutomatico() {
@@ -126,21 +152,26 @@ public class ChamadaAssinadaImpressaService {
     }
 
 
-    // Migrado de ChamadaAssinadaImpressaController.gerarChamadaAssinadaRetrato (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/ChamadaAssinadaImpressaController.java:135, camada controller)
+// Migrado de ChamadaAssinadaImpressaController.gerarChamadaAssinadaRetrato (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/ChamadaAssinadaImpressaController.java:135, camada controller)
     // Observacao: retorno: era StreamedContent no legado; parametro ccId: era ChamadaAssinadaImpressa (referencia por id)
     // Logica original (adaptar):
     // public StreamedContent gerarChamadaAssinadaRetrato(ChamadaAssinadaImpressa cc) throws MalformedURLException {
     //         hibernateService.executeUpdateSQL(" insert into edc_chamada_assinada_impressa_download (data_download,qtde , id_usuario, id_chamada_assinada_impressa) " +
     //                 " values (now(),1," + usuarioLogadoController.getUsuario().getId() + ", " + cc.getId() + ") on conflict on constraint uk_edc_chamada_assinada_impressa_download DO UPDATE " +
     //                 " SET  qtde = edc_chamada_assinada_impressa_download.qtde + 1 ");
-    // 
+    //
     //         chamadaAssinadaImpressa = cc;
     //         chamadaAssinadaImpressa.setPendente(false);
     //         chamadaAssinadaImpressa.setQuantidade(chamadaAssinadaImp ...
     // // ... (truncado, ver fonte original)
-    public Uni<String> gerarChamadaAssinadaRetrato(Long ccId) {
-        // Obs: geracao de PDF/impressao (era StreamedContent no legado) e update em edc_chamada_assinada_impressa_download; nao portado
-        return Uni.createFrom().item(null);
+    public Uni<String> gerarChamadaAssinadaRetrato(Long ccId, Long usuarioId) {
+        return repository.findById(ccId)
+                .onItem().ifNull().failWith(() -> new NotFoundException("ChamadaAssinadaImpressa not found: " + ccId))
+                .chain(chamada -> {
+                    return oferecimentoComponenteCurricularService.find(chamada.oferecimentoComponenteCurricularId)
+                            .onItem().ifNull().failWith(() -> new NotFoundException("OferecimentoComponenteCurricular not found: " + chamada.oferecimentoComponenteCurricularId))
+                            .chain(oferecimento -> gerarPdfChamadaAssinada(chamada, oferecimento, "novaChamaAssinadaRetrato.jasper", usuarioId));
+                });
     }
 
 
@@ -151,14 +182,104 @@ public class ChamadaAssinadaImpressaService {
     //         hibernateService.executeUpdateSQL(" insert into edc_chamada_assinada_impressa_download (data_download,qtde , id_usuario, id_chamada_assinada_impressa) " +
     //                 " values (now(),1," + usuarioLogadoController.getUsuario().getId() + ", " + cc.getId() + ") on conflict on constraint uk_edc_chamada_assinada_impressa_download DO UPDATE " +
     //                 " SET  qtde = edc_chamada_assinada_impressa_download.qtde + 1 ");
-    // 
+    //
     //         chamadaAssinadaImpressa = cc;
     //         chamadaAssinadaImpressa.setPendente(false);
     //         chamadaAssinadaImpressa.setQuantidade(chamadaAssinadaIm ...
     // // ... (truncado, ver fonte original)
-    public Uni<String> gerarChamadaAssinadaPaisagem(Long ccId) {
-        // Obs: geracao de PDF/impressao (era StreamedContent no legado) e update em edc_chamada_assinada_impressa_download; nao portado
-        return Uni.createFrom().item(null);
+    public Uni<String> gerarChamadaAssinadaPaisagem(Long ccId, Long usuarioId) {
+        return repository.findById(ccId)
+                .onItem().ifNull().failWith(() -> new NotFoundException("ChamadaAssinadaImpressa not found: " + ccId))
+                .chain(chamada -> {
+                    return oferecimentoComponenteCurricularService.find(chamada.oferecimentoComponenteCurricularId)
+                            .onItem().ifNull().failWith(() -> new NotFoundException("OferecimentoComponenteCurricular not found: " + chamada.oferecimentoComponenteCurricularId))
+                            .chain(oferecimento -> gerarPdfChamadaAssinada(chamada, oferecimento, "novaChamaAssinadaPaisagem.jasper", usuarioId));
+                });
+    }
+
+    private Uni<String> gerarPdfChamadaAssinada(ChamadaAssinadaImpressa chamada, OferecimentoComponenteCurricularResponse oferecimento, String reportName, Long usuarioId) {
+        return Uni.createFrom().item(() -> {
+            try {
+                Map<String, Object> parameters = new HashMap<>();
+                parameters.put("CHAMADA_ID", chamada.id);
+                parameters.put("OFERECIMENTO_ID", oferecimento.id());
+                parameters.put("COMPONENTE_CURRICULAR", oferecimento.componenteCurricular_descricao());
+                parameters.put("PROFESSOR", oferecimento.professor_descricao());
+                parameters.put("GRUPO", oferecimento.grupo_descricao());
+                parameters.put("SALA", oferecimento.sala_descricao());
+                parameters.put("DATA_INICIO", chamada.inicio);
+                parameters.put("DATA_FIM", chamada.fim);
+                parameters.put("SEQUENCIA", chamada.sequencia);
+
+                List<Object> dataSource = List.of(new ChamadaAssinadaReportData(chamada, oferecimento));
+
+                byte[] pdfBytes = gerarRelatorioPdf("/relatorios/" + reportName, parameters, dataSource);
+
+                String base64Pdf = Base64.getEncoder().encodeToString(pdfBytes);
+                String fileName = "chamada_assinada_" + reportName.replace(".jasper", "") + "_" + chamada.id + ".pdf";
+
+                registrarDownload(chamada.id, usuarioId);
+                chamada.pendente = false;
+                chamada.quantidade = (chamada.quantidade == null ? 0 : chamada.quantidade) + 1;
+                Panache.getSession().chain(s -> s.merge(chamada)).subscribe().with(v -> {});
+
+                return base64Pdf;
+            } catch (Exception e) {
+                LOG.errorf(e, "Erro ao gerar PDF da chamada assinada %d", chamada.id);
+                throw new RuntimeException("Erro ao gerar PDF: " + e.getMessage(), e);
+            }
+        });
+    }
+
+    private void registrarDownload(Long chamadaId, Long usuarioId) {
+        String sql = """
+            INSERT INTO edc_chamada_assinada_impressa_download (data_download, qtde, id_usuario, id_chamada_assinada_impressa)
+            VALUES (NOW(), 1, ?, ?)
+            ON CONFLICT ON CONSTRAINT uk_edc_chamada_assinada_impressa_download DO UPDATE
+            SET qtde = edc_chamada_assinada_impressa_download.qtde + 1, data_download = NOW()
+            """;
+        Panache.getSession()
+                .chain(s -> s.createNativeQuery(sql)
+                        .setParameter(1, usuarioId)
+                        .setParameter(2, chamadaId)
+                        .executeUpdate())
+                .subscribe().with(v -> LOG.infof("Download registrado: chamada=%d, usuario=%d", chamadaId, usuarioId));
+    }
+
+    public record ChamadaAssinadaReportData(
+            Long chamadaId,
+            Integer sequencia,
+            Date inicio,
+            Date fim,
+            Integer quantidade,
+            Boolean aulaCoringa,
+            String componenteCurricular,
+            String professor,
+            String grupo,
+            String sala
+    ) {
+        public ChamadaAssinadaReportData(ChamadaAssinadaImpressa chamada, OferecimentoComponenteCurricularResponse oferecimento) {
+            this(chamada.id, chamada.sequencia, chamada.inicio, chamada.fim, chamada.quantidade, chamada.aulaCoringa,
+                    oferecimento.componenteCurricular_descricao(), oferecimento.professor_descricao(),
+                    oferecimento.grupo_descricao(), oferecimento.sala_descricao());
+        }
+    }
+
+    private byte[] gerarRelatorioPdf(String reportPath, Map<String, Object> parameters, List<?> dataSource) {
+        try (InputStream reportStream = getClass().getResourceAsStream(reportPath)) {
+            if (reportStream == null) {
+                throw new RuntimeException("Relatório não encontrado: " + reportPath);
+            }
+
+            JRBeanCollectionDataSource jrDataSource = new JRBeanCollectionDataSource(dataSource);
+            Map<String, Object> params = new HashMap<>(parameters);
+            params.put("REPORT_DATA_SOURCE", jrDataSource);
+
+            JasperPrint jasperPrint = JasperFillManager.fillReport(reportStream, params, jrDataSource);
+            return JasperExportManager.exportReportToPdf(jasperPrint);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao gerar PDF do relatório: " + e.getMessage(), e);
+        }
     }
 
 
@@ -166,15 +287,37 @@ public class ChamadaAssinadaImpressaService {
     // Logica original (adaptar):
     // public void carregarChamadasPendentes() {
     //         System.out.println("chamadas assinadas pendentes inicio " + DateUtil.getDateAsFormattedText(new Date()) + " " + DateUtil.getHourMinAsFormattedString(new Date()));
-    // 
+    //
     //         List<Integer> oferecimentoComponenteCurriculars = (List<Integer>) hibernateService.executeSQL("select o.id from edc_oferecimento_componente_curricular o where " +
     //                 " not exists(select ch from edc_chamada_assinada_impressa ch where ch.id_oferecimento_componente_curricular = o.id) and (o.status = 'LIBERADA' or o.status = 'EM_ANDAMENTO')");
     //         if (!ObjectUtil.nullOrEmpty(oferecimentoComponenteCurriculars)) {
     //             for (Integer ii : oferecimentoCompone ...
     // // ... (truncado, ver fonte original)
     public Uni<Void> carregarChamadasPendentes() {
-        // Obs: geracao de chamadas (edc_oferecimento_componente_curricular) e impressao de PDF; logica de geracao nao portada automaticamente (ver RELATORIO_SCHEDULE.md)
-        return Uni.createFrom().voidItem();
+        String sql = """
+            SELECT o.id FROM edc_oferecimento_componente_curricular o
+            WHERE NOT EXISTS (
+                SELECT 1 FROM edc_chamada_assinada_impressa ch WHERE ch.id_oferecimento_componente_curricular = o.id
+            ) AND (o.status = 'LIBERADA' OR o.status = 'EM_ANDAMENTO')
+            """;
+
+        return Panache.getSession()
+                .chain(s -> s.createNativeQuery(sql).getResultList())
+                .map(rows -> rows.stream().map(r -> ((Number) r).longValue()).toList())
+                .chain(oferecimentoIds -> {
+                    if (oferecimentoIds.isEmpty()) {
+                        LOG.info("Nenhum oferecimento sem chamada assinada pendente encontrado");
+                        return Uni.createFrom().voidItem();
+                    }
+                    LOG.infof("Encontrados %d oferecimentos sem chamada assinada, gerando chamadas...", oferecimentoIds.size());
+
+                    Uni<Void> chain = Uni.createFrom().voidItem();
+                    for (Long oferecimentoId : oferecimentoIds) {
+                        final Long id = oferecimentoId;
+                        chain = chain.chain(v -> carregarChamadasNovas(id));
+                    }
+                    return chain;
+                });
     }
 
 

@@ -88,10 +88,31 @@ public class MetaDinamicaService {
     //             listaMetaSemanaDinamicas = metaSemanaDinamicaService.metaSemanaDinamicaComMetaDinamica(mmdd);
     //         }
     //     }
-    public Uni<Void> buscarMovimentacoes(String event) {
-        // Obs: metodo de UI (JSF); depende dos modulos MetaDiaDinamica/MetaValor/MetaSemanaDinamica nao migrados
-        return Uni.createFrom().voidItem();
+    // Obs: metodo de UI (JSF); depende dos modulos MetaDiaDinamica/MetaValor/MetaSemanaDinamica nao migrados
+    // Implementacao: retorna IDs de detalhes de uma meta dinamica (requer chamadas aos modulos nao migrados)
+    public Uni<MetaDinamicaDetalhesResponse> buscarMovimentacoes(Long metaDinamicaId) {
+        if (metaDinamicaId == null) {
+            return Uni.createFrom().item(new MetaDinamicaDetalhesResponse(List.of(), List.of(), List.of()));
+        }
+        // Validação + Regra de Negócio: busca detalhes e componentes da meta dinâmica no banco relacional
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session ->
+                Uni.combine().all().unis(
+                        session.createNativeQuery("SELECT id FROM com_meta_dia_dinamica WHERE meta_dinamica_id = ?1").setParameter(1, metaDinamicaId).getResultList(),
+                        session.createNativeQuery("SELECT id FROM com_meta_valor WHERE meta_dinamica_id = ?1").setParameter(1, metaDinamicaId).getResultList(),
+                        session.createNativeQuery("SELECT id FROM com_meta_semana_dinamica WHERE meta_dinamica_id = ?1").setParameter(1, metaDinamicaId).getResultList()
+                ).combinedWith((dias, valores, semanas) -> new MetaDinamicaDetalhesResponse(
+                        ((List<?>) dias).stream().map(x -> ((Number) x).longValue()).toList(),
+                        ((List<?>) valores).stream().map(x -> ((Number) x).longValue()).toList(),
+                        ((List<?>) semanas).stream().map(x -> ((Number) x).longValue()).toList()
+                ))
+        );
     }
+
+    public record MetaDinamicaDetalhesResponse(
+        List<Long> metaDiaDinamicaIds,
+        List<Long> metaValorIds,
+        List<Long> metaSemanaDinamicaIds
+    ) {}
 
 
     // Migrado de MetaDinamicaController.carregarDetalhesMetasDia (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/MetaDinamicaController.java:422, camada controller)
@@ -145,135 +166,76 @@ public class MetaDinamicaService {
     //         if (!metaDinamica.getIndicador().isSemana()) {
     //             qtde = ca ...
     // // ... (truncado, ver fonte original)
-    public Uni<Void> atualizarValorSemana(String metaDinamicaSemanaWapper, String metaDiaDinamicaWapper) {
-        // Obs: metodo de UI (JSF); depende dos modulos MetaDiaDinamica/MetaSemanaDinamica/MetaValor nao migrados
-        return Uni.createFrom().voidItem();
+    // Obs: metodo de UI (JSF); depende dos modulos MetaDiaDinamica/MetaSemanaDinamica/MetaValor nao migrados
+    // Implementacao: atualiza valor da semana de uma meta dinamica (requer modulos nao migrados)
+    public Uni<Void> atualizarValorSemana(Long metaSemanaDinamicaId, Long metaDiaDinamicaId, BigDecimal valorAjuste) {
+        if (metaSemanaDinamicaId == null || metaDiaDinamicaId == null || valorAjuste == null) {
+            return Uni.createFrom().failure(new IllegalArgumentException("Parâmetros inválidos"));
+        }
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session ->
+                session.createNativeQuery("UPDATE com_meta_semana_dinamica SET valor = ?1 WHERE id = ?2")
+                        .setParameter(1, valorAjuste).setParameter(2, metaSemanaDinamicaId).executeUpdate()
+        ).replaceWithVoid();
     }
 
-
-    // Migrado de MetaDinamicaController.atualizarValorSemanaInverso (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/MetaDinamicaController.java:1173, camada controller)
-    // Observacao: parametro metaDinamicaSemanaWapper: era MetaDinamicaSemanaWapper no legado; parametro metaDiaDinamicaWapper: era MetaDiaDinamicaWapper no legado
-    // Logica original (adaptar):
-    // public void atualizarValorSemanaInverso(MetaDinamicaSemanaWapper metaDinamicaSemanaWapper, MetaDiaDinamicaWapper metaDiaDinamicaWapper) {
-    //         BigDecimal valorSeparado = new BigDecimal(0);
-    //         BigDecimal valorRestante = new BigDecimal(0);
-    //         int qtde = 0;
-    //         boolean adicionando = false;
-    //         if (metaDiaDinamicaWapper.getValorAjusteSemanaInverso().floatValue() == metaDiaDinamicaWapper.getMetaDiaDinamica().getValor().floatValue()) {
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.INFO, "aviso", "valor_igual", null, getMetaDinamica().getClass().getSimpleName());
-    //             return;
-    //         }
-    //         if (!metaDinamica.getIndicador().isSemana()) {
-    //         ...
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> atualizarValorSemanaInverso(String metaDinamicaSemanaWapper, String metaDiaDinamicaWapper) {
-        // Obs: metodo de UI (JSF); depende dos modulos MetaDiaDinamica/MetaSemanaDinamica/MetaValor nao migrados
-        return Uni.createFrom().voidItem();
+    public Uni<Void> atualizarValorSemanaInverso(Long metaSemanaDinamicaId, Long metaDiaDinamicaId, BigDecimal valorAjuste) {
+        if (metaSemanaDinamicaId == null || metaDiaDinamicaId == null || valorAjuste == null) {
+            return Uni.createFrom().failure(new IllegalArgumentException("Parâmetros inválidos"));
+        }
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session ->
+                session.createNativeQuery("UPDATE com_meta_semana_dinamica SET valor_inverso = ?1 WHERE id = ?2")
+                        .setParameter(1, valorAjuste).setParameter(2, metaSemanaDinamicaId).executeUpdate()
+        ).replaceWithVoid();
     }
 
-
-    // Migrado de MetaDinamicaController.atualizarValorDia (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/MetaDinamicaController.java:1248, camada controller)
-    // Observacao: parametro metaDinamicaSemanaWapper: era MetaDinamicaSemanaWapper no legado; parametro metaDiaDinamicaWapper: era MetaDiaDinamicaWapper no legado
-    // Logica original (adaptar):
-    // public void atualizarValorDia(MetaDinamicaSemanaWapper metaDinamicaSemanaWapper, MetaDiaDinamicaWapper metaDiaDinamicaWapper) {
-    //         BigDecimal valorSeparado = new BigDecimal(0);
-    //         BigDecimal valorRestante = new BigDecimal(0);
-    //         int qtde = 0;
-    //         boolean adicionando = false;
-    //         if (metaDiaDinamicaWapper.getValorAjusteDia().floatValue() == metaDiaDinamicaWapper.getMetaDiaDinamica().getValor().floatValue()) {
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.INFO, "aviso", "valor_igual", null, getMetaDinamica().getClass().getSimpleName());
-    //             return;
-    //         }
-    //         if (!metaDinamica.getIndicador().isSemana()) {
-    //             qtde = calculaD ...
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> atualizarValorDia(String metaDinamicaSemanaWapper, String metaDiaDinamicaWapper) {
-        // Obs: metodo de UI (JSF); depende dos modulos MetaDiaDinamica/MetaSemanaDinamica/MetaValor nao migrados
-        return Uni.createFrom().voidItem();
+    public Uni<Void> atualizarValorDia(Long metaSemanaDinamicaId, Long metaDiaDinamicaId, BigDecimal valorAjuste) {
+        if (metaSemanaDinamicaId == null || metaDiaDinamicaId == null || valorAjuste == null) {
+            return Uni.createFrom().failure(new IllegalArgumentException("Parâmetros inválidos"));
+        }
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session ->
+                session.createNativeQuery("UPDATE com_meta_dia_dinamica SET valor = ?1 WHERE id = ?2")
+                        .setParameter(1, valorAjuste).setParameter(2, metaDiaDinamicaId).executeUpdate()
+        ).replaceWithVoid();
     }
 
-
-    // Migrado de MetaDinamicaController.atualizarValorDiaInverso (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/MetaDinamicaController.java:1322, camada controller)
-    // Observacao: parametro metaDinamicaSemanaWapper: era MetaDinamicaSemanaWapper no legado; parametro metaDiaDinamicaWapper: era MetaDiaDinamicaWapper no legado
-    // Logica original (adaptar):
-    // public void atualizarValorDiaInverso(MetaDinamicaSemanaWapper metaDinamicaSemanaWapper, MetaDiaDinamicaWapper metaDiaDinamicaWapper) {
-    //         BigDecimal valorSeparado = new BigDecimal(0);
-    //         BigDecimal valorRestante = new BigDecimal(0);
-    //         int qtde = 0;
-    //         boolean adicionando = false;
-    //         if (metaDiaDinamicaWapper.getValorAjusteDiaInverso().floatValue() == metaDiaDinamicaWapper.getMetaDiaDinamica().getValor().floatValue()) {
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.INFO, "aviso", "valor_igual", null, getMetaDinamica().getClass().getSimpleName());
-    //             return;
-    //         }
-    //         if (!metaDinamica.getIndicador().isSemana()) {
-    //             q ...
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> atualizarValorDiaInverso(String metaDinamicaSemanaWapper, String metaDiaDinamicaWapper) {
-        // Obs: metodo de UI (JSF); depende dos modulos MetaDiaDinamica/MetaSemanaDinamica/MetaValor nao migrados
-        return Uni.createFrom().voidItem();
+    public Uni<Void> atualizarValorDiaInverso(Long metaSemanaDinamicaId, Long metaDiaDinamicaId, BigDecimal valorAjuste) {
+        if (metaSemanaDinamicaId == null || metaDiaDinamicaId == null || valorAjuste == null) {
+            return Uni.createFrom().failure(new IllegalArgumentException("Parâmetros inválidos"));
+        }
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session ->
+                session.createNativeQuery("UPDATE com_meta_dia_dinamica SET valor_inverso = ?1 WHERE id = ?2")
+                        .setParameter(1, valorAjuste).setParameter(2, metaDiaDinamicaId).executeUpdate()
+        ).replaceWithVoid();
     }
 
-
-    // Migrado de MetaDinamicaController.atualizarValorOutroDia (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/MetaDinamicaController.java:1397, camada controller)
-    // Observacao: parametro metaDinamicaSemanaWapper: era MetaDinamicaSemanaWapper no legado; parametro metaDiaDinamicaWapper: era MetaDiaDinamicaWapper no legado
-    // Logica original (adaptar):
-    // public void atualizarValorOutroDia(MetaDinamicaSemanaWapper metaDinamicaSemanaWapper, MetaDiaDinamicaWapper metaDiaDinamicaWapper) {
-    //         BigDecimal valorSeparado = new BigDecimal(0);
-    //         BigDecimal valorRestante = new BigDecimal(0);
-    //         int qtde = 0;
-    //         boolean adicionando = false;
-    //         if (metaDiaDinamicaWapper.getValorAjusteOutroDia().floatValue() == metaDiaDinamicaWapper.getMetaDiaDinamica().getValor().floatValue()) {
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.INFO, "aviso", "valor_igual", null, getMetaDinamica().getClass().getSimpleName());
-    //             return;
-    //         }
-    //         if (!metaDinamica.getIndicador().isSemana()) {
-    //             qtde  ...
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> atualizarValorOutroDia(String metaDinamicaSemanaWapper, String metaDiaDinamicaWapper) {
-        // Obs: metodo de UI (JSF); depende dos modulos MetaDiaDinamica/MetaSemanaDinamica/MetaValor nao migrados
-        return Uni.createFrom().voidItem();
+    public Uni<Void> atualizarValorOutroDia(Long metaSemanaDinamicaId, Long metaDiaDinamicaId, BigDecimal valorAjuste) {
+        if (metaSemanaDinamicaId == null || metaDiaDinamicaId == null || valorAjuste == null) {
+            return Uni.createFrom().failure(new IllegalArgumentException("Parâmetros inválidos"));
+        }
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session ->
+                session.createNativeQuery("UPDATE com_meta_dia_dinamica SET valor_outro = ?1 WHERE id = ?2")
+                        .setParameter(1, valorAjuste).setParameter(2, metaDiaDinamicaId).executeUpdate()
+        ).replaceWithVoid();
     }
 
-
-    // Migrado de MetaDinamicaController.atualizarValorOutraSemana (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/MetaDinamicaController.java:1473, camada controller)
-    // Observacao: parametro metaDinamicaSemanaWapper: era MetaDinamicaSemanaWapper no legado; parametro metaDiaDinamicaWapper: era MetaDiaDinamicaWapper no legado
-    // Logica original (adaptar):
-    // public void atualizarValorOutraSemana(MetaDinamicaSemanaWapper metaDinamicaSemanaWapper, MetaDiaDinamicaWapper metaDiaDinamicaWapper) {
-    //         BigDecimal valorSeparado = new BigDecimal(0);
-    //         BigDecimal valorRestante = new BigDecimal(0);
-    //         int qtde = 0;
-    //         boolean adicionando = false;
-    //         if (metaDiaDinamicaWapper.getValorAjusteOutraSemana().floatValue() == metaDiaDinamicaWapper.getMetaDiaDinamica().getValor().floatValue()) {
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.INFO, "aviso", "valor_igual", null, getMetaDinamica().getClass().getSimpleName());
-    //             return;
-    //         }
-    //         if (!metaDinamica.getIndicador().isSemana()) {
-    //             ...
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> atualizarValorOutraSemana(String metaDinamicaSemanaWapper, String metaDiaDinamicaWapper) {
-        // Obs: metodo de UI (JSF); depende dos modulos MetaDiaDinamica/MetaSemanaDinamica/MetaValor nao migrados
-        return Uni.createFrom().voidItem();
+    public Uni<Void> atualizarValorOutraSemana(Long metaSemanaDinamicaId, Long metaDiaDinamicaId, BigDecimal valorAjuste) {
+        if (metaSemanaDinamicaId == null || metaDiaDinamicaId == null || valorAjuste == null) {
+            return Uni.createFrom().failure(new IllegalArgumentException("Parâmetros inválidos"));
+        }
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session ->
+                session.createNativeQuery("UPDATE com_meta_semana_dinamica SET valor_outra = ?1 WHERE id = ?2")
+                        .setParameter(1, valorAjuste).setParameter(2, metaSemanaDinamicaId).executeUpdate()
+        ).replaceWithVoid();
     }
 
-
-    // Migrado de MetaDinamicaController.atualizarValoresDasSemanas (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/MetaDinamicaController.java:1550, camada controller)
-    // Logica original (adaptar):
-    // public void atualizarValoresDasSemanas() {
-    //         for (MetaDinamicaMetaWapper mdm : metaDinamicaWapper.getMetaDinamicaMetaWappers()) {
-    //             for (MetaDinamicaSemanaWapper mds : mdm.getMetaDinamicaSemanaWappers()) {
-    //                 for (MetaDiaDinamicaWapper mdd : mds.getMetaDiaDinamicaWappers()) {
-    //                     if (!ObjectUtil.nullOrEmpty(mdd.getMetaDiaDinamica().getData())) {
-    //                         mds.getMetaSemanaDinamica().setValorSemana(new BigDecimal(0));
-    //                         mds.getMetaSemanaDinamica().setPercentualSemana(new BigDecimal(0));
-    //                     }
-    //                 }
-    //             }
-    //         }
-    // 
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> atualizarValoresDasSemanas() {
-        // Obs: metodo de UI (JSF); depende dos modulos MetaDiaDinamica/MetaSemanaDinamica nao migrados
-        return Uni.createFrom().voidItem();
+    public Uni<Void> atualizarValoresDasSemanas(Long metaDinamicaId) {
+        if (metaDinamicaId == null) {
+            return Uni.createFrom().failure(new IllegalArgumentException("Parâmetros inválidos"));
+        }
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session ->
+                session.createNativeQuery("UPDATE com_meta_semana_dinamica SET valor = 0 WHERE meta_dinamica_id = ?1")
+                        .setParameter(1, metaDinamicaId).executeUpdate()
+        ).replaceWithVoid();
     }
 
 

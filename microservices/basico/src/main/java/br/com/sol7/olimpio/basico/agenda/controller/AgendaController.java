@@ -106,6 +106,11 @@ public class AgendaController {
         return service.autoCompleteAll();
     }
 
+    @GET
+    @Path("/all")
+    public Uni<List<AgendaResponse>> all() {
+        return service.list();
+    }
 
     @GET
     @Path("/auto-complete-com-usuario")

@@ -10,13 +10,13 @@ export default function ViewResultadoLigacaoNapFormResultadoLigacaoNapListScreen
                     tabs={[
                         {
                             key: 'historicoDeLigacoes',
-                            label: 'HistÃ³rico de LigaÃ§Ãµes',
+                            label: 'Histórico de Ligações',
                             path: '/api/view/resultadoLigacaoNap/formResultadoLigacaoNap'
                         },
                         {
                             key: 'retornoDeLigacoes',
-                            label: 'Retorno de LigaÃ§Ãµes',
-                            empty: 'ConteÃºdo de Retorno de LigaÃ§Ãµes.'
+                            label: 'Retorno de Ligações',
+                            empty: 'Conteúdo de Retorno de Ligações.'
                         },
                     ]}
                 />

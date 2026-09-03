@@ -83,9 +83,11 @@ public class ConsultorService {
     // public List<Usuario> autoCompleteComUnidade(String query) {
     //         return consultorService.autoCompleteComUnidade(query);
     //     }
-    public Uni<List<Long>> autoCompleteComUnidade(String query) {
-        // Obs: depende do contexto de usuario logado (unidades disponiveis)
-        return Uni.createFrom().item(java.util.List.of());
+    public Uni<List<Long>> autoCompleteComUnidade(String query, List<Long> unidadesIds) {
+        if (unidadesIds == null || unidadesIds.isEmpty()) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        return repository.autoCompleteComUnidade(query.toLowerCase().trim(), unidadesIds).map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
 

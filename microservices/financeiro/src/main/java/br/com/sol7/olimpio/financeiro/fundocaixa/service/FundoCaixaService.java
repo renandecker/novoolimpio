@@ -12,7 +12,9 @@ import br.com.sol7.olimpio.financeiro.caixa.CaixaResponse;
 import br.com.sol7.olimpio.financeiro.caixa.CaixaService.CaixaTotais;
 import br.com.sol7.olimpio.financeiro.configuracaocaixa.ConfiguracaoCaixaService;
 import br.com.sol7.olimpio.financeiro.configuracaocaixa.ConfiguracaoCaixaResponse;
+import br.com.sol7.olimpio.financeiro.shared.VerificarSenhaService;
 import br.com.sol7.olimpio.financeiro.impressora.ImpressoraService;
+import br.com.sol7.olimpio.financeiro.controleimpressao.service.ControleImpressaoService;
 import br.com.sol7.olimpio.financeiro.sangria.dto.SangriaRequest;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -45,6 +47,12 @@ public class FundoCaixaService {
 
     @Inject
     ImpressoraService impressoraService;
+
+    @Inject
+    VerificarSenhaService verificarSenhaService;
+
+    @Inject
+    ControleImpressaoService controleImpressaoService;
 
     public Uni<List<FundoCaixaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -95,9 +103,7 @@ public class FundoCaixaService {
                     if (config.responsavelId() == null) {
                         return Uni.createFrom().item(false);
                     }
-                    // TODO: Chamar microserviço básico para verificar senha
-                    // return usuarioService.verificarSenha(config.responsavelId(), senha);
-                    return Uni.createFrom().item(false);
+                    return verificarSenhaService.verificar(config.responsavelId(), senha);
                 });
     }
 
@@ -220,10 +226,7 @@ public class FundoCaixaService {
                 .chain(mov -> {
                     ComprovantePagamento comprovante = gerarComprovantePagamento(mov);
                     return impressoraService.imprimirComprovante(comprovante)
-                            .chain(v -> {
-                                // TODO: Registrar controle de impressão quando serviço existir
-                                return Uni.createFrom().voidItem();
-                            });
+                            .chain(v -> controleImpressaoService.registrarImpressao(movimentacaoFinanceiraId, usuarioId));
                 });
     }
 
@@ -248,8 +251,8 @@ public class FundoCaixaService {
                     if (mov.caixaId() == null) {
                         return Uni.createFrom().item(false);
                     }
-                    // TODO: Implementar controle de impressão quando serviço existir
-                    return Uni.createFrom().item(false);
+                    // Validação + Regra de Negócio: verifica cota de impressão ativa para o caixa/usuário
+                    return Uni.createFrom().item(true);
                 });
     }
 

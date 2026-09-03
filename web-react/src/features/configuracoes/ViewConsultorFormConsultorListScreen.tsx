@@ -16,10 +16,11 @@ import {
 } from '../../shared/services/masterDetailSources';
 import type {ApiItem} from '../../features/auth/types';
 import {useApi} from '../../shared/services/api';
+import {API_PATHS} from '../../shared/services/apiPaths';
 
 const CONSULTOR_COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID do Consultor'},
-    {key: 'usuarioId', label: 'Consultor/UsuÃ¡rio'},
+    {key: 'usuarioId', label: 'Consultor/Usuário'},
 ];
 
 interface ConsultorData {
@@ -40,7 +41,7 @@ export default function ViewConsultorFormConsultorListScreen() {
         turnosTrabalho: [],
     });
 
-    const {get, post} = useApi('/api/comercial/consultor');
+    const {get, post} = useApi(API_PATHS.comercial.consultor);
 
     // Simple form without wizard - using master detail for agendas and turnos
     return (

@@ -186,28 +186,28 @@ export function AutoComplete({
                 >
                     ▾
                 </button>
+                {open && (
+                    <ul className="autocomplete-list">
+                        {carregando && <li className="autocomplete-item autocomplete-mensagem">Buscando...</li>}
+                        {!carregando && options.length === 0 && (
+                            <li className="autocomplete-item autocomplete-mensagem">Nenhum registro encontrado.</li>
+                        )}
+                        {!carregando &&
+                        options.map((option, index) => (
+                            <li key={option.id}>
+                                <button
+                                    type="button"
+                                    className={`autocomplete-item${index === highlighted ? ' autocomplete-item-active' : ''}`}
+                                    onMouseEnter={() => setHighlighted(index)}
+                                    onClick={() => selecionar(option)}
+                                >
+                                    {option.label || `#${option.id}`}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                )}
             </div>
-            {open && (
-                <ul className="autocomplete-list">
-                    {carregando && <li className="autocomplete-item autocomplete-mensagem">Buscando...</li>}
-                    {!carregando && options.length === 0 && (
-                        <li className="autocomplete-item autocomplete-mensagem">Nenhum registro encontrado.</li>
-                    )}
-                    {!carregando &&
-                    options.map((option, index) => (
-                        <li key={option.id}>
-                            <button
-                                type="button"
-                                className={`autocomplete-item${index === highlighted ? ' autocomplete-item-active' : ''}`}
-                                onMouseEnter={() => setHighlighted(index)}
-                                onClick={() => selecionar(option)}
-                            >
-                                {option.label || `#${option.id}`}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            )}
         </div>
     );
 }

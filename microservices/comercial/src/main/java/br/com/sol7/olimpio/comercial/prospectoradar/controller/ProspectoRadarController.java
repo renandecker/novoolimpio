@@ -8,6 +8,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Path("/api/comercial/prospecto-radar")
 @Produces(MediaType.APPLICATION_JSON)
@@ -52,7 +53,7 @@ public class ProspectoRadarController {
 
     @GET
     @Path("/carregar-prospecto-para-visualizacao")
-    public Uni<Void> carregarProspectoParaVisualizacao(@QueryParam("entityId") Long entityId) {
+    public Uni<List<Map<String, Object>>> carregarProspectoParaVisualizacao(@QueryParam("entityId") Long entityId) {
         return service.carregarProspectoParaVisualizacao(entityId);
     }
 
@@ -73,8 +74,8 @@ public class ProspectoRadarController {
 
     @POST
     @Path("/atualizar-radar")
-    public Uni<Void> atualizarRadar(@QueryParam("pro") String pro) {
-        return service.atualizarRadar(pro);
+    public Uni<Void> atualizarRadar(@QueryParam("prospectoId") Long prospectoId, @QueryParam("campoId") Long campoId, @QueryParam("valor") String valor) {
+        return service.atualizarRadar(prospectoId, campoId, valor);
     }
 
 }

@@ -24,18 +24,27 @@
     flex: 1;
     min-width: 200px;
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    align-items: flex-start;
+    gap: 10px;
 }
 
 .field-group.full {
     flex-basis: 100%;
 }
 
-.field-group label {
+.field-group > label {
+    flex: 0 0 140px;
+    padding-top: 8px;
     font-size: 13px;
     font-weight: 500;
     color: #333;
+}
+
+.field-group > input,
+.field-group > select,
+.field-group > div {
+    flex: 1;
+    min-width: 0;
 }
 
 .field-group input,
@@ -44,6 +53,19 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
+}
+
+@media (max-width: 900px) {
+    .field-group {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+
+    .field-group > label {
+        flex: none;
+        padding-top: 0;
+    }
 }
 
 .field-group input:focus,

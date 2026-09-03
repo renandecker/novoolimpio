@@ -117,9 +117,14 @@ public class ContratoService {
     //         } catch (Exception e) {
     //             e.printStackTrace();
     // // ... (truncado, ver fonte original)
-    public Uni<List<Long>> autoCompleteContrato(String query) {
-        // Obs: depende do microservico basico (Pessoa 'filter' vem da tela/controller JSF)
-        return Uni.createFrom().item(java.util.List.of());
+    public Uni<List<Long>> autoCompleteContrato(String query, Long pessoaId) {
+        if (pessoaId == null) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        if (query == null || query.isBlank()) {
+            return repository.find("pessoaId = ?1 order by id desc", pessoaId).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
+        }
+        return repository.autoCompleteContrato(query.toLowerCase().trim(), pessoaId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -219,8 +224,10 @@ public class ContratoService {
     //         return this.getContratoRepository().autoCompleteAlunoPagamentoPendenteUnidade(query.toLowerCase().trim(), unidade, new PageRequest(0, 10)).getContent();
     //     }
     public Uni<List<Long>> autoCompleteAlunoPagamentoPendenteUnidade(String query, Long unidadeId) {
-        // Obs: depende do microservico basico (Pessoa) e financeiro (Parcela)
-        return Uni.createFrom().item(java.util.List.of());
+        if (unidadeId == null || query == null || query.trim().isEmpty()) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        return repository.autoCompleteAlunoPagamentoPendenteUnidade(query.toLowerCase().trim(), unidadeId).map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
 
@@ -230,9 +237,11 @@ public class ContratoService {
     // public List<Pessoa> autoCompleteAlunoPagamentoPendente(String query) {
     //         return this.getContratoRepository().autoCompleteAlunoPagamentoPendente(query.toLowerCase().trim(), usuarioLogadoController.getUnidadesDisponiveis(), new PageRequest(0, 10)).getContent();
     //     }
-    public Uni<List<Long>> autoCompleteAlunoPagamentoPendente(String query) {
-        // Obs: depende do microservico basico (Pessoa/Unidade e unidades disponiveis do usuario logado) e financeiro (Parcela)
-        return Uni.createFrom().item(java.util.List.of());
+    public Uni<List<Long>> autoCompleteAlunoPagamentoPendente(String query, List<Long> unidadesIds) {
+        if (unidadesIds == null || unidadesIds.isEmpty() || query == null || query.trim().isEmpty()) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        return repository.autoCompleteAlunoPagamentoPendente(query.toLowerCase().trim(), unidadesIds).map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
 }

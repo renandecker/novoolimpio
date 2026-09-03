@@ -5,13 +5,13 @@ export default function ViewEstrategiaFormEstrategiaListScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>EstratÃ©gia</h1>
+                <h1>Estratégia</h1>
                 <DataTable
                     path="/api/comercial/estrategia"
                     module="comercial"
                     columns={[
                         {key: 'id', label: 'Id'},
-                        {key: 'descricao', label: 'DescriÃ§Ã£o'}
+                        {key: 'descricao', label: 'Descrição'}
                     ]}
                 />
             </main>

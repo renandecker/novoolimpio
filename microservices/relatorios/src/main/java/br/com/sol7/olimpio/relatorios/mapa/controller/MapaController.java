@@ -33,6 +33,12 @@ public class MapaController {
         return service.find(id);
     }
 
+    @GET
+    @Path("/{id}/pontos")
+    public Uni<MapaPontosResponse> buscarPontos(@PathParam("id") Long id) {
+        return service.buscarPontos(id);
+    }
+
     @POST
     public Uni<Response> create(@Valid MapaRequest r) {
         return service.create(r).map(item -> Response.status(Response.Status.CREATED).entity(item).build());

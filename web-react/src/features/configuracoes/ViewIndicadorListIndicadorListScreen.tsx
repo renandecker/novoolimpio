@@ -15,28 +15,28 @@ const COLUMNS: DataTableColumn[] = [
     {key: 'nome', label: 'Nome'},
     {
         key: 'data_criacao',
-        label: 'Data CriaÃ§Ã£o',
+        label: 'Data Criação',
         render: (item) => formatDate(asRecord(item).data_criacao),
     },
     {
         key: 'fl_ano',
         label: 'Ano',
-        render: (item) => (asRecord(item).fl_ano ? 'Sim' : 'NÃ£o'),
+        render: (item) => (asRecord(item).fl_ano ? 'Sim' : 'Não'),
     },
     {
         key: 'fl_mes',
-        label: 'MÃªs',
-        render: (item) => (asRecord(item).fl_mes ? 'Sim' : 'NÃ£o'),
+        label: 'Mês',
+        render: (item) => (asRecord(item).fl_mes ? 'Sim' : 'Não'),
     },
     {
         key: 'fl_semana',
         label: 'Semana',
-        render: (item) => (asRecord(item).fl_semana ? 'Sim' : 'NÃ£o'),
+        render: (item) => (asRecord(item).fl_semana ? 'Sim' : 'Não'),
     },
     {
         key: 'fl_dia',
         label: 'Dia',
-        render: (item) => (asRecord(item).fl_dia ? 'Sim' : 'NÃ£o'),
+        render: (item) => (asRecord(item).fl_dia ? 'Sim' : 'Não'),
     },
 ];
 

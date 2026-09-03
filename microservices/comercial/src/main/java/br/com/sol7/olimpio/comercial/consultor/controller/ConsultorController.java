@@ -52,8 +52,8 @@ public class ConsultorController {
 
     @GET
     @Path("/auto-complete-com-unidade")
-    public Uni<List<Long>> autoCompleteComUnidade(@QueryParam("query") String query) {
-        return service.autoCompleteComUnidade(query);
+    public Uni<List<Long>> autoCompleteComUnidade(@QueryParam("query") String query, @QueryParam("unidades") List<Long> unidades) {
+        return service.autoCompleteComUnidade(query, unidades);
     }
 
 

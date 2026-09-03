@@ -10,7 +10,7 @@ export default function CurriculoEntrevistaListScreen() {
                     path="/api/curriculo/entrevista"
                     module="curriculo"
                     columns={[
-                        {key: 'id_usuario', label: 'UsuÃ¡rio'},
+                        {key: 'id_usuario', label: 'Usuário'},
                         {key: 'id_vaga', label: 'Vaga'},
                         {key: 'id_empresa', label: 'Empresa'},
                         {key: 'token', label: 'Token'},

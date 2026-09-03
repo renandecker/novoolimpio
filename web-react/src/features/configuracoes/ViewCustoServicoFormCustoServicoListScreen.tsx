@@ -1,6 +1,7 @@
 ﻿import React, {useState, useEffect} from 'react';
 import {PermissionGate} from '../../shared/services/permissions';
 import {api} from '../../shared/services/api';
+import {API_PATHS} from '../../shared/services/apiPaths';
 
 const TIPOS_SERVICO = [
     {label: 'Por Contato', value: 0},
@@ -26,7 +27,7 @@ export default function ViewCustoServicoFormCustoServicoListScreen() {
     const [errorMsg, setErrorMsg] = useState('');
 
     useEffect(() => {
-        api.get('/api/basico/unidade').then(res => {
+        api.get(API_PATHS.basico.unidade).then(res => {
             if (Array.isArray(res.data)) {
                 setListaUnidades(res.data);
             }
@@ -66,7 +67,7 @@ export default function ViewCustoServicoFormCustoServicoListScreen() {
             dataAlteracao: new Date().toISOString()
         };
 
-        api.post('/api/financeiro/custo-servico', payload).then(() => {
+        api.post(API_PATHS.financeiro.custoServico, payload).then(() => {
             setSuccessMsg('Custo de serviço salvo com sucesso!');
             setLoading(false);
         }).catch(err => {

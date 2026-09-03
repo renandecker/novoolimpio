@@ -21,7 +21,7 @@ type AvaliacaoPergunta = {
 };
 
 const tiposOpcoes: Record<RespostaTipo, string> = {
-    SELECAO: 'SeleÃ§Ã£o MÃºltipla',
+    SELECAO: 'Seleção Múltipla',
     ESCOLHA: 'Escolha Ãšnica',
     TEXTO: 'Texto Livre',
     ARQUIVO: 'Arquivo',
@@ -130,7 +130,7 @@ function CriarPergunta() {
                         value={tipo}
                         onChange={(e) => setTipo(e.target.value as RespostaTipo)}
                     >
-                        <option value="SELECAO">SeleÃ§Ã£o MÃºltipla</option>
+                        <option value="SELECAO">Seleção Múltipla</option>
                         <option value="ESCOLHA">Escolha Ãšnica</option>
                         <option value="TEXTO">Texto Livre</option>
                         <option value="ARQUIVO">Arquivo</option>
@@ -150,7 +150,7 @@ function CriarPergunta() {
 
             {(tipo === 'SELECAO' || tipo === 'ESCOLHA') && (
                 <div className="gp-control-group">
-                    <span className="gp-control-label">OpÃ§Ãµes de Resposta</span>
+                    <span className="gp-control-label">Opções de Resposta</span>
                     {opcoes.map((opcao, idx) => (
                         <div key={idx} className="gp-opcao-linha">
                             {tipo === 'ESCOLHA' && (
@@ -176,7 +176,7 @@ function CriarPergunta() {
                             <button
                                 className="gp-btn gp-btn-acoes"
                                 onClick={() => removerOpcao(opcao.id)}
-                                title="Remover opÃ§Ã£o"
+                                title="Remover opção"
                             >
                                 âœ–
                             </button>
@@ -190,12 +190,12 @@ function CriarPergunta() {
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') adicionarOpcao();
                             }}
-                            placeholder="Nova opÃ§Ã£o"
+                            placeholder="Nova opção"
                         />
                         <button
                             className="gp-btn gp-btn-acoes"
                             onClick={adicionarOpcao}
-                            title="Adicionar opÃ§Ã£o"
+                            title="Adicionar opção"
                         >
                             âž•
                         </button>
@@ -320,9 +320,9 @@ function ListarPerguntas() {
                             <th>ID</th>
                             <th>Pergunta</th>
                             <th>Tipo</th>
-                            <th>OpÃ§Ãµes</th>
+                            <th>Opções</th>
                             <th>Anexos</th>
-                            <th>AÃ§Ãµes</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>

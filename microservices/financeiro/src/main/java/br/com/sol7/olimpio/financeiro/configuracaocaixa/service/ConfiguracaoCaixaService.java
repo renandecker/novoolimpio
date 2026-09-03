@@ -1,8 +1,8 @@
 package br.com.sol7.olimpio.financeiro.configuracaocaixa;
 
+import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
-
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -85,8 +85,11 @@ public class ConfiguracaoCaixaService {
     //         return new ArrayList<>();
     //     }
     public Uni<List<Long>> autoCompleteUsuario(String query) {
-        // Obs: depende do microservico basico (usuarioService.autoCompleteUsuario / usuarioService.buscarUsuarioPorUnidade)
-        return Uni.createFrom().item(java.util.List.of());
+        return Panache.getSession().chain(session ->
+                session.createNativeQuery("SELECT id FROM bas_usuario WHERE login ILIKE :query OR CAST(id AS TEXT) = :query")
+                        .setParameter("query", "%" + query + "%")
+                        .getResultList())
+                .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
 

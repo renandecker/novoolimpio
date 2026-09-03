@@ -47,4 +47,11 @@ public class CobrancaRepository implements PanacheRepository<Cobranca> {
                         .getResultList());
     }
 
+    public Uni<java.util.List<Cobranca>> findByContratoId(Long contratoId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery("SELECT c.* FROM fin_cobranca c WHERE c.id_contrato = ?1", Cobranca.class)
+                        .setParameter(1, contratoId)
+                        .getResultList());
+    }
+
 }

@@ -5,11 +5,14 @@ import br.com.sol7.olimpio.shared.RefOption;
 import br.com.sol7.olimpio.shared.RefService;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
+import io.quarkus.mailer.Mail;
+import io.quarkus.mailer.reactive.ReactiveMailer;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.unchecked.Unchecked;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
 import java.util.ArrayList;
@@ -23,6 +26,10 @@ public class VagaService {
     private static final Logger LOG = Logger.getLogger(VagaService.class);
 
     @Inject
+    ReactiveMailer mailer;
+
+    @ConfigProperty(name = "curriculo.email.enabled", defaultValue = "true")
+    boolean emailEnabled;
     VagaRepository repository;
 
     @Inject
@@ -226,8 +233,32 @@ public class VagaService {
                     List<Object[]> lista = rows.stream().map(r -> (Object[]) r).toList();
                     long lastId = lista.stream().map(r -> ((Number) r[0]).longValue()).max(Long::compare).orElse(0L);
                     for (Object[] row : lista) {
-                        LOG.infof("Vaga %s: envio de e-mail para [%s] <%s> (titulo=%s) - envio real de e-mail nao portado",
-                                row[3], row[1], row[2], row[4]);
+                        String vagaNome = (String) row[3];
+                        String login = (String) row[1];
+                        String email = (String) row[2];
+                        String tituloEmail = (String) row[4];
+
+                        if (emailEnabled && email != null && !email.isBlank()) {
+                            String assunto = tituloEmail != null ? tituloEmail : "Nova vaga disponível: " + vagaNome;
+                            String corpoHtml = String.format("""
+                                <html>
+                                <body>
+                                    <p>Olá %s,</p>
+                                    <p>Uma nova vaga está disponível: <strong>%s</strong></p>
+                                    <p>Por favor, acesse o sistema para mais detalhes.</p>
+                                    <p>Atenciosamente,<br>Equipe OlimpIO</p>
+                                </body>
+                                </html>
+                                """, login, vagaNome);
+
+                            mailer.send(Mail.withHtml(email, assunto, corpoHtml))
+                                    .onItem().invoke(() -> LOG.infof("E-mail de vaga enviado para %s <%s>", login, email))
+                                    .onFailure().invoke(e -> LOG.errorf(e, "Falha ao enviar e-mail de vaga para %s <%s>", login, email))
+                                    .subscribe().with(v -> {});
+                        } else {
+                            LOG.infof("Vaga %s: envio de e-mail para [%s] <%s> (titulo=%s) - e-mail desabilitado ou destinatário vazio",
+                                    vagaNome, login, email, tituloEmail);
+                        }
                     }
                     return updateConfig("ID_VAGA_ALUNO", lastId)
                             .chain(v -> Panache.getSession()

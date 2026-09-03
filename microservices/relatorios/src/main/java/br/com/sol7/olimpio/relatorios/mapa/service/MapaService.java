@@ -1,5 +1,6 @@
 package br.com.sol7.olimpio.relatorios.mapa;
 
+import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -8,7 +9,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @ApplicationScoped
 @WithTransaction
@@ -166,9 +169,6 @@ public class MapaService {
     }
 
 
-    // Migrado de MapaService.autoComplete (src/main/java/br/com/sol7/olimpio/service/services/relatorios/MapaService.java:49, camada service)
-    // Observacao: parametro estruturaId: era Estrutura (referencia por id)
-    // Logica original (adaptar):
     // public List<Mapa> autoComplete(String query, Estrutura estrutura) {
     //         return this.getConexaoRepository().autoComplete(query.toLowerCase(), estrutura, new PageRequest(0, 10)).getContent();
     //     }
@@ -176,4 +176,43 @@ public class MapaService {
         return repository.autoComplete(query.toLowerCase(), estruturaId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
+    @Inject
+    MapaRegraService mapaRegraService;
+
+    public Uni<MapaPontosResponse> buscarPontos(Long id) {
+        return repository.findById(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Mapa not found"))
+                .chain(mapa -> mapaRegraService.findByMapaId(id)
+                        .map(regras -> buildMapaPontosResponse(mapa, regras)));
+    }
+
+    private MapaPontosResponse buildMapaPontosResponse(Mapa mapa, List<MapaRegraResponse> regras) {
+        List<RegraPontos> regraPontosList = new ArrayList<>();
+        
+        // Parse center coordinates from mapa.coordenada
+        String[] centroCoords = mapa.coordenada != null ? mapa.coordenada.split(",") : new String[0];
+        String latCentro = centroCoords.length > 0 ? centroCoords[0].trim() : "0";
+        String lngCentro = centroCoords.length > 1 ? centroCoords[1].trim() : "0";
+        
+        // For each regra, create RegraPontos (without markers for now - would need SQL execution)
+        for (MapaRegraResponse regra : regras) {
+            if (Boolean.TRUE.equals(regra.ativo())) {
+                regraPontosList.add(new RegraPontos(
+                        regra.id(),
+                        regra.descricao(),
+                        regra.cor() != null ? "#" + regra.cor() : "#ff0000",
+                        regra.markerTamanho() != null ? regra.markerTamanho() : (mapa.markerTamanho != null ? mapa.markerTamanho : 10),
+                        new ArrayList<>() // Empty markers - would need SQL execution to populate
+                ));
+            }
+        }
+        
+        return new MapaPontosResponse(
+                latCentro + "," + lngCentro,
+                mapa.zoom,
+                mapa.altura,
+                mapa.markerTamanho,
+                regraPontosList
+        );
+    }
 }

@@ -81,36 +81,47 @@ public class CaixaController {
 
     @GET
     @Path("/auto-complete-movimento")
-    public Uni<List<Long>> autoCompleteMovimento(@QueryParam("query") String query) {
-        return service.autoCompleteMovimento(query);
+    public Uni<List<Long>> autoCompleteMovimento(@QueryParam("query") String query, @QueryParam("tipoMovimentoId") Long tipoMovimentoId) {
+        return service.autoCompleteMovimento(query, tipoMovimentoId);
     }
 
 
     @GET
     @Path("/verificar-senha-responsavel")
-    public Uni<Boolean> verificarSenhaResponsavel() {
-        return service.verificarSenhaResponsavel();
+    public Uni<Boolean> verificarSenhaResponsavel(@QueryParam("configuracaoCaixaId") Long configuracaoCaixaId, @QueryParam("senha") String senha) {
+        return service.verificarSenhaResponsavel(configuracaoCaixaId, senha);
     }
 
 
     @GET
     @Path("/verificar-senha-operador")
-    public Uni<Boolean> verificarSenhaOperador() {
-        return service.verificarSenhaOperador();
+    public Uni<Boolean> verificarSenhaOperador(@QueryParam("configuracaoCaixaId") Long configuracaoCaixaId, @QueryParam("senha") String senha) {
+        return service.verificarSenhaOperador(configuracaoCaixaId, senha);
     }
 
 
+    public static class ImprimirComprovanteRequest {
+        public Long movimentacaoFinanceiraId;
+        public Long usuarioId;
+    }
+
     @POST
     @Path("/imprimir-comprovante-pagamento")
-    public Uni<Void> imprimirComprovantePagamento() {
-        return service.imprimirComprovantePagamento();
+    public Uni<Void> imprimirComprovantePagamento(ImprimirComprovanteRequest request) {
+        if (request == null || request.movimentacaoFinanceiraId == null) {
+            return Uni.createFrom().voidItem();
+        }
+        return service.imprimirComprovantePagamento(request.movimentacaoFinanceiraId, request.usuarioId);
     }
 
 
     @GET
     @Path("/buscar-numero-parcela")
-    public Uni<Void> buscarNumeroParcela() {
-        return service.buscarNumeroParcela();
+    public Uni<CaixaService.ParcelaResponse> buscarNumeroParcela(
+            @QueryParam("numeroLancamento") Long numeroLancamento,
+            @QueryParam("caixaId") Long caixaId,
+            @QueryParam("caixaUnico") boolean caixaUnico) {
+        return service.buscarNumeroParcela(numeroLancamento, caixaId, caixaUnico);
     }
 
 

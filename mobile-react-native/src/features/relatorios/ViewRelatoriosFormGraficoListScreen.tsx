@@ -24,7 +24,8 @@ import {
     FILTRO_COLUMNS,
     FILTRO_SEARCH,
 } from '../masterDetailSources';
-import {useApi} from '../api';
+import {useApi} from '../../shared/services/api';
+import {API_PATHS} from '../../shared/services/apiPaths';
 import {DataTable} from '../DataTable';
 import {MasterDetail} from '../MasterDetail';
 import type {ApiItem} from '../types';
@@ -106,11 +107,11 @@ export default function ViewRelatoriosFormGraficoListScreen() {
     const [filtros, setFiltros] = useState<any[]>([]);
     const [estruturaSelecionada, setEstruturaSelecionada] = useState<any>(null);
 
-    const {post: saveGrafico} = useApi('/api/relatorios/grafico');
-    const {get: loadEstrutura} = useApi('/api/relatorios/estrutura');
-    const {get: loadFiltros} = useApi('/api/relatorios/filtro');
-    const {post: saveFiltro} = useApi('/api/relatorios/filtro');
-    const {delete: deleteFiltro} = useApi('/api/relatorios/filtro');
+    const {post: saveGrafico} = useApi(API_PATHS.relatorios.grafico);
+    const {get: loadEstrutura} = useApi(API_PATHS.relatorios.estrutura);
+    const {get: loadFiltros} = useApi(API_PATHS.relatorios.filtro);
+    const {post: saveFiltro} = useApi(API_PATHS.relatorios.filtro);
+    const {delete: deleteFiltro} = useApi(API_PATHS.relatorios.filtro);
 
     const [entity, setEntity] = useState({
         nome: '',

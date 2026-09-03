@@ -17,6 +17,10 @@ import {
 } from '../../shared/services/masterDetailSources';
 import {GENEROS, ETNIAS, ESTADOS_CIVIS, ESCOLARIDADES, formatCpf, formatPhone, str, num, semId, toDateInput} from '../../features/auth/cadastroUsuarioTypes';
 
+type Option = {value: string; label: string};
+const asOptions = (arr: Array<{id: number; descricao?: string; nome?: string}>): Option[] =>
+    (Array.isArray(arr) ? arr : []).map((x) => ({value: String(x.id), label: x.descricao ?? x.nome ?? String(x.id)}));
+
 // ── helpers ──────────────────────────────────────────────────────────
 const requiredMark = <span style={{color:'#C90000',marginLeft:4}}>*</span>;
 
@@ -98,7 +102,34 @@ export default function ViewUsuarioFormUsuarioListScreen(){
         }
     })();},[]);
 
-    // ── Acessos ──────────────────────────────────────────────────────
+    // ── Opções carregadas por API (gênero, etnia, estado civil, escolaridade) ──
+    const [generoOptions,setGeneroOptions]=useState<Option[]>(GENEROS);
+    const [etniaOptions,setEtniaOptions]=useState<Option[]>(ETNIAS);
+    const [estadoCivilOptions,setEstadoCivilOptions]=useState<Option[]>(ESTADOS_CIVIS);
+    const [escolaridadeOptions,setEscolaridadeOptions]=useState<Option[]>(ESCOLARIDADES);
+    useEffect(()=>{(async()=>{
+        try{
+            const r = await api.get<any[]>('/api/basico/genero/list');
+            const arr = Array.isArray(r.data)?r.data:(r.data as any)?.content??[];
+            if(arr.length) setGeneroOptions(arr.map((x:any)=>({value:String(x.id), label:x.descricao??x.nome??String(x.id)})));
+        }catch{/* mantém GENEROS */ }
+        try{
+            const r = await api.get<any[]>('/api/basico/etnia');
+            const arr = Array.isArray(r.data)?r.data:(r.data as any)?.content??[];
+            if(arr.length) setEtniaOptions(arr.map((x:any)=>({value:String(x.id), label:x.descricao??x.nome??String(x.id)})));
+        }catch{/* mantém ETNIAS */ }
+        try{
+            const r = await api.get<any[]>('/api/basico/estado-civil');
+            const arr = Array.isArray(r.data)?r.data:(r.data as any)?.content??[];
+            if(arr.length) setEstadoCivilOptions(arr.map((x:any)=>({value:String(x.id), label:x.descricao??x.nome??String(x.id)})));
+        }catch{/* mantém ESTADOS_CIVIS */ }
+        try{
+            const r = await api.get<any[]>('/api/basico/escolaridade');
+            const arr = Array.isArray(r.data)?r.data:(r.data as any)?.content??[];
+            if(arr.length) setEscolaridadeOptions(arr.map((x:any)=>({value:String(x.id), label:x.descricao??x.nome??String(x.id)})));
+        }catch{/* mantém ESCOLARIDADES */ }
+    })();},[]);
+    const [acessoSub,setAcessoSub]=useState<'unidade'|'perfil'|'agenda'>('unidade');
     const [unidadesAcesso,setUnidadesAcesso]=useState<ApiItem[]>([]);
     const [unidadeDefaultId,setUnidadeDefaultId]=useState('');
     const [perfis,setPerfis]=useState<ApiItem[]>([]);
@@ -178,11 +209,20 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                     } else if(cep||numero||complemento) enderecosCarregados.push({cep,cidade:'',bairro:'',logradouro:'',numero,complemento});
                     setEnderecos(enderecosCarregados);
                 }
-                // m2m
-                if((usu as any).perfis){ const ids=new Set(((usu as any).perfis as any[]).map((p:any)=>String(p.id))); setPerfis(allPerfis.filter(p=>ids.has(String((p as any).id)))); }
-                if((usu as any).agendas){ const ids=new Set(((usu as any).agendas as any[]).map((a:any)=>String(a.id))); setAgendas(allAgendas.filter(a=>ids.has(String((a as any).id)))); }
-                if((usu as any).unidades){ const ids=new Set(((usu as any).unidades as any[]).map((u:any)=>String(u.id))); setUnidadesAcesso(allUnidades.filter(u=>ids.has(String((u as any).id)))); }
-                if((usu as any).unidadeDefaultId) setUnidadeDefaultId(String((usu as any).unidadeDefaultId));
+                // m2m – perfis, agendas, unidades (embedded ou via endpoints dedicados)
+                try{
+                    const apply = (arr:any[], all:ApiItem[]) => { const ids=new Set(arr.map((x:any)=>String(x.id))); return all.filter(a=>ids.has(String((a as any).id))); };
+                    let perfisIds:number[] = (usu as any).perfis ? ((usu as any).perfis as any[]).map((p:any)=>p.id) : [];
+                    if(!perfisIds?.length){ try{ perfisIds=(await api.get<number[]>(`/api/basico/usuario/${idParam}/perfis`)).data??[]; }catch{} }
+                    setPerfis(apply(perfisIds.map(id=>({id})), allPerfis));
+                    let agendasIds:number[] = (usu as any).agendas ? ((usu as any).agendas as any[]).map((a:any)=>a.id) : [];
+                    if(!agendasIds?.length){ try{ agendasIds=(await api.get<number[]>(`/api/basico/usuario/${idParam}/agendas`)).data??[]; }catch{} }
+                    setAgendas(apply(agendasIds.map(id=>({id})), allAgendas));
+                    let unidadesIds:number[] = (usu as any).unidades ? ((usu as any).unidades as any[]).map((u:any)=>u.id) : [];
+                    if(!unidadesIds?.length){ try{ unidadesIds=(await api.get<number[]>(`/api/basico/usuario/${idParam}/unidades`)).data??[]; }catch{} }
+                    setUnidadesAcesso(apply(unidadesIds.map(id=>({id})), allUnidades));
+                    if((usu as any).unidadeDefaultId) setUnidadeDefaultId(String((usu as any).unidadeDefaultId));
+                }catch{/* ignore */}
             }catch(e){ console.error(e); alert('Erro ao carregar usuário.');}
         })();
         return()=>{alive=false;};
@@ -279,19 +319,19 @@ export default function ViewUsuarioFormUsuarioListScreen(){
 
             <label className="form-field"><span className="form-label">Gênero</span>
                 <select className="form-input form-select" value={f.generoId} onChange={e=>upd('generoId',e.target.value)}>
-                    <option value="">-- Selecione --</option>{GENEROS.map(o=> <option key={o.value} value={o.value}>{o.label}</option>)}
+                    <option value="">-- Selecione --</option>{generoOptions.map(o=> <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select></label>
             <label className="form-field"><span className="form-label">Etnia</span>
                 <select className="form-input form-select" value={f.etniaId} onChange={e=>upd('etniaId',e.target.value)}>
-                    <option value="">-- Selecione --</option>{ETNIAS.map(o=> <option key={o.value} value={o.value}>{o.label}</option>)}
+                    <option value="">-- Selecione --</option>{etniaOptions.map(o=> <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select></label>
             <label className="form-field"><span className="form-label">Estado Civil {requiredMark}</span>
                 <select className="form-input form-select" value={f.estadoCivilId} onChange={e=>upd('estadoCivilId',e.target.value)}>
-                    <option value="">-- Selecione --</option>{ESTADOS_CIVIS.map(o=> <option key={o.value} value={o.value}>{o.label}</option>)}
+                    <option value="">-- Selecione --</option>{estadoCivilOptions.map(o=> <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select></label>
             <label className="form-field"><span className="form-label">Escolaridade {requiredMark}</span>
                 <select className="form-input form-select" value={f.escolaridadeId} onChange={e=>upd('escolaridadeId',e.target.value)}>
-                    <option value="">-- Selecione --</option>{ESCOLARIDADES.map(o=> <option key={o.value} value={o.value}>{o.label}</option>)}
+                    <option value="">-- Selecione --</option>{escolaridadeOptions.map(o=> <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select></label>
         </div>
     );
@@ -466,61 +506,99 @@ export default function ViewUsuarioFormUsuarioListScreen(){
         </div>
     );
 
+    const acessoSubTabs: Array<{key:'unidade'|'perfil'|'agenda'; label:string; content:React.ReactNode}> = [
+        {
+            key:'unidade', label:'Unidade',
+            content:(
+                <div className="form-grid">
+                    <div style={{gridColumn: '1 / -1'}}>
+                        <MasterDetail
+                            label="Unidade"
+                            source={UNIDADE_SOURCE}
+                            valueKey="id"
+                            searchKeys={UNIDADE_SEARCH}
+                            columns={UNIDADE_COLUMNS}
+                            items={unidadesAcesso}
+                            onChange={setUnidadesAcesso}
+                        />
+                    </div>
+                    <label className="form-field" style={{gridColumn:'1 / -1'}}>
+                        <span className="form-label">Unidade Padrão {requiredMark}</span>
+                        <select className="form-input form-select" value={unidadeDefaultId} onChange={e => setUnidadeDefaultId(e.target.value)}>
+                            <option value="">-- Selecione --</option>
+                            {unidadesAcesso.map(u => <option key={String((u as any).id)} value={String((u as any).id)}>{(u as any).sucinto ?? (u as any).razaoSocial ?? String((u as any).id)}</option>)}
+                        </select>
+                    </label>
+                </div>
+            ),
+        },
+        {
+            key:'perfil', label:'Perfil',
+            content:(
+                <div className="form-grid">
+                    <div style={{gridColumn: '1 / -1'}}>
+                        <MasterDetail
+                            label="Perfil"
+                            source={PERFIL_SOURCE}
+                            valueKey="id"
+                            searchKeys={PERFIL_SEARCH}
+                            columns={PERFIL_COLUMNS}
+                            items={perfis}
+                            onChange={setPerfis}
+                        />
+                    </div>
+                </div>
+            ),
+        },
+        {
+            key:'agenda', label:'Agenda',
+            content:(
+                <div className="form-grid">
+                    <div style={{gridColumn: '1 / -1'}}>
+                        <MasterDetail
+                            label="Agenda"
+                            source={AGENDA_SOURCE}
+                            valueKey="id"
+                            searchKeys={AGENDA_SEARCH}
+                            columns={AGENDA_COLUMNS}
+                            items={agendas}
+                            onChange={setAgendas}
+                        />
+                    </div>
+                    <div style={{gridColumn: '1 / -1', marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10}}>
+                        <label className="form-field"><span className="form-label">Agendar</span><BooleanField value={agendaPerm.agendar} onChange={v => setAgendaPerm(p => ({...p, agendar: v}))} /></label>
+                        <label className="form-field"><span className="form-label">Alterar</span><BooleanField value={agendaPerm.alterar} onChange={v => setAgendaPerm(p => ({...p, alterar: v}))} /></label>
+                        <label className="form-field"><span className="form-label">Fechar</span><BooleanField value={agendaPerm.fechar} onChange={v => setAgendaPerm(p => ({...p, fechar: v}))} /></label>
+                        <label className="form-field"><span className="form-label">Iniciar</span><BooleanField value={agendaPerm.iniciar} onChange={v => setAgendaPerm(p => ({...p, iniciar: v}))} /></label>
+                        <label className="form-field"><span className="form-label">Atender</span><BooleanField value={agendaPerm.atender} onChange={v => setAgendaPerm(p => ({...p, atender: v}))} /></label>
+                    </div>
+                    <div style={{gridColumn: '1 / -1', marginTop: 8, fontSize: 11, color: '#777'}}>Permissões aplicadas às agendas selecionadas.</div>
+                </div>
+            ),
+        },
+    ];
+
     const tabAcessos = (
         <div className="form-grid">
-            <div style={sectionTitleStyle}>Unidades de Acesso</div>
-            <div style={{gridColumn: '1 / -1'}}>
-                <MasterDetail
-                    label="Unidade"
-                    source={UNIDADE_SOURCE}
-                    valueKey="id"
-                    searchKeys={UNIDADE_SEARCH}
-                    columns={UNIDADE_COLUMNS}
-                    items={unidadesAcesso}
-                    onChange={setUnidadesAcesso}
-                />
+            <div style={{gridColumn:'1 / -1', display:'flex', gap:8, borderBottom:'1px solid #e0e0e0', marginBottom:16, paddingBottom:0}}>
+                {acessoSubTabs.map(t => (
+                    <button
+                        key={t.key}
+                        type="button"
+                        onClick={() => setAcessoSub(t.key)}
+                        style={{
+                            padding:'8px 16px', border:'1px solid #e0e0e0', borderBottom:'none', borderRadius:'6px 6px 0 0',
+                            background: acessoSub===t.key ? '#ffffff' : '#f4f4f4', fontWeight:700, fontSize:'13px',
+                            color: acessoSub===t.key ? '#2a5a88' : '#555', cursor:'pointer',
+                        }}
+                    >
+                        {t.label}
+                    </button>
+                ))}
             </div>
-            <label className="form-field">
-                <span className="form-label">Unidade Padrão {requiredMark}</span>
-                <select className="form-input form-select" value={unidadeDefaultId} onChange={e => setUnidadeDefaultId(e.target.value)}>
-                    <option value="">-- Selecione --</option>
-                    {unidadesAcesso.map(u => <option key={String((u as any).id)} value={String((u as any).id)}>{(u as any).sucinto ?? (u as any).razaoSocial ?? String((u as any).id)}</option>)}
-                </select>
-            </label>
-
-            <div style={sectionTitleStyle}>Perfis de Acesso</div>
-            <div style={{gridColumn: '1 / -1'}}>
-                <MasterDetail
-                    label="Perfil"
-                    source={PERFIL_SOURCE}
-                    valueKey="id"
-                    searchKeys={PERFIL_SEARCH}
-                    columns={PERFIL_COLUMNS}
-                    items={perfis}
-                    onChange={setPerfis}
-                />
+            <div style={{gridColumn:'1 / -1'}}>
+                {acessoSubTabs.find(t => t.key === acessoSub)?.content}
             </div>
-
-            <div style={sectionTitleStyle}>Agendas</div>
-            <div style={{gridColumn: '1 / -1'}}>
-                <MasterDetail
-                    label="Agenda"
-                    source={AGENDA_SOURCE}
-                    valueKey="id"
-                    searchKeys={AGENDA_SEARCH}
-                    columns={AGENDA_COLUMNS}
-                    items={agendas}
-                    onChange={setAgendas}
-                />
-            </div>
-            <div style={{gridColumn: '1 / -1', marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10}}>
-                <label className="form-field"><span className="form-label">Agendar</span><BooleanField value={agendaPerm.agendar} onChange={v => setAgendaPerm(p => ({...p, agendar: v}))} /></label>
-                <label className="form-field"><span className="form-label">Alterar</span><BooleanField value={agendaPerm.alterar} onChange={v => setAgendaPerm(p => ({...p, alterar: v}))} /></label>
-                <label className="form-field"><span className="form-label">Fechar</span><BooleanField value={agendaPerm.fechar} onChange={v => setAgendaPerm(p => ({...p, fechar: v}))} /></label>
-                <label className="form-field"><span className="form-label">Iniciar</span><BooleanField value={agendaPerm.iniciar} onChange={v => setAgendaPerm(p => ({...p, iniciar: v}))} /></label>
-                <label className="form-field"><span className="form-label">Atender</span><BooleanField value={agendaPerm.atender} onChange={v => setAgendaPerm(p => ({...p, atender: v}))} /></label>
-            </div>
-            <div style={{gridColumn: '1 / -1', marginTop: 8, fontSize: 11, color: '#777'}}>Permissões aplicadas às agendas selecionadas.</div>
         </div>
     );
 

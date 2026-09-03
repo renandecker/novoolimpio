@@ -9,7 +9,7 @@ export default function ViewConfiguracaoFormConfiguracaoEstoqueListScreen() {
                 <ModuleTabs
                     tabs={[
                         {key: 'campos', label: 'Campos', path: '/api/view/configuracao/formConfiguracaoEstoque'},
-                        {key: 'configuracoes', label: 'ConfiguraÃ§Ãµes', empty: 'ConteÃºdo de ConfiguraÃ§Ãµes.'},
+                        {key: 'configuracoes', label: 'Configurações', empty: 'Conteúdo de Configurações.'},
                     ]}
                 />
             </main>

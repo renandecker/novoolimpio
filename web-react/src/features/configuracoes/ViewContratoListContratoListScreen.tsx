@@ -22,7 +22,7 @@ const renderStatus = (item: ApiItem) => {
         label = `Cancelado ${formatDate(record.data_cancelamento)}`;
         className = 'statusCANCELADA';
     } else if (record.inscricao !== true) {
-        label = 'Ativo sem inscriÃ§Ã£o';
+        label = 'Ativo sem inscrição';
         className = 'statusPENDENTE';
     } else {
         label = 'Ativo';
@@ -35,7 +35,7 @@ const COLUMNS: DataTableColumn[] = [
     {key: 'pessoa', label: 'Aluno'},
     {key: 'curso', label: 'Curso'},
     {key: 'unidade', label: 'Id_unidade'},
-    {key: 'unidadeResponsavel', label: 'Unidade ResponsÃ¡vel'},
+    {key: 'unidadeResponsavel', label: 'Unidade Responsável'},
     {key: 'status', label: 'Status', render: renderStatus},
     {key: 'data', label: 'Data', render: (item) => formatDate(asRecord(item).data)},
 ];

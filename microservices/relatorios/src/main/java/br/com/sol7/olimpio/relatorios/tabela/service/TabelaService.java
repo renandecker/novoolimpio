@@ -237,41 +237,36 @@ public class TabelaService {
     //             medidas = new ArrayList<>();
     //         }
     //     }
-    public Uni<Void> buscarMedidas(Long fatoId) {
-        // Obs: nao existe entidade/repositorio Medida neste microservico (medidaService.buscarMedidasPeloFato)
-        return Uni.createFrom().voidItem();
+    // Obs: nao existe entidade/repositorio Medida neste microservico (medidaService.buscarMedidasPeloFato)
+    // Implementacao: retorna IDs de medidas de uma estrutura (requer chamada ao microservico relatorios original ou modulo de medidas)
+    public Uni<List<Long>> buscarMedidas(Long estruturaId) {
+        if (estruturaId == null) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        // Validação + Regra de Negócio via consulta integrada no microserviço de relatórios
+        return Panache.getSession().chain(session ->
+                session.createNativeQuery("SELECT id FROM rel_medida WHERE estrutura_id = ?1").setParameter(1, estruturaId).getResultList())
+                .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de TabelaController.buscarDimensoesDescritivo (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/TabelaController.java:277, camada controller)
-    // Observacao: parametro fatoId: era Estrutura (referencia por id)
-    // Logica original (adaptar):
-    // public void buscarDimensoesDescritivo(Estrutura fato) {
-    //         if (fato != null) {
-    //             dimensaos = dimensaoService.buscarDimensaoComEstrutura(fato);
-    //         } else {
-    //             dimensaos = new ArrayList<>();
-    //         }
-    //     }
-    public Uni<Void> buscarDimensoesDescritivo(Long fatoId) {
-        // Obs: nao existe entidade/repositorio Dimensao neste microservico (dimensaoService.buscarDimensaoComEstrutura)
-        return Uni.createFrom().voidItem();
+    public Uni<List<Long>> buscarDimensoesDescritivo(Long estruturaId) {
+        if (estruturaId == null) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        // Validação + Regra de Negócio via consulta integrada no microserviço de relatórios (tipo DESCRITIVO)
+        return Panache.getSession().chain(session ->
+                session.createNativeQuery("SELECT id FROM rel_dimensao WHERE estrutura_id = ?1 AND tipo_info = 'DESCRITIVO'").setParameter(1, estruturaId).getResultList())
+                .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de TabelaController.buscarDimensoesTempo (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/TabelaController.java:316, camada controller)
-    // Observacao: parametro fatoId: era Estrutura (referencia por id)
-    // Logica original (adaptar):
-    // public void buscarDimensoesTempo(Estrutura fato) {
-    //         if (fato != null) {
-    //             dimensaosTempo = dimensaoService.buscarDimensaoTempoComEstrutura(fato);
-    //         } else {
-    //             dimensaosTempo = new ArrayList<>();
-    //         }
-    //     }
-    public Uni<Void> buscarDimensoesTempo(Long fatoId) {
-        // Obs: nao existe entidade/repositorio Dimensao neste microservico (dimensaoService.buscarDimensaoTempoComEstrutura)
-        return Uni.createFrom().voidItem();
+    public Uni<List<Long>> buscarDimensoesTempo(Long estruturaId) {
+        if (estruturaId == null) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        // Validação + Regra de Negócio via consulta integrada no microserviço de relatórios (tipo TEMPO)
+        return Panache.getSession().chain(session ->
+                session.createNativeQuery("SELECT id FROM rel_dimensao WHERE estrutura_id = ?1 AND tipo_info = 'TEMPO'").setParameter(1, estruturaId).getResultList())
+                .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
 
@@ -282,8 +277,9 @@ public class TabelaService {
     //         return getConexaoRepository().buscarUnidades(id);
     //     }
     public Uni<List<Long>> buscarUnidades(Long id) {
-        // Obs: depende do microservico basico (Unidade) - repository.buscarUnidades
-        return Uni.createFrom().item(java.util.List.of());
+        return Panache.getSession().chain(session ->
+                session.createNativeQuery("SELECT id FROM bas_unidade").getResultList())
+                .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
 
@@ -294,8 +290,9 @@ public class TabelaService {
     //         return getConexaoRepository().buscarPerfils(id);
     //     }
     public Uni<List<Long>> buscarPerfils(Long id) {
-        // Obs: depende do microservico basico (Perfil) - repository.buscarPerfils
-        return Uni.createFrom().item(java.util.List.of());
+        return Panache.getSession().chain(session ->
+                session.createNativeQuery("SELECT id FROM bas_perfil").getResultList())
+                .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
 
@@ -306,8 +303,9 @@ public class TabelaService {
     //         return getConexaoRepository().buscarUsuarios(id);
     //     }
     public Uni<List<Long>> buscarUsuarios(Long id) {
-        // Obs: depende do microservico basico (Usuario) - repository.buscarUsuarios
-        return Uni.createFrom().item(java.util.List.of());
+        return Panache.getSession().chain(session ->
+                session.createNativeQuery("SELECT id FROM bas_usuario").getResultList())
+                .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
 

@@ -104,9 +104,11 @@ public class AcaoService {
     // public List<Acao> autoCompleteEmAberto(String query) {
     //         return acaoService.autoCompleteEmAberto(query, usuarioLogadoController.getUnidadesDisponiveis());
     //     }
-    public Uni<List<Long>> autoCompleteEmAberto(String query) {
-        // Obs: depende do contexto de usuario logado (unidades disponiveis)
-        return Uni.createFrom().item(java.util.List.of());
+    public Uni<List<Long>> autoCompleteEmAberto(String query, List<Long> unidadesIds) {
+        if (unidadesIds == null || unidadesIds.isEmpty()) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        return repository.autoCompleteEmAberto(query.toLowerCase().trim(), unidadesIds).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 

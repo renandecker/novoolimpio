@@ -2,6 +2,7 @@ package br.com.sol7.olimpio.estoque.controleentrega;
 
 import br.com.sol7.olimpio.estoque.entrega.EntregaRepository;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -100,5 +101,51 @@ public class ControleEntregaService {
     private Uni<List<ControleEntregaResponse>> enrichResponses(List<ControleEntregaResponse> responses) {
         List<Uni<ControleEntregaResponse>> unis = responses.stream().map(this::enrichSingleResponse).toList();
         return Uni.join().all(unis).andFailFast();
+    }
+
+    // Auto-complete para busca por query
+    public Uni<List<ControleEntregaResponse>> autoComplete(String query) {
+        String sql = """
+            SELECT ce.* FROM est_controle_entrega ce
+            WHERE ce.fl_ativo = true
+            AND (ce.id::text ILIKE ? OR ce.rastreio ILIKE ? OR ce.status ILIKE ?)
+            ORDER BY ce.id DESC LIMIT 20
+            """;
+        return Panache.getSession()
+                .chain(s -> s.createNativeQuery(sql, ControleEntrega.class)
+                        .setParameter(1, "%" + query + "%")
+                        .setParameter(2, "%" + query + "%")
+                        .setParameter(3, "%" + query + "%")
+                        .getResultList())
+                .map(items -> items.stream().map(this::toResponse).toList())
+                .chain(this::enrichResponses);
+    }
+
+    // Auto-complete com unidade específica
+    public Uni<List<ControleEntregaResponse>> autoCompleteComUnidade(String query, Long unidadeId) {
+        String sql = """
+            SELECT DISTINCT ce.* FROM est_controle_entrega ce
+            INNER JOIN est_entrega_pedido ep ON ep.id_entrega = ce.id
+            INNER JOIN est_controle_pedidos c ON c.id = ep.id_pedido
+            WHERE c.id_unidade = ? AND ce.fl_ativo = true
+            AND (ce.id::text ILIKE ? OR ce.rastreio ILIKE ? OR ce.status ILIKE ?)
+            ORDER BY ce.id DESC LIMIT 20
+            """;
+        return Panache.getSession()
+                .chain(s -> s.createNativeQuery(sql, ControleEntrega.class)
+                        .setParameter(1, unidadeId)
+                        .setParameter(2, "%" + query + "%")
+                        .setParameter(3, "%" + query + "%")
+                        .setParameter(4, "%" + query + "%")
+                        .getResultList())
+                .map(items -> items.stream().map(this::toResponse).toList())
+                .chain(this::enrichResponses);
+    }
+
+    // Lista todas as entregas de uma unidade
+    public Uni<List<ControleEntregaResponse>> controleEntregaComUnidade(Long unidadeId) {
+        return repository.entregasPorUnidade(unidadeId)
+                .map(items -> items.stream().map(this::toResponse).toList())
+                .chain(this::enrichResponses);
     }
 }

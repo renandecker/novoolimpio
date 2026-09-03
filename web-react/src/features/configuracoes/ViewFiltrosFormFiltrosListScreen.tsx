@@ -20,7 +20,7 @@ export default function ViewFiltrosFormFiltrosListScreen() {
                 <ModuleTabs
                     tabs={[
                         {key: 'geral', label: 'Geral', path: '/api/view/filtros/formFiltros'},
-                        {key: 'permissao', label: 'PermissÃ£o', empty: 'ConteÃºdo de PermissÃ£o.'},
+                        {key: 'permissao', label: 'Permissão', empty: 'Conteúdo de Permissão.'},
                         {
                             key: 'usuario',
                             label: 'Usuario',
@@ -54,11 +54,11 @@ export default function ViewFiltrosFormFiltrosListScreen() {
                                 columns: PERFIL_COLUMNS
                             }
                         },
-                        {key: 'permissao2', label: 'PermissÃ£o 2', empty: 'ConteÃºdo de PermissÃ£o 2.'},
-                        {key: 'tabela', label: 'Tabela', empty: 'ConteÃºdo de Tabela.'},
-                        {key: 'grafico', label: 'GrÃ¡fico', empty: 'ConteÃºdo de GrÃ¡fico.'},
-                        {key: 'mapa', label: 'Mapa', empty: 'ConteÃºdo de Mapa.'},
-                        {key: 'organograma', label: 'Organograma', empty: 'ConteÃºdo de Organograma.'},
+                        {key: 'permissao2', label: 'Permissão 2', empty: 'Conteúdo de Permissão 2.'},
+                        {key: 'tabela', label: 'Tabela', empty: 'Conteúdo de Tabela.'},
+                        {key: 'grafico', label: 'Gráfico', empty: 'Conteúdo de Gráfico.'},
+                        {key: 'mapa', label: 'Mapa', empty: 'Conteúdo de Mapa.'},
+                        {key: 'organograma', label: 'Organograma', empty: 'Conteúdo de Organograma.'},
                     ]}
                 />
             </main>

@@ -216,8 +216,12 @@ export default function CadastroUsuarioMobileScreen() {
         }
         setSalvando(true);
         try {
-            // TODO: integrate with API
-            Alert.alert('Sucesso', 'Registro salvo com sucesso.');
+            const {data} = await api.post<{id: number, login: string}>(
+                '/api/basico/usuario',
+                {login: form.login || undefined, senha: form.senha || undefined},
+            );
+            Alert.alert('Sucesso', `Usuário ${data?.login ?? 'cadastrado'} salvo com sucesso.`);
+            setForm((prev) => ({...prev, login: '', senha: ''}));
         } catch {
             Alert.alert('Erro', 'Erro ao salvar registro.');
         } finally {

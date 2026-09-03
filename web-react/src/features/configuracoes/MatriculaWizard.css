@@ -18,16 +18,41 @@
 }
 
 .field-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
     flex: 1;
     min-width: 200px;
 }
 
-.field-group label {
-    display: block;
-    margin-bottom: 6px;
+.field-group > label {
+    flex: 0 0 140px;
+    padding-top: 7px;
+    margin-bottom: 0;
     font-weight: 500;
     color: #333;
     font-size: 0.9rem;
+}
+
+.field-group > select,
+.field-group > input,
+.field-group > textarea,
+.field-group > div {
+    flex: 1;
+    min-width: 0;
+}
+
+@media (max-width: 900px) {
+    .field-group {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+
+    .field-group > label {
+        flex: none;
+        padding-top: 0;
+    }
 }
 
 .form-input {
@@ -347,8 +372,9 @@
 
 .material-quantities label {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
     color: #4b5563;
 }
 

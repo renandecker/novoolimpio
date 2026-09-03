@@ -9,7 +9,7 @@ export default function ViewPessoaPessoaDocumentoListScreen() {
                 <ModuleTabs
                     tabs={[
                         {key: 'aluno', label: 'Aluno', path: '/api/view/pessoa/pessoaDocumento'},
-                        {key: 'responsavel', label: 'ResponsÃ¡vel', empty: 'ConteÃºdo de ResponsÃ¡vel.'},
+                        {key: 'responsavel', label: 'Responsável', empty: 'Conteúdo de Responsável.'},
                     ]}
                 />
             </main>

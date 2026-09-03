@@ -39,6 +39,9 @@ public class OferecimentoComponenteCurricularRepository {
      * Lista IDs de oferecimentos para replicacao.
      */
     public Uni<List<Long>> listarIdsParaReplicacao(String sql) {
-        return Uni.createFrom().item(java.util.List.of());
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql)
+                        .getResultList())
+                .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 }

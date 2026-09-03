@@ -9,7 +9,7 @@ export default function ViewCategoriaCampoListCategoriaCampoListScreen() {
                 path="/api/view/categoriaCampo/listCategoriaCampo" 
                 columns={[
                     {key: 'id', label: 'ID'},
-                    {key: 'descricao', label: 'DescriÃ§Ã£o'}
+                    {key: 'descricao', label: 'Descrição'}
                 ]}
             />
         </main>

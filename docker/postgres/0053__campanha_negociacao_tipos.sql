@@ -7,7 +7,12 @@
 -- Tipo da campanha: define qual das 4 estrategias sera aplicada
 -- =================================================================================================
 ALTER TABLE public.fin_campanha_negociacao ADD COLUMN IF NOT EXISTS tipo_campanha VARCHAR(50);
-ALTER TABLE public.fin_campanha_negociacao ADD CONSTRAINT fin_campanha_tipo_chk CHECK (tipo_campanha IS NULL OR tipo_campanha IN ('PARCELA_ZERO_ATRITO', 'TROCA_POR_DESCONTO', 'SEGUNDA_CHANCE', 'QUITA_FACIL'));
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fin_campanha_tipo_chk') THEN
+    ALTER TABLE public.fin_campanha_negociacao ADD CONSTRAINT fin_campanha_tipo_chk CHECK (tipo_campanha IS NULL OR tipo_campanha IN ('PARCELA_ZERO_ATRITO', 'TROCA_POR_DESCONTO', 'SEGUNDA_CHANCE', 'QUITA_FACIL'));
+  END IF;
+END $$;
 
 COMMENT ON COLUMN public.fin_campanha_negociacao.tipo_campanha IS 'Tipo da campanha de negociacao: PARCELA_ZERO_ATRITO, TROCA_POR_DESCONTO, SEGUNDA_CHANCE, QUITA_FACIL';
 
@@ -34,7 +39,12 @@ COMMENT ON COLUMN public.fin_campanha_negociacao.beneficio_proximo_mes IS 'Se ve
 -- Tipo de oferta: descricao resumida do que o cliente recebera
 -- =================================================================================================
 ALTER TABLE public.fin_campanha_negociacao ADD COLUMN IF NOT EXISTS tipo_oferta VARCHAR(50);
-ALTER TABLE public.fin_campanha_negociacao ADD CONSTRAINT fin_campanha_tipo_oferta_chk CHECK (tipo_oferta IS NULL OR tipo_oferta IN ('isenacao_juros_multa', 'desconto_percentual', 'reagendamento_sem_multa', 'quittar_1_desbloqueie_beneficio'));
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fin_campanha_tipo_oferta_chk') THEN
+    ALTER TABLE public.fin_campanha_negociacao ADD CONSTRAINT fin_campanha_tipo_oferta_chk CHECK (tipo_oferta IS NULL OR tipo_oferta IN ('isenacao_juros_multa', 'desconto_percentual', 'reagendamento_sem_multa', 'quittar_1_desbloqueie_beneficio'));
+  END IF;
+END $$;
 
 COMMENT ON COLUMN public.fin_campanha_negociacao.tipo_oferta IS 'Tipo de oferta: isenacao_juros_multa, desconto_percentual, reagendamento_sem_multa, quittar_1_desbloqueie_beneficio';
 
@@ -50,7 +60,7 @@ CREATE INDEX IF NOT EXISTS idx_fin_campanha_objetivo ON public.fin_campanha_nego
 DO $DO$
 BEGIN
     -- Campaign 1: Parcela Zero Atrito (foco: atrasos ate 30 dias)
-    INSERT INTO public.fin_campanha_negociacao (id, descricao, tipo_campanha, objetivo, condicao_especial, tipo_oferta, ativo, data_fim, criado_em, atualizado_em)
+    INSERT INTO public.fin_campanha_negociacao (id, descricao, tipo_campanha, objetivo, condicao_especial, tipo_oferta, fl_ativo, data_fim)
     SELECT nextval('public.fin_campanha_negociacao_id_seq'),
            'Parcela Zero Atrito',
            'PARCELA_ZERO_ATRITO',
@@ -58,13 +68,11 @@ BEGIN
            'isencao_juros_multa_pix_mesmo_dia',
            'isenacao_juros_multa',
            true,
-           null,
-           CURRENT_TIMESTAMP,
-           CURRENT_TIMESTAMP
+           null
     WHERE NOT EXISTS (SELECT 1 FROM public.fin_campanha_negociacao WHERE lower(descricao) = lower('Parcela Zero Atrito'));
 
     -- Campaign 2: Troca por Desconto (foco: liquidacao rapida)
-    INSERT INTO public.fin_campanha_negociacao (id, descricao, tipo_campanha, objetivo, condicao_especial, tipo_oferta, ativo, data_fim, criado_em, atualizado_em)
+    INSERT INTO public.fin_campanha_negociacao (id, descricao, tipo_campanha, objetivo, condicao_especial, tipo_oferta, fl_ativo, data_fim)
     SELECT nextval('public.fin_campanha_negociacao_id_seq'),
            'Troca por Desconto',
            'TROCA_POR_DESCONTO',
@@ -72,13 +80,11 @@ BEGIN
            'desconto_percentual_fixo_liq_imediata',
            'desconto_percentual',
            true,
-           null,
-           CURRENT_TIMESTAMP,
-           CURRENT_TIMESTAMP
+           null
     WHERE NOT EXISTS (SELECT 1 FROM public.fin_campanha_negociacao WHERE lower(descricao) = lower('Troca por Desconto'));
 
     -- Campaign 3: Segunda Chance / Reagendamento (foco: previnir inadimplencia longa)
-    INSERT INTO public.fin_campanha_negociacao (id, descricao, tipo_campanha, objetivo, condicao_especial, tipo_oferta, ativo, data_fim, criado_em, atualizado_em)
+    INSERT INTO public.fin_campanha_negociacao (id, descricao, tipo_campanha, objetivo, condicao_especial, tipo_oferta, fl_ativo, data_fim)
     SELECT nextval('public.fin_campanha_negociacao_id_seq'),
            'Segunda Chance',
            'SEGUNDA_CHANCE',
@@ -86,24 +92,20 @@ BEGIN
            'pula_mes_atual_para_final_contrato',
            'reagendamento_sem_multa',
            true,
-           null,
-           CURRENT_TIMESTAMP,
-           CURRENT_TIMESTAMP
+           null
     WHERE NOT EXISTS (SELECT 1 FROM public.fin_campanha_negociacao WHERE lower(descricao) = lower('Segunda Chance'));
 
     -- Campaign 4: Quita Faci / Pague 1, Desbloqueie Beneficio (foco: engajamento e retencao)
-    INSERT INTO public.fin_campanha_negociacao (id, descricao, tipo_campanha, objetivo, condicao_especial, tipo_oferta, ativo, beneficio_proximo_mes, data_fim, criado_em, atualizado_em)
+    INSERT INTO public.fin_campanha_negociacao (id, descricao, tipo_campanha, objetivo, condicao_especial, tipo_oferta, fl_ativo, beneficio_proximo_mes, data_fim)
     SELECT nextval('public.fin_campanha_negociacao_id_seq'),
            'Quita Faci',
            'QUITA_FACIL',
            'engajamento_retencao',
            'quittar_parcela_desbloqueie_beneficio',
-           'quittar_1_desbloqueie_beneficio_proximo_mes',
+           'quittar_1_desbloqueie_beneficio',
            true,
            true,
-           null,
-           CURRENT_TIMESTAMP,
-           CURRENT_TIMESTAMP
+           null
     WHERE NOT EXISTS (SELECT 1 FROM public.fin_campanha_negociacao WHERE lower(descricao) = lower('Quita Faci'));
 END
 $DO$;

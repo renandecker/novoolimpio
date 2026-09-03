@@ -3,7 +3,7 @@ import {DataTable, type DataTableColumn} from '../../shared/components/DataTable
 
 const COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID da Escolaridade'},
-    {key: 'descricao', label: 'DescriÃ§Ã£o'},
+    {key: 'descricao', label: 'Descrição'},
     {key: 'ordem', label: 'Ordem'},
 ];
 

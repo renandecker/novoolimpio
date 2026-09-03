@@ -8,6 +8,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Path("/api/estoque/controle-estoque")
 @Produces(MediaType.APPLICATION_JSON)
@@ -53,20 +54,20 @@ public class ControleEstoqueController {
 
     @GET
     @Path("/auto-complete")
-    public Uni<List<Long>> autoComplete(@QueryParam("query") String query) {
-        return service.autoComplete(query);
+    public Uni<List<Long>> autoComplete(@QueryParam("query") String query, @QueryParam("unidadesId") Long unidadesId) {
+        return service.autoComplete(query, unidadesId);
     }
 
     @GET
     @Path("/carregar-mapa")
-    public Uni<Void> carregarMapa(@QueryParam("controleEntregaId") Long controleEntregaId) {
+    public Uni<Map<String, Object>> carregarMapa(@QueryParam("controleEntregaId") Long controleEntregaId) {
         return service.carregarMapa(controleEntregaId);
     }
 
     @GET
     @Path("/buscar-estoque")
-    public Uni<Void> buscarEstoque() {
-        return service.buscarEstoque();
+    public Uni<Map<String, Object>> buscarEstoque(@QueryParam("unidadeId") Long unidadeId) {
+        return service.buscarEstoque(unidadeId);
     }
 
     @GET

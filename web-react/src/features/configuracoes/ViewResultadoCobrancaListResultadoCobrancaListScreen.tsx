@@ -14,7 +14,7 @@ const renderTela = (item: ApiItem) => {
 };
 
 const COLUMNS: DataTableColumn[] = [
-    {key: 'descricao', label: 'DescriÃ§Ã£o'},
+    {key: 'descricao', label: 'Descrição'},
     {key: 'tela', label: 'Tela', render: renderTela},
     {key: 'dias_retorno', label: 'Dias Retorno'},
     {key: 'ordem', label: 'Ordem'},

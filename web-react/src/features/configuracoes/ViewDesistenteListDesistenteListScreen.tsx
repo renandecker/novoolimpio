@@ -18,7 +18,7 @@ const DESISTENTE_COLUMNS: DataTableColumn[] = [
     {key: 'data_criacao', label: 'Data Desistente', render: (item) => formatDate(asRecord(item).data_criacao)},
     {key: 'id_contrato', label: 'Contrato'},
     {key: 'pessoa_aluno_descricao', label: 'Nome Aluno'},
-    {key: 'pessoa_notificou_descricao', label: 'Nome FuncionÃ¡rio'},
+    {key: 'pessoa_notificou_descricao', label: 'Nome Funcionário'},
     {key: 'motivo_descricao', label: 'Motivo'},
 ];
 

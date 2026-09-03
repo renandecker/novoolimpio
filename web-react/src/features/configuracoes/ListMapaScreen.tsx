@@ -9,7 +9,7 @@ export default function ListMapaScreen() {
     const extraRowActions: DataTableRowAction[] = [
         {
             key: 'acessar',
-            title: 'Acessar RelatÃ³rio',
+            title: 'Acessar Relatório',
             icon: <i className="fa fa-external-link" />,
             permission: 'EXECUTE',
             onClick: (item) => {
@@ -21,7 +21,7 @@ export default function ListMapaScreen() {
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>RelatÃ³rios - Mapa</h1>
+                <h1>Relatórios - Mapa</h1>
                 <DataTable
                     path="/api/relatorios/mapa"
                     extraRowActions={extraRowActions}

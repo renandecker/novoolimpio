@@ -537,11 +537,36 @@
 
 .gp-aula-label {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 8px;
     font-size: 13px;
     font-weight: bold;
     color: #333;
+}
+
+.gp-aula-label-text {
+    flex: 0 0 100px;
+    padding-top: 6px;
+}
+
+.gp-aula-label input[type='text'],
+.gp-aula-label textarea {
+    flex: 1;
+    min-width: 0;
+}
+
+@media (max-width: 900px) {
+    .gp-aula-label {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+    }
+
+    .gp-aula-label-text {
+        flex: none;
+        padding-top: 0;
+    }
 }
 
 .gp-aula-label input[type='text'] {

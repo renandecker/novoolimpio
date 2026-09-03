@@ -20,7 +20,6 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
     const idParam = route.params?.id;
 
     const [initialValues, setInitialValues] = useState<Record<string, unknown>>({});
-    const [documentos, setDocumentos] = useState<any[]>([]);
 
     useEffect(()=>{
         if(!idParam) return;
@@ -62,17 +61,6 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                     cep: cep ? cep.replace(/\D/g,'').replace(/(\d{5})(\d{3})/,'$1-$2') : '', cidade, bairro, logradouro, numero, complemento,
                     observacao: str(pes?.observacao),
                 });
-                if(pes?.id){
-                    try{
-                        const ids=(await api.get<number[]>(`/api/basico/pessoa-documento/buscar-pessoa-documento`,{params:{pessoaId: pes.id}})).data;
-                        if(ids?.length){
-                            const docs=await Promise.all(ids.map(id=> api.get<any>(`/api/basico/pessoa-documento/${id}`).then(r=>r.data).catch(()=>null)));
-                            if(ativo) setDocumentos(docs.filter(Boolean));
-                            // preenche campos de documento para compatibilidade
-                            if(docs[0]) setInitialValues(prev=>({...prev, docNome: docs[0].nome, docNumero: docs[0].documento}));
-                        }
-                    }catch{}
-                }
             }catch(e){ console.error(e); }
         })();
         return ()=>{ ativo=false;};
@@ -140,14 +128,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                 {name: 'complemento', label: 'Complemento', type: 'textarea'},
             ],
         },
-        {
-            key: 'documentos',
-            label: 'Documentos',
-            fields: [
-                {name: 'docNome', label: 'Nome Documento'},
-                {name: 'docNumero', label: 'Documento'},
-            ],
-        },
+
         {
             key: 'outros',
             label: 'Outros',
@@ -178,8 +159,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                             facebook: values.facebook, twitter: values.twitter, googlePlus: values.googlePlus,
                         });
                     }
-                    console.log('Salvar pessoa física:', values, 'documentos:', documentos);
-                    // documentos são salvos via /api/basico/pessoa-documento se necessário
+                    console.log('Salvar pessoa física:', values);
                 }catch(e){ console.error(e); }
             }}
             onCancel={()=> navigation.goBack()}

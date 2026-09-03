@@ -16,6 +16,9 @@ public class CobrancaController {
     @Inject
     CobrancaService service;
 
+    @Inject
+    br.com.sol7.olimpio.financeiro.shared.kafka.FinanceiroKafkaProducer kafkaProducer;
+
     @GET
     public Uni<List<CobrancaResponse>> list() {
         return service.list();
@@ -80,8 +83,9 @@ public class CobrancaController {
 
     @POST
     @Path("/atualizar-cobrancas-automatico")
-    public Uni<Void> atualizarCobrancasAutomatico() {
-        return service.atualizarCobrancasAutomatico();
+    public Uni<Response> atualizarCobrancasAutomatico() {
+        return kafkaProducer.enviarTriggerManutencao("atualizarCobrancasAutomatico")
+                .map(v -> Response.accepted().entity(java.util.Map.of("status", "trigger enviado", "action", "atualizarCobrancasAutomatico")).build());
     }
 
 }

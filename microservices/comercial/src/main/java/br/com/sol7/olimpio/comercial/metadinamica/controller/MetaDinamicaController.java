@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Path("/api/comercial/meta-dinamica")
@@ -52,8 +53,8 @@ public class MetaDinamicaController {
 
     @GET
     @Path("/buscar-movimentacoes")
-    public Uni<Void> buscarMovimentacoes(@QueryParam("event") String event) {
-        return service.buscarMovimentacoes(event);
+    public Uni<MetaDinamicaService.MetaDinamicaDetalhesResponse> buscarMovimentacoes(@QueryParam("metaDinamicaId") Long metaDinamicaId) {
+        return service.buscarMovimentacoes(metaDinamicaId);
     }
 
 
@@ -80,50 +81,50 @@ public class MetaDinamicaController {
 
     @POST
     @Path("/atualizar-valor-semana")
-    public Uni<Void> atualizarValorSemana(@QueryParam("metaDinamicaSemanaWapper") String metaDinamicaSemanaWapper, @QueryParam("metaDiaDinamicaWapper") String metaDiaDinamicaWapper) {
-        return service.atualizarValorSemana(metaDinamicaSemanaWapper, metaDiaDinamicaWapper);
+    public Uni<Void> atualizarValorSemana(@QueryParam("metaSemanaDinamicaId") Long metaSemanaDinamicaId, @QueryParam("metaDiaDinamicaId") Long metaDiaDinamicaId, @QueryParam("valorAjuste") BigDecimal valorAjuste) {
+        return service.atualizarValorSemana(metaSemanaDinamicaId, metaDiaDinamicaId, valorAjuste);
     }
 
 
     @POST
     @Path("/atualizar-valor-semana-inverso")
-    public Uni<Void> atualizarValorSemanaInverso(@QueryParam("metaDinamicaSemanaWapper") String metaDinamicaSemanaWapper, @QueryParam("metaDiaDinamicaWapper") String metaDiaDinamicaWapper) {
-        return service.atualizarValorSemanaInverso(metaDinamicaSemanaWapper, metaDiaDinamicaWapper);
+    public Uni<Void> atualizarValorSemanaInverso(@QueryParam("metaSemanaDinamicaId") Long metaSemanaDinamicaId, @QueryParam("metaDiaDinamicaId") Long metaDiaDinamicaId, @QueryParam("valorAjuste") BigDecimal valorAjuste) {
+        return service.atualizarValorSemanaInverso(metaSemanaDinamicaId, metaDiaDinamicaId, valorAjuste);
     }
 
 
     @POST
     @Path("/atualizar-valor-dia")
-    public Uni<Void> atualizarValorDia(@QueryParam("metaDinamicaSemanaWapper") String metaDinamicaSemanaWapper, @QueryParam("metaDiaDinamicaWapper") String metaDiaDinamicaWapper) {
-        return service.atualizarValorDia(metaDinamicaSemanaWapper, metaDiaDinamicaWapper);
+    public Uni<Void> atualizarValorDia(@QueryParam("metaSemanaDinamicaId") Long metaSemanaDinamicaId, @QueryParam("metaDiaDinamicaId") Long metaDiaDinamicaId, @QueryParam("valorAjuste") BigDecimal valorAjuste) {
+        return service.atualizarValorDia(metaSemanaDinamicaId, metaDiaDinamicaId, valorAjuste);
     }
 
 
     @POST
     @Path("/atualizar-valor-dia-inverso")
-    public Uni<Void> atualizarValorDiaInverso(@QueryParam("metaDinamicaSemanaWapper") String metaDinamicaSemanaWapper, @QueryParam("metaDiaDinamicaWapper") String metaDiaDinamicaWapper) {
-        return service.atualizarValorDiaInverso(metaDinamicaSemanaWapper, metaDiaDinamicaWapper);
+    public Uni<Void> atualizarValorDiaInverso(@QueryParam("metaSemanaDinamicaId") Long metaSemanaDinamicaId, @QueryParam("metaDiaDinamicaId") Long metaDiaDinamicaId, @QueryParam("valorAjuste") BigDecimal valorAjuste) {
+        return service.atualizarValorDiaInverso(metaSemanaDinamicaId, metaDiaDinamicaId, valorAjuste);
     }
 
 
     @POST
     @Path("/atualizar-valor-outro-dia")
-    public Uni<Void> atualizarValorOutroDia(@QueryParam("metaDinamicaSemanaWapper") String metaDinamicaSemanaWapper, @QueryParam("metaDiaDinamicaWapper") String metaDiaDinamicaWapper) {
-        return service.atualizarValorOutroDia(metaDinamicaSemanaWapper, metaDiaDinamicaWapper);
+    public Uni<Void> atualizarValorOutroDia(@QueryParam("metaSemanaDinamicaId") Long metaSemanaDinamicaId, @QueryParam("metaDiaDinamicaId") Long metaDiaDinamicaId, @QueryParam("valorAjuste") BigDecimal valorAjuste) {
+        return service.atualizarValorOutroDia(metaSemanaDinamicaId, metaDiaDinamicaId, valorAjuste);
     }
 
 
     @POST
     @Path("/atualizar-valor-outra-semana")
-    public Uni<Void> atualizarValorOutraSemana(@QueryParam("metaDinamicaSemanaWapper") String metaDinamicaSemanaWapper, @QueryParam("metaDiaDinamicaWapper") String metaDiaDinamicaWapper) {
-        return service.atualizarValorOutraSemana(metaDinamicaSemanaWapper, metaDiaDinamicaWapper);
+    public Uni<Void> atualizarValorOutraSemana(@QueryParam("metaSemanaDinamicaId") Long metaSemanaDinamicaId, @QueryParam("metaDiaDinamicaId") Long metaDiaDinamicaId, @QueryParam("valorAjuste") BigDecimal valorAjuste) {
+        return service.atualizarValorOutraSemana(metaSemanaDinamicaId, metaDiaDinamicaId, valorAjuste);
     }
 
 
     @POST
     @Path("/atualizar-valores-das-semanas")
-    public Uni<Void> atualizarValoresDasSemanas() {
-        return service.atualizarValoresDasSemanas();
+    public Uni<Void> atualizarValoresDasSemanas(@QueryParam("metaDinamicaId") Long metaDinamicaId) {
+        return service.atualizarValoresDasSemanas(metaDinamicaId);
     }
 
 

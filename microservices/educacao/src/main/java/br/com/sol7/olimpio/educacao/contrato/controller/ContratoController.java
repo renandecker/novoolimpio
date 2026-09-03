@@ -53,8 +53,8 @@ public class ContratoController {
 
     @GET
     @Path("/auto-complete-contrato")
-    public Uni<List<Long>> autoCompleteContrato(@QueryParam("query") String query) {
-        return service.autoCompleteContrato(query);
+    public Uni<List<Long>> autoCompleteContrato(@QueryParam("query") String query, @QueryParam("pessoaId") Long pessoaId) {
+        return service.autoCompleteContrato(query, pessoaId);
     }
 
 
@@ -109,8 +109,8 @@ public class ContratoController {
 
     @GET
     @Path("/auto-complete-aluno-pagamento-pendente")
-    public Uni<List<Long>> autoCompleteAlunoPagamentoPendente(@QueryParam("query") String query) {
-        return service.autoCompleteAlunoPagamentoPendente(query);
+    public Uni<List<Long>> autoCompleteAlunoPagamentoPendente(@QueryParam("query") String query, @QueryParam("unidadesIds") List<Long> unidadesIds) {
+        return service.autoCompleteAlunoPagamentoPendente(query, unidadesIds);
     }
 
 }

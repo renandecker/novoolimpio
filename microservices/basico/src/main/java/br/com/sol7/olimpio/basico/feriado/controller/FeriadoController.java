@@ -12,6 +12,7 @@ import java.util.Date;
 
 import br.com.sol7.olimpio.basico.feriado.dto.FeriadoRequest;
 import br.com.sol7.olimpio.basico.feriado.dto.FeriadoResponse;
+import br.com.sol7.olimpio.basico.feriado.dto.TrocaFeriadosRequest;
 import br.com.sol7.olimpio.basico.feriado.service.FeriadoService;
 
 @Path("/api/basico/feriado")
@@ -73,6 +74,13 @@ public class FeriadoController {
     @Path("/atualizar-oferecimento-ajustados")
     public Uni<String> atualizarOferecimentoAjustados() {
         return service.atualizarOferecimentoAjustados();
+    }
+
+
+    @POST
+    @Path("/trocar-feriados")
+    public Uni<Void> trocarFeriados(TrocaFeriadosRequest r) {
+        return service.trocarFeriados(r == null ? null : r.destinoId(), r == null ? null : r.origemIds());
     }
 
 
