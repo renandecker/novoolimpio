@@ -121,6 +121,42 @@
     border-color: #f0ad4e;
 }
 
+.gp-btn-acoes.btnpurple {
+    border-color: #9c27b0;
+    color: #9c27b0;
+}
+.gp-btn-acoes.btnpurple:hover:not(:disabled) {
+    background-color: #f3e5f5;
+    border-color: #9c27b0;
+}
+
+.gp-btn-acoes.btngrey {
+    border-color: #9e9e9e;
+    color: #9e9e9e;
+}
+.gp-btn-acoes.btngrey:hover:not(:disabled) {
+    background-color: #f5f5f5;
+    border-color: #9e9e9e;
+}
+
+.gp-btn-acoes.btnorange {
+    border-color: #ff9800;
+    color: #ff9800;
+}
+.gp-btn-acoes.btnorange:hover:not(:disabled) {
+    background-color: #fff3e0;
+    border-color: #ff9800;
+}
+
+.gp-btn-acoes.btnred {
+    border-color: #f44336;
+    color: #f44336;
+}
+.gp-btn-acoes.btnred:hover:not(:disabled) {
+    background-color: #ffebee;
+    border-color: #f44336;
+}
+
 .gp-btn-salvar {
     background-image: linear-gradient(180deg, #337ab7, #265a88);
     padding: 6px 18px;

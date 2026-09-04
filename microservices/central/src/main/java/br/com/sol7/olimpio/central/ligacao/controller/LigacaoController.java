@@ -6,6 +6,7 @@ import br.com.sol7.olimpio.central.ordemligacao.OrdemLigacaoService;
 import br.com.sol7.olimpio.central.resultadocontato.ResultadoContatoResponse;
 import br.com.sol7.olimpio.central.resultadocontato.ResultadoContatoService;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.SearchFilterRequest;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -210,5 +211,12 @@ public class LigacaoController {
     @Path("/resultado-contato/{tipoTela}")
     public Uni<List<ResultadoContatoResponse>> listarResultadosPorTela(@PathParam("tipoTela") int tipoTela) {
         return resultadoContatoService.listarPorTela(tipoTela);
+    }
+
+    @POST
+    @Path("/search")
+    public Uni<PagedResponse<LigacaoResponse>> search(SearchFilterRequest request,
+            @QueryParam("page") Integer page, @QueryParam("size") Integer size) {
+        return service.search(request, page == null ? 0 : page, size == null ? 10 : size);
     }
 }

@@ -1,4 +1,13 @@
 ﻿import {useState, useCallback} from 'react';
+
+import {
+  Search,
+  BarChart,
+  User,
+  Trash2,
+  AlertTriangle,
+} from 'lucide-react';
+
 import {PermissionGate} from '../../shared/services/permissions';
 import {DataTable, type DataTableColumn, type DataTableRowAction} from '../../shared/components/DataTable';
 import {api} from '../../shared/services/api';
@@ -158,28 +167,28 @@ export default function ViewOperacionalListOperacionalListScreen() {
             key: 'verFiltros',
             title: 'Ver Filtros',
             className: 'btnpurple',
-            icon: 'ðŸ”',
+            icon: <Search className="icon" />,
             onClick: openVerFiltros,
         },
         {
             key: 'verLigacoes',
             title: 'Resultados Prospectos',
             className: 'btnblue',
-            icon: 'ðŸ“Š',
+            icon: <BarChart className="icon" />,
             onClick: openVerLigacoes,
         },
         {
             key: 'verProspectos',
             title: 'Prospectos Filtrados',
             className: 'btnorange',
-            icon: 'ðŸ‘¥',
+            icon: <User className="icon" />,
             onClick: openDialogProspectos,
         },
         {
             key: 'removerProspectos',
             title: 'Prospectos sem Ligação',
             className: 'btnblack',
-            icon: 'ðŸ—‘ï¸',
+            icon: <Trash2 className="icon" />,
             onClick: openConfirmRemover,
         },
     ];
@@ -334,7 +343,7 @@ export default function ViewOperacionalListOperacionalListScreen() {
                 {/* Modal Confirm Remover Prospectos */}
                 <Modal open={confirmRemoverOpen} onClose={() => setConfirmRemoverOpen(false)} title="Atenção!" size="small">
                     <div style={{display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px'}}>
-                        <div style={{fontSize: '32px', color: '#C90000'}}>âš ï¸</div>
+                        <AlertTriangle className="icon" style={{fontSize: 32, color: '#C90000'}} />
                         <div>
                             <strong>Confirma a remoção dos prospectos do pacote?</strong>
                             <p style={{margin: '8px 0 0', color: '#666', fontSize: '13px'}}>

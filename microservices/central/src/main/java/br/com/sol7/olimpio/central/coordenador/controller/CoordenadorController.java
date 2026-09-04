@@ -1,6 +1,7 @@
 package br.com.sol7.olimpio.central.coordenador;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.SearchFilterRequest;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -160,5 +161,12 @@ public class CoordenadorController {
     @Path("/telefonos-prospecto")
     public Uni<List<String>> telefonesProspecto(@QueryParam("prospectoId") Long prospectoId) {
         return service.telefonesProspecto(prospectoId);
+    }
+
+    @POST
+    @Path("/search")
+    public Uni<PagedResponse<CoordenadorResponse>> search(SearchFilterRequest request,
+            @QueryParam("page") Integer page, @QueryParam("size") Integer size) {
+        return service.search(request, page == null ? 0 : page, size == null ? 10 : size);
     }
 }

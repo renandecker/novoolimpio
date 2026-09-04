@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useModulePaged, PAGE_SIZES } from '../useModulePaged';
-import type { ApiItem } from '../types';
+import type { ApiItem, SearchFilterRequest } from '../types';
+import { ModuleFilter } from '../../shared/components/ModuleFilter';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -10,7 +11,11 @@ export default function ViewTurnoTrabalhoListTurnoTrabalhoListScreen() {
   const navigation = useNavigation<any>();
   const [page, setPage] = useState(0);
   const [size] = useState(PAGE_SIZES[0]);
-  const q = useModulePaged('/api/view/turnoTrabalho/listTurnoTrabalho', page, size);
+  const [filterParams, setFilterParams] = useState<SearchFilterRequest>({filters: {}});
+
+  const COLUMN_FIELDS = ['descricao', 'inicio', 'fim'] as const;
+
+  const q = useModulePaged('/api/view/turnoTrabalho/listTurnoTrabalho', page, size, undefined, filterParams);
   const items = q.data?.content ?? [];
   const totalPages = Math.max(1, q.data?.totalPages ?? 1);
 
@@ -73,9 +78,15 @@ export default function ViewTurnoTrabalhoListTurnoTrabalhoListScreen() {
     <View style={styles.page}>
       <View style={styles.header}>
         <Text style={styles.title}>Turno Trabalho</Text>
-        <Pressable style={[styles.btn, styles.btnPrimary]} onPress={() => navigation.navigate('view/turnoTrabalho/formTurnoTrabalho')}>
-          <Text style={styles.btnText}>Novo</Text>
-        </Pressable>
+        <ModuleFilter columns={[...COLUMN_FIELDS]} value={filterParams} onChange={setFilterParams} />
+        <View style={styles.headerActions}>
+          <Pressable style={[styles.btn, styles.btnYellow]} onPress={() => navigation.navigate('view/turnoUsuario/listTurnoUsuario')}>
+            <Text style={styles.btnText}>Voltar Turno Usuário</Text>
+          </Pressable>
+          <Pressable style={[styles.btn, styles.btnPrimary]} onPress={() => navigation.navigate('view/turnoTrabalho/formTurnoTrabalho')}>
+            <Text style={styles.btnText}>Novo</Text>
+          </Pressable>
+        </View>
       </View>
       {items.length === 0 ? (
         <View style={styles.center}>
@@ -114,9 +125,11 @@ const styles = StyleSheet.create({
   error: { color: '#8A1F1F', marginBottom: 12, fontWeight: '700' },
   empty: { color: '#888', fontStyle: 'italic' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 12, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e5e7eb' },
+  headerActions: { flexDirection: 'row', gap: 8 },
   title: { fontSize: 18, fontWeight: '800', color: '#111' },
   btn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 6, alignItems: 'center' },
   btnPrimary: { backgroundColor: '#2a5a88' },
+  btnYellow: { backgroundColor: '#f9c74f' },
   btnGreen: { backgroundColor: '#2e7d32' },
   btnRed: { backgroundColor: '#a61b29' },
   btnText: { color: '#fff', fontWeight: '700', fontSize: 13 },

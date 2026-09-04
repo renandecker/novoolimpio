@@ -1,6 +1,8 @@
 package br.com.sol7.olimpio.central.meta;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.SearchFilterRequest;
+import br.com.sol7.olimpio.shared.GenericSearchService;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
@@ -22,6 +24,9 @@ public class MetaService {
     @Inject
     MetaRepository repository;
 
+    @Inject
+    GenericSearchService genericSearch;
+
     public Uni<List<MetaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
     }
@@ -32,6 +37,14 @@ public class MetaService {
         return repository.findAll(io.quarkus.panache.common.Sort.by("id").descending()).page(io.quarkus.panache.common.Page.of(p, s)).list()
                 .onItem().transformToUni(items -> repository.count()
                         .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
+    }
+
+    public Uni<PagedResponse<MetaResponse>> search(SearchFilterRequest request, int page, int size) {
+        int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
+        return genericSearch.search(Meta.class, request, page, s)
+                .map(paged -> new PagedResponse<>(
+                        paged.content().stream().map(this::toResponse).toList(),
+                        paged.totalElements(), paged.page(), paged.size()));
     }
 
     public Uni<PagedResponse<Map<String, Object>>> pagedEnriched(int page, int size, String operadorLogin, Long operacionalId, String dataStr) {

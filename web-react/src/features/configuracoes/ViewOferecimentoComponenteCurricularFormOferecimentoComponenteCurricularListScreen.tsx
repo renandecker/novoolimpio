@@ -1,4 +1,6 @@
 ﻿import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+
+import {X} from 'lucide-react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {PermissionGate} from '../../shared/services/permissions';
 import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
@@ -608,7 +610,7 @@ const [carregando, setCarregando] = useState(true);
                                                 {data.ocorrencias.length > 0 && (
                                                     <table className="data-table" style={{width: '100%', marginTop: 12}}>
                                                         <thead><tr><th>Data</th><th>Dia Semana</th><th>Turno</th><th>Tempo Aula</th><th>Sala</th><th>Ação</th></tr></thead>
-                                                        <tbody>{[...data.ocorrencias].sort((a, b) => a.data.localeCompare(b.data)).map((occ) => {const da = diaAulas.find((x) => x.id === occ.diaAulaId); const sala = salas.find((s) => s.id === occ.salaId); return (<tr key={occ.key}><td>{occ.data}</td><td>{nomeDiaSemana(da?.diaSemanaId)}</td><td>{da?.turnoEducacao_descricao ?? '-'}</td><td>{da?.tempoAula_descricao ?? '-'}</td><td>{sala?.descricao ?? sala?.sucinto ?? occ.salaId}</td><td><button type="button" className="btn-action btnred" onClick={() => removerOcorrencia(occ)}>âœ•</button></td></tr>); })}</tbody>
+                                                        <tbody>{[...data.ocorrencias].sort((a, b) => a.data.localeCompare(b.data)).map((occ) => {const da = diaAulas.find((x) => x.id === occ.diaAulaId); const sala = salas.find((s) => s.id === occ.salaId); return (<tr key={occ.key}><td>{occ.data}</td><td>{nomeDiaSemana(da?.diaSemanaId)}</td><td>{da?.turnoEducacao_descricao ?? '-'}</td><td>{da?.tempoAula_descricao ?? '-'}</td><td>{sala?.descricao ?? sala?.sucinto ?? occ.salaId}</td><td><button type="button" className="btn-action btnred" onClick={() => removerOcorrencia(occ)}><X className="icon" /></button></td></tr>); })}</tbody>
                                                     </table>
                                                 )}
                                                 {data.invalidas.length > 0 && (

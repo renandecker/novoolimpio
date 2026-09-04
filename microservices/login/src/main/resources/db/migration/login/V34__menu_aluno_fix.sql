@@ -28,7 +28,7 @@ CREATE TEMP TABLE tmp_menu_aluno_dupes AS
 SELECT m.id
 FROM public.bas_modulo m
 WHERE lower(m.rotulo) NOT IN ('aluno', 'acesso do aluno')
-  AND m.outcome IN ('/aluno/dashboard', '/aluno/boletim', '/aluno/frequencia',
+  AND m.outcome IN ('/aluno/portalAluno', '/aluno/boletim', '/aluno/frequencia',
                     '/aluno/financeiro', '/aluno/aulas', '/aluno/avaliacoes')
   AND EXISTS (
       SELECT 1 FROM public.bas_modulo m2
@@ -48,15 +48,15 @@ DROP TABLE tmp_menu_aluno_dupes;
 -- 4) Telas do portal ficam dentro de "Acesso do Aluno" (somente folhas).
 UPDATE public.bas_modulo tela
 SET id_modulo = (SELECT g.id FROM public.bas_modulo g WHERE lower(g.rotulo) = 'acesso do aluno' LIMIT 1)
-WHERE tela.outcome IN ('/aluno/dashboard', '/aluno/boletim', '/aluno/frequencia',
+WHERE tela.outcome IN ('/aluno/portalAluno', '/aluno/boletim', '/aluno/frequencia',
                        '/aluno/financeiro', '/aluno/aulas', '/aluno/avaliacoes')
   AND lower(tela.rotulo) NOT IN ('aluno', 'acesso do aluno')
   AND (tela.id_modulo IS NULL
        OR tela.id_modulo <> (SELECT g.id FROM public.bas_modulo g WHERE lower(g.rotulo) = 'acesso do aluno' LIMIT 1));
 
--- 5) Raiz "Aluno" aponta para o dashboard do aluno.
+-- 5) Raiz "Aluno" aponta para o portal do aluno.
 UPDATE public.bas_modulo raiz
-SET outcome = '/aluno/dashboard'
+SET outcome = '/aluno/portalAluno'
 WHERE lower(raiz.rotulo) = 'aluno'
   AND raiz.id_modulo IS NULL
   AND (raiz.outcome IS NULL OR raiz.outcome = '' OR raiz.outcome = '/default');
@@ -83,7 +83,7 @@ INSERT INTO public.bas_perfil_modulo (id_perfil, id_modulo, novo, editar, remove
 SELECT p.id, m.id, FALSE, FALSE, FALSE, FALSE, nextval('public.bas_perfil_modulo_id_seq')
 FROM public.bas_perfil p
 JOIN public.bas_modulo m
-  ON m.outcome IN ('/aluno/dashboard', '/aluno/boletim', '/aluno/frequencia', '/aluno/financeiro',
+  ON m.outcome IN ('/aluno/portalAluno', '/aluno/boletim', '/aluno/frequencia', '/aluno/financeiro',
                    '/aluno/aulas', '/aluno/avaliacoes')
   OR lower(m.rotulo) IN ('acesso do aluno', 'aluno')
 WHERE lower(p.descricao) = 'aluno'
@@ -97,7 +97,7 @@ INSERT INTO public.bas_perfil_modulo (id_perfil, id_modulo, novo, editar, remove
 SELECT p.id, m.id, TRUE, TRUE, TRUE, TRUE, nextval('public.bas_perfil_modulo_id_seq')
 FROM public.bas_perfil p
 JOIN public.bas_modulo m
-  ON m.outcome IN ('/aluno/dashboard', '/aluno/boletim', '/aluno/frequencia', '/aluno/financeiro',
+  ON m.outcome IN ('/aluno/portalAluno', '/aluno/boletim', '/aluno/frequencia', '/aluno/financeiro',
                    '/aluno/aulas', '/aluno/avaliacoes')
   OR lower(m.rotulo) IN ('acesso do aluno', 'aluno')
 WHERE upper(trim(p.hierarquia)) = 'ADMIN'

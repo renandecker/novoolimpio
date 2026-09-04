@@ -1,6 +1,6 @@
 package br.com.sol7.olimpio.educacao.valorcurso;
 
-import br.com.sol7.olimpio.educacao.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;

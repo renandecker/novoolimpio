@@ -1,4 +1,6 @@
 ﻿import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+
+import {X} from 'lucide-react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {PermissionGate} from '../../shared/services/permissions';
 import {BooleanField} from '../../shared/components/BooleanField';
@@ -783,7 +785,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                         <td>{r.mediaMinima ?? '-'}</td>
                                         <td>
                                             <button type="button" className="btn-action btnred" title="Remover"
-                                                    onClick={() => removerRequisito(r.key)}>âœ•
+                                                    onClick={() => removerRequisito(r.key)}><X className="icon" />
                                             </button>
                                         </td>
                                     </tr>
@@ -876,7 +878,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                     <td>{m.obrigatorio ? 'Sim' : 'Não'}</td>
                                     <td>
                                         <button type="button" className="btn-action btnred" title="Remover"
-                                                onClick={() => removerMaterial(m.key)}>âœ•
+                                                onClick={() => removerMaterial(m.key)}><X className="icon" />
                                         </button>
                                     </td>
                                 </tr>

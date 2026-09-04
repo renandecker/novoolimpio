@@ -3,7 +3,7 @@
 
 -- 1) Modulo raiz "Acesso do Aluno" (grupo do menu).
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
-SELECT 251, NULL, 'Acesso do Aluno', 'Portal de acesso do aluno', '🎓', '/aluno/dashboard', 'Tela de acesso do aluno: dashboard, boletim e frequência.', 5
+SELECT 251, NULL, 'Acesso do Aluno', 'Portal de acesso do aluno', '🎓', '/aluno/portalAluno', 'Tela de acesso do aluno: portal, boletim e frequência.', 5
 WHERE NOT EXISTS (
     SELECT 1 FROM public.bas_modulo
     WHERE id = 251 OR lower(rotulo) = 'acesso do aluno'
@@ -11,7 +11,7 @@ WHERE NOT EXISTS (
 
 -- 2) Telas do acesso do aluno, vinculadas ao modulo raiz.
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
-SELECT 252, (SELECT id FROM public.bas_modulo WHERE lower(rotulo) = 'acesso do aluno' LIMIT 1), 'Dashboard do Aluno', 'Visão geral do aluno', '📊', '/aluno/dashboard', NULL, 1
+SELECT 252, (SELECT id FROM public.bas_modulo WHERE lower(rotulo) = 'acesso do aluno' LIMIT 1), 'Portal do aluno', 'Visão geral do aluno', '📊', '/aluno/portalAluno', NULL, 1
 WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE id = 252);
 
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
@@ -36,7 +36,7 @@ SELECT p.id, m.id, FALSE, FALSE, FALSE, FALSE, nextval('public.bas_perfil_modulo
 FROM public.bas_perfil p
 CROSS JOIN public.bas_modulo m
 WHERE lower(p.descricao) = 'aluno'
-  AND m.outcome IN ('/aluno/dashboard', '/aluno/boletim', '/aluno/frequencia')
+  AND m.outcome IN ('/aluno/portalAluno', '/aluno/boletim', '/aluno/frequencia')
   AND NOT EXISTS (
       SELECT 1 FROM public.bas_perfil_modulo pm
       WHERE pm.id_perfil = p.id AND pm.id_modulo = m.id
@@ -48,7 +48,7 @@ SELECT p.id, m.id, TRUE, TRUE, TRUE, TRUE, nextval('public.bas_perfil_modulo_id_
 FROM public.bas_perfil p
 CROSS JOIN public.bas_modulo m
 WHERE lower(p.descricao) = 'administrador'
-  AND m.outcome IN ('/aluno/dashboard', '/aluno/boletim', '/aluno/frequencia')
+  AND m.outcome IN ('/aluno/portalAluno', '/aluno/boletim', '/aluno/frequencia')
   AND NOT EXISTS (
       SELECT 1 FROM public.bas_perfil_modulo pm
       WHERE pm.id_perfil = p.id AND pm.id_modulo = m.id

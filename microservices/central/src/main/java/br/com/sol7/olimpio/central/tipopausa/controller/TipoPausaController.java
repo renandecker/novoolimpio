@@ -1,6 +1,7 @@
 package br.com.sol7.olimpio.central.tipopausa;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.SearchFilterRequest;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -48,6 +49,13 @@ public class TipoPausaController {
     @Path("/{id}")
     public Uni<Void> delete(@PathParam("id") Long id) {
         return service.delete(id);
+    }
+
+    @POST
+    @Path("/search")
+    public Uni<PagedResponse<TipoPausaResponse>> search(SearchFilterRequest request,
+            @QueryParam("page") Integer page, @QueryParam("size") Integer size) {
+        return service.search(request, page == null ? 0 : page, size == null ? 10 : size);
     }
 
     @GET

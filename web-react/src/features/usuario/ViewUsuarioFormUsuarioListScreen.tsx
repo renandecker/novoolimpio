@@ -109,7 +109,7 @@ export default function ViewUsuarioFormUsuarioListScreen(){
     const [escolaridadeOptions,setEscolaridadeOptions]=useState<Option[]>(ESCOLARIDADES);
     useEffect(()=>{(async()=>{
         try{
-            const r = await api.get<any[]>('/api/basico/genero/list');
+            const r = await api.get<any[]>('/api/basico/genero');
             const arr = Array.isArray(r.data)?r.data:(r.data as any)?.content??[];
             if(arr.length) setGeneroOptions(arr.map((x:any)=>({value:String(x.id), label:x.descricao??x.nome??String(x.id)})));
         }catch{/* mantém GENEROS */ }
@@ -213,13 +213,13 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                 try{
                     const apply = (arr:any[], all:ApiItem[]) => { const ids=new Set(arr.map((x:any)=>String(x.id))); return all.filter(a=>ids.has(String((a as any).id))); };
                     let perfisIds:number[] = (usu as any).perfis ? ((usu as any).perfis as any[]).map((p:any)=>p.id) : [];
-                    if(!perfisIds?.length){ try{ perfisIds=(await api.get<number[]>(`/api/basico/usuario/${idParam}/perfis`)).data??[]; }catch{} }
+                    if(!perfisIds?.length){ try{ perfisIds=(await api.get<number[]>(`/api/basico/usuario/buscar-usuario-seu-perfil?entityId=${idParam}`)).data??[]; }catch{} }
                     setPerfis(apply(perfisIds.map(id=>({id})), allPerfis));
                     let agendasIds:number[] = (usu as any).agendas ? ((usu as any).agendas as any[]).map((a:any)=>a.id) : [];
-                    if(!agendasIds?.length){ try{ agendasIds=(await api.get<number[]>(`/api/basico/usuario/${idParam}/agendas`)).data??[]; }catch{} }
+                    if(!agendasIds?.length){ try{ agendasIds=(await api.get<number[]>(`/api/basico/usuario/buscar-agendas-disponiveis?usuarioId=${idParam}`)).data??[]; }catch{} }
                     setAgendas(apply(agendasIds.map(id=>({id})), allAgendas));
                     let unidadesIds:number[] = (usu as any).unidades ? ((usu as any).unidades as any[]).map((u:any)=>u.id) : [];
-                    if(!unidadesIds?.length){ try{ unidadesIds=(await api.get<number[]>(`/api/basico/usuario/${idParam}/unidades`)).data??[]; }catch{} }
+                    if(!unidadesIds?.length){ try{ unidadesIds=(await api.get<number[]>(`/api/basico/usuario/buscar-unidades-disponiveis?usuarioId=${idParam}`)).data??[]; }catch{} }
                     setUnidadesAcesso(apply(unidadesIds.map(id=>({id})), allUnidades));
                     if((usu as any).unidadeDefaultId) setUnidadeDefaultId(String((usu as any).unidadeDefaultId));
                 }catch{/* ignore */}
@@ -255,9 +255,6 @@ export default function ViewUsuarioFormUsuarioListScreen(){
             if(!pfId && novoPesId && novoPfId) await api.put(`/api/basico/pessoa-fisica/${novoPfId}`, {...pfBody, pessoaId:novoPesId});
 
             if(novoUsuId){
-                try{ await api.put(`/api/basico/usuario/${novoUsuId}/perfis`, perfis.map(p=> (p as any).id)); }catch{/*ignore*/}
-                try{ await api.put(`/api/basico/usuario/${novoUsuId}/agendas`, agendas.map(a=> (a as any).id)); }catch{/*ignore*/}
-                try{ await api.put(`/api/basico/usuario/${novoUsuId}/unidades`, unidadesAcesso.map(u=> (u as any).id)); }catch{/*ignore*/}
                 if(unidadeDefaultId) try{ await api.put(`/api/basico/usuario/${novoUsuId}`, {unidadeDefaultId: Number(unidadeDefaultId)});}catch{/*ignore*/}
                 if(turnosTrabalho.length) try{ await api.put(`/api/basico/usuario/${novoUsuId}/turnos-trabalho`, turnosTrabalho.map(t=> (t as any).id)); }catch{/*ignore*/}
             }

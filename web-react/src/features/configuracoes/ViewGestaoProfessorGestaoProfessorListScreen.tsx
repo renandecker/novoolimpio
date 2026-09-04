@@ -1,4 +1,16 @@
 ﻿import {useRef, useState, useEffect} from 'react';
+
+import {
+  BookOpen,
+  Clapperboard,
+  Info,
+  X,
+  Plus,
+  Trash2,
+  ChevronDown,
+  ChevronRight,
+  FileText,
+} from 'lucide-react';
 import {api} from '../../shared/services/api';
 import {PermissionGate, usePermissions} from '../../shared/services/permissions';
 import {useAuth} from '../../features/auth/auth';
@@ -120,7 +132,7 @@ function Painel({
         <div className="gp-panel">
             <div className="gp-panel-header" onClick={onToggle}>
                 <span className="gp-panel-titulo">{titulo}</span>
-                <span className="gp-panel-setinha">{colapsado ? 'â–¸' : 'â–¾'}</span>
+                <span className="gp-panel-setinha">{colapsado ? '<ChevronRight className="icon" />' : '<ChevronDown className="icon" />'}</span>
             </div>
             {!colapsado && <div className="gp-panel-body">{children}</div>}
         </div>
@@ -570,7 +582,7 @@ function GestaoTab() {
                                     <>
                                         <button className="gp-btn gp-btn-acoes btnstop" title="Caderno chamada"
                                                 onClick={() => abrirCaderno(t)}>
-                                            ðŸ“–
+                                            <BookOpen className="icon" />
                                         </button>
                                         <button className="gp-btn gp-btn-acoes btngreen" title="Notas"
                                                 onClick={() => abrirNotas(t)}>
@@ -578,17 +590,17 @@ function GestaoTab() {
                                         </button>
                                         <button className="gp-btn gp-btn-acoes btnblack" title="Registros de aula"
                                                 onClick={() => abrirRegistro(t)}>
-                                            ðŸ“„
+                                            <FileText className="icon" />
                                         </button>
                                         <button className="gp-btn gp-btn-acoes" title="Aulas"
                                                 onClick={() => abrirAula(t)}>
-                                            ðŸŽ¬
+                                            <Clapperboard className="icon" />
                                         </button>
                                     </>
                                 )}
                                 <button className="gp-btn gp-btn-acoes btnyellow" title="Informações"
                                         onClick={() => window.open(`/api/educacao/professor/${t.id}/informacoes`, '_blank')}>
-                                    â„¹ï¸
+                                    <Info className="icon" />
                                 </button>
                             </td>
                             </tr>
@@ -986,7 +998,7 @@ function GestaoTab() {
                                                     }))
                                                 }
                                             >
-                                                âœ–
+                                                <X className="icon" />
                                             </button>
                                         </div>
                                     ))}
@@ -997,7 +1009,7 @@ function GestaoTab() {
                                             anexos: [...f.anexos, {nome: '', anexo: '', tipo: 'VIDEO'}]
                                         }))}
                                     >
-                                        âž• Anexo
+                                        <Plus className="icon" /> Anexo
                                     </button>
                                 </div>
                                 <div className="gp-rodape">
@@ -1051,7 +1063,7 @@ function GestaoTab() {
                                                 </button>
                                                 <button className="gp-btn gp-btn-acoes" title="Excluir"
                                                         onClick={() => excluirAula(aula)}>
-                                                    ðŸ—‘ï¸
+                                                    <Trash2 className="icon" />
                                                 </button>
                                             </td>
                                         </tr>

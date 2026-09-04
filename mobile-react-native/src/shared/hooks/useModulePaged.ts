@@ -1,6 +1,6 @@
 import {keepPreviousData, useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {api} from './api';
-import type {ApiItem, ApiRequest, PagedResponse} from './types';
+import type {ApiItem, ApiRequest, PagedResponse, SearchFilterRequest} from './types';
 
 export const PAGE_SIZES = [10, 20, 50, 100];
 
@@ -9,10 +9,10 @@ export const useModulePaged = (
     page: number,
     size: number,
     extraParams?: Record<string, string | number | boolean | undefined>,
-    filters?: Record<string, unknown>,
+    filters?: SearchFilterRequest,
 ) => {
     const queryClient = useQueryClient();
-    const hasFilters = filters && Object.keys(filters).length > 0;
+    const hasFilters = filters && filters.filters && Object.keys(filters.filters).length > 0;
     const basePath = path.replace(/\/paged\/?$/, '').replace(/\/search\/?$/, '');
     const query = useQuery({
         queryKey: [path, hasFilters ? 'search' : 'paged', page, size, extraParams, filters],

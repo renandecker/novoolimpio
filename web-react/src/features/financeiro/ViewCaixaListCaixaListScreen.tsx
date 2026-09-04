@@ -3,8 +3,10 @@ import {PermissionGate, useCurrentOutcome} from '../../shared/services/permissio
 import {api} from '../../shared/services/api';
 import {useModulePaged} from '../../shared/hooks/useModulePaged';
 import type {ApiItem} from '../../shared/types/index';
+import type {SearchFilterRequest} from '../../shared/types/types';
 import {legacyClassName} from '../../shared/components/DataTable';
 import {ExportDropdown} from '../../shared/components/ExportDropdown';
+import {ModuleFilter} from '../../shared/components/ModuleFilter';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -97,7 +99,9 @@ export default function ViewCaixaListCaixaListScreen() {
     const [loadingMovimentacoes, setLoadingMovimentacoes] = useState<Record<number, boolean>>({});
     const [fluxoCaixaDialog, setFluxoCaixaDialog] = useState<{open: boolean; caixa: CaixaRow | null}>({open: false, caixa: null});
 
-    const q = useModulePaged('/api/view/caixa/listCaixa', 0, 10);
+    const [filterParams, setFilterParams] = useState<SearchFilterRequest>({filters: {}});
+
+    const q = useModulePaged('/api/view/caixa/listCaixa', 0, 10, undefined, filterParams);
     const all = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);
@@ -262,6 +266,7 @@ export default function ViewCaixaListCaixaListScreen() {
                     </div>
                     <div className="page-header-actions">
                         <ExportDropdown options={exportOptions} triggerLabel="Exportar" triggerIcon={<i className="fa fa-download"/>} triggerClassName="btnyellow"/>
+                        <ModuleFilter columns={COLUMNS} value={filterParams} onChange={setFilterParams}/>
                     </div>
                 </div>
                 <div className="data-table">

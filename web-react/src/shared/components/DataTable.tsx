@@ -2,7 +2,8 @@
 import type {ReactNode} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
-import type {ApiItem} from '../types/index';
+import type {ApiItem, SearchFilterRequest, FilterCondition, QueryOperation} from '../types/types';
+import {STRING_OPERATIONS, NUMBER_OPERATIONS} from '../types/types';
 import {api} from '../services/api';
 import {useModulePaged} from '../hooks/useModulePaged';
 import {executeAction, type Action} from '../services/actions';
@@ -49,6 +50,14 @@ export interface DataTableRowAction {
     onClick: (item: ApiItem) => void | Promise<void>;
 }
 
+export interface DataTableToolbarButton {
+    label: string;
+    onClick: () => void;
+    className?: string;
+    disabled?: boolean;
+    title?: string;
+}
+
 interface DataTableProps {
     path: string;
     columns?: DataTableColumn[];
@@ -67,6 +76,8 @@ interface DataTableProps {
     editNavigateTo?: string;
     /** Rota do formulário para navegar ao clicar em Novo. */
     createNavigateTo?: string;
+    /** Botões extras na toolbar (ao lado do botão Novo). */
+    extraToolbarButtons?: DataTableToolbarButton[];
     /** Ações extras por linha (ex.: Atualizar/Troca do listLogradouro.xhtml). */
     extraRowActions?: DataTableRowAction[];
 }
@@ -232,10 +243,10 @@ type ModalState =
 
 interface FilterModalState {
     open: boolean;
-    filters: Record<string, unknown>;
+    filters: SearchFilterRequest;
 }
 
-export function DataTable({path, columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, hideUpdate = false, hideDelete = false, hideView = false, editNavigateTo, createNavigateTo, extraRowActions}: DataTableProps) {
+export function DataTable({path, columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, hideUpdate = false, hideDelete = false, hideView = false, editNavigateTo, createNavigateTo, extraToolbarButtons, extraRowActions}: DataTableProps) {
     const navigate = useNavigate();
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(PAGE_SIZES[0]);
@@ -243,8 +254,8 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
     const [executing, setExecuting] = useState<Action | null>(null);
     const [notice, setNotice] = useState<string>('');
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-    const [filterModal, setFilterModal] = useState<FilterModalState>({open: false, filters: {}});
-    const [filterParams, setFilterParams] = useState<Record<string, unknown>>({});
+    const [filterModal, setFilterModal] = useState<FilterModalState>({open: false, filters: {filters: {}}});
+    const [filterParams, setFilterParams] = useState<SearchFilterRequest>({filters: {}});
     const colorColumnSet = new Set(colorColumns ?? []);
     const {can} = usePermissions();
     const {session} = useAuth();
@@ -252,7 +263,7 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
     const routeOutcome = useCurrentOutcome();
     const screenOutcome = outcome ?? routeOutcome;
 
-    const q = useModulePaged(path, page, size, {...params, ...filterParams});
+    const q = useModulePaged(path, page, size, params, filterParams);
     const items = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);
@@ -487,16 +498,28 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
                         onClick={() => createNavigateTo ? navigate(createNavigateTo) : setModal({mode: 'create'})}>
                     Novo
                 </button>}
+                {extraToolbarButtons?.map((btn, idx) => (
+                    <button
+                        key={idx}
+                        type="button"
+                        className={`btn-primary ${btn.className ?? 'btnstop'}`}
+                        onClick={btn.onClick}
+                        disabled={btn.disabled}
+                        title={btn.title}
+                    >
+                        {btn.label}
+                    </button>
+                ))}
+                <button
+                    type="button"
+                    className="btngreen"
+                    style={{marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px'}}
+                    onClick={() => setFilterModal({open: true, filters: filterParams})}
+                >
+                    <i className="fa fa-search"/> Buscar
+                </button>
                 {canRelatorio && items.length > 0 && (
                     <>
-                        <button
-                            type="button"
-                            className="btngreen"
-                            style={{marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px'}}
-                            onClick={() => setFilterModal({open: true, filters: filterParams})}
-                        >
-                            <i className="fa fa-search"/> Busca
-                        </button>
                         <ExportDropdown
                             options={[
                                 {
@@ -719,7 +742,7 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
                 <FilterModal
                     columns={cols}
                     initialFilters={filterModal.filters}
-                    onClose={() => setFilterModal({open: false, filters: {}})}
+                    onClose={() => setFilterModal({open: false, filters: {filters: {}}})}
                     onApply={(filters) => {
                         setFilterParams(filters);
                         setPage(0);
@@ -1044,51 +1067,113 @@ function ExportModal({ item, tipo, onClose, onExport, entityTitle }: ExportModal
 
 interface FilterModalProps {
     columns: DataTableColumn[];
-    initialFilters: Record<string, unknown>;
+    initialFilters: SearchFilterRequest;
     onClose: () => void;
-    onApply: (filters: Record<string, unknown>) => void;
+    onApply: (filters: SearchFilterRequest) => void;
 }
 
 function FilterModal({columns, initialFilters, onClose, onApply}: FilterModalProps) {
-    const [filters, setFilters] = useState<Record<string, unknown>>(() => ({...initialFilters}));
+    const [fieldValues, setFieldValues] = useState<Record<string, string>>(() => {
+        const vals: Record<string, string> = {};
+        for (const col of columns) {
+            const cond = initialFilters.filters[col.key];
+            vals[col.key] = cond?.value ?? '';
+        }
+        return vals;
+    });
+    const [fieldOps, setFieldOps] = useState<Record<string, QueryOperation>>(() => {
+        const ops: Record<string, QueryOperation> = {};
+        for (const col of columns) {
+            ops[col.key] = initialFilters.filters[col.key]?.operation ?? 'CONTAINS';
+        }
+        return ops;
+    });
+    const [fieldValues2, setFieldValues2] = useState<Record<string, string>>(() => {
+        const vals: Record<string, string> = {};
+        for (const col of columns) {
+            const cond = initialFilters.filters[col.key];
+            vals[col.key] = cond?.value2 ?? '';
+        }
+        return vals;
+    });
 
-    const handleChange = (key: string, value: unknown) => {
-        setFilters(prev => ({...prev, [key]: value === '' ? null : value}));
-    };
+    const isNumberOp = (op: QueryOperation) =>
+        ['EQUALS', 'NOT_EQUALS', 'GREATER_THAN', 'GREATER_THAN_OR_EQUAL', 'LESS_THAN', 'LESS_THAN_OR_EQUAL', 'BETWEEN'].includes(op);
 
     const handleClear = () => {
-        setFilters({});
+        setFieldValues({});
+        setFieldOps(() => {
+            const ops: Record<string, QueryOperation> = {};
+            for (const col of columns) ops[col.key] = 'CONTAINS';
+            return ops;
+        });
+        setFieldValues2({});
     };
 
     const handleSubmit = () => {
-        const cleanFilters: Record<string, unknown> = {};
-        for (const [key, value] of Object.entries(filters)) {
-            if (value !== null && value !== undefined && value !== '') {
-                cleanFilters[key] = value;
+        const filters: Record<string, FilterCondition> = {};
+        for (const col of columns) {
+            const val = fieldValues[col.key];
+            if (val !== null && val !== undefined && val !== '') {
+                const op = fieldOps[col.key] ?? 'CONTAINS';
+                filters[col.key] = {
+                    operation: op,
+                    value: val,
+                    value2: isNumberOp(op) ? (fieldValues2[col.key] ?? undefined) : undefined,
+                };
             }
         }
-        onApply(cleanFilters);
+        onApply({filters});
     };
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal form-modal" onClick={e => e.stopPropagation()} style={{maxWidth: '700px', width: '90%'}}>
+            <div className="modal form-modal" onClick={e => e.stopPropagation()} style={{maxWidth: '800px', width: '90%'}}>
                 <div className="div_form">
                     <div className="form-title">Filtros de Busca</div>
                     <form className="table_form" onSubmit={e => {e.preventDefault(); handleSubmit();}}>
-                        <div className="form-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '12px'}}>
-                            {columns.map((column) => (
-                                <label key={column.key} className="form-field">
-                                    <span className="form-label">{column.label}</span>
-                                    <input
-                                        className="form-input"
-                                        type="text"
-                                        value={String(filters[column.key] ?? '')}
-                                        onChange={e => handleChange(column.key, e.target.value)}
-                                        placeholder={`Filtrar por ${column.label}`}
-                                    />
-                                </label>
-                            ))}
+                        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '12px'}}>
+                            {columns.map((column) => {
+                                const op = fieldOps[column.key] ?? 'CONTAINS';
+                                const showBetween = op === 'BETWEEN';
+                                return (
+                                    <div key={column.key} className="form-field" style={{display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                                        <span className="form-label">{column.label}</span>
+                                        <div style={{display: 'flex', gap: '4px', alignItems: 'center'}}>
+                                            <select
+                                                style={{width: '120px', padding: '4px', fontSize: '12px', border: '1px solid #ccc', borderRadius: '4px'}}
+                                                value={op}
+                                                onChange={e => setFieldOps(prev => ({...prev, [column.key]: e.target.value as QueryOperation}))}
+                                            >
+                                                {STRING_OPERATIONS.map(o => (
+                                                    <option key={o.value} value={o.value}>{o.label}</option>
+                                                ))}
+                                            </select>
+                                            <input
+                                                className="form-input"
+                                                type="text"
+                                                style={{flex: 1}}
+                                                value={fieldValues[column.key] ?? ''}
+                                                onChange={e => setFieldValues(prev => ({...prev, [column.key]: e.target.value}))}
+                                                placeholder={`Filtrar por ${column.label}`}
+                                            />
+                                        </div>
+                                        {showBetween && (
+                                            <div style={{display: 'flex', gap: '4px', alignItems: 'center', marginTop: '4px'}}>
+                                                <span style={{fontSize: '12px', color: '#666'}}>até</span>
+                                                <input
+                                                    className="form-input"
+                                                    type="text"
+                                                    style={{flex: 1}}
+                                                    value={fieldValues2[column.key] ?? ''}
+                                                    onChange={e => setFieldValues2(prev => ({...prev, [column.key]: e.target.value}))}
+                                                    placeholder={`Valor final`}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                         <div className="modal-actions form-footer" style={{marginTop: '16px', display: 'flex', gap: '8px', justifyContent: 'flex-end'}}>
                             <button type="button" className="btn-form-back" onClick={onClose}>Cancelar</button>

@@ -427,7 +427,7 @@ function AppRoutes() {
     return <QueryClientProvider client={q}><NavigationContainer><Stack.Navigator initialRouteName='home'><Stack.Screen
         name='home' component={HomeScreen} options={{headerShown: false}}/>
         <Stack.Screen name='default' component={DefaultListScreen}/>
-        <Stack.Screen name='aluno/dashboard' component={AlunoDashboardScreen} options={{title: 'Portal do Aluno'}}/>
+        <Stack.Screen name='aluno/portalAluno' component={AlunoDashboardScreen} options={{title: 'Portal do Aluno'}}/>
         <Stack.Screen name='aluno/boletim' component={AlunoBoletimScreen} options={{title: 'Boletim'}}/>
         <Stack.Screen name='aluno/frequencia' component={AlunoFrequenciaScreen} options={{title: 'Frequência'}}/>
         <Stack.Screen name='aluno/aulas' component={AlunoAulasScreen} options={{title: 'Minhas Aulas'}}/>

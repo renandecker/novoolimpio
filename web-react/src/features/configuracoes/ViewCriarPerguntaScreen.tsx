@@ -5,6 +5,7 @@ import {useAuth} from '../../features/auth/auth';
 import {Tabs} from '../../shared/components/Tabs';
 import {AutoComplete} from '../../shared/components/AutoComplete';
 import {ExportDropdown} from '../../shared/components/ExportDropdown';
+import {Plus, Save, X, FilePlus2, Pencil, Trash2} from 'lucide-react';
 
 type RespostaTipo = 'SELECAO' | 'ESCOLHA' | 'TEXTO' | 'ARQUIVO';
 
@@ -178,7 +179,7 @@ function CriarPergunta() {
                                 onClick={() => removerOpcao(opcao.id)}
                                 title="Remover opção"
                             >
-                                âœ–
+                                <X className="icon" />
                             </button>
                         </div>
                     ))}
@@ -197,7 +198,7 @@ function CriarPergunta() {
                             onClick={adicionarOpcao}
                             title="Adicionar opção"
                         >
-                            âž•
+                            <Plus className="icon" />
                         </button>
                     </div>
                 </div>
@@ -226,7 +227,7 @@ function CriarPergunta() {
                 <div className="gp-control-group">
                     <span className="gp-control-label">Anexos</span>
                     <button className="gp-btn gp-btn-acoes" onClick={adicionarAnexo} title="Adicionar anexo">
-                        âž• Anexo
+                        <FilePlus2 className="icon" /> Anexo
                     </button>
                     {anexos.map((a, idx) => (
                         <div key={idx} className="gp-anexo-chip">
@@ -236,7 +237,7 @@ function CriarPergunta() {
                                 onClick={() => removerAnexo(a.id)}
                                 title="Remover anexo"
                             >
-                                âœ–
+                                <X className="icon" />
                             </button>
                         </div>
                     ))}
@@ -346,8 +347,8 @@ function ListarPerguntas() {
                                     ))}
                                 </td>
                                 <td>
-                                    <button className="gp-btn gp-btn-acoes" title="Editar">âœï¸</button>
-                                    <button className="gp-btn gp-btn-acoes" title="Excluir">ðŸ—‘ï¸</button>
+                                    <button className="gp-btn gp-btn-acoes" title="Editar"><Pencil className="icon" /></button>
+                                    <button className="gp-btn gp-btn-acoes" title="Excluir"><Trash2 className="icon" /></button>
                                 </td>
                             </tr>
                         ))}

@@ -3,7 +3,7 @@ package br.com.sol7.olimpio.educacao.disponibilidadeprofessor;
 import br.com.sol7.olimpio.educacao.disponibilidadeprofessor.dto.DisponibilidadeProfessorRequest;
 import br.com.sol7.olimpio.educacao.disponibilidadeprofessor.dto.DisponibilidadeProfessorResponse;
 import br.com.sol7.olimpio.educacao.shared.DisponibilidadeScheduleEventResponse;
-import br.com.sol7.olimpio.educacao.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.PagedResponse;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;

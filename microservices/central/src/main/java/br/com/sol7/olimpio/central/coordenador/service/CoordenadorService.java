@@ -1,6 +1,8 @@
 package br.com.sol7.olimpio.central.coordenador;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.SearchFilterRequest;
+import br.com.sol7.olimpio.shared.GenericSearchService;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
@@ -19,6 +21,9 @@ public class CoordenadorService {
     @Inject
     CoordenadorRepository repository;
 
+    @Inject
+    GenericSearchService genericSearch;
+
     public Uni<List<CoordenadorResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toEnrichedResponse).toList());
     }
@@ -29,6 +34,14 @@ public class CoordenadorService {
         return repository.findAll(io.quarkus.panache.common.Sort.by("id").descending()).page(io.quarkus.panache.common.Page.of(p, s)).list()
                 .onItem().transformToUni(items -> repository.count()
                         .map(count -> new PagedResponse<>(items.stream().map(this::toEnrichedResponse).toList(), count, p, s)));
+    }
+
+    public Uni<PagedResponse<CoordenadorResponse>> search(SearchFilterRequest request, int page, int size) {
+        int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
+        return genericSearch.search(Coordenador.class, request, page, s)
+                .map(paged -> new PagedResponse<>(
+                        paged.content().stream().map(this::toEnrichedResponse).toList(),
+                        paged.totalElements(), paged.page(), paged.size()));
     }
 
     public Uni<PagedResponse<Map<String, Object>>> pagedEnriched(int page, int size, String operadorLogin, String coordenadorLogin, String dataStr) {

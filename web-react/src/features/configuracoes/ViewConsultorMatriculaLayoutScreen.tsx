@@ -92,8 +92,10 @@ export default function ViewConsultorMatriculaLayoutScreen() {
     const [loading, setLoading] = useState(false);
     const [contrato, setContrato] = useState<Record<string, unknown>>({});
     const [materialEstoque, setMaterialEstoque] = useState<any[]>([]);
-    const [materialContrato, setMaterialContrato] = useState<any[]>([]);
-
+    const [materialContrato, setMaterialContrato] = useState<any[]>([]);
+
+    const [matriculaSelecionadas, setMatriculaSelecionadas] = useState<OferecimentoItem[]>([]);
+
     const loadAlunos = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
         if (!query || query.length < 3) return [];
         try {
@@ -578,3 +580,5 @@ export default function ViewConsultorMatriculaLayoutScreen() {
         </PermissionGate>
     );
 }
+
+

@@ -81,7 +81,7 @@ function AuditTable({entidade, titulo}: { entidade: string; titulo: string }) {
                                             title={isOpen ? 'Recolher' : 'Expandir'}
                                             onClick={() => toggle(item)}
                                         >
-                                            {isOpen ? 'â–¾' : 'â–¸'}
+                                            {isOpen ? '▼' : '▶'}
                                         </button>
                                     </td>
                                     <td className="col-id">{item.id}</td>

@@ -15,8 +15,9 @@ import {PAGE_SIZES, useModulePaged} from './useModulePaged';
 import {executeAction} from './actions';
 import {can} from './permissions';
 import {useAuth} from './auth';
-import type {ApiItem} from './types';
+import type {ApiItem, SearchFilterRequest} from './types';
 import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from './theme';
+import {ModuleFilter} from '../../shared/components/ModuleFilter';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -181,8 +182,11 @@ export default function ViewCaixaListCaixaListScreen() {
     const [movimentacoes, setMovimentacoes] = useState<Record<number, Movimentacao[]>>({});
     const [loadingMovimentacoes, setLoadingMovimentacoes] = useState<Record<number, boolean>>({});
     const [notice, setNotice] = useState('');
+    const [filterParams, setFilterParams] = useState<SearchFilterRequest>({filters: {}});
 
-    const q = useModulePaged('/api/view/caixa/listCaixa', page, size);
+    const COLUMN_FIELDS = ['id_caixa_unidade', 'usuario_login', 'unidade_sucinto', 'data', 'fundo_caixa'] as const;
+
+    const q = useModulePaged('/api/view/caixa/listCaixa', page, size, undefined, filterParams);
     const items = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);
@@ -244,6 +248,7 @@ export default function ViewCaixaListCaixaListScreen() {
         <View style={styles.page}>
             <View style={styles.header}>
                 <Text style={styles.title}>Gerência Fluxo Caixa</Text>
+                <ModuleFilter columns={[...COLUMN_FIELDS]} value={filterParams} onChange={setFilterParams} />
                 <Pressable style={styles.exportButton} onPress={() => Alert.alert('Exportar', 'Selecione o formato', [
                     {text: 'PDF', onPress: async () => {
                         try {

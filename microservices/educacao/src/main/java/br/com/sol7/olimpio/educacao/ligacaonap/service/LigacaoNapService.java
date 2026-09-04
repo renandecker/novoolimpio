@@ -1,6 +1,6 @@
 package br.com.sol7.olimpio.educacao.ligacaonap;
 
-import br.com.sol7.olimpio.educacao.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.PagedResponse;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;

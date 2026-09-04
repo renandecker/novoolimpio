@@ -273,7 +273,7 @@ export default function ReportViewScreen() {
                     )}
 
                     <dl className="report-details">
-                        {Object.entries(data.configuracao)
+                        {data.configuracao && Object.entries(data.configuracao)
                             .filter(([key]) => key !== 'id' && !key.startsWith('todos') && !Array.isArray(data.configuracao[key]) && !isObject(data.configuracao[key]))
                             .map(([key, value]) => <div key={key}>
                                 <dt>{labelFor(key)}</dt>

@@ -630,18 +630,18 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                             const row = (
                                 <tr key={`${rowKey}-row`}>
                                     <td className="col-toggle">
-                                        <button
-                                            type="button"
-                                            className="btn-row-toggle"
-                                            title="Carregar dados do aluno e seus contratos"
-                                            disabled={!asRecord(item).id_pessoa}
-                                            onClick={() => onBuscarContratos(
-                                                Number(asRecord(item).id_pessoa),
-                                                String(asRecord(item).pessoa_descricao ?? ''),
-                                            )}
-                                        >
-                                            <i className="fa fa-search"/>
-                                        </button>
+<button
+                                            type="button"
+                                            className="btn-row-toggle"
+                                            title="Carregar dados do aluno e seus contratos"
+                                            disabled={!asRecord(item).id_pessoa}
+                                            onClick={() => onBuscarContratos(
+                                                Number(asRecord(item).id_pessoa),
+                                                String(asRecord(item).pessoa_descricao ?? ''),
+                                            )}
+                                        >
+                                            <i className="fa fa-info-circle"/>
+                                        </button>
                                     </td>
                                     <td className="col-toggle">
                                         <button
@@ -650,7 +650,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
                                             title={isOpen ? 'Recolher' : 'Expandir'}
                                             onClick={() => setExpanded((prev) => ({...prev, [rowKey]: !prev[rowKey]}))}
                                         >
-                                            {isOpen ? 'â–¾' : 'â–¸'}
+                                            {isOpen ? '▼' : '▶'}
                                         </button>
                                     </td>
                                     <td className="col-id">{item.id}</td>

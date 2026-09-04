@@ -17,7 +17,7 @@ import br.com.sol7.olimpio.educacao.professor.ProfessorRepository;
 import br.com.sol7.olimpio.educacao.basico.PessoaFisica;
 import br.com.sol7.olimpio.educacao.basico.PessoaFisicaRepository;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
-import br.com.sol7.olimpio.educacao.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.PagedResponse;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;

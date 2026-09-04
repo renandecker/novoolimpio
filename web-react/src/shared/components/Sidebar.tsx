@@ -91,9 +91,9 @@ export default function Sidebar() {
         if (modulos.length === 0) {
             items.push(
                 {
-                    label: 'Dashboard',
+                    label: 'Portal do aluno',
                     parent: 'Portal do Aluno',
-                    path: '/aluno/dashboard',
+                    path: '/aluno/portalAluno',
                     icon: menuIcon('dashboard'),
                     keywords: 'portal aluno dashboard'
                 },
@@ -202,9 +202,9 @@ export default function Sidebar() {
                                 </button>
                                 {portalOpen && (
                                     <div className="sidebar-submenu">
-                                        <Link className="sidebar-item sidebar-subitem" to="/aluno/dashboard"><span
+                                        <Link className="sidebar-item sidebar-subitem" to="/aluno/portalAluno"><span
                                             className="sidebar-icon">{menuIcon('dashboard')}</span><span
-                                            className="sidebar-label">Dashboard</span></Link>
+                                            className="sidebar-label">Portal do aluno</span></Link>
                                         <Link className="sidebar-item sidebar-subitem" to="/aluno/boletim"><span
                                             className="sidebar-icon">{menuIcon('boletim')}</span><span
                                             className="sidebar-label">Notas</span></Link>

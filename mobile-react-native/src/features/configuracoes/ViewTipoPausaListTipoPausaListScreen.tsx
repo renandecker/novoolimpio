@@ -16,8 +16,9 @@ import { useModulePaged } from '../useModulePaged';
 import { api } from '../api';
 import { can } from '../permissions';
 import { useAuth } from '../auth';
-import type { ApiItem } from '../types';
+import type { ApiItem, SearchFilterRequest } from '../types';
 import { BorderRadius, Colors, Shadows, Spacing, Typography } from '../theme';
+import { ModuleFilter } from '../../shared/components/ModuleFilter';
 import { useNavigation } from '@react-navigation/native';
 
 /**
@@ -54,8 +55,11 @@ export default function ViewTipoPausaListTipoPausaListScreen() {
   const [descricao, setDescricao] = useState('');
   const [tempo, setTempo] = useState('');
   const [saving, setSaving] = useState(false);
+  const [filterParams, setFilterParams] = useState<SearchFilterRequest>({filters: {}});
 
-  const q = useModulePaged(PATH, page, size);
+  const COLUMN_FIELDS = ['descricao', 'tempo'] as const;
+
+  const q = useModulePaged(PATH, page, size, undefined, filterParams);
   const items = q.data?.content ?? [];
   const totalPages = Math.max(1, q.data?.totalPages ?? 0);
   const totalElements = q.data?.totalElements ?? 0;
@@ -144,6 +148,7 @@ export default function ViewTipoPausaListTipoPausaListScreen() {
     <View style={styles.page}>
       <View style={styles.header}>
         <Text style={styles.title}>Tipo Pausa</Text>
+        <ModuleFilter columns={[...COLUMN_FIELDS]} value={filterParams} onChange={setFilterParams} />
         {canCreate && (
           <Pressable style={styles.primaryButton} onPress={openCreate}>
             <Text style={styles.primaryButtonText}>Novo</Text>

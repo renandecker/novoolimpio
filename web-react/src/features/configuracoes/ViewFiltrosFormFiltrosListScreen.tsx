@@ -58,7 +58,6 @@ export default function ViewFiltrosFormFiltrosListScreen() {
                         {key: 'tabela', label: 'Tabela', empty: 'Conteúdo de Tabela.'},
                         {key: 'grafico', label: 'Gráfico', empty: 'Conteúdo de Gráfico.'},
                         {key: 'mapa', label: 'Mapa', empty: 'Conteúdo de Mapa.'},
-                        {key: 'organograma', label: 'Organograma', empty: 'Conteúdo de Organograma.'},
                     ]}
                 />
             </main>

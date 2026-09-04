@@ -1,6 +1,6 @@
 import {keepPreviousData, useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {api} from '../services/api';
-import type {ApiItem, ApiRequest, PagedResponse, ModulePermissions} from '../types/index';
+import type {ApiItem, ApiRequest, PagedResponse, ModulePermissions, SearchFilterRequest} from '../types/types';
 
 export interface PerfilModuloPermissions {
     novo: boolean;
@@ -9,12 +9,17 @@ export interface PerfilModuloPermissions {
     relatorio: boolean;
 }
 
-export const useModulePaged = (path: string, page: number, size: number, params?: Record<string, unknown>, filters?: Record<string, unknown>) => {
+export const useModulePaged = (
+    path: string,
+    page: number,
+    size: number,
+    params?: Record<string, unknown>,
+    filters?: SearchFilterRequest
+) => {
     const queryClient = useQueryClient();
     const paramsKey = params ? JSON.stringify(params) : '';
     const filtersKey = filters ? JSON.stringify(filters) : '';
-    const hasFilters = filters && Object.keys(filters).length > 0;
-    // Normalize path to avoid double /paged or /search (e.g. caller passed "/api/.../paged")
+    const hasFilters = filters && filters.filters && Object.keys(filters.filters).length > 0;
     const basePath = path.replace(/\/paged\/?$/, '').replace(/\/search\/?$/, '');
     const query = useQuery({
         queryKey: [path, hasFilters ? 'search' : 'paged', page, size, paramsKey, filtersKey],

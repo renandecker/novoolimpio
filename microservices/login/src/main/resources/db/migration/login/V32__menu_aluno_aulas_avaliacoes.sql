@@ -2,7 +2,7 @@
 -- 1) Reposiciona "Financeiro" dentro de "Acesso do Aluno" (estava solto, sem pai).
 -- 2) Cria as telas "Registro de Aulas" (/aluno/aulas) e "Avaliações"
 --    (/aluno/avaliacoes) dentro de "Acesso do Aluno".
--- 3) Aponta o outcome do grupo raiz "Aluno" para /aluno/dashboard.
+-- 3) Aponta o outcome do grupo raiz "Aluno" para /aluno/portalAluno.
 -- 4) Concede acesso aos perfis Aluno (somente leitura) e Administrador
 --    (hierarquia ADMIN, acesso integral).
 -- Idempotente (mesmo padrao de V9/V18/V30).
@@ -15,9 +15,9 @@ WHERE lower(rotulo) = 'financeiro'
   AND (id_modulo IS NULL
        OR id_modulo <> (SELECT m.id FROM public.bas_modulo m WHERE lower(m.rotulo) = 'acesso do aluno' LIMIT 1));
 
--- 2) Grupo raiz "Aluno" aponta para o dashboard do aluno.
+-- 2) Grupo raiz "Aluno" aponta para o portal do aluno.
 UPDATE public.bas_modulo
-SET outcome = '/aluno/dashboard'
+SET outcome = '/aluno/portalAluno'
 WHERE lower(rotulo) = 'aluno'
   AND id_modulo IS NULL
   AND (outcome IS NULL OR outcome = '' OR outcome = '/default');
@@ -52,10 +52,24 @@ INSERT INTO public.bas_perfil_modulo (id_perfil, id_modulo, novo, editar, remove
 SELECT p.id, m.id, FALSE, FALSE, FALSE, FALSE, nextval('public.bas_perfil_modulo_id_seq')
 FROM public.bas_perfil p
 JOIN public.bas_modulo m
-  ON m.outcome IN ('/aluno/dashboard', '/aluno/boletim', '/aluno/frequencia', '/aluno/financeiro',
+  ON m.outcome IN ('/aluno/portalAluno', '/aluno/boletim', '/aluno/frequencia', '/aluno/financeiro',
                    '/aluno/aulas', '/aluno/avaliacoes')
   OR lower(m.rotulo) IN ('acesso do aluno', 'aluno')
 WHERE lower(p.descricao) = 'aluno'
+  AND NOT EXISTS (
+      SELECT 1 FROM public.bas_perfil_modulo pm
+      WHERE pm.id_perfil = p.id AND pm.id_modulo = m.id
+  );
+
+-- 6) Perfis de hierarquia ADMIN: acesso integral as telas e aos grupos do portal.
+INSERT INTO public.bas_perfil_modulo (id_perfil, id_modulo, novo, editar, remover, relatorio, id)
+SELECT p.id, m.id, TRUE, TRUE, TRUE, TRUE, nextval('public.bas_perfil_modulo_id_seq')
+FROM public.bas_perfil p
+JOIN public.bas_modulo m
+  ON m.outcome IN ('/aluno/portalAluno', '/aluno/boletim', '/aluno/frequencia', '/aluno/financeiro',
+                   '/aluno/aulas', '/aluno/avaliacoes')
+  OR lower(m.rotulo) IN ('acesso do aluno', 'aluno')
+WHERE upper(trim(p.hierarquia)) = 'ADMIN'
   AND NOT EXISTS (
       SELECT 1 FROM public.bas_perfil_modulo pm
       WHERE pm.id_perfil = p.id AND pm.id_modulo = m.id

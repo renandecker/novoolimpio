@@ -6,7 +6,15 @@ import type {ApiItem} from '../../features/auth/types';
 import {legacyClassName} from '../../shared/components/DataTable';
 import {PAGE_SIZES} from '../../shared/components/DataTable';
 import {RowMenu, type RowMenuItem} from '../../shared/components/RowMenu';
-import {ExportDropdown} from '../../shared/components/ExportDropdown';
+import {ExportDropdown} from '../../shared/components/ExportDropdown';
+
+import type {SearchFilterRequest} from '../../shared/types/types';
+
+import {ModuleFilter} from '../../shared/components/ModuleFilter';
+
+
+
+
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -36,7 +44,9 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
     const [deleteDialog, setDeleteDialog] = useState<{open: boolean; entity: any | null}>({open: false, entity: null});
     const [selecaoDialog, setSelecaoDialog] = useState<{open: boolean; entity: any | null}>({open: false, entity: null});
     const [selecionados, setSelecionados] = useState<number[]>([]);
-    const [filter, setFilter] = useState<Record<string, any>>({});
+    const [filter, setFilter] = useState<Record<string, any>>({});
+
+    const [filterParams, setFilterParams] = useState<SearchFilterRequest>({filters: {}});
 
     const {can} = usePermissions();
     const outcome = useCurrentOutcome();
@@ -63,7 +73,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
     const acessoEditar = can('UPDATE', outcome) || (perfilModuloPermissions?.editar ?? false);
     const acessoRemover = can('DELETE', outcome) || (perfilModuloPermissions?.remover ?? false);
 
-    const q = useModulePaged('/api/educacao/oferecimento-curso', page, size, filter);
+    const q = useModulePaged('/api/educacao/oferecimento-curso', page, size, filter, filterParams);
     const all = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);

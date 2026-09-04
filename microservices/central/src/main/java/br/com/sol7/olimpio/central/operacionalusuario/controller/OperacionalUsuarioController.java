@@ -1,5 +1,7 @@
 package br.com.sol7.olimpio.central.operacionalusuario;
 
+import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.SearchFilterRequest;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -33,5 +35,12 @@ public class OperacionalUsuarioController {
     @Path("/operacional/{operacionalId}/usuario/{usuarioId}")
     public Uni<Void> delete(@PathParam("operacionalId") Long operacionalId, @PathParam("usuarioId") Long usuarioId) {
         return service.deleteByOperacionalIdAndUsuarioId(operacionalId, usuarioId);
+    }
+
+    @POST
+    @Path("/search")
+    public Uni<PagedResponse<OperacionalUsuarioResponse>> search(SearchFilterRequest request,
+            @QueryParam("page") Integer page, @QueryParam("size") Integer size) {
+        return service.search(request, page == null ? 0 : page, size == null ? 10 : size);
     }
 }

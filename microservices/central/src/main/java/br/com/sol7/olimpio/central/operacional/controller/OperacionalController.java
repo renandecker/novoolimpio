@@ -1,6 +1,7 @@
 package br.com.sol7.olimpio.central.operacional;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.SearchFilterRequest;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -110,6 +111,13 @@ public class OperacionalController {
     @Path("/buscar-coordenador-operacional")
     public Uni<Long> buscarCoordenadorOperacional(@QueryParam("operacionalId") Long operacionalId) {
         return service.buscarCoordenadorOperacional(operacionalId);
+    }
+
+    @POST
+    @Path("/search")
+    public Uni<PagedResponse<OperacionalResponse>> search(SearchFilterRequest request,
+            @QueryParam("page") Integer page, @QueryParam("size") Integer size) {
+        return service.search(request, page == null ? 0 : page, size == null ? 10 : size);
     }
 
 }

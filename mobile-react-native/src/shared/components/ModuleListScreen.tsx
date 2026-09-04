@@ -17,7 +17,8 @@ import {PAGE_SIZES, useModulePaged} from './useModulePaged';
 import {executeAction} from './actions';
 import {can, isAdmin} from './permissions';
 import {useAuth} from './auth';
-import type {ApiItem} from './types';
+import type {ApiItem, SearchFilterRequest, FilterCondition, QueryOperation} from './types';
+import {STRING_OPERATIONS, NUMBER_OPERATIONS} from './types';
 import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from './theme';
 
 const PREFERRED_LABELS = ['nome', 'descricao', 'razao_social', 'nome_fantasia', 'username', 'titulo', 'rotulo', 'sigla', 'sobrenome', 'login', 'uf', 'tema'];
@@ -104,8 +105,10 @@ export function ModuleList({
     const [notice, setNotice] = useState('');
     const [runningAction, setRunningAction] = useState<string | null>(null);
     const [filterModalVisible, setFilterModalVisible] = useState(false);
-    const [filterParams, setFilterParams] = useState<Record<string, unknown>>({});
+    const [filterParams, setFilterParams] = useState<SearchFilterRequest>({filters: {}});
     const [filterInputs, setFilterInputs] = useState<Record<string, string>>({});
+    const [filterOps, setFilterOps] = useState<Record<string, QueryOperation>>({});
+    const [filterValues2, setFilterValues2] = useState<Record<string, string>>({});
 
     const segments = path.split('/').filter(Boolean);
     const feature = segments[2] ?? '';
@@ -122,7 +125,7 @@ export function ModuleList({
     const isAdminUser = isAdmin(session);
     const canRelatorio = isAdminUser || canExecute;
 
-    const q = useModulePaged(path, page, size, {...params, ...filterParams});
+    const q = useModulePaged(path, page, size, params, filterParams);
     const items = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);
@@ -199,23 +202,32 @@ export function ModuleList({
 
     const openFilterModal = () => {
         setFilterInputs({});
+        setFilterOps({});
+        setFilterValues2({});
         setFilterModalVisible(true);
     };
 
     const applyFilters = () => {
-        const cleanFilters: Record<string, unknown> = {};
+        const filters: Record<string, FilterCondition> = {};
         for (const [key, value] of Object.entries(filterInputs)) {
             if (value !== null && value !== undefined && value !== '') {
-                cleanFilters[key] = value;
+                const op = filterOps[key] ?? 'CONTAINS';
+                filters[key] = {
+                    operation: op,
+                    value,
+                    value2: op === 'BETWEEN' ? (filterValues2[key] ?? undefined) : undefined,
+                };
             }
         }
-        setFilterParams(cleanFilters);
+        setFilterParams({filters});
         setPage(0);
         setFilterModalVisible(false);
     };
 
     const clearFilters = () => {
         setFilterInputs({});
+        setFilterOps({});
+        setFilterValues2({});
     };
 
     return (
@@ -227,11 +239,11 @@ export function ModuleList({
                         <Text style={styles.primaryButtonText}>Novo</Text>
                     </Pressable>
                 )}
+                <Pressable style={[styles.exportButton, styles.searchButton]} onPress={openFilterModal}>
+                    <Text style={styles.exportButtonText}>Buscar</Text>
+                </Pressable>
                 {canRelatorio && items.length > 0 && (
                     <>
-                        <Pressable style={[styles.exportButton, styles.searchButton]} onPress={openFilterModal}>
-                            <Text style={styles.exportButtonText}>Busca</Text>
-                        </Pressable>
                         <Pressable style={styles.exportButton} onPress={() => {
                             // Show action sheet or modal with export options
                             Alert.alert(
@@ -386,9 +398,14 @@ export function ModuleList({
                         <FilterModal
                             columns={Object.keys(asRecord(items[0] ?? {})).filter(k => k !== 'id' && k !== 'dadosJson')}
                             initialFilters={filterInputs}
+                            initialOps={filterOps}
+                            initialValues2={filterValues2}
                             onClose={() => setFilterModalVisible(false)}
                             onApply={applyFilters}
                             onClear={clearFilters}
+                            onChangeField={(key, value) => setFilterInputs(prev => ({...prev, [key]: value}))}
+                            onChangeOp={(key, op) => setFilterOps(prev => ({...prev, [key]: op}))}
+                            onChangeValue2={(key, value) => setFilterValues2(prev => ({...prev, [key]: value}))}
                         />
                     </Pressable>
                 </Pressable>
@@ -460,21 +477,28 @@ function RecordModal({
 function FilterModal({
     columns,
     initialFilters,
+    initialOps,
+    initialValues2,
     onClose,
     onApply,
     onClear,
+    onChangeField,
+    onChangeOp,
+    onChangeValue2,
 }: {
     columns: string[];
     initialFilters: Record<string, string>;
+    initialOps: Record<string, QueryOperation>;
+    initialValues2: Record<string, string>;
     onClose: () => void;
     onApply: () => void;
     onClear: () => void;
+    onChangeField: (key: string, value: string) => void;
+    onChangeOp: (key: string, op: QueryOperation) => void;
+    onChangeValue2: (key: string, value: string) => void;
 }) {
-    const [filters, setFilters] = useState<Record<string, string>>(() => ({...initialFilters}));
-
-    const handleChange = (key: string, value: string) => {
-        setFilters(prev => ({...prev, [key]: value}));
-    };
+    const isNumberOp = (op: QueryOperation) =>
+        ['EQUALS', 'NOT_EQUALS', 'GREATER_THAN', 'GREATER_THAN_OR_EQUAL', 'LESS_THAN', 'LESS_THAN_OR_EQUAL', 'BETWEEN'].includes(op);
 
     return (
         <View style={styles.recordModalContainer}>
@@ -488,17 +512,47 @@ function FilterModal({
                 {columns.length === 0 ? (
                     <Text style={styles.modalEmpty}>Nenhum campo disponível para filtro.</Text>
                 ) : (
-                    columns.map((field) => (
-                        <View key={field} style={styles.field}>
-                            <Text style={styles.fieldLabel}>{toTitle(field)}</Text>
-                            <TextInput
-                                style={styles.fieldInput}
-                                value={filters[field] ?? ''}
-                                onChangeText={(text) => handleChange(field, text)}
-                                placeholder={`Filtrar por ${toTitle(field)}`}
-                            />
-                        </View>
-                    ))
+                    columns.map((field) => {
+                        const op = initialOps[field] ?? 'CONTAINS';
+                        const showBetween = op === 'BETWEEN';
+                        return (
+                            <View key={field} style={styles.filterField}>
+                                <Text style={styles.fieldLabel}>{toTitle(field)}</Text>
+                                <View style={styles.filterRow}>
+                                    <View style={styles.filterOpContainer}>
+                                        {STRING_OPERATIONS.map(o => (
+                                            <Pressable
+                                                key={o.value}
+                                                style={[styles.filterOpBtn, op === o.value && styles.filterOpBtnActive]}
+                                                onPress={() => onChangeOp(field, o.value)}
+                                            >
+                                                <Text style={[styles.filterOpBtnText, op === o.value && styles.filterOpBtnTextActive]}>
+                                                    {o.label}
+                                                </Text>
+                                            </Pressable>
+                                        ))}
+                                    </View>
+                                    <TextInput
+                                        style={styles.fieldInput}
+                                        value={initialFilters[field] ?? ''}
+                                        onChangeText={(text) => onChangeField(field, text)}
+                                        placeholder={`Filtrar por ${toTitle(field)}`}
+                                    />
+                                </View>
+                                {showBetween && (
+                                    <View style={styles.filterBetweenRow}>
+                                        <Text style={styles.filterBetweenLabel}>até</Text>
+                                        <TextInput
+                                            style={[styles.fieldInput, {flex: 1}]}
+                                            value={initialValues2[field] ?? ''}
+                                            onChangeText={(text) => onChangeValue2(field, text)}
+                                            placeholder="Valor final"
+                                        />
+                                    </View>
+                                )}
+                            </View>
+                        );
+                    })
                 )}
             </ScrollView>
             <View style={styles.modalActions}>
@@ -826,5 +880,47 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spacing.xl,
         paddingVertical: Spacing.md,
         marginLeft: Spacing.md,
+    },
+    filterField: {
+        marginBottom: Spacing.md,
+    },
+    filterRow: {
+        flexDirection: 'column',
+        gap: Spacing.xs,
+    },
+    filterOpContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: Spacing.xs,
+    },
+    filterOpBtn: {
+        paddingHorizontal: Spacing.sm,
+        paddingVertical: Spacing.xs,
+        borderRadius: BorderRadius.md,
+        backgroundColor: Colors.bgPrimary,
+        borderWidth: 1,
+        borderColor: Colors.borderLight,
+    },
+    filterOpBtnActive: {
+        backgroundColor: Colors.primary,
+        borderColor: Colors.primary,
+    },
+    filterOpBtnText: {
+        fontSize: Typography.sizes.xs,
+        color: Colors.textSecondary,
+    },
+    filterOpBtnTextActive: {
+        color: Colors.textWhite,
+        fontWeight: Typography.weights.semibold,
+    },
+    filterBetweenRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: Spacing.sm,
+        marginTop: Spacing.xs,
+    },
+    filterBetweenLabel: {
+        fontSize: Typography.sizes.sm,
+        color: Colors.textMuted,
     },
 });

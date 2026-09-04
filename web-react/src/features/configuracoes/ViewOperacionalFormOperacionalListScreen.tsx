@@ -1,4 +1,6 @@
 ﻿import {useEffect, useState, useCallback} from 'react';
+
+import {Plus, X} from 'lucide-react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {PermissionGate} from '../../shared/services/permissions';
 import {api} from '../../shared/services/api';
@@ -309,7 +311,7 @@ export default function ViewOperacionalFormOperacionalListScreen() {
                                 style={{flex: 1, maxWidth: 300}}
                             />
                             <button type="button" className="btnblue" onClick={handleAddUsuario} disabled={!usuarioSelecionado} title="Adicionar operador">
-                                âž•
+                                <Plus className="icon" />
                             </button>
                         </div>
                         <table className="data-table" style={{width: '100%', fontSize: '13px'}}>
@@ -330,7 +332,7 @@ export default function ViewOperacionalFormOperacionalListScreen() {
                                         <td>{ou.ativo ? 'Sim' : 'Não'}</td>
                                         <td>{ou.status}</td>
                                         <td>
-                                            <button type="button" className="btnred" onClick={() => handleRemoveUsuario(idx)} title="Remover">âœ•</button>
+                                            <button type="button" className="btnred" onClick={() => handleRemoveUsuario(idx)} title="Remover"><X className="icon" /></button>
                                         </td>
                                     </tr>
                                 ))}

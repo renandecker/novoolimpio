@@ -1,4 +1,6 @@
 ﻿import {useEffect, useState} from 'react';
+
+import {Smartphone} from 'lucide-react';
 import {alunoApi, ContratoFinanceiro, Financeiro, formatarData, formatarMoeda, Parcela} from '../../features/aluno/aluno';
 import {PixQrCodeModal} from '../../features/professor/GestaoAlunoModais';
 import '../../features/aluno/AlunoPortal.css';
@@ -59,7 +61,7 @@ function ParcelasTabela({parcelas, titulo, pessoaId}: { parcelas: Parcela[]; tit
                                         onClick={() => handlePixClick(p)}
                                         title={p.idParcelaPix ? 'Ver PIX gerado / Enviar por e-mail' : 'Gerar QR Code PIX'}
                                     >
-                                        {p.idParcelaPix ? 'ðŸ“± PIX' : 'ðŸ“± Gerar PIX'}
+                                        {p.idParcelaPix ? '📱 PIX' : '📱 Gerar PIX'}
                                     </button>
                                 )}
                             </td>

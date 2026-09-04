@@ -1,4 +1,6 @@
 ﻿import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+
+import {X, ChevronDown, ChevronRight} from 'lucide-react';
 import {useNavigate, useParams} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
 import {api} from '../../shared/services/api';
@@ -296,12 +298,19 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
         [unidadesQuery.data],
     );
 
-    const gruposDisponiveis = useMemo(
-        () => (gruposQuery.data ?? []).filter((g) =>
-            (!data.unidadeId || g.unidadeId === data.unidadeId) &&
-            (!data.curriculoId || g.curriculoId === data.curriculoId)),
-        [gruposQuery.data, data.unidadeId, data.curriculoId],
-    );
+const gruposDisponiveis = useMemo(
+        () => {
+            const base = (gruposQuery.data ?? []).filter((g) =>
+                (!data.unidadeId || g.unidadeId === data.unidadeId) &&
+                (!data.curriculoId || g.curriculoId === data.curriculoId));
+            if (emEdicao && data.grupoId && !base.some((g) => g.id === data.grupoId)) {
+                const current = gruposQuery.data?.find((g) => g.id === data.grupoId);
+                if (current) return [...base, current];
+            }
+            return base;
+        },
+        [gruposQuery.data, data.unidadeId, data.curriculoId, emEdicao, data.grupoId],
+    );
 
     const carregarCatalogosUnidade = useCallback(async (unidadeId: number) => {
         try {
@@ -1046,7 +1055,7 @@ useEffect(() => {
                                 title="Remover"
                                 onClick={() => updateField('responsaveis', data.responsaveis.filter((x) => x.id !== r.id))}
                             >
-                                âœ•
+                                <X className="icon" />
                             </button>
                         </span>
                     ))}
@@ -1214,7 +1223,7 @@ useEffect(() => {
                                         <td>{tempo?.descricao || `#${item.tempoAulaId}`}</td>
                                         <td>
                                             <button type="button" className="ofc-btn-remove" title="Remover"
-                                                    onClick={() => removerDiaAula(indice)}>âœ•
+                                                    onClick={() => removerDiaAula(indice)}><X className="icon" />
                                             </button>
                                         </td>
                                     </tr>
@@ -1238,7 +1247,7 @@ useEffect(() => {
                             className="ofc-card-header"
                             onClick={() => setExpandido(expandido === turma.componenteCurricularId ? null : turma.componenteCurricularId)}
                         >
-                            <span className="ofc-card-toggle">{expandido === turma.componenteCurricularId ? 'â–¾' : 'â–¸'}</span>
+                            <span className="ofc-card-toggle">{expandido === turma.componenteCurricularId ? '<ChevronDown className="icon" />' : '<ChevronRight className="icon" />'}</span>
                             <span className="ofc-card-title">{turma.descricao}</span>
                             <span className="ofc-card-meta">
                                 Carga horária: {turma.cargaHoraria}h · {turma.ocorrencias.length} aula(s)

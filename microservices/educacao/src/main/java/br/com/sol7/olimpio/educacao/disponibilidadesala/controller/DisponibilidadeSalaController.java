@@ -1,6 +1,6 @@
 package br.com.sol7.olimpio.educacao.disponibilidadesala;
 
-import br.com.sol7.olimpio.educacao.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.educacao.shared.DisponibilidadeScheduleEventResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;

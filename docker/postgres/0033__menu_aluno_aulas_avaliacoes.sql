@@ -30,8 +30,8 @@ WHERE NOT EXISTS (
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
 SELECT nextval('public.bas_modulo_id_seq'),
        (SELECT m.id FROM public.bas_modulo m WHERE lower(m.rotulo) = 'acesso do aluno' LIMIT 1),
-       'Dashboard', 'Visão geral do aluno', '📊', '/aluno/dashboard', NULL, 1
-WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE outcome = '/aluno/dashboard');
+       'Portal do aluno', 'Visão geral do aluno', '📊', '/aluno/portalAluno', NULL, 1
+WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE outcome = '/aluno/portalAluno');
 
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
 SELECT nextval('public.bas_modulo_id_seq'),
@@ -70,15 +70,15 @@ WHERE lower(rotulo) = 'financeiro'
 -- Grupos ("aluno", "acesso do aluno") nunca sao reposicionados por aqui.
 UPDATE public.bas_modulo
 SET id_modulo = (SELECT m.id FROM public.bas_modulo m WHERE lower(m.rotulo) = 'acesso do aluno' LIMIT 1)
-WHERE outcome IN ('/aluno/dashboard', '/aluno/boletim', '/aluno/frequencia',
+WHERE outcome IN ('/aluno/portalAluno', '/aluno/boletim', '/aluno/frequencia',
                   '/aluno/financeiro', '/aluno/aulas', '/aluno/avaliacoes')
   AND lower(rotulo) NOT IN ('aluno', 'acesso do aluno')
   AND (id_modulo IS NULL
        OR id_modulo <> (SELECT m.id FROM public.bas_modulo m WHERE lower(m.rotulo) = 'acesso do aluno' LIMIT 1));
 
--- 5) Grupo raiz "Aluno" aponta para o dashboard do aluno.
+-- 5) Grupo raiz "Aluno" aponta para o portal do aluno.
 UPDATE public.bas_modulo
-SET outcome = '/aluno/dashboard'
+SET outcome = '/aluno/portalAluno'
 WHERE lower(rotulo) = 'aluno'
   AND id_modulo IS NULL
   AND (outcome IS NULL OR outcome = '' OR outcome = '/default');
@@ -103,7 +103,7 @@ INSERT INTO public.bas_perfil_modulo (id_perfil, id_modulo, novo, editar, remove
 SELECT p.id, m.id, FALSE, FALSE, FALSE, FALSE, nextval('public.bas_perfil_modulo_id_seq')
 FROM public.bas_perfil p
 JOIN public.bas_modulo m
-  ON m.outcome IN ('/aluno/dashboard', '/aluno/boletim', '/aluno/frequencia', '/aluno/financeiro',
+  ON m.outcome IN ('/aluno/portalAluno', '/aluno/boletim', '/aluno/frequencia', '/aluno/financeiro',
                    '/aluno/aulas', '/aluno/avaliacoes')
   OR lower(m.rotulo) IN ('acesso do aluno', 'aluno')
 WHERE lower(p.descricao) = 'aluno'
@@ -117,7 +117,7 @@ INSERT INTO public.bas_perfil_modulo (id_perfil, id_modulo, novo, editar, remove
 SELECT p.id, m.id, TRUE, TRUE, TRUE, TRUE, nextval('public.bas_perfil_modulo_id_seq')
 FROM public.bas_perfil p
 JOIN public.bas_modulo m
-  ON m.outcome IN ('/aluno/dashboard', '/aluno/boletim', '/aluno/frequencia', '/aluno/financeiro',
+  ON m.outcome IN ('/aluno/portalAluno', '/aluno/boletim', '/aluno/frequencia', '/aluno/financeiro',
                    '/aluno/aulas', '/aluno/avaliacoes')
   OR lower(m.rotulo) IN ('acesso do aluno', 'aluno')
 WHERE upper(trim(p.hierarquia)) = 'ADMIN'

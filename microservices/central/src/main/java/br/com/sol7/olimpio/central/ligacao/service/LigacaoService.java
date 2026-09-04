@@ -3,6 +3,8 @@ package br.com.sol7.olimpio.central.ligacao;
 import br.com.sol7.olimpio.central.filaprioritaria.FilaPrioritariaResponse;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.SearchFilterRequest;
+import br.com.sol7.olimpio.shared.GenericSearchService;
 
 import java.util.Date;
 
@@ -20,6 +22,9 @@ public class LigacaoService {
     @Inject
     LigacaoRepository repository;
 
+    @Inject
+    GenericSearchService genericSearch;
+
     public Uni<List<LigacaoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
     }
@@ -30,6 +35,14 @@ public class LigacaoService {
         return repository.findAll(io.quarkus.panache.common.Sort.by("id").descending()).page(io.quarkus.panache.common.Page.of(p, s)).list()
                 .onItem().transformToUni(items -> repository.count()
                         .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
+    }
+
+    public Uni<PagedResponse<LigacaoResponse>> search(SearchFilterRequest request, int page, int size) {
+        int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
+        return genericSearch.search(Ligacao.class, request, page, s)
+                .map(paged -> new PagedResponse<>(
+                        paged.content().stream().map(this::toResponse).toList(),
+                        paged.totalElements(), paged.page(), paged.size()));
     }
 
 

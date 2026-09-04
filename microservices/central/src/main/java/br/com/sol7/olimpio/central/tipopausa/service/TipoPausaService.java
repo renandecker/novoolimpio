@@ -4,6 +4,8 @@ import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.SearchFilterRequest;
+import br.com.sol7.olimpio.shared.GenericSearchService;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -19,6 +21,9 @@ public class TipoPausaService {
     @Inject
     TipoPausaRepository repository;
 
+    @Inject
+    GenericSearchService genericSearch;
+
     @CacheResult(cacheName = "tipo-pausa-cache")
     public Uni<List<TipoPausaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -30,6 +35,14 @@ public class TipoPausaService {
         return repository.findAll(io.quarkus.panache.common.Sort.by("id").descending()).page(io.quarkus.panache.common.Page.of(p, s)).list()
                 .onItem().transformToUni(items -> repository.count()
                         .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
+    }
+
+    public Uni<PagedResponse<TipoPausaResponse>> search(SearchFilterRequest request, int page, int size) {
+        int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
+        return genericSearch.search(TipoPausa.class, request, page, s)
+                .map(paged -> new PagedResponse<>(
+                        paged.content().stream().map(this::toResponse).toList(),
+                        paged.totalElements(), paged.page(), paged.size()));
     }
 
 

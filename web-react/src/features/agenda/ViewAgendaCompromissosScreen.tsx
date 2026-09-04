@@ -2,7 +2,7 @@
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {api} from '../../shared/services/api';
 import {PermissionGate} from '../../shared/services/permissions';
-import {ScheduleWeekView, mondayOf, toIsoDate, type ScheduleEventData} from '../../shared/components/WeeklyGrid';
+import {ScheduleWeekView, mondayOf, toIsoDate, parseDate, addDays, type ScheduleEventData} from '../../shared/components/WeeklyGrid';
 import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
 import {Tabs} from '../../shared/components/Tabs';
 import {Modal} from '../../shared/components/Modal';
@@ -166,7 +166,7 @@ export default function ViewAgendaCompromissosScreen() {
     const compromissosQuery = useQuery({
         queryKey: ['compromissos', selectedAgendaId, weekStart, viewMode],
         queryFn: async () => {
-            const params: Record<string, any> = {inicio: weekStart, fim: toIsoDate(new Date(weekStart + 'T00:00:00').getTime() + 6 * 86400000)};
+            const params: Record<string, any> = {inicio: weekStart, fim: toIsoDate(addDays(parseDate(weekStart), 6))};
             if (selectedAgendaId) params.agendaId = selectedAgendaId;
             const response = await api.get<Compromisso[]>('/api/view/compromisso/listCompromisso', {params});
             return response.data;
@@ -177,7 +177,7 @@ export default function ViewAgendaCompromissosScreen() {
     const eventosQuery = useQuery({
         queryKey: ['compromissos-eventos', selectedAgendaId, weekStart],
         queryFn: async () => {
-            const params: Record<string, any> = {inicio: weekStart, fim: toIsoDate(new Date(weekStart + 'T00:00:00').getTime() + 6 * 86400000)};
+            const params: Record<string, any> = {inicio: weekStart, fim: toIsoDate(addDays(parseDate(weekStart), 6))};
             if (selectedAgendaId) params.agendaId = selectedAgendaId;
             const response = await api.get<Compromisso[]>('/api/view/compromisso/listCompromisso', {params});
             return response.data.map(c => ({
@@ -506,13 +506,13 @@ export default function ViewAgendaCompromissosScreen() {
                         />
                     </div>
 
-                    {viewMode === 'calendar' && (
+{viewMode === 'calendar' && (
                         <div className="filter-group">
                             <label>Semana</label>
                             <div className="week-nav">
-                                <button onClick={() => setWeekStart(toIsoDate(new Date(new Date(weekStart).getTime() - 7 * 86400000)))}>‹ Anterior</button>
-                                <span>{formatDateBR(weekStart)} - {formatDateBR(toIsoDate(new Date(weekStart).getTime() + 6 * 86400000))}</span>
-                                <button onClick={() => setWeekStart(toIsoDate(new Date(new Date(weekStart).getTime() + 7 * 86400000)))}>Próximo ›</button>
+                                <button onClick={() => setWeekStart(toIsoDate(addDays(parseDate(weekStart), -7)))}>‹ Anterior</button>
+                                <span>{formatDateBR(weekStart)} - {formatDateBR(toIsoDate(addDays(parseDate(weekStart), 6)))}</span>
+                                <button onClick={() => setWeekStart(toIsoDate(addDays(parseDate(weekStart), 7)))}>Próximo ›</button>
                                 <button onClick={() => setWeekStart(toIsoDate(mondayOf(new Date())))} className="btn-today">Hoje</button>
                             </div>
                         </div>

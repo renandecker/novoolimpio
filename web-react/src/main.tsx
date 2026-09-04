@@ -3,6 +3,51 @@ import {createRoot} from 'react-dom/client';
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 
+if (typeof window !== 'undefined') {
+    const handleCorruption = async () => {
+        console.warn('Database corruption detected (block checksum mismatch), clearing all IndexedDB databases...');
+        try {
+            const dbs = await indexedDB.databases?.();
+            if (dbs) {
+                await Promise.all(dbs.map(db => db.name ? new Promise<void>((resolve) => {
+                    const req = indexedDB.deleteDatabase(db.name!);
+                    req.onsuccess = req.onerror = () => resolve();
+                }) : Promise.resolve()));
+            }
+            localStorage.clear();
+            sessionStorage.clear();
+        } catch (e) {
+            console.error('Failed to clear storage:', e);
+        }
+        setTimeout(() => window.location.reload(), 100);
+    };
+
+    window.addEventListener('error', (event) => {
+        const msg = event.error?.message || String(event.error || '');
+        if (msg.includes('Corruption: block checksum mismatch') || msg.includes('block checksum mismatch')) {
+            handleCorruption();
+        }
+    });
+
+    window.addEventListener('unhandledrejection', (event) => {
+        const msg = event.reason?.message || String(event.reason || '');
+        if (msg.includes('Corruption: block checksum mismatch') || msg.includes('block checksum mismatch')) {
+            handleCorruption();
+            event.preventDefault();
+        }
+    });
+
+    (async () => {
+        try {
+            const dbs = await indexedDB.databases?.();
+            if (dbs?.length) {
+                console.debug('IndexedDB databases found:', dbs.map(d => d.name).filter(Boolean).join(', '));
+            }
+        } catch {
+        }
+    })();
+}
+
 import {
     AuthProvider,
     ThemeProvider,
@@ -389,7 +434,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     element={<ProtectedRoute/>}><Route path="/auditoria" element={<AuditoriaScreen/>}/><Route path="/view/tema/listTemas"
                                                                                          element={
                                                                                              <ViewTemaListTemasListScreen/>}/>
-    <Route path="/aluno/dashboard" element={<AlunoDashboardScreen/>}/>
+    <Route path="/aluno/portalAluno" element={<AlunoDashboardScreen/>}/>
     <Route path="/aluno/boletim" element={<AlunoBoletimScreen/>}/>
     <Route path="/aluno/frequencia" element={<AlunoFrequenciaScreen/>}/>
     <Route path="/aluno/financeiro" element={<AlunoFinanceiroScreen/>}/>

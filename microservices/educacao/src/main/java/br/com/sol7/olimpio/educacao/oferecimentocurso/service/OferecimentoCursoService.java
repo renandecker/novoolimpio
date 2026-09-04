@@ -1,6 +1,6 @@
 package br.com.sol7.olimpio.educacao.oferecimentocurso;
 
-import br.com.sol7.olimpio.educacao.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.educacao.curso.Curso;
 import br.com.sol7.olimpio.educacao.curso.CursoRepository;
 import br.com.sol7.olimpio.educacao.curriculo.Curriculo;

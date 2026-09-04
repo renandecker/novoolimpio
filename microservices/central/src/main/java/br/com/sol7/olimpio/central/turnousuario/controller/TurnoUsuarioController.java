@@ -1,6 +1,7 @@
 package br.com.sol7.olimpio.central.turnousuario;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.SearchFilterRequest;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -94,6 +95,13 @@ public class TurnoUsuarioController {
     @Path("/por-usuario")
     public Uni<List<TurnoUsuarioResponse>> porUsuario(@QueryParam("usuarioId") Long usuarioId) {
         return service.buscarPorUsuario(usuarioId);
+    }
+
+    @POST
+    @Path("/search")
+    public Uni<PagedResponse<TurnoUsuarioResponse>> search(SearchFilterRequest request,
+            @QueryParam("page") Integer page, @QueryParam("size") Integer size) {
+        return service.search(request, page == null ? 0 : page, size == null ? 10 : size);
     }
 
 }

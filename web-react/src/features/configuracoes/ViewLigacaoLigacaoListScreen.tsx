@@ -4,6 +4,27 @@ import { PermissionGate } from '../../shared/services/permissions';
 import { api } from '../../shared/services/api';
 import { AutoComplete, type AutoCompleteOption } from '../../shared/components/AutoComplete';
 
+import {
+  Headphones,
+  Building,
+  Package,
+  Tag,
+  Star,
+  Pause,
+  Phone,
+  Info,
+  Folder,
+  Check,
+  BarChart,
+  RefreshCw,
+  Flame,
+  Play,
+  Clock,
+  Target,
+  Users,
+  AlertCircle,
+} from 'lucide-react';
+
 type UnidadeInfo = {
     sucinto?: string;
     telefones?: Array<{ numero: string }>;
@@ -313,7 +334,7 @@ export default function ViewLigacaoLigacaoListScreen() {
             <main style={{ padding: '12px 16px', background: '#f5f6f8', minHeight: 'calc(100vh - 60px)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                     <h1 style={{ fontSize: 22, margin: 0, color: '#2c3e50', display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span>ðŸŽ§</span> Tela de Ligação (Central de Atendimento)
+                        <Headphones className="icon" /> Tela de Ligação (Central de Atendimento)
                     </h1>
                 </div>
 
@@ -337,7 +358,7 @@ export default function ViewLigacaoLigacaoListScreen() {
                             {/* Accordion Unidade */}
                             <details style={{ border: '1px solid #cfd8dc', borderRadius: 6, marginBottom: 12, background: '#fafafa' }}>
                                 <summary style={{ padding: '10px 14px', fontWeight: 600, cursor: 'pointer', background: '#eceff1', borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>
-                                    ðŸ¢ Unidade: {unidade?.sucinto ?? 'Carregando...'}
+                                    <Building className="icon" /> Unidade: {unidade?.sucinto ?? 'Carregando...'}
                                 </summary>
                                 <div style={{ padding: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 13 }}>
                                     <div><strong>Unidade:</strong> {unidade?.sucinto}</div>
@@ -351,8 +372,8 @@ export default function ViewLigacaoLigacaoListScreen() {
 
                             {/* Pacote e Estratégia */}
                             <div style={{ background: '#f5f5f5', padding: 10, borderRadius: 6, marginBottom: 12, fontSize: 13, borderLeft: '4px solid #1976d2' }}>
-                                <div><strong>ðŸ“¦ Pacote:</strong> {operacional?.operacional?.id} - {operacional?.operacional?.pacote?.descricao}</div>
-                                <div style={{ marginTop: 4 }}><strong>ðŸŽ¯ Estratégia:</strong> {operacional?.operacional?.pacote?.acaoDeCampanha?.estrategia?.descricao}</div>
+                                <div><strong><Package className="icon" /> Pacote:</strong> {operacional?.operacional?.id} - {operacional?.operacional?.pacote?.descricao}</div>
+                                <div style={{ marginTop: 4 }}><strong><Tag className="icon" /> Estratégia:</strong> {operacional?.operacional?.pacote?.acaoDeCampanha?.estrategia?.descricao}</div>
                             </div>
 
                             {/* Cronômetro e Dados da Ligação Atual */}
@@ -363,13 +384,13 @@ export default function ViewLigacaoLigacaoListScreen() {
                                         <span style={{ fontSize: 20, fontWeight: 700 }}>{Math.floor(tempoAtual / 60)}:{String(tempoAtual % 60).padStart(2, '0')}</span>
                                         <span style={{ fontSize: 10, color: '#b0bec5' }}>de {Math.floor(tempoTotal / 60)}m</span>
                                     </div>
-                                    <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>Tempo Ligação</div>
+                                    <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}><Clock className="icon" style={{fontSize: 12, marginRight: 4}} /> Tempo Ligação</div>
                                 </div>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                         <strong>Nome:</strong>
-                                        {prioritaria && <span title="Ligação Prioritária" style={{ background: '#ffa000', color: '#fff', padding: '1px 6px', borderRadius: 4, fontSize: 11 }}>â˜… Prioritária</span>}
+                                        {prioritaria && <span title="Ligação Prioritária" style={{ background: '#ffa000', color: '#fff', padding: '1px 6px', borderRadius: 4, fontSize: 11 }}><Star className="icon" fill="currentColor" /> Prioritária</span>}
                                         <span style={{ fontSize: 15, fontWeight: 600, color: '#1976d2' }}>{proxProspectoNome}</span>
                                     </div>
 
@@ -408,14 +429,14 @@ export default function ViewLigacaoLigacaoListScreen() {
 
                             {/* Botões de Ação Inferiores */}
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 10 }}>
-                                <button onClick={abrirPausa} style={{ background: '#fbc02d', color: '#000', border: 0, padding: '8px 4px', borderRadius: 4, fontWeight: 600, cursor: 'pointer', fontSize: 12 }}>â¸ Pause</button>
-                                <button onClick={() => setModalRetorno(true)} style={{ background: '#388e3c', color: '#fff', border: 0, padding: '8px 4px', borderRadius: 4, fontWeight: 600, cursor: 'pointer', fontSize: 12 }}>ðŸ”„ Retorno</button>
-                                <button onClick={abrirInfo} style={{ background: '#d32f2f', color: '#fff', border: 0, padding: '8px 4px', borderRadius: 4, fontWeight: 600, cursor: 'pointer', fontSize: 12 }}>â„¹ Informações</button>
-                                <button onClick={abrirPacotes} style={{ background: '#757575', color: '#fff', border: 0, padding: '8px 4px', borderRadius: 4, fontWeight: 600, cursor: 'pointer', fontSize: 12 }}>ðŸ“‚ Pacotes</button>
+                                <button onClick={abrirPausa} style={{ background: '#fbc02d', color: '#000', border: 0, padding: '8px 4px', borderRadius: 4, fontWeight: 600, cursor: 'pointer', fontSize: 12 }}><Pause className="icon" /> Pause</button>
+                                <button onClick={() => setModalRetorno(true)} style={{ background: '#388e3c', color: '#fff', border: 0, padding: '8px 4px', borderRadius: 4, fontWeight: 600, cursor: 'pointer', fontSize: 12 }}><Phone className="icon" /> Retorno</button>
+                                <button onClick={abrirInfo} style={{ background: '#d32f2f', color: '#fff', border: 0, padding: '8px 4px', borderRadius: 4, fontWeight: 600, cursor: 'pointer', fontSize: 12 }}><Info className="icon" /> Informações</button>
+                                <button onClick={abrirPacotes} style={{ background: '#757575', color: '#fff', border: 0, padding: '8px 4px', borderRadius: 4, fontWeight: 600, cursor: 'pointer', fontSize: 12 }}><Folder className="icon" /> Pacotes</button>
                             </div>
 
                             <button onClick={finalizarLigacao} style={{ width: '100%', background: '#c62828', color: '#fff', border: 0, padding: 12, borderRadius: 6, fontWeight: 700, fontSize: 16, cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
-                                âœ” Finalizar Ligação
+                                <Check className="icon" /> Finalizar Ligação
                             </button>
                         </div>
 
@@ -424,22 +445,22 @@ export default function ViewLigacaoLigacaoListScreen() {
                             
                             {/* Painel Metas */}
                             <div style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, padding: 16 }}>
-                                <h3 style={{ margin: '0 0 10px 0', fontSize: 15, color: '#37474f', borderBottom: '1px solid #eee', paddingBottom: 6 }}>ðŸ“Š Minhas Metas de Hoje</h3>
+                                <h3 style={{ margin: '0 0 10px 0', fontSize: 15, color: '#37474f', borderBottom: '1px solid #eee', paddingBottom: 6 }}><BarChart className="icon" /> Minhas Metas de Hoje</h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, textAlign: 'center', marginBottom: 12 }}>
                                     <div style={{ background: '#f5f5f5', padding: 8, borderRadius: 6 }}>
-                                        <div style={{ fontSize: 11, color: '#666' }}>DIA</div>
+                                        <div style={{ fontSize: 11, color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}><Target className="icon" style={{fontSize: 12}} /> DIA</div>
                                         <div style={{ fontSize: 16, fontWeight: 700, color: '#1976d2' }}>{metaHoje}</div>
                                     </div>
                                     <div style={{ background: '#f5f5f5', padding: 8, borderRadius: 6 }}>
-                                        <div style={{ fontSize: 11, color: '#666' }}>META</div>
+                                        <div style={{ fontSize: 11, color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}><Target className="icon" style={{fontSize: 12}} /> META</div>
                                         <div style={{ fontSize: 16, fontWeight: 700, color: '#388e3c' }}>{metaHoje}</div>
                                     </div>
                                     <div style={{ background: '#f5f5f5', padding: 8, borderRadius: 6 }}>
-                                        <div style={{ fontSize: 11, color: '#666' }}>AGENDADOS</div>
+                                        <div style={{ fontSize: 11, color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}><Users className="icon" style={{fontSize: 12}} /> AGENDADOS</div>
                                         <div style={{ fontSize: 16, fontWeight: 700, color: '#f57c00' }}>{agendados}</div>
                                     </div>
                                     <div style={{ background: '#f5f5f5', padding: 8, borderRadius: 6 }}>
-                                        <div style={{ fontSize: 11, color: '#666' }}>RESTANTES</div>
+                                        <div style={{ fontSize: 11, color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}><AlertCircle className="icon" style={{fontSize: 12}} /> RESTANTES</div>
                                         <div style={{ fontSize: 16, fontWeight: 700, color: '#d32f2f' }}>{restantes}</div>
                                     </div>
                                 </div>
@@ -505,7 +526,7 @@ export default function ViewLigacaoLigacaoListScreen() {
                                                         <td style={{ padding: 6 }}>{f.ligacao?.telefoneDiscado}</td>
                                                         <td style={{ padding: 6 }}>{new Date(f.data).toLocaleString('pt-BR')}</td>
                                                         <td style={{ padding: 6, textAlign: 'center' }}>
-                                                            <button title="Retornar ligação" style={{ background: '#388e3c', color: '#fff', border: 0, padding: '4px 8px', borderRadius: 4, cursor: 'pointer' }}>âž”</button>
+                                                            <button title="Retornar ligação" style={{ background: '#388e3c', color: '#fff', border: 0, padding: '4px 8px', borderRadius: 4, cursor: 'pointer' }}><RefreshCw className="icon" /></button>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -682,7 +703,7 @@ export default function ViewLigacaoLigacaoListScreen() {
                 {telaBloqueada && (
                     <div style={{ position: 'fixed', inset: 0, background: 'rgba(38,50,56,0.92)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                         <div style={{ background: '#37474f', padding: 30, borderRadius: 8, textAlign: 'center', maxWidth: 450, width: '90%', border: '2px solid #546e7a' }}>
-                            <h2 style={{ color: '#ffb74d', marginBottom: 12 }}>ðŸ”’ Tela Bloqueada</h2>
+                            <h2 style={{ color: '#ffb74d', marginBottom: 12 }}><Flame className="icon" /> Tela Bloqueada</h2>
                             <p style={{ fontSize: 16, marginBottom: 20 }}>{blocoMotivo}</p>
                             
                             <div style={{ margin: '15px 0', textAlign: 'left' }}>
@@ -691,7 +712,7 @@ export default function ViewLigacaoLigacaoListScreen() {
                             </div>
 
                             <button onClick={destravarTela} style={{ width: '100%', background: '#2e7d32', color: '#fff', border: 0, padding: 12, borderRadius: 6, fontWeight: 700, fontSize: 15, cursor: 'pointer', marginTop: 10 }}>
-                                â–¶ Desbloquear / Continuar Trabalho
+                                <Play className="icon" /> Desbloquear / Continuar Trabalho
                             </button>
                         </div>
                     </div>

@@ -1,6 +1,7 @@
 package br.com.sol7.olimpio.central.resultadocontato;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.SearchFilterRequest;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -67,6 +68,13 @@ public class ResultadoContatoController {
     @Path("/all")
     public Uni<List<ResultadoContatoResponse>> all() {
         return service.list();
+    }
+
+    @POST
+    @Path("/search")
+    public Uni<PagedResponse<ResultadoContatoResponse>> search(SearchFilterRequest request,
+            @QueryParam("page") Integer page, @QueryParam("size") Integer size) {
+        return service.search(request, page == null ? 0 : page, size == null ? 10 : size);
     }
 
 }

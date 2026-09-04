@@ -5,6 +5,24 @@ import { api } from '../../shared/services/api';
 import { useAuth } from '../../features/auth/auth';
 import { AutoComplete, type AutoCompleteOption } from '../../shared/components/AutoComplete';
 
+import {
+  Star,
+  Building,
+  Clock,
+  Pause,
+  Calendar,
+  Shuffle,
+  Search,
+  X,
+  AlertTriangle,
+  PieChart,
+  Phone,
+  Play,
+  Filter,
+  User,
+  Users,
+} from 'lucide-react';
+
 type CoordenadorRow = {
     id: number;
     id_operador: number;
@@ -228,14 +246,14 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
                 <h1 style={{ margin: '8px 0 12px', fontSize: 22 }}>Coordenador</h1>
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12, alignItems: 'center' }}>
-                    <button className="btnblue" onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('prioritariaCoord'); }} title="Detalhe Fila Prioritária" style={{ background: '#1976d2', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>â˜… Fila Prioritária</button>
-                    <button className="btnstop" onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('ligacaoCoord'); }} title="Detalhe Ligações" style={{ background: '#37474f', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>â˜Ž Ligação</button>
-                    <button onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('ordem'); }} style={{ background: '#8d6e63', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>â˜° Fila Pendente</button>
-                    <button onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('pausaCoord'); }} title="Detalhe Pausa" style={{ background: '#c62828', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>â¸ Pausa</button>
-                    <button onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('agend'); }} style={{ background: '#2e7d32', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>ðŸ“… Agendados</button>
-                    <button onClick={() => setModal('trocaLig')} style={{ background: '#f9a825', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>â‡„ Redistribuir ligação</button>
-                    <button onClick={() => setModal('trocaPri')} style={{ background: '#212121', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>â‡„ Troca prioritária</button>
-                    <button onClick={() => setShowFiltros(v => !v)} style={{ marginLeft: 'auto', background: '#607d8b', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}>ðŸ” Filtros</button>
+                    <button className="btnblue" onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('prioritariaCoord'); }} title="Detalhe Fila Prioritária" style={{ background: '#1976d2', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}><Star className="icon" fill="currentColor" /> Fila Prioritária</button>
+                    <button className="btnstop" onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('ligacaoCoord'); }} title="Detalhe Ligações" style={{ background: '#37474f', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}><Phone className="icon" /> Ligação</button>
+                    <button onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('ordem'); }} style={{ background: '#8d6e63', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}><Clock className="icon" /> Fila Pendente</button>
+                    <button onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('pausaCoord'); }} title="Detalhe Pausa" style={{ background: '#c62828', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}><Pause className="icon" /> Pausa</button>
+                    <button onClick={() => { if (selOperador) setModalOperador({ id: selOperador.id, login: selOperador.label }); setDetailPage(0); setModal('agend'); }} style={{ background: '#2e7d32', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}><Calendar className="icon" /> Agendados</button>
+                    <button onClick={() => setModal('trocaLig')} style={{ background: '#f9a825', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}><Shuffle className="icon" /> Redistribuir ligação</button>
+                    <button onClick={() => setModal('trocaPri')} style={{ background: '#212121', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}><Shuffle className="icon" /> Troca prioritária</button>
+                    <button onClick={() => setShowFiltros(v => !v)} style={{ marginLeft: 'auto', background: '#607d8b', color: '#fff', border: 0, padding: '6px 10px', borderRadius: 4 }}><Filter className="icon" /> Filtros</button>
                 </div>
 
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
@@ -254,8 +272,8 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
                             <label>Data<input type="date" value={filtros.data} onChange={e => setFiltros(s => ({ ...s, data: e.target.value }))} style={{ width: '100%', padding: 6, borderRadius: 4, border: '1px solid #ccc' }} /></label>
                         </div>
                         <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                            <button onClick={() => { setPage(0); q.refetch(); }} style={{ padding: '6px 14px', background: '#1976d2', color: '#fff', border: 0, borderRadius: 4 }}>ðŸ” Pesquisar</button>
-                            <button onClick={() => { setFiltros({ operadorLogin: '', coordenadorLogin: '', data: '' }); setPage(0); }} style={{ padding: '6px 14px', background: '#ef6c00', color: '#fff', border: 0, borderRadius: 4 }}>âœ• Limpar</button>
+                            <button onClick={() => { setPage(0); q.refetch(); }} style={{ padding: '6px 14px', background: '#1976d2', color: '#fff', border: 0, borderRadius: 4 }}><Search className="icon" /> Pesquisar</button>
+                            <button onClick={() => { setFiltros({ operadorLogin: '', coordenadorLogin: '', data: '' }); setPage(0); }} style={{ padding: '6px 14px', background: '#ef6c00', color: '#fff', border: 0, borderRadius: 4 }}><X className="icon" /> Limpar</button>
                             <span style={{ marginLeft: 'auto', fontSize: 12, color: '#777', alignSelf: 'center' }}>Total: {totalElements} â€¢ Página {page + 1} de {totalPages}</span>
                         </div>
                     </div>
@@ -300,12 +318,12 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
                                         <td style={{ padding: '8px 10px', textAlign: 'center' }}>{row.prioritario ?? 0}</td>
                                         <td style={{ padding: '8px 10px', textAlign: 'center' }}><span style={{ padding: '2px 6px', borderRadius: 10, fontSize: 11, background: en.situacao === 'Pausa' ? '#ffebee' : en.situacao === 'Acessando' ? '#e8f5e9' : en.situacao === 'Ausente' ? '#f5f5f5' : '#fff3e0', border: '1px solid #e0e0e0' }}>{en.situacao || 'â€”'}</span></td>
                                         <td style={{ padding: '6px 8px', display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                                            <button title="Resultados" onClick={() => handlePie(row)} style={{ background: '#7b1fa2', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px', cursor: 'pointer' }}>â—‰</button>
-                                            <button title="Fila Prioritária" onClick={() => { setModalOperador({ id: row.id_operador, login: row.operador_login }); setModal('prioritaria'); setModalOperadorOpt({ id: row.id_operador, label: row.operador_login }); }} style={{ background: '#1976d2', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}>â˜…</button>
-                                            <button title="Ligações" onClick={() => { setModalOperador({ id: row.id_operador, login: row.operador_login }); setModal('ligacao'); setModalOperadorOpt({ id: row.id_operador, label: row.operador_login }); }} style={{ background: '#37474f', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}>â˜Ž</button>
-                                            <button title="Pausa" onClick={() => { setModalOperador({ id: row.id_operador, login: row.operador_login }); setModal('pausa'); setModalOperadorOpt({ id: row.id_operador, label: row.operador_login }); }} style={{ background: '#c62828', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}>â¸</button>
-                                            <button title="Agendamentos" onClick={() => { setModalOperador({ id: row.id_operador, login: row.operador_login }); setModal('agend'); setModalOperadorOpt({ id: row.id_operador, label: row.operador_login }); }} style={{ background: '#2e7d32', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}>ðŸ“…</button>
-                                            <button title={en.situacao === 'Pausa' ? 'Despausar' : 'Pausar'} onClick={() => en.situacao === 'Pausa' ? handleDespausar(row) : handlePausar(row)} style={{ background: en.situacao === 'Pausa' ? '#1976d2' : '#c62828', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}>{en.situacao === 'Pausa' ? 'â–¶' : 'â¸'}</button>
+                                            <button title="Resultados" onClick={() => handlePie(row)} style={{ background: '#7b1fa2', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px', cursor: 'pointer' }}><PieChart className="icon" /></button>
+                                            <button title="Fila Prioritária" onClick={() => { setModalOperador({ id: row.id_operador, login: row.operador_login }); setModal('prioritaria'); setModalOperadorOpt({ id: row.id_operador, label: row.operador_login }); }} style={{ background: '#1976d2', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}><Star className="icon" fill="currentColor" /></button>
+                                            <button title="Ligações" onClick={() => { setModalOperador({ id: row.id_operador, login: row.operador_login }); setModal('ligacao'); setModalOperadorOpt({ id: row.id_operador, label: row.operador_login }); }} style={{ background: '#37474f', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}><Phone className="icon" /></button>
+                                            <button title="Pausa" onClick={() => { setModalOperador({ id: row.id_operador, login: row.operador_login }); setModal('pausa'); setModalOperadorOpt({ id: row.id_operador, label: row.operador_login }); }} style={{ background: '#c62828', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}><Pause className="icon" /></button>
+                                            <button title="Agendamentos" onClick={() => { setModalOperador({ id: row.id_operador, login: row.operador_login }); setModal('agend'); setModalOperadorOpt({ id: row.id_operador, label: row.operador_login }); }} style={{ background: '#2e7d32', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}><Calendar className="icon" /></button>
+                                            <button title={en.situacao === 'Pausa' ? 'Despausar' : 'Pausar'} onClick={() => en.situacao === 'Pausa' ? handleDespausar(row) : handlePausar(row)} style={{ background: en.situacao === 'Pausa' ? '#1976d2' : '#c62828', color: '#fff', border: 0, borderRadius: 4, padding: '4px 6px' }}>{en.situacao === 'Pausa' ? <Play className="icon" /> : <Pause className="icon" />}</button>
                                         </td>
                                     </tr>
                                 );
@@ -509,7 +527,7 @@ function DetailModal({ title, children, onClose }: { title: string; children: Re
             <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 8, padding: 16, width: 'min(1100px, 95vw)', maxHeight: '85vh', overflow: 'auto' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                     <h3 style={{ margin: 0, fontSize: 15 }}>{title}</h3>
-                    <button onClick={onClose} style={{ background: '#e0e0e0', border: 0, borderRadius: 4, padding: '4px 8px' }}>âœ•</button>
+                    <button onClick={onClose} style={{ background: '#e0e0e0', border: 0, borderRadius: 4, padding: '4px 8px' }}><X className="icon" /></button>
                 </div>
                 {children}
             </div>

@@ -1,6 +1,7 @@
 package br.com.sol7.olimpio.central.turnotrabalho;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.SearchFilterRequest;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -137,6 +138,13 @@ public class TurnoTrabalhoController {
     @Path("/buscar-turnos-da-unidade")
     public Uni<List<Long>> buscarTurnosDaUnidade() {
         return service.buscarTurnosDaUnidade();
+    }
+
+    @POST
+    @Path("/search")
+    public Uni<PagedResponse<TurnoTrabalhoResponse>> search(SearchFilterRequest request,
+            @QueryParam("page") Integer page, @QueryParam("size") Integer size) {
+        return service.search(request, page == null ? 0 : page, size == null ? 10 : size);
     }
 
 }

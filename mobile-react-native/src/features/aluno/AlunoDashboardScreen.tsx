@@ -19,7 +19,7 @@ const STATUS_COLOR: Record<string, string> = {
     'SEM NOTAS': '#666',
 };
 
-export default function AlunoDashboardScreen({navigation}: NativeStackScreenProps<ParamList, 'aluno/dashboard'>) {
+export default function AlunoDashboardScreen({navigation}: NativeStackScreenProps<ParamList, 'aluno/portalAluno'>) {
     const [nome, setNome] = useState('');
     const [boletins, setBoletins] = useState<BoletimResumo[]>([]);
     const [error, setError] = useState('');

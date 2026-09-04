@@ -1,7 +1,7 @@
 package br.com.sol7.olimpio.educacao.matricula;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
-import br.com.sol7.olimpio.educacao.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.PagedResponse;
 
 import java.util.Date;
 

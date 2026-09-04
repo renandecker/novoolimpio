@@ -156,7 +156,7 @@ export default function ViewUsuarioFormUsuarioListScreen(){
     const [estadoCivilOptions,setEstadoCivilOptions]=useState<OptionItem[]>(ESTADOS_CIVIS);
     const [escolaridadeOptions,setEscolaridadeOptions]=useState<OptionItem[]>(ESCOLARIDADES);
     useEffect(()=>{(async()=>{
-        try{ const r=await api.get<any[]>('/api/basico/genero/list'); const arr=Array.isArray(r.data)?r.data:(r.data as any)?.content??[]; if(arr.length) setGeneroOptions(arr.map((x:any)=>({value:String(x.id),label:x.descricao??x.nome??String(x.id)}))); }catch{}
+        try{ const r=await api.get<any[]>('/api/basico/genero'); const arr=Array.isArray(r.data)?r.data:(r.data as any)?.content??[]; if(arr.length) setGeneroOptions(arr.map((x:any)=>({value:String(x.id),label:x.descricao??x.nome??String(x.id)}))); }catch{}
         try{ const r=await api.get<any[]>('/api/basico/etnia'); const arr=Array.isArray(r.data)?r.data:(r.data as any)?.content??[]; if(arr.length) setEtniaOptions(arr.map((x:any)=>({value:String(x.id),label:x.descricao??x.nome??String(x.id)}))); }catch{}
         try{ const r=await api.get<any[]>('/api/basico/estado-civil'); const arr=Array.isArray(r.data)?r.data:(r.data as any)?.content??[]; if(arr.length) setEstadoCivilOptions(arr.map((x:any)=>({value:String(x.id),label:x.descricao??x.nome??String(x.id)}))); }catch{}
         try{ const r=await api.get<any[]>('/api/basico/escolaridade'); const arr=Array.isArray(r.data)?r.data:(r.data as any)?.content??[]; if(arr.length) setEscolaridadeOptions(arr.map((x:any)=>({value:String(x.id),label:x.descricao??x.nome??String(x.id)}))); }catch{}
@@ -190,10 +190,8 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                 const novoPesId=(resPes.data as any)?.id;
                 if(novoPesId && novoPfId) try{ await api.put(`/api/basico/pessoa-fisica/${novoPfId}`, {...pfBody, pessoaId:novoPesId}); }catch{}
                 if(novoUsuId){
-                    try{ await api.put(`/api/basico/usuario/${novoUsuId}/perfis`, perfis.map(p=>(p as any).id)); }catch{}
-                    try{ await api.put(`/api/basico/usuario/${novoUsuId}/agendas`, agendas.map(a=>(a as any).id)); }catch{}
-                    try{ await api.put(`/api/basico/usuario/${novoUsuId}/unidades`, unidadesAcesso.map(u=>(u as any).id)); }catch{}
-                }
+                // Relationship endpoints don't exist in backend yet
+            }
             }catch(e:any){
                 // fallback: loga
                 console.log('Save fallback', e?.message);

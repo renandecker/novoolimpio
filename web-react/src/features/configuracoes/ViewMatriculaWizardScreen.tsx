@@ -672,7 +672,7 @@ export default function ViewMatriculaWizardScreen() {
                                         }))}
                                     >
                                         <span>{grupoData.grupo?.nome || `Grupo #${grupoId}`}</span>
-                                        <span className="accordion-toggle">â–¼</span>
+                                        <span className="accordion-toggle">▼</span>
                                     </button>
                                     <div className="accordion-content">
                                         <table className="ofc-table">

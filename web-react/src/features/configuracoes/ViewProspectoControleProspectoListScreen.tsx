@@ -1,4 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
+
+import {Info, Sun} from 'lucide-react';
 import { PermissionGate } from '../../shared/services/permissions';
 import { Modal } from '../../shared/components/Modal';
 
@@ -181,7 +183,7 @@ export default function ViewProspectoControleProspectoListScreen() {
                                             style={{ background: '#f0ad4e', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '3px', cursor: 'pointer' }}
                                             onClick={() => handleCarregarDetalhes(item.id)}
                                         >
-                                            â„¹ï¸
+                                            <Info className="icon" />
                                         </button>
                                         {item.outro && (
                                             <>
@@ -190,14 +192,14 @@ export default function ViewProspectoControleProspectoListScreen() {
                                                     style={{ background: '#d9534f', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '3px', cursor: 'pointer' }}
                                                     onClick={() => handleOpenAjustar(item)}
                                                 >
-                                                    âš™ï¸
+                                                    <Sun className="icon" />
                                                 </button>
                                                 <button
                                                     title="Ajustar prospecto selecionados"
                                                     style={{ background: '#5cb85c', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '3px', cursor: 'pointer' }}
                                                     onClick={() => handleOpenAjustarSelecionar(item)}
                                                 >
-                                                    â˜‘ï¸
+                                                    <Sun className="icon" />
                                                 </button>
                                             </>
                                         )}

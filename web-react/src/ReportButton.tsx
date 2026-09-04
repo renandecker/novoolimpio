@@ -23,7 +23,6 @@ const tipoRota: Record<string, string> = {
     TABELA: '/view/relatorios/viewTabela',
     GRAFICO: '/view/relatorios/viewGraficoBarrasVertical',
     MAPA: '/view/relatorios/viewMapa',
-    ORGANOGRAMA: '/view/relatorios/viewOrganograma',
     DASHBOARD: '/view/relatorios/viewDashboard',
     PIZZA: '/view/relatorios/viewGraficoPizza',
     LINHA: '/view/relatorios/viewGraficoLinhas',

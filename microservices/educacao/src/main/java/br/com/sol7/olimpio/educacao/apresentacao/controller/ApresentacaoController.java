@@ -1,7 +1,7 @@
 package br.com.sol7.olimpio.educacao.apresentacao;
 
 import br.com.sol7.olimpio.educacao.apresentacaovideo.ApresentacaoVideoResponse;
-import br.com.sol7.olimpio.educacao.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
