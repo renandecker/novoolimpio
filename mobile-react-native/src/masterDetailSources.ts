@@ -47,7 +47,13 @@ export const AGENDA_SOURCE = '/api/view/agenda/listAgenda';
 export const AGENDA_COLUMNS: MasterDetailColumn[] = [
     {key: 'id', label: 'Id'},
     {key: 'descricao', label: 'Descrição'},
+    {key: 'agendar', label: 'Agendar', render: (item: any) => (item?.agendar ? 'SIM' : 'NÃO')},
+    {key: 'alterar', label: 'Alterar', render: (item: any) => (item?.alterar ? 'SIM' : 'NÃO')},
+    {key: 'fechar', label: 'Fechar', render: (item: any) => (item?.fechar ? 'SIM' : 'NÃO')},
+    {key: 'iniciar', label: 'Iniciar', render: (item: any) => (item?.iniciar ? 'SIM' : 'NÃO')},
+    {key: 'atender', label: 'Atender', render: (item: any) => (item?.atender ? 'SIM' : 'NÃO')},
 ];
+export const AGENDA_SEARCH = ['descricao'];
 export const AGENDA_SEARCH = ['descricao'];
 
 export const PESSOA_SOURCE = '/api/view/pessoa/listPessoa';

@@ -10,11 +10,13 @@ final class SQLHelper {
     private SQLHelper() {
     }
 
-    static List<ControleProspectoWapperResponse> rowsToWapper(List<?> rows) {
+     static List<ControleProspectoWapperResponse> rowsToWapper(List<?> rows) {
         List<ControleProspectoWapperResponse> out = new ArrayList<>();
         if (rows == null) return out;
         for (Object row : rows) {
+            if (row == null) continue;
             Long id = numericOrNull(column(row, "id"));
+            if (id == null) id = 0L;
             String nome = str(column(row, "nome"));
             String valor = str(column(row, "valor"));
             String outro = str(column(row, "outro"));

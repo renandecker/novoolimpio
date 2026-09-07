@@ -222,55 +222,99 @@ private Uni<PagedResponse<Map<String, Object>>> doPagedCuratedWithFilters(Mutiny
         return buildWhereClause(filters, null);
     }
 
+    private Map<String, Object> unwrapFilters(Map<String, Object> filters) {
+        if (filters != null && filters.size() == 1 && filters.containsKey("filters")) {
+            Object inner = filters.get("filters");
+            if (inner instanceof Map<?, ?> wrapped) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> unwrapped = (Map<String, Object>) wrapped;
+                return unwrapped;
+            }
+        }
+        return filters;
+    }
+
+    private String paramName(String key) {
+        return key.replaceAll("[^a-zA-Z0-9_]", "");
+    }
+
+    private static String likeValue(String operation, Object value) {
+        String v = String.valueOf(value);
+        return switch (operation) {
+            case "STARTS_WITH" -> v + "%";
+            case "ENDS_WITH" -> "%" + v;
+            default -> "%" + v + "%";
+        };
+    }
+
+    private static boolean isLikeOperation(String operation) {
+        return switch (operation) {
+            case "STARTS_WITH", "ENDS_WITH", "CONTAINS", "LIKE", "ILIKE" -> true;
+            default -> false;
+        };
+    }
+
     private String buildWhereClause(Map<String, Object> filters, List<String> cols) {
-        if (filters == null || filters.isEmpty()) return "";
+        Map<String, Object> unwrapped = unwrapFilters(filters);
+        if (unwrapped == null || unwrapped.isEmpty()) return "";
         List<String> conditions = new ArrayList<>();
-        for (Map.Entry<String, Object> entry : filters.entrySet()) {
+        for (Map.Entry<String, Object> entry : unwrapped.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
             if (value == null || "".equals(value)) continue;
             if (cols != null && !cols.contains(key)) continue;
             String col = quote(key);
+            String pn = paramName(key);
             if (value instanceof Map) {
-                Map<String, Object> op = (Map<String, Object>) value;
-                String operator = (String) op.get("operator");
-                Object val = op.get("value");
-                if (operator != null && val != null) {
-                    conditions.add(buildCondition(col, operator, val));
-                }
+                Map<String, Object> cond = (Map<String, Object>) value;
+                Object opObj = cond.containsKey("operation") ? cond.get("operation") : cond.get("operator");
+                Object val = cond.get("value");
+                if (opObj == null || val == null) continue;
+                String op = String.valueOf(opObj).toUpperCase();
+                conditions.add(buildCondition(col, pn, op));
             } else {
-                conditions.add(col + " ILIKE :" + key);
+                conditions.add(col + " ILIKE :" + pn);
             }
         }
         if (conditions.isEmpty()) return "";
         return " WHERE " + String.join(" AND ", conditions);
     }
 
-    private String buildCondition(String col, String operator, Object value) {
-        return switch (operator.toUpperCase()) {
-            case "EQ", "=" -> col + " = :" + col.replaceAll("[^a-zA-Z0-9_]", "");
-case "NE", "!=" -> col + " != :" + col.replaceAll("[^a-zA-Z0-9_]", "");
-            case "GT", ">" -> col + " > :" + col.replaceAll("[^a-zA-Z0-9_]", "");
-            case "GE", ">=" -> col + " >= :" + col.replaceAll("[^a-zA-Z0-9_]", "");
-            case "LT", "<" -> col + " < :" + col.replaceAll("[^a-zA-Z0-9_]", "");
-            case "LE", "<=" -> col + " <= :" + col.replaceAll("[^a-zA-Z0-9_]", "");
-            case "LIKE" -> col + " ILIKE :" + col.replaceAll("[^a-zA-Z0-9_]", "");
-            case "IN" -> col + " IN (:" + col.replaceAll("[^a-zA-Z0-9_]", "") + ")";
-            default -> col + " ILIKE :" + col.replaceAll("[^a-zA-Z0-9_]", "");
+    private String buildCondition(String col, String paramName, String operator) {
+        return switch (operator) {
+            case "EQUALS", "EQ", "=" -> col + " = :" + paramName;
+            case "NOT_EQUALS", "NE", "!=" -> col + " != :" + paramName;
+            case "GREATER_THAN", "GT", ">" -> col + " > :" + paramName;
+            case "GREATER_THAN_OR_EQUAL", "GE", ">=" -> col + " >= :" + paramName;
+            case "LESS_THAN", "LT", "<" -> col + " < :" + paramName;
+            case "LESS_THAN_OR_EQUAL", "LE", "<=" -> col + " <= :" + paramName;
+            case "BETWEEN" -> col + " BETWEEN :" + paramName + " AND :" + paramName + "_2";
+            case "IN" -> col + " IN (:" + paramName + ")";
+            case "STARTS_WITH", "ENDS_WITH", "CONTAINS", "LIKE", "ILIKE" -> col + " ILIKE :" + paramName;
+            default -> col + " ILIKE :" + paramName;
         };
     }
 
     private void setFilterParameters(Mutiny.Query<?> query, Map<String, Object> filters) {
-        if (filters == null || filters.isEmpty()) return;
-        for (Map.Entry<String, Object> entry : filters.entrySet()) {
+        Map<String, Object> unwrapped = unwrapFilters(filters);
+        if (unwrapped == null || unwrapped.isEmpty()) return;
+        for (Map.Entry<String, Object> entry : unwrapped.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
             if (value == null || "".equals(value)) continue;
-            String paramName = key.replaceAll("[^a-zA-Z0-9_]", "");
+            String paramName = paramName(key);
             if (value instanceof Map) {
-                Map<String, Object> op = (Map<String, Object>) value;
-                Object val = op.get("value");
-                if (val != null) {
+                Map<String, Object> cond = (Map<String, Object>) value;
+                Object opObj = cond.containsKey("operation") ? cond.get("operation") : cond.get("operator");
+                Object val = cond.get("value");
+                if (opObj == null || val == null) continue;
+                String op = String.valueOf(opObj).toUpperCase();
+                if ("BETWEEN".equals(op)) {
+                    query.setParameter(paramName, val);
+                    query.setParameter(paramName + "_2", cond.get("value2"));
+                } else if (isLikeOperation(op)) {
+                    query.setParameter(paramName, likeValue(op, val));
+                } else {
                     query.setParameter(paramName, val);
                 }
             } else {

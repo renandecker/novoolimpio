@@ -52,7 +52,7 @@ export default function AulaAlunoScreen() {
 
     return (
         <main className="aluno-portal">
-            <p className="aluno-portal-item-acoes"><Link to="/aluno/aula">Voltar Cursos</Link></p>
+            <p className="aluno-portal-item-acoes"><Link to="/aluno/aulas">Voltar Aulas</Link></p>
             <h1>{aula.nome || `Aula ${aula.id}`}</h1>
 
             {videos.length > 0 && (

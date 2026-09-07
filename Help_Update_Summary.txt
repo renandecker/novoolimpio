@@ -1,9 +1,0 @@
-Help text updates for bas_modulo.ajuda field:
-
-1. 0018__financeiro_aluno.sql - Added: 'Visualiza parcelas e contratos do aluno com detalhes de pagamento e histórico.' for /aluno/financeiro module
-
-2. 0014__temas_posicao_e_menu.sql:
-   - Ícones Disponíveis: 'Exibe a lista de ícones disponíveis para uso nas telas e componentes do sistema.'
-   - Temas: 'Cadastro e gerenciamento de temas (cores e layout) do sistema.'
-
-These descriptions will be displayed in the HelpOverlay component when users click the help (??) button on screens. The ajuda field stores text that explains what the screen does and its business rules, shown in an organized panel via the HelpOverlay component at web-react/src/HelpOverlay.tsx.

@@ -97,7 +97,19 @@ export function ModuleList({
     extraActions?: ModuleListExtraAction[];
     outcome?: string;
 }) {
-    const {session} = useAuth();
+    const [sortField, setSortField] = useState<string>('id');
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+    const handleSort = (field: string) => {
+        if (sortField === field) {
+            setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortField(field);
+            setSortDirection('asc');
+        }
+    };
+
+    const sortRequest = {field: sortField, direction: sortDirection};
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(PAGE_SIZES[0]);
     const [sizePickerOpen, setSizePickerOpen] = useState(false);
@@ -125,7 +137,7 @@ export function ModuleList({
     const isAdminUser = isAdmin(session);
     const canRelatorio = isAdminUser || canExecute;
 
-    const q = useModulePaged(path, page, size, params, filterParams);
+    const q = useModulePaged(path, page, size, params, filterParams, sortRequest);
     const items = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);
@@ -142,19 +154,7 @@ export function ModuleList({
             .finally(() => setRunningAction(null));
     };
 
-    const exportarPDF = (item: ApiItem) => {
-        const url = `/api/relatorios/relatorio/disponiveis/TABELA/${item.id}`;
-        Linking.openURL(url);
-    };
-
-    const exportarDOCX = (item: ApiItem) => {
-        // Exportar DOCX - implementar conforme necessário
-    };
-
-    const exportarExcel = (item: ApiItem) => {
-        const url = `/api/relatorios/relatorio/disponiveis/GRAFICO/${item.id}`;
-        Linking.openURL(url);
-    };
+    
 
     const fields = useMemo(
         () => (modal?.mode === 'edit' ? editableFields(modal.item) : editableFields(items[0] ?? null)),
@@ -244,23 +244,32 @@ export function ModuleList({
                 </Pressable>
                 {canRelatorio && items.length > 0 && (
                     <>
-                        <Pressable style={styles.exportButton} onPress={() => {
-                            // Show action sheet or modal with export options
-                            Alert.alert(
-                                'Exportar',
-                                'Selecione o formato de exportação',
-                                [
-                                    {text: 'PDF', onPress: () => exportarPDF(items[0])},
-                                    {text: 'DOCX', onPress: () => exportarDOCX(items[0])},
-                                    {text: 'Excel', onPress: () => exportarExcel(items[0])},
-                                    {text: 'Cancelar', style: 'cancel'},
-                                ]
-                            );
-                        }}>
-                            <Text style={styles.exportButtonText}>Exportar</Text>
-                        </Pressable>
                     </>
                 )}
+            </View>
+            <View style={{paddingHorizontal: 16, paddingVertical: 8, backgroundColor: '#f5f5f5', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: '#ddd'}}>
+                <Text style={{fontSize: 12, fontWeight: '600', color: '#333'}}>Ordenar por:</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap: 6, alignItems: 'center'}}>
+                    {['id', ...Object.keys(items[0] ?? {}).filter(k => k !== 'dadosJson')].map(field => {
+                        const isSelected = sortField === field;
+                        return (
+                            <Pressable
+                                key={field}
+                                onPress={() => handleSort(field)}
+                                style={{
+                                    paddingHorizontal: 10,
+                                    paddingVertical: 4,
+                                    borderRadius: 12,
+                                    backgroundColor: isSelected ? '#007bff' : '#e0e0e0',
+                                }}
+                            >
+                                <Text style={{fontSize: 12, color: isSelected ? '#fff' : '#333', fontWeight: isSelected ? '700' : '400'}}>
+                                    {toTitle(field)} {isSelected ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+                                </Text>
+                            </Pressable>
+                        );
+                    })}
+                </ScrollView>
             </View>
             {notice ? <Text style={styles.notice}>{notice}</Text> : null}
             {items.length === 0 ? (

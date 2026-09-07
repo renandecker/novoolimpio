@@ -3,7 +3,7 @@ import {useQuery} from '@tanstack/react-query';
 import {api} from '../../shared/services/api';
 import {PermissionGate} from '../../shared/services/permissions';
 import {Tabs, type TabItem} from '../../shared/components/Tabs';
-import {ExportDropdown} from '../../shared/components/ExportDropdown';
+
 
 interface UnidadeRow {
     id: number;
@@ -197,7 +197,7 @@ function SolicitacoesTab({unidadeId}: { unidadeId: string }) {
                 <span className="legenda-purple">Aprovado não entregue</span>
             </div>
             <div className="data-table-toolbar" style={{marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px'}}>
-                <ExportDropdown options={exportOptions} triggerLabel="Exportar" triggerIcon={<i className="fa fa-download"/>}/>
+                
             </div>
             <table className="data-table">
                 <thead>

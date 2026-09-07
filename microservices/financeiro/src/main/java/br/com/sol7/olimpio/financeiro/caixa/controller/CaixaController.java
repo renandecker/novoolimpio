@@ -17,6 +17,7 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
 import java.util.List;
 import java.math.BigDecimal;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 @Path("/api/financeiro/caixa")
 @Produces(MediaType.APPLICATION_JSON)
@@ -43,19 +44,19 @@ public class CaixaController {
     }
 
     @POST
-    public Uni<Response> create(@Valid CaixaRequest r) {
+    public Uni<Response> create(CaixaRequest r) {
         return service.create(r).map(item -> Response.status(Response.Status.CREATED).entity(item).build());
     }
 
     @POST
     @Path("/abrir-novo-caixa")
-    public Uni<Response> abrirNovoCaixa(@Valid CaixaRequest r) {
+    public Uni<Response> abrirNovoCaixa(CaixaRequest r) {
         return service.create(r).map(item -> Response.status(Response.Status.CREATED).entity(item).build());
     }
 
     @PUT
     @Path("/{id}")
-    public Uni<CaixaResponse> update(@PathParam("id") Long id, @Valid CaixaRequest r) {
+    public Uni<CaixaResponse> update(@PathParam("id") Long id, CaixaRequest r) {
         return service.update(id, r);
     }
 
@@ -231,6 +232,22 @@ public class CaixaController {
                         default:
                             throw new IllegalArgumentException("Formato não suportado: " + format);
                     }
+                    return Response.ok(bytes)
+                            .header("Content-Type", contentType)
+                            .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
+                            .build();
+                });
+    }
+
+    @POST
+    @Path("/{id}/imprimir")
+    @Consumes(MediaType.WILDCARD)
+    @Produces({"application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"})
+    public Uni<Response> imprimir(@PathParam("id") Long id) {
+        return service.imprimirCaixa(id)
+                .map(bytes -> {
+                    String contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                    String fileName = "relatorio-caixa-" + id + ".docx";
                     return Response.ok(bytes)
                             .header("Content-Type", contentType)
                             .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")

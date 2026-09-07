@@ -13,7 +13,7 @@ public final class LoteNapResponse {
     public record Aluno(Long contratoId, String aluno, String contratante, String email) {
     }
 
-    public record Resumo(Integer processados, Integer semEmail, String assunto) {
+    public record Resumo(Integer processados, Integer semEmail, Integer notificacoes, String assunto) {
     }
 
     public record ResultadoLigacao(Integer processados) {

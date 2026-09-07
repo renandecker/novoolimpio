@@ -6,7 +6,7 @@ import {ScheduleWeekView, mondayOf, toIsoDate, parseDate, addDays, type Schedule
 import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
 import {Tabs} from '../../shared/components/Tabs';
 import {Modal} from '../../shared/components/Modal';
-import {AutoComplete} from '../../shared/components/AutoComplete';
+import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
 import {format} from 'date-fns';
 import '../../features/professor/Disponibilidade.css';
 import './ViewAgendaCompromissosScreen.css';
@@ -235,6 +235,19 @@ export default function ViewAgendaCompromissosScreen() {
         setFormData(prev => ({...prev, agenda}));
     }, [formData.data, formTipoHorario, loadHorarios]);
 
+    const fetchAgendaOptions = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
+        const list = agendasQuery.data || [];
+        const filtered = query.trim()
+            ? list.filter(a => a.descricao.toLowerCase().includes(query.trim().toLowerCase()))
+            : list;
+        return filtered.slice(0, 50).map(a => ({id: a.id, label: a.descricao}));
+    }, [agendasQuery.data]);
+
+    const fetchAgendaById = useCallback(async (id: number): Promise<AutoCompleteOption | null> => {
+        const agenda = (agendasQuery.data || []).find(a => a.id === id);
+        return agenda ? {id: agenda.id, label: agenda.descricao} : null;
+    }, [agendasQuery.data]);
+
     const handleTipoHorarioChange = useCallback((tipo: 'unidade' | 'pessoa') => {
         setFormTipoHorario(tipo);
         if (formData.agenda?.id && formData.data) {
@@ -431,9 +444,9 @@ export default function ViewAgendaCompromissosScreen() {
                         <label htmlFor="agenda">Agenda *</label>
                         <AutoComplete
                             id="agenda"
-                            value={selectedAgendaId ? agendasQuery.data?.find(a => a.id === selectedAgendaId) : null}
-                            onChange={(e: any) => {
-                                const agenda = e.target?.option?.id ? agendasQuery.data?.find((a: any) => a.id === Number(e.target.value)) : null;
+                            value={selectedAgendaId ? agendasQuery.data?.find(a => a.id === selectedAgendaId) ? {id: selectedAgendaId, label: agendasQuery.data.find(a => a.id === selectedAgendaId)?.descricao || ''} : null : null}
+                            onChange={(opt: AutoCompleteOption | null) => {
+                                const agenda = opt?.id ? agendasQuery.data?.find((a: Agenda) => a.id === opt.id) : null;
                                 setSelectedAgendaId(agenda?.id || '');
                                 if (agenda && formData.data) {
                                     loadHorarios(agenda.id, formData.data, formTipoHorario);
@@ -442,9 +455,10 @@ export default function ViewAgendaCompromissosScreen() {
                                 }
                                 setFormData(prev => ({...prev, agenda}));
                             }}
-                            options={agendasQuery.data || []}
-                            getOptionLabel={(a) => a.descricao}
-                            getOptionValue={(a) => a.id}
+                            fetchOptions={fetchAgendaOptions}
+                            fetchById={fetchAgendaById}
+                            minChars={1}
+                            minDropdownResults={50}
                             required
                             placeholder="Selecione a agenda"
                         />
@@ -783,11 +797,15 @@ export default function ViewAgendaCompromissosScreen() {
                                 <div className="form-group">
                                     <label>Agenda *</label>
                                     <AutoComplete
-                                        value={formData.agenda}
-                                        onChange={handleAgendaChange}
-                                        options={agendasQuery.data || []}
-                                        getOptionLabel={(a) => a.descricao}
-                                        getOptionValue={(a) => a.id}
+                                        value={formData.agenda ? {id: formData.agenda.id, label: formData.agenda.descricao} : null}
+                                        onChange={(opt: AutoCompleteOption | null) => {
+                                            const agenda = opt?.id ? agendasQuery.data?.find(a => a.id === opt.id) : null;
+                                            handleAgendaChange(agenda || null);
+                                        }}
+                                        fetchOptions={fetchAgendaOptions}
+                                        fetchById={fetchAgendaById}
+                                        minChars={1}
+                                        minDropdownResults={50}
                                         required
                                         placeholder="Selecione a agenda"
                                     />

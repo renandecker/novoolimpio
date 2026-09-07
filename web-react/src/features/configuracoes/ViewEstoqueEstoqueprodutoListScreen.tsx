@@ -3,7 +3,7 @@ import {useQuery} from '@tanstack/react-query';
 import {api} from '../../shared/services/api';
 import {PermissionGate} from '../../shared/services/permissions';
 import {Tabs, type TabItem} from '../../shared/components/Tabs';
-import {ExportDropdown} from '../../shared/components/ExportDropdown';
+
 
 interface UnidadeRow {
     id: number;
@@ -152,11 +152,7 @@ function PendenciaVendaTab({unidadeId}: { unidadeId: string }) {
         }
     };
 
-    const exportOptions = [
-        {key: 'pdf', label: 'PDF', icon: <i className="fa fa-file-pdf-o"/>, onClick: () => handleExport('pdf')},
-        {key: 'docx', label: 'DOCX', icon: <i className="fa fa-file-word-o"/>, onClick: () => handleExport('docx')},
-        {key: 'excel', label: 'Excel', icon: <i className="fa fa-file-excel-o"/>, onClick: () => handleExport('excel')},
-    ];
+
 
     if (!unidadeId) return <p className="disp-aviso">Selecione uma unidade para visualizar as pendências.</p>;
     if (isLoading) return <p>Carregando...</p>;
@@ -164,9 +160,6 @@ function PendenciaVendaTab({unidadeId}: { unidadeId: string }) {
 
     return (
         <div>
-            <div className="data-table-toolbar" style={{marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px'}}>
-                <ExportDropdown options={exportOptions} triggerLabel="Exportar" triggerIcon={<i className="fa fa-download"/>}/>
-            </div>
             <table className="data-table">
             <thead>
             <tr>

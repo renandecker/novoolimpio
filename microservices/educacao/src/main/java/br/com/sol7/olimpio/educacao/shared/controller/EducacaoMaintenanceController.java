@@ -23,21 +23,21 @@ public class EducacaoMaintenanceController {
     @POST
     @Path("/corrigir-avaliacoes")
     public Uni<Response> corrigirAvaliacoes() {
-        return kafkaProducer.enviarTriggerManutencao("corrigirAvaliacoes")
+        return kafkaProducer.enviarTriggerCorrigirAvaliacoes("corrigirAvaliacoes")
                 .map(v -> Response.accepted().entity(Map.of("status", "trigger enviado", "action", "corrigirAvaliacoes")).build());
     }
 
     @POST
     @Path("/carregar-chamadas-pendentes")
     public Uni<Response> carregarChamadasPendentes() {
-        return kafkaProducer.enviarTriggerManutencao("carregarChamadasPendentes")
+        return kafkaProducer.enviarTriggerCarregarChamadasPendentes("carregarChamadasPendentes")
                 .map(v -> Response.accepted().entity(Map.of("status", "trigger enviado", "action", "carregarChamadasPendentes")).build());
     }
 
     @POST
     @Path("/remover-extratores-antigos")
     public Uni<Response> removerExtratoresAntigos() {
-        return kafkaProducer.enviarTriggerManutencao("removerExtratoresAntigos")
+        return kafkaProducer.enviarTriggerRemoverExtratoresAntigos("removerExtratoresAntigos")
                 .map(v -> Response.accepted().entity(Map.of("status", "trigger enviado", "action", "removerExtratoresAntigos")).build());
     }
 }

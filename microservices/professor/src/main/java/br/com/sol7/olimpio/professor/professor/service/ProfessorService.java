@@ -24,34 +24,57 @@ public class ProfessorService {
     ProfessorRepository repository;
 
     public Uni<List<ProfessorResponse>> list() {
-        return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
+        return repository.listAllWithNome();
     }
 
     public Uni<PagedResponse<ProfessorResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
-        return repository.findAll(io.quarkus.panache.common.Sort.by("id").descending()).page(io.quarkus.panache.common.Page.of(p, s)).list()
-                .onItem().transformToUni(items -> repository.count()
-                        .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
+        String sql = "SELECT p.id, p.id_pessoa, p.fl_ativo, p.caderno_bola, p.dt_inicio, p.dt_fim, " +
+                "COALESCE(pf.nome, pj.nome_fantasia, '') AS nome " +
+                "FROM edc_professor p " +
+                "LEFT JOIN bas_pessoa pes ON pes.id = p.id_pessoa " +
+                "LEFT JOIN bas_pessoa_fisica pf ON pf.id_pessoa = pes.id " +
+                "LEFT JOIN bas_pessoa_juridica pj ON pj.id_pessoa = pes.id " +
+                "ORDER BY p.id DESC";
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql)
+                        .setFirstResult(p * s)
+                        .setMaxResults(s)
+                        .getResultList())
+                .onItem().transform(list -> list.stream()
+                        .map(tuple -> (Object[]) tuple)
+                        .map(arr -> new ProfessorResponse(
+                                ((Number) arr[0]).longValue(),
+                                arr[1] != null ? ((Number) arr[1]).longValue() : null,
+                                (Boolean) arr[2],
+                                (Boolean) arr[3],
+                                (java.sql.Date) arr[4],
+                                (java.sql.Date) arr[5],
+                                (String) arr[6]
+                        ))
+                        .toList())
+                .onItem().transformToUni(list -> repository.count()
+                        .map(count -> new PagedResponse<ProfessorResponse>(list, count, p, s)));
     }
 
     public Uni<ProfessorResponse> find(Long id) {
-        return repository.findById(id).onItem().ifNull()
-                .failWith(() -> new NotFoundException("Professor not found"))
-                .map(this::toResponse);
+        return repository.findByIdWithNome(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Professor not found"));
     }
 
     public Uni<ProfessorResponse> create(ProfessorRequest r) {
         var e = new Professor();
         apply(e, r);
-        return repository.persist(e).replaceWith(() -> toResponse(e));
+        return repository.persist(e)
+                .chain(saved -> repository.findByIdWithNome(saved.id));
     }
 
     public Uni<ProfessorResponse> update(Long id, ProfessorRequest r) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Professor not found"))
                 .invoke(e -> apply(e, r))
-                .map(this::toResponse);
+                .chain(saved -> repository.findByIdWithNome(saved.id));
     }
 
     public Uni<Void> delete(Long id) {
@@ -66,10 +89,6 @@ public class ProfessorService {
         e.cadernoBola = r.cadernoBola();
         e.dataInicio = r.dataInicio();
         e.dataFim = r.dataFim();
-    }
-
-    private ProfessorResponse toResponse(Professor e) {
-        return new ProfessorResponse(e.id, e.pessoaId, e.ativo, e.cadernoBola, e.dataInicio, e.dataFim);
     }
 
     public Uni<Void> buscarDetalhes(String event) {

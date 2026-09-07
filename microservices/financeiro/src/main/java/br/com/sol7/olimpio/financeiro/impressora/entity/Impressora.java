@@ -4,6 +4,8 @@ import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 import java.util.Date;
 
@@ -21,6 +23,7 @@ public class Impressora extends PanacheEntity {
     public boolean manual;
     @Column(name = "tamanho")
     public String tamanho;
+    @Temporal(TemporalType.DATE)
     @Column(name = "data_alteracao")
     public Date dataAlteracao;
 }

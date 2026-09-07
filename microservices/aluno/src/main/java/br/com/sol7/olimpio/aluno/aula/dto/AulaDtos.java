@@ -22,6 +22,13 @@ public final class AulaDtos {
     public record OcorrenciaAulaResponse(Long id, String data, boolean aulaCoringa, boolean aulaPresencial) {
     }
 
+    public record TurmaAulaResponse(Long id, String curso, String componente, Integer turma, String unidade,
+                                    String professor) {
+    }
+
+    public record AulaTurmaResponse(Long id, String nome, String descricao, String data, boolean assistida) {
+    }
+
     public record AulaAssistidaRequest(Long pessoaId) {
     }
 

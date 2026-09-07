@@ -2,6 +2,11 @@ package br.com.sol7.olimpio.relatorios.mapa;
 
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
+import br.com.sol7.olimpio.relatorios.dimensao.DimensaoService;
+import br.com.sol7.olimpio.relatorios.estrutura.EstruturaService;
+import br.com.sol7.olimpio.relatorios.estruturacoluna.EstruturaColunaService;
+import br.com.sol7.olimpio.relatorios.georeferencia.GeoreferenciaService;
+import br.com.sol7.olimpio.relatorios.medida.MedidaService;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
 import io.smallrye.mutiny.Uni;
@@ -9,6 +14,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
+
+import javax.sql.DataSource;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -19,6 +32,28 @@ public class MapaService {
 
     @Inject
     MapaRepository repository;
+
+    @Inject
+    DataSource dataSource;
+
+    @Inject
+    DimensaoService dimensaoService;
+
+    @Inject
+    MedidaService medidaService;
+
+    @Inject
+    GeoreferenciaService georeferenciaService;
+
+    @Inject
+    EstruturaColunaService estruturaColunaService;
+
+    @Inject
+    EstruturaService estruturaService;
+
+    private JdbcTemplate getJdbcTemplate() {
+        return new JdbcTemplate(dataSource);
+    }
 
     public Uni<List<MapaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -88,8 +123,15 @@ public class MapaService {
     //         }
     //         return new ArrayList<>();
     //     }
-    public Uni<List<Long>> autoCompleteMedida(String query) {
-        // Obs: nao existe entidade/repositorio Medida neste microservico (medidaService.autoCompleteMedida)
+    public Uni<List<Long>> autoCompleteMedida(String query, Long estruturaId) {
+        if (estruturaId != null) {
+            return medidaService.list()
+                    .map(list -> list.stream()
+                            .filter(m -> m.estruturaId() != null && m.estruturaId().equals(estruturaId))
+                            .filter(m -> m.nomeVisualizacao() != null && m.nomeVisualizacao().toLowerCase().contains(query.toLowerCase()))
+                            .map(m -> m.id())
+                            .toList());
+        }
         return Uni.createFrom().item(java.util.List.of());
     }
 
@@ -102,8 +144,15 @@ public class MapaService {
     //         }
     //         return new ArrayList<>();
     //     }
-    public Uni<List<Long>> autoCompleteGeoreferencia(String query) {
-        // Obs: nao existe entidade/repositorio Georeferencia neste microservico (georeferenciaService.autoCompleteGeoreferencia)
+    public Uni<List<Long>> autoCompleteGeoreferencia(String query, Long estruturaId) {
+        if (estruturaId != null) {
+            return georeferenciaService.list()
+                    .map(list -> list.stream()
+                            .filter(g -> g.estruturaId() != null && g.estruturaId().equals(estruturaId))
+                            .filter(g -> g.nomeVisualizacao() != null && g.nomeVisualizacao().toLowerCase().contains(query.toLowerCase()))
+                            .map(g -> g.id())
+                            .toList());
+        }
         return Uni.createFrom().item(java.util.List.of());
     }
 
@@ -116,8 +165,15 @@ public class MapaService {
     //         }
     //         return new ArrayList<>();
     //     }
-    public Uni<List<Long>> autoCompleteDimensao(String query) {
-        // Obs: nao existe entidade/repositorio Dimensao neste microservico (dimensaoService.autoCompleteDimensao)
+    public Uni<List<Long>> autoCompleteDimensao(String query, Long estruturaId) {
+        if (estruturaId != null) {
+            return dimensaoService.list()
+                    .map(list -> list.stream()
+                            .filter(d -> d.estruturaId() != null && d.estruturaId().equals(estruturaId))
+                            .filter(d -> d.nomeVisualizacao() != null && d.nomeVisualizacao().toLowerCase().contains(query.toLowerCase()))
+                            .map(d -> d.id())
+                            .toList());
+        }
         return Uni.createFrom().item(java.util.List.of());
     }
 
@@ -179,6 +235,10 @@ public class MapaService {
     @Inject
     MapaRegraService mapaRegraService;
 
+    // Coordinate regex pattern from legacy code
+    private static final String COORDENADA_REGEX = "(?<!\\\\d)([-+]?(?:[1-8]?\\\\d(?:\\\\.\\\\d+)?|90(?:\\\\.0+)?)),\\\\s*([-+]?(?:180(?:\\\\.0+)?|(?:(?:1[0-7]\\\\d)|(?:[1-9]?\\\\d))(?:\\\\.\\\\d+)?))(?!\\\\d)";
+    private static final Pattern COORDENADA_PATTERN = Pattern.compile(COORDENADA_REGEX);
+
     public Uni<MapaPontosResponse> buscarPontos(Long id) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Mapa not found"))
@@ -188,25 +248,26 @@ public class MapaService {
 
     private MapaPontosResponse buildMapaPontosResponse(Mapa mapa, List<MapaRegraResponse> regras) {
         List<RegraPontos> regraPontosList = new ArrayList<>();
-        
+
         // Parse center coordinates from mapa.coordenada
         String[] centroCoords = mapa.coordenada != null ? mapa.coordenada.split(",") : new String[0];
         String latCentro = centroCoords.length > 0 ? centroCoords[0].trim() : "0";
         String lngCentro = centroCoords.length > 1 ? centroCoords[1].trim() : "0";
-        
-        // For each regra, create RegraPontos (without markers for now - would need SQL execution)
+
+        // For each regra, create RegraPontos with actual markers from SQL execution
         for (MapaRegraResponse regra : regras) {
             if (Boolean.TRUE.equals(regra.ativo())) {
+                List<Marcador> marcadores = executarConsultaMarcadores(mapa, regra);
                 regraPontosList.add(new RegraPontos(
                         regra.id(),
                         regra.descricao(),
                         regra.cor() != null ? "#" + regra.cor() : "#ff0000",
                         regra.markerTamanho() != null ? regra.markerTamanho() : (mapa.markerTamanho != null ? mapa.markerTamanho : 10),
-                        new ArrayList<>() // Empty markers - would need SQL execution to populate
+                        marcadores
                 ));
             }
         }
-        
+
         return new MapaPontosResponse(
                 latCentro + "," + lngCentro,
                 mapa.zoom,
@@ -214,5 +275,179 @@ public class MapaService {
                 mapa.markerTamanho,
                 regraPontosList
         );
+    }
+
+    private List<Marcador> executarConsultaMarcadores(Mapa mapa, MapaRegraResponse regra) {
+        List<Marcador> marcadores = new ArrayList<>();
+        JdbcTemplate jdbcTemplate = getJdbcTemplate();
+
+        try {
+            // Fetch column names from related entities using reactive chains
+            // Medida column
+            String medidaColuna = medidaService.find(regra.medidaId())
+                    .onItem().transform(m -> m.estruturaColunaId())
+                    .onItem().transformToUni(id -> estruturaColunaService.find(id))
+                    .onItem().transform(e -> e.coluna())
+                    .await().indefinitely();
+
+            // MedidaMeta column
+            String medidaMetaColuna = null;
+            if (regra.medidaMetaId() != null) {
+                medidaMetaColuna = medidaService.find(regra.medidaMetaId())
+                        .onItem().transform(m -> m.estruturaColunaId())
+                        .onItem().transformToUni(id -> estruturaColunaService.find(id))
+                        .onItem().transform(e -> e.coluna())
+                        .await().indefinitely();
+            }
+
+            // MedidaMetaDois column
+            String medidaMetaDoisColuna = null;
+            if (regra.medidaMetaDoisId() != null) {
+                medidaMetaDoisColuna = medidaService.find(regra.medidaMetaDoisId())
+                        .onItem().transform(m -> m.estruturaColunaId())
+                        .onItem().transformToUni(id -> estruturaColunaService.find(id))
+                        .onItem().transform(e -> e.coluna())
+                        .await().indefinitely();
+            }
+
+            // Georeferencia column
+            String georeferenciaColuna = georeferenciaService.find(mapa.georeferenciaId)
+                    .onItem().transform(g -> g.estruturaColunaId())
+                    .onItem().transformToUni(id -> estruturaColunaService.find(id))
+                    .onItem().transform(e -> e.coluna())
+                    .await().indefinitely();
+
+            // Estrutura table and condition
+            String estruturaTabela = estruturaService.find(mapa.estruturaId)
+                    .onItem().transform(e -> e.tabela())
+                    .await().indefinitely();
+            String estruturaCondicao = estruturaService.find(mapa.estruturaId)
+                    .onItem().transform(e -> e.condicao())
+                    .await().indefinitely();
+
+            // Dimensao column
+            String dimensaoColuna = null;
+            if (mapa.dimensaoId != null) {
+                dimensaoColuna = dimensaoService.find(mapa.dimensaoId)
+                        .onItem().transform(d -> d.estruturaColunaId())
+                        .onItem().transformToUni(id -> estruturaColunaService.find(id))
+                        .onItem().transform(e -> e.coluna())
+                        .await().indefinitely();
+            }
+
+            if (medidaColuna == null || georeferenciaColuna == null || estruturaTabela == null) {
+                // Missing required configuration
+                return marcadores;
+            }
+
+            String medidaCondicao = buildMedidaCondicao(regra, medidaColuna, medidaMetaColuna, medidaMetaDoisColuna);
+            String colunasSelect;
+            String groupBy;
+
+            if (dimensaoColuna == null || dimensaoColuna.isBlank()) {
+                colunasSelect = "sum(" + medidaColuna + ")";
+                groupBy = "group by 1";
+            } else {
+                colunasSelect = dimensaoColuna + ", sum(" + medidaColuna + ")";
+                groupBy = "group by 1,2";
+            }
+
+            String whereClause;
+            if (estruturaCondicao != null && !estruturaCondicao.isBlank()) {
+                whereClause = " " + estruturaCondicao + " and " + medidaCondicao;
+            } else {
+                whereClause = " where " + medidaCondicao;
+            }
+
+            String sql = "select distinct " + georeferenciaColuna + ", " + colunasSelect +
+                    " " + estruturaTabela + whereClause + " " + groupBy + " limit 1000";
+
+            final String finalDimensaoColuna = dimensaoColuna;
+            jdbcTemplate.query(sql, new RowCallbackHandler() {
+                @Override
+                public void processRow(ResultSet rs) throws SQLException {
+                    String coordenada = rs.getString(1);
+                    if (coordenada != null && COORDENADA_PATTERN.matcher(coordenada).matches()) {
+                        String[] coords = coordenada.split(",");
+                        String latitude = coords.length > 0 ? coords[0].trim() : "0";
+                        String longitude = coords.length > 1 ? coords[1].trim() : "0";
+
+                        String valorFormatado = formatarValor(rs, finalDimensaoColuna != null && !finalDimensaoColuna.isBlank());
+
+                        String popup = buildPopup(coordenada, valorFormatado, finalDimensaoColuna != null && !finalDimensaoColuna.isBlank() ? rs.getString(2) : null);
+
+                        Marcador marcador = new Marcador(latitude, longitude, popup, valorFormatado);
+                        marcadores.add(marcador);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Return empty list on error
+        }
+
+        return marcadores;
+    }
+
+    private String buildMedidaCondicao(MapaRegraResponse regra, String medidaColuna, String medidaMetaColuna, String medidaMetaDoisColuna) {
+        String condicao = regra.condicao();
+        String meta = regra.meta() != null ? regra.meta().toString() : "0";
+        String meta2 = regra.meta2() != null ? regra.meta2().toString() : "0";
+
+        // For conditions that compare with another column (medidaMeta)
+        if (medidaMetaColuna != null && !medidaMetaColuna.isBlank() && (condicao.equals("EQ") || condicao.equals("NE") || condicao.equals("GT") || condicao.equals("LT") || condicao.equals("GTE") || condicao.equals("LTE"))) {
+            return switch (condicao) {
+                case "EQ" -> medidaColuna + " = " + medidaMetaColuna;
+                case "NE" -> medidaColuna + " <> " + medidaMetaColuna;
+                case "GT" -> medidaColuna + " > " + medidaMetaColuna;
+                case "LT" -> medidaColuna + " < " + medidaMetaColuna;
+                case "GTE" -> medidaColuna + " >= " + medidaMetaColuna;
+                case "LTE" -> medidaColuna + " <= " + medidaMetaColuna;
+                default -> medidaColuna + " = " + medidaMetaColuna;
+            };
+        }
+
+        // For BETWEEN with two columns
+        if (condicao.equals("BETWEEN") && medidaMetaColuna != null && !medidaMetaColuna.isBlank() && medidaMetaDoisColuna != null && !medidaMetaDoisColuna.isBlank()) {
+            return medidaColuna + " BETWEEN " + medidaMetaColuna + " AND " + medidaMetaDoisColuna;
+        }
+
+        // For BETWEEN with values
+        if (condicao.equals("BETWEEN")) {
+            return medidaColuna + " BETWEEN " + meta + " AND " + meta2;
+        }
+
+        // For IN/NOT_IN with values
+        if (condicao.equals("IN") || condicao.equals("NOT_IN")) {
+            return medidaColuna + " " + condicao + " (" + meta + ")";
+        }
+
+        // Default: compare with value
+        return switch (condicao) {
+            case "EQ" -> medidaColuna + " = " + meta;
+            case "NE" -> medidaColuna + " <> " + meta;
+            case "GT" -> medidaColuna + " > " + meta;
+            case "LT" -> medidaColuna + " < " + meta;
+            case "GTE" -> medidaColuna + " >= " + meta;
+            case "LTE" -> medidaColuna + " <= " + meta;
+            default -> medidaColuna + " = " + meta;
+        };
+    }
+
+    private String formatarValor(ResultSet rs, boolean hasDimensao) throws SQLException {
+        Number valor = hasDimensao ? rs.getBigDecimal(3) : rs.getBigDecimal(2);
+        if (valor == null) return "0";
+
+        // Default to numeric format with 2 decimal places
+        return new BigDecimal(valor.toString()).setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",");
+    }
+
+    private String buildPopup(String coordenada, String valorFormatado, String dimensaoValor) {
+        StringBuilder popup = new StringBuilder();
+        if (dimensaoValor != null && !dimensaoValor.isBlank()) {
+            popup.append("<b>").append(dimensaoValor.replace("'", " ").replace("\"", " ")).append("</b><br>");
+        }
+        popup.append(valorFormatado);
+        return popup.toString();
     }
 }

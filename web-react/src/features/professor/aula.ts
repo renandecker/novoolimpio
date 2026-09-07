@@ -38,7 +38,26 @@ export type AulaAssistida = {
     dataAssistida: string | null;
 };
 
+export type TurmaAula = {
+    id: number;
+    curso: string;
+    componente: string;
+    turma: number | null;
+    unidade: string;
+    professor: string;
+};
+
+export type AulaTurma = {
+    id: number;
+    nome: string;
+    descricao: string;
+    data: string | null;
+    assistida: boolean;
+};
+
 export const aulaApi = {
+    turmas: () => api.get<TurmaAula[]>('/api/aluno/aula/turmas').then(r => r.data),
+    aulasDaTurma: (oferecimentoId: number) => api.get<AulaTurma[]>('/api/aluno/aula/aulas-da-turma', {params: {oferecimentoId}}).then(r => r.data),
     contratos: () => api.get<ContratoAula[]>('/api/aluno/aula/contratos').then(r => r.data),
     oferecimentos: (contratoId: number) => api.get<OferecimentoAula[]>('/api/aluno/aula/oferecimentos', {params: {contratoId}}).then(r => r.data),
     ocorrencias: (oferecimentoId: number) => api.get<OcorrenciaAula[]>('/api/aluno/aula/ocorrencias', {params: {oferecimentoId}}).then(r => r.data),

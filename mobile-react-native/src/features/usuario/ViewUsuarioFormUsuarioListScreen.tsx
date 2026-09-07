@@ -100,7 +100,8 @@ function Toggle({label, value, onChange}:{label:string; value:boolean; onChange:
 }
 
 // ── main ─────────────────────────────────────────────────────────────
-export default function ViewUsuarioFormUsuarioListScreen(){
+export default function ViewUsuarioFormUsuarioListScreen({route}: {route?: any}){
+    const idParam = route?.params?.id ?? route?.params?.entityId;
     const [activeTab,setActiveTab]=useState<'pessoal'|'endereco'|'documentos'|'trabalho'|'acessos'>('pessoal');
     const [acessoSub,setAcessoSub]=useState<'unidade'|'perfil'|'agenda'>('unidade');
 
@@ -168,34 +169,114 @@ export default function ViewUsuarioFormUsuarioListScreen(){
     const [agendas,setAgendas]=useState<ApiItem[]>([]);
     const [agendaPerm,setAgendaPerm]=useState({agendar:false,alterar:false,fechar:false,iniciar:false,atender:false});
 
+    const {data:allUnidades=[]}=useQuery({queryKey:[UNIDADE_SOURCE], queryFn:async()=>(await api.get<ApiItem[]>(UNIDADE_SOURCE)).data});
+    const {data:allPerfis=[]}=useQuery({queryKey:[PERFIL_SOURCE], queryFn:async()=>(await api.get<ApiItem[]>(PERFIL_SOURCE)).data});
+    const {data:allAgendas=[]}=useQuery({queryKey:[AGENDA_SOURCE], queryFn:async()=>(await api.get<ApiItem[]>(AGENDA_SOURCE)).data});
+
+    const [usuarioId,setUsuarioId]=useState<number|undefined>();
+    const [usuarioOriginal,setUsuarioOriginal]=useState<Record<string,unknown>|null>(null);
+    const [pessoaId,setPessoaId]=useState<number|undefined>();
+    const [pessoaOriginal,setPessoaOriginal]=useState<Record<string,unknown>|null>(null);
+    const [pfId,setPfId]=useState<number|undefined>();
+    const [pfOriginal,setPfOriginal]=useState<Record<string,unknown>|null>(null);
+
+    useEffect(()=>{
+        if(!idParam) return;
+        let alive=true;
+        (async()=>{
+            try{
+                const usu = (await api.get<Record<string,unknown>>(`/api/basico/usuario/${idParam}`)).data;
+                let pes:Record<string,unknown>|null=null;
+                let pf:Record<string,unknown>|null=null;
+                if(usu.pessoaId){
+                    pes = (await api.get<Record<string,unknown>>(`/api/basico/pessoa/${usu.pessoaId}`)).data;
+                    if(pes?.id) try{ pf = (await api.get<Record<string,unknown>>(`/api/basico/pessoa-fisica/por-pessoa/${pes.id}`)).data; }catch{
+                        try{ pf = (await api.get<Record<string,unknown>>(`/api/basico/pessoa-fisica/${pes.id}`)).data;}catch{/*ignore*/}
+                    }
+                }
+                if(!alive) return;
+                setUsuarioId(usu.id as number);
+                setUsuarioOriginal(usu);
+                setAtivo(usu.ativo!==false);
+                setPessoaId(pes?.id as number|undefined);
+                setPessoaOriginal(pes);
+                setPfId(pf?.id as number|undefined);
+                setPfOriginal(pf);
+                setF({
+                    login:String(usu.login??''), senha:'',
+                    cpf:String(pf?.cpf??''), rg:String(pf?.rg??''), nome:String(pf?.nome??''), email:String(pes?.email??''),
+                    nomeSocial:String(pf?.nomeSocial??''), dataNascimento:String(pf?.dataNascimento??'').split('T')[0],
+                    nomePai:String(pf?.nomePai??''), nomeMae:String(pf?.nomeMae??''),
+                    telefoneResidencial:String(pes?.telefone??''), celular:String(pes?.celular??''),
+                    nomeReferencia:String(pf?.nomeReferencia??''), telefoneReferencia:String(pf?.telefoneReferencia??''), celularReferencia:String(pf?.celularReferencia??''),
+                    nomeReferencia2:String(pf?.nomeReferencia2??''), telefoneReferencia2:String(pf?.telefoneReferencia2??''), celularReferencia2:String(pf?.celularReferencia2??''),
+                    generoId:pf?.generoId!=null?String(pf.generoId):'', etniaId:pf?.etniaId!=null?String(pf.etniaId):'',
+                    estadoCivilId:pf?.estadoCivilId!=null?String(pf.estadoCivilId):'', escolaridadeId:pf?.escolaridadeId!=null?String(pf.escolaridadeId):'',
+                });
+                setObservacao(String(pes?.observacao??''));
+
+                try{
+                    const apply = (arr:any[], all:ApiItem[]) => { const ids=new Set(arr.map((x:any)=>String(x.id ?? x))); return all.filter(a=>ids.has(String((a as any).id))); };
+                    
+                    let perfisArr:any[] = [];
+                    try { perfisArr = (await api.get<any[]>(`/api/basico/usuario/${idParam}/perfis`)).data ?? []; } catch {}
+                    if(!perfisArr.length && (usu as any).perfis){ perfisArr = (usu as any).perfis; }
+                    if(!perfisArr.length){ try{ const pIds = (await api.get<number[]>(`/api/basico/usuario/buscar-usuario-seu-perfil?entityId=${idParam}`)).data??[]; perfisArr = pIds.map(id=>({id})); }catch{} }
+                    setPerfis(apply(perfisArr, allPerfis));
+
+                    let agendasArr:any[] = [];
+                    try { agendasArr = (await api.get<any[]>(`/api/basico/usuario/${idParam}/agendas`)).data ?? []; } catch {}
+                    if(!agendasArr.length && (usu as any).agendas){ agendasArr = (usu as any).agendas; }
+                    if(!agendasArr.length){ try{ const aIds = (await api.get<number[]>(`/api/basico/usuario/buscar-agendas-disponiveis?usuarioId=${idParam}`)).data??[]; agendasArr = aIds.map(id=>({id})); }catch{} }
+                    setAgendas(apply(agendasArr, allAgendas));
+
+                    let unidadesArr:any[] = [];
+                    try { unidadesArr = (await api.get<any[]>(`/api/basico/usuario/${idParam}/unidades`)).data ?? []; } catch {}
+                    if(!unidadesArr.length && (usu as any).unidades){ unidadesArr = (usu as any).unidades; }
+                    if(!unidadesArr.length && pes?.id){ try{ const uIds = (await api.get<number[]>(`/api/basico/pessoa/buscar-unidades-disponiveis`, {params:{pessoaId: pes.id}})).data??[]; unidadesArr = uIds.map(id=>({id})); }catch{} }
+                    if(!unidadesArr.length){ try{ const uIds = (await api.get<number[]>(`/api/basico/usuario/buscar-unidades-disponiveis?usuarioId=${idParam}`)).data??[]; unidadesArr = uIds.map(id=>({id})); }catch{} }
+                    setUnidadesAcesso(apply(unidadesArr, allUnidades));
+
+                    if((usu as any).unidadeDefaultId) setUnidadeDefaultId(String((usu as any).unidadeDefaultId));
+                }catch(e){ console.error('Erro ao carregar acessos do usuário', e); }
+            }catch(e){ console.error(e); Alert.alert('Erro','Erro ao carregar usuário.'); }
+        })();
+        return()=>{alive=false;};
+    },[idParam, allPerfis, allAgendas, allUnidades]);
+
     const [salvando,setSalvando]=useState(false);
 
     const salvar=async()=>{
         if(!f.login.trim() || !f.nome.trim() || !f.cpf.trim()){ Alert.alert('Campos obrigatórios','Informe Login, Nome e CPF.'); return; }
         setSalvando(true);
         try{
-            // tenta salvar – se API não existir, apenas simula
-            try{
-                const usuBody:any={login:f.login, senha:f.senha||null, ativo, pessoaId:null};
-                const resUsu=await api.post('/api/basico/usuario', usuBody);
-                const novoUsuId=(resUsu.data as any)?.id;
-                const pfBody:any={nome:f.nome, cpf:f.cpf, rg:f.rg||null, nomeSocial:f.nomeSocial||null, dataNascimento:f.dataNascimento||null,
-                    generoId:f.generoId?Number(f.generoId):null, etniaId:f.etniaId?Number(f.etniaId):null, estadoCivilId:f.estadoCivilId?Number(f.estadoCivilId):null, escolaridadeId:f.escolaridadeId?Number(f.escolaridadeId):null,
-                    nomePai:f.nomePai||null, nomeMae:f.nomeMae||null, nomeReferencia:f.nomeReferencia||null, telefoneReferencia:f.telefoneReferencia||null, celularReferencia:f.celularReferencia||null,
-                    nomeReferencia2:f.nomeReferencia2||null, telefoneReferencia2:f.telefoneReferencia2||null, celularReferencia2:f.celularReferencia2||null };
-                const resPf=await api.post('/api/basico/pessoa-fisica', pfBody);
-                const novoPfId=(resPf.data as any)?.id;
-                const pessoaBody:any={email:f.email||null, telefone:f.telefoneResidencial||null, celular:f.celular||null, observacao:observacao||null, cep:enderecos[0]?.cep||null, numero:enderecos[0]?.numero||null, complemento:enderecos[0]?.complemento||null};
-                const resPes=await api.post('/api/basico/pessoa', pessoaBody);
-                const novoPesId=(resPes.data as any)?.id;
-                if(novoPesId && novoPfId) try{ await api.put(`/api/basico/pessoa-fisica/${novoPfId}`, {...pfBody, pessoaId:novoPesId}); }catch{}
-                if(novoUsuId){
-                // Relationship endpoints don't exist in backend yet
+            const usuBody:Record<string,unknown>={...(usuarioOriginal||{}), login:f.login, senha:f.senha||null, ativo, pessoaId:pessoaId||null};
+            const resUsu = usuarioId ? await api.put(`/api/basico/usuario/${usuarioId}`, usuBody) : await api.post('/api/basico/usuario', usuBody);
+            const novoUsuId=(resUsu.data as Record<string,unknown>)?.id ?? usuarioId;
+
+            const pfBody:Record<string,unknown>={...(pfOriginal||{}), nome:f.nome, cpf:f.cpf, rg:f.rg||null, nomeSocial:f.nomeSocial||null, dataNascimento:f.dataNascimento||null,
+                generoId:f.generoId?Number(f.generoId):null, etniaId:f.etniaId?Number(f.etniaId):null, estadoCivilId:f.estadoCivilId?Number(f.estadoCivilId):null, escolaridadeId:f.escolaridadeId?Number(f.escolaridadeId):null,
+                nomePai:f.nomePai||null, nomeMae:f.nomeMae||null,
+                nomeReferencia:f.nomeReferencia||null, telefoneReferencia:f.telefoneReferencia||null, celularReferencia:f.celularReferencia||null,
+                nomeReferencia2:f.nomeReferencia2||null, telefoneReferencia2:f.telefoneReferencia2||null, celularReferencia2:f.celularReferencia2||null,
+            };
+            const resPf = pfId ? await api.put(`/api/basico/pessoa-fisica/${pfId}`, pfBody) : await api.post('/api/basico/pessoa-fisica', pfBody);
+            const novoPfId=(resPf.data as Record<string,unknown>)?.id ?? pfId;
+
+            const pessoaBody:Record<string,unknown>={...(pessoaOriginal||{}), email:f.email||null, telefone:f.telefoneResidencial||null, celular:f.celular||null,
+                observacao:observacao||null, cep:enderecos[0]?.cep||null, numero:enderecos[0]?.numero||null, complemento:enderecos[0]?.complemento||null };
+            let novoPesId=pessoaId;
+            if(pessoaId) await api.put(`/api/basico/pessoa/${pessoaId}`, pessoaBody);
+            else novoPesId=((await api.post('/api/basico/pessoa', pessoaBody)).data as Record<string,unknown>)?.id as number|undefined;
+            if(!pfId && novoPesId && novoPfId) await api.put(`/api/basico/pessoa-fisica/${novoPfId}`, {...pfBody, pessoaId:novoPesId});
+
+            if(novoUsuId){
+                if(unidadeDefaultId) try{ await api.put(`/api/basico/usuario/${novoUsuId}`, {unidadeDefaultId: Number(unidadeDefaultId)});}catch{/*ignore*/}
+                try{ await api.put(`/api/basico/usuario/${novoUsuId}/perfis`, perfis.map(p => (p as any).id)); }catch{/*ignore*/}
+                try{ await api.put(`/api/basico/usuario/${novoUsuId}/agendas`, agendas.map(a => (a as any).id)); }catch{/*ignore*/}
+                try{ await api.put(`/api/basico/usuario/${novoUsuId}/unidades`, unidadesAcesso.map(u => (u as any).id)); }catch{/*ignore*/}
             }
-            }catch(e:any){
-                // fallback: loga
-                console.log('Save fallback', e?.message);
-            }
+
             Alert.alert('Sucesso','Usuário salvo com sucesso.');
         }catch(e:any){ Alert.alert('Erro','Erro ao salvar.'); }
         finally{ setSalvando(false); }
@@ -353,15 +434,15 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                         )}
                         {acessoSub==='agenda' && (
                             <View>
-                                <MasterDetail label="Agenda" source={AGENDA_SOURCE} valueKey="id" searchKeys={AGENDA_SEARCH} columns={AGENDA_COLUMNS} items={agendas} onChange={setAgendas}/>
-                                <View style={{marginTop:12, gap:8}}>
+                                <View style={{marginBottom:12, gap:8}}>
                                     <Toggle label="Agendar" value={agendaPerm.agendar} onChange={v=>setAgendaPerm(p=>({...p,agendar:v}))}/>
                                     <Toggle label="Alterar" value={agendaPerm.alterar} onChange={v=>setAgendaPerm(p=>({...p,alterar:v}))}/>
                                     <Toggle label="Fechar" value={agendaPerm.fechar} onChange={v=>setAgendaPerm(p=>({...p,fechar:v}))}/>
                                     <Toggle label="Iniciar" value={agendaPerm.iniciar} onChange={v=>setAgendaPerm(p=>({...p,iniciar:v}))}/>
                                     <Toggle label="Atender" value={agendaPerm.atender} onChange={v=>setAgendaPerm(p=>({...p,atender:v}))}/>
                                 </View>
-                                <Text style={s.hint}>Permissões aplicadas às agendas selecionadas.</Text>
+                                <Text style={[s.hint, {marginBottom:8}]}>Permissões aplicadas às agendas selecionadas (bas_usuario_agenda).</Text>
+                                <MasterDetail label="Agenda" source={AGENDA_SOURCE} valueKey="id" searchKeys={AGENDA_SEARCH} columns={AGENDA_COLUMNS} items={agendas} onChange={setAgendas}/>
                             </View>
                         )}
                     </View>

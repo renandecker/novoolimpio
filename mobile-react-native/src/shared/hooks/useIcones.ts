@@ -141,7 +141,7 @@ const FALLBACK_ICON_RULES: Array<[RegExp, string]> = [
     [/^caixa$|fluxodecaixa|gerenciafluxocaixa|configuracaocaixa/, '💵'],
     [/^contacorrente$|^contagestaocontas$/, '🏦'],
     [/pagamento|^parcela|^bandeira$|^valorproduto$|^diaspara/, '💳'],
-    [/cobranca|^financeiro$|^gestaovendas$|^movimentofinanceiro$/, '💰'],
+    [/cobranca|^financeiro$|^movimentofinanceiro$/, '💰'],
     [/^estoque$|^produto|^pacote$|^marca$|^entrega$|controleestoque/, '📦'],
     [/^reservalivros$/, '🔖'],
     [/^devolucaolivros$/, '↩️'],

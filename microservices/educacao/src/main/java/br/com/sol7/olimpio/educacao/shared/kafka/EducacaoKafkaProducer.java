@@ -8,8 +8,14 @@ import jakarta.inject.Inject;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 
 /**
- * Publica triggers manuais no Kafka para o microsservico schedule.
- * Usado quando o educacao dispara manualmente email NAP.
+ * Publica triggers manuais no Kafka.
+ * <ul>
+ *   <li>Email NAP -> consumido pelo notificacoes-service (dono do dominio de e-mail);</li>
+ *   <li>Manutencao -> um topico por regra de negocio, todos consumidos pelo schedule-service:
+ *       {@code olimpio.educacao.corrigir-avaliacoes},
+ *       {@code olimpio.educacao.carregar-chamadas-pendentes} e
+ *       {@code olimpio.educacao.remover-extratores-antigos}.</li>
+ * </ul>
  */
 @ApplicationScoped
 public class EducacaoKafkaProducer {
@@ -19,25 +25,51 @@ public class EducacaoKafkaProducer {
     MutinyEmitter<String> emailNapEmitter;
 
     @Inject
-    @Channel("educacao-maintenance-out")
-    MutinyEmitter<String> maintenanceEmitter;
+    @Channel("corrigir-avaliacoes-out")
+    MutinyEmitter<String> corrigirAvaliacoesEmitter;
+
+    @Inject
+    @Channel("carregar-chamadas-out")
+    MutinyEmitter<String> carregarChamadasEmitter;
+
+    @Inject
+    @Channel("remover-extratores-out")
+    MutinyEmitter<String> removerExtratoresEmitter;
 
     public Uni<Void> enviarTriggerEmailNap(String payload) {
-        Log.infof("EducacaoKafkaProducer - enviando trigger email NAP para o schedule: %s", payload);
+        Log.infof("EducacaoKafkaProducer - enviando trigger email NAP para o notificacoes: %s", payload);
         return emailNapEmitter.send(payload)
                 .onFailure().invoke(err -> Log.warnf("EducacaoKafkaProducer - falha ao enviar trigger email NAP: %s", err.getMessage()))
                 .onFailure().recoverWithNull();
     }
 
     /**
-     * Envia um trigger de manutencao do dominio educacao para o schedule.
-     * Acoes suportadas: corrigirAvaliacoes, carregarChamadasPendentes, removerExtratoresAntigos
+     * Envia o trigger da regra corrigirAvaliacoes para o schedule.
      */
-    public Uni<Void> enviarTriggerManutencao(String action) {
-        Log.infof("EducacaoKafkaProducer - enviando trigger manutencao para o schedule: %s", action);
-        return maintenanceEmitter.send(action)
-                .onFailure().invoke(err -> Log.warnf("EducacaoKafkaProducer - falha ao enviar trigger manutencao: %s", err.getMessage()))
+    public Uni<Void> enviarTriggerCorrigirAvaliacoes(String payload) {
+        Log.infof("EducacaoKafkaProducer - enviando trigger corrigirAvaliacoes para o schedule: %s", payload);
+        return corrigirAvaliacoesEmitter.send(payload)
+                .onFailure().invoke(err -> Log.warnf("EducacaoKafkaProducer - falha ao enviar trigger corrigirAvaliacoes: %s", err.getMessage()))
+                .onFailure().recoverWithNull();
+    }
+
+    /**
+     * Envia o trigger da regra carregarChamadasPendentes para o schedule.
+     */
+    public Uni<Void> enviarTriggerCarregarChamadasPendentes(String payload) {
+        Log.infof("EducacaoKafkaProducer - enviando trigger carregarChamadasPendentes para o schedule: %s", payload);
+        return carregarChamadasEmitter.send(payload)
+                .onFailure().invoke(err -> Log.warnf("EducacaoKafkaProducer - falha ao enviar trigger carregarChamadasPendentes: %s", err.getMessage()))
+                .onFailure().recoverWithNull();
+    }
+
+    /**
+     * Envia o trigger da regra removerExtratoresAntigos para o schedule.
+     */
+    public Uni<Void> enviarTriggerRemoverExtratoresAntigos(String payload) {
+        Log.infof("EducacaoKafkaProducer - enviando trigger removerExtratoresAntigos para o schedule: %s", payload);
+        return removerExtratoresEmitter.send(payload)
+                .onFailure().invoke(err -> Log.warnf("EducacaoKafkaProducer - falha ao enviar trigger removerExtratoresAntigos: %s", err.getMessage()))
                 .onFailure().recoverWithNull();
     }
 }
-

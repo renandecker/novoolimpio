@@ -10,8 +10,11 @@ import jakarta.ws.rs.core.*;
 import java.util.List;
 import java.util.Date;
 
+import br.com.sol7.olimpio.basico.feriado.dto.CalendarioEventoResponse;
+import br.com.sol7.olimpio.basico.feriado.dto.FeriadoAjusteResponse;
 import br.com.sol7.olimpio.basico.feriado.dto.FeriadoRequest;
 import br.com.sol7.olimpio.basico.feriado.dto.FeriadoResponse;
+import br.com.sol7.olimpio.basico.feriado.dto.OcorrenciaFeriadoResponse;
 import br.com.sol7.olimpio.basico.feriado.dto.TrocaFeriadosRequest;
 import br.com.sol7.olimpio.basico.feriado.service.FeriadoService;
 
@@ -167,4 +170,33 @@ public class FeriadoController {
         return service.atualizarOferecimento2(ocorrenciaComponenteCurriculars);
     }
 
+    @GET
+    @Path("/ajustes/paged")
+    public Uni<PagedResponse<FeriadoAjusteResponse>> feriadoAjustesPaged(@QueryParam("page") Integer page, @QueryParam("size") Integer size) {
+        return service.feriadoAjustesPaged(page == null ? 0 : page, size == null ? 10 : size);
+    }
+
+    @GET
+    @Path("/ajustes/{id}")
+    public Uni<FeriadoAjusteResponse> feriadoAjusteFind(@PathParam("id") Long id) {
+        return service.feriadoAjusteFind(id);
+    }
+
+    @GET
+    @Path("/calendario/eventos")
+    public Uni<List<CalendarioEventoResponse>> calendarioEventos() {
+        return service.calendarioEventos();
+    }
+
+    @GET
+    @Path("/ajustes/{id}/ocorrencias-ajustar")
+    public Uni<List<OcorrenciaFeriadoResponse>> ocorrenciasAjustar(@PathParam("id") Long id) {
+        return service.ocorrenciasAjustar(id);
+    }
+
+    @GET
+    @Path("/ajustes/{id}/ocorrencias-nao-ajustar")
+    public Uni<List<OcorrenciaFeriadoResponse>> ocorrenciasNaoAjustar(@PathParam("id") Long id) {
+        return service.ocorrenciasNaoAjustar(id);
+    }
 }

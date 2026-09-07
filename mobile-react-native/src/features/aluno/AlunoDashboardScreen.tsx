@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import {ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, TouchableOpacity, Alert} from 'react-native';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {alunoApi, BoletimResumo, formatarNota, formatarPercentual} from '../aluno';
-import {CurriculumAttachment} from '../shared/components/CurriculumAttachment';
-import type {ParamList} from '../HomeScreen';
+import {alunoApi, BoletimResumo, formatarNota, formatarPercentual} from './aluno';
+import {CurriculumAttachment} from './ViewCurriculoAttachmentScreen';
+import type {ParamList} from '../../HomeScreen';
 
 const STATUS_ROTULO: Record<string, string> = {
     APROVADO: 'Aprovado',
@@ -58,7 +58,7 @@ export default function AlunoDashboardScreen({navigation}: NativeStackScreenProp
     if (error) {
         return (
             <View style={styles.page}>
-                <Text style={styles.title}>Portal do Aluno</Text>
+                <Text style={styles.title}>Portal do aluno</Text>
                 <Text style={styles.errorText}>{error}</Text>
             </View>
         );
@@ -68,7 +68,7 @@ export default function AlunoDashboardScreen({navigation}: NativeStackScreenProp
 
     return (
         <ScrollView style={styles.page} contentContainerStyle={styles.content}>
-            <Text style={styles.title}>Portal do Aluno</Text>
+            <Text style={styles.title}>Portal do aluno</Text>
             <Text style={styles.greeting}>
                 Olá, <Text style={styles.greetingName}>{nome}</Text>! Este é o seu painel acadêmico.
             </Text>
@@ -134,6 +134,9 @@ export default function AlunoDashboardScreen({navigation}: NativeStackScreenProp
                         </Pressable>
                         <Pressable onPress={() => navigation.navigate('aluno/frequencia')}>
                             <Text style={styles.link}>Ver frequência</Text>
+                        </Pressable>
+                        <Pressable onPress={() => navigation.navigate('aluno/aulas')}>
+                            <Text style={styles.link}>Ver aulas</Text>
                         </Pressable>
                     </View>
                 </View>

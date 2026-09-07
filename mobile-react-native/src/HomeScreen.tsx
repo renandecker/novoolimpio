@@ -3,8 +3,13 @@ import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity, Activi
 import { LayoutDashboard, BarChart2, Users, Settings, LogOut, DollarSign, ShoppingBag, Search, Bell, TrendingUp, TrendingDown } from 'lucide-react-native';
 import { BarChart } from 'react-native-chart-kit';
 import { Dimensions } from 'react-native';
+import {Header} from './shared/components/Header';
 
 const screenWidth = Dimensions.get('window').width;
+
+export type ParamList = {
+    [key: string]: any;
+};
 
 export default function App() {
   const [loading, setLoading] = useState(false);
@@ -26,9 +31,9 @@ export default function App() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
+    <View style={styles.container}>
+      <Header title="Visão Geral" />
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.searchContainer}>
           <Search size={18} color="#9ca3af" style={styles.searchIcon} />
           <TextInput placeholder="Buscar..." placeholderTextColor="#9ca3af" style={styles.searchInput} />
@@ -37,13 +42,11 @@ export default function App() {
           <Bell size={20} color="#6b7280" />
           <View style={styles.badge} />
         </TouchableOpacity>
-      </View>
 
-      {/* Title */}
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>Visão Geral</Text>
-        <Text style={styles.subtitle}>Acompanhe as métricas principais do seu negócio.</Text>
-      </View>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Visão Geral</Text>
+          <Text style={styles.subtitle}>Acompanhe as métricas principais do seu negócio.</Text>
+        </View>
 
       {/* Cards */}
       <View style={styles.cardsContainer}>
@@ -131,6 +134,7 @@ export default function App() {
         </View>
       </View>
     </ScrollView>
+  </View>
   );
 }
 
@@ -138,14 +142,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
-    padding: 16,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-    marginTop: 20,
+  scrollContent: {
+    padding: 16,
+    paddingTop: 0,
   },
   searchContainer: {
     flex: 1,

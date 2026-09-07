@@ -58,7 +58,9 @@ export default function ViewValorCursoListValorCursoListScreen() {
             <main>
                 <h1>Valor Curso</h1>
                 <DataTable path="/api/view/valorCurso/listValorCurso" columns={VALOR_CURSO_COLUMNS}
-                           maxMainColumns={VALOR_CURSO_COLUMNS.length}/>
+                           maxMainColumns={VALOR_CURSO_COLUMNS.length}
+                           createNavigateTo="/view/valorCurso/formValorCurso"
+                           editNavigateTo="/view/valorCurso/formValorCurso"/>
             </main>
         </PermissionGate>
     );

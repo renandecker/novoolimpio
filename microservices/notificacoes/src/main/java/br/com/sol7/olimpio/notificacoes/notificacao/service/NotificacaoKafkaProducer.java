@@ -62,7 +62,7 @@ public class NotificacaoKafkaProducer {
         try {
             return objectMapper.writeValueAsString(new NotificacaoMessage(
                     e.id, e.username, e.titulo, e.mensagem, e.tipo, e.link,
-                    e.canalSistema, e.canalMobile, e.canalEmail));
+                    e.canalSistema, e.canalMobile, e.canalEmail, null));
         } catch (JsonProcessingException ex) {
             throw new IllegalStateException("Erro ao serializar a notificação para o Kafka", ex);
         }

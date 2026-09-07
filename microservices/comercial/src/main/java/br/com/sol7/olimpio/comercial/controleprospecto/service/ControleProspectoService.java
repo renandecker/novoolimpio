@@ -22,11 +22,14 @@ public class ControleProspectoService {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
     }
 
-    public Uni<List<ControleProspectoResponse>> list(Long campoId) {
+    public Uni<List<ControleProspectoWapperResponse>> list(Long campoId) {
         if (campoId == null) {
-            return list();
+            return Uni.createFrom().item(List.of());
         }
-        return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
+        // O frontend chama GET /api/comercial/controle-prospecto?campoId=X esperando
+        // a lista agrupada por campo (id, nome, valor, outro). Delegar para a query
+        // legada em vez de ler a tabela inexistente "controle_prospecto".
+        return listarPorCampo(campoId, 0, 1000, null, null, null, null, null);
     }
 
     public Uni<PagedResponse<ControleProspectoResponse>> paged(int page, int size) {
@@ -88,12 +91,13 @@ public class ControleProspectoService {
             filter.append(" and pc.valor LIKE '%").append(filtroValor.replace("'", "''")).append("%'");
         }
 
+        int offset = p * s;
         String order;
         if (sortField != null && !sortField.isBlank()) {
             String dir = "DESC".equalsIgnoreCase(sortOrder) ? "desc" : "asc";
-            order = " order by " + sortField + " " + dir + " limit " + s + " offset " + p;
+            order = " order by " + sortField + " " + dir + " limit " + s + " offset " + offset;
         } else {
-            order = " order by p.id desc limit " + s + " offset " + p;
+            order = " order by p.id desc limit " + s + " offset " + offset;
         }
 
         String sql =
@@ -106,7 +110,7 @@ public class ControleProspectoService {
                 " where pc.id_campo = " + campoId + filter + order;
 
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql)
+                .chain(session -> session.createNativeQuery(sql, jakarta.persistence.Tuple.class)
                         .getResultList()
                         .map(SQLHelper::rowsToWapper));
     }

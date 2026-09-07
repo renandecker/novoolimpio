@@ -1,4 +1,4 @@
-ï»¿import {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import {PermissionGate} from '../../shared/services/permissions';
 import {MasterDetail} from '../../shared/components/MasterDetail';
 import {Tabs} from '../../shared/components/Tabs';
@@ -41,16 +41,16 @@ const MAPA_REGRA_COLUMNS: DataTableColumn[] = [
     {key: 'markerTamanho', label: 'Tamanho', width: '60px'},
     {key: 'tipoValor', label: 'Tipo', width: '80px', render: (item: any) => item.medidaMeta ? 'Medida' : 'Valor'},
     {key: 'medidaNome', label: 'Medida', width: '20%'},
-    {key: 'condicao', label: 'CondiÃ§Ã£o', width: '120px'},
+    {key: 'condicao', label: 'Condição', width: '120px'},
     {key: 'meta', label: 'Valor/Meta', width: '120px'},
-    {key: 'descricao', label: 'DescriÃ§Ã£o', width: '30%'},
+    {key: 'descricao', label: 'Descrição', width: '30%'},
 ];
 
 const FILTRO_COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID do Filtro', width: '80px'},
     {key: 'nome', label: 'Nome'},
     {key: 'estruturaNome', label: 'Estrutura'},
-    {key: 'dimensaoNome', label: 'DimensÃ£o'},
+    {key: 'dimensaoNome', label: 'Dimensão'},
 ];
 
 const CONDICOES = [
@@ -62,7 +62,7 @@ const CONDICOES = [
     {value: 'LTE', label: 'Menor ou igual'},
     {value: 'BETWEEN', label: 'Entre'},
     {value: 'IN', label: 'Na lista'},
-    {value: 'NOT_IN', label: 'NÃ£o na lista'},
+    {value: 'NOT_IN', label: 'Não na lista'},
 ];
 
 interface MapaFormData {
@@ -185,11 +185,11 @@ export default function ViewRelatoriosFormMapaListScreen() {
         }
         if (regraForm.condicao === 'BETWEEN') {
             if (!regraForm.tipoValor && (regraForm.meta2 === undefined || regraForm.meta2 === null)) {
-                alert('Informe o segundo valor para condiÃ§Ã£o Entre');
+                alert('Informe o segundo valor para condição Entre');
                 return;
             }
             if (regraForm.tipoValor && !regraForm.medidaMeta2Id) {
-                alert('Selecione a segunda medida para condiÃ§Ã£o Entre');
+                alert('Selecione a segunda medida para condição Entre');
                 return;
             }
         }
@@ -236,7 +236,7 @@ export default function ViewRelatoriosFormMapaListScreen() {
 
     const addFiltro = async () => {
         if (!filtroNome.trim() || !filtroDimensao) {
-            alert('Informe nome e dimensÃ£o para o filtro');
+            alert('Informe nome e dimensão para o filtro');
             return;
         }
         try {
@@ -272,7 +272,7 @@ export default function ViewRelatoriosFormMapaListScreen() {
         if (!currentData.entity.nome || currentData.entity.nome.length < 3) {
             return 'Nome deve ter pelo menos 3 caracteres';
         }
-        if (!currentData.entity.coordenada) return 'Informe a coordenada/Ã¡rea';
+        if (!currentData.entity.coordenada) return 'Informe a coordenada/área';
         if (!currentData.entity.zoom || currentData.entity.zoom <= 0) return 'Zoom deve ser maior que zero';
         if (!currentData.entity.markerTamanho || currentData.entity.markerTamanho <= 0) {
             return 'Tamanho do marker deve ser maior que zero';
@@ -294,7 +294,7 @@ export default function ViewRelatoriosFormMapaListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <div className="div_form">
-                    <div className="form-title">Mapa / RelatÃ³rio GeogrÃ¡fico</div>
+                    <div className="form-title">Mapa / Relatório Geográfico</div>
                     <div className="table_form">
                         <Wizard
                             initialData={data}
@@ -302,11 +302,11 @@ export default function ViewRelatoriosFormMapaListScreen() {
                             steps={[
                                 {
                                     key: 'definicao',
-                                    label: 'DefiniÃ§Ã£o',
+                                    label: 'Definição',
                                     content: (
                                         <div>
                                             <FormLayout
-                                                title="ConfiguraÃ§Ã£o do Mapa"
+                                                title="Configuração do Mapa"
                                                 tabs={[
                                                     {
                                                         key: 'principal',
@@ -314,21 +314,32 @@ export default function ViewRelatoriosFormMapaListScreen() {
                                                         fields: [
                                                             {name: 'nome', label: 'Nome *', required: true, span: 3},
                                                             {name: 'estruturaId', label: 'Estrutura', type: 'autoComplete', autoCompleteSource: ESTRUTURA_SOURCE, autoCompleteSearchKeys: ESTRUTURA_SEARCH, autoCompleteColumns: ESTRUTURA_COLUMNS, span: 3},
-                                                            {name: 'dimensaoId', label: 'DimensÃ£o', type: 'autoComplete', autoCompleteSource: DIMENSAO_SOURCE, autoCompleteSearchKeys: DIMENSAO_SEARCH, autoCompleteColumns: DIMENSAO_COLUMNS, filterParams: {estruturaId: data.entity.estruturaId}},
+                                                            {name: 'dimensaoId', label: 'Dimensão', type: 'autoComplete', autoCompleteSource: DIMENSAO_SOURCE, autoCompleteSearchKeys: DIMENSAO_SEARCH, autoCompleteColumns: DIMENSAO_COLUMNS, filterParams: {estruturaId: data.entity.estruturaId}},
                                                             {name: 'medidaId', label: 'Medida', type: 'autoComplete', autoCompleteSource: MEDIDA_SOURCE, autoCompleteSearchKeys: MEDIDA_SEARCH, autoCompleteColumns: MEDIDA_COLUMNS, filterParams: {estruturaId: data.entity.estruturaId}},
-                                                            {name: 'georeferenciaId', label: 'Coordenada (GeorreferÃªncia)', type: 'autoComplete', autoCompleteSource: GEOREFERENCIA_SOURCE, autoCompleteSearchKeys: GEOREFERENCIA_SEARCH, autoCompleteColumns: GEOREFERENCIA_COLUMNS, filterParams: {estruturaId: data.entity.estruturaId}},
+                                                            {name: 'georeferenciaId', label: 'Coordenada (Georreferência)', type: 'autoComplete', autoCompleteSource: GEOREFERENCIA_SOURCE, autoCompleteSearchKeys: GEOREFERENCIA_SEARCH, autoCompleteColumns: GEOREFERENCIA_COLUMNS, filterParams: {estruturaId: data.entity.estruturaId}},
                                                         ],
                                                     },
-                                                    {
-                                                        key: 'visual',
-                                                        label: 'Visual',
-                                                        fields: [
-                                                            {name: 'coordenada', label: 'Ãrea/Coordenada *', required: true, span: 2},
-                                                            {name: 'zoom', label: 'Zoom *', type: 'number', required: true, min: 1},
-                                                            {name: 'markerTamanho', label: 'Tamanho Marker *', type: 'number', required: true, min: 1},
-                                                            {name: 'altura', label: 'Altura *', type: 'number', required: true, min: 1},
-                                                        ],
-                                                    },
+{
+                                                        key: 'visual',
+                                                        label: 'Visual',
+                                                        fields: [
+                                                            {name: 'coordenada', label: 'Área/Coordenada *', required: true, span: 2},
+                                                            {name: 'zoom', label: 'Zoom *', type: 'number', required: true, min: 1},
+                                                            {name: 'markerTamanho', label: 'Tamanho Marker *', type: 'number', required: true, min: 1},
+                                                            {name: 'altura', label: 'Altura *', type: 'number', required: true, min: 1},
+                                                        ],
+                                                    },
+                                                    {
+                                                        key: 'sql',
+                                                        label: 'Configuração SQL',
+                                                        fields: [
+                                                            {name: 'estruturaTabela', label: 'Tabela da Estrutura *', required: true, span: 2},
+                                                            {name: 'estruturaCondicao', label: 'Condição da Estrutura', type: 'textarea', span: 4},
+                                                            {name: 'georeferenciaColuna', label: 'Coluna de Georeferência *', required: true, span: 2},
+                                                            {name: 'dimensaoColuna', label: 'Coluna da Dimensão', span: 2},
+                                                            {name: 'medidaColuna', label: 'Coluna da Medida *', required: true, span: 2},
+                                                        ],
+                                                    },
                                                 ]}
                                                 initialValues={data.entity}
                                                 onSubmit={(vals) => updateFields({entity: {...data.entity, ...vals}})}
@@ -342,13 +353,13 @@ export default function ViewRelatoriosFormMapaListScreen() {
                                 },
                                 {
                                     key: 'permissao',
-                                    label: 'PermissÃ£o',
+                                    label: 'Permissão',
                                     content: (
                                         <div>
                                             <div style={{marginBottom: '20px'}}>
-                                                <h3>UsuÃ¡rios</h3>
+                                                <h3>Usuários</h3>
                                                 <MasterDetail
-                                                    label="UsuÃ¡rio"
+                                                    label="Usuário"
                                                     source={USUARIO_SOURCE}
                                                     valueKey="id"
                                                     searchKeys={USUARIO_SEARCH}
@@ -405,14 +416,14 @@ export default function ViewRelatoriosFormMapaListScreen() {
                                                                 ], span: 1, onChange: (v) => setRegraForm({...regraForm, tipoValor: v === 'true'})},
                                                                 {name: 'markerTamanho', label: 'Tamanho Marker *', type: 'number', required: true, min: 1, span: 1},
                                                                 {name: 'medidaId', label: 'Medida', type: 'autoComplete', autoCompleteSource: MEDIDA_SOURCE, autoCompleteSearchKeys: MEDIDA_SEARCH, autoCompleteColumns: MEDIDA_COLUMNS, filterParams: {estruturaId: data.entity.estruturaId}, span: 2, conditional: regraForm.tipoValor},
-                                                                {name: 'condicao', label: 'CondiÃ§Ã£o', type: 'select', options: CONDICOES, span: 1},
+                                                                {name: 'condicao', label: 'Condição', type: 'select', options: CONDICOES, span: 1},
                                                                 {name: 'meta', label: 'Valor', type: 'number', step: 0.01, span: 2, conditional: !regraForm.tipoValor && regraForm.condicao !== 'BETWEEN'},
                                                                 {name: 'medidaMetaId', label: 'Medida Meta', type: 'autoComplete', autoCompleteSource: MEDIDA_SOURCE, autoCompleteSearchKeys: MEDIDA_SEARCH, autoCompleteColumns: MEDIDA_COLUMNS, filterParams: {estruturaId: data.entity.estruturaId}, span: 2, conditional: regraForm.tipoValor && regraForm.condicao !== 'BETWEEN'},
                                                                 {name: 'meta', label: 'Valor Inicial', type: 'number', step: 0.01, span: 1, conditional: !regraForm.tipoValor && regraForm.condicao === 'BETWEEN'},
                                                                 {name: 'meta2', label: 'Valor Final', type: 'number', step: 0.01, span: 1, conditional: !regraForm.tipoValor && regraForm.condicao === 'BETWEEN'},
                                                                 {name: 'medidaMetaId', label: 'Medida Meta Inicial', type: 'autoComplete', autoCompleteSource: MEDIDA_SOURCE, autoCompleteSearchKeys: MEDIDA_SEARCH, autoCompleteColumns: MEDIDA_COLUMNS, filterParams: {estruturaId: data.entity.estruturaId}, span: 2, conditional: regraForm.tipoValor && regraForm.condicao === 'BETWEEN'},
                                                                 {name: 'medidaMeta2Id', label: 'Medida Meta Final', type: 'autoComplete', autoCompleteSource: MEDIDA_SOURCE, autoCompleteSearchKeys: MEDIDA_SEARCH, autoCompleteColumns: MEDIDA_COLUMNS, filterParams: {estruturaId: data.entity.estruturaId}, span: 2, conditional: regraForm.tipoValor && regraForm.condicao === 'BETWEEN'},
-                                                                {name: 'descricao', label: 'DescriÃ§Ã£o *', required: true, span: 4},
+                                                                {name: 'descricao', label: 'Descrição *', required: true, span: 4},
                                                             ],
                                                         },
                                                     ]}
@@ -451,7 +462,7 @@ export default function ViewRelatoriosFormMapaListScreen() {
                                                             label: '',
                                                             fields: [
                                                                 {name: 'nome', label: 'Nome *', required: true, span: 2},
-                                                                {name: 'dimensaoId', label: 'DimensÃ£o', type: 'autoComplete', autoCompleteSource: DIMENSAO_SOURCE, autoCompleteSearchKeys: DIMENSAO_SEARCH, autoCompleteColumns: DIMENSAO_COLUMNS, span: 2},
+                                                                {name: 'dimensaoId', label: 'Dimensão', type: 'autoComplete', autoCompleteSource: DIMENSAO_SOURCE, autoCompleteSearchKeys: DIMENSAO_SEARCH, autoCompleteColumns: DIMENSAO_COLUMNS, span: 2},
                                                             ],
                                                         },
                                                     ]}
@@ -484,3 +495,4 @@ export default function ViewRelatoriosFormMapaListScreen() {
         </PermissionGate>
     );
 }
+

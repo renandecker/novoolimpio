@@ -1,5 +1,6 @@
-﻿import React from 'react';
+import React from 'react';
 export { default as AlunoAulasScreen } from '../features/configuracoes/AlunoAulasScreen.tsx';
+export { default as AlunoAulasTurmaScreen } from '../features/configuracoes/AlunoAulasTurmaScreen.tsx';
 export { default as AlunoAvaliacaoResponderScreen } from '../features/configuracoes/AlunoAvaliacaoResponderScreen.tsx';
 export { default as AlunoAvaliacoesScreen } from '../features/configuracoes/AlunoAvaliacoesScreen.tsx';
 export { default as AlunoBoletimScreen } from '../features/configuracoes/AlunoBoletimScreen.tsx';
@@ -11,10 +12,6 @@ export { default as AsaasCobrancasListScreen } from '../features/configuracoes/A
 export { default as AsaasParcelasListScreen } from '../features/configuracoes/AsaasParcelasListScreen.tsx';
 export { default as AuditoriaScreen } from '../features/configuracoes/AuditoriaScreen.tsx';
 export { default as AulaAlunoScreen } from '../features/configuracoes/AulaAlunoScreen.tsx';
-export { default as AulaAulaScreen } from '../features/configuracoes/AulaAulaScreen.tsx';
-export { default as AulaContratoScreen } from '../features/configuracoes/AulaContratoScreen.tsx';
-export { default as AulaOcorrenciaScreen } from '../features/configuracoes/AulaOcorrenciaScreen.tsx';
-export { default as AulaOferecimentoScreen } from '../features/configuracoes/AulaOferecimentoScreen.tsx';
 export { default as CadastroUsuarioScreen } from '../features/configuracoes/CadastroUsuarioScreen.tsx';
 export { default as CurriculoCampoListScreen } from '../features/configuracoes/CurriculoCampoListScreen.tsx';
 export { default as CurriculoConfiguracaoListScreen } from '../features/configuracoes/CurriculoConfiguracaoListScreen.tsx';
@@ -59,7 +56,7 @@ export { default as ViewCampanhaNegociacaoListCampanhaNegociacaoListScreen } fro
 export const ViewCampanhaFormCampanhaListScreen = () => <div>ViewCampanhaFormCampanhaListScreen (not implemented)</div>;
 export const ViewCampanhaFormDirecionamentoListScreen = () => <div>ViewCampanhaFormDirecionamentoListScreen (not implemented)</div>;
 export const ViewCampanhaFormGerarPacotesListScreen = () => <div>ViewCampanhaFormGerarPacotesListScreen (not implemented)</div>;
-export const ViewCampanhaListCampanhaListScreen = () => <div>ViewCampanhaListCampanhaListScreen (not implemented)</div>;
+export { default as ViewCampanhaListCampanhaListScreen } from '../features/marketing/ViewCampanhaListCampanhaListScreen.tsx';
 export { default as ViewCampoFormCampoListScreen } from '../features/configuracoes/ViewCampoFormCampoListScreen.tsx';
 export { default as ViewCampoListCampoListScreen } from '../features/configuracoes/ViewCampoListCampoListScreen.tsx';
 export { default as ViewCargaFormCargaListScreen } from '../features/configuracoes/ViewCargaFormCargaListScreen.tsx';
@@ -105,7 +102,7 @@ export { default as ViewConfiguracaoListConfiguracaoParcelaListScreen } from '..
 export { default as ViewConfiguracaoListLayoutListScreen } from '../features/configuracoes/ViewConfiguracaoListLayoutListScreen.tsx';
 export { default as ViewConsultorConsultorListScreen } from '../features/configuracoes/ViewConsultorConsultorListScreen.tsx';
 export { default as ViewConsultorFormConsultorListScreen } from '../features/configuracoes/ViewConsultorFormConsultorListScreen.tsx';
-export { default as ViewConsultorListConsultorListScreen } from '../features/configuracoes/ViewConsultorListConsultorListScreen.tsx';
+
 export { default as ViewContaControlePagamentoListScreen } from '../features/configuracoes/ViewContaControlePagamentoListScreen.tsx';
 export { default as ViewContaCorrenteFormContaCorrenteListScreen } from '../features/configuracoes/ViewContaCorrenteFormContaCorrenteListScreen.tsx';
 export { default as ViewContaCorrenteListContaCorrenteListScreen } from '../features/configuracoes/ViewContaCorrenteListContaCorrenteListScreen.tsx';
@@ -229,11 +226,11 @@ export { default as ViewOferecimentoComponenteCurricularListOferecimentoCursoLis
 export { default as ViewOperacionalFormOperacionalListScreen } from '../features/configuracoes/ViewOperacionalFormOperacionalListScreen.tsx';
 export { default as ViewOperacionalListOperacionalListScreen } from '../features/configuracoes/ViewOperacionalListOperacionalListScreen.tsx';
 export { default as ViewPacoteListPacoteListScreen } from '../features/configuracoes/ViewPacoteListPacoteListScreen.tsx';
+export { default as ViewPacoteFormPacoteListScreen } from '../features/configuracoes/ViewPacoteFormPacoteListScreen.tsx';
 export { default as ViewPagamentoAberturacaixaListScreen } from '../features/configuracoes/ViewPagamentoAberturacaixaListScreen.tsx';
 export { default as ViewPagamentoCaixaentradaListScreen } from '../features/configuracoes/ViewPagamentoCaixaentradaListScreen.tsx';
 export { default as ViewPagamentoCaixasaidaListScreen } from '../features/configuracoes/ViewPagamentoCaixasaidaListScreen.tsx';
 export { default as ViewPagamentoCodigoVerificadorListScreen } from '../features/configuracoes/ViewPagamentoCodigoVerificadorListScreen.tsx';
-export { default as ViewPagamentoEfetuarPagamentoListScreen } from '../features/configuracoes/ViewPagamentoEfetuarPagamentoListScreen.tsx';
 export { default as ViewPagamentoFechamentoCaixaWizardScreen } from '../features/configuracoes/ViewPagamentoFechamentoCaixaWizardScreen.tsx';
 export { default as ViewPagamentoMovimentocaixaListScreen } from '../features/configuracoes/ViewPagamentoMovimentocaixaListScreen.tsx';
 export { default as ViewPagamentoProdutoListScreen } from '../features/configuracoes/ViewPagamentoProdutoListScreen.tsx';
@@ -251,7 +248,7 @@ export { default as ViewPessoaFormPessoaPessoaUsuarioListScreen } from '../featu
 export { default as ViewPessoaListDisponibilidadePessoaListScreen } from '../features/configuracoes/ViewPessoaListDisponibilidadePessoaListScreen.tsx';
 export { default as ViewPessoaListPessoaFisicaListScreen } from '../features/configuracoes/ViewPessoaListPessoaFisicaListScreen.tsx';
 export { default as ViewPessoaListPessoaJuridicaListScreen } from '../features/configuracoes/ViewPessoaListPessoaJuridicaListScreen.tsx';
-export { default as ViewPessoaListPessoaListScreen } from '../features/configuracoes/ViewPessoaListPessoaListScreen.tsx';
+
 export { default as ViewPessoaPessoaDocumentoListScreen } from '../features/configuracoes/ViewPessoaPessoaDocumentoListScreen.tsx';
 
 export { default as ViewProdutoFormProdutoListScreen } from '../features/configuracoes/ViewProdutoFormProdutoListScreen.tsx';
@@ -330,9 +327,6 @@ export { default as ViewTipoCursoFormTipoCursoListScreen } from '../features/con
 export { default as ViewTipoCursoListTipoCursoListScreen } from '../features/configuracoes/ViewTipoCursoListTipoCursoListScreen.tsx';
 export { default as ViewTipoHistoricoFormTipoHistoricoListScreen } from '../features/configuracoes/ViewTipoHistoricoFormTipoHistoricoListScreen.tsx';
 export { default as ViewTipoHistoricoListTipoHistoricoListScreen } from '../features/configuracoes/ViewTipoHistoricoListTipoHistoricoListScreen.tsx';
-export { default as ViewTipoPagamentoColunasTipoPagamentoListScreen } from '../features/configuracoes/ViewTipoPagamentoColunasTipoPagamentoListScreen.tsx';
-export { default as ViewTipoPagamentoFormTipoPagamentoListScreen } from '../features/configuracoes/ViewTipoPagamentoFormTipoPagamentoListScreen.tsx';
-export { default as ViewTipoPagamentoListTipoPagamentoListScreen } from '../features/configuracoes/ViewTipoPagamentoListTipoPagamentoListScreen.tsx';
 export { default as ViewTipoPausaFormTipoPausaListScreen } from '../features/configuracoes/ViewTipoPausaFormTipoPausaListScreen.tsx';
 export { default as ViewTipoPausaListTipoPausaListScreen } from '../features/configuracoes/ViewTipoPausaListTipoPausaListScreen.tsx';
 export { default as ViewTipoSalaFormTipoSalaListScreen } from '../features/configuracoes/ViewTipoSalaFormTipoSalaListScreen.tsx';
@@ -345,7 +339,6 @@ export { default as ViewTipoUnidadeListTipoUnidadeListScreen } from '../features
 export { default as ViewTurmaFormAjusteCalendarioListScreen } from '../features/configuracoes/ViewTurmaFormAjusteCalendarioListScreen.tsx';
 export { default as ViewTurmaListTurmaFinalizandoListScreen } from '../features/configuracoes/ViewTurmaListTurmaFinalizandoListScreen.tsx';
 export { default as ViewTurmaListTurmaListScreen } from '../features/configuracoes/ViewTurmaListTurmaListScreen.tsx';
-export { default as ViewTurmaRecriarCalendarioAcademicoListScreen } from '../features/configuracoes/ViewTurmaRecriarCalendarioAcademicoListScreen.tsx';
 
 export { default as ViewTurnoEducacaoFormTurnoEducacaoListScreen } from '../features/configuracoes/ViewTurnoEducacaoFormTurnoEducacaoListScreen.tsx';
 export { default as ViewTurnoEducacaoListTurnoEducacaoListScreen } from '../features/configuracoes/ViewTurnoEducacaoListTurnoEducacaoListScreen.tsx';

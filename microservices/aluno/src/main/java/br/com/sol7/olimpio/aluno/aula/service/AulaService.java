@@ -4,9 +4,11 @@ import br.com.sol7.olimpio.aluno.aula.entity.Aula;
 import br.com.sol7.olimpio.aluno.aula.repository.AulaRepository;
 import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.AulaAssistidaResponse;
 import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.AulaResponse;
+import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.AulaTurmaResponse;
 import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.ContratoAulaResponse;
 import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.OcorrenciaAulaResponse;
 import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.OferecimentoAulaResponse;
+import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.TurmaAulaResponse;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -68,6 +70,33 @@ public class AulaService {
                         .toList());
     }
 
+    public Uni<List<TurmaAulaResponse>> turmas(String username) {
+        return repository.pessoaIdPorUsername(username)
+                .onItem().ifNull().failWith(() -> new NotFoundException("Aluno não encontrado"))
+                .onItem().transformToUni(pessoaId -> repository.turmasDoAluno(pessoaId)
+                        .map(rows -> rows.stream()
+                                .map(row -> new TurmaAulaResponse(asLong(row[0]),
+                                        asString(row[1]),
+                                        asString(row[2]),
+                                        asInteger(row[3]),
+                                        asString(row[4]),
+                                        asString(row[5])))
+                                .toList()));
+    }
+
+    public Uni<List<AulaTurmaResponse>> aulasDaTurma(String username, Long oferecimentoId) {
+        return repository.pessoaIdPorUsername(username)
+                .onItem().ifNull().failWith(() -> new NotFoundException("Aluno não encontrado"))
+                .onItem().transformToUni(pessoaId -> repository.aulasDaTurma(oferecimentoId, pessoaId)
+                        .map(rows -> rows.stream()
+                                .map(row -> new AulaTurmaResponse(asLong(row[0]),
+                                        asString(row[1]),
+                                        asString(row[2]),
+                                        formatData(asDate(row[3])),
+                                        asBoolean(row[4])))
+                                .toList()));
+    }
+
     public Uni<AulaAssistidaResponse> marcarAssistida(String username, Long aulaId) {
         return repository.pessoaIdPorUsername(username)
                 .onItem().ifNull().failWith(() -> new NotFoundException("Aluno não encontrado"))
@@ -98,6 +127,12 @@ public class AulaService {
         if (o == null) return null;
         if (o instanceof Number n)return n.longValue();
         return Long.valueOf(o.toString());
+    }
+
+    private Integer asInteger(Object o) {
+        if (o == null) return null;
+        if (o instanceof Number n)return n.intValue();
+        return Integer.valueOf(o.toString());
     }
 
     private Date asDate(Object o) {

@@ -11,12 +11,13 @@ public class ImpressoraRepository implements PanacheRepository<Impressora> {
 
     // Migrado de ImpressoraRepository.buscarImpressorasUnidade (legado) - HQL original:
     // Select i from Impressora i where i.unidade = ?1 order by i.dataAlteracao desc
-    public static final String SQL_BUSCAR_IMPRESSORAS_UNIDADE =
-            "SELECT i.* FROM fin_impressora i WHERE i.id_unidade = ?1 ORDER BY i.data_alteracao desc";
+    // (unidadeId agora é uma coluna simples Long, não associação cross-service)
+    public static final String HQL_BUSCAR_IMPRESSORAS_UNIDADE =
+            "SELECT i FROM Impressora i WHERE i.unidadeId = ?1 ORDER BY i.dataAlteracao DESC";
 
     public Uni<java.util.List<Impressora>> buscarImpressorasUnidade(Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_IMPRESSORAS_UNIDADE, Impressora.class)
+                .chain(session -> session.createQuery(HQL_BUSCAR_IMPRESSORAS_UNIDADE, Impressora.class)
                         .setParameter(1, unidadeId)
                         .getResultList());
     }
@@ -24,12 +25,12 @@ public class ImpressoraRepository implements PanacheRepository<Impressora> {
 
     // Migrado de ImpressoraRepository.verificarImpressorasComUnidade (legado) - HQL original:
     // Select i from Impressora i where i.unidade = ?1 and i.id <> ?2 order by i.dataAlteracao desc
-    public static final String SQL_VERIFICAR_IMPRESSORAS_COM_UNIDADE =
-            "SELECT i.* FROM fin_impressora i WHERE i.id_unidade = ?1 and i.id <> ?2 ORDER BY i.data_alteracao desc";
+    public static final String HQL_VERIFICAR_IMPRESSORAS_COM_UNIDADE =
+            "SELECT i FROM Impressora i WHERE i.unidadeId = ?1 and i.id <> ?2 ORDER BY i.dataAlteracao DESC";
 
     public Uni<java.util.List<Impressora>> verificarImpressorasComUnidade(Long unidadeId, int id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_VERIFICAR_IMPRESSORAS_COM_UNIDADE, Impressora.class)
+                .chain(session -> session.createQuery(HQL_VERIFICAR_IMPRESSORAS_COM_UNIDADE, Impressora.class)
                         .setParameter(1, unidadeId)
                         .setParameter(2, id)
                         .getResultList());

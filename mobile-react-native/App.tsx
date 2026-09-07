@@ -97,7 +97,7 @@ import ViewConfiguracaoListConfiguracaoParcelaListScreen
 import ViewConfiguracaoListLayoutListScreen from './src/screens/ViewConfiguracaoListLayoutListScreen';
 import ViewConsultorConsultorListScreen from './src/screens/ViewConsultorConsultorListScreen';
 import ViewConsultorFormConsultorListScreen from './src/screens/ViewConsultorFormConsultorListScreen';
-import ViewConsultorListConsultorListScreen from './src/screens/ViewConsultorListConsultorListScreen';
+
 import ViewContaControlePagamentoListScreen from './src/screens/ViewContaControlePagamentoListScreen';
 import ViewContaGestaoContaListScreen from './src/screens/ViewContaGestaoContaListScreen';
 import ViewContaCorrenteFormContaCorrenteListScreen from './src/screens/ViewContaCorrenteFormContaCorrenteListScreen';
@@ -246,6 +246,7 @@ import ViewOferecimentoComponenteCurricularListOferecimentoCursoListScreen
 import ViewOperacionalFormOperacionalListScreen from './src/screens/ViewOperacionalFormOperacionalListScreen';
 import ViewOperacionalListOperacionalListScreen from './src/screens/ViewOperacionalListOperacionalListScreen';
 import ViewPacoteListPacoteListScreen from './src/screens/ViewPacoteListPacoteListScreen';
+import ViewPacoteFormPacoteListScreen from './src/features/configuracoes/ViewPacoteFormPacoteListScreen';
 import ViewPagamentoAberturacaixaListScreen from './src/screens/ViewPagamentoAberturacaixaListScreen';
 import ViewPagamentoCaixaentradaListScreen from './src/screens/ViewPagamentoCaixaentradaListScreen';
 import ViewPagamentoCaixasaidaListScreen from './src/screens/ViewPagamentoCaixasaidaListScreen';
@@ -265,7 +266,7 @@ import ViewPessoaFormPessoaPessoaFisicaListScreen from './src/screens/ViewPessoa
 import ViewPessoaFormPessoaPessoaJuridicaListScreen from './src/screens/ViewPessoaFormPessoaPessoaJuridicaListScreen';
 import ViewPessoaFormPessoaPessoaUsuarioListScreen from './src/screens/ViewPessoaFormPessoaPessoaUsuarioListScreen';
 import ViewPessoaListDisponibilidadePessoaListScreen from './src/screens/ViewPessoaListDisponibilidadePessoaListScreen';
-import ViewPessoaListPessoaListScreen from './src/screens/ViewPessoaListPessoaListScreen';
+
 import ViewPessoaListPessoaFisicaListScreen from './src/screens/ViewPessoaListPessoaFisicaListScreen';
 import ViewPessoaListPessoaJuridicaListScreen from './src/screens/ViewPessoaListPessoaJuridicaListScreen';
 import ViewPessoaPessoaDocumentoListScreen from './src/screens/ViewPessoaPessoaDocumentoListScreen';
@@ -336,8 +337,9 @@ import ViewStatusCompromissoFormStatusCompromissoListScreen
     from './src/screens/ViewStatusCompromissoFormStatusCompromissoListScreen';
 import ViewStatusCompromissoListStatusCompromissoListScreen
     from './src/screens/ViewStatusCompromissoListStatusCompromissoListScreen';
-import ViewSubCategoriaFormSubCategoriaListScreen from './src/screens/ViewSubCategoriaFormSubCategoriaListScreen';
-import ViewSubCategoriaListSubCategoriaListScreen from './src/screens/ViewSubCategoriaListSubCategoriaListScreen';
+import ViewSubCategoriaFormSubCategoriaListScreen from './src/features/configuracoes/ViewSubCategoriaFormSubCategoriaListScreen';
+import ViewSubCategoriaListSubCategoriaListScreen from './src/features/configuracoes/ViewSubCategoriaListSubCategoriaListScreen';
+
 
 import ViewTelefoneFormTelefoneListScreen from './src/screens/ViewTelefoneFormTelefoneListScreen';
 import ViewTelefoneListTelefoneListScreen from './src/screens/ViewTelefoneListTelefoneListScreen';
@@ -405,12 +407,14 @@ import ViewValorCursoListValorCursoListScreen from './src/screens/ViewValorCurso
 import ViewValorProdutoFormValorProdutoListScreen from './src/screens/ViewValorProdutoFormValorProdutoListScreen';
 import ViewValorProdutoListValorProdutoListScreen from './src/screens/ViewValorProdutoListValorProdutoListScreen';
 import ViewTemaListTemasListScreen from './src/screens/ViewTemaListTemasListScreen';
-import AlunoDashboardScreen from './src/screens/AlunoDashboardScreen';
-import AlunoBoletimScreen from './src/screens/AlunoBoletimScreen';
-import AlunoFrequenciaScreen from './src/screens/AlunoFrequenciaScreen';
-import AlunoAulasScreen from './src/screens/AlunoAulasScreen';
-import AlunoFinanceiroScreen from './src/screens/AlunoFinanceiroScreen';
-import ViewCurriculoAttachmentScreen from './src/screens/aluno/ViewCurriculoAttachmentScreen';
+import AlunoDashboardScreen from './src/features/aluno/AlunoDashboardScreen';
+import AlunoBoletimScreen from './src/features/aluno/AlunoBoletimScreen';
+import AlunoFrequenciaScreen from './src/features/aluno/AlunoFrequenciaScreen';
+import AlunoAulasScreen from './src/features/aluno/AlunoAulasScreen';
+import AlunoAulasTurmaScreen from './src/features/aluno/AlunoAulasTurmaScreen';
+import AlunoAulaScreen from './src/features/aluno/AlunoAulaScreen';
+import AlunoFinanceiroScreen from './src/features/aluno/AlunoFinanceiroScreen';
+import ViewCurriculoAttachmentScreen from './src/features/aluno/ViewCurriculoAttachmentScreen';
 import MeusDadosScreen from './src/screens/MeusDadosScreen';
 import ViewNotificacaoListNotificacaoListScreen from './src/screens/ViewNotificacaoListNotificacaoListScreen';
 import ViewCategoriaEstoqueListCategoriaListScreen from './src/screens/ViewCategoriaEstoqueListCategoriaListScreen';
@@ -427,10 +431,12 @@ function AppRoutes() {
     return <QueryClientProvider client={q}><NavigationContainer><Stack.Navigator initialRouteName='home'><Stack.Screen
         name='home' component={HomeScreen} options={{headerShown: false}}/>
         <Stack.Screen name='default' component={DefaultListScreen}/>
-        <Stack.Screen name='aluno/portalAluno' component={AlunoDashboardScreen} options={{title: 'Portal do Aluno'}}/>
+        <Stack.Screen name='aluno/portalAluno' component={AlunoDashboardScreen} options={{title: 'Portal do aluno'}}/>
         <Stack.Screen name='aluno/boletim' component={AlunoBoletimScreen} options={{title: 'Boletim'}}/>
         <Stack.Screen name='aluno/frequencia' component={AlunoFrequenciaScreen} options={{title: 'Frequência'}}/>
-        <Stack.Screen name='aluno/aulas' component={AlunoAulasScreen} options={{title: 'Minhas Aulas'}}/>
+        <Stack.Screen name='aluno/aulas' component={AlunoAulasScreen} options={{title: 'Aulas'}}/>
+        <Stack.Screen name='aluno/aulas/turma' component={AlunoAulasTurmaScreen} options={{title: 'Aulas da Turma'}}/>
+        <Stack.Screen name='aluno/aulas/aula' component={AlunoAulaScreen} options={{title: 'Detalhe da Aula'}}/>
         <Stack.Screen name='aluno/financeiro' component={AlunoFinanceiroScreen} options={{title: 'Financeiro'}}/>
         <Stack.Screen name='aluno/curriculo-anexo' component={ViewCurriculoAttachmentScreen} options={{title: 'Anexar Currículo'}}/>
         <Stack.Screen name='meus-dados' component={MeusDadosScreen} options={{title: 'Meus dados'}}/>
@@ -541,7 +547,7 @@ function AppRoutes() {
         <Stack.Screen name='view/configuracao/listLayout' component={ViewConfiguracaoListLayoutListScreen}/>
         <Stack.Screen name='view/consultor/consultor' component={ViewConsultorConsultorListScreen}/>
         <Stack.Screen name='view/consultor/formConsultor' component={ViewConsultorFormConsultorListScreen}/>
-        <Stack.Screen name='view/consultor/listConsultor' component={ViewConsultorListConsultorListScreen}/>
+
         <Stack.Screen name='view/conta/controlePagamento' component={ViewContaControlePagamentoListScreen}/>
         <Stack.Screen name='view/conta/gestaoConta' component={ViewContaGestaoContaListScreen}/>
         <Stack.Screen name='view/contaCorrente/formContaCorrente'
@@ -694,6 +700,7 @@ function AppRoutes() {
         <Stack.Screen name='view/operacional/formOperacional' component={ViewOperacionalFormOperacionalListScreen}/>
         <Stack.Screen name='view/operacional/listOperacional' component={ViewOperacionalListOperacionalListScreen}/>
         <Stack.Screen name='view/pacote/listPacote' component={ViewPacoteListPacoteListScreen}/>
+        <Stack.Screen name='view/pacote/formPacote' component={ViewPacoteFormPacoteListScreen}/>
         <Stack.Screen name='view/pagamento/aberturacaixa' component={ViewPagamentoAberturacaixaListScreen}/>
         <Stack.Screen name='view/pagamento/caixaentrada' component={ViewPagamentoCaixaentradaListScreen}/>
         <Stack.Screen name='view/pagamento/caixasaida' component={ViewPagamentoCaixasaidaListScreen}/>
@@ -716,7 +723,7 @@ function AppRoutes() {
                       component={ViewPessoaFormPessoaPessoaUsuarioListScreen}/>
         <Stack.Screen name='view/pessoa/listDisponibilidadePessoa'
                       component={ViewPessoaListDisponibilidadePessoaListScreen}/>
-        <Stack.Screen name='view/pessoa/listPessoa' component={ViewPessoaListPessoaListScreen}/>
+
         <Stack.Screen name='view/pessoa/listPessoaFisica' component={ViewPessoaListPessoaFisicaListScreen}/>
         <Stack.Screen name='view/pessoa/listPessoaJuridica' component={ViewPessoaListPessoaJuridicaListScreen}/>
         <Stack.Screen name='view/pessoa/pessoaDocumento' component={ViewPessoaPessoaDocumentoListScreen}/>

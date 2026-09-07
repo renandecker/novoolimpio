@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {
     ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, View, TouchableOpacity,
 } from 'react-native';
-import {alunoApi, formatarPercentual} from '../aluno';
+import {alunoApi, formatarPercentual} from './aluno';
 import {useNavigation} from '@react-navigation/native';
 
 export default function AlunoFrequenciaScreen() {

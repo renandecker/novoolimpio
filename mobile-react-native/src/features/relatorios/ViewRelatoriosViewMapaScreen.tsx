@@ -1,9 +1,11 @@
 import React, {useRef, useState, useEffect} from 'react';
-import {View, StyleSheet, ActivityIndicator, Text, SafeAreaView} from 'react-native';
+import {View, StyleSheet, ActivityIndicator, Text, SafeAreaView, ScrollView} from 'react-native';
 import {WebView} from 'react-native-webview';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import {api} from '../../shared/services/api';
 import type {MapaPontosResponse} from './relatorios';
+import {ReportFilters} from '../../shared/components/ReportFilters';
+import type {FiltroRelatorioWrapper} from '../../shared/types/types';
 
 type RouteParams = {
     id: string;
@@ -140,6 +142,8 @@ export default function ViewRelatoriosViewMapaScreen() {
     const [mapData, setMapData] = useState<MapaPontosResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [filtros, setFiltros] = useState<FiltroRelatorioWrapper[]>([]);
+    const [filtrosLoading, setFiltrosLoading] = useState(true);
     const webViewRef = useRef<WebView>(null);
 
     useEffect(() => {
@@ -158,6 +162,22 @@ export default function ViewRelatoriosViewMapaScreen() {
         };
 
         fetchData();
+    }, [id]);
+
+    useEffect(() => {
+        const fetchFiltros = async () => {
+            try {
+                setFiltrosLoading(true);
+                const response = await api.get<FiltroRelatorioWrapper[]>(`/api/relatorios/filtros/viewMapa/${id}`);
+                setFiltros(response.data);
+            } catch (err) {
+                console.error('Erro ao carregar filtros:', err);
+            } finally {
+                setFiltrosLoading(false);
+            }
+        };
+
+        fetchFiltros();
     }, [id]);
 
     useEffect(() => {
@@ -200,22 +220,41 @@ export default function ViewRelatoriosViewMapaScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <WebView
-                ref={webViewRef}
-                originWhitelist={['*']}
-                source={{html: MAP_HTML}}
-                onMessage={onMessage}
-                style={styles.webView}
-                javaScriptEnabled={true}
-                domStorageEnabled={true}
-                startInLoadingState={true}
-                renderLoading={() => (
-                    <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color="#3a85bd" />
-                        <Text style={styles.loadingText}>Inicializando mapa...</Text>
-                    </View>
+            <ScrollView style={styles.scrollView}>
+                <View style={styles.header}>
+                    <Text style={styles.headerTitle}>Mapa</Text>
+                </View>
+                {!filtrosLoading && (
+                    <ReportFilters
+                        filtros={filtros}
+                        onFiltersChange={setFiltros}
+                        onApplyFilters={() => {
+                            console.log('Aplicar filtros do mapa');
+                            if (mapData && webViewRef.current) {
+                                webViewRef.current.injectJavaScript(`renderMap(${JSON.stringify(mapData)});`);
+                            }
+                        }}
+                    />
                 )}
-            />
+                <View style={styles.webViewContainer}>
+                    <WebView
+                        ref={webViewRef}
+                        originWhitelist={['*']}
+                        source={{html: MAP_HTML}}
+                        onMessage={onMessage}
+                        style={styles.webView}
+                        javaScriptEnabled={true}
+                        domStorageEnabled={true}
+                        startInLoadingState={true}
+                        renderLoading={() => (
+                            <View style={styles.loadingContainer}>
+                                <ActivityIndicator size="large" color="#3a85bd" />
+                                <Text style={styles.loadingText}>Inicializando mapa...</Text>
+                            </View>
+                        )}
+                    />
+                </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }
@@ -224,6 +263,24 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
+    },
+    scrollView: {
+        flex: 1,
+    },
+    header: {
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        backgroundColor: '#f8f9fa',
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    headerTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#333',
+    },
+    webViewContainer: {
+        flex: 1,
     },
     webView: {
         flex: 1,

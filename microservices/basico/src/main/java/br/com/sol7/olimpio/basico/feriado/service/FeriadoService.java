@@ -11,11 +11,16 @@ import jakarta.ws.rs.NotFoundException;
 import java.util.List;
 import java.util.Date;
 
+import br.com.sol7.olimpio.basico.feriado.dto.FeriadoAjusteResponse;
 import br.com.sol7.olimpio.basico.feriado.dto.FeriadoRequest;
 import br.com.sol7.olimpio.basico.feriado.dto.FeriadoResponse;
 import br.com.sol7.olimpio.basico.feriado.entity.Feriado;
+import br.com.sol7.olimpio.basico.feriado.entity.FeriadoAjuste;
 import br.com.sol7.olimpio.basico.feriado.producer.FeriadoKafkaProducer;
+import br.com.sol7.olimpio.basico.feriado.repository.FeriadoAjusteRepository;
 import br.com.sol7.olimpio.basico.feriado.repository.FeriadoRepository;
+import br.com.sol7.olimpio.basico.feriado.dto.CalendarioEventoResponse;
+import br.com.sol7.olimpio.basico.feriado.dto.OcorrenciaFeriadoResponse;
 
 @ApplicationScoped
 @WithTransaction
@@ -23,6 +28,8 @@ public class FeriadoService {
 
     @Inject
     FeriadoRepository repository;
+    @Inject
+    FeriadoAjusteRepository feriadoAjusteRepository;
     @Inject
     FeriadoKafkaProducer kafkaProducer;
 
@@ -279,4 +286,174 @@ public class FeriadoService {
         return Uni.createFrom().voidItem();
     }
 
+    // -------------------------------------------------------------------------
+    // Novos endpoints para as abas do listFeriado
+    // -------------------------------------------------------------------------
+
+    public Uni<PagedResponse<FeriadoAjusteResponse>> feriadoAjustesPaged(int page, int size) {
+        int p = Math.max(0, page);
+        int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
+        return feriadoAjusteRepository.findAll(io.quarkus.panache.common.Sort.by("id").descending()).page(io.quarkus.panache.common.Page.of(p, s)).list()
+                .onItem().transformToUni(items -> feriadoAjusteRepository.count()
+                        .map(count -> new PagedResponse<>(items.stream().map(this::toFeriadoAjusteResponse).toList(), count, p, s)));
+    }
+
+    public Uni<FeriadoAjusteResponse> feriadoAjusteFind(Long id) {
+        return feriadoAjusteRepository.findByIdWithDetails(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("FeriadoAjuste not found"))
+                .map(this::toFeriadoAjusteResponse);
+    }
+
+    private FeriadoAjusteResponse toFeriadoAjusteResponse(FeriadoAjuste e) {
+        return new FeriadoAjusteResponse(
+                e.id,
+                e.feriadoId,
+                null, // feriadoNome - seria necessario join
+                null, // feriadoData - seria necessario join
+                e.usuarioId,
+                null, // usuarioLogin - seria necessario join
+                e.ativo,
+                e.ocorrencia,
+                e.ocorrenciaAjustarIds,
+                e.ocorrenciaNaoAjustarIds
+        );
+    }
+
+    public Uni<List<CalendarioEventoResponse>> calendarioEventos() {
+        String sql = """
+            SELECT f.id, f.nome, f.dt_feriado,
+                   CASE WHEN f.fl_feriado_fixo = true THEN '#27ae60' ELSE '#3498db' END,
+                   f.fl_feriado_fixo, f.fl_nacional, f.descricao
+            FROM bas_feriado f
+            ORDER BY f.dt_feriado
+        """;
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql).getResultList()
+                        .map(list -> list.stream().map(row -> {
+                            Object[] arr = (Object[]) row;
+                            return new CalendarioEventoResponse(
+                                    ((Number) arr[0]).longValue(),
+                                    (String) arr[1],
+                                    (Date) arr[2],
+                                    (String) arr[3],
+                                    (Boolean) arr[4],
+                                    (Boolean) arr[5],
+                                    (String) arr[6]
+                            );
+                        }).toList()));
+    }
+
+    public Uni<List<OcorrenciaFeriadoResponse>> ocorrenciasAjustar(Long feriadoAjusteId) {
+        String sql = """
+            SELECT o.id, o.data, o.id_oferecimento_componente_curricular,
+                   ofe.id, ofe.id_grupo, g.nome,
+                   ofe.id_unidade, u.sucinto,
+                   ofe.id_curso, c.nome,
+                   ofe.id_componente_curricular, cc.descricao,
+                   cc.carga_horaria,
+                   ofe.status,
+                   ofe.inscritos, ofe.vagas,
+                   o.id_dia_aula, da.nome,
+                   tu.descricao,
+                   ta.descricao
+            FROM bas_feriado_ocorrencia_ajustar foa
+            JOIN edc_ocorrencia_componente_curricular o ON o.id = foa.id_ocorrencia_componente_curricular
+            JOIN edc_oferecimento_componente_curricular ofe ON ofe.id = o.id_oferecimento_componente_curricular
+            LEFT JOIN edc_grupo g ON g.id = ofe.id_grupo
+            LEFT JOIN bas_unidade u ON u.id = ofe.id_unidade
+            LEFT JOIN edc_curriculo c ON c.id = ofe.id_curso
+            LEFT JOIN edc_componente_curricular cc ON cc.id = ofe.id_componente_curricular
+            LEFT JOIN edc_dia_aula da ON da.id = o.id_dia_aula
+            LEFT JOIN edc_turno tu ON tu.id = da.id_turno
+            LEFT JOIN edc_tempo_aula ta ON ta.id = da.id_tempo_aula
+            WHERE foa.id_feriado_ajuste = $1
+            ORDER BY ofe.id, o.data
+        """;
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql)
+                        .setParameter(1, feriadoAjusteId)
+                        .getResultList()
+                        .map(list -> list.stream().map(row -> {
+                            Object[] arr = (Object[]) row;
+                            return new OcorrenciaFeriadoResponse(
+                                    ((Number) arr[0]).longValue(),
+                                    (Date) arr[1],
+                                    ((Number) arr[2]).longValue(),
+                                    (String) arr[3],
+                                    arr[4] != null ? ((Number) arr[4]).longValue() : null,
+                                    (String) arr[5],
+                                    arr[6] != null ? ((Number) arr[6]).longValue() : null,
+                                    (String) arr[7],
+                                    arr[8] != null ? ((Number) arr[8]).longValue() : null,
+                                    (String) arr[9],
+                                    arr[10] != null ? ((Number) arr[10]).longValue() : null,
+                                    (String) arr[11],
+                                    arr[12] != null ? ((Number) arr[12]).intValue() : null,
+                                    (String) arr[13],
+                                    arr[14] != null ? ((Number) arr[14]).intValue() : null,
+                                    arr[15] != null ? ((Number) arr[15]).intValue() : null,
+                                    arr[16] != null ? ((Number) arr[16]).longValue() : null,
+                                    (String) arr[17],
+                                    (String) arr[18],
+                                    (String) arr[19]
+                            );
+                        }).toList()));
+    }
+
+    public Uni<List<OcorrenciaFeriadoResponse>> ocorrenciasNaoAjustar(Long feriadoAjusteId) {
+        String sql = """
+            SELECT o.id, o.data, o.id_oferecimento_componente_curricular,
+                   ofe.id, ofe.id_grupo, g.nome,
+                   ofe.id_unidade, u.sucinto,
+                   ofe.id_curso, c.nome,
+                   ofe.id_componente_curricular, cc.descricao,
+                   cc.carga_horaria,
+                   ofe.status,
+                   ofe.inscritos, ofe.vagas,
+                   o.id_dia_aula, da.nome,
+                   tu.descricao,
+                   ta.descricao
+            FROM bas_feriado_ocorrencia_nao_ajustar fona
+            JOIN edc_ocorrencia_componente_curricular o ON o.id = fona.id_ocorrencia_componente_curricular
+            JOIN edc_oferecimento_componente_curricular ofe ON ofe.id = o.id_oferecimento_componente_curricular
+            LEFT JOIN edc_grupo g ON g.id = ofe.id_grupo
+            LEFT JOIN bas_unidade u ON u.id = ofe.id_unidade
+            LEFT JOIN edc_curriculo c ON c.id = ofe.id_curso
+            LEFT JOIN edc_componente_curricular cc ON cc.id = ofe.id_componente_curricular
+            LEFT JOIN edc_dia_aula da ON da.id = o.id_dia_aula
+            LEFT JOIN edc_turno tu ON tu.id = da.id_turno
+            LEFT JOIN edc_tempo_aula ta ON ta.id = da.id_tempo_aula
+            WHERE fona.id_feriado_ajuste = $1
+            ORDER BY ofe.id, o.data
+        """;
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql)
+                        .setParameter(1, feriadoAjusteId)
+                        .getResultList()
+                        .map(list -> list.stream().map(row -> {
+                            Object[] arr = (Object[]) row;
+                            return new OcorrenciaFeriadoResponse(
+                                    ((Number) arr[0]).longValue(),
+                                    (Date) arr[1],
+                                    ((Number) arr[2]).longValue(),
+                                    (String) arr[3],
+                                    arr[4] != null ? ((Number) arr[4]).longValue() : null,
+                                    (String) arr[5],
+                                    arr[6] != null ? ((Number) arr[6]).longValue() : null,
+                                    (String) arr[7],
+                                    arr[8] != null ? ((Number) arr[8]).longValue() : null,
+                                    (String) arr[9],
+                                    arr[10] != null ? ((Number) arr[10]).longValue() : null,
+                                    (String) arr[11],
+                                    arr[12] != null ? ((Number) arr[12]).intValue() : null,
+                                    (String) arr[13],
+                                    arr[14] != null ? ((Number) arr[14]).intValue() : null,
+                                    arr[15] != null ? ((Number) arr[15]).intValue() : null,
+                                    arr[16] != null ? ((Number) arr[16]).longValue() : null,
+                                    (String) arr[17],
+                                    (String) arr[18],
+                                    (String) arr[19]
+                            );
+                        }).toList()));
+    }
 }

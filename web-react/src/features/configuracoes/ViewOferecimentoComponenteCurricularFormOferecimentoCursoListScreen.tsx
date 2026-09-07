@@ -1,7 +1,7 @@
 ﻿import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {X, ChevronDown, ChevronRight} from 'lucide-react';
-import {useNavigate, useParams} from 'react-router-dom';
+import {useNavigate, useSearchParams} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
 import {api} from '../../shared/services/api';
 import {PermissionGate} from '../../shared/services/permissions';
@@ -222,10 +222,11 @@ const TABS: {key: TabKey; label: string}[] = [
     {key: 'tabProfessor', label: 'Professores'},
 ];
 
-export default function ViewOferecimentoComponenteCurricularFormOferecimentoCursoListScreen() {
-    const {id} = useParams<{id?: string}>();
-    const navigate = useNavigate();
-    const emEdicao = !!id;
+export default function ViewOferecimentoComponenteCurricularFormOferecimentoCursoListScreen() {
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const id = searchParams.get('id');
+    const emEdicao = !!id;
 
     const [data, setData] = useState<OferecimentoCursoData>(initialData);
     const [activeTab, setActiveTab] = useState<TabKey>('tabGrupo');
@@ -708,16 +709,26 @@ useEffect(() => {
         if (diaSemanaId) params.diaSemanaId = diaSemanaId;
         if (turnoId) params.turnoId = turnoId;
         if (tempoAulaId) params.tempoAulaId = tempoAulaId;
-        const {data: rows} = await api.get<Array<{id: number; nome: string}>>('/api/professor/professor/auto-complete-professor', {params});
-        let filtered = (rows ?? []).map((p) => ({id: Number(p.id), label: p.nome || `#${p.id}`}));
-        return filtered;
-    };
-
-    const fetchProfessorById = async (id: number): Promise<AutoCompleteOption | null> => {
-        const {data} = await api.get(`/api/professor/professor/${id}`);
-        return {id: data.id, label: data.nome};
-    };
-
+        try {
+            const {data: rows} = await api.get<Array<{id: number; nome: string}>>('/api/professor/professor/auto-complete-professor', {params});
+            let filtered = (rows ?? []).map((p) => ({id: Number(p.id), label: p.nome || `#${p.id}`}));
+            return filtered;
+        } catch (err) {
+            console.warn('Erro ao buscar professores (auto-complete):', err);
+            return [];
+        }
+    };
+
+    const fetchProfessorById = async (id: number): Promise<AutoCompleteOption | null> => {
+        try {
+            const {data} = await api.get(`/api/professor/professor/${id}`);
+        return {id: data.id, label: data.nome};
+        } catch (err) {
+            console.warn('Erro ao buscar professor por ID:', err);
+            return null;
+        }
+    };
+
     const consultarOferecimentos = async () => {
         if (!data.grupoId) {
             setMensagem('Selecione ou informe um grupo antes de consultar os oferecimentos.');

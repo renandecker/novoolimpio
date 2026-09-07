@@ -21,15 +21,16 @@ const formatDate = (value: unknown): string => {
 };
 
 const COBRANCA_COLUMNS: DataTableColumn[] = [
-    {key: 'usuarioId', label: 'Usuário ligou'},
-    {key: 'dataInicial', label: 'Data inicial', render: (item) => formatDate(asRecord(item).dataInicial)},
-    {key: 'dataFinal', label: 'Data final', render: (item) => formatDate(asRecord(item).dataFinal)},
-    {key: 'compromissoId', label: 'Compromisso'},
-    {key: 'resultadoCobrancaId', label: 'Resultado ligação'},
-    {key: 'telefone', label: 'Telefone'},
-    {key: 'qtdeParcela', label: 'Parcelas Pendente'},
-    {key: 'valor', label: 'Valor'},
-    {key: 'observacao', label: 'Observação'},
+    {key: 'contrato', label: 'Contrato'},
+    {key: 'unidade', label: 'Unidade'},
+    {key: 'unidaderesponsavel', label: 'Unidade Responsável'},
+    {key: 'aluno', label: 'Aluno'},
+    {key: 'responsavel', label: 'Contratante'},
+    {key: 'curso', label: 'Curso'},
+    {key: 'pendente', label: 'Pendente'},
+    {key: 'atrasada', label: 'Atrasado'},
+    {key: 'valor', label: 'Valor', render: (item) => `R$ ${asRecord(item).valor}`},
+    {key: 'campoDetalhes', label: 'Detalhes'},
 ];
 
 const extraRowActions: DataTableRowAction[] = [
@@ -40,15 +41,6 @@ const extraRowActions: DataTableRowAction[] = [
         permission: 'READ',
         onClick: async (item) => {
             await executeAction('ligacao-cobranca', 'carregarDetalhes', JSON.stringify({contrato: asRecord(item).contrato}), 'financeiro');
-        },
-    },
-    {
-        key: 'documento',
-        title: 'Documento',
-        icon: <i className="fa fa-file-text-o"/>,
-        permission: 'READ',
-        onClick: async (item) => {
-            await executeAction('ligacao-cobranca', 'carregarContrato', JSON.stringify({contrato: asRecord(item).contrato}), 'financeiro');
         },
     },
     {

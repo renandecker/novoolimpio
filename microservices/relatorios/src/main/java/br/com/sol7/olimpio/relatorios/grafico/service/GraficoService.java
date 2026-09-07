@@ -157,18 +157,25 @@ public class GraficoService {
     }
 
     private String montarSql(String tipo, String ordemGrafico, int limite, String tabela, String condicao, String dimensaoColuna, String medidaColuna, String medidaTipoInfo) {
+        String dimensaoSql = semAlias(dimensaoColuna);
+        String medidaBase = semAlias(medidaColuna);
         String medidaSql;
         if ("CONTAGEM-DISTINTA".equalsIgnoreCase(medidaTipoInfo)) {
-            medidaSql = "count(DISTINCT " + medidaColuna + ")";
+            medidaSql = "count(DISTINCT " + medidaBase + ")";
         } else if ("CONTAGEM".equalsIgnoreCase(medidaTipoInfo)) {
-            medidaSql = "count(" + medidaColuna + ")";
+            medidaSql = "count(" + medidaBase + ")";
         } else {
-            medidaSql = "sum(" + medidaColuna + ")";
+            medidaSql = "sum(" + medidaBase + ")";
         }
 
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT ").append(dimensaoColuna).append(" AS categoria, ").append(medidaSql).append(" AS valor");
-        sql.append(" FROM ").append(tabela);
+        sql.append("SELECT ").append(dimensaoSql).append(" AS categoria, ").append(medidaSql).append(" AS valor");
+        String tabelaAjustada = tabela == null ? "" : tabela.trim();
+        if (tabelaAjustada.toLowerCase().startsWith("from")) {
+            sql.append(" ").append(tabelaAjustada);
+        } else {
+            sql.append(" FROM ").append(tabelaAjustada);
+        }
 
         if (condicao != null && !condicao.isBlank()) {
             sql.append(" ").append(condicao);
@@ -336,6 +343,16 @@ public class GraficoService {
     //     }
     public Uni<List<Long>> autoComplete(String query, Long estruturaId) {
         return repository.autoComplete(query.toLowerCase(), estruturaId).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    // As colunas legadas (rel_coluna.coluna) guardam expressoes com alias proprio,
+    // ex.: "con.data as data_matricula" ou "aluno.id as \"Qtd Alunos\"". Removemos o
+    // sufixo " as <alias>" para gerar SQL valido ao incluir nossos proprios aliases.
+    private static String semAlias(String coluna) {
+        if (coluna == null) return null;
+        String c = coluna.trim();
+        int idx = c.toLowerCase().lastIndexOf(" as ");
+        return idx >= 0 ? c.substring(0, idx) : c;
     }
 
 }

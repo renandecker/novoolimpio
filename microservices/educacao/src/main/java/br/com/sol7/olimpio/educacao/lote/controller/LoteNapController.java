@@ -54,7 +54,7 @@ public class LoteNapController {
     public Uni<String> enviarEmail(@Valid LoteNapEmailRequest request) throws Exception {
         String json = objectMapper.writeValueAsString(request);
         return kafkaProducer.enviarTriggerEmailNap(json)
-                .replaceWith("Trigger de email NAP enviado para o schedule");
+                .replaceWith("Trigger de email NAP enviado para o notificacoes");
     }
 
     @POST

@@ -4,7 +4,7 @@
 
 CREATE TABLE IF NOT EXISTS not_notificacao_regra (
     id BIGSERIAL PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
+    nome VARCHAR(100) NOT NULL UNIQUE,
     descricao VARCHAR(255),
     tipo_regra VARCHAR(50) NOT NULL,
     canal VARCHAR(30) NOT NULL,
@@ -27,5 +27,5 @@ INSERT INTO not_notificacao_regra (nome, descricao, tipo_regra, canal, destinata
 
     ('Dias para Vencer', 'Notificar dias antes do vencimento', 'dias_a_vencer', 'EMAIL', 'DONO_PARCELA', 7.0, TRUE),
 
-    ('Parcela Venceu', 'Notificacao quando parcela venceu', 'vencido', 'SISTEMA', 'DONO_PARCELA', 0.0, TRUE);
+    ('Parcela Venceu', 'Notificacao quando parcela venceu', 'vencido', 'SISTEMA', 'DONO_PARCELA', 0.0, TRUE)
 ON CONFLICT (nome) DO NOTHING;

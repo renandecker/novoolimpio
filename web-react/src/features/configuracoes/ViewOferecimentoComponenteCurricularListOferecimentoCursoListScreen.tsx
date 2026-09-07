@@ -5,8 +5,10 @@ import {useModulePaged} from '../../shared/hooks/useModulePaged';
 import type {ApiItem} from '../../features/auth/types';
 import {legacyClassName} from '../../shared/components/DataTable';
 import {PAGE_SIZES} from '../../shared/components/DataTable';
-import {RowMenu, type RowMenuItem} from '../../shared/components/RowMenu';
-import {ExportDropdown} from '../../shared/components/ExportDropdown';
+import {RowMenu, type RowMenuItem} from '../../shared/components/RowMenu';
+
+import {ExportDropdown} from '../../shared/components/ExportDropdown';
+
 
 import type {SearchFilterRequest} from '../../shared/types/types';
 
@@ -24,19 +26,7 @@ const COLUMNS = [
     {key: 'unidade_sucinto', label: 'Unidade'},
     {key: 'curso_nome', label: 'Curso'},
 ];
-
-const exportarPDF = (item: ApiItem) => {
-    window.open(`/api/relatorios/relatorio/disponiveis/TABELA/${item.id}`, '_blank');
-};
-
-const exportarDOCX = (item: ApiItem) => {
-    // Exportar DOCX
-};
-
-const exportarExcel = (item: ApiItem) => {
-    window.open(`/api/relatorios/relatorio/disponiveis/GRAFICO/${item.id}`, '_blank');
-};
-
+
 export default function ViewOferecimentoComponenteCurricularListOferecimentoCursoListScreen() {
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(PAGE_SIZES[0]);
@@ -68,11 +58,11 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
         };
         carregarPermissoes();
     }, [outcome]);
-
-    const acessoRelatorios = can('EXECUTE', outcome) || (perfilModuloPermissions?.relatorio ?? false);
-    const acessoEditar = can('UPDATE', outcome) || (perfilModuloPermissions?.editar ?? false);
-    const acessoRemover = can('DELETE', outcome) || (perfilModuloPermissions?.remover ?? false);
-
+    const acessoRelatorios = can('EXECUTE', outcome) || (perfilModuloPermissions?.relatorio ?? false);
+
+    const acessoEditar = can('UPDATE', outcome) || (perfilModuloPermissions?.editar ?? false);
+
+    const acessoRemover = can('DELETE', outcome) || (perfilModuloPermissions?.remover ?? false);
     const q = useModulePaged('/api/educacao/oferecimento-curso', page, size, filter, filterParams);
     const all = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
@@ -113,6 +103,30 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
         }
     };
 
+    const exportarPDF = (_record: Record<string, unknown>) => {
+
+        alert('Exportação PDF não implementada');
+
+    };
+
+
+
+    const exportarDOCX = (_record: Record<string, unknown>) => {
+
+        alert('Exportação DOCX não implementada');
+
+    };
+
+
+
+    const exportarExcel = (_record: Record<string, unknown>) => {
+
+        alert('Exportação Excel não implementada');
+
+    };
+
+
+
     return (
         <PermissionGate permission="READ">
             <main>

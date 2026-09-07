@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {ActivityIndicator, ScrollView, StyleSheet, Text, View} from 'react-native';
-import {alunoApi, Boletim, formatarData, formatarNota, formatarPercentual} from '../aluno';
+import {alunoApi, Boletim, formatarData, formatarNota, formatarPercentual} from './aluno';
 
 const STATUS_ROTULO: Record<string, string> = {
     APROVADO: 'Aprovado',

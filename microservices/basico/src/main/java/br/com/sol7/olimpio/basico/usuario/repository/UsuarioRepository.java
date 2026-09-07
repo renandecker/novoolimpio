@@ -636,4 +636,81 @@ public class UsuarioRepository implements PanacheRepository<Usuario> {
                         .getResultList());
     }
 
+
+    // Sub-recursos de acesso do usuario (Acessos no formUsuario): perfis, agendas e unidades.
+    // Tabelas de associacao sem entidade mapeada neste microsservico (mesmo padrao de AgendaRepository).
+    private static final String SQL_LISTAR_PERFIS =
+            "SELECT id_perfil FROM bas_usuario_perfil WHERE id_usuario = ?1 ORDER BY id_perfil";
+    private static final String SQL_LIMPAR_PERFIS =
+            "DELETE FROM bas_usuario_perfil WHERE id_usuario = ?1";
+    private static final String SQL_INSERIR_PERFIL =
+            "INSERT INTO bas_usuario_perfil (id_usuario, id_perfil) VALUES (?1, ?2)";
+
+    private static final String SQL_LISTAR_AGENDAS =
+            "SELECT id_agenda FROM bas_usuario_agenda WHERE id_usuario = ?1 ORDER BY id_agenda";
+    private static final String SQL_LIMPAR_AGENDAS =
+            "DELETE FROM bas_usuario_agenda WHERE id_usuario = ?1";
+    private static final String SQL_INSERIR_AGENDA =
+            "INSERT INTO bas_usuario_agenda (id_usuario, id_agenda, atender, iniciar, fechar, alterar, agendar) VALUES (?1, ?2, false, false, false, false, false)";
+
+    private static final String SQL_LISTAR_UNIDADES =
+            "SELECT id_unidade FROM bas_usuario_unidade WHERE id_usuario = ?1 ORDER BY id_unidade";
+    private static final String SQL_LIMPAR_UNIDADES =
+            "DELETE FROM bas_usuario_unidade WHERE id_usuario = ?1";
+    private static final String SQL_INSERIR_UNIDADE =
+            "INSERT INTO bas_usuario_unidade (id_usuario, id_unidade) VALUES (?1, ?2)";
+
+    public Uni<java.util.List<Long>> listarPerfisIds(Long usuarioId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_LISTAR_PERFIS, Long.class)
+                        .setParameter(1, usuarioId)
+                        .getResultList());
+    }
+
+    public Uni<Void> substituirPerfis(Long usuarioId, java.util.List<Long> perfis) {
+        return substituirFilhos(SQL_LIMPAR_PERFIS, SQL_INSERIR_PERFIL, usuarioId, perfis);
+    }
+
+    public Uni<java.util.List<Long>> listarAgendasIds(Long usuarioId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_LISTAR_AGENDAS, Long.class)
+                        .setParameter(1, usuarioId)
+                        .getResultList());
+    }
+
+    public Uni<Void> substituirAgendas(Long usuarioId, java.util.List<Long> agendas) {
+        return substituirFilhos(SQL_LIMPAR_AGENDAS, SQL_INSERIR_AGENDA, usuarioId, agendas);
+    }
+
+    public Uni<java.util.List<Long>> listarUnidadesIds(Long usuarioId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_LISTAR_UNIDADES, Long.class)
+                        .setParameter(1, usuarioId)
+                        .getResultList());
+    }
+
+    public Uni<Void> substituirUnidades(Long usuarioId, java.util.List<Long> unidades) {
+        return substituirFilhos(SQL_LIMPAR_UNIDADES, SQL_INSERIR_UNIDADE, usuarioId, unidades);
+    }
+
+    private Uni<Void> substituirFilhos(String sqlLimpar, String sqlInserir, Long usuarioId, java.util.List<Long> filhos) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(sqlLimpar)
+                        .setParameter(1, usuarioId)
+                        .executeUpdate()
+                        .chain(ignored -> {
+                            Uni<Void> insercoes = Uni.createFrom().voidItem();
+                            for (Long filho : filhos) {
+                                final Long filhoId = filho;
+                                insercoes = insercoes.onItem().transformToUni(v ->
+                                        session.createNativeQuery(sqlInserir)
+                                                .setParameter(1, usuarioId)
+                                                .setParameter(2, filhoId)
+                                                .executeUpdate()
+                                                .map(i -> (Void) null));
+                            }
+                            return insercoes;
+                        }));
+    }
+
 }

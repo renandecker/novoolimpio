@@ -25,15 +25,6 @@ const extraActions: ModuleListExtraAction[] = [
         },
     },
     {
-        key: 'documento',
-        title: 'Documento',
-        icon: '📄',
-        permission: 'READ',
-        onPress: async (item) => {
-            await executeAction('ligacao-nap', 'carregarContrato', JSON.stringify({contrato: asRecord(item).contrato}), 'educacao');
-        },
-    },
-    {
         key: 'ligacao',
         title: 'Ligação',
         icon: '📞',

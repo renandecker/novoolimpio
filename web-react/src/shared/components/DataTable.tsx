@@ -9,7 +9,6 @@ import {useModulePaged} from '../hooks/useModulePaged';
 import {executeAction, type Action} from '../services/actions';
 import {usePermissions, useCurrentOutcome} from '../services/permissions';
 import {useAuth} from '../../features/auth/auth';
-import {ExportDropdown} from './ExportDropdown';
 import {BooleanField} from './BooleanField';
 import {Base64FileUpload} from './Base64FileUpload';
 import {PerfilModuloPermissions} from '../hooks/useModulePaged';
@@ -248,6 +247,19 @@ interface FilterModalState {
 
 export function DataTable({path, columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, hideUpdate = false, hideDelete = false, hideView = false, editNavigateTo, createNavigateTo, extraToolbarButtons, extraRowActions}: DataTableProps) {
     const navigate = useNavigate();
+    const [sortField, setSortField] = useState<string>('id');
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+    const handleSort = (field: string) => {
+        if (sortField === field) {
+            setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortField(field);
+            setSortDirection('asc');
+        }
+    };
+
+    const sortRequest = {field: sortField, direction: sortDirection};
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(PAGE_SIZES[0]);
     const [modal, setModal] = useState<ModalState>(null);
@@ -263,7 +275,7 @@ export function DataTable({path, columns, params, module = 'basico', outcome, co
     const routeOutcome = useCurrentOutcome();
     const screenOutcome = outcome ?? routeOutcome;
 
-    const q = useModulePaged(path, page, size, params, filterParams);
+    const q = useModulePaged(path, page, size, params, filterParams, sortRequest);
     const items = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);
@@ -518,35 +530,7 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
                 >
                     <i className="fa fa-search"/> Buscar
                 </button>
-                {canRelatorio && items.length > 0 && (
-                    <>
-                        <ExportDropdown
-                            options={[
-                                {
-                                    key: 'pdf',
-                                    label: 'PDF',
-                                    icon: <i className="fa fa-file-pdf-o"/>,
-                                    onClick: () => exportarPDF(items[0]),
-                                },
-                                {
-                                    key: 'docx',
-                                    label: 'DOCX',
-                                    icon: <i className="fa fa-file-word-o"/>,
-                                    onClick: () => exportarDOCX(items[0]),
-                                },
-                                {
-                                    key: 'excel',
-                                    label: 'Excel',
-                                    icon: <i className="fa fa-file-excel-o"/>,
-                                    onClick: () => exportarExcel(items[0]),
-                                }
-                            ]}
-                            triggerLabel="Exportar"
-                            triggerIcon={<i className="fa fa-download"/>}
-                            triggerClassName="btnyellow"
-                        />
-                    </>
-                )}
+
                 {notice && <span className="data-table-notice">{notice}</span>}
             </div>
             {q.isError ? (
@@ -556,12 +540,18 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
                     <thead>
                     <tr>
                         {expandable && <th className="col-toggle"></th>}
-                        <th className="col-id">Id</th>
+                        <th className="col-id" onClick={() => handleSort('id')} style={{cursor: 'pointer', userSelect: 'none'}}>
+                            Id {sortField === 'id' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}
+                        </th>
                         {mainCols.map((column) => (
-                            <th key={column.key}>{column.label}</th>
+                            <th key={column.key} onClick={() => handleSort(column.key)} style={{cursor: 'pointer', userSelect: 'none'}}>
+                                {column.label} {sortField === column.key ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}
+                            </th>
                         ))}
                         {!expandable && subCols.map((column) => (
-                            <th key={column.key}>{column.label}</th>
+                            <th key={column.key} onClick={() => handleSort(column.key)} style={{cursor: 'pointer', userSelect: 'none'}}>
+                                {column.label} {sortField === column.key ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}
+                            </th>
                         ))}
                         {actionColumns.map((column) => (
                             <th key={column.key} className="col-actions">{column.label}</th>
@@ -1123,7 +1113,7 @@ function FilterModal({columns, initialFilters, onClose, onApply}: FilterModalPro
                 };
             }
         }
-        onApply({filters});
+        onApply({filters: {...filters}});
     };
 
     return (

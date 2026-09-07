@@ -21,6 +21,7 @@ import {api} from '../api';
 import {useRoute} from '@react-navigation/native';
 import {PhotoUploadModal} from '../PhotoUploadModal';
 import {alunoApi, formatarData} from '../aluno';
+import {Header} from '../../shared/components/Header';
 
 function normalizeOutcome(outcome: string): string {
     return outcome.replace(/\.xhtml$/i, '').replace(/^\/+|\/+$/g, '');
@@ -160,9 +161,8 @@ export default function MeusDadosScreen({navigation}: { navigation: any }) {
 
     return (
         <View style={styles.page}>
+            <Header title="Meus dados" />
             <ScrollView contentContainerStyle={styles.content}>
-                <Text style={styles.title}>Meus dados</Text>
-
                 <View style={styles.favoritesSection}>
                     <Text style={styles.favoritesTitle}>Favoritos</Text>
                     {favoritos.length === 0 ? (
@@ -231,9 +231,8 @@ export default function MeusDadosScreen({navigation}: { navigation: any }) {
 
 const styles = StyleSheet.create({
     page: {flex: 1, backgroundColor: '#fff'},
-    content: {padding: 16},
+    content: {padding: 16, paddingTop: 8},
     center: {flex: 1, justifyContent: 'center', alignItems: 'center'},
-    title: {fontSize: 22, fontWeight: 'bold', color: '#2b2b2b', marginBottom: 16},
     card: {
         backgroundColor: '#ffffff',
         borderWidth: 1,

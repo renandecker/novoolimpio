@@ -1,7 +1,20 @@
 import {useMemo} from 'react';
-import {AgCharts} from 'ag-charts-react';
-import type {AgChartOptions} from 'ag-charts-enterprise';
-import 'ag-charts-enterprise';
+import {
+    ResponsiveContainer,
+    ComposedChart,
+    BarChart,
+    LineChart,
+    PieChart,
+    Bar,
+    Line,
+    Pie,
+    Cell,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    Legend
+} from 'recharts';
 import type {LinhaGrafico} from '../../features/relatorios/relatorios';
 
 type GraficoChartProps = {
@@ -26,107 +39,40 @@ function limpar(valor: unknown): number {
     return Number.isFinite(n) ? n : 0;
 }
 
-function normalizarLinhas(linhas: LinhaGrafico[]): { categoria: string; valor: number }[] {
+function normalizarLinhas(linhas: LinhaGrafico[]): { categoria: string; valor: number; valorCombinado?: number }[] {
     return (linhas || []).map((linha) => ({
         categoria: String(linha.categoria ?? 'Não informado'),
         valor: limpar(linha.valor),
     }));
 }
 
-function categoriaValor(data: { categoria: string; valor: number }[]) {
-    return {
-        type: 'category' as const,
-        xKey: 'categoria',
-        yKey: 'valor',
-        yName: 'Valor',
-    };
-}
-
 export default function GraficoChart({tipo, linhas, linhasCombinado, exibirLegenda, exibirValor, exibirPercentual, valorAcumulado, posicao}: GraficoChartProps) {
     const dados = useMemo(() => normalizarLinhas(linhas), [linhas]);
     const dadosCombinado = useMemo(() => normalizarLinhas(linhasCombinado || []), [linhasCombinado]);
 
-    const options = useMemo<AgChartOptions>(() => {
-        const categoria = posicao && ['top', 'bottom', 'left', 'right'].includes(posicao.toLowerCase())
-            ? posicao.toLowerCase() as 'top' | 'bottom' | 'left' | 'right'
-            : 'right';
+    // Mesclar dados combinados se existirem
+    const dadosMesclados = useMemo(() => {
+        if (!dadosCombinado.length) return dados;
+        const mapa = new Map<string, any>();
+        dados.forEach(d => mapa.set(d.categoria, { ...d }));
+        dadosCombinado.forEach(d => {
+            if (mapa.has(d.categoria)) {
+                mapa.get(d.categoria).valorCombinado = d.valor;
+            } else {
+                mapa.set(d.categoria, { categoria: d.categoria, valor: 0, valorCombinado: d.valor });
+            }
+        });
+        return Array.from(mapa.values());
+    }, [dados, dadosCombinado]);
 
-        switch (tipo.toUpperCase()) {
-            case 'PIZZA':
-            case 'CIRCULAR': {
-                const doughnut = tipo.toUpperCase() === 'CIRCULAR';
-                return {
-                    data: dados,
-                    series: [{
-                        type: doughnut ? 'donut' : 'pie',
-                        angleKey: 'valor',
-                        calloutLabelKey: 'categoria',
-                        ...(doughnut ? {innerRadiusRatio: 0.6} : {}),
-                        ...(exibirPercentual ? {sectorLabelKey: 'valor', sectorLabel: {formatter: ({value}: any) => `${Math.round(value)}%`}} : {}),
-                    }],
-                    legend: {enabled: exibirLegenda !== false, position: categoria},
-                };
-            }
-            case 'LINHA':
-                return {
-                    data: dados,
-                    series: [{
-                        type: 'line',
-                        xKey: 'categoria',
-                        yKey: 'valor',
-                        yName: 'Valor',
-                        marker: {enabled: true},
-                    }],
-                    legend: {enabled: exibirLegenda !== false, position: categoria},
-                };
-            case 'COMBINADO': {
-                const series: any[] = [{
-                    type: 'bar',
-                    xKey: 'categoria',
-                    yKey: 'valor',
-                    yName: 'Principal',
-                    grouped: true,
-                }];
-                if (dadosCombinado.length > 0) {
-                    series.push({
-                        type: 'line',
-                        xKey: 'categoria',
-                        yKey: 'valor',
-                        yName: 'Combinado',
-                    } as any);
-                }
-                return {
-                    data: dados,
-                    series,
-                    legend: {enabled: exibirLegenda !== false, position: categoria},
-                };
-            }
-            case 'BARRA_HORIZONTAL': {
-                return {
-                    data: dados,
-                    series: [{
-                        type: 'bar',
-                        direction: 'horizontal',
-                        ...categoriaValor(dados),
-                    }],
-                    legend: {enabled: exibirLegenda !== false, position: categoria},
-                };
-            }
-            case 'GRAFICO':
-            case 'BARRA_VERTICAL':
-            default: {
-                return {
-                    data: dados,
-                    series: [{
-                        type: 'bar',
-                        ...categoriaValor(dados),
-                        grouped: true,
-                    }],
-                    legend: {enabled: exibirLegenda !== false, position: categoria},
-                };
-            }
-        }
-    }, [tipo, dados, dadosCombinado, exibirLegenda, exibirPercentual, posicao]);
+    const tipoUpper = tipo.toUpperCase();
+    const mostrarLegenda = exibirLegenda !== false;
+    const vertical = tipoUpper === 'BARRA_VERTICAL' || tipoUpper === 'GRAFICO';
+    const horizontal = tipoUpper === 'BARRA_HORIZONTAL';
+    const pizza = tipoUpper === 'PIZZA' || tipoUpper === 'CIRCULAR';
+    const circular = tipoUpper === 'CIRCULAR';
+    const linha = tipoUpper === 'LINHA';
+    const combinado = tipoUpper === 'COMBINADO';
 
     if (dados.length === 0 && dadosCombinado.length === 0) {
         return <p>Nenhum dado disponível para exibição no gráfico.</p>;
@@ -134,7 +80,73 @@ export default function GraficoChart({tipo, linhas, linhasCombinado, exibirLegen
 
     return (
         <div style={{height: 460, width: '100%'}}>
-            <AgCharts options={options} style={{height: '100%', width: '100%'}}/>
+            <ResponsiveContainer width="100%" height="100%">
+                {pizza ? (
+                    <PieChart>
+                        <Tooltip />
+                        {mostrarLegenda && <Legend />}
+                        <Pie
+                            data={dados}
+                            dataKey="valor"
+                            nameKey="categoria"
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={140}
+                            {...(circular ? {innerRadius: 80} : {})}
+                            label={exibirPercentual ? ({percent}) => `${Math.round((percent || 0) * 100)}%` : true}
+                        >
+                            {dados.map((_, index) => (
+                                <Cell key={`cell-${index}`} fill={PALETA[index % PALETA.length]} />
+                            ))}
+                        </Pie>
+                    </PieChart>
+                ) : linha ? (
+                    <LineChart data={dados} margin={{top: 20, right: 30, left: 20, bottom: 5}}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="categoria" />
+                        <YAxis />
+                        <Tooltip />
+                        {mostrarLegenda && <Legend />}
+                        <Line type="monotone" dataKey="valor" name="Valor" stroke={PALETA[0]} strokeWidth={2} dot={{r: 4}} />
+                    </LineChart>
+                ) : combinado ? (
+                    <ComposedChart data={dadosMesclados.length ? dadosMesclados : dados} margin={{top: 20, right: 30, left: 20, bottom: 5}}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="categoria" />
+                        <YAxis />
+                        <Tooltip />
+                        {mostrarLegenda && <Legend />}
+                        <Bar dataKey="valor" name="Principal" fill={PALETA[0]} />
+                        <Line type="monotone" dataKey="valorCombinado" name="Combinado" stroke={PALETA[1]} strokeWidth={2} />
+                    </ComposedChart>
+                ) : horizontal ? (
+                    <BarChart layout="vertical" data={dados} margin={{top: 20, right: 30, left: 40, bottom: 5}}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis type="number" />
+                        <YAxis dataKey="categoria" type="category" width={100} />
+                        <Tooltip />
+                        {mostrarLegenda && <Legend />}
+                        <Bar dataKey="valor" name="Valor" fill={PALETA[0]}>
+                            {dados.map((_, index) => (
+                                <Cell key={`cell-${index}`} fill={PALETA[index % PALETA.length]} />
+                            ))}
+                        </Bar>
+                    </BarChart>
+                ) : (
+                    <BarChart data={dados} margin={{top: 20, right: 30, left: 20, bottom: 5}}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="categoria" />
+                        <YAxis />
+                        <Tooltip />
+                        {mostrarLegenda && <Legend />}
+                        <Bar dataKey="valor" name="Valor" fill={PALETA[0]}>
+                            {dados.map((_, index) => (
+                                <Cell key={`cell-${index}`} fill={PALETA[index % PALETA.length]} />
+                            ))}
+                        </Bar>
+                    </BarChart>
+                )}
+            </ResponsiveContainer>
         </div>
     );
 }

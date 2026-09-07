@@ -10,10 +10,14 @@ import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.jboss.logging.Logger;
 
 /**
- * Consome triggers manuais do educacao (manual) e executa as rotinas de manutencao
- * de dominio: correcao de avaliacoes, carregamento de chamadas pendentes e remocao
- * de extratores antigos com limpeza de pasta.
- * Topico: olimpio.educacao.maintenance
+ * Consome os triggers manuais do educacao — um tópico por regra de negócio — e
+ * executa a rotina correspondente:
+ * <ul>
+ *   <li>{@code olimpio.educacao.corrigir-avaliacoes} → correcao de avaliacoes;</li>
+ *   <li>{@code olimpio.educacao.carregar-chamadas-pendentes} → carregamento de chamadas pendentes;</li>
+ *   <li>{@code olimpio.educacao.remover-extratores-antigos} → remocao de extratores
+ *       antigos com limpeza de pasta (rotina do dominio relatorios).</li>
+ * </ul>
  */
 @ApplicationScoped
 public class EducacaoMaintenanceConsumer {
@@ -26,24 +30,42 @@ public class EducacaoMaintenanceConsumer {
     @Inject
     RelatoriosMaintenanceService relatorios;
 
-    @Incoming("educacao-maintenance")
+    @Incoming("educacao-corrigir-avaliacoes")
     @Blocking
     @RunOnVirtualThread
-    public void processarEducacaoMaintenance(String action) {
-        LOG.infof("EducacaoMaintenanceConsumer - recebido trigger manual do educacao: %s", action);
+    public void processarCorrigirAvaliacoes(String trigger) {
+        LOG.infof("EducacaoMaintenanceConsumer - recebido trigger corrigirAvaliacoes: %s", trigger);
         try {
-            switch (action) {
-                case "corrigirAvaliacoes" ->educacao.corrigirAvaliacoes().await().indefinitely();
-                case "carregarChamadasPendentes" ->educacao.carregarChamadasPendentesAutomatico().await().indefinitely();
-                case "removerExtratoresAntigos" ->relatorios.removerExtratoresAntigos().await().indefinitely();
-                default ->{
-                    LOG.warnf("EducacaoMaintenanceConsumer - acao desconhecida: %s", action);
-                    return;
-                }
-            }
-            LOG.infof("EducacaoMaintenanceConsumer - acao '%s' concluida", action);
+            educacao.corrigirAvaliacoes().await().indefinitely();
+            LOG.info("EducacaoMaintenanceConsumer - corrigirAvaliacoes concluido");
         } catch (Exception e) {
-            LOG.errorf(e, "EducacaoMaintenanceConsumer - falha ao executar acao '%s'", action);
+            LOG.error("EducacaoMaintenanceConsumer - falha ao executar corrigirAvaliacoes", e);
+        }
+    }
+
+    @Incoming("educacao-carregar-chamadas")
+    @Blocking
+    @RunOnVirtualThread
+    public void processarCarregarChamadasPendentes(String trigger) {
+        LOG.infof("EducacaoMaintenanceConsumer - recebido trigger carregarChamadasPendentes: %s", trigger);
+        try {
+            educacao.carregarChamadasPendentesAutomatico().await().indefinitely();
+            LOG.info("EducacaoMaintenanceConsumer - carregarChamadasPendentes concluido");
+        } catch (Exception e) {
+            LOG.error("EducacaoMaintenanceConsumer - falha ao executar carregarChamadasPendentes", e);
+        }
+    }
+
+    @Incoming("educacao-remover-extratores")
+    @Blocking
+    @RunOnVirtualThread
+    public void processarRemoverExtratoresAntigos(String trigger) {
+        LOG.infof("EducacaoMaintenanceConsumer - recebido trigger removerExtratoresAntigos: %s", trigger);
+        try {
+            relatorios.removerExtratoresAntigos().await().indefinitely();
+            LOG.info("EducacaoMaintenanceConsumer - removerExtratoresAntigos concluido");
+        } catch (Exception e) {
+            LOG.error("EducacaoMaintenanceConsumer - falha ao executar removerExtratoresAntigos", e);
         }
     }
 }

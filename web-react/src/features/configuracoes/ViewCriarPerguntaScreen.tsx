@@ -4,7 +4,6 @@ import {PermissionGate} from '../../shared/services/permissions';
 import {useAuth} from '../../features/auth/auth';
 import {Tabs} from '../../shared/components/Tabs';
 import {AutoComplete} from '../../shared/components/AutoComplete';
-import {ExportDropdown} from '../../shared/components/ExportDropdown';
 import {Plus, Save, X, FilePlus2, Pencil, Trash2} from 'lucide-react';
 
 type RespostaTipo = 'SELECAO' | 'ESCOLHA' | 'TEXTO' | 'ARQUIVO';
@@ -278,11 +277,7 @@ function ListarPerguntas() {
         }
     };
 
-    const exportOptions = [
-        {key: 'pdf', label: 'PDF', icon: <i className="fa fa-file-pdf-o"/>, onClick: () => handleExport('pdf')},
-        {key: 'docx', label: 'DOCX', icon: <i className="fa fa-file-word-o"/>, onClick: () => handleExport('docx')},
-        {key: 'excel', label: 'Excel', icon: <i className="fa fa-file-excel-o"/>, onClick: () => handleExport('excel')},
-    ];
+
 
     const carregarPerguntas = async () => {
         setCarregando(true);
@@ -309,7 +304,6 @@ function ListarPerguntas() {
                 >
                     {carregando ? 'Carregando...' : 'Carregar Perguntas'}
                 </button>
-                <ExportDropdown options={exportOptions} triggerLabel="Exportar" triggerIcon={<i className="fa fa-download"/>}/>
             </div>
 
             <Aviso tipo={aviso.tipo} texto={aviso.texto}/>

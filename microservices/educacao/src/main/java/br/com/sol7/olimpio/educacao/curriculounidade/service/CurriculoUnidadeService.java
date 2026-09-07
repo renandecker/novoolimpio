@@ -19,7 +19,7 @@ public class CurriculoUnidadeService {
     }
 
     public Uni<List<CurriculoUnidadeResponse>> listarPorCurriculo(Long curriculoId) {
-        return repository.find("curriculoId", curriculoId).list()
+        return repository.find("curriculoId = ?1", curriculoId).list()
                 .map(items -> items.stream().map(this::toResponse).toList());
     }
 

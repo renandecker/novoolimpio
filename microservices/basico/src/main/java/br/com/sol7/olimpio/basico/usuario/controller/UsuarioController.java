@@ -55,6 +55,49 @@ public class UsuarioController {
         return service.find(id);
     }
 
+    @GET
+    @Path("/atual")
+    public Uni<UsuarioResponse> atual(@HeaderParam("X-Authenticated-Username") String username) {
+        return service.buscarPorUsername(username);
+    }
+
+    // ── Sub-recursos de acesso (Acessos no formUsuario): perfis, agendas e unidades ──
+    @GET
+    @Path("/{id}/perfis")
+    public Uni<List<Long>> listarPerfis(@PathParam("id") Long id) {
+        return service.listarPerfis(id);
+    }
+
+    @PUT
+    @Path("/{id}/perfis")
+    public Uni<Void> substituirPerfis(@PathParam("id") Long id, List<Long> perfis) {
+        return service.substituirPerfis(id, perfis);
+    }
+
+    @GET
+    @Path("/{id}/agendas")
+    public Uni<List<Long>> listarAgendas(@PathParam("id") Long id) {
+        return service.listarAgendas(id);
+    }
+
+    @PUT
+    @Path("/{id}/agendas")
+    public Uni<Void> substituirAgendas(@PathParam("id") Long id, List<Long> agendas) {
+        return service.substituirAgendas(id, agendas);
+    }
+
+    @GET
+    @Path("/{id}/unidades")
+    public Uni<List<Long>> listarUnidades(@PathParam("id") Long id) {
+        return service.listarUnidades(id);
+    }
+
+    @PUT
+    @Path("/{id}/unidades")
+    public Uni<Void> substituirUnidades(@PathParam("id") Long id, List<Long> unidades) {
+        return service.substituirUnidades(id, unidades);
+    }
+
     @POST
     public Uni<Response> create(@Valid UsuarioRequest r) {
         return service.create(r).map(item -> Response.status(Response.Status.CREATED).entity(item).build());

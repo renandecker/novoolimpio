@@ -18,7 +18,10 @@ function montarHtml(nodes: {id: number; parentId: number | null; name: string}[]
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-  <script src="${AG_CHARTS_ENTERPRISE_CDN}"></script>
+    <script src="${AG_CHARTS_ENTERPRISE_CDN}"></script>
+  <script>
+    agCharts.LicenseManager.setLicenseKey('USING_AG_CHARTS_DEVELOPER_LICENSE');
+  </script>
   <style>
     html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, Roboto, Arial, sans-serif; }
     #myChart { width: 100%; height: calc(100vh - 56px); }

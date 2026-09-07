@@ -1,6 +1,7 @@
 export type ApiItem = { id: number; nome: string; dadosJson?: string };
 export type ApiRequest = Omit<ApiItem, 'id'>;
 export type PagedResponse<T> = { content: T[]; totalElements: number; page: number; size: number; totalPages: number };
+export type SortRequest = { field?: string; direction?: 'asc' | 'desc' };
 export type ModulePermissions = Record<string, string[]>;
 
 export type QueryOperation =
@@ -36,13 +37,46 @@ export const NUMBER_OPERATIONS: { value: QueryOperation; label: string }[] = [
     {value: 'BETWEEN', label: 'Entre'},
 ];
 
-export type Modulo = {
+export type FilterDimensionType = 'TEMPO' | 'DESCRITIVO' | 'NUMERICO';
+
+export interface FiltroRelatorio {
     id: number;
-    antecessorId: number | null;
-    rotulo: string;
-    descricao?: string;
-    icone?: string;
-    ajuda?: string;
-    outcome: string;
-    ordem: number;
-};
+    nome: string;
+    fixo: boolean;
+    exibirFiltro: boolean;
+    tipo: 'FIXO' | 'DINAMICO';
+    informacao?: string;
+    dimensao: {
+        tipoInfo: FilterDimensionType;
+    };
+}
+
+export interface FiltroRelatorioWrapper {
+    filtroRelatorio: FiltroRelatorio;
+    selected: boolean;
+    informacao?: string;
+}
+
+export type TempoFilterType = 0 | 1 | 2 | 3;
+
+export interface TempoFilterState {
+    tipo: TempoFilterType;
+    dataInicio?: string;
+    dataFim?: string;
+    campoDinamico?: string;
+    queryOperation?: QueryOperation;
+}
+
+export interface DescritivoFilterState {
+    listaTodosSelected: Array<{ informacao: string }>;
+}
+
+export interface FixoFilterState {
+    selected: boolean;
+}
+
+export type FilterState = TempoFilterState | DescritivoFilterState | FixoFilterState;
+
+export interface ReportFiltersState {
+    [filtroId: number]: FilterState;
+}

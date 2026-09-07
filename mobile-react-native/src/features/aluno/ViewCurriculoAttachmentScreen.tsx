@@ -11,11 +11,10 @@ import {
     Platform,
     PermissionsAndroid,
     TextInput,
+    Image,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import {api} from '../api';
-import {PhotoUploadModal} from '../shared/components/PhotoUploadModal';
-import {Base64FileUpload} from '../shared/components/Base64FileUpload';
+import {api} from '../../shared/services/api';
 
 interface CurriculumAttachmentProps {
     visible: boolean;
@@ -189,12 +188,9 @@ export function CurriculumAttachment({visible, onClose, onAttachmentUpdate, curr
                             editable={!uploading}
                         />
                         {fileSelected && currentFileBase64 && (
-                            <Base64FileUpload
-                                value={currentFileBase64}
-                                onChange={() => {}}
-                                label="Documento de Currículo"
-                                accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                            />
+                            <View style={styles.currentFileArea}>
+                                <Text style={styles.previewText}>Documento atual: {currentFileName || 'currículo anexado'}</Text>
+                            </View>
                         )}
 
                         {preview ? (
@@ -225,7 +221,7 @@ export function CurriculumAttachment({visible, onClose, onAttachmentUpdate, curr
                             </View>
                         )}
 
-                        {currentFoto && (
+                        {currentFileBase64 && (
                             <TouchableOpacity style={styles.dangerBtn} onPress={removeDocument} disabled={uploading}>
                                 <Text style={styles.dangerBtnText}>Remover documento</Text>
                             </TouchableOpacity>
@@ -239,6 +235,25 @@ export function CurriculumAttachment({visible, onClose, onAttachmentUpdate, curr
                 </View>
             </View>
         </Modal>
+    );
+}
+
+export default function ViewCurriculoAttachmentScreen({navigation}: any) {
+    const [fileName, setFileName] = useState<string>('');
+    const [fileBase64, setFileBase64] = useState<string | null>(null);
+    return (
+        <View style={{flex: 1}}>
+            <CurriculumAttachment
+                visible={true}
+                onClose={() => navigation?.goBack?.()}
+                onAttachmentUpdate={(data, name) => {
+                    setFileBase64(data || null);
+                    setFileName(name || '');
+                }}
+                currentFileName={fileName}
+                currentFileBase64={fileBase64}
+            />
+        </View>
     );
 }
 
@@ -286,6 +301,14 @@ const styles = StyleSheet.create({
         padding: 12,
         marginBottom: 16,
         fontSize: 14,
+    },
+    currentFileArea: {
+        width: '100%',
+        borderRadius: 8,
+        backgroundColor: '#f5f5f5',
+        marginBottom: 16,
+        padding: 12,
+        alignItems: 'center',
     },
     previewArea: {
         width: '100%',

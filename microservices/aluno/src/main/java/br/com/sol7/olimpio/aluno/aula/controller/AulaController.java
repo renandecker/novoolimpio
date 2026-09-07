@@ -3,9 +3,11 @@ package br.com.sol7.olimpio.aluno.aula.controller;
 import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.AulaAssistidaRequest;
 import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.AulaAssistidaResponse;
 import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.AulaResponse;
+import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.AulaTurmaResponse;
 import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.ContratoAulaResponse;
 import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.OcorrenciaAulaResponse;
 import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.OferecimentoAulaResponse;
+import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.TurmaAulaResponse;
 import br.com.sol7.olimpio.aluno.aula.service.AulaService;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
@@ -59,6 +61,19 @@ public class AulaController {
     @Path("/por-oferecimento")
     public Uni<List<AulaResponse>> aulasDoOferecimento(@QueryParam("oferecimentoId") Long oferecimentoId) {
         return service.aulasDoOferecimento(oferecimentoId);
+    }
+
+    @GET
+    @Path("/turmas")
+    public Uni<List<TurmaAulaResponse>> turmas(@Context ContainerRequestContext ctx) {
+        return service.turmas(username(ctx));
+    }
+
+    @GET
+    @Path("/aulas-da-turma")
+    public Uni<List<AulaTurmaResponse>> aulasDaTurma(@Context ContainerRequestContext ctx,
+                                                    @QueryParam("oferecimentoId") Long oferecimentoId) {
+        return service.aulasDaTurma(username(ctx), oferecimentoId);
     }
 
     @GET

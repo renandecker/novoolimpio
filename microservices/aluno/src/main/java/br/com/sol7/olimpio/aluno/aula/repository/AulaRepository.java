@@ -82,6 +82,43 @@ public class AulaRepository implements PanacheRepository<Aula> {
         return list("ocorrenciaComponenteCurricularId", ocorrenciaId);
     }
 
+    public Uni<List<Object[]>> turmasDoAluno(Long pessoaId) {
+        String sql = """
+        SELECT DISTINCT of.id,
+                COALESCE(c.nome, '') AS curso,
+        COALESCE(cc.descricao, '') AS componente,
+        COALESCE(of.sequencia, 0) AS turma,
+        COALESCE(un.nome_fantasia, '') AS unidade,
+        COALESCE(f.nome, '') AS professor
+        FROM edc_matricula m
+        JOIN edc_contrato ct ON ct.id = m.id_contrato
+        JOIN edc_curso c ON c.id = ct.id_curso
+        LEFT JOIN edc_oferecimento_componente_curricular of ON of.id = m.id_oferecimento_componente_curricular
+        LEFT JOIN edc_componente_curricular cc ON cc.id = of.id_componente_curricular
+        LEFT JOIN bas_unidade un ON un.id = ct.id_unidade
+        LEFT JOIN bas_pessoa pprof ON pprof.id = of.id_professor
+        LEFT JOIN bas_pessoa_fisica f ON f.id_pessoa = pprof.id
+        WHERE ct.id_pessoa = ?1 AND m.data_cancelamento IS NULL AND of.id IS NOT NULL
+        ORDER BY curso, componente, turma
+        """;
+        return nativeList(sql, pessoaId);
+    }
+
+    public Uni<List<Object[]>> aulasDaTurma(Long oferecimentoId, Long pessoaId) {
+        String sql = """
+        SELECT a.id,
+               COALESCE(a.nome, '') AS nome,
+        COALESCE(a.descricao, '') AS descricao,
+        occ.data,
+        EXISTS (SELECT 1 FROM edc_aula_aluno aa WHERE aa.id_aula = a.id AND aa.id_pessoa = ?2) AS assistida
+        FROM edc_aula a
+        JOIN edc_ocorrencia_componente_curricular occ ON occ.id = a.id_ocorrencia_componente_curricular
+        WHERE occ.id_oferecimento_componente_curricular = ?1
+        ORDER BY occ.data NULLS LAST, a.id
+        """;
+        return nativeList(sql, oferecimentoId, pessoaId);
+    }
+
     public Uni<List<Aula>> aulasDoOferecimento(Long oferecimentoId) {
         String sql = """
         SELECT a.*

@@ -116,7 +116,7 @@ export default function ViewConsultorFormConsultorListScreen() {
                 alert('Consultor criado com sucesso.');
             }
             if (!continuar) {
-                navigate('/view/consultor/listConsultor');
+                navigate('/view/consultor/consultor');
             } else if (!isEdit) {
                 setUsuario(null);
                 setAgendas([]);
@@ -129,7 +129,7 @@ export default function ViewConsultorFormConsultorListScreen() {
         }
     };
 
-    const voltar = () => navigate('/view/consultor/listConsultor');
+    const voltar = () => navigate('/view/consultor/consultor');
 
     return (
         <PermissionGate permission="READ">

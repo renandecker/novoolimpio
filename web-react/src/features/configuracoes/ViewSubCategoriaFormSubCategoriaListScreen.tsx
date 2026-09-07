@@ -1,8 +1,11 @@
-﻿import {PermissionGate} from '../../shared/services/permissions';
+import {PermissionGate} from '../../shared/services/permissions';
 import {DataTable} from '../../shared/components/DataTable';
 
 export default function ViewSubCategoriaFormSubCategoriaListScreen() {
     return <PermissionGate permission="READ">
-        <main><h1>Form Sub Categoria</h1><DataTable path="/api/view/subCategoria/formSubCategoria"/></main>
-    </PermissionGate>
+        <main>
+            <h1>Form Sub Categoria</h1>
+            <DataTable path="/api/view/subCategoria/formSubCategoria"/>
+        </main>
+    </PermissionGate>;
 }

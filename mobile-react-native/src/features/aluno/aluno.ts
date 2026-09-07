@@ -1,4 +1,4 @@
-import {api} from './api';
+import {api} from '../../shared/services/api';
 
 export type AlunoPerfil = {
     username: string;
@@ -87,7 +87,37 @@ export type Boletim = {
     frequenciaPerc: number | null;
 };
 
-export type Ocorrencia = { data: string | null; presenca: string; presencaDescricao: string; componente: string };
+export type TurmaAula = {
+    id: number;
+    curso: string;
+    componente: string;
+    turma: number | null;
+    unidade: string;
+    professor: string;
+};
+
+export type AulaTurma = {
+    id: number;
+    nome: string;
+    descricao: string;
+    data: string | null;
+    assistida: boolean;
+};
+
+export type AulaAnexoMobile = {
+    id: number;
+    aulaId: number;
+    nome: string;
+    anexo: string;
+    tipo: string;
+};
+
+export type AulaDetalheMobile = {
+    id: number;
+    nome: string;
+    descricao: string;
+    ocorrenciaComponenteCurricularId: number | null;
+};
 
 export type Frequencia = {
     matricula: Matricula;
@@ -112,6 +142,12 @@ export const alunoApi = {
     boletim: () => api.get<Boletim[]>('/api/aluno/boletim').then((r) => r.data),
     boletimDetalhe: (matriculaId: number) => api.get<Boletim>(`/api/aluno/boletim/${matriculaId}`).then((r) => r.data),
     frequencia: (matriculaId: number) => api.get<Frequencia>(`/api/aluno/frequencia/${matriculaId}`).then((r) => r.data),
+    turmas: () => api.get<TurmaAula[]>('/api/aluno/aula/turmas').then((r) => r.data),
+    aulasDaTurma: (oferecimentoId: number) => api.get<AulaTurma[]>('/api/aluno/aula/aulas-da-turma', {params: {oferecimentoId}}).then((r) => r.data),
+    aula: (id: number) => api.get<AulaDetalheMobile>(`/api/aluno/aula/${id}`).then((r) => r.data),
+    anexosDaAula: (aulaId: number) => api.get<AulaAnexoMobile[]>('/api/aluno/aula-anexo/por-aula', {params: {aulaId}}).then((r) => r.data),
+    jaAssistida: (aulaId: number) => api.get<boolean>(`/api/aluno/aula/${aulaId}/assistida`).then((r) => r.data),
+    marcarAssistida: (aulaId: number) => api.post<any>(`/api/aluno/aula/${aulaId}/assistida`, {}).then((r) => r.data),
 };
 
 export function formatarNota(valor: number | null | undefined): string {

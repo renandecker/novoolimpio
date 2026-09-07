@@ -2,8 +2,8 @@ import React, {useEffect, useState} from 'react';
 import {
     ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, View, TouchableOpacity,
 } from 'react-native';
-import {alunoApi, formatarMoeda, formatarPercentual} from '../aluno';
-import {useNavigation} from '@react-native-async-storage/async-storage';
+import {alunoApi, formatarMoeda, formatarPercentual} from './aluno';
+import {useNavigation} from '@react-navigation/native';
 
 export default function AlunoFinanceiroScreen() {
     const [lancamentos, setLancamentos] = useState<any[]>([]);

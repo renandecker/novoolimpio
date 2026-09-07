@@ -225,12 +225,17 @@ function GestaoTab() {
 
     const notificar = (tipo: 'erro' | 'sucesso', texto: string) => setAviso({tipo, texto});
 
-    const fetchProfessores = async (query: string): Promise<AutoCompleteOption[]> => {
-        const {data} = await api.get<{ id: number; nome: string }[]>(
-            '/api/professor/professor/auto-complete-professor',
-            {params: {query}},
-        );
-        return (data ?? []).map((item) => ({id: item.id, label: item.nome || `#${item.id}`}));
+    const fetchProfessores = async (query: string): Promise<AutoCompleteOption[]> => {
+        try {
+            const {data} = await api.get<{ id: number; nome: string }[]>(
+                '/api/professor/professor/auto-complete-professor',
+                {params: {query}},
+            );
+            return (data ?? []).map((item) => ({id: item.id, label: item.nome || `#${item.id}`}));
+        } catch (err) {
+            console.warn('Erro ao buscar professores (auto-complete):', err);
+            return [];
+        }
     };
 
     async function buscarTurmas(professorId: number | null) {

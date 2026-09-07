@@ -19,6 +19,7 @@ type Auth = {
     signIn: (username: string, password: string, bootstrap?: boolean) => Promise<void>;
     signOut: () => Promise<void>;
     refreshModules: () => Promise<void>;
+    refreshSession: (session: Session) => void;
 };
 
 const KEY = 'olimpio.session';
@@ -102,6 +103,10 @@ export function AuthProvider({children}: { children: ReactNode }) {
                     });
                     return prev;
                 });
+            },
+            refreshSession: (newSession: Session) => {
+                AsyncStorage.setItem(KEY, JSON.stringify(newSession));
+                setSession(newSession);
             },
         }),
         [session, ready],

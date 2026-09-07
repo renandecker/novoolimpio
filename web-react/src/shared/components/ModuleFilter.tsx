@@ -49,7 +49,7 @@ export function ModuleFilter({columns, value, onChange}: ModuleFilterProps) {
                 };
             }
         }
-        onChange({filters});
+        onChange({filters: {...filters}});
         setOpen(false);
     };
 

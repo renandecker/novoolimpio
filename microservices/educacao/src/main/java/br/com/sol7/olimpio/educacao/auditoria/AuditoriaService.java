@@ -3,6 +3,7 @@ package br.com.sol7.olimpio.educacao.auditoria;
 import br.com.sol7.olimpio.educacao.auditoria.dto.AuditoriaCampo;
 import br.com.sol7.olimpio.educacao.auditoria.dto.AuditoriaResponse;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -28,6 +29,7 @@ public class AuditoriaService {
     @Inject
     AuditoriaRepository repository;
 
+    @WithSession
     public Uni<PagedResponse<AuditoriaResponse>> paged(String entidade, int page, int size) {
         if (entidade == null || !repository.existeEntidade(entidade)) {
             return Uni.createFrom().failure(new BadRequestException("Entidade de auditoria inválida: " + entidade));

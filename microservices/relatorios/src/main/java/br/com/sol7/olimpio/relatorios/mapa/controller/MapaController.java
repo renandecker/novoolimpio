@@ -58,22 +58,22 @@ public class MapaController {
 
     @GET
     @Path("/auto-complete-medida")
-    public Uni<List<Long>> autoCompleteMedida(@QueryParam("query") String query) {
-        return service.autoCompleteMedida(query);
+    public Uni<List<Long>> autoCompleteMedida(@QueryParam("query") String query, @QueryParam("estruturaId") Long estruturaId) {
+        return service.autoCompleteMedida(query, estruturaId);
     }
 
 
     @GET
     @Path("/auto-complete-georeferencia")
-    public Uni<List<Long>> autoCompleteGeoreferencia(@QueryParam("query") String query) {
-        return service.autoCompleteGeoreferencia(query);
+    public Uni<List<Long>> autoCompleteGeoreferencia(@QueryParam("query") String query, @QueryParam("estruturaId") Long estruturaId) {
+        return service.autoCompleteGeoreferencia(query, estruturaId);
     }
 
 
     @GET
     @Path("/auto-complete-dimensao")
-    public Uni<List<Long>> autoCompleteDimensao(@QueryParam("query") String query) {
-        return service.autoCompleteDimensao(query);
+    public Uni<List<Long>> autoCompleteDimensao(@QueryParam("query") String query, @QueryParam("estruturaId") Long estruturaId) {
+        return service.autoCompleteDimensao(query, estruturaId);
     }
 
 

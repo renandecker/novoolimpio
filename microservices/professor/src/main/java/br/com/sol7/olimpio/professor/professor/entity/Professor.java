@@ -21,4 +21,7 @@ public class Professor extends PanacheEntity {
     public Date dataInicio;
     @Column(name = "dt_fim")
     public Date dataFim;
+
+    @jakarta.persistence.Transient
+    public String nome;
 }

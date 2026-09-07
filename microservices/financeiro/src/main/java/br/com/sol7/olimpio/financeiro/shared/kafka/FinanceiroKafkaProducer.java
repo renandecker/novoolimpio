@@ -8,8 +8,11 @@ import jakarta.inject.Inject;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 
 /**
- * Publica triggers manuais no Kafka para o microsservico schedule.
- * Usado quando o financeiro dispara manualmente email de cobranca ou fechamento de caixa.
+ * Publica triggers manuais no Kafka.
+ * <ul>
+ *   <li>Email de cobranca -> consumido pelo notificacoes-service (dono do dominio de e-mail);</li>
+ *   <li>Fechamento de caixa e manutencao -> consumidos pelo schedule-service.</li>
+ * </ul>
  */
 @ApplicationScoped
 public class FinanceiroKafkaProducer {
@@ -23,11 +26,11 @@ public class FinanceiroKafkaProducer {
     MutinyEmitter<String> fechamentoCaixaEmitter;
 
     @Inject
-    @Channel("financeiro-maintenance-out")
-    MutinyEmitter<String> maintenanceEmitter;
+    @Channel("financeiro-atualizar-cobrancas-out")
+    MutinyEmitter<String> atualizarCobrancasEmitter;
 
     public Uni<Void> enviarTriggerEmailCobranca(String payload) {
-        Log.infof("FinanceiroKafkaProducer - enviando trigger email cobranca para o schedule: %s", payload);
+        Log.infof("FinanceiroKafkaProducer - enviando trigger email cobranca para o notificacoes: %s", payload);
         return emailCobrancaEmitter.send(payload)
                 .onFailure().invoke(err -> Log.warnf("FinanceiroKafkaProducer - falha ao enviar trigger email cobranca: %s", err.getMessage()))
                 .onFailure().recoverWithNull();
@@ -40,10 +43,14 @@ public class FinanceiroKafkaProducer {
                 .onFailure().recoverWithNull();
     }
 
-    public Uni<Void> enviarTriggerManutencao(String action) {
-        Log.infof("FinanceiroKafkaProducer - enviando trigger manutencao para o schedule: %s", action);
-        return maintenanceEmitter.send(action)
-                .onFailure().invoke(err -> Log.warnf("FinanceiroKafkaProducer - falha ao enviar trigger manutencao: %s", err.getMessage()))
+    /**
+     * Envia o trigger da regra de negocio atualizarCobrancasAutomatico para o schedule,
+     * no topico dedicado {@code olimpio.financeiro.atualizar-cobrancas}.
+     */
+    public Uni<Void> enviarTriggerAtualizarCobrancas(String action) {
+        Log.infof("FinanceiroKafkaProducer - enviando trigger atualizarCobrancas para o schedule: %s", action);
+        return atualizarCobrancasEmitter.send(action)
+                .onFailure().invoke(err -> Log.warnf("FinanceiroKafkaProducer - falha ao enviar trigger atualizarCobrancas: %s", err.getMessage()))
                 .onFailure().recoverWithNull();
     }
 }

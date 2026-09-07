@@ -19,6 +19,10 @@ import java.util.List;
  * caseCor da situacao) e registra um registro em edc_nap_email para cada contrato que atende
  * as regras. Nao foi portado o envio efetivo: aqui fica registrado o envio pendente + log.
  * <p>
+ * O trigger manual via Kafka (topico olimpio.educacao.email-manual) e consumido pelo
+ * notificacoes-service, que possui copia desta rotina; aqui a rotina roda apenas no
+ * agendamento automatico (SchedulingJobs.rotinaEmails via MaintenanceConsumer.processarEmails).
+ * <p>
  * Acessa o banco pelo datasource reativo "educacao-db" (SQL nativo, sem REST).
  */
 @ApplicationScoped

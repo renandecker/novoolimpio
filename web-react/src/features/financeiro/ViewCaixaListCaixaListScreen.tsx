@@ -5,7 +5,6 @@ import {useModulePaged} from '../../shared/hooks/useModulePaged';
 import type {ApiItem} from '../../shared/types/index';
 import type {SearchFilterRequest} from '../../shared/types/types';
 import {legacyClassName} from '../../shared/components/DataTable';
-import {ExportDropdown} from '../../shared/components/ExportDropdown';
 import {ModuleFilter} from '../../shared/components/ModuleFilter';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
@@ -73,6 +72,40 @@ type Movimentacao = {
     tipoMovimento: string;
 };
 
+type CaixaTotais = {
+    caixaId?: number;
+    totalFundoCaixa: number;
+    totalDinheiro: number;
+    totalCheque: number;
+    totalCartao: number;
+    totalBoleto: number;
+    totalTransferencia: number;
+    totalDeposito: number;
+    totalSangria: number;
+    totalValor: number;
+    totalDesconto: number;
+    totalJurosMulta: number;
+    totalValorPagar: number;
+    totalDinheiroCaixa: number;
+};
+
+const toTotais = (raw: Record<string, unknown>, fundoFallback: number): CaixaTotais => ({
+    caixaId: raw.caixaId != null ? Number(raw.caixaId) : undefined,
+    totalFundoCaixa: Number(raw.totalFundoCaixa ?? fundoFallback) || 0,
+    totalDinheiro: Number(raw.totalDinheiro) || 0,
+    totalCheque: Number(raw.totalCheque) || 0,
+    totalCartao: Number(raw.totalCartao) || 0,
+    totalBoleto: Number(raw.totalBoleto) || 0,
+    totalTransferencia: Number(raw.totalTransferencia) || 0,
+    totalDeposito: Number(raw.totalDeposito) || 0,
+    totalSangria: Number(raw.totalSangria) || 0,
+    totalValor: Number(raw.totalValor) || 0,
+    totalDesconto: Number(raw.totalDesconto) || 0,
+    totalJurosMulta: Number(raw.totalJurosMulta) || 0,
+    totalValorPagar: Number(raw.totalValorPagar) || 0,
+    totalDinheiroCaixa: Number(raw.totalDinheiroCaixa) || 0,
+});
+
 type CaixaRow = {
     id: number;
     idCaixaUnidade: string;
@@ -107,6 +140,33 @@ export default function ViewCaixaListCaixaListScreen() {
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);
     const [page, setPage] = useState(0);
 
+    const [totaisCaixa, setTotaisCaixa] = useState<Record<number, CaixaTotais>>({});
+    const [loadingTotais, setLoadingTotais] = useState<Record<number, boolean>>({});
+    const [erroTotais, setErroTotais] = useState<Record<number, string>>({});
+
+    const loadTotais = async (row: CaixaRow): Promise<CaixaTotais | null> => {
+        if (totaisCaixa[row.id] || loadingTotais[row.id]) return totaisCaixa[row.id] ?? null;
+        setLoadingTotais(prev => ({...prev, [row.id]: true}));
+        setErroTotais(prev => {
+            const next = {...prev};
+            delete next[row.id];
+            return next;
+        });
+        try {
+            // Totais sempre via API (caixa aberto ou fechado) — backend calcula por forma de pagamento.
+            const {data} = await api.get<Record<string, unknown>>(`/api/financeiro/caixa/${row.id}/totais-fechamento`);
+            const totais = toTotais(data ?? {}, Number(row.fundoCaixa) || 0);
+            setTotaisCaixa(prev => ({...prev, [row.id]: totais}));
+            return totais;
+        } catch (e: any) {
+            console.error('Erro ao carregar totais:', e?.response?.data ?? e);
+            setErroTotais(prev => ({...prev, [row.id]: 'Falha ao carregar totais da API'}));
+            return null;
+        } finally {
+            setLoadingTotais(prev => ({...prev, [row.id]: false}));
+        }
+    };
+
     const toggleExpand = async (row: CaixaRow) => {
         const id = row.id;
         const isOpen = expandedRows[id];
@@ -125,36 +185,30 @@ export default function ViewCaixaListCaixaListScreen() {
                 setLoadingMovimentacoes(prev => ({...prev, [id]: false}));
             }
         }
+        // Totais do detalhe expandido sempre via API.
+        if (!isOpen) {
+            void loadTotais(row);
+        }
     };
 
-    const [totaisCaixa, setTotaisCaixa] = useState<Record<number, any>>({});
-    const [loadingTotais, setLoadingTotais] = useState<Record<number, boolean>>({});
-
-    const openFluxoCaixa = async (row: CaixaRow) => {
+const openFluxoCaixa = async (row: CaixaRow) => {
         setFluxoCaixaDialog({open: true, caixa: row});
-        if (!movimentacoes[row.id] && !loadingMovimentacoes[row.id]) {
+        let movs = movimentacoes[row.id];
+        if (!movs && !loadingMovimentacoes[row.id]) {
             setLoadingMovimentacoes(prev => ({...prev, [row.id]: true}));
             try {
                 const {data} = await api.get<Record<string, unknown>[]>(`/api/financeiro/caixa/${row.id}/movimentacoes`);
-                setMovimentacoes(prev => ({...prev, [row.id]: (data ?? []).map(toMovimentacao)}));
+                movs = (data ?? []).map(toMovimentacao);
+                setMovimentacoes(prev => ({...prev, [row.id]: movs}));
             } catch (e) {
                 console.error('Erro ao carregar movimentações:', e);
+                movs = [];
                 setMovimentacoes(prev => ({...prev, [row.id]: []}));
             } finally {
                 setLoadingMovimentacoes(prev => ({...prev, [row.id]: false}));
             }
         }
-        if (!totaisCaixa[row.id] && !loadingTotais[row.id]) {
-            setLoadingTotais(prev => ({...prev, [row.id]: true}));
-            try {
-                const {data} = await api.get(`/api/financeiro/caixa/${row.id}/totais-fechamento`);
-                setTotaisCaixa(prev => ({...prev, [row.id]: data}));
-            } catch (e) {
-                console.error('Erro ao carregar totais:', e);
-            } finally {
-                setLoadingTotais(prev => ({...prev, [row.id]: false}));
-            }
-        }
+        await loadTotais(row);
     };
 
     const closeFluxoCaixa = () => {
@@ -201,7 +255,27 @@ export default function ViewCaixaListCaixaListScreen() {
     const shouldShowSegundaViaPagamento = (tipo: string) => tipo === 'ENTRADA' || tipo === '1';
     const shouldShowSegundaViaSangria = (tipo: string) => tipo === 'SANGRIA' || tipo === '3';
 
-    const handleExport = async (format: 'pdf' | 'docx' | 'excel') => {
+      const handleImprimir = async (caixaId: number) => {
+          try {
+              const response = await api.post(`/api/financeiro/caixa/${caixaId}/imprimir`, undefined, {
+                  responseType: 'blob',
+                  headers: {Accept: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'},
+              });
+              const url = window.URL.createObjectURL(new Blob([response.data]));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', `relatorio-caixa-${caixaId}.docx`);
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+              q.refetch();
+          } catch (e) {
+              console.error('Erro ao imprimir:', e);
+              alert('Erro ao imprimir');
+          }
+      };
+
+     const handleExport = async (format: 'pdf' | 'docx' | 'excel') => {
         try {
             const response = await api.get(`/api/financeiro/caixa/exportar/${format}`, {responseType: 'blob'});
             const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -265,7 +339,6 @@ export default function ViewCaixaListCaixaListScreen() {
                         <span className="breadcrumb-current">Gerência Fluxo Caixa</span>
                     </div>
                     <div className="page-header-actions">
-                        <ExportDropdown options={exportOptions} triggerLabel="Exportar" triggerIcon={<i className="fa fa-download"/>} triggerClassName="btnyellow"/>
                         <ModuleFilter columns={COLUMNS} value={filterParams} onChange={setFilterParams}/>
                     </div>
                 </div>
@@ -331,20 +404,21 @@ export default function ViewCaixaListCaixaListScreen() {
                                                  <div className="row-actions-menu">
                                                      <button
                                                          type="button"
-                                                         className="btn-action btnblue"
+                                                         className="btn-action btnblack"
                                                           title="Fluxo Caixa"
                                                           onClick={() => openFluxoCaixa(caixaRow)}
                                                       >
                                                           <i className="fa fa-bar-chart"/>
                                                       </button>
-                                                     <button
-                                                         type="button"
-                                                         className="btn-action btnblue"
-                                                          title="Imprimir"
-                                                          disabled={!caixaRow.dataFechamento}
-                                                      >
-                                                          <i className="fa fa-print"/>
-                                                      </button>
+                                                      <button
+                                                          type="button"
+                                                          className="btn-action btnblue"
+                                                           title="Imprimir"
+                                                           disabled={!caixaRow.dataFechamento}
+                                                           onClick={() => handleImprimir(caixaRow.id)}
+                                                       >
+                                                           <i className="fa fa-print"/>
+                                                       </button>
                                                        {!caixaRow.dataFechamento ? (
                                                            <button
                                                                type="button"
@@ -471,10 +545,37 @@ export default function ViewCaixaListCaixaListScreen() {
                                                                 <div className="caixa-totals-actions">
                                                                     <div className="caixa-totals">
 {(() => {
-                                                                             const totals = calculateTotals(movs);
-                                                                             const fundoCaixa = Number(caixaRow.fundoCaixa) || 0;
-                                                                             const totalDinheiroCaixa = totals.totalDinheiro + fundoCaixa;
+                                                                             const apiTotais = totaisCaixa[caixaId];
+                                                                             const isLoadingTotais = loadingTotais[caixaId];
+                                                                             if (isLoadingTotais && !apiTotais) {
+                                                                                 return <p>Carregando totais...</p>;
+                                                                             }
+                                                                             const totals = apiTotais ?? (() => {
+                                                                                 const t = calculateTotals(movs);
+                                                                                 const fundo = Number(caixaRow.fundoCaixa) || 0;
+                                                                                 return {
+                                                                                     totalFundoCaixa: fundo,
+                                                                                     totalDinheiro: t.totalDinheiro,
+                                                                                     totalCheque: t.totalCheque,
+                                                                                     totalCartao: t.totalCartao,
+                                                                                     totalBoleto: t.totalBoleto,
+                                                                                     totalTransferencia: t.totalTransferencia,
+                                                                                     totalDeposito: t.totalDeposito,
+                                                                                     totalSangria: t.totalSangria,
+                                                                                     totalValor: t.totalValor,
+                                                                                     totalDesconto: t.totalDesconto,
+                                                                                     totalJurosMulta: t.totalJurosMulta,
+                                                                                     totalValorPagar: t.totalValorPagar,
+                                                                                     totalDinheiroCaixa: t.totalDinheiro + fundo,
+                                                                                 };
+                                                                             })();
                                                                              return (
+                                                                                <>
+                                                                                {erroTotais[caixaId] && !apiTotais ? (
+                                                                                    <p style={{color: '#a00'}}>Totais da API indisponíveis — exibindo cálculo local.{' '}
+                                                                                        <button type="button" className="btn-form-back" style={{marginLeft: 8}} onClick={() => loadTotais(caixaRow)}>Tentar novamente</button>
+                                                                                    </p>
+                                                                                ) : null}
                                                                                 <table className="totals-table">
                                                                                     <thead>
                                                                                     <tr>
@@ -495,7 +596,7 @@ export default function ViewCaixaListCaixaListScreen() {
                                                                                     </thead>
                                                                                     <tbody>
                                                                                     <tr>
-                                                                                        <td>{formatCurrency(fundoCaixa)}</td>
+                                                                                        <td>{formatCurrency(totals.totalFundoCaixa)}</td>
                                                                                         <td>{formatCurrency(totals.totalDinheiro)}</td>
                                                                                         <td>{formatCurrency(totals.totalCheque)}</td>
                                                                                         <td>{formatCurrency(totals.totalCartao)}</td>
@@ -507,10 +608,11 @@ export default function ViewCaixaListCaixaListScreen() {
                                                                                         <td>{formatCurrency(totals.totalDesconto)}</td>
                                                                                         <td>{formatCurrency(totals.totalJurosMulta)}</td>
                                                                                         <td>{formatCurrency(totals.totalValorPagar)}</td>
-                                                                                        <td>{formatCurrency(totalDinheiroCaixa)}</td>
+                                                                                        <td>{formatCurrency(totals.totalDinheiroCaixa)}</td>
                                                                                     </tr>
                                                                                     </tbody>
 </table>
+                                                                                </>
                                                                               );
                                                                           })()}
                                                                </div>
@@ -608,12 +710,28 @@ export default function ViewCaixaListCaixaListScreen() {
                                                 <td>{formatCurrency(totaisCaixa[fluxoCaixaDialog.caixa.id].totalDinheiroCaixa)}</td>
                                             </tr>
                                             </>
-                                        ) : (
+                                        ) : (() => {
+                                            const fallbackMovs = movimentacoes[fluxoCaixaDialog.caixa.id] ?? [];
+                                            const t = calculateTotals(fallbackMovs);
+                                            const fundo = Number(fluxoCaixaDialog.caixa.fundoCaixa) || 0;
+                                            return (
                                             <tr>
-                                                <td>{formatCurrency(fluxoCaixaDialog.caixa.fundoCaixa)}</td>
-                                                <td colSpan={12} style={{textAlign: 'center', color: '#666'}}>Totais calculados no servidor (não disponível)</td>
+                                                <td>{formatCurrency(fundo)}</td>
+                                                <td>{formatCurrency(t.totalDinheiro)}</td>
+                                                <td>{formatCurrency(t.totalCheque)}</td>
+                                                <td>{formatCurrency(t.totalCartao)}</td>
+                                                <td>{formatCurrency(t.totalBoleto)}</td>
+                                                <td>{formatCurrency(t.totalTransferencia)}</td>
+                                                <td>{formatCurrency(t.totalDeposito)}</td>
+                                                <td>{formatCurrency(t.totalSangria)}</td>
+                                                <td>{formatCurrency(t.totalValor)}</td>
+                                                <td>{formatCurrency(t.totalDesconto)}</td>
+                                                <td>{formatCurrency(t.totalJurosMulta)}</td>
+                                                <td>{formatCurrency(t.totalValorPagar)}</td>
+                                                <td>{formatCurrency(t.totalDinheiro + fundo)}</td>
                                             </tr>
-                                        )}
+                                            );
+                                        })()}
                                     </tbody>
                                     </table>
                                     <h3 style={{marginTop: '20px', marginBottom: '10px'}}>Movimentações</h3>

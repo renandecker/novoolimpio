@@ -35,7 +35,7 @@ public class MovimentacaoFinanceiraRepository implements PanacheRepository<Movim
                         .setParameter(1, caixaId)
                         .setParameter(2, tipoPagamento)
                         .getSingleResult())
-                .map(v -> new BigDecimal(v.toString()));
+                .map(v -> v == null ? BigDecimal.ZERO : new BigDecimal(v.toString()));
     }
 
     // Migrado de CaixaController.totalRelatorio (legado) - soma do troco concedido em pagamentos
@@ -49,7 +49,7 @@ public class MovimentacaoFinanceiraRepository implements PanacheRepository<Movim
     public Uni<BigDecimal> totalTroco(Long caixaId) {
         return Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_TOTAL_TROCO).setParameter(1, caixaId).getSingleResult())
-                .map(v -> new BigDecimal(v.toString()));
+                .map(v -> v == null ? BigDecimal.ZERO : new BigDecimal(v.toString()));
     }
 
     // Migrado de CaixaController.totalRelatorio (legado) - totais vinculados a pagamento de

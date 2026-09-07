@@ -1,25 +1,23 @@
 import React, {useEffect, useState} from 'react';
-import {
-    ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, View, TouchableOpacity,
-} from 'react-native';
-import {alunoApi, AulaAluno, formatarData} from '../aluno';
-import {useNavigation} from '@react-navigation/native';
+import {ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import type {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {alunoApi, TurmaAula} from './aluno';
+import type {ParamList} from '../../HomeScreen';
 
-export default function AlunoAulasScreen() {
-    const [aulas, setAulas] = useState<AulaAluno[]>([]);
+export default function AlunoAulasScreen({navigation}: NativeStackScreenProps<ParamList, 'aluno/aulas'>) {
+    const [turmas, setTurmas] = useState<TurmaAula[]>([]);
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(true);
-    const navigation = useNavigation();
 
     useEffect(() => {
         let active = true;
         alunoApi
-            .aulas()
+            .turmas()
             .then((data) => {
-                if (active) setAulas(data ?? []);
+                if (active) setTurmas(data ?? []);
             })
             .catch((e: any) => {
-                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar as aulas.');
+                if (active) setError(e.response?.data?.error || e.response?.data?.message || 'Não foi possível carregar as turmas.');
             })
             .finally(() => {
                 if (active) setBusy(false);
@@ -40,64 +38,60 @@ export default function AlunoAulasScreen() {
     if (error) {
         return (
             <View style={styles.page}>
-                <Text style={styles.title}>Minhas Aulas</Text>
+                <Text style={styles.title}>Aulas</Text>
                 <Text style={styles.errorText}>{error}</Text>
             </View>
         );
     }
 
     return (
-        <ScrollView style={styles.page} contentContainerStyle={styles.content}>
-            <Text style={styles.title}>Minhas Aulas</Text>
-            <Text style={styles.subtitle}>Total de aulas registradas: {aulas.length}</Text>
+        <View style={styles.page}>
+            <Text style={styles.title}>Aulas</Text>
+            <Text style={styles.subtitle}>Selecione a turma para ver as aulas.</Text>
 
-            {aulas.length === 0 && (
-                <Text style={styles.empty}>Nenhuma aula encontrada.</Text>
-            )}
+            {turmas.length === 0 && <Text style={styles.empty}>Nenhuma turma encontrada.</Text>}
 
             <FlatList
-                data={aulas}
+                data={turmas}
                 keyExtractor={(item) => String(item.id)}
                 renderItem={({item}) => (
-                    <View style={styles.aulaItem}>
-                        <Text style={styles.aulaTitulo}>{item.nome}</Text>
-                        <Text style={styles.aulaMeta}>
-                            {item.turma ? `Turma: ${item.turma}` : ''} {item.componente ? `· ${item.componente}` : ''}
+                    <TouchableOpacity
+                        style={styles.item}
+                        onPress={() => navigation.navigate('aluno/aulas/turma', {oferecimentoId: item.id})}
+                    >
+                        <Text style={styles.itemTitle}>{item.componente}</Text>
+                        <Text style={styles.itemMeta}>
+                            {[item.curso, item.turma ? `Turma ${item.turma}` : null, item.unidade]
+                                .filter(Boolean)
+                                .join(' · ')}
                         </Text>
-                        <Text style={styles.aulaInfo}>Data: {formatarData(item.data)}</Text>
-                        <TouchableOpacity style={styles.verDetalhes} onPress={() =>
-                            navigation.navigate('aluno/aula', {aulaId: String(item.id)})
-                        }>
-                            <Text style={styles.verTexto}>Ver detalhes</Text>
-                        </TouchableOpacity>
-                    </View>
+                        <Text style={styles.itemProf}>{item.professor || 'Professor não informado'}</Text>
+                    </TouchableOpacity>
                 )}
-                contentContainerStyle={styles.flatListContainer}
+                contentContainerStyle={styles.listContainer}
             />
-        </ScrollView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    page: {flex: 1, backgroundColor: '#f8f9fa'},
-    content: {padding: 20},
+    page: {flex: 1, backgroundColor: '#f8f9fa', padding: 16},
     center: {flex: 1, justifyContent: 'center', alignItems: 'center'},
-    title: {fontSize: 22, fontWeight: 'bold', color: '#2a5a88', marginBottom: 8},
+    title: {fontSize: 22, fontWeight: 'bold', color: '#2a5a88', marginBottom: 4},
     subtitle: {fontSize: 14, color: '#666', marginBottom: 16},
     empty: {textAlign: 'center', color: '#888', marginTop: 16, fontSize: 14},
-    aulaItem: {
+    errorText: {color: '#a61b29', fontSize: 14},
+    listContainer: {paddingBottom: 20},
+    item: {
         backgroundColor: '#ffffff',
         borderWidth: 1,
         borderColor: '#e5e5e5',
         borderRadius: 8,
         padding: 16,
         marginBottom: 12,
-        elevation: 2,
+        elevation: 1,
     },
-    aulaTitulo: {fontSize: 16, fontWeight: '700', color: '#2b2b2b', marginBottom: 4},
-    aulaMeta: {fontSize: 13, color: '#555', marginBottom: 2},
-    aulaInfo: {fontSize: 12, color: '#888'},
-    verDetalhes: {marginTop: 8},
-    verTexto: {color: '#2a5a88', fontWeight: '600', fontSize: 13},
-    flatListContainer: {},
+    itemTitle: {fontSize: 16, fontWeight: '700', color: '#2b2b2b', marginBottom: 4},
+    itemMeta: {fontSize: 12, color: '#666', marginBottom: 2},
+    itemProf: {fontSize: 12, color: '#888'},
 });

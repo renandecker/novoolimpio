@@ -39,7 +39,7 @@ public class NotificacaoDispatchConsumer {
     @Incoming("notificacao-email-in")
     public Uni<Void> onEmail(String payload) {
         return parse(payload)
-                .chain(msg -> canalEmailService.enviar(msg))
+                .chain(msg -> canalEmailService.enviar(msg, msg.destinatario()))
                 .onFailure().invoke(err ->
                         LOGGER.warn("Falha ao processar notificação no canal EMAIL: {}", err.getMessage()));
     }
@@ -47,8 +47,15 @@ public class NotificacaoDispatchConsumer {
     @Incoming("notificacao-mobile-in")
     public Uni<Void> onMobile(String payload) {
         return parse(payload)
-                .invoke(msg -> sseHub.publish(NotificacaoSseHub.CANAL_MOBILE, msg.username(), payload))
-                .chain(msg -> marcaEnviado("mobile_enviado", msg.id()))
+                .chain(msg -> {
+                    if (msg.username() == null || msg.username().isBlank()) {
+                        LOGGER.info("Notificação sem username (fluxo de lote por e-mail direto) - push MOBILE ignorado.");
+                        return Uni.createFrom().voidItem();
+                    }
+                    return Uni.createFrom().voidItem()
+                            .invoke(() -> sseHub.publish(NotificacaoSseHub.CANAL_MOBILE, msg.username(), payload))
+                            .chain(() -> marcaEnviado("mobile_enviado", msg.id()));
+                })
                 .onFailure().invoke(err ->
                         LOGGER.warn("Falha ao processar notificação no canal MOBILE: {}", err.getMessage()));
     }
@@ -56,7 +63,14 @@ public class NotificacaoDispatchConsumer {
     @Incoming("notificacao-web-in")
     public Uni<Void> onWeb(String payload) {
         return parse(payload)
-                .invoke(msg -> sseHub.publish(NotificacaoSseHub.CANAL_WEB, msg.username(), payload))
+                .chain(msg -> {
+                    if (msg.username() == null || msg.username().isBlank()) {
+                        LOGGER.info("Notificação sem username (fluxo de lote por e-mail direto) - push WEB ignorado.");
+                        return Uni.createFrom().voidItem();
+                    }
+                    return Uni.createFrom().voidItem()
+                            .invoke(() -> sseHub.publish(NotificacaoSseHub.CANAL_WEB, msg.username(), payload));
+                })
                 .onFailure().invoke(err ->
                         LOGGER.warn("Falha ao processar notificação no canal WEB: {}", err.getMessage()))
                 .replaceWithVoid();

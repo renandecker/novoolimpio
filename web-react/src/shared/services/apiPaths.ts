@@ -66,6 +66,17 @@ export const API_PATHS = {
     modeloEmail: '/api/cobranca/modelo-email',
     enviarEmailLote: '/api/cobranca/enviar-email-lote',
     alunoContrato: '/api/educacao/aluno-contrato',
+    conta: {
+      gestaoConta: '/api/conta/gestaoConta',
+      controlePagamento: '/api/conta/controlePagamento',
+    },
+  },
+  educacao: {
+    nap: '/api/educacao/nap',
+    gerirNap: '/api/view/nap/listGerirNap',
+  },
+  cobranca: {
+    gerirCobranca: '/api/view/cobranca/listGerirCobranca',
   },
   relatorios: {
     tabela: '/api/relatorios/tabela',
@@ -79,6 +90,7 @@ export const API_PATHS = {
     mapaRegra: '/api/relatorios/mapa-regra',
     painelPainel: '/api/relatorios/painel-painel',
     georeferencia: '/api/relatorios/georeferencia',
+    estruturaColuna: '/api/relatorios/estrutura-coluna',
     relatorioDisponiveis: '/api/relatorios/relatorio/disponiveis',
     organograma: '/api/relatorios/organograma',
   },
@@ -101,6 +113,10 @@ export const API_PATHS = {
     diaSemana: '/api/view/diaSemana/listDiaSemana',
     tipoPausa: '/api/view/tipoPausa/listTipoPausa',
     turnoTrabalho: '/api/view/turnoTrabalho/listTurnoTrabalho',
+    conta: {
+      gestaoConta: '/api/view/conta/gestaoConta',
+      controlePagamento: '/api/view/conta/controlePagamento',
+    },
   },
 } as const;
 

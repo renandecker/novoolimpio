@@ -78,63 +78,71 @@ services:
     - ./docker/postgres:/backup:ro
     entrypoint: ["/bin/sh", "-e", "-c"]
     command:
-    - |
-      echo "[restore] Aguardando o Postgres aceitar conexoes..."
-      until pg_isready -h postgres -U postgres; do sleep 1; done
-      echo "[restore] Restaurando 001_olimpio.sql no banco 'olimpio'..."
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -c "DROP DATABASE IF EXISTS olimpio WITH (FORCE);"
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -c "CREATE DATABASE olimpio;"
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/olimpio.sql
-      echo "[restore] Aplicando migracoes..."
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/002_create_bas_login.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/003__temas.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/004__admin_login.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/005__admin_acesso_total.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/006__login_session.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/007__menu_react_e_perfil_admin.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/008__provisionar_usuarios_legados.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/008_1__asaas_menu.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/009__acesso_aluno.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0010__remove_whatsapp_telegram.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0011__menu_recriar_calendario_academico.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0012__remove_pagina_inicial.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0013__corrigir_modulo_genero.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0014__temas_posicao_e_menu.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0015__foto_base64_usuario.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0015_1__menu_lote_nap_cobranca.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0015_2__auditoria_menu.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0017__fiserv.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0018__financeiro_aluno.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0019__admin_acesso_total.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0020__perfil_admin_acesso_total.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0021__pagamento_fiserv.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0022__ajuste_pix.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0023__schema_aula.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0024__avaliacao_fl_ativo.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0025__asaas_base.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0026__schema_curriculo.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0027__menu_curriculo.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0028__create_notificacoes.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0029__icones_menu_principais.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0030__menu_aluno.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0031__remove_biblioteca_livros.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0033__menu_aluno_aulas_avaliacoes.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0034__menu_aluno_fix.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0044__create_notificacao_regra_status.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0045__rel_document_template.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0046__criar_acesso_alunos_contrato.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0047__fin_bancos.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0048__menu_curriculo_empresa_ajuste.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0049__update_bas_modulo_outcome_react_routes.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0049__ajustes_menu_curriculo_financeiro.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0050__fin_bancos_seed.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0051__create_turma.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0052__create_bas_icone_table.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0050__create_bas_icone_table.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0051__populate_bas_icone.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0053__campanha_negociacao_tipos.sql
-      psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0055__ajuste_menu_relatorios_paineis.sql
-      echo "[restore] Restore concluido."
+      - |
+        echo "[restore] Aguardando o Postgres aceitar conexoes..."
+        until pg_isready -h postgres -U postgres; do sleep 1; done
+        echo "[restore] Restaurando olimpio.sql no banco 'olimpio'..."
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -c "DROP DATABASE IF EXISTS olimpio WITH (FORCE);"
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -c "CREATE DATABASE olimpio;"
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/olimpio.sql
+        echo "[restore] Aplicando migracoes..."
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/002_create_bas_login.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/003__temas.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/004__admin_login.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/005__admin_acesso_total.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/006__login_session.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/007__menu_react_e_perfil_admin.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/008__provisionar_usuarios_legados.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/008_1__asaas_menu.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/009__acesso_aluno.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0010__remove_whatsapp_telegram.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/011__ajustes_custo_servico.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/012__remover_modelo_carta.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0013__corrigir_modulo_genero.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0014__temas_posicao_e_menu.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0015__foto_base64_usuario.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0015_1__menu_lote_nap_cobranca.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0015_2__auditoria_menu.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0017__fiserv.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0018__financeiro_aluno.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0019__admin_acesso_total.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0020__perfil_admin_acesso_total.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0021__pagamento_fiserv.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0022__ajuste_pix.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0023__schema_aula.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0024__avaliacao_fl_ativo.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0025__asaas_base.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0026__schema_curriculo.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0027__menu_curriculo.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0028__create_notificacoes.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0029__icones_menu_principais.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0029__create_notificacao_regra.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0029__avaliacao_aluno_nota.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0030__menu_aluno.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0031__remove_biblioteca_livros.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0032__menu_meus_dados.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0033__menu_aluno_aulas_avaliacoes.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0034__menu_aluno_fix.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0044__create_notificacao_regra_status.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0045__rel_document_template.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0046__criar_acesso_alunos_contrato.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0047__fin_bancos.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0048__menu_curriculo_empresa_ajuste.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0049__update_bas_modulo_outcome_react_routes.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0049__ajustes_menu_curriculo_financeiro.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0050__fin_bancos_seed.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0052__create_bas_icone_table.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0051__create_turma.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0051__populate_bas_icone.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0053__campanha_negociacao_tipos.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0055__ajuste_menu_relatorios_paineis.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0056__remove_tipo_pagamento.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0057__portal_aluno_rename.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0058__remove_gestao_atividade_avaliacao_menu.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0059__remove_gestao_vendas_menu.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0060__remove_consultor_list_menu.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0061__schedule_pagamento_confirmado_log.sql
+        echo "[restore] Restore concluido."
 
   # Broker Kafka (KRaft). O schedule publica os triggers de rotina e o basico
   # consome o topico olimpio.schedule.feriado.
@@ -344,6 +352,8 @@ services:
     environment:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
+      DATABASE_HOST: postgres
+      DATABASE_PORT: "5432"
     ports:
     - "8088:8088"
     healthcheck:

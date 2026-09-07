@@ -42,7 +42,10 @@ function montarHtml(dados: OrganogramaDados): string {
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-  <script src="${AG_CHARTS_ENTERPRISE_CDN}"></script>
+    <script src="${AG_CHARTS_ENTERPRISE_CDN}"></script>
+  <script>
+    agCharts.LicenseManager.setLicenseKey('USING_AG_CHARTS_DEVELOPER_LICENSE');
+  </script>
   <style>
     html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, Roboto, Arial, sans-serif; }
     #toolbar { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; background: #f4f4f4; align-items: center; }

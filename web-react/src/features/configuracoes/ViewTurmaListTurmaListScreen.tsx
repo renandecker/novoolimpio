@@ -3,7 +3,7 @@ import type {ReactNode} from 'react';
 
 import {PermissionGate} from '../../shared/services/permissions';
 
-import {DataTable, type DataTableColumn, type DataTableRowAction} from '../../shared/components/DataTable';
+import {DataTable, type DataTableColumn, type DataTableRowAction, type DataTableToolbarButton} from '../../shared/components/DataTable';
 
 import {MasterDetail} from '../../shared/components/MasterDetail';
 
@@ -501,6 +501,48 @@ function TrocarTurmaModal({onClose}: { onClose: () => void }) {
 }
 
 
+function RecriarCalendarioAcademicoWizard({turma, onClose}: { turma: ApiItem | null; onClose: () => void }) {
+    return (
+        <div>
+            <h2>Recriar Calendário Acadêmico</h2>
+            <Wizard
+                completeLabel="Recriar"
+                onComplete={() => {
+                    alert('Calendário acadêmico recriado com sucesso!');
+                    onClose();
+                }}
+                steps={[
+                    {
+                        key: 'turma',
+                        label: 'Turma',
+                        content: (
+                            <>
+                                <p className="master-detail-empty">Turma selecionada: #{turma?.id ?? 'Nenhuma'} - {String(turma?.nome ?? '')}</p>
+                                <DataTable path="/api/educacao/turma" columns={TURMA_COLUMNS} />
+                            </>
+                        ),
+                    },
+                    {
+                        key: 'periodo',
+                        label: 'Período',
+                        content: <p className="master-detail-empty">Informe o período letivo para recriação.</p>,
+                    },
+                    {
+                        key: 'confirmacao',
+                        label: 'Confirmação',
+                        nextLabel: 'Recriar',
+                        content: <p className="master-detail-empty">Revise e recrie o calendário acadêmico.</p>,
+                    },
+                ]}
+            />
+            <div className="modal-actions form-footer" style={{marginTop: '15px'}}>
+                <button type="button" className="btn-form-back" onClick={onClose}>Fechar</button>
+            </div>
+        </div>
+    );
+}
+
+
 export default function ViewTurmaListTurmaListScreen() {
 
     const [unidades, setUnidades] = useState<ApiItem[]>([]);
@@ -516,6 +558,9 @@ export default function ViewTurmaListTurmaListScreen() {
     const [infoAberto, setInfoAberto] = useState(false);
 
     const [turmaSelecionada, setTurmaSelecionada] = useState<ApiItem | null>(null);
+
+    const [recriarCalendarioAberto, setRecriarCalendarioAberto] = useState(false);
+    const [recriarCalendarioTurma, setRecriarCalendarioTurma] = useState<ApiItem | null>(null);
 
     const {can} = usePermissions();
     const screenOutcome = '/view/turma/listTurma';
@@ -682,6 +727,17 @@ export default function ViewTurmaListTurmaListScreen() {
     const extraRowActions = buildExtraRowActions();
 
 
+    const extraToolbarButtons: DataTableToolbarButton[] = [
+        {
+            label: 'Recriar Calendário Acadêmico',
+            className: 'btnpurple',
+            onClick: () => {
+                setRecriarCalendarioTurma(null);
+                setRecriarCalendarioAberto(true);
+            },
+        },
+    ];
+
     return (
 
         <PermissionGate permission="READ">
@@ -742,6 +798,7 @@ export default function ViewTurmaListTurmaListScreen() {
                     path="/api/educacao/turma"
                     columns={TURMA_COLUMNS}
                     extraRowActions={extraRowActions}
+                    extraToolbarButtons={extraToolbarButtons}
                     module="educacao"
                     outcome={screenOutcome}
                 />
@@ -758,6 +815,16 @@ export default function ViewTurmaListTurmaListScreen() {
                             <div className="modal-actions form-footer">
                                 <button type="button" className="btn-form-back" onClick={() => { setInfoAberto(false); setTurmaSelecionada(null); }}>Fechar</button>
                             </div>
+                        </div>
+                    </div>
+                )}
+                {recriarCalendarioAberto && (
+                    <div className="modal-overlay" onClick={() => { setRecriarCalendarioAberto(false); setRecriarCalendarioTurma(null); }}>
+                        <div className="modal form-modal" style={{maxWidth: '900px', width: '95%'}} onClick={(e) => e.stopPropagation()}>
+                            <RecriarCalendarioAcademicoWizard
+                                turma={recriarCalendarioTurma}
+                                onClose={() => { setRecriarCalendarioAberto(false); setRecriarCalendarioTurma(null); }}
+                            />
                         </div>
                     </div>
                 )}

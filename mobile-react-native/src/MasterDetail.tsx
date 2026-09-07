@@ -7,6 +7,8 @@ import type {ApiItem} from './types';
 export interface MasterDetailColumn {
     key: string;
     label: string;
+    /** Renderização customizada da célula (ex.: booleanos como Sim/Não). */
+    render?: (item: ApiItem) => string;
 }
 
 interface MasterDetailProps {
@@ -77,7 +79,8 @@ const formatTableCellValue = (key: string, value: unknown): string => {
     return String(value);
 };
 
-const renderValue = (item: ApiItem, key: string): string => {
+const renderValue = (item: ApiItem, key: string, render?: (item: ApiItem) => string): string => {
+    if (render) return render(item);
     const base = fkBase(key);
     if (base) {
         const description = asRecord(item)[`${base}_descricao`];
@@ -150,7 +153,7 @@ export function MasterDetail({
 
     const addSuggestion = (item: ApiItem) => {
         setSelected(item);
-        setQuery(detailCols.map((col) => renderValue(item, col.key)).filter(Boolean).join(' - '));
+        setQuery(detailCols.map((col) => renderValue(item, col.key, col.render)).filter(Boolean).join(' - '));
         setOpen(false);
     };
 
@@ -184,7 +187,7 @@ export function MasterDetail({
                                     onPress={() => addSuggestion(item)}
                                 >
                                     <Text style={styles.suggestionText}>
-                                        {detailCols.map((col) => renderValue(item, col.key)).filter(Boolean).join(' - ') ||
+                                        {detailCols.map((col) => renderValue(item, col.key, col.render)).filter(Boolean).join(' - ') ||
                                         `#${String(asRecord(item)[valueKey])}`}
                                     </Text>
                                 </Pressable>
@@ -214,7 +217,7 @@ export function MasterDetail({
                                 <View style={styles.rowText}>
                                     {detailCols.map((col) => (
                                         <Text key={col.key} style={styles.rowValue}>
-                                            {col.label}: {renderValue(item, col.key)}
+                                            {col.label}: {renderValue(item, col.key, col.render)}
                                         </Text>
                                     ))}
                                 </View>

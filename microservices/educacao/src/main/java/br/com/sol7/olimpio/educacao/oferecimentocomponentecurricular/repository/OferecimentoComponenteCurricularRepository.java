@@ -505,7 +505,8 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
 
     // Dias de aula de todos os oferecimentos de um grupo (join table edc_oferecimento_dias_aula).
     public static final String SQL_BUSCAR_DIAS_AULA_POR_GRUPO =
-            "SELECT DISTINCT da.* FROM edc_oferecimento_dias_aula oda " +
+            "SELECT DISTINCT da.id, da.id_dia_semana, da.id_turno, da.id_tempo_aula " +
+                    "FROM edc_oferecimento_dias_aula oda " +
                     "JOIN edc_oferecimento_componente_curricular o ON o.id = oda.id_oferecimento_componente_curricular " +
                     "JOIN edc_dia_aula da ON da.id = oda.id_dia_aula " +
                     "WHERE o.id_grupo = ?1 ORDER BY da.id";
@@ -520,7 +521,8 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     // Dias de aula de um oferecimento especifico (join table edc_oferecimento_dias_aula) -
     // migrado de DiaAulaService.buscaDiasAulaOferecimentoList (legado).
     public static final String SQL_BUSCAR_DIAS_AULA_POR_OFERECIMENTO =
-            "SELECT DISTINCT da.* FROM edc_oferecimento_dias_aula oda " +
+            "SELECT DISTINCT da.id, da.id_dia_semana, da.id_turno, da.id_tempo_aula " +
+                    "FROM edc_oferecimento_dias_aula oda " +
                     "JOIN edc_dia_aula da ON da.id = oda.id_dia_aula " +
                     "WHERE oda.id_oferecimento_componente_curricular = ?1 ORDER BY da.id";
 

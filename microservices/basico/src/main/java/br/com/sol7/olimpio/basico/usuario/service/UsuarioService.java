@@ -49,6 +49,15 @@ public class UsuarioService {
                 .map(this::toResponse);
     }
 
+    public Uni<UsuarioResponse> buscarPorUsername(String username) {
+        if (username == null || username.isBlank()) {
+            return Uni.createFrom().failure(new NotFoundException("Usuario not found"));
+        }
+        return repository.buscarPorLogin(username).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Usuario not found"))
+                .map(this::toResponse);
+    }
+
     public Uni<UsuarioResponse> create(UsuarioRequest r) {
         var e = new Usuario();
         apply(e, r);
@@ -412,6 +421,32 @@ public class UsuarioService {
     //     }
     public Uni<List<Long>> buscarAgendasDisponiveis(Long usuarioId) {
         return repository.buscarAgendasDisponiveis(usuarioId).map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
+    }
+
+
+    // Sub-recursos de acesso do usuario (Acessos no formUsuario): perfis, agendas e unidades.
+    public Uni<List<Long>> listarPerfis(Long usuarioId) {
+        return repository.listarPerfisIds(usuarioId);
+    }
+
+    public Uni<Void> substituirPerfis(Long usuarioId, List<Long> perfis) {
+        return repository.substituirPerfis(usuarioId, perfis == null ? List.of() : perfis);
+    }
+
+    public Uni<List<Long>> listarAgendas(Long usuarioId) {
+        return repository.listarAgendasIds(usuarioId);
+    }
+
+    public Uni<Void> substituirAgendas(Long usuarioId, List<Long> agendas) {
+        return repository.substituirAgendas(usuarioId, agendas == null ? List.of() : agendas);
+    }
+
+    public Uni<List<Long>> listarUnidades(Long usuarioId) {
+        return repository.listarUnidadesIds(usuarioId);
+    }
+
+    public Uni<Void> substituirUnidades(Long usuarioId, List<Long> unidades) {
+        return repository.substituirUnidades(usuarioId, unidades == null ? List.of() : unidades);
     }
 
 

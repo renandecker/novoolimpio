@@ -28,6 +28,29 @@ public class CanalEmailService {
         return enviar(msg, null);
     }
 
+    /**
+     * Envia um e-mail transacional direto (sem partir de uma notificação gravada),
+     * ex.: e-mail de fechamento de caixa publicado pelo schedule-service no tópico
+     * {@code olimpio.financeiro.email-manual}. Usa o mesmo SMTP de {@code bas_email}.
+     */
+    public Uni<Void> enviarDireto(String destinatario, String assunto, String corpoHtml) {
+        if (destinatario == null || destinatario.isBlank()) {
+            LOGGER.warn("Destinatário vazio - e-mail direto '{}' não enviado.", assunto);
+            return Uni.createFrom().voidItem();
+        }
+        return configSmtpPadrao()
+                .chain(config -> {
+                    if (config == null || config.host() == null || config.host().isBlank()) {
+                        LOGGER.warn("Sem configuração de e-mail (bas_email). E-mail direto '{}' não enviado.", assunto);
+                        return Uni.createFrom().voidItem();
+                    }
+                    return send(config, destinatario.trim(), assunto, corpoHtml)
+                            .onFailure().invoke(err ->
+                                    LOGGER.warn("Falha ao enviar e-mail direto '{}' para '{}': {}", assunto, destinatario, err.getMessage()))
+                            .replaceWithVoid();
+                });
+    }
+
     public Uni<Void> enviar(NotificacaoMessage msg, String destinatarioOverride) {
         if (msg == null) {
             return Uni.createFrom().voidItem();

@@ -129,7 +129,7 @@ ViewComunicacaoListComunicacaoListScreen,
     ViewConfiguracaoDocumentosListScreen,
     ViewConsultorConsultorListScreen,
     ViewConsultorFormConsultorListScreen,
-    ViewConsultorListConsultorListScreen,
+
     ViewContaControlePagamentoListScreen,
     ViewContaGestaoContaListScreen,
     ViewContaCorrenteFormContaCorrenteListScreen,
@@ -253,6 +253,7 @@ ViewComunicacaoListComunicacaoListScreen,
     ViewOperacionalFormOperacionalListScreen,
     ViewOperacionalListOperacionalListScreen,
     ViewPacoteListPacoteListScreen,
+    ViewPacoteFormPacoteListScreen,
     ViewPagamentoAberturacaixaListScreen,
     ViewPagamentoCaixaentradaListScreen,
     ViewPagamentoCaixasaidaListScreen,
@@ -272,7 +273,7 @@ ViewComunicacaoListComunicacaoListScreen,
     ViewPessoaFormPessoaPessoaJuridicaListScreen,
     ViewPessoaFormPessoaPessoaUsuarioListScreen,
     ViewPessoaListDisponibilidadePessoaListScreen,
-    ViewPessoaListPessoaListScreen,
+
     ViewPessoaListPessoaFisicaListScreen,
     ViewPessoaListPessoaJuridicaListScreen,
     ViewPessoaPessoaDocumentoListScreen,
@@ -331,9 +332,9 @@ ViewComunicacaoListComunicacaoListScreen,
 
     ViewStatusCompromissoFormStatusCompromissoListScreen,
     ViewStatusCompromissoListStatusCompromissoListScreen,
+    ViewSubcategoriaEstoqueListSubCategoriaListScreen,
     ViewSubCategoriaFormSubCategoriaListScreen,
     ViewSubCategoriaListSubCategoriaListScreen,
-    ViewSubcategoriaEstoqueListSubCategoriaListScreen,
 
     ViewTelefoneFormTelefoneListScreen,
     ViewTelefoneListTelefoneListScreen,
@@ -366,7 +367,6 @@ ViewComunicacaoListComunicacaoListScreen,
     ViewTurmaFormAjusteCalendarioListScreen,
     ViewTurmaListTurmaListScreen,
     ViewTurmaListTurmaFinalizandoListScreen,
-    ViewTurmaRecriarCalendarioAcademicoListScreen,
     ViewTurnoFormTurnoListScreen,
     ViewTurnoListTurnoListScreen,
 
@@ -401,12 +401,9 @@ ViewComunicacaoListComunicacaoListScreen,
     AlunoFrequenciaScreen,
     AlunoFinanceiroScreen,
     AlunoAulasScreen,
+    AlunoAulasTurmaScreen,
     AlunoAvaliacoesScreen,
     AlunoAvaliacaoResponderScreen,
-    AulaContratoScreen,
-    AulaOferecimentoScreen,
-    AulaOcorrenciaScreen,
-    AulaAulaScreen,
     AulaAlunoScreen,
     MeusDadosScreen,
     IconesListScreen,
@@ -439,13 +436,10 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/aluno/frequencia" element={<AlunoFrequenciaScreen/>}/>
     <Route path="/aluno/financeiro" element={<AlunoFinanceiroScreen/>}/>
 <Route path="/aluno/aulas" element={<AlunoAulasScreen/>}/>
+    <Route path="/aluno/aulas/turma/:oferecimentoId" element={<AlunoAulasTurmaScreen/>}/>
+    <Route path="/aluno/aulas/aula/:aulaId" element={<AulaAlunoScreen/>}/>
     <Route path="/aluno/avaliacoes" element={<AlunoAvaliacoesScreen/>}/>
     <Route path="/aluno/avaliacao/:id" element={<AlunoAvaliacaoResponderScreen/>}/>
-    <Route path="/aluno/aula" element={<AulaContratoScreen/>}/>
-    <Route path="/aluno/aula/oferecimentos/:contratoId" element={<AulaOferecimentoScreen/>}/>
-    <Route path="/aluno/aula/ocorrencias/:oferecimentoId" element={<AulaOcorrenciaScreen/>}/>
-    <Route path="/aluno/aula/aulas/:ocorrenciaId" element={<AulaAlunoScreen/>}/>
-    <Route path="/aluno/aula/aula/:aulaId" element={<AulaAlunoScreen/>}/>
     <Route path="/aluno/curriculo-anexo" element={<AlunoDashboardScreen/>}/>
     <Route path="/meus-dados" element={<MeusDadosScreen/>}/>
     <Route path="/view/acao/formAcao" element={<ViewAcaoFormAcaoListScreen/>}/>
@@ -541,7 +535,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/configuracao/listDocumentos" element={<ViewConfiguracaoDocumentosListScreen/>}/>
     <Route path="/view/consultor/consultor" element={<ViewConsultorConsultorListScreen/>}/>
     <Route path="/view/consultor/formConsultor" element={<ViewConsultorFormConsultorListScreen/>}/>
-    <Route path="/view/consultor/listConsultor" element={<ViewConsultorListConsultorListScreen/>}/>
+
     <Route path="/view/conta/controlePagamento" element={<ViewContaControlePagamentoListScreen/>}/>
     <Route path="/view/conta/gestaoConta" element={<ViewContaGestaoContaListScreen/>}/>
     <Route path="/view/contaCorrente/formContaCorrente" element={<ViewContaCorrenteFormContaCorrenteListScreen/>}/>
@@ -681,6 +675,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/operacional/formOperacional" element={<ViewOperacionalFormOperacionalListScreen/>}/>
     <Route path="/view/operacional/listOperacional" element={<ViewOperacionalListOperacionalListScreen/>}/>
     <Route path="/view/pacote/listPacote" element={<ViewPacoteListPacoteListScreen/>}/>
+    <Route path="/view/pacote/formPacote" element={<ViewPacoteFormPacoteListScreen/>}/>
     <Route path="/view/pagamento/aberturacaixa" element={<ViewPagamentoAberturacaixaListScreen/>}/>
     <Route path="/view/pagamento/caixaentrada" element={<ViewPagamentoCaixaentradaListScreen/>}/>
     <Route path="/view/pagamento/caixasaida" element={<ViewPagamentoCaixasaidaListScreen/>}/>
@@ -700,7 +695,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/pessoa/formPessoaPessoaJuridica" element={<ViewPessoaFormPessoaPessoaJuridicaListScreen/>}/>
     <Route path="/view/pessoa/formPessoaPessoaUsuario" element={<ViewPessoaFormPessoaPessoaUsuarioListScreen/>}/>
     <Route path="/view/pessoa/listDisponibilidadePessoa" element={<ViewPessoaListDisponibilidadePessoaListScreen/>}/>
-    <Route path="/view/pessoa/listPessoa" element={<ViewPessoaListPessoaListScreen/>}/>
+
     <Route path="/view/pessoa/listPessoaFisica" element={<ViewPessoaListPessoaFisicaListScreen/>}/>
     <Route path="/view/pessoa/listPessoaJuridica" element={<ViewPessoaListPessoaJuridicaListScreen/>}/>
     <Route path="/view/pessoa/pessoaDocumento" element={<ViewPessoaPessoaDocumentoListScreen/>}/>
@@ -767,10 +762,10 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/sala/formSala" element={<ViewSalaFormSalaListScreen/>}/>
     <Route path="/view/sala/listSala" element={<ViewSalaListSalaListScreen/>}/>
 
-    <Route path="/view/statusCompromisso/formStatusCompromisso"
-           element={<ViewStatusCompromissoFormStatusCompromissoListScreen/>}/>
+<Route path="/view/statusCompromisso/formStatusCompromisso"
+            element={<ViewStatusCompromissoFormStatusCompromissoListScreen/>}/>
     <Route path="/view/statusCompromisso/listStatusCompromisso"
-           element={<ViewStatusCompromissoListStatusCompromissoListScreen/>}/>
+            element={<ViewStatusCompromissoListStatusCompromissoListScreen/>}/>
     <Route path="/view/subCategoria/formSubCategoria" element={<ViewSubCategoriaFormSubCategoriaListScreen/>}/>
     <Route path="/view/subCategoria/listSubCategoria" element={<ViewSubCategoriaListSubCategoriaListScreen/>}/>
     <Route path="/view/subcategoriaEstoque/listSubCategoria"
@@ -807,7 +802,6 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/turma/formAjusteCalendario" element={<ViewTurmaFormAjusteCalendarioListScreen/>}/>
     <Route path="/view/turma/listTurma" element={<ViewTurmaListTurmaListScreen/>}/>
     <Route path="/view/turma/listTurmaFinalizando" element={<ViewTurmaListTurmaFinalizandoListScreen/>}/>
-    <Route path="/view/turma/recriarCalendarioAcademico" element={<ViewTurmaRecriarCalendarioAcademicoListScreen/>}/>
     <Route path="/view/turno/formTurno" element={<ViewTurnoFormTurnoListScreen/>}/>
     <Route path="/view/turno/listTurno" element={<ViewTurnoListTurnoListScreen/>}/>
 

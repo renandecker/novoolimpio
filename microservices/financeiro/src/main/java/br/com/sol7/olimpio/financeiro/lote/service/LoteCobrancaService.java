@@ -7,6 +7,8 @@ import br.com.sol7.olimpio.financeiro.lote.dto.LoteCobrancaResponse.Aluno;
 import br.com.sol7.olimpio.financeiro.lote.dto.LoteCobrancaResponse.ModeloEmail;
 import br.com.sol7.olimpio.financeiro.lote.dto.LoteCobrancaResponse.Resumo;
 import br.com.sol7.olimpio.financeiro.lote.dto.LoteCobrancaResponse.ResultadoLigacao;
+import br.com.sol7.olimpio.financeiro.lote.kafka.NotificacaoEventProducer;
+import br.com.sol7.olimpio.financeiro.lote.kafka.NotificacaoMessage;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;
 import io.vertx.mutiny.sqlclient.Row;
@@ -33,6 +35,9 @@ public class LoteCobrancaService {
     @Inject
     Pool pool;
 
+    @Inject
+    NotificacaoEventProducer notificacaoProducer;
+
     private static final String SQL_MODELOS_EMAIL =
             "select m.id, m.descricao, m.assunto, m.mensagem from bas_mensagem m " +
                     "where m.fl_email = true and m.tipo = 'COBRANCA' order by m.descricao";
@@ -44,7 +49,10 @@ public class LoteCobrancaService {
             "select et.fl_customizado, et.campo_customizado from fin_etapas_cobranca et where et.id = $1";
 
     private static final String SQL_EMAIL_CONTRATO =
-            "select COALESCE(responsavel.email, pessoa.email) as email " +
+            "select COALESCE(responsavel.email, pessoa.email) as email, " +
+                    "(select l.username from bas_login l " +
+                    "  join bas_usuario u on (u.id = l.id_usuario) " +
+                    "  where u.id_pessoa = COALESCE(contrato.id_responsavel, contrato.id_pessoa) limit 1) as username " +
                     "from edc_contrato contrato " +
                     "left join bas_pessoa responsavel on (responsavel.id = contrato.id_responsavel) " +
                     "left join bas_pessoa pessoa on (pessoa.id = contrato.id_pessoa) " +
@@ -154,6 +162,9 @@ public class LoteCobrancaService {
             return Uni.createFrom().failure(new BadRequestException("etapasCobrancaId e mensagemId são obrigatórios"));
         }
         List<Long> ids = req.contratoIds() == null ? List.of() : req.contratoIds();
+        boolean canalEmail = req.canalEmail() == null || req.canalEmail();
+        boolean canalMobile = Boolean.TRUE.equals(req.canalMobile());
+        boolean canalSistema = Boolean.TRUE.equals(req.canalSistema());
         return pool.preparedQuery(SQL_MODELO_POR_ID).execute(Tuple.of(req.mensagemId()))
                 .onItem().transformToUni(rows -> {
                     if (rows.size() == 0) {
@@ -163,27 +174,61 @@ public class LoteCobrancaService {
                     String assunto = row.getString("assunto");
                     String mensagem = row.getString("mensagem");
                     return processarEmails(req.etapasCobrancaId(), req.mensagemId(), assunto, mensagem, ids, 0,
-                            new Resumo(0, 0, assunto));
+                            new Resumo(0, 0, 0, assunto), canalEmail, canalMobile, canalSistema);
                 });
     }
 
+    private record Destinatario(String email, String username) {
+    }
+
     private Uni<Resumo> processarEmails(Long etapaId, Long mensagemId, String assunto, String mensagem,
-                                        List<Long> ids, int index, Resumo acc) {
+                                        List<Long> ids, int index, Resumo acc,
+                                        boolean canalEmail, boolean canalMobile, boolean canalSistema) {
         if (index >= ids.size()) {
             return Uni.createFrom().item(acc);
         }
         Long contratoId = ids.get(index);
-        return resolverEmail(contratoId).chain(email -> {
-            if (email == null || email.isBlank()) {
+        return resolverDestinatario(contratoId).chain(dest -> {
+            if (dest.email() == null || dest.email().isBlank()) {
                 LOG.infof("Cobranca lote - contrato %d sem e-mail cadastrado", contratoId);
                 return processarEmails(etapaId, mensagemId, assunto, mensagem, ids, index + 1,
-                        new Resumo(acc.processados(), acc.semEmail() + 1, assunto));
+                        new Resumo(acc.processados(), acc.semEmail() + 1, acc.notificacoes(), assunto),
+                        canalEmail, canalMobile, canalSistema);
             }
             return pool.preparedQuery(SQL_INCREMENTAR_EMAIL).execute(Tuple.of(contratoId))
-                    .chain(v -> pool.preparedQuery(SQL_INSERIR_EMAIL).execute(Tuple.of(contratoId, email, assunto, mensagem, mensagemId, etapaId)))
-                    .chain(v -> processarEmails(etapaId, mensagemId, assunto, mensagem, ids, index + 1,
-                            new Resumo(acc.processados() + 1, acc.semEmail(), assunto)));
+                    .chain(v -> pool.preparedQuery(SQL_INSERIR_EMAIL).execute(Tuple.of(contratoId, dest.email(), assunto, mensagem, mensagemId, etapaId)))
+                    .chain(v -> publicarNotificacao(contratoId, dest, assunto, mensagem, canalEmail, canalMobile, canalSistema))
+                    .chain(publicado -> processarEmails(etapaId, mensagemId, assunto, mensagem, ids, index + 1,
+                            new Resumo(acc.processados() + 1, acc.semEmail(), acc.notificacoes() + publicado,
+                                    assunto),
+                            canalEmail, canalMobile, canalSistema));
         });
+    }
+
+    /**
+     * Publica a cobrança do contrato nos tópicos do notificacoes-service, nos canais
+     * solicitados (e-mail no endereço do contrato; push mobile/web no username quando
+     * houver login). Retorna 1 quando ao menos um canal foi publicado, 0 caso contrário.
+     */
+    private Uni<Integer> publicarNotificacao(Long contratoId, Destinatario dest, String assunto, String mensagem,
+                                             boolean canalEmail, boolean canalMobile, boolean canalSistema) {
+        if (!canalEmail && !canalMobile && !canalSistema) {
+            return Uni.createFrom().item(0);
+        }
+        boolean push = (canalMobile || canalSistema) && dest.username() != null && !dest.username().isBlank();
+        boolean email = canalEmail && dest.email() != null && !dest.email().isBlank();
+        if (!push && !email) {
+            return Uni.createFrom().item(0);
+        }
+        NotificacaoMessage msg = new NotificacaoMessage(null, dest.username(), assunto, mensagem,
+                "COBRANCA", null, canalSistema && push, canalMobile && push, email, dest.email());
+        return notificacaoProducer.publicar(msg)
+                .map(v -> 1)
+                .onFailure().recoverWithItem(e -> {
+                    LOG.warnf("Cobranca lote - contrato %d: falha ao publicar no notificacoes: %s",
+                            contratoId, e.getMessage());
+                    return 0;
+                });
     }
 
     public Uni<ResultadoLigacao> iniciarLigacao(LoteCobrancaLigacaoRequest req) {
@@ -206,9 +251,15 @@ public class LoteCobrancaService {
                 .onItem().transformToUni(total -> processarLigacoes(etapaId, ids, index + 1, total));
     }
 
-    private Uni<String> resolverEmail(Long contratoId) {
+    private Uni<Destinatario> resolverDestinatario(Long contratoId) {
         return pool.preparedQuery(SQL_EMAIL_CONTRATO).execute(Tuple.of(contratoId))
-                .map(rows -> rows.size() == 0 ? null : rows.iterator().next().getString("email"));
+                .map(rows -> {
+                    if (rows.size() == 0) {
+                        return new Destinatario(null, null);
+                    }
+                    Row row = rows.iterator().next();
+                    return new Destinatario(row.getString("email"), row.getString("username"));
+                });
     }
 
     private static String botaoPorTipo(Integer tipo) {

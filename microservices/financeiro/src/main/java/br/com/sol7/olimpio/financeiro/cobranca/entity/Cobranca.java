@@ -4,6 +4,8 @@ import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 import java.util.Date;
 
@@ -15,16 +17,22 @@ public class Cobranca extends PanacheEntity {
     public Long contratoId;  // referencia a Contrato (id, cross-service)
     @Column(name = "id_etapa_cobranca")
     public Long etapasCobrancaId;  // referencia a EtapasCobranca (id, cross-service)
+    @Temporal(TemporalType.DATE)
     @Column(name = "devendo_desde")
     public Date devendoDesde;
+    @Temporal(TemporalType.DATE)
     @Column(name = "data_ultimo_carta")
     public Date dataUltimaCarta;
+    @Temporal(TemporalType.DATE)
     @Column(name = "data_ultimo_retorno")
     public Date dataUltimoRetorno;
+    @Temporal(TemporalType.DATE)
     @Column(name = "data_ultimo_sms")
     public Date dataUltimaSms;
+    @Temporal(TemporalType.DATE)
     @Column(name = "data_ultimo_ligacao")
     public Date dataUltimaLigacao;
+    @Temporal(TemporalType.DATE)
     @Column(name = "data_ultimo_email")
     public Date dataUltimoEmail;
     @Column(name = "id_ligacao_cobranca")

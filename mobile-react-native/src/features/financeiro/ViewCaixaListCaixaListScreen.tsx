@@ -3,6 +3,7 @@ import {
     ActivityIndicator,
     Alert,
     FlatList,
+    Modal,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -76,6 +77,40 @@ type Movimentacao = {
     total: number;
     tipoMovimento: string;
 };
+
+type CaixaTotais = {
+    caixaId?: number;
+    totalFundoCaixa: number;
+    totalDinheiro: number;
+    totalCheque: number;
+    totalCartao: number;
+    totalBoleto: number;
+    totalTransferencia: number;
+    totalDeposito: number;
+    totalSangria: number;
+    totalValor: number;
+    totalDesconto: number;
+    totalJurosMulta: number;
+    totalValorPagar: number;
+    totalDinheiroCaixa: number;
+};
+
+const toTotais = (raw: Record<string, unknown>, fundoFallback: number): CaixaTotais => ({
+    caixaId: raw.caixaId != null ? Number(raw.caixaId) : undefined,
+    totalFundoCaixa: Number(raw.totalFundoCaixa ?? fundoFallback) || 0,
+    totalDinheiro: Number(raw.totalDinheiro) || 0,
+    totalCheque: Number(raw.totalCheque) || 0,
+    totalCartao: Number(raw.totalCartao) || 0,
+    totalBoleto: Number(raw.totalBoleto) || 0,
+    totalTransferencia: Number(raw.totalTransferencia) || 0,
+    totalDeposito: Number(raw.totalDeposito) || 0,
+    totalSangria: Number(raw.totalSangria) || 0,
+    totalValor: Number(raw.totalValor) || 0,
+    totalDesconto: Number(raw.totalDesconto) || 0,
+    totalJurosMulta: Number(raw.totalJurosMulta) || 0,
+    totalValorPagar: Number(raw.totalValorPagar) || 0,
+    totalDinheiroCaixa: Number(raw.totalDinheiroCaixa) || 0,
+});
 
 type CaixaRow = {
     id: number;
@@ -181,6 +216,10 @@ export default function ViewCaixaListCaixaListScreen() {
     const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
     const [movimentacoes, setMovimentacoes] = useState<Record<number, Movimentacao[]>>({});
     const [loadingMovimentacoes, setLoadingMovimentacoes] = useState<Record<number, boolean>>({});
+    const [totaisCaixa, setTotaisCaixa] = useState<Record<number, CaixaTotais>>({});
+    const [loadingTotais, setLoadingTotais] = useState<Record<number, boolean>>({});
+    const [erroTotais, setErroTotais] = useState<Record<number, string>>({});
+    const [fluxoCaixa, setFluxoCaixa] = useState<CaixaRow | null>(null);
     const [notice, setNotice] = useState('');
     const [filterParams, setFilterParams] = useState<SearchFilterRequest>({filters: {}});
 
@@ -197,24 +236,64 @@ export default function ViewCaixaListCaixaListScreen() {
 
     const canExecute = can(session, 'EXECUTE', outcome);
 
+    const loadTotais = async (row: CaixaRow): Promise<CaixaTotais | null> => {
+        if (totaisCaixa[row.id] || loadingTotais[row.id]) return totaisCaixa[row.id] ?? null;
+        setLoadingTotais(prev => ({...prev, [row.id]: true}));
+        setErroTotais(prev => {
+            const next = {...prev};
+            delete next[row.id];
+            return next;
+        });
+        try {
+            // Totais sempre via API (caixa aberto ou fechado) — backend calcula por forma de pagamento.
+            const {data} = await api.get<Record<string, unknown>>(`/api/financeiro/caixa/${row.id}/totais-fechamento`);
+            const totais = toTotais(data ?? {}, Number(row.fundoCaixa) || 0);
+            setTotaisCaixa(prev => ({...prev, [row.id]: totais}));
+            return totais;
+        } catch (e) {
+            console.error('Erro ao carregar totais:', e);
+            setErroTotais(prev => ({...prev, [row.id]: 'Falha ao carregar totais da API'}));
+            return null;
+        } finally {
+            setLoadingTotais(prev => ({...prev, [row.id]: false}));
+        }
+    };
+
+    const loadMovimentacoes = async (row: CaixaRow): Promise<Movimentacao[]> => {
+        const cached = movimentacoes[row.id];
+        if (cached || loadingMovimentacoes[row.id]) return cached ?? [];
+        setLoadingMovimentacoes(prev => ({...prev, [row.id]: true}));
+        try {
+            const {data} = await api.get<Record<string, unknown>[]>(`/api/financeiro/caixa/${row.id}/movimentacoes`);
+            const movs = (data ?? []).map(toMovimentacao);
+            setMovimentacoes(prev => ({...prev, [row.id]: movs}));
+            return movs;
+        } catch (e) {
+            console.error('Erro ao carregar movimentações:', e);
+            setMovimentacoes(prev => ({...prev, [row.id]: []}));
+            return [];
+        } finally {
+            setLoadingMovimentacoes(prev => ({...prev, [row.id]: false}));
+        }
+    };
+
     const toggleExpand = async (row: CaixaRow) => {
         const id = row.id;
         const isOpen = expandedRows[id];
         const newExpanded = {...expandedRows, [id]: !isOpen};
         setExpandedRows(newExpanded);
 
-        if (!isOpen && !movimentacoes[id] && !loadingMovimentacoes[id]) {
-            setLoadingMovimentacoes(prev => ({...prev, [id]: true}));
-            try {
-                const {data} = await api.get<Record<string, unknown>[]>(`/api/financeiro/caixa/${id}/movimentacoes`);
-                setMovimentacoes(prev => ({...prev, [id]: (data ?? []).map(toMovimentacao)}));
-            } catch (e) {
-                console.error('Erro ao carregar movimentações:', e);
-                setMovimentacoes(prev => ({...prev, [id]: []}));
-            } finally {
-                setLoadingMovimentacoes(prev => ({...prev, [id]: false}));
-            }
+        if (!isOpen) {
+            // Detalhe expandido: movimentações + totais via API.
+            void loadMovimentacoes(row);
+            void loadTotais(row);
         }
+    };
+
+    const openFluxoCaixa = async (row: CaixaRow) => {
+        setFluxoCaixa(row);
+        void loadMovimentacoes(row);
+        void loadTotais(row);
     };
 
     const runAction = (action: string, item: ApiItem) => {
@@ -249,28 +328,6 @@ export default function ViewCaixaListCaixaListScreen() {
             <View style={styles.header}>
                 <Text style={styles.title}>Gerência Fluxo Caixa</Text>
                 <ModuleFilter columns={[...COLUMN_FIELDS]} value={filterParams} onChange={setFilterParams} />
-                <Pressable style={styles.exportButton} onPress={() => Alert.alert('Exportar', 'Selecione o formato', [
-                    {text: 'PDF', onPress: async () => {
-                        try {
-                            const response = await api.get(`/api/financeiro/caixa/exportar/pdf`, {responseType: 'blob'});
-                            // Note: Mobile blob handling requires different approach (Share, etc.)
-                            Alert.alert('Sucesso', 'Exportação PDF iniciada');
-                        } catch (e) {
-                            Alert.alert('Erro', 'Erro ao exportar PDF');
-                        }
-                    }},
-                    {text: 'Excel', onPress: async () => {
-                        try {
-                            const response = await api.get(`/api/financeiro/caixa/exportar/excel`, {responseType: 'blob'});
-                            Alert.alert('Sucesso', 'Exportação Excel iniciada');
-                        } catch (e) {
-                            Alert.alert('Erro', 'Erro ao exportar Excel');
-                        }
-                    }},
-                    {text: 'Cancelar', style: 'cancel'},
-                ])}>
-                    <Text style={styles.exportButtonText}>Exportar</Text>
-                </Pressable>
             </View>
             {notice ? <Text style={styles.notice}>{notice}</Text> : null}
             {items.length === 0 ? (
@@ -296,9 +353,28 @@ export default function ViewCaixaListCaixaListScreen() {
                             dataFechamento: row.data_fechamento ? String(row.data_fechamento) : null,
                             fundoCaixa: Number(row.fundo_caixa ?? 0),
                         };
-                        const totals = calculateTotals(movs);
-                        const fundoCaixa = Number(caixaRow.fundoCaixa) || 0;
-                        const totalDinheiroCaixa = totals.totalDinheiro + fundoCaixa;
+                        const totalsApi = totaisCaixa[caixaId];
+                        const isLoadingTotais = loadingTotais[caixaId];
+                        // Totais via API; fallback local apenas se a API falhar.
+                        const totals: CaixaTotais = totalsApi ?? (() => {
+                            const t = calculateTotals(movs);
+                            const fundo = Number(caixaRow.fundoCaixa) || 0;
+                            return {
+                                totalFundoCaixa: fundo,
+                                totalDinheiro: t.totalDinheiro,
+                                totalCheque: t.totalCheque,
+                                totalCartao: t.totalCartao,
+                                totalBoleto: t.totalBoleto,
+                                totalTransferencia: t.totalTransferencia,
+                                totalDeposito: t.totalDeposito,
+                                totalSangria: t.totalSangria,
+                                totalValor: t.totalValor,
+                                totalDesconto: t.totalDesconto,
+                                totalJurosMulta: t.totalJurosMulta,
+                                totalValorPagar: t.totalValorPagar,
+                                totalDinheiroCaixa: t.totalDinheiro + fundo,
+                            };
+                        })();
 
                         return (
                             <View style={styles.rowContainer}>
@@ -328,21 +404,24 @@ export default function ViewCaixaListCaixaListScreen() {
                                             <Text style={styles.rowValue}>{formatCurrency(caixaRow.fundoCaixa)}</Text>
                                         </View>
 <View style={styles.rowActions}>
-                                             <Pressable style={[styles.actionButton, styles.actionBlue]} onPress={() => Alert.alert('Fluxo Caixa', `Detalhes do caixa ${caixaRow.idCaixaUnidade}`)}>
-                                                 <Text style={styles.actionButtonText}>📊 Fluxo</Text>
+                                             <Pressable style={[styles.actionButton, styles.actionBlack]} onPress={() => openFluxoCaixa(caixaRow)}>
+                                                 <Text style={[styles.actionButtonText, styles.actionBlackText]}>📊 Fluxo</Text>
                                              </Pressable>
-                                             <Pressable style={[styles.actionButton, styles.actionBlue]} disabled={!caixaRow.dataFechamento} onPress={() => Alert.alert('Imprimir', 'Gerando comprovante...', [
-                                                  {text: 'OK', onPress: async () => {
-                                                      try {
-                                                          await api.post(`/api/financeiro/caixa/${caixaRow.id}/imprimir`);
-                                                          Alert.alert('Sucesso', 'Enviado para impressão');
-                                                      } catch (e) {
-                                                          Alert.alert('Erro', 'Erro ao imprimir');
-                                                      }
-                                                  }},
-                                              ])}>
-                                                 <Text style={styles.actionButtonText}>🖨️ Imprimir</Text>
-                                             </Pressable>
+                                              <Pressable style={[styles.actionButton, styles.actionBlue]} disabled={!caixaRow.dataFechamento} onPress={() => Alert.alert('Imprimir', 'Gerando relatório...', [
+                                                   {text: 'OK', onPress: async () => {
+                                                       try {
+                                                            const response = await api.post(`/api/financeiro/caixa/${caixaRow.id}/imprimir`, undefined, {responseType: 'blob', headers: {Accept: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}});
+                                                           const blob = new Blob([response.data], {type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+                                                           const url = URL.createObjectURL(blob);
+                                                           Alert.alert('Sucesso', 'Relatório gerado para impressão');
+                                                           q.refetch();
+                                                       } catch (e) {
+                                                           Alert.alert('Erro', 'Erro ao imprimir');
+                                                       }
+                                                   }},
+                                               ])}>
+                                                  <Text style={styles.actionButtonText}>🖨️ Imprimir</Text>
+                                              </Pressable>
 {caixaRow.dataFechamento ? (
                                                   <Pressable style={[styles.actionButton, styles.actionStop]} onPress={() => Alert.alert('Reabrir Caixa', 'Deseja reabrir este caixa?', [
                                                       {text: 'Cancelar', style: 'cancel'},
@@ -430,12 +509,21 @@ export default function ViewCaixaListCaixaListScreen() {
                                                     </ScrollView>
                                                 </View>
                                                 <View style={styles.totalsContainer}>
-                                                    <Text style={styles.totalsTitle}>Totais</Text>
+                                                    <Text style={styles.totalsTitle}>Totais {isLoadingTotais && !totalsApi ? '(carregando...)' : totalsApi ? '(API)' : '(local)'}</Text>
+                                                    {isLoadingTotais && !totalsApi ? (
+                                                        <View style={styles.loadingContainer}>
+                                                            <ActivityIndicator color={Colors.primary} size="small"/>
+                                                            <Text style={styles.loadingText}>Carregando totais da API...</Text>
+                                                        </View>
+                                                    ) : null}
+                                                    {erroTotais[caixaId] && !totalsApi ? (
+                                                        <Text style={styles.totalsError}>Totais da API indisponíveis — exibindo cálculo local.</Text>
+                                                    ) : null}
                                                     <ScrollView horizontal={true} style={styles.totalsScroll}>
                                                         <View style={styles.totalsRow}>
                                                             <View style={styles.totalsCell}>
                                                                 <Text style={styles.totalsLabel}>Fundo Caixa</Text>
-                                                                <Text style={styles.totalsValue}>{formatCurrency(fundoCaixa)}</Text>
+                                                                <Text style={styles.totalsValue}>{formatCurrency(totals.totalFundoCaixa)}</Text>
                                                             </View>
                                                             <View style={styles.totalsCell}>
                                                                 <Text style={styles.totalsLabel}>Total Dinheiro</Text>
@@ -483,10 +571,15 @@ export default function ViewCaixaListCaixaListScreen() {
                                                             </View>
                                                             <View style={styles.totalsCell}>
                                                                 <Text style={styles.totalsLabel}>Total Caixa</Text>
-                                                                <Text style={styles.totalsValue}>{formatCurrency(totalDinheiroCaixa)}</Text>
+                                                                <Text style={styles.totalsValue}>{formatCurrency(totals.totalDinheiroCaixa)}</Text>
                                                             </View>
                                                         </View>
 </ScrollView>
+                                                    {!totalsApi && !isLoadingTotais ? (
+                                                        <Pressable style={styles.retryButton} onPress={() => loadTotais(caixaRow)}>
+                                                            <Text style={styles.retryButtonText}>Recarregar totais da API</Text>
+                                                        </Pressable>
+                                                    ) : null}
                                                 </View>
                                             </>
                                         )}
@@ -519,6 +612,85 @@ export default function ViewCaixaListCaixaListScreen() {
             <Pressable style={styles.sizeSelector} onPress={() => Alert.alert('Tamanho da página', 'Selecione', PAGE_SIZES.map(s => ({text: `${s}`, onPress: () => { setSize(s); setPage(0); }})))}>
                 <Text style={styles.sizeSelectorText}>{size} por página ▾</Text>
             </Pressable>
+            <Modal visible={fluxoCaixa !== null} animationType="slide" transparent={true} onRequestClose={() => setFluxoCaixa(null)}>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Fluxo de Caixa {fluxoCaixa ? `- ${fluxoCaixa.idCaixaUnidade}` : ''}</Text>
+                        {fluxoCaixa ? (
+                            <>
+                                <Text style={styles.modalSubtitle}>Unidade: {fluxoCaixa.unidade}</Text>
+                                {loadingTotais[fluxoCaixa.id] ? (
+                                    <View style={styles.loadingContainer}>
+                                        <ActivityIndicator color={Colors.primary} size="small"/>
+                                        <Text style={styles.loadingText}>Carregando totais da API...</Text>
+                                    </View>
+                                ) : (() => {
+                                    const apiT = totaisCaixa[fluxoCaixa.id];
+                                    const movsModal = movimentacoes[fluxoCaixa.id] ?? [];
+                                    const t: CaixaTotais = apiT ?? (() => {
+                                        const c = calculateTotals(movsModal);
+                                        const fundo = Number(fluxoCaixa.fundoCaixa) || 0;
+                                        return {
+                                            totalFundoCaixa: fundo,
+                                            totalDinheiro: c.totalDinheiro,
+                                            totalCheque: c.totalCheque,
+                                            totalCartao: c.totalCartao,
+                                            totalBoleto: c.totalBoleto,
+                                            totalTransferencia: c.totalTransferencia,
+                                            totalDeposito: c.totalDeposito,
+                                            totalSangria: c.totalSangria,
+                                            totalValor: c.totalValor,
+                                            totalDesconto: c.totalDesconto,
+                                            totalJurosMulta: c.totalJurosMulta,
+                                            totalValorPagar: c.totalValorPagar,
+                                            totalDinheiroCaixa: c.totalDinheiro + fundo,
+                                        };
+                                    })();
+                                    const pairs: [string, number][] = [
+                                        ['Fundo Caixa', t.totalFundoCaixa],
+                                        ['Total Dinheiro', t.totalDinheiro],
+                                        ['Total Cheque', t.totalCheque],
+                                        ['Total Cartão', t.totalCartao],
+                                        ['Total Boleto', t.totalBoleto],
+                                        ['Total Transf.', t.totalTransferencia],
+                                        ['Total Depósito', t.totalDeposito],
+                                        ['Total Sangria', t.totalSangria],
+                                        ['Valor', t.totalValor],
+                                        ['Desconto', t.totalDesconto],
+                                        ['Juros/Multa', t.totalJurosMulta],
+                                        ['Valor Total', t.totalValorPagar],
+                                        ['Total Caixa', t.totalDinheiroCaixa],
+                                    ];
+                                    return (
+                                        <ScrollView horizontal={true} style={styles.totalsScroll}>
+                                            <View style={styles.totalsRow}>
+                                                {pairs.map(([label, value]) => (
+                                                    <View key={label} style={styles.totalsCell}>
+                                                        <Text style={styles.totalsLabel}>{label}{apiT ? '' : ' (local)'}</Text>
+                                                        <Text style={styles.totalsValue}>{formatCurrency(value)}</Text>
+                                                    </View>
+                                                ))}
+                                            </View>
+                                        </ScrollView>
+                                    );
+                                })()}
+                                <Text style={styles.totalsTitle}>Movimentações ({(fluxoCaixa && movimentacoes[fluxoCaixa.id]?.length) ?? 0})</Text>
+                                <ScrollView style={styles.modalMovList}>
+                                    {(fluxoCaixa && movimentacoes[fluxoCaixa.id] ? movimentacoes[fluxoCaixa.id]! : []).map((mov) => (
+                                        <View key={mov.id} style={styles.modalMovRow}>
+                                            <Text style={styles.modalMovText}>{renderMovimentacaoIcon(mov.tipoMovimento)} #{mov.id} · {mov.aluno} · {mov.formaPagamento}</Text>
+                                            <Text style={styles.modalMovText}>{formatCurrency(mov.total)} (V:{formatCurrency(mov.valor)} D:{formatCurrency(mov.desconto)} J:{formatCurrency(mov.multaJuros)})</Text>
+                                        </View>
+                                    ))}
+                                </ScrollView>
+                            </>
+                        ) : null}
+                        <Pressable style={styles.modalCloseButton} onPress={() => setFluxoCaixa(null)}>
+                            <Text style={styles.modalCloseText}>Fechar</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -633,6 +805,9 @@ const styles = StyleSheet.create({
     actionBlue: {
         backgroundColor: Colors.primary + '20',
     },
+    actionBlack: {
+        backgroundColor: Colors.btnBlack,
+    },
     actionRed: {
         backgroundColor: Colors.errorBg,
     },
@@ -646,6 +821,9 @@ const styles = StyleSheet.create({
         color: Colors.textPrimary,
         fontSize: Typography.sizes.sm,
         fontWeight: Typography.weights.semibold,
+    },
+    actionBlackText: {
+        color: Colors.textWhite,
     },
     expandedContainer: {
         marginTop: Spacing.md,
@@ -828,5 +1006,73 @@ const styles = StyleSheet.create({
         color: Colors.primary,
         fontSize: Typography.sizes.base,
         fontWeight: Typography.weights.semibold,
+    },
+    totalsError: {
+        color: Colors.error,
+        fontSize: Typography.sizes.sm,
+        marginBottom: Spacing.sm,
+    },
+    retryButton: {
+        marginTop: Spacing.sm,
+        alignSelf: 'flex-start',
+        backgroundColor: Colors.primary + '15',
+        borderRadius: BorderRadius.md,
+        paddingHorizontal: Spacing.md,
+        paddingVertical: Spacing.xs,
+    },
+    retryButtonText: {
+        color: Colors.primary,
+        fontSize: Typography.sizes.sm,
+        fontWeight: Typography.weights.semibold,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: Spacing.lg,
+    },
+    modalContent: {
+        width: '100%',
+        maxHeight: '85%',
+        backgroundColor: Colors.bgSecondary,
+        borderRadius: BorderRadius.lg,
+        padding: Spacing.lg,
+    },
+    modalTitle: {
+        fontSize: Typography.sizes.xl,
+        fontWeight: Typography.weights.bold,
+        color: Colors.textPrimary,
+        marginBottom: Spacing.xs,
+    },
+    modalSubtitle: {
+        fontSize: Typography.sizes.base,
+        color: Colors.textSecondary,
+        marginBottom: Spacing.md,
+    },
+    modalMovList: {
+        maxHeight: 250,
+        marginTop: Spacing.md,
+    },
+    modalMovRow: {
+        paddingVertical: Spacing.xs,
+        borderBottomWidth: 1,
+        borderBottomColor: Colors.borderLight,
+    },
+    modalMovText: {
+        fontSize: Typography.sizes.sm,
+        color: Colors.textPrimary,
+    },
+    modalCloseButton: {
+        marginTop: Spacing.md,
+        backgroundColor: Colors.primary,
+        borderRadius: BorderRadius.md,
+        paddingVertical: Spacing.sm,
+        alignItems: 'center',
+    },
+    modalCloseText: {
+        color: Colors.textWhite,
+        fontSize: Typography.sizes.base,
+        fontWeight: Typography.weights.bold,
     },
 });

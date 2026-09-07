@@ -84,7 +84,7 @@ public class CobrancaController {
     @POST
     @Path("/atualizar-cobrancas-automatico")
     public Uni<Response> atualizarCobrancasAutomatico() {
-        return kafkaProducer.enviarTriggerManutencao("atualizarCobrancasAutomatico")
+        return kafkaProducer.enviarTriggerAtualizarCobrancas("atualizarCobrancasAutomatico")
                 .map(v -> Response.accepted().entity(java.util.Map.of("status", "trigger enviado", "action", "atualizarCobrancasAutomatico")).build());
     }
 

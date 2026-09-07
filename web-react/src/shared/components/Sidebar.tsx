@@ -92,28 +92,28 @@ export default function Sidebar() {
             items.push(
                 {
                     label: 'Portal do aluno',
-                    parent: 'Portal do Aluno',
+                    parent: 'Portal do aluno',
                     path: '/aluno/portalAluno',
                     icon: menuIcon('dashboard'),
                     keywords: 'portal aluno dashboard'
                 },
                 {
                     label: 'Boletim',
-                    parent: 'Portal do Aluno',
+                    parent: 'Portal do aluno',
                     path: '/aluno/boletim',
                     icon: menuIcon('boletim'),
                     keywords: 'portal aluno boletim notas'
                 },
                 {
                     label: 'Frequência',
-                    parent: 'Portal do Aluno',
+                    parent: 'Portal do aluno',
                     path: '/aluno/frequencia',
                     icon: menuIcon('frequencia'),
                     keywords: 'portal aluno frequencia'
                 },
                 {
                     label: 'Financeiro',
-                    parent: 'Portal do Aluno',
+                    parent: 'Portal do aluno',
                     path: '/aluno/financeiro',
                     icon: menuIcon('financeiro'),
                     keywords: 'portal aluno financeiro parcelas'
@@ -197,7 +197,7 @@ export default function Sidebar() {
                                 <button className="sidebar-item sidebar-group-header"
                                         onClick={() => setPortalOpen(prev => !prev)}>
                                     <span className="sidebar-icon">{menuIcon('aluno')}</span>
-                                    <span className="sidebar-label">Portal do Aluno</span>
+                                    <span className="sidebar-label">Portal do aluno</span>
                                     <span className="sidebar-arrow">{portalOpen ? '▾' : '▸'}</span>
                                 </button>
                                 {portalOpen && (
@@ -214,8 +214,8 @@ export default function Sidebar() {
                                         <Link className="sidebar-item sidebar-subitem" to="/aluno/financeiro"><span
                                             className="sidebar-icon">{menuIcon('financeiro')}</span><span
                                             className="sidebar-label">Financeiro</span></Link>
-                                        <Link className="sidebar-item sidebar-subitem" to="/aluno/aulas"><span
-                                            className="sidebar-icon">{menuIcon('aulas')}</span><span className="sidebar-label">Registro de Aulas</span></Link>
+                                         <Link className="sidebar-item sidebar-subitem" to="/aluno/aulas"><span
+                                             className="sidebar-icon">{menuIcon('aulas')}</span><span className="sidebar-label">Aulas</span></Link>
                                         <Link className="sidebar-item sidebar-subitem" to="/aluno/avaliacoes"><span
                                             className="sidebar-icon">{menuIcon('avaliacoes')}</span><span
                                             className="sidebar-label">Avaliações</span></Link>

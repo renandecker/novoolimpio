@@ -34,7 +34,7 @@ public class CaixaRepository implements PanacheRepository<Caixa> {
                 .chain(session -> session.createNativeQuery(sql)
                         .setParameter(1, caixaId)
                         .getSingleResult())
-                .map(v -> new java.math.BigDecimal(v.toString()));
+                .map(v -> v == null ? java.math.BigDecimal.ZERO : new java.math.BigDecimal(v.toString()));
     }
 
     public Uni<java.math.BigDecimal> somarEntradas(Long caixaId) {

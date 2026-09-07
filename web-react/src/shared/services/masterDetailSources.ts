@@ -47,6 +47,11 @@ export const AGENDA_SOURCE = '/api/view/agenda/listAgenda';
 export const AGENDA_COLUMNS: MasterDetailColumn[] = [
     {key: 'id', label: 'ID da Agenda'},
     {key: 'descricao', label: 'Descrição'},
+    {key: 'agendar', label: 'Agendar', render: (item) => ((item as any).agendar ? 'SIM' : 'NÃO')},
+    {key: 'alterar', label: 'Alterar', render: (item) => ((item as any).alterar ? 'SIM' : 'NÃO')},
+    {key: 'fechar', label: 'Fechar', render: (item) => ((item as any).fechar ? 'SIM' : 'NÃO')},
+    {key: 'iniciar', label: 'Iniciar', render: (item) => ((item as any).iniciar ? 'SIM' : 'NÃO')},
+    {key: 'atender', label: 'Atender', render: (item) => ((item as any).atender ? 'SIM' : 'NÃO')},
 ];
 export const AGENDA_SEARCH = ['descricao'];
 
@@ -197,6 +202,13 @@ export const GEOREFERENCIA_COLUMNS: MasterDetailColumn[] = [
     {key: 'nome', label: 'Nome'},
 ];
 export const GEOREFERENCIA_SEARCH = ['nomeVisualizacao', 'nome'];
+
+export const ESTRUTURA_COLUNA_SOURCE = '/api/relatorios/estrutura-coluna';
+export const ESTRUTURA_COLUNA_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'ID da Coluna'},
+    {key: 'coluna', label: 'Coluna'},
+];
+export const ESTRUTURA_COLUNA_SEARCH = ['coluna'];
 
 export const FILTRO_SOURCE = '/api/relatorios/filtro';
 export const FILTRO_COLUMNS: MasterDetailColumn[] = [

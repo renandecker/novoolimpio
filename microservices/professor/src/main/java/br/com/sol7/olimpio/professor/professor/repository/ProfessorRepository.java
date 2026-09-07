@@ -1,6 +1,7 @@
 package br.com.sol7.olimpio.professor.professor.repository;
 
 import br.com.sol7.olimpio.professor.professor.entity.Professor;
+import br.com.sol7.olimpio.professor.professor.dto.ProfessorResponse;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
@@ -12,7 +13,7 @@ import java.util.Date;
 public class ProfessorRepository implements PanacheRepository<Professor> {
 
     public static final String SQL_AUTO_COMPLETE_PROFESSOR_FISICA =
-            "SELECT DISTINCT p.* FROM edc_professor p INNER JOIN edc_professor_unidade dp ON dp.id_professor = p.id LEFT JOIN bas_pessoa j_p_pessoa ON j_p_pessoa.id = p.id_pessoa LEFT JOIN bas_pessoa_fisica j_j_p_pessoa_pessoaFisica ON j_j_p_pessoa_pessoaFisica.id_pessoa = j_p_pessoa.id WHERE dp.id_unidade in (?2) and (lower(j_j_p_pessoa_pessoaFisica.nome) like '%' || ?1 || '%' OR (j_j_p_pessoa_pessoaFisica.cpf) like '%' || ?1 || '%') and p.fl_ativo = true LIMIT 10";
+            "SELECT DISTINCT p.*, COALESCE(pf.nome, pj.nome_fantasia, '') AS nome FROM edc_professor p INNER JOIN edc_professor_unidade dp ON dp.id_professor = p.id LEFT JOIN bas_pessoa j_p_pessoa ON j_p_pessoa.id = p.id_pessoa LEFT JOIN bas_pessoa_fisica j_j_p_pessoa_pessoaFisica ON j_j_p_pessoa_pessoaFisica.id_pessoa = j_p_pessoa.id LEFT JOIN bas_pessoa_juridica j_j_p_pessoa_pessoaJuridica ON j_j_p_pessoa_pessoaJuridica.id_pessoa = j_p_pessoa.id WHERE dp.id_unidade in (?2) and (lower(j_j_p_pessoa_pessoaFisica.nome) like '%' || ?1 || '%' OR (j_j_p_pessoa_pessoaFisica.cpf) like '%' || ?1 || '%') and p.fl_ativo = true LIMIT 10";
 
     public Uni<List<Professor>> autoCompleteProfessorFisica(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
@@ -23,7 +24,7 @@ public class ProfessorRepository implements PanacheRepository<Professor> {
     }
 
     public static final String SQL_AUTO_COMPLETE_PROFESSOR_JURIDICA =
-            "SELECT DISTINCT p.* FROM edc_professor p INNER JOIN edc_professor_unidade dp ON dp.id_professor = p.id LEFT JOIN bas_pessoa j_p_pessoa ON j_p_pessoa.id = p.id_pessoa LEFT JOIN bas_pessoa_juridica j_j_p_pessoa_pessoaJuridica ON j_j_p_pessoa_pessoaJuridica.id_pessoa = j_p_pessoa.id WHERE dp.id_unidade in (?2) and (lower(j_j_p_pessoa_pessoaJuridica.nome_fantasia) like '%' || ?1 || '%' OR (j_j_p_pessoa_pessoaJuridica.cnpj) like '%' || ?1 || '%') and p.fl_ativo = true LIMIT 10";
+            "SELECT DISTINCT p.*, COALESCE(pf.nome, pj.nome_fantasia, '') AS nome FROM edc_professor p INNER JOIN edc_professor_unidade dp ON dp.id_professor = p.id LEFT JOIN bas_pessoa j_p_pessoa ON j_p_pessoa.id = p.id_pessoa LEFT JOIN bas_pessoa_fisica j_j_p_pessoa_pessoaFisica ON j_j_p_pessoa_pessoaFisica.id_pessoa = j_p_pessoa.id LEFT JOIN bas_pessoa_juridica j_j_p_pessoa_pessoaJuridica ON j_j_p_pessoa_pessoaJuridica.id_pessoa = j_p_pessoa.id WHERE dp.id_unidade in (?2) and (lower(j_j_p_pessoa_pessoaJuridica.nome_fantasia) like '%' || ?1 || '%' OR (j_j_p_pessoa_pessoaJuridica.cnpj) like '%' || ?1 || '%') and p.fl_ativo = true LIMIT 10";
 
     public Uni<List<Professor>> autoCompleteProfessorJuridica(String query, List<Long> unidadesIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
@@ -34,7 +35,7 @@ public class ProfessorRepository implements PanacheRepository<Professor> {
     }
 
     public static final String SQL_AUTO_COMPLETE_PROFESSOR =
-            "SELECT p.id, COALESCE(pf.nome, pj.nome_fantasia, '') AS nome FROM edc_professor p " +
+            "SELECT p.*, COALESCE(pf.nome, pj.nome_fantasia, '') AS nome FROM edc_professor p " +
                     "LEFT JOIN bas_pessoa pes ON pes.id = p.id_pessoa " +
                     "LEFT JOIN bas_pessoa_fisica pf ON pf.id_pessoa = pes.id " +
                     "LEFT JOIN bas_pessoa_juridica pj ON pj.id_pessoa = pes.id " +
@@ -165,4 +166,60 @@ public class ProfessorRepository implements PanacheRepository<Professor> {
                         .getResultList());
     }
 
-}
+    public static final String SQL_LIST_ALL_WITH_NOME =
+            "SELECT p.id, p.id_pessoa, p.fl_ativo, p.caderno_bola, p.dt_inicio, p.dt_fim, " +
+                    "COALESCE(pf.nome, pj.nome_fantasia, '') AS nome " +
+                    "FROM edc_professor p " +
+                    "LEFT JOIN bas_pessoa pes ON pes.id = p.id_pessoa " +
+                    "LEFT JOIN bas_pessoa_fisica pf ON pf.id_pessoa = pes.id " +
+                    "LEFT JOIN bas_pessoa_juridica pj ON pj.id_pessoa = pes.id " +
+                    "ORDER BY p.id DESC";
+
+    public Uni<List<ProfessorResponse>> listAllWithNome() {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_LIST_ALL_WITH_NOME)
+                        .getResultList())
+                .onItem().transform(list -> list.stream()
+                        .map(tuple -> (Object[]) tuple)
+                        .map(arr -> new ProfessorResponse(
+                                ((Number) arr[0]).longValue(),
+                                arr[1] != null ? ((Number) arr[1]).longValue() : null,
+                                (Boolean) arr[2],
+                                (Boolean) arr[3],
+                                (java.sql.Date) arr[4],
+                                (java.sql.Date) arr[5],
+                                (String) arr[6]
+                        ))
+                        .toList());
+    }
+
+    public static final String SQL_FIND_BY_ID_WITH_NOME =
+            "SELECT p.id, p.id_pessoa, p.fl_ativo, p.caderno_bola, p.dt_inicio, p.dt_fim, " +
+                    "COALESCE(pf.nome, pj.nome_fantasia, '') AS nome " +
+                    "FROM edc_professor p " +
+                    "LEFT JOIN bas_pessoa pes ON pes.id = p.id_pessoa " +
+                    "LEFT JOIN bas_pessoa_fisica pf ON pf.id_pessoa = pes.id " +
+                    "LEFT JOIN bas_pessoa_juridica pj ON pj.id_pessoa = pes.id " +
+                    "WHERE p.id = ?1";
+
+    public Uni<ProfessorResponse> findByIdWithNome(Long id) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_FIND_BY_ID_WITH_NOME)
+                        .setParameter(1, id)
+                        .getSingleResultOrNull())
+                .onItem().transform(tuple -> {
+                    if (tuple == null) return null;
+                    Object[] arr = (Object[]) tuple;
+                    return new ProfessorResponse(
+                            ((Number) arr[0]).longValue(),
+                            arr[1] != null ? ((Number) arr[1]).longValue() : null,
+                            (Boolean) arr[2],
+                            (Boolean) arr[3],
+                            (java.sql.Date) arr[4],
+                            (java.sql.Date) arr[5],
+                            (String) arr[6]
+                    );
+                });
+    }
+
+    }

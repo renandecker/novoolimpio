@@ -9,9 +9,9 @@ import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.jboss.logging.Logger;
 
 /**
- * Consome triggers manuais do financeiro e executa as rotinas de manutencao de dominio:
- * atualizarCobrancasAutomatico.
- * Topico: olimpio.financeiro.maintenance
+ * Consome o trigger manual da regra de negócio atualizarCobrancasAutomatico do
+ * financeiro e executa a rotina.
+ * Topico: olimpio.financeiro.atualizar-cobrancas (nome segue a regra de negócio).
  */
 @ApplicationScoped
 public class FinanceiroMaintenanceConsumer {
@@ -21,22 +21,16 @@ public class FinanceiroMaintenanceConsumer {
     @Inject
     FinanceiroMaintenanceService financeiro;
 
-    @Incoming("financeiro-maintenance")
+    @Incoming("financeiro-atualizar-cobrancas")
     @Blocking
     @RunOnVirtualThread
-    public void processarFinanceiroMaintenance(String action) {
-        LOG.infof("FinanceiroMaintenanceConsumer - recebido trigger manual do financeiro: %s", action);
+    public void processarAtualizarCobrancas(String trigger) {
+        LOG.infof("FinanceiroMaintenanceConsumer - recebido trigger atualizarCobrancasAutomatico: %s", trigger);
         try {
-            switch (action) {
-                case "atualizarCobrancasAutomatico" -> financeiro.atualizarCobrancasAutomatico().await().indefinitely();
-                default -> {
-                    LOG.warnf("FinanceiroMaintenanceConsumer - acao desconhecida: %s", action);
-                    return;
-                }
-            }
-            LOG.infof("FinanceiroMaintenanceConsumer - acao '%s' concluida", action);
+            financeiro.atualizarCobrancasAutomatico().await().indefinitely();
+            LOG.info("FinanceiroMaintenanceConsumer - atualizarCobrancasAutomatico concluido");
         } catch (Exception e) {
-            LOG.errorf(e, "FinanceiroMaintenanceConsumer - falha ao executar acao '%s'", action);
+            LOG.error("FinanceiroMaintenanceConsumer - falha ao executar atualizarCobrancasAutomatico", e);
         }
     }
 }

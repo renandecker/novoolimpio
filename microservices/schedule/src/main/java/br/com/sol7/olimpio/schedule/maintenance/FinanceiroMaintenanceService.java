@@ -1,5 +1,7 @@
 package br.com.sol7.olimpio.schedule.maintenance;
 
+import br.com.sol7.olimpio.schedule.financeiro.FechamentoCaixaEmailEvent;
+import br.com.sol7.olimpio.schedule.financeiro.FechamentoEmailProducer;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;
 import io.vertx.mutiny.sqlclient.Row;
@@ -27,7 +29,7 @@ public class FinanceiroMaintenanceService {
     Pool pool;
 
     @Inject
-    EmailService emailService;
+    FechamentoEmailProducer fechamentoEmailProducer;
 
     // Migrado de FormaPagamentoService.verificarCotaAuto()
     private static final String SQL_VERIFICAR_COTA_DIARIO =
@@ -242,11 +244,17 @@ public class FinanceiroMaintenanceService {
                 })
                 .chain(data -> {
                     if (data.destinatario() == null || data.destinatario().isBlank()) {
-                        LOG.warnf("Caixa %d (unidade %d): nenhum e-mail de destino encontrado (configCaixa nem unidade) - e-mail nao enviado",
+                        LOG.warnf("Caixa %d (unidade %d): nenhum e-mail de destino encontrado (configCaixa nem unidade) - e-mail nao publicado",
                                 caixa.id(), caixa.unidadeId());
                         return Uni.createFrom().voidItem();
                     }
-                    return emailService.enviarEmailFechamentoCaixa(data.destinatario(), data.assunto(), data.corpoHtml());
+                    // Regra do legado: um e-mail por caixa fechado. A entrega e feita pelo
+                    // notificacoes-service via topico olimpio.financeiro.email-manual.
+                    return fechamentoEmailProducer.publicar(new FechamentoCaixaEmailEvent(
+                            FechamentoCaixaEmailEvent.TIPO_FECHAMENTO_CAIXA,
+                            caixa.id(), caixa.unidadeId(),
+                            data.destinatario(), data.assunto(), data.corpoHtml(),
+                            entradas, saidas, sangria));
                 });
     }
 

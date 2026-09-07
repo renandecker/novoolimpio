@@ -19,6 +19,10 @@ import java.util.List;
  * joins + caseCor da situacao) e registra um registro em fin_cobranca_email para cada contrato
  * que atende as regras. Nao foi portado o envio efetivo: aqui fica registrado o envio pendente + log.
  * <p>
+ * O trigger manual via Kafka (topico olimpio.financeiro.email-manual) e consumido pelo
+ * notificacoes-service, que possui copia desta rotina; aqui a rotina roda apenas no
+ * agendamento automatico (SchedulingJobs.rotinaEmails via MaintenanceConsumer.processarEmails).
+ * <p>
  * Acessa o banco pelo datasource reativo "financeiro-db" (SQL nativo, sem REST).
  */
 @ApplicationScoped

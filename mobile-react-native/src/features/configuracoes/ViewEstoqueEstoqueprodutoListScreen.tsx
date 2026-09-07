@@ -162,7 +162,7 @@ function PendenciaVendaTab({unidadeId}: { unidadeId: string }) {
     return (
         <div>
             <div className="data-table-toolbar" style={{marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px'}}>
-                <ExportDropdown options={exportOptions} triggerLabel="Exportar" triggerIcon={<i className="fa fa-download"/>}/>
+
             </div>
             <table className="data-table">
                 <thead>

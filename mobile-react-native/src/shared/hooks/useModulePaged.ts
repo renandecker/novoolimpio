@@ -1,6 +1,6 @@
 import {keepPreviousData, useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {api} from './api';
-import type {ApiItem, ApiRequest, PagedResponse, SearchFilterRequest} from './types';
+import type {ApiItem, ApiRequest, PagedResponse, SearchFilterRequest, SortRequest} from './types';
 
 export const PAGE_SIZES = [10, 20, 50, 100];
 
@@ -10,17 +10,20 @@ export const useModulePaged = (
     size: number,
     extraParams?: Record<string, string | number | boolean | undefined>,
     filters?: SearchFilterRequest,
+    sort?: SortRequest
 ) => {
     const queryClient = useQueryClient();
     const hasFilters = filters && filters.filters && Object.keys(filters.filters).length > 0;
     const basePath = path.replace(/\/paged\/?$/, '').replace(/\/search\/?$/, '');
+    const sortKey = sort ? JSON.stringify(sort) : '';
     const query = useQuery({
-        queryKey: [path, hasFilters ? 'search' : 'paged', page, size, extraParams, filters],
+        queryKey: [path, hasFilters ? 'search' : 'paged', page, size, extraParams, filters, sortKey],
         queryFn: async () => {
+            const queryParams = {page, size, ...extraParams, sort: sort?.field, order: sort?.direction};
             if (hasFilters) {
-                return (await api.post<PagedResponse<ApiItem>>(`${basePath}/search`, filters, {params: {page, size, ...extraParams}})).data;
+                return (await api.post<PagedResponse<ApiItem>>(`${basePath}/search`, filters, {params: queryParams})).data;
             }
-            return (await api.get<PagedResponse<ApiItem>>(`${basePath}/paged`, {params: {page, size, ...extraParams}})).data;
+            return (await api.get<PagedResponse<ApiItem>>(`${basePath}/paged`, {params: queryParams})).data;
         },
         placeholderData: keepPreviousData,
     });

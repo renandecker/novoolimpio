@@ -42,8 +42,8 @@ export default function AlunoDashboardScreen() {
         };
     }, []);
 
-    if (busy) return <main><h1>Portal do Aluno</h1><p className="aluno-portal-msg">Carregando...</p></main>;
-    if (error) return <main><h1>Portal do Aluno</h1>
+    if (busy) return <main><h1>Portal do aluno</h1><p className="aluno-portal-msg">Carregando...</p></main>;
+    if (error) return <main><h1>Portal do aluno</h1>
         <div className="aluno-portal-error" role="alert">{error}</div>
     </main>;
 
@@ -51,7 +51,7 @@ export default function AlunoDashboardScreen() {
 
     return (
         <main className="aluno-portal">
-            <h1>Portal do Aluno</h1>
+            <h1>Portal do aluno</h1>
             <p className="aluno-portal-saudacao">Olá, <strong>{nome}</strong>! Este é o seu painel acadêmico.</p>
 
             <div className="aluno-portal-cards">

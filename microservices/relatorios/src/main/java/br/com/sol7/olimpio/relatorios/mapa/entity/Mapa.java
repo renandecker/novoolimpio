@@ -32,11 +32,11 @@ public class Mapa extends PanacheEntity {
     @Column(name = "data_atualizacao")
     public Date dataAlteracao;
     @Column(name = "id_georeferencia")
-    public Long georeferenciaId;  // referencia a Georeferencia (id, cross-service)
+    public Long georeferenciaId;
     @Column(name = "id_dimensao")
-    public Long dimensaoId;  // referencia a Dimensao (id, cross-service)
+    public Long dimensaoId;
     @Column(name = "id_medida")
-    public Long medidaId;  // referencia a Medida (id, cross-service)
+    public Long medidaId;
     @Column(name = "id_estrutura")
-    public Long estruturaId;  // referencia a Estrutura (id, cross-service)
+    public Long estruturaId;
 }

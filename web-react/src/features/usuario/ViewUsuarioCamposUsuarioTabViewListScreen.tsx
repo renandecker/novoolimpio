@@ -111,14 +111,14 @@ export default function ViewUsuarioCamposUsuarioTabViewListScreen(){
             {acessoSub==='perfil' && <MasterDetail label="Perfil" source={PERFIL_SOURCE} valueKey="id" searchKeys={PERFIL_SEARCH} columns={PERFIL_COLUMNS} items={perfis} onChange={setPerfis}/>}
             {acessoSub==='agenda' && (
                 <div>
-                    <MasterDetail label="Agenda" source={AGENDA_SOURCE} valueKey="id" searchKeys={AGENDA_SEARCH} columns={AGENDA_COLUMNS} items={agendas} onChange={setAgendas}/>
-                    <div style={{marginTop:14, display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(150px,1fr))', gap:10}}>
+                    <div style={{marginBottom:14, display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(150px,1fr))', gap:10}}>
                         <label className="form-field"><span className="form-label">Agendar</span><BooleanField value={agendaPerm.agendar} onChange={v=>setAgendaPerm(p=>({...p,agendar:v}))}/></label>
                         <label className="form-field"><span className="form-label">Alterar</span><BooleanField value={agendaPerm.alterar} onChange={v=>setAgendaPerm(p=>({...p,alterar:v}))}/></label>
                         <label className="form-field"><span className="form-label">Fechar</span><BooleanField value={agendaPerm.fechar} onChange={v=>setAgendaPerm(p=>({...p,fechar:v}))}/></label>
                         <label className="form-field"><span className="form-label">Iniciar</span><BooleanField value={agendaPerm.iniciar} onChange={v=>setAgendaPerm(p=>({...p,iniciar:v}))}/></label>
                         <label className="form-field"><span className="form-label">Atender</span><BooleanField value={agendaPerm.atender} onChange={v=>setAgendaPerm(p=>({...p,atender:v}))}/></label>
                     </div>
+                    <MasterDetail label="Agenda" source={AGENDA_SOURCE} valueKey="id" searchKeys={AGENDA_SEARCH} columns={AGENDA_COLUMNS} items={agendas} onChange={setAgendas}/>
                 </div>
             )}
         </div>

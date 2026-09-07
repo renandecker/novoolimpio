@@ -60,6 +60,14 @@
     flex-shrink: 0;
 }
 
+.report-view-actions button,
+.report-view-actions .export-dropdown-trigger {
+    min-width: 100px;
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+}
+
 .report-view-content {
     background-color: #ffffff;
     border: 1px solid #d3d3d3;

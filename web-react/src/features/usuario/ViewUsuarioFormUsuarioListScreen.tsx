@@ -209,20 +209,31 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                     } else if(cep||numero||complemento) enderecosCarregados.push({cep,cidade:'',bairro:'',logradouro:'',numero,complemento});
                     setEnderecos(enderecosCarregados);
                 }
-                // m2m – perfis, agendas, unidades (embedded ou via endpoints dedicados)
+                // m2m – perfis, agendas, unidades
                 try{
-                    const apply = (arr:any[], all:ApiItem[]) => { const ids=new Set(arr.map((x:any)=>String(x.id))); return all.filter(a=>ids.has(String((a as any).id))); };
-                    let perfisIds:number[] = (usu as any).perfis ? ((usu as any).perfis as any[]).map((p:any)=>p.id) : [];
-                    if(!perfisIds?.length){ try{ perfisIds=(await api.get<number[]>(`/api/basico/usuario/buscar-usuario-seu-perfil?entityId=${idParam}`)).data??[]; }catch{} }
-                    setPerfis(apply(perfisIds.map(id=>({id})), allPerfis));
-                    let agendasIds:number[] = (usu as any).agendas ? ((usu as any).agendas as any[]).map((a:any)=>a.id) : [];
-                    if(!agendasIds?.length){ try{ agendasIds=(await api.get<number[]>(`/api/basico/usuario/buscar-agendas-disponiveis?usuarioId=${idParam}`)).data??[]; }catch{} }
-                    setAgendas(apply(agendasIds.map(id=>({id})), allAgendas));
-                    let unidadesIds:number[] = (usu as any).unidades ? ((usu as any).unidades as any[]).map((u:any)=>u.id) : [];
-                    if(!unidadesIds?.length){ try{ unidadesIds=(await api.get<number[]>(`/api/basico/usuario/buscar-unidades-disponiveis?usuarioId=${idParam}`)).data??[]; }catch{} }
-                    setUnidadesAcesso(apply(unidadesIds.map(id=>({id})), allUnidades));
+                    const apply = (arr:any[], all:ApiItem[]) => { const ids=new Set(arr.map((x:any)=>String(x.id ?? x))); return all.filter(a=>ids.has(String((a as any).id))); };
+                    
+                    let perfisArr:any[] = [];
+                    try { perfisArr = (await api.get<any[]>(`/api/basico/usuario/${idParam}/perfis`)).data ?? []; } catch {}
+                    if(!perfisArr.length && (usu as any).perfis){ perfisArr = (usu as any).perfis; }
+                    if(!perfisArr.length){ try{ const pIds = (await api.get<number[]>(`/api/basico/usuario/buscar-usuario-seu-perfil?entityId=${idParam}`)).data??[]; perfisArr = pIds.map(id=>({id})); }catch{} }
+                    setPerfis(apply(perfisArr, allPerfis));
+
+                    let agendasArr:any[] = [];
+                    try { agendasArr = (await api.get<any[]>(`/api/basico/usuario/${idParam}/agendas`)).data ?? []; } catch {}
+                    if(!agendasArr.length && (usu as any).agendas){ agendasArr = (usu as any).agendas; }
+                    if(!agendasArr.length){ try{ const aIds = (await api.get<number[]>(`/api/basico/usuario/buscar-agendas-disponiveis?usuarioId=${idParam}`)).data??[]; agendasArr = aIds.map(id=>({id})); }catch{} }
+                    setAgendas(apply(agendasArr, allAgendas));
+
+                    let unidadesArr:any[] = [];
+                    try { unidadesArr = (await api.get<any[]>(`/api/basico/usuario/${idParam}/unidades`)).data ?? []; } catch {}
+                    if(!unidadesArr.length && (usu as any).unidades){ unidadesArr = (usu as any).unidades; }
+                    if(!unidadesArr.length && pes?.id){ try{ const uIds = (await api.get<number[]>(`/api/basico/pessoa/buscar-unidades-disponiveis`, {params:{pessoaId: pes.id}})).data??[]; unidadesArr = uIds.map(id=>({id})); }catch{} }
+                    if(!unidadesArr.length){ try{ const uIds = (await api.get<number[]>(`/api/basico/usuario/buscar-unidades-disponiveis?usuarioId=${idParam}`)).data??[]; unidadesArr = uIds.map(id=>({id})); }catch{} }
+                    setUnidadesAcesso(apply(unidadesArr, allUnidades));
+
                     if((usu as any).unidadeDefaultId) setUnidadeDefaultId(String((usu as any).unidadeDefaultId));
-                }catch{/* ignore */}
+                }catch(e){ console.error('Erro ao carregar acessos do usuário', e); }
             }catch(e){ console.error(e); alert('Erro ao carregar usuário.');}
         })();
         return()=>{alive=false;};
@@ -257,6 +268,9 @@ export default function ViewUsuarioFormUsuarioListScreen(){
             if(novoUsuId){
                 if(unidadeDefaultId) try{ await api.put(`/api/basico/usuario/${novoUsuId}`, {unidadeDefaultId: Number(unidadeDefaultId)});}catch{/*ignore*/}
                 if(turnosTrabalho.length) try{ await api.put(`/api/basico/usuario/${novoUsuId}/turnos-trabalho`, turnosTrabalho.map(t=> (t as any).id)); }catch{/*ignore*/}
+                try{ await api.put(`/api/basico/usuario/${novoUsuId}/perfis`, perfis.map(p => (p as any).id)); }catch{/*ignore*/}
+                try{ await api.put(`/api/basico/usuario/${novoUsuId}/agendas`, agendas.map(a => (a as any).id)); }catch{/*ignore*/}
+                try{ await api.put(`/api/basico/usuario/${novoUsuId}/unidades`, unidadesAcesso.map(u => (u as any).id)); }catch{/*ignore*/}
             }
 
             if(voltarDepois) voltar(); else alert('Registro salvo com sucesso.');
@@ -551,7 +565,15 @@ export default function ViewUsuarioFormUsuarioListScreen(){
             key:'agenda', label:'Agenda',
             content:(
                 <div className="form-grid">
-                    <div style={{gridColumn: '1 / -1'}}>
+                    <div style={{gridColumn: '1 / -1', marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10}}>
+                        <label className="form-field"><span className="form-label">Agendar</span><BooleanField value={agendaPerm.agendar} onChange={v => setAgendaPerm(p => ({...p, agendar: v}))} /></label>
+                        <label className="form-field"><span className="form-label">Alterar</span><BooleanField value={agendaPerm.alterar} onChange={v => setAgendaPerm(p => ({...p, alterar: v}))} /></label>
+                        <label className="form-field"><span className="form-label">Fechar</span><BooleanField value={agendaPerm.fechar} onChange={v => setAgendaPerm(p => ({...p, fechar: v}))} /></label>
+                        <label className="form-field"><span className="form-label">Iniciar</span><BooleanField value={agendaPerm.iniciar} onChange={v => setAgendaPerm(p => ({...p, iniciar: v}))} /></label>
+                        <label className="form-field"><span className="form-label">Atender</span><BooleanField value={agendaPerm.atender} onChange={v => setAgendaPerm(p => ({...p, atender: v}))} /></label>
+                    </div>
+                    <div style={{gridColumn: '1 / -1', marginTop: 4, fontSize: 11, color: '#777'}}>Permissões aplicadas às agendas selecionadas (tabela bas_usuario_agenda).</div>
+                    <div style={{gridColumn: '1 / -1', marginTop: 8}}>
                         <MasterDetail
                             label="Agenda"
                             source={AGENDA_SOURCE}
@@ -562,14 +584,6 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                             onChange={setAgendas}
                         />
                     </div>
-                    <div style={{gridColumn: '1 / -1', marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10}}>
-                        <label className="form-field"><span className="form-label">Agendar</span><BooleanField value={agendaPerm.agendar} onChange={v => setAgendaPerm(p => ({...p, agendar: v}))} /></label>
-                        <label className="form-field"><span className="form-label">Alterar</span><BooleanField value={agendaPerm.alterar} onChange={v => setAgendaPerm(p => ({...p, alterar: v}))} /></label>
-                        <label className="form-field"><span className="form-label">Fechar</span><BooleanField value={agendaPerm.fechar} onChange={v => setAgendaPerm(p => ({...p, fechar: v}))} /></label>
-                        <label className="form-field"><span className="form-label">Iniciar</span><BooleanField value={agendaPerm.iniciar} onChange={v => setAgendaPerm(p => ({...p, iniciar: v}))} /></label>
-                        <label className="form-field"><span className="form-label">Atender</span><BooleanField value={agendaPerm.atender} onChange={v => setAgendaPerm(p => ({...p, atender: v}))} /></label>
-                    </div>
-                    <div style={{gridColumn: '1 / -1', marginTop: 8, fontSize: 11, color: '#777'}}>Permissões aplicadas às agendas selecionadas.</div>
                 </div>
             ),
         },
