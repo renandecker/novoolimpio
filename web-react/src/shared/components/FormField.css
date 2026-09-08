@@ -1,0 +1,315 @@
+/* ============================================
+   FormField Component Styles
+   Padronização de labels e inputs em formulários
+   ============================================ */
+
+.form-field-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* ---- Label ---- */
+.form-field-label {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+}
+
+.form-field-label-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.4;
+}
+
+.form-field-required {
+  color: #c90000;
+  font-weight: bold;
+  margin-left: 2px;
+  aria-label: "obrigatório";
+}
+
+/* ---- Input Wrapper (para ícones) ---- */
+.form-field-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.form-field-input-wrapper--with-left-icon .form-input {
+  padding-left: 32px;
+}
+
+.form-field-input-wrapper--with-right-icon .form-input {
+  padding-right: 32px;
+}
+
+.form-field-icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  pointer-events: none;
+  font-size: 14px;
+  height: 100%;
+  width: 28px;
+}
+
+.form-field-icon--left {
+  left: 4px;
+}
+
+.form-field-icon--right {
+  right: 4px;
+}
+
+/* ---- Input Base Styles ---- */
+.form-input {
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 8px;
+  border: 1px solid #a8d0e6;
+  border-radius: 3px;
+  background-color: #ffffff;
+  color: #333;
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.4;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-input::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+/* Focus state */
+.form-input:focus {
+  outline: none;
+  border-color: #3baae3;
+  box-shadow: 0 0 0 2px rgba(59, 170, 227, 0.1);
+  background-color: #fafbfc;
+}
+
+/* Hover state */
+.form-input:hover:not(:disabled) {
+  border-color: #7fb3d5;
+  background-color: #fafbfc;
+}
+
+/* Error state */
+.form-input--error {
+  border-color: #d9534f;
+  background-color: #fff5f5;
+}
+
+.form-input--error:focus {
+  box-shadow: 0 0 0 2px rgba(217, 83, 79, 0.1);
+  border-color: #d9534f;
+}
+
+/* Disabled state */
+.form-input--disabled {
+  background-color: #f3f4f6;
+  color: #999;
+  cursor: not-allowed;
+  border-color: #d3d3d3;
+}
+
+.form-input--disabled:hover {
+  border-color: #d3d3d3;
+}
+
+/* ---- Select Specific ---- */
+select.form-input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 18px;
+  padding-right: 28px;
+}
+
+select.form-input:disabled {
+  background-color: #f3f4f6;
+}
+
+/* ---- Textarea Specific ---- */
+textarea.form-input {
+  resize: vertical;
+  min-height: 80px;
+  padding: 8px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  line-height: 1.5;
+}
+
+/* ---- Checkbox e Radio ---- */
+.form-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-radio,
+.form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #333;
+}
+
+.form-radio input[type="radio"],
+.form-checkbox input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #3baae3;
+}
+
+.form-radio input[type="radio"]:disabled,
+.form-checkbox input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ---- Mensagens de Erro e Ajuda ---- */
+.form-field-error {
+  font-size: 12px;
+  color: #d9534f;
+  background-color: #fff5f5;
+  border-left: 3px solid #d9534f;
+  padding: 4px 8px;
+  border-radius: 2px;
+  line-height: 1.3;
+}
+
+.form-field-help {
+  font-size: 11px;
+  color: #666;
+  font-style: italic;
+  line-height: 1.3;
+}
+
+/* ============================================
+   Form Grid Container (para múltiplos campos)
+   ============================================ */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px 16px;
+  width: 100%;
+}
+
+/* Field that spans multiple columns */
+.form-grid .form-field-wrapper[style*="grid-column"] {
+  /* grid-column já aplicado inline */
+}
+
+/* ============================================
+   Responsivo
+   ============================================ */
+@media (max-width: 1200px) {
+  .form-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 12px;
+  }
+
+  .form-field-label {
+    font-size: 12px;
+  }
+
+  .form-input {
+    font-size: 14px;
+    min-height: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .form-field-wrapper {
+    grid-column: auto !important;
+  }
+
+  .form-input {
+    font-size: 16px; /* Evita zoom em iOS */
+  }
+}
+
+/* ============================================
+   Seções e Agrupamentos
+   ============================================ */
+.form-section {
+  grid-column: 1 / -1;
+  border-top: 1px solid #e6e6e6;
+  margin-top: 8px;
+  padding-top: 12px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #2f333b;
+}
+
+.form-section-divider {
+  grid-column: 1 / -1;
+  height: 1px;
+  background: #e6e6e6;
+  margin: 6px 0;
+}
+
+/* ============================================
+   Validação Visual
+   ============================================ */
+.form-field-wrapper.has-error .form-input {
+  border-color: #d9534f;
+  background-color: #fff5f5;
+}
+
+.form-field-wrapper.has-success .form-input {
+  border-color: #5cb85c;
+  background-color: #f5fff5;
+}
+
+.form-field-wrapper.is-loading .form-input {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* ============================================
+   Acessibilidade
+   ============================================ */
+.form-input:focus-visible {
+  outline: 2px solid #3baae3;
+  outline-offset: 2px;
+}
+
+.form-field-label:focus-visible {
+  outline: 2px solid #3baae3;
+  outline-offset: 2px;
+}
+
+/* Reduz movimento para usuários que preferem motion reduzida */
+@media (prefers-reduced-motion: reduce) {
+  .form-input {
+    transition: none;
+  }
+}
