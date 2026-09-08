@@ -1,4 +1,5 @@
 ﻿import {useState, useEffect} from 'react';
+import {useSearchParams, useNavigate} from 'react-router-dom';
 import {PermissionGate} from '../../shared/services/permissions';
 import {MasterDetail} from '../../shared/components/MasterDetail';
 import {Tabs} from '../../shared/components/Tabs';
@@ -29,7 +30,7 @@ import {
     FILTRO_SEARCH,
 } from '../../shared/services/masterDetailSources';
 import type {ApiItem} from '../../features/auth/types';
-import {useApi} from '../../shared/services/api';
+import {useApi, api} from '../../shared/services/api';
 import {API_PATHS} from '../../shared/services/apiPaths';
 import {FormLayout, FormTabConfig} from '../../shared/components/FormLayout';
 
@@ -101,6 +102,8 @@ export default function ViewRelatoriosFormTabelaListScreen() {
     });
 
     const {post: saveTabela} = useApi(API_PATHS.relatorios.tabela);
+    const {put: updateTabela} = useApi(API_PATHS.relatorios.tabela);
+    const loadTabelaPorId = async (id: number) => (await api.get(`${API_PATHS.relatorios.tabela}/${id}`)).data;
     const {get: loadEstrutura} = useApi(API_PATHS.relatorios.estrutura);
     const {get: loadDimensoes} = useApi(API_PATHS.relatorios.dimensao);
     const {get: loadMedidas} = useApi(API_PATHS.relatorios.medida);
@@ -108,25 +111,41 @@ export default function ViewRelatoriosFormTabelaListScreen() {
     const {post: saveFiltro} = useApi(API_PATHS.relatorios.filtro);
     const {delete: deleteFiltro} = useApi(API_PATHS.relatorios.filtro);
 
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const editingId = searchParams.get('id') ? Number(searchParams.get('id')) : undefined;
+
     useEffect(() => {
         if (data.entity.estruturaId && data.entity.estruturaId !== estruturaSelecionada?.id) {
             loadEstruturaPorId(data.entity.estruturaId);
         }
     }, [data.entity.estruturaId]);
 
+    useEffect(() => {
+        if (editingId) {
+            loadTabelaPorId(editingId)
+                .then(async (tabela: any) => {
+                    updateFields({entity: {...data.entity, ...tabela}});
+                    if (tabela.estruturaId) await loadEstruturaPorId(tabela.estruturaId);
+                })
+                .catch((error) => console.error('Erro ao carregar tabela:', error));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [editingId]);
+
     const loadEstruturaPorId = async (id: number) => {
         try {
-            const resp = await loadEstrutura(id);
-            const estrutura = resp.data;
+            const estrutura = (await api.get(`${API_PATHS.relatorios.estrutura}/${id}`)).data;
             setEstruturaSelecionada(estrutura);
-            // Load dimensoes and medidas for this estrutura
-            const [dimResp, medResp] = await Promise.all([
-                loadDimensoes({estruturaId: id}),
-                loadMedidas({estruturaId: id}),
+            // O back end não filtra por estrutura no GET de lista; filtra no cliente
+            const [dimList, medList] = await Promise.all([
+                loadDimensoes(),
+                loadMedidas(),
             ]);
-            setDimensoesDescritivas(dimResp.data.filter((d: any) => d.tipoInfo !== 'TEMPO'));
-            setDimensoesTempo(dimResp.data.filter((d: any) => d.tipoInfo === 'TEMPO'));
-            setMedidas(medResp.data);
+            const dimsDoEstrutura = (dimList ?? []).filter((d: any) => d.estruturaId === id);
+            setDimensoesDescritivas(dimsDoEstrutura.filter((d: any) => d.tipoInfo !== 'TEMPO'));
+            setDimensoesTempo(dimsDoEstrutura.filter((d: any) => d.tipoInfo === 'TEMPO'));
+            setMedidas((medList ?? []).filter((m: any) => m.estruturaId === id));
         } catch (error) {
             console.error('Erro ao carregar estrutura:', error);
         }
@@ -179,18 +198,27 @@ export default function ViewRelatoriosFormTabelaListScreen() {
 
     const handleComplete = async (formData: TabelaFormData) => {
         try {
-            await saveTabela({
-                ...formData.entity,
-                usuarios: formData.usuarios,
-                unidades: formData.unidades,
-                perfis: formData.perfis,
-                dimensoesDescritivas: formData.dimensoesDescritivas,
-                dimensoesTempo: formData.dimensoesTempo,
-                medidas: formData.medidas,
-                tabelaColunas: formData.tabelaColunas,
-                filtros: formData.filtros,
-            });
+            const payload = {
+                nome: formData.entity.nome,
+                estruturaId: formData.entity.estruturaId,
+                todosUsuarios: formData.usuarios.length === 0,
+                todosUnidades: formData.unidades.length === 0,
+                todosPerfis: formData.perfis.length === 0,
+                colunas: formData.tabelaColunas
+                    .filter((c: any) => c && c.dimensaoId)
+                    .map((c: any, index: number) => ({
+                        dimensaoId: c.dimensaoId,
+                        medidaId: c.medidaId ?? null,
+                        ordem: index + 1,
+                    })),
+            };
+            if (editingId) {
+                await updateTabela(editingId, payload);
+            } else {
+                await saveTabela(payload);
+            }
             alert('Tabela salva com sucesso!');
+            navigate('/view/relatorios/listTabela');
         } catch (error) {
             console.error('Erro ao salvar tabela:', error);
             alert('Erro ao salvar tabela');
@@ -207,12 +235,11 @@ export default function ViewRelatoriosFormTabelaListScreen() {
             return;
         }
         try {
-            const resp = await saveFiltro({
+            const newFiltro = await saveFiltro({
                 nome: filtroNome,
                 dimensaoId: filtroDimensao.id,
                 estruturaId: data.entity.estruturaId,
             });
-            const newFiltro = resp.data;
             setFiltros([...filtros, newFiltro]);
             updateFields({filtros: [...filtros, newFiltro]});
             setFiltroNome('');

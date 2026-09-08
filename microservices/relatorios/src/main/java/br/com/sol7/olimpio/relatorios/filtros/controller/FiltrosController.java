@@ -51,6 +51,18 @@ public class FiltrosController {
     }
 
     @GET
+    @Path("/{id}/relacoes")
+    public Uni<FiltrosRelacoesResponse> relacoes(@PathParam("id") Long id) {
+        return service.relacoes(id);
+    }
+
+    @PUT
+    @Path("/{id}/relacoes")
+    public Uni<Void> replaceRelacoes(@PathParam("id") Long id, FiltrosRelacoesRequest r) {
+        return service.replaceRelacoes(id, r);
+    }
+
+    @GET
     @Path("/auto-complete-dimensao")
     public Uni<List<Long>> autoCompleteDimensao(@QueryParam("query") String query) {
         return service.autoCompleteDimensao(query);

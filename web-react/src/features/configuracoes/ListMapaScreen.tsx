@@ -25,6 +25,8 @@ export default function ListMapaScreen() {
                 <DataTable
                     path="/api/relatorios/mapa"
                     extraRowActions={extraRowActions}
+                    createNavigateTo="/view/relatorios/formMapa"
+                    editNavigateTo="/view/relatorios/formMapa"
                 />
             </main>
         </PermissionGate>

@@ -75,16 +75,4 @@ WHERE upper(trim(p.hierarquia)) = 'ADMIN'
       WHERE pm.id_perfil = p.id AND pm.id_modulo = m.id
   );
 
--- 6) Perfis de hierarquia ADMIN: acesso integral as telas e aos grupos do portal.
-INSERT INTO public.bas_perfil_modulo (id_perfil, id_modulo, novo, editar, remover, relatorio, id)
-SELECT p.id, m.id, TRUE, TRUE, TRUE, TRUE, nextval('public.bas_perfil_modulo_id_seq')
-FROM public.bas_perfil p
-JOIN public.bas_modulo m
-  ON m.outcome IN ('/aluno/dashboard', '/aluno/boletim', '/aluno/frequencia', '/aluno/financeiro',
-                   '/aluno/aulas', '/aluno/avaliacoes')
-  OR lower(m.rotulo) IN ('acesso do aluno', 'aluno')
-WHERE upper(trim(p.hierarquia)) = 'ADMIN'
-  AND NOT EXISTS (
-      SELECT 1 FROM public.bas_perfil_modulo pm
-      WHERE pm.id_perfil = p.id AND pm.id_modulo = m.id
-  );
+

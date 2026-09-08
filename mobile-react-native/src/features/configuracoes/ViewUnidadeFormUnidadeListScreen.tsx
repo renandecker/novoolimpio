@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Alert, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Alert, ScrollView, StyleSheet, Text, TextInput, View} from 'react-native';
 import {useRoute} from '@react-navigation/native';
 import {useQuery} from '@tanstack/react-query';
 import {api} from '../api';
@@ -344,19 +344,23 @@ const styles = StyleSheet.create({
         padding: Spacing.lg,
     },
     field: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: Spacing.sm,
         marginBottom: Spacing.md,
     },
     fieldLabel: {
+        width: 130,
         fontSize: Typography.sizes.base,
         fontWeight: Typography.weights.semibold,
         color: Colors.textSecondary,
-        marginBottom: Spacing.xs,
     },
     required: {
         color: Colors.error,
         marginLeft: 2,
     },
     fieldInput: {
+        flex: 1,
         borderWidth: 1,
         borderColor: Colors.formInputBorder,
         borderRadius: BorderRadius.lg,

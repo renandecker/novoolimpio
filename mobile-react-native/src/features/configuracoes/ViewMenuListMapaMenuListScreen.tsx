@@ -24,30 +24,92 @@ function montarHtml(nodes: {id: number; parentId: number | null; name: string}[]
   </script>
   <style>
     html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, Roboto, Arial, sans-serif; }
-    #myChart { width: 100%; height: calc(100vh - 56px); }
+    #toolbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; background: #f4f4f4; align-items: center; }
+    #toolbar select, #toolbar button { font-size: 12px; padding: 6px 8px; border-radius: 6px; border: 1px solid #ccc; }
+    #toolbar button { background: #1B65BF; color: #fff; border: none; }
+    #myChart { width: 100%; height: calc(100vh - 96px); }
   </style>
 </head>
 <body>
+  <div id="toolbar">
+    <select id="direcao">
+      <option value="VERTICAL">Vertical</option>
+      <option value="HORIZONTAL">Horizontal</option>
+      <option value="TOGGLE_REVERSE">Toggle Reverse</option>
+    </select>
+    <button id="expandAll">Expand All</button>
+    <button id="collapseAll">Collapse All</button>
+    <select id="noSelecionado"></select>
+    <button id="toggleNo">Toggle Nó</button>
+  </div>
   <div id="myChart"></div>
   <script>
     var dados = ${dadosJson};
-    var chart = agCharts.AgCharts.create({
-      container: document.getElementById('myChart'),
-      data: dados,
-      series: [{
-        type: 'organization',
-        idKey: 'id',
-        parentIdKey: 'parentId',
-        direction: 'vertical',
-        innerSpacing: 20,
-        outerSpacing: 40,
-        depthSpacing: 52,
-        node: {
-          width: 180,
-          cornerRadius: 10,
-          title: {key: 'name', textAlign: 'left', fontSize: 13, fontWeight: 'bold'},
-        },
-      }],
+    var collapsed = [];
+
+    function idsComFilhos() {
+      var pais = {};
+      dados.forEach(function (n) { if (n.parentId !== null && n.parentId !== undefined && String(n.parentId) !== '') pais[String(n.parentId)] = true; });
+      return Object.keys(pais);
+    }
+
+    function direcaoParaSerie(direcao) {
+      if (direcao === 'HORIZONTAL') return {direction: 'horizontal', reverse: false};
+      if (direcao === 'TOGGLE_REVERSE') return {direction: 'vertical', reverse: true};
+      return {direction: 'vertical', reverse: false};
+    }
+
+    function montarOpcoes() {
+      var direcao = document.getElementById('direcao').value;
+      var dr = direcaoParaSerie(direcao);
+      return {
+        container: document.getElementById('myChart'),
+        data: dados,
+        initialState: {collapsed: collapsed},
+        series: [{
+          type: 'organization',
+          idKey: 'id',
+          parentIdKey: 'parentId',
+          direction: dr.direction,
+          reverse: dr.reverse,
+          innerSpacing: 20,
+          outerSpacing: 40,
+          depthSpacing: 52,
+          node: {
+            width: 180,
+            cornerRadius: 10,
+            title: {key: 'name', textAlign: 'left', fontSize: 13, fontWeight: 'bold'},
+            itemStyler: function () { return {fill: '#1B65BF', fillOpacity: 0.15, stroke: '#1B65BF', strokeWidth: 2}; },
+          },
+          link: {itemStyler: function () { return {stroke: '#1B65BF'}; }},
+          expander: {text: {showAllChildren: true, showDirectChildren: true}},
+        }],
+      };
+    }
+
+    var chart = agCharts.AgCharts.create(montarOpcoes());
+
+    function atualizar() { chart = agCharts.AgCharts.update(chart, montarOpcoes()); }
+
+    document.getElementById('direcao').addEventListener('change', atualizar);
+
+    var selectNo = document.getElementById('noSelecionado');
+    idsComFilhos().forEach(function (id) {
+      var no = dados.find(function (n) { return String(n.id) === id; });
+      var opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = no ? (no.name || id) : id;
+      selectNo.appendChild(opt);
+    });
+
+    document.getElementById('expandAll').addEventListener('click', function () { collapsed = []; atualizar(); });
+    document.getElementById('collapseAll').addEventListener('click', function () { collapsed = idsComFilhos(); atualizar(); });
+    document.getElementById('toggleNo').addEventListener('click', function () {
+      var id = selectNo.value;
+      if (!id) return;
+      var idx = collapsed.indexOf(id);
+      if (idx >= 0) collapsed.splice(idx, 1); else collapsed.push(id);
+      atualizar();
     });
   </script>
 </body>

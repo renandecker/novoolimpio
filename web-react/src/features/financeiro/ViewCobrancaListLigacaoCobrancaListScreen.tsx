@@ -1,6 +1,6 @@
 ﻿import {useQuery} from '@tanstack/react-query';
 import {api} from '../../shared/services/api';
-import {PermissionGate, useCurrentOutcome} from '../../shared/services/permissions';
+import {PermissionGate} from '../../shared/services/permissions';
 import {DataTable, type DataTableColumn, type DataTableRowAction} from '../../shared/components/DataTable';
 import {Tabs} from '../../shared/components/Tabs';
 import type {ApiItem} from '../../shared/types/index';
@@ -14,23 +14,29 @@ interface EtapaCobranca {
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
 const formatDate = (value: unknown): string => {
-    if (value === null || value === undefined) return '';
+    if (value === null || value === undefined || value === '') return '';
     const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value));
     if (!match) return String(value);
     return `${match[3]}/${match[2]}/${match[1]}`;
 };
 
+const formatValor = (value: unknown): string => {
+    if (value === null || value === undefined || value === '') return '';
+    const n = Number(value);
+    if (!Number.isFinite(n)) return String(value);
+    return n.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+};
+
 const COBRANCA_COLUMNS: DataTableColumn[] = [
-    {key: 'contrato', label: 'Contrato'},
-    {key: 'unidade', label: 'Unidade'},
-    {key: 'unidaderesponsavel', label: 'Unidade Responsável'},
-    {key: 'aluno', label: 'Aluno'},
-    {key: 'responsavel', label: 'Contratante'},
-    {key: 'curso', label: 'Curso'},
-    {key: 'pendente', label: 'Pendente'},
-    {key: 'atrasada', label: 'Atrasado'},
-    {key: 'valor', label: 'Valor', render: (item) => `R$ ${asRecord(item).valor}`},
-    {key: 'campoDetalhes', label: 'Detalhes'},
+    {key: 'contratoId', label: 'Contrato'},
+    {key: 'telefone', label: 'Telefone'},
+    {key: 'dataInicial', label: 'Início', render: (item) => formatDate(asRecord(item).dataInicial)},
+    {key: 'dataFinal', label: 'Fim', render: (item) => formatDate(asRecord(item).dataFinal)},
+    {key: 'resultadoCobrancaId', label: 'Resultado'},
+    {key: 'qtdeParcela', label: 'Qtd. Parcelas'},
+    {key: 'valor', label: 'Valor', render: (item) => formatValor(asRecord(item).valor)},
+    {key: 'observacao', label: 'Observação'},
+    {key: 'ativo', label: 'Ativo'},
 ];
 
 const extraRowActions: DataTableRowAction[] = [
@@ -40,7 +46,8 @@ const extraRowActions: DataTableRowAction[] = [
         icon: <i className="fa fa-info-circle"/>,
         permission: 'READ',
         onClick: async (item) => {
-            await executeAction('ligacao-cobranca', 'carregarDetalhes', JSON.stringify({contrato: asRecord(item).contrato}), 'financeiro');
+            const r = asRecord(item);
+            await executeAction('ligacao-cobranca', 'carregarDetalhes', JSON.stringify({contrato: r.contratoId ?? r.contrato}), 'financeiro');
         },
     },
     {
@@ -49,7 +56,8 @@ const extraRowActions: DataTableRowAction[] = [
         icon: <i className="fa fa-phone"/>,
         permission: 'EXECUTE',
         onClick: async (item) => {
-            await executeAction('ligacao-cobranca', 'iniciarLigacao', JSON.stringify({cobranca: asRecord(item).cobranca, contrato: asRecord(item).contrato}), 'financeiro');
+            const r = asRecord(item);
+            await executeAction('ligacao-cobranca', 'iniciarLigacao', JSON.stringify({cobranca: r.id ?? r.cobranca, contrato: r.contratoId ?? r.contrato}), 'financeiro');
         },
     },
     {
@@ -69,12 +77,10 @@ export default function ViewCobrancaListLigacaoCobrancaListScreen() {
         queryFn: async () => (await api.get<EtapaCobranca[]>('/api/financeiro/etapas-cobranca')).data,
     });
     const etapas = etapasQuery.data ?? [];
-    const routeOutcome = useCurrentOutcome();
 
     return (
         <PermissionGate permission="READ">
             <main>
-                <h1>Ligação Cobrança</h1>
                 {etapasQuery.isLoading && etapas.length === 0 ? (
                     <p>Carregando etapas...</p>
                 ) : (

@@ -1,4 +1,5 @@
 ﻿import {useState, useEffect} from 'react';
+import {useSearchParams, useNavigate} from 'react-router-dom';
 import {PermissionGate} from '../../shared/services/permissions';
 import {MasterDetail} from '../../shared/components/MasterDetail';
 import {Tabs} from '../../shared/components/Tabs';
@@ -29,7 +30,7 @@ import {
     FILTRO_SEARCH,
 } from '../../shared/services/masterDetailSources';
 import type {ApiItem} from '../../features/auth/types';
-import {useApi} from '../../shared/services/api';
+import {useApi, api} from '../../shared/services/api';
 import {API_PATHS} from '../../shared/services/apiPaths';
 import {FormLayout, FormTabConfig} from '../../shared/components/FormLayout';
 
@@ -140,6 +141,8 @@ export default function ViewRelatoriosFormGraficoListScreen() {
     });
 
     const {post: saveGrafico} = useApi(API_PATHS.relatorios.grafico);
+    const {put: updateGrafico} = useApi(API_PATHS.relatorios.grafico);
+    const loadGraficoPorId = async (id: number) => (await api.get(`${API_PATHS.relatorios.grafico}/${id}`)).data;
     const {get: loadEstrutura} = useApi(API_PATHS.relatorios.estrutura);
     const {get: loadDimensoes} = useApi(API_PATHS.relatorios.dimensao);
     const {get: loadMedidas} = useApi(API_PATHS.relatorios.medida);
@@ -147,16 +150,31 @@ export default function ViewRelatoriosFormGraficoListScreen() {
     const {post: saveFiltro} = useApi(API_PATHS.relatorios.filtro);
     const {delete: deleteFiltro} = useApi(API_PATHS.relatorios.filtro);
 
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const editingId = searchParams.get('id') ? Number(searchParams.get('id')) : undefined;
+
     useEffect(() => {
         if (data.entity.estruturaId && data.entity.estruturaId !== estruturaSelecionada?.id) {
             loadEstruturaPorId(data.entity.estruturaId);
         }
     }, [data.entity.estruturaId]);
 
+    useEffect(() => {
+        if (editingId) {
+            loadGraficoPorId(editingId)
+                .then(async (grafico: any) => {
+                    updateFields({entity: {...data.entity, ...grafico}});
+                    if (grafico.estruturaId) await loadEstruturaPorId(grafico.estruturaId);
+                })
+                .catch((error) => console.error('Erro ao carregar gráfico:', error));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [editingId]);
+
     const loadEstruturaPorId = async (id: number) => {
         try {
-            const resp = await loadEstrutura(id);
-            const estrutura = resp.data;
+            const estrutura = (await api.get(`${API_PATHS.relatorios.estrutura}/${id}`)).data;
             setEstruturaSelecionada(estrutura);
         } catch (error) {
             console.error('Erro ao carregar estrutura:', error);
@@ -204,15 +222,39 @@ export default function ViewRelatoriosFormGraficoListScreen() {
 
     const handleComplete = async (formData: GraficoFormData) => {
         try {
-            await saveGrafico({
-                ...formData.entity,
-                usuarios: formData.usuarios,
-                unidades: formData.unidades,
-                perfis: formData.perfis,
-                graficoEixos: formData.graficoEixos,
-                filtros: formData.filtros,
-            });
+            const payload = {
+                nome: formData.entity.nome,
+                estruturaId: formData.entity.estruturaId,
+                tipo: formData.entity.tipo,
+                ordemGrafico: formData.entity.ordemGrafico,
+                limite: formData.entity.limite,
+                tipoEixo: formData.entity.tipoEixo,
+                formatoData: formData.entity.formatoData,
+                posicao: formData.entity.posicao,
+                colunaLegenda: formData.entity.colunaLegenda,
+                coluna: formData.entity.coluna,
+                altura: formData.entity.altura,
+                diametro: formData.entity.diametro,
+                margem: formData.entity.margem,
+                exibirValor: formData.entity.exibirValor,
+                exibirLegenda: formData.entity.exibirLegenda,
+                exibirPercentual: formData.entity.exibirPercentual,
+                valorAcumulado: formData.entity.valorAcumulado,
+                dimensaoReferenciaId: formData.entity.dimensaoReferenciaId,
+                medidaInformacaoId: formData.entity.medidaInformacaoId,
+                dimensaoCombinadoId: formData.entity.dimensaoCombinadoId,
+                medidaCombinadoId: formData.entity.medidaCombinadoId,
+                todosUsuarios: formData.usuarios.length === 0,
+                todosUnidades: formData.unidades.length === 0,
+                todosPerfis: formData.perfis.length === 0,
+            };
+            if (editingId) {
+                await updateGrafico(editingId, payload);
+            } else {
+                await saveGrafico(payload);
+            }
             alert('Gráfico salvo com sucesso!');
+            navigate('/view/relatorios/listGrafico');
         } catch (error) {
             console.error('Erro ao salvar gráfico:', error);
             alert('Erro ao salvar gráfico');
@@ -229,12 +271,11 @@ export default function ViewRelatoriosFormGraficoListScreen() {
             return;
         }
         try {
-            const resp = await saveFiltro({
+            const newFiltro = await saveFiltro({
                 nome: filtroNome,
                 dimensaoId: filtroDimensao.id,
                 estruturaId: data.entity.estruturaId,
             });
-            const newFiltro = resp.data;
             setFiltros([...filtros, newFiltro]);
             updateFields({filtros: [...filtros, newFiltro]});
             setFiltroNome('');

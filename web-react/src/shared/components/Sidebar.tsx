@@ -22,12 +22,21 @@ const HIDDEN_ROTULOS = new Set([
     'tipodematrizcurricular',
     'grupocomponentecurricular',
     'cronogramacomponentecurricular',
+    'auditoriahistorico',
+    'modulo',
+    'pacote',
 ]);
 const HIDDEN_OUTCOMES = [
     '/view/contratoSituacao',
     '/view/tipoMatrizCurricular',
     '/view/grupoComponenteCurricular',
     '/view/cronogramaComponenteCurricular',
+    '/view/auditoria/listauditoriahistorico',
+    '/view/auditoria/formauditoriahistorico',
+    '/view/modulo/listModulo',
+    '/view/modulo/formModulo',
+    '/view/pacote/listPacote',
+    '/view/pacote/formPacote',
 ];
 const CONFIGURACAO_DOCUMENTOS_OUTCOME = '/view/configuracao/listDocumentos';
 
@@ -91,8 +100,8 @@ export default function Sidebar() {
         if (modulos.length === 0) {
             items.push(
                 {
-                    label: 'Portal do aluno',
-                    parent: 'Portal do aluno',
+                    label: 'Portal Aluno',
+                    parent: 'Portal Aluno',
                     path: '/aluno/portalAluno',
                     icon: menuIcon('dashboard'),
                     keywords: 'portal aluno dashboard'
@@ -204,7 +213,7 @@ export default function Sidebar() {
                                     <div className="sidebar-submenu">
                                         <Link className="sidebar-item sidebar-subitem" to="/aluno/portalAluno"><span
                                             className="sidebar-icon">{menuIcon('dashboard')}</span><span
-                                            className="sidebar-label">Portal do aluno</span></Link>
+                                            className="sidebar-label">Portal Aluno</span></Link>
                                         <Link className="sidebar-item sidebar-subitem" to="/aluno/boletim"><span
                                             className="sidebar-icon">{menuIcon('boletim')}</span><span
                                             className="sidebar-label">Notas</span></Link>

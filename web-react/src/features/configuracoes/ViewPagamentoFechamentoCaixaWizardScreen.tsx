@@ -544,6 +544,8 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
     const validateStep1 = useCallback(async (d: FechamentoCaixaData) => {
 
+        if (!d.usuarioId) return 'Usuário não identificado';
+
         if (!d.unidadeId) return 'Selecione a unidade';
 
         if (!configCaixaExistente) return 'Não há Configuração de Caixa para este usuário/unidade. Cadastre em Configurações antes de abrir o caixa.';
@@ -616,11 +618,11 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
                 data: new Date().toISOString(),
 
-                usuarioId: Number(data.usuarioId),
+                usuarioId: data.usuarioId ? Number(data.usuarioId) : null,
 
-                unidadeId: Number(data.unidadeId),
+                unidadeId: data.unidadeId ? Number(data.unidadeId) : null,
 
-                fundoCaixa: Number(data.fundoCaixa || 0),
+                fundoCaixa: data.fundoCaixa ? Number(data.fundoCaixa) : null,
 
                 impressoraId: data.impressoraId ? Number(data.impressoraId) : null,
 

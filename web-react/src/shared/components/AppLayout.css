@@ -1285,20 +1285,21 @@
 
 @media (max-width: 900px) {
     .form-grid {
-        grid-template-columns: 1fr;
+        display: block;
     }
-    /* Em mobile, força campos que eram display:contents ou fullRow a empilhar label acima do input */
+    /* Em telas estreitas cada campo vira um mini-grid com label à esquerda e input à direita na mesma linha */
     .form-field {
-        display: flex !important;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 4px;
-        grid-column: auto !important;
+        display: grid;
+        grid-template-columns: minmax(96px, 140px) minmax(0, 1fr);
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
     }
-    .form-field[style*="gridColumn"] {
-        display: flex !important;
-        grid-column: auto !important;
-        grid-template-columns: unset !important;
+    .form-field > .form-label {
+        grid-column: 1;
+    }
+    .form-field > *:not(.form-label) {
+        grid-column: 2 !important;
     }
 }
 

@@ -91,12 +91,30 @@ public class CaixaService {
     }
 
     public Uni<CaixaResponse> create(CaixaRequest r) {
+        if (r.usuarioId() != null && r.usuarioId() <= 0) {
+            return Uni.createFrom().failure(new IllegalArgumentException("usuarioId inválido"));
+        }
+        if (r.unidadeId() != null && r.unidadeId() <= 0) {
+            return Uni.createFrom().failure(new IllegalArgumentException("unidadeId inválido"));
+        }
+        if (r.impressoraId() != null && r.impressoraId() <= 0) {
+            return Uni.createFrom().failure(new IllegalArgumentException("impressoraId inválido"));
+        }
         var e = new Caixa();
         apply(e, r);
         return repository.persist(e).replaceWith(() -> toResponse(e));
     }
 
     public Uni<CaixaResponse> update(Long id, CaixaRequest r) {
+        if (r.usuarioId() != null && r.usuarioId() <= 0) {
+            return Uni.createFrom().failure(new IllegalArgumentException("usuarioId inválido"));
+        }
+        if (r.unidadeId() != null && r.unidadeId() <= 0) {
+            return Uni.createFrom().failure(new IllegalArgumentException("unidadeId inválido"));
+        }
+        if (r.impressoraId() != null && r.impressoraId() <= 0) {
+            return Uni.createFrom().failure(new IllegalArgumentException("impressoraId inválido"));
+        }
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Caixa not found"))
                 .invoke(e -> apply(e, r))
@@ -427,12 +445,20 @@ public class CaixaService {
     // Migrado de CaixaController.imprimirComprovantePagamento
     // Imprime comprovante de pagamento de parcela
     public Uni<Void> imprimirComprovantePagamento(Long movimentacaoFinanceiraId, Long usuarioId) {
+        if (movimentacaoFinanceiraId == null) {
+            return Uni.createFrom().voidItem();
+        }
         return movimentacaoFinanceiraService.find(movimentacaoFinanceiraId)
                 .chain(mov -> {
+                    if (mov == null) {
+                        return Uni.createFrom().voidItem();
+                    }
                     ComprovantePagamento comprovante = gerarComprovantePagamento(mov);
                     return impressoraService.imprimirComprovante(comprovante)
-                            .chain(v -> controleImpressaoService.registrarImpressao(movimentacaoFinanceiraId, usuarioId));
-                });
+                            .chain(v -> usuarioId != null ? controleImpressaoService.registrarImpressao(movimentacaoFinanceiraId, usuarioId) : Uni.createFrom().voidItem())
+                            .onFailure().recoverWithUni(ex -> Uni.createFrom().voidItem());
+                })
+                .onFailure().recoverWithUni(ex -> Uni.createFrom().voidItem());
     }
 
     // Versão sem parâmetros para compatibilidade com controller
@@ -617,12 +643,12 @@ public class CaixaService {
     // Gera comprovante de pagamento (migração do atributosCompovante original)
     private ComprovantePagamento gerarComprovantePagamento(MovimentacaoFinanceiraResponse mov) {
         String vencimentoStr = mov.vencimento() != null ? mov.vencimento() : "";
-        String pagamentoStr = ""; // dataPagamento não existe no response
+        String pagamentoStr = mov.dataMovimento() != null ? new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(mov.dataMovimento()) : "";
         String emissaoStr = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date());
-        String valorStr = mov.valor().setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",");
-        String descontoStr = mov.desconto().setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",");
-        String multaJurosStr = mov.multaJuros().setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",");
-        String lancamentoStr = mov.parcelaId() != null ? mov.parcelaId().toString() : mov.id().toString();
+        String valorStr = mov.valor() != null ? mov.valor().setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",") : "0,00";
+        String descontoStr = mov.desconto() != null ? mov.desconto().setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",") : "0,00";
+        String multaJurosStr = mov.multaJuros() != null ? mov.multaJuros().setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",") : "0,00";
+        String lancamentoStr = mov.parcelaId() != null ? mov.parcelaId().toString() : (mov.id() != null ? mov.id().toString() : "");
 
         return new ComprovantePagamento(
                 null, null, null, null, null,

@@ -1,6 +1,7 @@
 package br.com.sol7.olimpio.relatorios.extrator;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.relatorios.extrator.dto.ExportRequest;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -57,9 +58,31 @@ public class ExtratorController {
     }
 
     @POST
+    @Path("/{id}/reiniciar")
+    public Uni<ExtratorResponse> reiniciar(@PathParam("id") Long id) {
+        return service.reiniciar(id);
+    }
+
+    @GET
+    @Path("/{id}/arquivo")
+    public Uni<Response> arquivo(@PathParam("id") Long id, @QueryParam("tipo") String tipo) {
+        String t = "PDF".equalsIgnoreCase(tipo) ? "PDF" : "CSV";
+        return service.arquivo(id, t).map(file -> Response.ok(file)
+                .type("PDF".equals(t) ? MediaType.APPLICATION_OCTET_STREAM : "text/csv")
+                .header("Content-Disposition", "attachment; filename=\"" + id + "." + ("PDF".equals(t) ? "pdf" : "csv") + "\"")
+                .build());
+    }
+
+    @POST
     @Path("/remover")
     public Uni<Void> remover() {
         return service.remover();
+    }
+
+    @POST
+    @Path("/exportar")
+    public Uni<ExtratorResponse> exportar(ExportRequest request) {
+        return service.solicitarExportacao(request.tabelaId(), request.usuarioId(), request.tipo(), request.filtros());
     }
 
 }

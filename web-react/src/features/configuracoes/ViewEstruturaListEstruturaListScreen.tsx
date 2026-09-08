@@ -25,7 +25,13 @@ export default function ViewEstruturaListEstruturaListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <h1>Estrutura</h1>
-                <DataTable path="/api/view/estrutura/listEstrutura" columns={COLUMNS} maxMainColumns={COLUMNS.length}/>
+                <DataTable
+                    path="/api/view/estrutura/listEstrutura"
+                    columns={COLUMNS}
+                    maxMainColumns={COLUMNS.length}
+                    createNavigateTo="/view/estrutura/formEstrutura"
+                    editNavigateTo="/view/estrutura/formEstrutura"
+                />
             </main>
         </PermissionGate>
     );

@@ -66,29 +66,16 @@ type ControlePagamentoRow = {
 export default function ViewContaControlePagamentoListScreen() {
     const outcome = useCurrentOutcome();
     const alertDialog = useAlertDialog();
-    const [unidadeId, setUnidadeId] = useState<string>('');
     const [filterParams, setFilterParams] = useState<SearchFilterRequest>({filters: {}});
     const [notice, setNotice] = useState<string>('');
     const [selectedItem, setSelectedItem] = useState<ControlePagamentoRow | null>(null);
     const [showCalcOverlay, setShowCalcOverlay] = useState<{open: boolean; item: ControlePagamentoRow | null}>({open: false, item: null});
 
-    const q = useModulePaged('/api/view/conta/controlePagamento', 0, 10, {unidadeId: unidadeId || undefined}, filterParams);
+    const q = useModulePaged('/api/view/conta/controlePagamento', 0, 10, undefined, filterParams);
     const all = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);
     const [page, setPage] = useState(0);
-
-    const handleBuscar = async () => {
-        setPage(0);
-        q.refetch();
-    };
-
-    const handleLimpar = () => {
-        setUnidadeId('');
-        setFilterParams({filters: {}});
-        setPage(0);
-        q.refetch();
-    };
 
     const handleCalcularPagamento = async (item: ControlePagamentoRow) => {
         try {
@@ -141,143 +128,104 @@ export default function ViewContaControlePagamentoListScreen() {
                         </div>
                     </div>
 
-                    <div className="data-table-form">
-                        <div className="form-panel">
-                            <div className="form-title">Controle de Pagamento</div>
-                            <div className="table_form">
-                                <div className="form-grid">
-                                    <label className="form-field">
-                                        <span className="form-label">Unidade</span>
-                                        <div style={{display: 'flex', gap: '8px', width: '100%'}}>
-                                            <select
-                                                className="form-input form-select"
-                                                value={unidadeId}
-                                                onChange={e => setUnidadeId(e.target.value)}
-                                                style={{flex: 1}}
-                                            >
-                                                <option value="">-- Selecione --</option>
-                                            </select>
-                                            <button
-                                                type="button"
-                                                className="btn-form-save btnyellow"
-                                                onClick={handleBuscar}
-                                                title="Recarregar"
-                                            >
-                                                <i className="fa fa-search"/> Buscar/Atualizar
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="btn-form-back btnred"
-                                                onClick={handleLimpar}
-                                                title="Limpar campo"
-                                            >
-                                                <i className="fa fa-times"/> Limpar
-                                            </button>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="list-panel">
-                            <div className="data-table">
-                                {q.isError ? (
-                                    <p>Erro ao carregar os controles de pagamento.</p>
-                                ) : (
-                                    <table>
-                                        <thead>
+                    <div className="list-panel">
+                        <div className="data-table">
+                            {q.isError ? (
+                                <p>Erro ao carregar os controles de pagamento.</p>
+                            ) : (
+                                <table>
+                                    <thead>
+                                    <tr>
+                                        {COLUMNS.map((column) => (
+                                            <th key={column.key}>{column.label}</th>
+                                        ))}
+                                        <th className="col-actions">Ações</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {q.isLoading && all.length === 0 ? (
                                         <tr>
-                                            {COLUMNS.map((column) => (
-                                                <th key={column.key}>{column.label}</th>
-                                            ))}
-                                            <th className="col-actions">Ações</th>
+                                            <td colSpan={COLUMNS.length + 1}>Carregando...</td>
                                         </tr>
-                                        </thead>
-                                        <tbody>
-                                        {q.isLoading && all.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={COLUMNS.length + 1}>Carregando...</td>
-                                            </tr>
-                                        ) : all.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={COLUMNS.length + 1}>Nenhum registro encontrado.</td>
-                                            </tr>
-                                        ) : (
-                                            all.map((item) => {
-                                                const row = asRecord(item);
-                                                const id = Number(row.id);
-                                                const dataAplicada = row.dataAplicada;
-                                                const overdue = isOverdue(row.dataConta);
-                                                return (
-                                                    <tr key={id} style={{backgroundColor: overdue && !dataAplicada ? '#fff3cd' : undefined}}>
-                                                        {COLUMNS.map((column) => {
-                                                            const value = row[column.key];
-                                                            let cellValue = String(value ?? '');
-                                                            if (overdue && !dataAplicada && column.key === 'dataConta') {
-                                                                cellValue = <span style={{color: '#C90000', fontWeight: 'bold'}}>{formatDate(value)}</span>;
-                                                            }
-                                                            return (
-                                                                <td key={column.key}>
-                                                                    {column.render ? column.render(item) : cellValue}
-                                                                </td>
-                                                            );
-                                                        })}
-                                                        <td className="col-actions">
-                                                            <div className="row-actions-menu">
+                                    ) : all.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={COLUMNS.length + 1}>Nenhum registro encontrado.</td>
+                                        </tr>
+                                    ) : (
+                                        all.map((item) => {
+                                            const row = asRecord(item);
+                                            const id = Number(row.id);
+                                            const dataAplicada = row.dataAplicada;
+                                            const overdue = isOverdue(row.dataConta);
+                                            return (
+                                                <tr key={id} style={{backgroundColor: overdue && !dataAplicada ? '#fff3cd' : undefined}}>
+                                                    {COLUMNS.map((column) => {
+                                                        const value = row[column.key];
+                                                        let cellValue = String(value ?? '');
+                                                        if (overdue && !dataAplicada && column.key === 'dataConta') {
+                                                            cellValue = <span style={{color: '#C90000', fontWeight: 'bold'}}>{formatDate(value)}</span>;
+                                                        }
+                                                        return (
+                                                            <td key={column.key}>
+                                                                {column.render ? column.render(item) : cellValue}
+                                                            </td>
+                                                        );
+                                                    })}
+                                                    <td className="col-actions">
+                                                        <div className="row-actions-menu">
+                                                            <button
+                                                                type="button"
+                                                                className="btn-action btnblack"
+                                                                title="Calcula pagamento"
+                                                                onClick={() => handleCalcularPagamento(row as unknown as ControlePagamentoRow)}
+                                                            >
+                                                                <i className="fa fa-usd"/>
+                                                            </button>
+                                                            {!dataAplicada && (
                                                                 <button
                                                                     type="button"
-                                                                    className="btn-action btnblack"
-                                                                    title="Calcula pagamento"
-                                                                    onClick={() => handleCalcularPagamento(row as unknown as ControlePagamentoRow)}
+                                                                    className="btn-action btnstop"
+                                                                    title="Aplicar pago"
+                                                                    onClick={() => handleAplicarPago(row as unknown as ControlePagamentoRow)}
                                                                 >
-                                                                    <i className="fa fa-usd"/>
+                                                                    <i className="fa fa-check"/>
                                                                 </button>
-                                                                {!dataAplicada && (
-                                                                    <button
-                                                                        type="button"
-                                                                        className="btn-action btnstop"
-                                                                        title="Aplicar pago"
-                                                                        onClick={() => handleAplicarPago(row as unknown as ControlePagamentoRow)}
-                                                                    >
-                                                                        <i className="fa fa-check"/>
-                                                                    </button>
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })
-                                        )}
-                                        </tbody>
-                                        <tfoot>
-                                        <tr>
-                                            <td colSpan={COLUMNS.length + 1} className="data-table-paginator">
-                                                <button onClick={() => setPage(current => Math.max(0, current - 1))} disabled={page === 0 || q.isFetching}>
-                                                    Anterior
-                                                </button>
-                                                <span>Página {page + 1} de {totalPages}</span>
-                                                <button onClick={() => setPage(current => Math.min(totalPages - 1, current + 1))} disabled={page >= totalPages - 1 || q.isFetching}>
-                                                    Próxima
-                                                </button>
-                                                <label>
-                                                    Registros por página
-                                                    <select value={10} onChange={e => { setPage(0); }}>
-                                                        <option value={10}>10</option>
-                                                        <option value={20}>20</option>
-                                                        <option value={50}>50</option>
-                                                    </select>
-                                                </label>
-                                                <span>Total: {totalElements}</span>
-                                            </td>
-                                        </tr>
-                                        </tfoot>
-                                    </table>
-                                )}
-                            </div>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
+                                    )}
+                                    </tbody>
+                                    <tfoot>
+                                    <tr>
+                                        <td colSpan={COLUMNS.length + 1} className="data-table-paginator">
+                                            <button onClick={() => setPage(current => Math.max(0, current - 1))} disabled={page === 0 || q.isFetching}>
+                                                Anterior
+                                            </button>
+                                            <span>Página {page + 1} de {totalPages}</span>
+                                            <button onClick={() => setPage(current => Math.min(totalPages - 1, current + 1))} disabled={page >= totalPages - 1 || q.isFetching}>
+                                                Próxima
+                                            </button>
+                                            <label>
+                                                Registros por página
+                                                <select value={10} onChange={e => { setPage(0); }}>
+                                                    <option value={10}>10</option>
+                                                    <option value={20}>20</option>
+                                                    <option value={50}>50</option>
+                                                </select>
+                                            </label>
+                                            <span>Total: {totalElements}</span>
+                                        </td>
+                                    </tr>
+                                    </tfoot>
+                                </table>
+                            )}
                         </div>
-
-                        {notice && <div className="data-table-notice global-notice">{notice}</div>}
                     </div>
+
+                    {notice && <div className="data-table-notice global-notice">{notice}</div>}
 
                     {showCalcOverlay.open && showCalcOverlay.item && (
                         <div className="modal-overlay" onClick={() => setShowCalcOverlay({open: false, item: null})}>

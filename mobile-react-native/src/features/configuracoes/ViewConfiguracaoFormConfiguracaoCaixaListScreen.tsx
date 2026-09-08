@@ -39,38 +39,46 @@ export default function ViewConfiguracaoFormConfiguracaoCaixaListScreen({navigat
         <ScrollView style={styles.container}>
             <Text style={styles.title}>Configuração de Caixa</Text>
 
-            <Text style={styles.label}>E-mail *</Text>
-            <TextInput
-                style={styles.input}
-                value={form.email}
-                onChangeText={(v) => setForm({...form, email: v})}
-                placeholder="email@exemplo.com"
-                keyboardType="email-address"
-            />
+            <View style={styles.fieldRow}>
+                <Text style={styles.label}>E-mail *</Text>
+                <TextInput
+                    style={styles.input}
+                    value={form.email}
+                    onChangeText={(v) => setForm({...form, email: v})}
+                    placeholder="email@exemplo.com"
+                    keyboardType="email-address"
+                />
+            </View>
 
-            <Text style={styles.label}>Dias (Validade 2ª via)</Text>
-            <TextInput
-                style={styles.input}
-                value={form.dias}
-                onChangeText={(v) => setForm({...form, dias: v})}
-                keyboardType="numeric"
-            />
+            <View style={styles.fieldRow}>
+                <Text style={styles.label}>Dias (Validade 2ª via)</Text>
+                <TextInput
+                    style={styles.input}
+                    value={form.dias}
+                    onChangeText={(v) => setForm({...form, dias: v})}
+                    keyboardType="numeric"
+                />
+            </View>
 
-            <Text style={styles.label}>Impressão / Cota</Text>
-            <TextInput
-                style={styles.input}
-                value={form.impressao}
-                onChangeText={(v) => setForm({...form, impressao: v})}
-                keyboardType="numeric"
-            />
+            <View style={styles.fieldRow}>
+                <Text style={styles.label}>Impressão / Cota</Text>
+                <TextInput
+                    style={styles.input}
+                    value={form.impressao}
+                    onChangeText={(v) => setForm({...form, impressao: v})}
+                    keyboardType="numeric"
+                />
+            </View>
 
-            <Text style={styles.label}>Fundo de Caixa *</Text>
-            <TextInput
-                style={styles.input}
-                value={form.fundoCaixa}
-                onChangeText={(v) => setForm({...form, fundoCaixa: v})}
-                keyboardType="numeric"
-            />
+            <View style={styles.fieldRow}>
+                <Text style={styles.label}>Fundo de Caixa *</Text>
+                <TextInput
+                    style={styles.input}
+                    value={form.fundoCaixa}
+                    onChangeText={(v) => setForm({...form, fundoCaixa: v})}
+                    keyboardType="numeric"
+                />
+            </View>
 
             <TouchableOpacity style={styles.button} onPress={handleSave} disabled={loading}>
                 <Text style={styles.buttonText}>{loading ? 'Salvando...' : 'Salvar Configuração'}</Text>
@@ -82,8 +90,9 @@ export default function ViewConfiguracaoFormConfiguracaoCaixaListScreen({navigat
 const styles = StyleSheet.create({
     container: {flex: 1, padding: 16, backgroundColor: '#fff'},
     title: {fontSize: 20, fontWeight: 'bold', marginBottom: 16, color: '#333'},
-    label: {fontSize: 14, fontWeight: '600', marginBottom: 6, color: '#444'},
-    input: {borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 10, marginBottom: 14, fontSize: 14},
+    label: {fontSize: 14, fontWeight: '600', width: 150, color: '#444'},
+    fieldRow: {flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14},
+    input: {flex: 1, borderWidth: 1, borderColor: '#ccc', borderRadius: 6, padding: 10, fontSize: 14},
     button: {backgroundColor: '#2e7d32', padding: 14, borderRadius: 6, alignItems: 'center', marginTop: 10, marginBottom: 30},
     buttonText: {color: '#fff', fontSize: 16, fontWeight: 'bold'}
 });

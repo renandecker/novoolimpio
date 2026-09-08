@@ -28,6 +28,35 @@ public class FiltrosService {
                         .map(count -> new PagedResponse<>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
 
+    public Uni<FiltrosRelacoesResponse> relacoes(Long id) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Filtros not found"))
+                .replaceWith(Uni.combine().all().unis(
+                        repository.findInformacoes(id),
+                        repository.findTabelas(id),
+                        repository.findGraficos(id),
+                        repository.findMapas(id),
+                        repository.findOrganogramas(id),
+                        repository.findUsuarios(id),
+                        repository.findUnidades(id),
+                        repository.findPerfis(id))
+                        .asTuple()
+                        .map(t -> new FiltrosRelacoesResponse(
+                                (List<String>) t.getItem1(),
+                                (List<FiltroRelatorioItem>) t.getItem2(),
+                                (List<FiltroRelatorioItem>) t.getItem3(),
+                                (List<FiltroRelatorioItem>) t.getItem4(),
+                                (List<FiltroRelatorioItem>) t.getItem5(),
+                                (List<FiltroPermissaoItem>) t.getItem6(),
+                                (List<FiltroPermissaoItem>) t.getItem7(),
+                                (List<FiltroPermissaoItem>) t.getItem8())));
+    }
+
+    public Uni<Void> replaceRelacoes(Long id, FiltrosRelacoesRequest r) {
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Filtros not found"))
+                .flatMap(f -> repository.replaceRelacoes(id, r.informacoes(), r.tabelasIds(), r.graficosIds(),
+                        r.mapasIds(), r.organogramasIds(), r.usuariosIds(), r.unidadesIds(), r.perfisIds()));
+    }
+
     public Uni<FiltrosResponse> find(Long id) {
         return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Filtros not found")).map(this::toResponse);
     }

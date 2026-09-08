@@ -60,8 +60,17 @@ public class MovimentacaoFinanceiraRepository implements PanacheRepository<Movim
 
     public Uni<Object[]> totaisParcela(Long caixaId) {
         return Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_TOTAIS_PARCELA).setParameter(1, caixaId).getSingleResult())
-                .map(v -> (Object[]) v);
+                .chain(session -> session.createNativeQuery(SQL_TOTAIS_PARCELA).setParameter(1, caixaId).getResultList())
+                .map(list -> {
+                    if (list == null || list.isEmpty()) {
+                        return new Object[] { BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO };
+                    }
+                    Object item = list.get(0);
+                    if (item instanceof Object[] arr) {
+                        return arr;
+                    }
+                    return new Object[] { item, BigDecimal.ZERO, BigDecimal.ZERO };
+                });
     }
 
     // Migrado de CaixaController.buscarMovimentacaoCaixaEntrada (legado)

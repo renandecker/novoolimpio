@@ -171,14 +171,15 @@ export function MasterDetail({
             key: 'remover',
             label: 'Remover',
             render: (item) => (
-                <button
-                    type="button"
-                    className="btn-action btn-danger"
-                    title="Remover"
-                    onClick={() => removeItem(item)}
-                >
-                    −
-                </button>
+                    <button
+                        type="button"
+                        className="btn-action btn-danger"
+                        style={{backgroundColor: '#e53935', borderColor: '#e53935', color: '#fff'}}
+                        title="Remover"
+                        onClick={() => removeItem(item)}
+                    >
+                        −
+                    </button>
             ),
         },
     ];

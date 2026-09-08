@@ -550,13 +550,23 @@ public class OferecimentoComponenteCurricularService {
                             .flatMap(vagas -> {
                                 OferecimentoComponenteCurricular novo = new OferecimentoComponenteCurricular();
                                 copiarParaReplicacao(velho, novo, vagas);
-                                novo.diasAula = new LinkedHashSet<>(diasAulaSelecionado);
+                                List<DiaAula> diasAulaEntities = diasAulaSelecionado.stream()
+                                        .map(d -> {
+                                            DiaAula da = new DiaAula();
+                                            da.id = d.id();
+                                            da.diaSemanaId = d.diaSemanaId();
+                                            da.turnoEducacaoId = d.turnoEducacaoId();
+                                            da.tempoAulaId = d.tempoAulaId();
+                                            return da;
+                                        })
+                                        .toList();
+                                novo.diasAula = new LinkedHashSet<>(diasAulaEntities);
                                 return calcularDataInicioReplicacao(velho)
                                         .flatMap(dataInicio -> {
                                             if (dataInicio == null) {
                                                 return Uni.createFrom().item(0);
                                             }
-                                            List<Long> diasIds = diasAulaSelecionado.stream().map(d -> d.id).toList();
+                                            List<Long> diasIds = diasAulaSelecionado.stream().map(d -> d.id()).toList();
                                             return gerarAula(novo, dataInicio, diasIds)
                                                     .flatMap(ocorrencias -> {
                                                         if (ocorrencias == null || ocorrencias.isEmpty()) {
@@ -673,8 +683,40 @@ public class OferecimentoComponenteCurricularService {
                         .unis(turnoEducacaoRepository.listAll(), tempoAulaRepository.listAll())
                         .asTuple()
                         .map(tuple -> dias.stream().map(d -> {
-                            hydrate(d, tuple.getItem1(), tuple.getItem2());
-                            return toDiaAulaResponse(d);
+                            TurnoEducacao turno = d.turnoEducacaoId() != null
+                                    ? tuple.getItem1().stream().filter(t -> t.id.equals(d.turnoEducacaoId())).findFirst().orElse(null)
+                                    : null;
+                            TempoAula tempo = d.tempoAulaId() != null
+                                    ? tuple.getItem2().stream().filter(t -> t.id.equals(d.tempoAulaId())).findFirst().orElse(null)
+                                    : null;
+                            return new DiaAulaResponse(d.id(), d.diaSemanaId(), d.turnoEducacaoId(), d.tempoAulaId(),
+                                    turno != null ? turno.descricao : null,
+                                    tempo != null ? tempo.descricao : null,
+                                    turno != null ? turno.inicio : null,
+                                    turno != null ? turno.fim : null,
+                                    tempo != null ? tempo.minutos : null);
+                        }).toList()));
+    }
+
+    // Dias de aula de um oferecimento especifico.
+    public Uni<List<DiaAulaResponse>> buscarDiasAulaPorOferecimento(Long oferecimentoComponenteCurricularId) {
+        return repository.buscarDiasAulaPorOferecimento(oferecimentoComponenteCurricularId)
+                .flatMap(dias -> Uni.combine().all()
+                        .unis(turnoEducacaoRepository.listAll(), tempoAulaRepository.listAll())
+                        .asTuple()
+                        .map(tuple -> dias.stream().map(d -> {
+                            TurnoEducacao turno = d.turnoEducacaoId() != null
+                                    ? tuple.getItem1().stream().filter(t -> t.id.equals(d.turnoEducacaoId())).findFirst().orElse(null)
+                                    : null;
+                            TempoAula tempo = d.tempoAulaId() != null
+                                    ? tuple.getItem2().stream().filter(t -> t.id.equals(d.tempoAulaId())).findFirst().orElse(null)
+                                    : null;
+                            return new DiaAulaResponse(d.id(), d.diaSemanaId(), d.turnoEducacaoId(), d.tempoAulaId(),
+                                    turno != null ? turno.descricao : null,
+                                    tempo != null ? tempo.descricao : null,
+                                    turno != null ? turno.inicio : null,
+                                    turno != null ? turno.fim : null,
+                                    tempo != null ? tempo.minutos : null);
                         }).toList()));
     }
 

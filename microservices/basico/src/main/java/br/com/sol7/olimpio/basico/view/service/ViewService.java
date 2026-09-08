@@ -63,7 +63,9 @@ public class ViewService {
             Map.entry("categoriaCampo/listCategoriaCampo", "com_categoria"),
             Map.entry("categoriaCampo/formCategoriaCampo", "com_categoria"),
             Map.entry("resultadoCobranca/listResultadoCobranca", "fin_resultado_ligacao_cobranca"),
-            Map.entry("resultadoCobranca/formResultadoCobranca", "fin_resultado_ligacao_cobranca"));
+            Map.entry("resultadoCobranca/formResultadoCobranca", "fin_resultado_ligacao_cobranca"),
+            Map.entry("filtros/listFiltros", "rel_filtro"),
+            Map.entry("filtros/formFiltros", "rel_filtro"));
 
     // Consultas com JOIN para telas que exibem colunas de relacionamentos aninhados
     // (ex.: logradouro -> bairro -> cidade -> estado), como no listLogradouro.xhtml legado.

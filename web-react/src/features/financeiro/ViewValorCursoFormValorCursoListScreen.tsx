@@ -106,7 +106,7 @@ function LinkPicker({label, options, selectedIds, onChange, optionLabel}: {
                     : selectedItems.map((o) => (
                         <div key={itemId(o)} style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, border: '1px solid #e0e0e0', borderRadius: 6, padding: '8px 12px', background: '#fafafa'}}>
                             <span style={{fontSize: 13}}>{optionLabel(o)}</span>
-                            <button type="button" className="btnstop" onClick={() => onChange(selectedIds.filter((id) => id !== itemId(o)))}>Remover</button>
+                            <button type="button" className="btnstop" style={{backgroundColor: '#e53935', borderColor: '#e53935', color: '#fff'}} onClick={() => onChange(selectedIds.filter((id) => id !== itemId(o)))}>Remover</button>
                         </div>
                     ))}
             </div>

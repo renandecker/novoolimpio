@@ -110,26 +110,24 @@ export function FormLayout({
 
         return (
             <View key={field.name} style={styles.fieldContainer}>
-                <View style={styles.fieldLabelContainer}>
-                    <Text style={styles.fieldLabel}>
-                        {field.label} {field.required && <Text style={styles.requiredStar}>*</Text>}
-                    </Text>
+                <Text style={styles.fieldLabel}>
+                    {field.label} {field.required && <Text style={styles.requiredStar}>*</Text>}
+                </Text>
+                <View style={styles.fieldControl}>
+                    {field.type === 'select' ? (
+                        <View style={styles.selectContainer}>
+                            <TextInput
+                                {...getInputProps()}
+                                style={[styles.fieldInput, styles.selectInput]}
+                                editable={false}
+                            />
+                            <Text style={styles.selectArrow}>▾</Text>
+                        </View>
+                    ) : (
+                        <TextInput {...getInputProps()} />
+                    )}
+                    {fieldError && <Text style={styles.fieldError}>{fieldError}</Text>}
                 </View>
-                {field.type === 'select' ? (
-                    <View style={styles.selectContainer}>
-                        <TextInput
-                            {...getInputProps()}
-                            style={[styles.fieldInput, styles.selectInput]}
-                            editable={false}
-                        />
-                        <Text style={styles.selectArrow}>▾</Text>
-                    </View>
-                ) : field.type === 'textarea' ? (
-                    <TextInput {...getInputProps()} />
-                ) : (
-                    <TextInput {...getInputProps()} />
-                )}
-                {fieldError && <Text style={styles.fieldError}>{fieldError}</Text>}
             </View>
         );
     };
@@ -256,15 +254,20 @@ const styles = StyleSheet.create({
         gap: Spacing.md,
     },
     fieldContainer: {
-        gap: Spacing.xs,
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: Spacing.sm,
     },
-    fieldLabelContainer: {},
     fieldLabel: {
+        width: 110,
+        paddingTop: 13,
         fontSize: Typography.sizes.sm,
         fontWeight: Typography.weights.semibold,
         color: Colors.textPrimary,
-        flexDirection: 'row',
-        alignItems: 'center',
+    },
+    fieldControl: {
+        flex: 1,
+        gap: Spacing.xs,
     },
     requiredStar: {
         color: Colors.danger,

@@ -90,20 +90,22 @@ function SelectField({label, required, value, onChange, options}:{label:string; 
     return (
         <View style={s.field}>
             <Text style={s.label}>{label} {required && <Text style={s.req}>*</Text>}</Text>
-            <Pressable style={s.selectBox} onPress={()=>setOpen(!open)}>
-                <Text style={[s.selectText, !current && {color:Colors.textPlaceholder}]}>{current? current.label : '-- Selecione --'}</Text>
-                <Text style={s.selectArrow}>▾</Text>
-            </Pressable>
-            {open && (
-                <View style={s.selectDropdown}>
-                    <Pressable style={s.selectOption} onPress={()=>{onChange(''); setOpen(false);}}><Text style={s.selectOptionText}>-- Selecione --</Text></Pressable>
-                    {options.map(o=>(
-                        <Pressable key={o.value} style={[s.selectOption, value===o.value && s.selectOptionActive]} onPress={()=>{onChange(o.value); setOpen(false);}}>
-                            <Text style={[s.selectOptionText, value===o.value && s.selectOptionTextActive]}>{o.label}</Text>
-                        </Pressable>
-                    ))}
-                </View>
-            )}
+            <View style={s.selectGroup}>
+                <Pressable style={s.selectBox} onPress={()=>setOpen(!open)}>
+                    <Text style={[s.selectText, !current && {color:Colors.textPlaceholder}]}>{current? current.label : '-- Selecione --'}</Text>
+                    <Text style={s.selectArrow}>▾</Text>
+                </Pressable>
+                {open && (
+                    <View style={s.selectDropdown}>
+                        <Pressable style={s.selectOption} onPress={()=>{onChange(''); setOpen(false);}}><Text style={s.selectOptionText}>-- Selecione --</Text></Pressable>
+                        {options.map(o=>(
+                            <Pressable key={o.value} style={[s.selectOption, value===o.value && s.selectOptionActive]} onPress={()=>{onChange(o.value); setOpen(false);}}>
+                                <Text style={[s.selectOptionText, value===o.value && s.selectOptionTextActive]}>{o.label}</Text>
+                            </Pressable>
+                        ))}
+                    </View>
+                )}
+            </View>
         </View>
     );
 }
@@ -373,10 +375,11 @@ const s=StyleSheet.create({
     content:{flex:1},
     card:{backgroundColor:Colors.bgSecondary, borderRadius:BorderRadius.lg, padding:Spacing.lg, gap:Spacing.md, ...Shadows.small},
     sectionTitle:{fontSize:13, fontWeight:Typography.weights.bold, color:Colors.textPrimary, textTransform:'uppercase', letterSpacing:0.5, borderTopWidth:1, borderTopColor:Colors.borderLight, paddingTop:10, marginTop:4},
-    field:{gap:4},
-    label:{fontSize:Typography.sizes.sm, fontWeight:Typography.weights.semibold, color:Colors.textPrimary},
+    field:{flexDirection:'row', alignItems:'center', gap:Spacing.sm},
+    label:{width:130, fontSize:Typography.sizes.sm, fontWeight:Typography.weights.semibold, color:Colors.textPrimary},
     req:{color:Colors.error},
-    input:{height:44, borderWidth:1, borderColor:Colors.borderMedium, borderRadius:BorderRadius.md, paddingHorizontal:12, fontSize:Typography.sizes.md, color:Colors.textPrimary, backgroundColor:Colors.bgPrimary},
+    input:{flex:1, height:44, borderWidth:1, borderColor:Colors.borderMedium, borderRadius:BorderRadius.md, paddingHorizontal:12, fontSize:Typography.sizes.md, color:Colors.textPrimary, backgroundColor:Colors.bgPrimary},
+    selectGroup:{flex:1, gap:Spacing.xs},
     selectBox:{height:44, borderWidth:1, borderColor:Colors.borderMedium, borderRadius:BorderRadius.md, paddingHorizontal:12, flexDirection:'row', alignItems:'center', justifyContent:'space-between', backgroundColor:Colors.bgPrimary},
     selectText:{fontSize:Typography.sizes.md, color:Colors.textPrimary},
     selectArrow:{fontSize:12, color:Colors.textLight},

@@ -58,7 +58,7 @@ export default function AlunoDashboardScreen({navigation}: NativeStackScreenProp
     if (error) {
         return (
             <View style={styles.page}>
-                <Text style={styles.title}>Portal do aluno</Text>
+                <Text style={styles.title}>Portal Aluno</Text>
                 <Text style={styles.errorText}>{error}</Text>
             </View>
         );

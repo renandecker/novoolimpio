@@ -138,19 +138,19 @@ interface OferecimentoCCData {
 
 
 
-const DIAS_NOMES = ['Domingo', 'Segunda-feira', 'Ter�a-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'S�bado'];
+const DIAS_NOMES = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
 
 
 
 const TIPOS_REPLICACAO = [
 
-    {valor: 0, rotulo: 'Na data inicio'},
+    {valor: 0, rotulo: 'Na data início'},
 
-    {valor: 1, rotulo: 'Ap�s data inicio'},
+    {valor: 1, rotulo: 'Após data início'},
 
     {valor: 2, rotulo: 'Na data fim'},
 
-    {valor: 3, rotulo: 'Ap�s data fim'},
+    {valor: 3, rotulo: 'Após data fim'},
 
 ];
 
@@ -198,7 +198,7 @@ function numeroDiaSemana(nome: any, id: any): number {
 
     if (texto.startsWith('sex')) return 6;
 
-    if (texto.startsWith('s�b') || texto.startsWith('sab')) return 7;
+    if (texto.startsWith('sáb') || texto.startsWith('sab')) return 7;
 
     return ((Number(id) || 1) - 1) % 7 + 1;
 
@@ -448,7 +448,7 @@ const [carregando, setCarregando] = useState(true);
 
                         }
 
-                    } catch { alert('N�o foi poss�vel carregar o oferecimento para edi��o'); }
+                    } catch { alert('Não foi possível carregar o oferecimento para edição'); }
 
                 }
 
@@ -512,7 +512,7 @@ const [carregando, setCarregando] = useState(true);
 
 
 
-    const rotuloDiaAula = (da: any): string => [nomeDiaSemana(da.diaSemanaId), da.turnoEducacao_descricao, da.tempoAula_descricao].filter(Boolean).join(' �?� ');
+    const rotuloDiaAula = (da: any): string => [nomeDiaSemana(da.diaSemanaId), da.turnoEducacao_descricao, da.tempoAula_descricao].filter(Boolean).join(' → ');
 
 
 
@@ -702,7 +702,7 @@ const [carregando, setCarregando] = useState(true);
 
     const removerOcorrencia = async (occ: OcorrenciaLocal) => {
 
-        if (occ.id) { try { await api.delete(`/api/educacao/ocorrencia-componente-curricular/${occ.id}`); } catch { alert('N�o foi poss�vel remover a aula salva'); return; } }
+        if (occ.id) { try { await api.delete(`/api/educacao/ocorrencia-componente-curricular/${occ.id}`); } catch { alert('Não foi possível remover a aula salva'); return; } }
 
         updateField('ocorrencias', dataRef.current.ocorrencias.filter((o) => o.key !== occ.key));
 
@@ -768,17 +768,17 @@ const [carregando, setCarregando] = useState(true);
 
         if (!e.unidadeId || !e.curriculoId || !e.salaId) { alert('Selecione unidade, curso e sala antes de gerar as aulas'); return; }
 
-        if (!atual.diasAulaConfig.length) { alert('Adicione pelo menos uma configura��o de dia de aula (dia semana, turno e tempo)'); return; }
+        if (!atual.diasAulaConfig.length) { alert('Adicione pelo menos uma configuração de dia de aula (dia semana, turno e tempo)'); return; }
 
-        if (!e.dataInicio || !e.dataFim) { alert('Defina as datas de in�cio e fim do oferecimento'); return; }
+        if (!e.dataInicio || !e.dataFim) { alert('Defina as datas de início e fim do oferecimento'); return; }
 
-        if (e.dataInicio > e.dataFim) { alert('A data inicial deve ser anterior ou igual � data final'); return; }
+        if (e.dataInicio > e.dataFim) { alert('A data inicial deve ser anterior ou igual à data final'); return; }
 
 
 
         const diaAulaIdsSelecionados = getDiaAulaIdsSelecionados();
 
-        if (!diaAulaIdsSelecionados.length) { alert('Nenhum dia de aula v�lido encontrado para as configura��es selecionadas'); return; }
+        if (!diaAulaIdsSelecionados.length) { alert('Nenhum dia de aula válido encontrado para as configurações selecionadas'); return; }
 
 
 
@@ -836,9 +836,9 @@ const [carregando, setCarregando] = useState(true);
 
                     if (feriado) { invalidas.push({data: iso, motivo: feriado}); continue; }
 
-                    if (critInicio && iso < fmtDate(critInicio)) { invalidas.push({data: iso, motivo: 'Existe um crit�rio definido para o inicio das aulas'}); continue; }
+                    if (critInicio && iso < fmtDate(critInicio)) { invalidas.push({data: iso, motivo: 'Existe um critério definido para o inicio das aulas'}); continue; }
 
-                    if (critFim && iso > fmtDate(critFim)) { invalidas.push({data: iso, motivo: 'Existe um crit�rio definido para o fim das aulas'}); continue; }
+                    if (critFim && iso > fmtDate(critFim)) { invalidas.push({data: iso, motivo: 'Existe um critério definido para o fim das aulas'}); continue; }
 
                     if (existentes.some((o) => o.data === iso && o.salaId === e.salaId && o.diaAulaId === da.id)) { invalidas.push({data: iso, motivo: `Aula marcada na turma ${salas.find((s) => s.id === e.salaId)?.descricao ?? e.salaId}`}); continue; }
 
@@ -878,13 +878,13 @@ const [carregando, setCarregando] = useState(true);
 
             if (!d.novoGrupo && !d.entity.grupoId) { alert('Selecione o grupo'); return false; }
 
-            if (!d.diasAulaConfig.length) { alert('Adicione pelo menos uma configura��o de dia de aula (dia semana, turno e tempo)'); return false; }
-
         }
 
         if (targetTab === 'tabProfessor') {
 
-            if (!d.entity.vagas || d.entity.vagas <= 0) { alert('O n�mero de vagas deve ser maior que zero'); return false; }
+            if (!d.diasAulaConfig.length) { alert('Adicione pelo menos uma configuração de dia de aula (dia semana, turno e tempo)'); return false; }
+
+            if (!d.entity.vagas || d.entity.vagas <= 0) { alert('O número de vagas deve ser maior que zero'); return false; }
 
             if (!d.ocorrencias.length) { alert('Defina os dias de aula antes de escolher o professor'); return false; }
 
@@ -920,7 +920,7 @@ const [carregando, setCarregando] = useState(true);
 
         const d = dataRef.current;
 
-        if (!d.entity.vagas || d.entity.vagas <= 0) { alert('O n�mero de vagas n�o pode ser zero'); return; }
+        if (!d.entity.vagas || d.entity.vagas <= 0) { alert('O número de vagas não pode ser zero'); return; }
 
         if (!d.ocorrencias.length) { alert('Defina os dias de aula antes de escolher o professor'); return; }
 
@@ -946,7 +946,7 @@ const [carregando, setCarregando] = useState(true);
 
         if (!validateTab('tabDiaAula') || !validateTab('tabProfessor')) return;
 
-        if (!d.professorId) { alert('Selecione o respons�vel pela turma'); return; }
+        if (!d.professorId) { alert('Selecione o responsável pela turma'); return; }
 
         try {
 
@@ -960,7 +960,7 @@ const [carregando, setCarregando] = useState(true);
 
                 grupoId = existente ? existente.id : (await api.post('/api/educacao/grupo', {nome, unidadeId: e.unidadeId, curriculoId: e.curriculoId}))?.id;
 
-                if (!grupoId) { alert('N�o foi poss�vel criar o grupo'); return; }
+                if (!grupoId) { alert('Não foi possível criar o grupo'); return; }
 
             }
 
@@ -992,7 +992,7 @@ const [carregando, setCarregando] = useState(true);
 
 
 
-    const saveLabel = gerando ? 'Salvando...' : activeTab === 'tabProfessor' ? 'Salvar' : 'Pr�ximo';
+    const saveLabel = gerando ? 'Salvando...' : activeTab === 'tabProfessor' ? 'Salvar' : 'Próximo';
 
 
 
@@ -1072,7 +1072,7 @@ const [carregando, setCarregando] = useState(true);
 
                                                     <div className="form-field">
 
-                                                        <span className="form-label">Criar nova sequ�ncia</span>
+                                                        <span className="form-label">Criar nova sequência</span>
 
                                                         <label style={{display: 'flex', gap: 6, alignItems: 'center'}}>
 
@@ -1126,11 +1126,11 @@ const [carregando, setCarregando] = useState(true);
 
                                                 <div className="form-field" style={{marginTop: 16, padding: 12, background: '#f8f9fa', borderRadius: 8}}>
 
-                                                    <strong>Crit�rio do Curso:</strong><br/>
+                                                    <strong>Critério do Curso:</strong><br/>
 
-                                                    Turmas m�ximas: {criterio.qtdTurmaAbertas ?? 'N�o definido'} | Per�odo: {criterio.periodo ?? 'N�o definido'}<br/>
+                                                    Turmas máximas: {criterio.qtdTurmaAbertas ?? 'Não definido'} | Período: {criterio.periodo ?? 'Não definido'}<br/>
 
-                                                    {criterio.dataInicio && `In�cio v�lido a partir de: ${fmtDate(parseISO(criterio.dataInicio)!)}`} | {criterio.dataFim && `T�rmino at�: ${fmtDate(parseISO(criterio.dataFim)!)}`}
+                                                    {criterio.dataInicio && `Início válido a partir de: ${fmtDate(parseISO(criterio.dataInicio)!)}`} | {criterio.dataFim && `Término até: ${fmtDate(parseISO(criterio.dataFim)!)}`}
 
                                                 </div>
 
@@ -1146,7 +1146,7 @@ const [carregando, setCarregando] = useState(true);
 
                                                         <label style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="radio" name="replicar" checked={!!data.entity.replicar} onChange={() => updateField('entity.replicar', true)}/> Sim</label>
 
-                                                        <label style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="radio" name="replicar" checked={!data.entity.replicar} onChange={() => updateField('entity.replicar', false)}/> N�o</label>
+                                                        <label style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="radio" name="replicar" checked={!data.entity.replicar} onChange={() => updateField('entity.replicar', false)}/> Não</label>
 
                                                     </div></div>
 
@@ -1156,7 +1156,7 @@ const [carregando, setCarregando] = useState(true);
 
                                                             <label className="form-field"><span className="form-label">Dias a Replicar</span><input type="number" min={1} className="form-input" value={data.entity.diasReplicar ?? ''} onChange={(ev) => updateField('entity.diasReplicar', Number(ev.target.value))}/></label>
 
-                                                            <div className="form-field"><span className="form-label">Detalhar Replica��o</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={!!data.entity.detalharReplicacao} onChange={(ev) => updateField('entity.detalharReplicacao', ev.target.checked)}/> Sim</label></div>
+                                                            <div className="form-field"><span className="form-label">Detalhar Replicação</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={!!data.entity.detalharReplicacao} onChange={(ev) => updateField('entity.detalharReplicacao', ev.target.checked)}/> Sim</label></div>
 
                                                             {data.entity.detalharReplicacao && (
 
@@ -1180,17 +1180,17 @@ const [carregando, setCarregando] = useState(true);
 
                                             <fieldset className="form-fieldset" style={{marginBottom: 16}}>
 
-                                                <legend>Respons�vel</legend>
+                                                <legend>Responsável</legend>
 
                                                 <div className="form-grid">
 
                                                     <label className="form-field" style={{gridColumn: 'span 4'}}>
 
-                                                        <span className="form-label">Respons�vel</span>
+                                                        <span className="form-label">Responsável</span>
 
                                                         <AutoComplete
 
-                                                            placeholder="Digite para buscar o usu�rio..."
+                                                            placeholder="Digite para buscar o usuário..."
 
                                                             value={null}
 
@@ -1222,17 +1222,155 @@ const [carregando, setCarregando] = useState(true);
 
                                                 <div className="form-grid">
 
-                                                    <label className="form-field"><span className="form-label">Sala *</span><select className="form-input form-select" value={data.entity.salaId ?? ''} onChange={(ev) => aoSelecionarSala(Number(ev.target.value))}><option value="">Selecione</option>{salasDaUnidade.map((s) => <option key={s.id} value={s.id}>{s.descricao || s.sucinto || `Sala ${s.id}`}</option>)}</select></label>
+                                                    <label className="form-field"><span className="form-label">Sala *</span><div style={{display: 'flex', gap: 8, alignItems: 'flex-end'}}><select className="form-input form-select" style={{flex: 1}} value={data.entity.salaId ?? ''} onChange={(ev) => aoSelecionarSala(Number(ev.target.value))}><option value="">Selecione</option>{salasDaUnidade.map((s) => <option key={s.id} value={s.id}>{s.descricao || s.sucinto || `Sala ${s.id}`}</option>)}</select><button type="button" className="btnyellow" title="Consultar disponibilidade da sala" onClick={() => alert('Funcionalidade de disponibilidade de sala a ser implementada')}>Disponibilidade</button></div></label>
 
-                                                    <label className="form-field"><span className="form-label">Qtde Sequ�ncia</span><input type="number" min={1} className="form-input" value={data.entity.qtdeSequencia ?? 1} onChange={(ev) => updateField('entity.qtdeSequencia', Math.max(1, Number(ev.target.value)))}/></label>
+                                                    <label className="form-field"><span className="form-label">Qtde Sequência</span><input type="number" min={1} className="form-input" value={data.entity.qtdeSequencia ?? 1} onChange={(ev) => updateField('entity.qtdeSequencia', Math.max(1, Number(ev.target.value)))}/></label>
 
                                                     <label className="form-field"><span className="form-label">Data Inicial *</span><input type="date" className="form-input" value={data.entity.dataInicio ?? ''} onChange={(ev) => updateField('entity.dataInicio', ev.target.value)}/></label>
 
                                                     <label className="form-field"><span className="form-label">Data Fim</span><input type="date" className="form-input" value={data.entity.dataFim ?? ''} onChange={(ev) => updateField('entity.dataFim', ev.target.value)}/></label>
 
-                                                    <div className="form-field" style={{gridColumn: 'span 4'}}><span className="form-label">Dias de Aula</span><div style={{display: 'flex', gap: 12, flexWrap: 'wrap'}}>{diaAulas.map((da) => (<label key={da.id} style={{display: 'flex', gap: 4, alignItems: 'center'}}><input type="checkbox" checked={(data.diasAulaSelecionados ?? []).includes(da.id)} onChange={() => alternarDiaAula(da.id)}/> {rotuloDiaAula(da)}</label>))}</div></div>
+                                                    <label className="form-field"><span className="form-label">Quantidade de Aulas</span><input type="text" className="form-input" value={data.ocorrencias.length.toString()} readOnly/></label>
 
-                                                    <div className="form-field" style={{gridColumn: 'span 4'}}><button type="button" className="btnblue" onClick={gerarAulas} disabled={gerando}>{gerando ? 'Gerando...' : 'Gerar Aulas'}</button></div>
+                                                </div>
+
+                                                <div style={{marginTop: 16}}>
+
+                                                    <fieldset className="form-fieldset" style={{marginBottom: 16}}>
+
+                                                        <legend>Configuração de Dias de Aula</legend>
+
+                                                        <div style={{display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: 12}}>
+
+                                                            <div style={{flex: 1, minWidth: 200}}>
+
+                                                                <label className="form-field" style={{display: 'flex', flexDirection: 'column', gap: 4}}>
+
+                                                                    <span className="form-label">Dia da Semana *</span>
+
+                                                                    <select className="form-input form-select" value={diaSemanaSelecionado.diaSemanaId ?? ''} onChange={(ev) => setDiaSemanaSelecionado({...diaSemanaSelecionado, diaSemanaId: Number(ev.target.value)})}>
+
+                                                                        <option value="">Selecione</option>
+
+                                                                        {diasSemana.map((d) => <option key={d.id} value={d.id}>{d.nome}</option>)}
+
+                                                                    </select>
+
+                                                                </label>
+
+                                                            </div>
+
+                                                            <div style={{flex: 1, minWidth: 200}}>
+
+                                                                <label className="form-field" style={{display: 'flex', flexDirection: 'column', gap: 4}}>
+
+                                                                    <span className="form-label">Turno *</span>
+
+                                                                    <select className="form-input form-select" value={diaSemanaSelecionado.turnoEducacaoId ?? ''} onChange={(ev) => setDiaSemanaSelecionado({...diaSemanaSelecionado, turnoEducacaoId: Number(ev.target.value)})}>
+
+                                                                        <option value="">Selecione</option>
+
+                                                                        {turnos.map((t) => <option key={t.id} value={t.id}>{t.descricao || t.itemLabel || `Turno ${t.id}`}</option>)}
+
+                                                                    </select>
+
+                                                                </label>
+
+                                                            </div>
+
+                                                            <div style={{flex: 1, minWidth: 200}}>
+
+                                                                <label className="form-field" style={{display: 'flex', flexDirection: 'column', gap: 4}}>
+
+                                                                    <span className="form-label">Tempo de Aula *</span>
+
+                                                                    <select className="form-input form-select" value={diaSemanaSelecionado.tempoAulaId ?? ''} onChange={(ev) => setDiaSemanaSelecionado({...diaSemanaSelecionado, tempoAulaId: Number(ev.target.value)})}>
+
+                                                                        <option value="">Selecione</option>
+
+                                                                        {tempoAulas.map((t) => <option key={t.id} value={t.id}>{t.descricao || `Tempo ${t.id}`}</option>)}
+
+                                                                    </select>
+
+                                                                </label>
+
+                                                            </div>
+
+                                                            <button type="button" className="btnblue" onClick={() => {
+
+                                                                const {diaSemanaId, turnoEducacaoId, tempoAulaId} = diaSemanaSelecionado;
+
+                                                                if (!diaSemanaId || !turnoEducacaoId || !tempoAulaId) { alert('Preencha dia da semana, turno e tempo de aula'); return; }
+
+                                                                const existe = diasSemanaConfigurados.find((c) => c.diaSemanaId === diaSemanaId && c.turnoEducacaoId === turnoEducacaoId && c.tempoAulaId === tempoAulaId);
+
+                                                                if (existe) { alert('Esta configuração já foi adicionada'); return; }
+
+                                                                const novaConfig = {key: `config-${Date.now()}`, diaSemanaId, turnoEducacaoId, tempoAulaId};
+
+                                                                setDiasSemanaConfigurados((prev) => [...prev, novaConfig]);
+
+                                                                const config: DiaAulaConfig = {diaSemanaId, turnoEducacaoId, tempoAulaId};
+
+                                                                updateField('diasAulaConfig', [...dataRef.current.diasAulaConfig, config]);
+
+                                                                setDiaSemanaSelecionado({diaSemanaId: undefined, turnoEducacaoId: undefined, tempoAulaId: undefined});
+
+                                                            }} disabled={gerando}>
+
+                                                                Adicionar
+
+                                                            </button>
+
+                                                        </div>
+
+                                                        {diasSemanaConfigurados.length > 0 && (
+
+                                                            <table className="data-table" style={{width: '100%'}}>
+
+                                                                <thead><tr><th>Dia da Semana</th><th>Turno</th><th>Tempo de Aula</th><th style={{width: 60}}>Ação</th></tr></thead>
+
+                                                                <tbody>
+
+                                                                    {diasSemanaConfigurados.map((config) => (
+
+                                                                        <tr key={config.key}>
+
+                                                                            <td>{nomeDiaSemana(config.diaSemanaId)}</td>
+
+                                                                            <td>{turnos.find((t) => t.id === config.turnoEducacaoId)?.descricao ?? turnos.find((t) => t.id === config.turnoEducacaoId)?.itemLabel ?? '-'}</td>
+
+                                                                            <td>{tempoAulas.find((t) => t.id === config.tempoAulaId)?.descricao ?? '-'}</td>
+
+                                                                            <td><button type="button" className="btn-action btnred" onClick={() => {
+
+                                                                                setDiasSemanaConfigurados((prev) => prev.filter((c) => c.key !== config.key));
+
+                                                                                updateField('diasAulaConfig', dataRef.current.diasAulaConfig.filter((c) => !(c.diaSemanaId === config.diaSemanaId && c.turnoEducacaoId === config.turnoEducacaoId && c.tempoAulaId === config.tempoAulaId)));
+
+                                                                            }}><X className="icon" /></button></td>
+
+                                                                        </tr>
+
+                                                                    ))}
+
+                                                                </tbody>
+
+                                                            </table>
+
+                                                        )}
+
+                                                    </fieldset>
+
+                                                </div>
+
+                                                <div className="form-field" style={{marginTop: 12}}>
+
+                                                    <button type="button" className="btnblue" onClick={gerarAulas} disabled={gerando || !data.entity.salaId || !data.entity.dataInicio || !data.entity.dataFim || !diasSemanaConfigurados.length}>
+
+                                                        {gerando ? 'Gerando...' : 'Gerar Aulas'}
+
+                                                    </button>
 
                                                 </div>
 
@@ -1240,7 +1378,7 @@ const [carregando, setCarregando] = useState(true);
 
                                                     <table className="data-table" style={{width: '100%', marginTop: 12}}>
 
-                                                        <thead><tr><th>Data</th><th>Dia Semana</th><th>Turno</th><th>Tempo Aula</th><th>Sala</th><th>A��o</th></tr></thead>
+                                                        <thead><tr><th>Data</th><th>Dia Semana</th><th>Turno</th><th>Tempo Aula</th><th>Sala</th><th>Ação</th></tr></thead>
 
                                                         <tbody>{[...data.ocorrencias].sort((a, b) => a.data.localeCompare(b.data)).map((occ) => {const da = diaAulas.find((x) => x.id === occ.diaAulaId); const sala = salas.find((s) => s.id === occ.salaId); return (<tr key={occ.key}><td>{occ.data}</td><td>{nomeDiaSemana(da?.diaSemanaId)}</td><td>{da?.turnoEducacao_descricao ?? '-'}</td><td>{da?.tempoAula_descricao ?? '-'}</td><td>{sala?.descricao ?? sala?.sucinto ?? occ.salaId}</td><td><button type="button" className="btn-action btnred" onClick={() => removerOcorrencia(occ)}><X className="icon" /></button></td></tr>); })}</tbody>
 
@@ -1252,7 +1390,7 @@ const [carregando, setCarregando] = useState(true);
 
                                                     <table className="data-table" style={{width: '100%', marginTop: 12}}>
 
-                                                        <thead><tr><th style={{width: 130}}>Data Inv�lida</th><th>Motivo</th></tr></thead>
+                                                        <thead><tr><th style={{width: 130}}>Data Inválida</th><th>Motivo</th></tr></thead>
 
                                                         <tbody>{data.invalidas.map((inv, idx) => (<tr key={`${inv.data}-${idx}`}><td style={{color: 'red'}}>{inv.data}</td><td style={{color: 'red'}}>{inv.motivo}</td></tr>))}</tbody>
 
@@ -1270,9 +1408,9 @@ const [carregando, setCarregando] = useState(true);
 
                                                     <label className="form-field"><span className="form-label">Vagas</span><input type="number" className="form-input" value={data.entity.vagas ?? ''} onChange={(ev) => updateField('entity', {...dataRef.current.entity, vagas: Number(ev.target.value)})}/><button type="button" className="btnblue" onClick={ajustarVagas}>Ajustar Vagas</button></label>
 
-                                                    <label className="form-field"><span className="form-label">Registra Frequ�ncia</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={data.entity.registraFrequencia !== false} onChange={(ev) => updateField('entity', {...dataRef.current.entity, registraFrequencia: ev.target.checked})}/> Sim</label></label>
+                                                    <label className="form-field"><span className="form-label">Registra Frequência</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={data.entity.registraFrequencia !== false} onChange={(ev) => updateField('entity', {...dataRef.current.entity, registraFrequencia: ev.target.checked})}/> Sim</label></label>
 
-                                                    <label className="form-field"><span className="form-label">Possui Avalia��o</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={data.entity.possuiAvaliacao !== false} onChange={(ev) => updateField('entity', {...dataRef.current.entity, possuiAvaliacao: ev.target.checked})}/> Sim</label></label>
+                                                    <label className="form-field"><span className="form-label">Possui Avaliação</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={data.entity.possuiAvaliacao !== false} onChange={(ev) => updateField('entity', {...dataRef.current.entity, possuiAvaliacao: ev.target.checked})}/> Sim</label></label>
 
                                                     <button type="button" className="btn-action btnyellow" style={{gridColumn: 'span 2'}} onClick={() => window.open(`/api/educacao/oferecimento-componente-curricular/paged?unidadeId=${data.entity.unidadeId}&curriculoId=${data.entity.curriculoId}`, '_blank')}>
 
@@ -1300,7 +1438,7 @@ const [carregando, setCarregando] = useState(true);
 
                                                     <label className="form-field" style={{gridColumn: 'span 3'}}>
 
-                                                        <span className="form-label">Respons�vel pela Turma</span>
+                                                        <span className="form-label">Responsável pela Turma</span>
 
                                                         <AutoComplete
 

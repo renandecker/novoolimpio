@@ -50,6 +50,38 @@ const VALOR_CURSO_COLUMNS: DataTableColumn[] = [
     },
     {key: 'dias_spc', label: 'Dias Atraso'},
     {key: 'dias_tolerancia_multa', label: 'Dia Tolerância'},
+    {
+        key: 'descontos',
+        label: 'Descontos',
+        render: (item) => {
+            const r = asRecord(item);
+            return String(r.descontos ?? r.desconto_descricao ?? r.desconto ?? '-');
+        },
+    },
+    {
+        key: 'formas_pagamento',
+        label: 'Forma Pagamento',
+        render: (item) => {
+            const r = asRecord(item);
+            return String(r.formas_pagamento ?? r.forma_pagamento ?? r.formasPagamento ?? '-');
+        },
+    },
+    {
+        key: 'taxas',
+        label: 'Taxas',
+        render: (item) => {
+            const r = asRecord(item);
+            return String(r.taxas ?? r.taxa_descricao ?? '-');
+        },
+    },
+    {
+        key: 'unidades',
+        label: 'Unidades',
+        render: (item) => {
+            const r = asRecord(item);
+            return String(r.unidades ?? r.unidade_descricao ?? '-');
+        },
+    },
 ];
 
 export default function ViewValorCursoListValorCursoListScreen() {

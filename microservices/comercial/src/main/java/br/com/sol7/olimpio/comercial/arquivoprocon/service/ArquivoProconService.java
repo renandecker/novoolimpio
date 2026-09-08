@@ -1,21 +1,26 @@
 package br.com.sol7.olimpio.comercial.arquivoprocon;
 
-import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
+import io.quarkus.hibernate.reactive.panache.Panache;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
 
 @ApplicationScoped
-@WithTransaction
 public class ArquivoProconService {
 
     @Inject
     ArquivoProconRepository repository;
+
+    @Inject
+    @Channel("arquivo-procon-out")
+    Emitter<String> arquivoProconEmitter;
 
     public Uni<List<ArquivoProconResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -55,6 +60,10 @@ public class ArquivoProconService {
                         : Uni.createFrom().failure(new NotFoundException("ArquivoProcon not found")));
     }
 
+    public Uni<List<ArquivoProcon>> verificarHash(String hash) {
+        return repository.verificarHash(hash);
+    }
+
     private void apply(ArquivoProcon e, ArquivoProconRequest r) {
         e.data = r.data();
         e.numeroLinhas = r.numeroLinhas();
@@ -67,14 +76,58 @@ public class ArquivoProconService {
         return new ArquivoProconResponse(e.id, e.data, e.numeroLinhas, e.usuarioId, e.hash, e.prospectosDeletadosPacote);
     }
 
+    public Uni<ArquivoProconResponse> uploadAndProduce(ArquivoProconUploadRequest r) {
+        var e = new ArquivoProcon();
+        e.data = new java.util.Date();
+        e.numeroLinhas = 0;
+        e.hash = java.util.UUID.randomUUID().toString();
+        e.prospectosDeletadosPacote = -1;
+        return repository.persist(e).invoke(persisted -> {
+            try {
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                String json = mapper.writeValueAsString(r);
+                arquivoProconEmitter.send(json);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }).map(this::toResponse);
+    }
 
-    // Migrado de ArquivoProconService.verificarHash (src/main/java/br/com/sol7/olimpio/service/services/comercial/ArquivoProconService.java:23, camada service)
-    // Logica original (adaptar):
-    // public List<ArquivoProcon> verificarHash(String hash) {
-    //         return getArquivoProconRepository().verificarHash(hash);
-    //     }
-    public Uni<List<Long>> verificarHash(String hash) {
-        return repository.find("hash = ?1", hash).list().map(list -> list.stream().map(x -> x.id).toList());
+    @org.eclipse.microprofile.reactive.messaging.Incoming("arquivo-procon-in")
+    public void consumeArquivoProcon(String payload) {
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            ArquivoProconUploadRequest r = mapper.readValue(payload, ArquivoProconUploadRequest.class);
+            // Process file data base64 and import into database
+            String base64 = r.fileData();
+            if (base64.contains(",")) {
+                base64 = base64.split(",")[1];
+            }
+            byte[] decoded = java.util.Base64.getDecoder().decode(base64);
+            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(new java.io.ByteArrayInputStream(decoded), java.nio.charset.StandardCharsets.ISO_8859_1));
+            String line;
+            int count = 0;
+            boolean first = true;
+            while ((line = reader.readLine()) != null) {
+                if (first) {
+                    first = false;
+                    continue; // skip header
+                }
+                count++;
+            }
+            final int finalCount = count;
+            // Update last inserted or create record with actual line count
+            Panache.withTransaction(() -> 
+                repository.findAll(io.quarkus.panache.common.Sort.by("id").descending()).firstResult().invoke(latest -> {
+                    if (latest != null) {
+                        latest.numeroLinhas = finalCount;
+                        latest.prospectosDeletadosPacote = 0;
+                    }
+                })
+            ).await().indefinitely();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

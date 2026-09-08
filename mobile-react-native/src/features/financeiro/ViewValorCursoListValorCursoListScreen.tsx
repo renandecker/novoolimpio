@@ -87,6 +87,10 @@ export default function ViewValorCursoListValorCursoListScreen({navigation}: {na
                                     <Text style={s.rowTitle}>{String(r.curriculo_descricao ?? r.curriculo ?? r.curso_descricao ?? `#${item.id}`)}</Text>
                                     <Text style={s.rowSub}>Data: {formatDate(r.data)} · {porHora ? 'Valor Hora' : 'Valor Curso'}: {formatValor(r.valor)}{porHora ? ' (por hora)' : ''}</Text>
                                     <Text style={s.rowSub}>Dias SPC: {String(r.dias_spc ?? '')} · Tol. multa: {String(r.dias_tolerancia_multa ?? '')}</Text>
+                                    <Text style={s.rowSub}>Descontos: {String(r.descontos ?? r.desconto_descricao ?? r.desconto ?? '-')}</Text>
+                                    <Text style={s.rowSub}>Forma Pagamento: {String(r.formas_pagamento ?? r.forma_pagamento ?? '-')}</Text>
+                                    <Text style={s.rowSub}>Taxas: {String(r.taxas ?? r.taxa_descricao ?? '-')}</Text>
+                                    <Text style={s.rowSub}>Unidades: {String(r.unidades ?? r.unidade_descricao ?? '-')}</Text>
                                 </View>
                                 <View style={s.rowActions}>
                                     <Pressable style={[s.actionBtn, s.actionEdit]} onPress={() => editar(item.id)}>

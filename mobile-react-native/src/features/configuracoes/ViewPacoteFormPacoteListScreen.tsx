@@ -258,27 +258,35 @@ export default function ViewPacoteFormPacoteListScreen() {
                     label: 'Informações',
                     content: (
                         <ScrollView style={styles.container}>
-                            <Text style={styles.label}>Descrição</Text>
-                            <TextInput style={styles.input} value={descricao} onChangeText={setDescricao} placeholder="Descrição do pacote" />
+                            <View style={styles.fieldRow}>
+                                <Text style={styles.label}>Descrição</Text>
+                                <TextInput style={styles.input} value={descricao} onChangeText={setDescricao} placeholder="Descrição do pacote" />
+                            </View>
 
-                            <Text style={styles.label}>Ação de Campanha *</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={acoesCampanha.find(a => Number(a.id) === Number(acaoCampanhaId))?.descricao ?? ''}
-                                editable={false}
-                                onFocus={() => Alert.alert('Selecione a Ação', 'Funcionalidade de seleção a ser implementada')}
-                            />
+                            <View style={styles.fieldRow}>
+                                <Text style={styles.label}>Ação de Campanha *</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={acoesCampanha.find(a => Number(a.id) === Number(acaoCampanhaId))?.descricao ?? ''}
+                                    editable={false}
+                                    onFocus={() => Alert.alert('Selecione a Ação', 'Funcionalidade de seleção a ser implementada')}
+                                />
+                            </View>
 
-                            <Text style={styles.label}>Unidade *</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={unidades.find(u => Number(u.id) === Number(unidadeId))?.sucinto ?? unidades.find(u => Number(u.id) === Number(unidadeId))?.nomeFantasia ?? ''}
-                                editable={false}
-                                onFocus={() => Alert.alert('Selecione a Unidade', 'Funcionalidade de seleção a ser implementada')}
-                            />
+                            <View style={styles.fieldRow}>
+                                <Text style={styles.label}>Unidade *</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={unidades.find(u => Number(u.id) === Number(unidadeId))?.sucinto ?? unidades.find(u => Number(u.id) === Number(unidadeId))?.nomeFantasia ?? ''}
+                                    editable={false}
+                                    onFocus={() => Alert.alert('Selecione a Unidade', 'Funcionalidade de seleção a ser implementada')}
+                                />
+                            </View>
 
-                            <Text style={styles.label}>Quantidade de Prospectos *</Text>
-                            <TextInput style={styles.input} value={String(numeroProspectos)} onChangeText={setNumeroProspectos} keyboardType="numeric" placeholder="Quantidade" />
+                            <View style={styles.fieldRow}>
+                                <Text style={styles.label}>Quantidade de Prospectos *</Text>
+                                <TextInput style={styles.input} value={String(numeroProspectos)} onChangeText={setNumeroProspectos} keyboardType="numeric" placeholder="Quantidade" />
+                            </View>
                         </ScrollView>
                     )
                 },
@@ -301,19 +309,25 @@ export default function ViewPacoteFormPacoteListScreen() {
                     label: 'Operacional',
                     content: (
                         <ScrollView style={styles.container}>
-                            <Text style={styles.label}>Direcionamento *</Text>
-                            <TextInput style={styles.input} value={direcionamento} onChangeText={setDirecionamento} placeholder="INTERNO" />
+                            <View style={styles.fieldRow}>
+                                <Text style={styles.label}>Direcionamento *</Text>
+                                <TextInput style={styles.input} value={direcionamento} onChangeText={setDirecionamento} placeholder="INTERNO" />
+                            </View>
 
-                            <Text style={styles.label}>Coordenador</Text>
-                            <TextInput style={styles.input} value={coordenadorNome} onChangeText={setCoordenadorNome} placeholder="Nome do coordenador" />
+                            <View style={styles.fieldRow}>
+                                <Text style={styles.label}>Coordenador</Text>
+                                <TextInput style={styles.input} value={coordenadorNome} onChangeText={setCoordenadorNome} placeholder="Nome do coordenador" />
+                            </View>
 
-                            <Text style={styles.label}>Equipe (Operadores)</Text>
-                            <TextInput
-                                style={styles.input}
-                                value=""
-                                placeholder="Buscar usuário para adicionar"
-                                onFocus={() => Alert.alert('Adicionar Operador', 'Funcionalidade de busca a ser implementada')}
-                            />
+                            <View style={styles.fieldRow}>
+                                <Text style={styles.label}>Equipe (Operadores)</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value=""
+                                    placeholder="Buscar usuário para adicionar"
+                                    onFocus={() => Alert.alert('Adicionar Operador', 'Funcionalidade de busca a ser implementada')}
+                                />
+                            </View>
 
                             {usuarios.length > 0 && (
                                 <View style={{marginTop: 10}}>
@@ -342,8 +356,9 @@ export default function ViewPacoteFormPacoteListScreen() {
 
 const styles = StyleSheet.create({
     container: {padding: 15, flex: 1},
-    label: {fontWeight: 'bold', marginTop: 15, marginBottom: 5},
-    input: {borderWidth: 1, borderColor: '#ccc', padding: 10, borderRadius: 4, marginBottom: 10, backgroundColor: '#fff'},
+    label: {fontWeight: 'bold', width: 150},
+    fieldRow: {flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 15},
+    input: {flex: 1, borderWidth: 1, borderColor: '#ccc', padding: 10, borderRadius: 4, backgroundColor: '#fff'},
     loading: {textAlign: 'center', marginTop: 50, color: '#888'},
     usuarioRow: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#eee'},
     removeBtn: {color: 'red', fontWeight: 'bold'},

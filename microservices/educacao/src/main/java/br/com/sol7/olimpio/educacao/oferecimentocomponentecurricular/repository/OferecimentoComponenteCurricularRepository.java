@@ -511,11 +511,20 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
                     "JOIN edc_dia_aula da ON da.id = oda.id_dia_aula " +
                     "WHERE o.id_grupo = ?1 ORDER BY da.id";
 
-    public Uni<java.util.List<DiaAula>> buscarDiasAulaPorGrupo(Long grupoId) {
+    public Uni<java.util.List<DiaAulaGrupoDTO>> buscarDiasAulaPorGrupo(Long grupoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_DIAS_AULA_POR_GRUPO, DiaAula.class)
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_DIAS_AULA_POR_GRUPO)
                         .setParameter(1, grupoId)
-                        .getResultList());
+                        .getResultList())
+                .map(list -> list.stream()
+                        .map(row -> (Object[]) row)
+                        .map(arr -> new DiaAulaGrupoDTO(
+                                ((Number) arr[0]).longValue(),
+                                arr[1] != null ? ((Number) arr[1]).longValue() : null,
+                                arr[2] != null ? ((Number) arr[2]).longValue() : null,
+                                arr[3] != null ? ((Number) arr[3]).longValue() : null
+                        ))
+                        .toList());
     }
 
     // Dias de aula de um oferecimento especifico (join table edc_oferecimento_dias_aula) -
@@ -526,11 +535,20 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
                     "JOIN edc_dia_aula da ON da.id = oda.id_dia_aula " +
                     "WHERE oda.id_oferecimento_componente_curricular = ?1 ORDER BY da.id";
 
-    public Uni<java.util.List<DiaAula>> buscarDiasAulaPorOferecimento(Long oferecimentoComponenteCurricularId) {
+    public Uni<java.util.List<DiaAulaGrupoDTO>> buscarDiasAulaPorOferecimento(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_DIAS_AULA_POR_OFERECIMENTO, DiaAula.class)
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_DIAS_AULA_POR_OFERECIMENTO)
                         .setParameter(1, oferecimentoComponenteCurricularId)
-                        .getResultList());
+                        .getResultList())
+                .map(list -> list.stream()
+                        .map(row -> (Object[]) row)
+                        .map(arr -> new DiaAulaGrupoDTO(
+                                ((Number) arr[0]).longValue(),
+                                arr[1] != null ? ((Number) arr[1]).longValue() : null,
+                                arr[2] != null ? ((Number) arr[2]).longValue() : null,
+                                arr[3] != null ? ((Number) arr[3]).longValue() : null
+                        ))
+                        .toList());
     }
 
     // Migrado de OferecimentoComponenteCurricularService.atualizaDataOferecimento (legado) -

@@ -34,8 +34,9 @@ public class ArquivoProconController {
     }
 
     @POST
-    public Uni<Response> create(@Valid ArquivoProconRequest r) {
-        return service.create(r).map(item -> Response.status(Response.Status.CREATED).entity(item).build());
+    @Path("/upload")
+    public Uni<Response> upload(ArquivoProconUploadRequest r) {
+        return service.uploadAndProduce(r).map(item -> Response.status(Response.Status.ACCEPTED).entity(item).build());
     }
 
     @PUT
@@ -52,8 +53,8 @@ public class ArquivoProconController {
 
     @GET
     @Path("/verificar-hash")
-    public Uni<List<Long>> verificarHash(@QueryParam("hash") String hash) {
-        return service.verificarHash(hash);
+    public Uni<List<ArquivoProconResponse>> verificarHash(@QueryParam("hash") String hash) {
+        return service.verificarHash(hash).map(list -> list.stream().map(e -> new ArquivoProconResponse(e.id, e.data, e.numeroLinhas, e.usuarioId, e.hash, e.prospectosDeletadosPacote)).toList());
     }
 
 }

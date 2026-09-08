@@ -65,14 +65,20 @@ export default function ViewCustoServicoFormCustoServicoListScreen() {
 
             {msg ? <Text style={styles.msg}>{msg}</Text> : null}
 
-            <Text style={styles.label}>Valor Email *</Text>
-            <TextInput style={styles.input} keyboardType="numeric" value={valorEmail} onChangeText={setValorEmail} placeholder="0.00" />
+            <View style={styles.fieldRow}>
+                <Text style={styles.label}>Valor Email *</Text>
+                <TextInput style={styles.input} keyboardType="numeric" value={valorEmail} onChangeText={setValorEmail} placeholder="0.00" />
+            </View>
 
-            <Text style={styles.label}>Valor SMS *</Text>
-            <TextInput style={styles.input} keyboardType="numeric" value={valorSms} onChangeText={setValorSms} placeholder="0.00" />
+            <View style={styles.fieldRow}>
+                <Text style={styles.label}>Valor SMS *</Text>
+                <TextInput style={styles.input} keyboardType="numeric" value={valorSms} onChangeText={setValorSms} placeholder="0.00" />
+            </View>
 
-            <Text style={styles.label}>Valor Ligação *</Text>
-            <TextInput style={styles.input} keyboardType="numeric" value={valorLigacao} onChangeText={setValorLigacao} placeholder="0.00" />
+            <View style={styles.fieldRow}>
+                <Text style={styles.label}>Valor Ligação *</Text>
+                <TextInput style={styles.input} keyboardType="numeric" value={valorLigacao} onChangeText={setValorLigacao} placeholder="0.00" />
+            </View>
 
             <TouchableOpacity style={styles.button} onPress={handleSave} disabled={loading}>
                 <Text style={styles.buttonText}>{loading ? 'Salvando...' : 'Salvar'}</Text>
@@ -84,8 +90,9 @@ export default function ViewCustoServicoFormCustoServicoListScreen() {
 const styles = StyleSheet.create({
     container: {flex: 1, padding: 20, backgroundColor: '#fff'},
     title: {fontSize: 22, fontWeight: 'bold', marginBottom: 20},
-    label: {fontSize: 14, fontWeight: '600', marginTop: 10, marginBottom: 5},
-    input: {borderWidth: 1, borderColor: '#ccc', borderRadius: 5, padding: 10, fontSize: 16},
+    label: {fontSize: 14, fontWeight: '600', width: 150},
+    fieldRow: {flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10},
+    input: {flex: 1, borderWidth: 1, borderColor: '#ccc', borderRadius: 5, padding: 10, fontSize: 16},
     button: {backgroundColor: '#007bff', padding: 15, borderRadius: 5, alignItems: 'center', marginTop: 25},
     buttonText: {color: '#fff', fontSize: 16, fontWeight: 'bold'},
     msg: {padding: 10, backgroundColor: '#e2e3e5', color: '#383d41', marginBottom: 15, borderRadius: 5}

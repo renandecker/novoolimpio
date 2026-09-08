@@ -25,6 +25,8 @@ export default function ListGraficoScreen() {
                 <DataTable
                     path="/api/relatorios/grafico"
                     extraRowActions={extraRowActions}
+                    createNavigateTo="/view/relatorios/formGrafico"
+                    editNavigateTo="/view/relatorios/formGrafico"
                 />
             </main>
         </PermissionGate>

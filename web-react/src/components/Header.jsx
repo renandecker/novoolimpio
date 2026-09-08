@@ -1,4 +1,5 @@
-import { Bell, Search, Mail, User } from 'lucide-react';
+import { Bell, Search, Mail } from 'lucide-react';
+import { UserMenu } from '../shared/components/UserMenu';
 
 export function Header() {
   return (
@@ -19,9 +20,7 @@ export function Header() {
           <Bell size={20} />
           <span className="absolute top-2 right-2 h-2 w-2 bg-blue-600 rounded-full"></span>
         </button>
-        <div className="h-10 w-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center font-semibold overflow-hidden border border-blue-200 ml-2">
-          <User size={22} />
-        </div>
+        <UserMenu />
       </div>
     </header>
   );

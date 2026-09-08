@@ -26,6 +26,8 @@ export default function ListTabelaScreen() {
                 <DataTable
                     path="/api/relatorios/tabela"
                     extraRowActions={extraRowActions}
+                    createNavigateTo="/view/relatorios/formTabela"
+                    editNavigateTo="/view/relatorios/formTabela"
                 />
             </main>
         </PermissionGate>

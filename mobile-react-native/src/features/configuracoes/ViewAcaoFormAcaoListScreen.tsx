@@ -64,35 +64,53 @@ export default function ViewAcaoFormAcaoListScreen() {
                     label: 'Ação',
                     content: (
                         <ScrollView style={styles.container}>
-                            <Text style={styles.label}>Descrição *</Text>
-                            <TextInput style={styles.input} value={descricao} onChangeText={setDescricao} />
-
-                            <Text style={styles.label}>Contratante (Responsável) *</Text>
-                            <View style={{flexDirection: 'row', gap: 5}}>
-                                <TextInput style={[styles.input, {flex: 1}]} value={responsavelId} onChangeText={setResponsavelId} placeholder="ID Responsável" />
-                                <Button title="+" onPress={() => setShowModal(true)} />
+                            <View style={styles.fieldRow}>
+                                <Text style={styles.label}>Descrição *</Text>
+                                <TextInput style={styles.input} value={descricao} onChangeText={setDescricao} />
                             </View>
 
-                            <Text style={styles.label}>Data Coleta</Text>
-                            <TextInput style={styles.input} value={dataColeta} onChangeText={setDataColeta} placeholder="DD/MM/YYYY" />
+                            <View style={styles.fieldRow}>
+                                <Text style={styles.label}>Contratante (Responsável) *</Text>
+                                <View style={styles.fieldButtonGroup}>
+                                    <TextInput style={styles.input} value={responsavelId} onChangeText={setResponsavelId} placeholder="ID Responsável" />
+                                    <Button title="+" onPress={() => setShowModal(true)} />
+                                </View>
+                            </View>
 
-                            <Text style={styles.label}>Data Inicial Captação</Text>
-                            <TextInput style={styles.input} value={dataInicial} onChangeText={setDataInicial} placeholder="DD/MM/YYYY" />
+                            <View style={styles.fieldRow}>
+                                <Text style={styles.label}>Data Coleta</Text>
+                                <TextInput style={styles.input} value={dataColeta} onChangeText={setDataColeta} placeholder="DD/MM/YYYY" />
+                            </View>
 
-                            <Text style={styles.label}>Data Final Captação</Text>
-                            <TextInput style={styles.input} value={dataFinalCaptacao} onChangeText={setDataFinalCaptacao} placeholder="DD/MM/YYYY" />
+                            <View style={styles.fieldRow}>
+                                <Text style={styles.label}>Data Inicial Captação</Text>
+                                <TextInput style={styles.input} value={dataInicial} onChangeText={setDataInicial} placeholder="DD/MM/YYYY" />
+                            </View>
 
-                            <Text style={styles.label}>Tipo Ação *</Text>
-                            <TextInput style={styles.input} value={tipoAcaoId} onChangeText={setTipoAcaoId} placeholder="ID Tipo Ação" />
+                            <View style={styles.fieldRow}>
+                                <Text style={styles.label}>Data Final Captação</Text>
+                                <TextInput style={styles.input} value={dataFinalCaptacao} onChangeText={setDataFinalCaptacao} placeholder="DD/MM/YYYY" />
+                            </View>
 
-                            <Text style={styles.label}>Data Final Cadastro</Text>
-                            <TextInput style={styles.input} value={dataFinal} onChangeText={setDataFinal} placeholder="DD/MM/YYYY" />
+                            <View style={styles.fieldRow}>
+                                <Text style={styles.label}>Tipo Ação *</Text>
+                                <TextInput style={styles.input} value={tipoAcaoId} onChangeText={setTipoAcaoId} placeholder="ID Tipo Ação" />
+                            </View>
 
-                            <Text style={styles.label}>Prev. Meta *</Text>
-                            <TextInput style={styles.input} value={meta} onChangeText={setMeta} keyboardType="numeric" />
+                            <View style={styles.fieldRow}>
+                                <Text style={styles.label}>Data Final Cadastro</Text>
+                                <TextInput style={styles.input} value={dataFinal} onChangeText={setDataFinal} placeholder="DD/MM/YYYY" />
+                            </View>
 
-                            <Text style={styles.label}>Prev. Custo *</Text>
-                            <TextInput style={styles.input} value={custo} onChangeText={setCusto} keyboardType="numeric" />
+                            <View style={styles.fieldRow}>
+                                <Text style={styles.label}>Prev. Meta *</Text>
+                                <TextInput style={styles.input} value={meta} onChangeText={setMeta} keyboardType="numeric" />
+                            </View>
+
+                            <View style={styles.fieldRow}>
+                                <Text style={styles.label}>Prev. Custo *</Text>
+                                <TextInput style={styles.input} value={custo} onChangeText={setCusto} keyboardType="numeric" />
+                            </View>
 
                             <Button title="Salvar" onPress={handleSave} />
 
@@ -134,6 +152,8 @@ export default function ViewAcaoFormAcaoListScreen() {
 
 const styles = StyleSheet.create({
     container: {padding: 15},
-    label: {fontWeight: 'bold', marginTop: 10, marginBottom: 5},
-    input: {borderWidth: 1, borderColor: '#ccc', padding: 8, borderRadius: 4, marginBottom: 10},
+    fieldRow: {flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12},
+    fieldButtonGroup: {flex: 1, flexDirection: 'row', gap: 5},
+    label: {width: 150, fontWeight: 'bold'},
+    input: {flex: 1, borderWidth: 1, borderColor: '#ccc', padding: 8, borderRadius: 4},
 });
