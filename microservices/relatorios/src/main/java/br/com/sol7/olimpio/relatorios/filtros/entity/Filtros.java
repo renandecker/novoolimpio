@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.relatorios.filtros;
+package br.com.sol7.olimpio.relatorios.filtros.entity;
 
 import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Entity;

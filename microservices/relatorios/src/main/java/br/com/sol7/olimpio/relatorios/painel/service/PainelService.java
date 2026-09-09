@@ -1,7 +1,12 @@
-package br.com.sol7.olimpio.relatorios.painel;
+package br.com.sol7.olimpio.relatorios.painel.service;
+import br.com.sol7.olimpio.relatorios.estrutura.entity.Estrutura;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.relatorios.painel.repository.PainelRepository;
+import br.com.sol7.olimpio.relatorios.painel.entity.Painel;
+import br.com.sol7.olimpio.relatorios.painel.dto.PainelRequest;
+import br.com.sol7.olimpio.relatorios.painel.dto.PainelResponse;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;

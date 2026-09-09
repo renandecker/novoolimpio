@@ -357,6 +357,7 @@ services:
       DATABASE_URL: postgresql://postgres:5432/olimpio
       DATABASE_HOST: postgres
       DATABASE_PORT: "5432"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
     - "8088:8088"
     healthcheck:
@@ -368,6 +369,8 @@ services:
     depends_on:
       restore:
         condition: service_completed_successfully
+      kafka:
+        condition: service_healthy
       login:
         condition: service_healthy
 

@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.relatorios.organograma;
+package br.com.sol7.olimpio.relatorios.organograma.service;
 
 /**
  * Paleta fixa de 40 cores usada para colorir, em tempo real, os nós do organograma por

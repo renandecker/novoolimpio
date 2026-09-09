@@ -1,6 +1,10 @@
-package br.com.sol7.olimpio.relatorios.mapa;
+package br.com.sol7.olimpio.relatorios.mapa.service;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
+import br.com.sol7.olimpio.relatorios.mapa.repository.MapaRegraRepository;
+import br.com.sol7.olimpio.relatorios.mapa.entity.MapaRegra;
+import br.com.sol7.olimpio.relatorios.mapa.dto.MapaRegraRequest;
+import br.com.sol7.olimpio.relatorios.mapa.dto.MapaRegraResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

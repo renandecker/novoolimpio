@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.relatorios.filtros;
+package br.com.sol7.olimpio.relatorios.filtros.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

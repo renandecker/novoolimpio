@@ -1,4 +1,5 @@
-package br.com.sol7.olimpio.relatorios.envio;
+package br.com.sol7.olimpio.relatorios.envio.repository;
+import br.com.sol7.olimpio.relatorios.envio.entity.Envio;
 
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;

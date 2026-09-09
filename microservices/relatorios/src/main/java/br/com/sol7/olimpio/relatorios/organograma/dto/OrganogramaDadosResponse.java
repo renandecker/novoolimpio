@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.relatorios.organograma;
+package br.com.sol7.olimpio.relatorios.organograma.dto;
 
 import java.util.List;
 import java.util.Map;

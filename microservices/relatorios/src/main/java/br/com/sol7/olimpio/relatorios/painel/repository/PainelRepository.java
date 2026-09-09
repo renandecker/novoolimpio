@@ -1,7 +1,9 @@
-package br.com.sol7.olimpio.relatorios.painel;
+package br.com.sol7.olimpio.relatorios.painel.repository;
+import br.com.sol7.olimpio.relatorios.tabela.entity.Tabela;
 
 import java.util.List;
 
+import br.com.sol7.olimpio.relatorios.painel.entity.Painel;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;

@@ -1,4 +1,8 @@
-package br.com.sol7.olimpio.relatorios.envio;
+package br.com.sol7.olimpio.relatorios.envio.service;
+import br.com.sol7.olimpio.relatorios.envio.dto.EnvioRequest;
+import br.com.sol7.olimpio.relatorios.envio.dto.EnvioResponse;
+import br.com.sol7.olimpio.relatorios.envio.entity.Envio;
+import br.com.sol7.olimpio.relatorios.envio.repository.EnvioRepository;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;

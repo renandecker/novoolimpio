@@ -1,6 +1,12 @@
-package br.com.sol7.olimpio.relatorios.extrator;
+package br.com.sol7.olimpio.relatorios.extrator.service;
+import br.com.sol7.olimpio.relatorios.extrator.controller.ExtratorController;
 
 import br.com.sol7.olimpio.relatorios.extrator.dto.ExportRequest;
+import br.com.sol7.olimpio.relatorios.extrator.ExportProducer;
+import br.com.sol7.olimpio.relatorios.extrator.repository.ExtratorRepository;
+import br.com.sol7.olimpio.relatorios.extrator.entity.Extrator;
+import br.com.sol7.olimpio.relatorios.extrator.dto.ExtratorRequest;
+import br.com.sol7.olimpio.relatorios.extrator.dto.ExtratorResponse;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
@@ -107,7 +113,8 @@ public class ExtratorService {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Extrator not found"))
                 .map(e -> {
-                    String ext = "PDF".equalsIgnoreCase(tipo) ? "pdf" : "csv";
+                    String ext = "PDF".equalsIgnoreCase(tipo) ? "pdf"
+                            : ("EXCEL".equalsIgnoreCase(tipo) || "XLSX".equalsIgnoreCase(tipo)) ? "xlsx" : "csv";
                     File file = Paths.get(diretorioArquivos, id + "." + ext).toFile();
                     if (!file.exists() || !file.isFile()) {
                         throw new NotFoundException("Arquivo " + id + "." + ext + " nao encontrado em " + diretorioArquivos);

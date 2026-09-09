@@ -1,4 +1,7 @@
-package br.com.sol7.olimpio.relatorios.estrutura;
+package br.com.sol7.olimpio.relatorios.estrutura.controller;
+import br.com.sol7.olimpio.relatorios.estrutura.dto.EstruturaRequest;
+import br.com.sol7.olimpio.relatorios.estrutura.dto.EstruturaResponse;
+import br.com.sol7.olimpio.relatorios.estrutura.service.EstruturaService;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;

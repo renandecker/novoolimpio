@@ -1,7 +1,10 @@
-package br.com.sol7.olimpio.relatorios.grafico;
+package br.com.sol7.olimpio.relatorios.grafico.controller;
 
-import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.relatorios.grafico.dto.GraficoDadosResponse;
+import br.com.sol7.olimpio.relatorios.grafico.dto.GraficoRequest;
+import br.com.sol7.olimpio.relatorios.grafico.dto.GraficoResponse;
+import br.com.sol7.olimpio.relatorios.grafico.service.GraficoService;
+import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;

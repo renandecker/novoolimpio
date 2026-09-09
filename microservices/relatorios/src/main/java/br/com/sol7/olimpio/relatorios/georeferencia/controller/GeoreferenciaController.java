@@ -1,6 +1,9 @@
-package br.com.sol7.olimpio.relatorios.georeferencia;
+package br.com.sol7.olimpio.relatorios.georeferencia.controller;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.relatorios.georeferencia.service.GeoreferenciaService;
+import br.com.sol7.olimpio.relatorios.georeferencia.dto.GeoreferenciaRequest;
+import br.com.sol7.olimpio.relatorios.georeferencia.dto.GeoreferenciaResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;

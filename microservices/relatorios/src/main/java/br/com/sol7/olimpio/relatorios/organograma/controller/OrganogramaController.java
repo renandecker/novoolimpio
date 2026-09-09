@@ -1,6 +1,10 @@
-package br.com.sol7.olimpio.relatorios.organograma;
+package br.com.sol7.olimpio.relatorios.organograma.controller;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.relatorios.organograma.service.OrganogramaService;
+import br.com.sol7.olimpio.relatorios.organograma.dto.OrganogramaRequest;
+import br.com.sol7.olimpio.relatorios.organograma.dto.OrganogramaResponse;
+import br.com.sol7.olimpio.relatorios.organograma.dto.OrganogramaDadosResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;

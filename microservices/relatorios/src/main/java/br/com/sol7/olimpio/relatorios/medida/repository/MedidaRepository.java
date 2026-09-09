@@ -1,4 +1,5 @@
-package br.com.sol7.olimpio.relatorios.medida;
+package br.com.sol7.olimpio.relatorios.medida.repository;
+import br.com.sol7.olimpio.relatorios.medida.entity.Medida;
 
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.quarkus.panache.common.Page;

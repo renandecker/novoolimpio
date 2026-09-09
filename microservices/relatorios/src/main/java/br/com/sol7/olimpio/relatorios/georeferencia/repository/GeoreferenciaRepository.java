@@ -1,7 +1,8 @@
-package br.com.sol7.olimpio.relatorios.georeferencia;
+package br.com.sol7.olimpio.relatorios.georeferencia.repository;
 
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.quarkus.panache.common.Page;
+import br.com.sol7.olimpio.relatorios.georeferencia.entity.Georeferencia;
 import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 

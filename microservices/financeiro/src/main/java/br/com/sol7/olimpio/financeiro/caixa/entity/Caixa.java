@@ -1,8 +1,11 @@
 package br.com.sol7.olimpio.financeiro.caixa.entity;
 
-import io.quarkus.hibernate.reactive.panache.PanacheEntity;
+import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
@@ -10,7 +13,11 @@ import java.util.Date;
 
 @Entity
 @Table(name = "fin_caixa")
-public class Caixa extends PanacheEntity {
+public class Caixa extends PanacheEntityBase {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Long id;
 
     @Column(name = "data")
     public Date data;

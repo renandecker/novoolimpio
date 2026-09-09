@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.relatorios.estruturacoluna;
+package br.com.sol7.olimpio.relatorios.estruturacoluna.entity;
 
 import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;

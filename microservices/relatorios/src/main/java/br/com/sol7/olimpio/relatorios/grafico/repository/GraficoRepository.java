@@ -1,7 +1,8 @@
-package br.com.sol7.olimpio.relatorios.grafico;
+package br.com.sol7.olimpio.relatorios.grafico.repository;
 
 import java.util.List;
 
+import br.com.sol7.olimpio.relatorios.grafico.entity.Grafico;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;

@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.relatorios.medida;
+package br.com.sol7.olimpio.relatorios.medida.entity;
 
 import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;

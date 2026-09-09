@@ -10,7 +10,7 @@ export { default as AlunoFrequenciaScreen } from '../features/configuracoes/Alun
 export { default as AsaasClientesListScreen } from '../features/configuracoes/AsaasClientesListScreen.tsx';
 export { default as AsaasCobrancasListScreen } from '../features/configuracoes/AsaasCobrancasListScreen.tsx';
 export { default as AsaasParcelasListScreen } from '../features/configuracoes/AsaasParcelasListScreen.tsx';
-export { default as AuditoriaScreen } from '../features/configuracoes/AuditoriaScreen.tsx';
+export { default as AuditoriaScreen } from '../features/configuracoes/auditoria/AuditoriaScreen.tsx';
 export { default as AulaAlunoScreen } from '../features/configuracoes/AulaAlunoScreen.tsx';
 export { default as CadastroUsuarioScreen } from '../features/configuracoes/CadastroUsuarioScreen.tsx';
 export { default as CurriculoCampoListScreen } from '../features/configuracoes/CurriculoCampoListScreen.tsx';

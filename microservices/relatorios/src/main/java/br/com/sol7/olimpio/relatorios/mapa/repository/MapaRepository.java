@@ -1,7 +1,8 @@
-package br.com.sol7.olimpio.relatorios.mapa;
+package br.com.sol7.olimpio.relatorios.mapa.repository;
 
 import java.util.List;
 
+import br.com.sol7.olimpio.relatorios.mapa.entity.Mapa;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;

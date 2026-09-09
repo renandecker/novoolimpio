@@ -1,4 +1,9 @@
-package br.com.sol7.olimpio.relatorios.filtros;
+package br.com.sol7.olimpio.relatorios.filtros.controller;
+import br.com.sol7.olimpio.relatorios.filtros.dto.FiltrosRelacoesRequest;
+import br.com.sol7.olimpio.relatorios.filtros.dto.FiltrosRelacoesResponse;
+import br.com.sol7.olimpio.relatorios.filtros.dto.FiltrosRequest;
+import br.com.sol7.olimpio.relatorios.filtros.dto.FiltrosResponse;
+import br.com.sol7.olimpio.relatorios.filtros.service.FiltrosService;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;

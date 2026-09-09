@@ -1,4 +1,7 @@
-package br.com.sol7.olimpio.relatorios.comentario;
+package br.com.sol7.olimpio.relatorios.comentario.controller;
+import br.com.sol7.olimpio.relatorios.comentario.dto.ComentarioRequest;
+import br.com.sol7.olimpio.relatorios.comentario.dto.ComentarioResponse;
+import br.com.sol7.olimpio.relatorios.comentario.service.ComentarioService;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;

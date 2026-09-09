@@ -1,4 +1,8 @@
-package br.com.sol7.olimpio.relatorios.comentario;
+package br.com.sol7.olimpio.relatorios.comentario.service;
+import br.com.sol7.olimpio.relatorios.comentario.dto.ComentarioRequest;
+import br.com.sol7.olimpio.relatorios.comentario.dto.ComentarioResponse;
+import br.com.sol7.olimpio.relatorios.comentario.entity.Comentario;
+import br.com.sol7.olimpio.relatorios.comentario.repository.ComentarioRepository;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;

@@ -1,5 +1,7 @@
-package br.com.sol7.olimpio.relatorios.tabela;
+package br.com.sol7.olimpio.relatorios.tabela.controller;
+import br.com.sol7.olimpio.relatorios.tabela.dto.TabelaExecutadaResponse;
 
+import br.com.sol7.olimpio.relatorios.tabela.service.TabelaService;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;

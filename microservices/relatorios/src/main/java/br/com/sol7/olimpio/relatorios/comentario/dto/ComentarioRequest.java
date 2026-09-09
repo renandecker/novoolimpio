@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.relatorios.comentario;
+package br.com.sol7.olimpio.relatorios.comentario.dto;
 
 import java.util.Date;
 

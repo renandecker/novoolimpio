@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.relatorios.mapa;
+package br.com.sol7.olimpio.relatorios.mapa.dto;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,13 +15,18 @@ record RegraPontos(
         Long regraId,
         String descricao,
         String cor,
+        BigDecimal meta,
+        BigDecimal meta2,
         Integer markerTamanho,
+        String condicao,
+        Boolean ativo,
         List<Marcador> marcadores
 ) {}
 
 record Marcador(
-        String latitude,
-        String longitude,
-        String popup,
-        String valorFormatado
+        String coordenada,
+        BigDecimal valor,
+        BigDecimal meta,
+        BigDecimal meta2,
+        String condicao
 ) {}

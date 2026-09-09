@@ -1,4 +1,8 @@
-package br.com.sol7.olimpio.relatorios.estrutura;
+package br.com.sol7.olimpio.relatorios.estrutura.service;
+import br.com.sol7.olimpio.relatorios.estrutura.dto.EstruturaRequest;
+import br.com.sol7.olimpio.relatorios.estrutura.dto.EstruturaResponse;
+import br.com.sol7.olimpio.relatorios.estrutura.entity.Estrutura;
+import br.com.sol7.olimpio.relatorios.estrutura.repository.EstruturaRepository;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;

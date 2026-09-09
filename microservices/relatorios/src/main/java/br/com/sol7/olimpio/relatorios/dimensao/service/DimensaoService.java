@@ -1,4 +1,8 @@
-package br.com.sol7.olimpio.relatorios.dimensao;
+package br.com.sol7.olimpio.relatorios.dimensao.service;
+import br.com.sol7.olimpio.relatorios.dimensao.dto.DimensaoRequest;
+import br.com.sol7.olimpio.relatorios.dimensao.dto.DimensaoResponse;
+import br.com.sol7.olimpio.relatorios.dimensao.entity.Dimensao;
+import br.com.sol7.olimpio.relatorios.dimensao.repository.DimensaoRepository;
 
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;

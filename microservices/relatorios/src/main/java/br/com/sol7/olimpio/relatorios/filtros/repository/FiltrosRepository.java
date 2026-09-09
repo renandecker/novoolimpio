@@ -1,8 +1,8 @@
-package br.com.sol7.olimpio.relatorios.filtros;
+package br.com.sol7.olimpio.relatorios.filtros.repository;
 
-import br.com.sol7.olimpio.relatorios.filtros.FiltroPermissaoItem;
-import br.com.sol7.olimpio.relatorios.filtros.FiltroRelatorioItem;
-import br.com.sol7.olimpio.relatorios.filtros.Filtros;
+import br.com.sol7.olimpio.relatorios.filtros.dto.FiltroPermissaoItem;
+import br.com.sol7.olimpio.relatorios.filtros.dto.FiltroRelatorioItem;
+import br.com.sol7.olimpio.relatorios.filtros.entity.Filtros;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Uni;

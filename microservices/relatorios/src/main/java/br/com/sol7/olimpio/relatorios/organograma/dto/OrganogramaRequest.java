@@ -1,4 +1,5 @@
-package br.com.sol7.olimpio.relatorios.organograma;
+package br.com.sol7.olimpio.relatorios.organograma.dto;
+import br.com.sol7.olimpio.relatorios.tabela.entity.Tabela;
 
 import java.util.Date;
 

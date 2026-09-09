@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.relatorios.extrator;
+package br.com.sol7.olimpio.relatorios.extrator.dto;
 
 import java.util.Date;
 

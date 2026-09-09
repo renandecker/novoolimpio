@@ -1,4 +1,9 @@
-package br.com.sol7.olimpio.relatorios.relatorio;
+package br.com.sol7.olimpio.relatorios.relatorio.service;
+import br.com.sol7.olimpio.relatorios.relatorio.controller.RelatorioController;
+import br.com.sol7.olimpio.relatorios.relatorio.dto.RelatorioRequest;
+import br.com.sol7.olimpio.relatorios.relatorio.dto.RelatorioResponse;
+import br.com.sol7.olimpio.relatorios.relatorio.entity.Relatorio;
+import br.com.sol7.olimpio.relatorios.relatorio.repository.RelatorioRepository;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;

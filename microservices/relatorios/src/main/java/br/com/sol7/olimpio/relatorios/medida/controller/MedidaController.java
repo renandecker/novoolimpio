@@ -1,4 +1,7 @@
-package br.com.sol7.olimpio.relatorios.medida;
+package br.com.sol7.olimpio.relatorios.medida.controller;
+import br.com.sol7.olimpio.relatorios.medida.dto.MedidaRequest;
+import br.com.sol7.olimpio.relatorios.medida.dto.MedidaResponse;
+import br.com.sol7.olimpio.relatorios.medida.service.MedidaService;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;

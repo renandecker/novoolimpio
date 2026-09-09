@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.relatorios.envio;
+package br.com.sol7.olimpio.relatorios.envio.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

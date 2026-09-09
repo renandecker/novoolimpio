@@ -1,4 +1,7 @@
-package br.com.sol7.olimpio.relatorios.relatorio;
+package br.com.sol7.olimpio.relatorios.relatorio.controller;
+import br.com.sol7.olimpio.relatorios.relatorio.dto.RelatorioRequest;
+import br.com.sol7.olimpio.relatorios.relatorio.dto.RelatorioResponse;
+import br.com.sol7.olimpio.relatorios.relatorio.service.RelatorioService;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;

@@ -1,4 +1,5 @@
-package br.com.sol7.olimpio.relatorios.estrutura;
+package br.com.sol7.olimpio.relatorios.estrutura.repository;
+import br.com.sol7.olimpio.relatorios.estrutura.entity.Estrutura;
 
 import java.util.List;
 

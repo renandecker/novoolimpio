@@ -1,4 +1,7 @@
-package br.com.sol7.olimpio.relatorios.grafico;
+package br.com.sol7.olimpio.relatorios.grafico.entity;
+import br.com.sol7.olimpio.relatorios.dimensao.entity.Dimensao;
+import br.com.sol7.olimpio.relatorios.estrutura.entity.Estrutura;
+import br.com.sol7.olimpio.relatorios.medida.entity.Medida;
 
 import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;

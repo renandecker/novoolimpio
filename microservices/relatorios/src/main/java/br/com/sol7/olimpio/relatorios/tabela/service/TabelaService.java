@@ -1,4 +1,7 @@
-package br.com.sol7.olimpio.relatorios.tabela;
+package br.com.sol7.olimpio.relatorios.tabela.service;
+import br.com.sol7.olimpio.relatorios.estrutura.entity.Estrutura;
+import br.com.sol7.olimpio.relatorios.medida.entity.Medida;
+import br.com.sol7.olimpio.relatorios.tabela.controller.TabelaController;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
@@ -20,7 +23,9 @@ import br.com.sol7.olimpio.relatorios.tabela.dto.TabelaColunaRequest;
 import br.com.sol7.olimpio.relatorios.tabela.dto.TabelaColunaResponse;
 import br.com.sol7.olimpio.relatorios.tabela.dto.TabelaCampoResponse;
 import br.com.sol7.olimpio.relatorios.tabela.dto.TabelaOpcoesResponse;
+import br.com.sol7.olimpio.relatorios.tabela.entity.Tabela;
 import br.com.sol7.olimpio.relatorios.tabela.entity.TabelaColuna;
+import br.com.sol7.olimpio.relatorios.tabela.repository.TabelaRepository;
 import br.com.sol7.olimpio.relatorios.tabela.repository.TabelaColunaRepository;
 import io.quarkus.hibernate.reactive.panache.Panache;
 
@@ -96,8 +101,11 @@ public class TabelaService {
         return executar(tabelaId, 0, 500);
     }
 
-    private Uni<TabelaExecutadaResponse> executarSql(Object[] estrutura, List<?> configuracoes, int page, int size) {
-        if (configuracoes.isEmpty()) return Uni.createFrom().item(new TabelaExecutadaResponse(List.of(), List.of()));
+    private record SqlMontado(String sql, List<String> cabecalhos) {
+    }
+
+    private SqlMontado montarSql(Object[] estrutura, List<?> configuracoes) {
+        if (configuracoes.isEmpty()) return new SqlMontado("SELECT 1", List.of());
         String origem = texto(estrutura[0]);
         String condicao = texto(estrutura[1]);
         validarFragmento(origem);
@@ -120,10 +128,16 @@ public class TabelaService {
         StringBuilder sql = new StringBuilder("SELECT ").append(String.join(", ", expressoes)).append(' ').append(origem);
         if (!condicao.isBlank()) sql.append(' ').append(condicao);
         if (possuiAgregacao && !grupos.isEmpty()) sql.append(" GROUP BY ").append(String.join(", ", grupos));
+        return new SqlMontado(sql.toString(), cabecalhos);
+    }
 
-        String mainSql = sql.toString();
-        String whereClause = condicao.isBlank() ? "" : condicao;
-        String countSql = "SELECT count(*) FROM (SELECT 1 " + origem + whereClause + ") _cnt";
+    private Uni<TabelaExecutadaResponse> executarSql(Object[] estrutura, List<?> configuracoes, int page, int size) {
+        if (configuracoes.isEmpty()) return Uni.createFrom().item(new TabelaExecutadaResponse(List.of(), List.of()));
+        SqlMontado montado = montarSql(estrutura, configuracoes);
+        String mainSql = montado.sql();
+        String origem = texto(estrutura[0]);
+        String whereClause = texto(estrutura[1]);
+        String countSql = "SELECT count(*) FROM (SELECT 1 " + origem + (whereClause.isBlank() ? "" : " " + whereClause) + ") _cnt";
 
         int offset = page * size;
         String paginatedSql = mainSql + " LIMIT " + size + " OFFSET " + offset;
@@ -137,7 +151,7 @@ public class TabelaService {
 
         return countUni.chain(totalCount -> dataUni.map(resultado -> {
             int totalPages = (int) Math.ceil((double) totalCount / Math.max(1, size));
-            return new TabelaExecutadaResponse(cabecalhos, converterLinhas(resultado, cabecalhos), totalCount, page, size, totalPages);
+            return new TabelaExecutadaResponse(montado.cabecalhos(), converterLinhas(resultado, montado.cabecalhos()), totalCount, page, size, totalPages);
         }));
     }
 
@@ -224,6 +238,17 @@ public class TabelaService {
     public Uni<String> gerarSql() {
         // Obs: logica de UI do controlador JSF legado (lazyTabelaWapper com dados da tela), sem equivalente reativo
         return Uni.createFrom().item(null);
+    }
+
+    public Uni<String> gerarSqlCompleto(Long tabelaId, Map<String, Object> filtros) {
+        return Panache.getSession().chain(session -> session.createNativeQuery(SQL_ESTRUTURA).setParameter(1, tabelaId).getSingleResultOrNull())
+                .onItem().ifNull().failWith(() -> new NotFoundException("Estrutura da tabela não encontrada"))
+                .onItem().transformToUni(estrutura -> Panache.getSession()
+                        .chain(session -> session.createNativeQuery(SQL_COLUNAS).setParameter(1, tabelaId).getResultList())
+                        .map(configuracoes -> {
+                            if (configuracoes.isEmpty()) return "SELECT 1";
+                            return montarSql((Object[]) estrutura, configuracoes).sql();
+                        }));
     }
 
 

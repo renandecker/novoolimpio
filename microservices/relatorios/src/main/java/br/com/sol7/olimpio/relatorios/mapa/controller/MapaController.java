@@ -1,6 +1,12 @@
-package br.com.sol7.olimpio.relatorios.mapa;
+package br.com.sol7.olimpio.relatorios.mapa.controller;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.relatorios.mapa.service.MapaService;
+import br.com.sol7.olimpio.relatorios.mapa.dto.MapaRequest;
+import br.com.sol7.olimpio.relatorios.mapa.dto.MapaResponse;
+import br.com.sol7.olimpio.relatorios.mapa.dto.MapaRegraResponse;
+import br.com.sol7.olimpio.relatorios.mapa.dto.MapaRegraRequest;
+import br.com.sol7.olimpio.relatorios.mapa.dto.MapaPontosResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;

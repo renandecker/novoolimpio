@@ -1,10 +1,15 @@
-package br.com.sol7.olimpio.relatorios.organograma;
+package br.com.sol7.olimpio.relatorios.organograma.service;
 
 import io.quarkus.cache.CacheInvalidate;
 import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.relatorios.organograma.repository.OrganogramaRepository;
+import br.com.sol7.olimpio.relatorios.organograma.entity.Organograma;
+import br.com.sol7.olimpio.relatorios.organograma.dto.OrganogramaRequest;
+import br.com.sol7.olimpio.relatorios.organograma.dto.OrganogramaResponse;
+import br.com.sol7.olimpio.relatorios.organograma.dto.OrganogramaDadosResponse;
 
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;

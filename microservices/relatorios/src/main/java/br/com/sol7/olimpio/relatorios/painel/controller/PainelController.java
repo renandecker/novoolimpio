@@ -1,6 +1,9 @@
-package br.com.sol7.olimpio.relatorios.painel;
+package br.com.sol7.olimpio.relatorios.painel.controller;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.relatorios.painel.service.PainelService;
+import br.com.sol7.olimpio.relatorios.painel.dto.PainelRequest;
+import br.com.sol7.olimpio.relatorios.painel.dto.PainelResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;

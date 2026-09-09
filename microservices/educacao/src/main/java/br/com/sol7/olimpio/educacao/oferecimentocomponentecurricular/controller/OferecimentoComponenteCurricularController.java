@@ -225,6 +225,12 @@ public class OferecimentoComponenteCurricularController {
         return service.buscarDiasAulaPorGrupo(grupoId);
     }
 
+    @GET
+    @Path("/buscar-dias-aula-por-oferecimento")
+    public Uni<List<DiaAulaResponse>> buscarDiasAulaPorOferecimento(@QueryParam("oferecimentoComponenteCurricularId") Long oferecimentoComponenteCurricularId) {
+        return service.buscarDiasAulaPorOferecimento(oferecimentoComponenteCurricularId);
+    }
+
 
     @GET
     @Path("/verificarchamada-assinada")

@@ -1,5 +1,6 @@
-package br.com.sol7.olimpio.relatorios.tabela;
+package br.com.sol7.olimpio.relatorios.tabela.repository;
 
+import br.com.sol7.olimpio.relatorios.tabela.entity.Tabela;
 import java.util.List;
 
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;

@@ -1,4 +1,8 @@
-package br.com.sol7.olimpio.relatorios.georeferencia;
+package br.com.sol7.olimpio.relatorios.georeferencia.service;
+import br.com.sol7.olimpio.relatorios.georeferencia.dto.GeoreferenciaRequest;
+import br.com.sol7.olimpio.relatorios.georeferencia.dto.GeoreferenciaResponse;
+import br.com.sol7.olimpio.relatorios.georeferencia.entity.Georeferencia;
+import br.com.sol7.olimpio.relatorios.georeferencia.repository.GeoreferenciaRepository;
 
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;

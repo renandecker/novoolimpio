@@ -1,4 +1,5 @@
-package br.com.sol7.olimpio.relatorios.comentario;
+package br.com.sol7.olimpio.relatorios.comentario.repository;
+import br.com.sol7.olimpio.relatorios.comentario.entity.Comentario;
 
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;

@@ -1,4 +1,7 @@
-package br.com.sol7.olimpio.relatorios.dimensao;
+package br.com.sol7.olimpio.relatorios.dimensao.controller;
+import br.com.sol7.olimpio.relatorios.dimensao.dto.DimensaoRequest;
+import br.com.sol7.olimpio.relatorios.dimensao.dto.DimensaoResponse;
+import br.com.sol7.olimpio.relatorios.dimensao.service.DimensaoService;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;

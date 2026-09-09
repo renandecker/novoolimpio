@@ -1,4 +1,8 @@
-package br.com.sol7.olimpio.relatorios.estruturacoluna;
+package br.com.sol7.olimpio.relatorios.estruturacoluna.service;
+import br.com.sol7.olimpio.relatorios.estruturacoluna.dto.EstruturaColunaRequest;
+import br.com.sol7.olimpio.relatorios.estruturacoluna.dto.EstruturaColunaResponse;
+import br.com.sol7.olimpio.relatorios.estruturacoluna.entity.EstruturaColuna;
+import br.com.sol7.olimpio.relatorios.estruturacoluna.repository.EstruturaColunaRepository;
 
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;

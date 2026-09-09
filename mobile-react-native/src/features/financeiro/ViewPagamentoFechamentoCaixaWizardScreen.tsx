@@ -1,4 +1,5 @@
 import React, {useEffect, useState, useCallback} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
     ActivityIndicator,
     Pressable,
@@ -177,6 +178,30 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
     const fetchParcela = fetchAutoComplete('/api/financeiro/parcela/buscar', 'id', 'descricao');
     const fetchMovimento = fetchAutoComplete('/api/view/movimento/listMovimento', 'id', 'descricaocompleta');
 
+    // Resolve o usuário da sessão logada
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const raw = await AsyncStorage.getItem('olimpio.session');
+                if (raw) {
+                    const session = JSON.parse(raw);
+                    if (session?.username) {
+                        const {data} = await api.get<{id: number}>('/api/basico/usuario/atual');
+                        if (!cancelled && data?.id) {
+                            setState(s => ({...s, usuarioId: String(data.id)}));
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('Erro ao carregar o usuário da sessão:', err);
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
     // Load caixa when usuario/unidade change
     useEffect(() => {
         if (!state.usuarioId || !state.unidadeId) return;
@@ -223,7 +248,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
     // Step validation functions
     const validateStep1 = useCallback(async (d: FechamentoCaixaData) => {
-        if (!d.usuarioId) return 'Selecione o usuário';
+        if (!d.usuarioId) return 'Usuário não identificado';
         if (!d.unidadeId) return 'Selecione a unidade';
         if (!d.caixaAberto) {
             if (!d.impressoraId) return 'Selecione a impressora';

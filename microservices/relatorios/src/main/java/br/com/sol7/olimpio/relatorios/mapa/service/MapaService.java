@@ -1,12 +1,28 @@
-package br.com.sol7.olimpio.relatorios.mapa;
+package br.com.sol7.olimpio.relatorios.mapa.service;
+import br.com.sol7.olimpio.relatorios.dimensao.entity.Dimensao;
+import br.com.sol7.olimpio.relatorios.estrutura.entity.Estrutura;
+import br.com.sol7.olimpio.relatorios.georeferencia.entity.Georeferencia;
+import br.com.sol7.olimpio.relatorios.mapa.controller.MapaController;
+import br.com.sol7.olimpio.relatorios.medida.entity.Medida;
 
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
-import br.com.sol7.olimpio.relatorios.dimensao.DimensaoService;
-import br.com.sol7.olimpio.relatorios.estrutura.EstruturaService;
-import br.com.sol7.olimpio.relatorios.estruturacoluna.EstruturaColunaService;
-import br.com.sol7.olimpio.relatorios.georeferencia.GeoreferenciaService;
-import br.com.sol7.olimpio.relatorios.medida.MedidaService;
+import br.com.sol7.olimpio.relatorios.dimensao.service.DimensaoService;
+import br.com.sol7.olimpio.relatorios.estrutura.service.EstruturaService;
+import br.com.sol7.olimpio.relatorios.estruturacoluna.service.EstruturaColunaService;
+import br.com.sol7.olimpio.relatorios.georeferencia.service.GeoreferenciaService;
+import br.com.sol7.olimpio.relatorios.medida.service.MedidaService;
+import br.com.sol7.olimpio.relatorios.mapa.repository.MapaRepository;
+import br.com.sol7.olimpio.relatorios.mapa.repository.MapaRegraRepository;
+import br.com.sol7.olimpio.relatorios.mapa.entity.Mapa;
+import br.com.sol7.olimpio.relatorios.mapa.entity.MapaRegra;
+import br.com.sol7.olimpio.relatorios.mapa.dto.MapaRequest;
+import br.com.sol7.olimpio.relatorios.mapa.dto.MapaResponse;
+import br.com.sol7.olimpio.relatorios.mapa.dto.MapaRegraResponse;
+import br.com.sol7.olimpio.relatorios.mapa.dto.MapaRegraRequest;
+import br.com.sol7.olimpio.relatorios.mapa.dto.MapaPontosResponse;
+import br.com.sol7.olimpio.relatorios.mapa.dto.Marcador;
+import br.com.sol7.olimpio.relatorios.mapa.dto.RegraPontos;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
 import io.smallrye.mutiny.Uni;

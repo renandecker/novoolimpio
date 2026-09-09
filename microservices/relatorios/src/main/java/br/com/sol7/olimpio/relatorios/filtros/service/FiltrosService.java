@@ -1,4 +1,19 @@
-package br.com.sol7.olimpio.relatorios.filtros;
+package br.com.sol7.olimpio.relatorios.filtros.service;
+import br.com.sol7.olimpio.relatorios.dimensao.entity.Dimensao;
+import br.com.sol7.olimpio.relatorios.estrutura.entity.Estrutura;
+import br.com.sol7.olimpio.relatorios.filtros.controller.FiltrosController;
+import br.com.sol7.olimpio.relatorios.filtros.dto.FiltroPermissaoItem;
+import br.com.sol7.olimpio.relatorios.filtros.dto.FiltroRelatorioItem;
+import br.com.sol7.olimpio.relatorios.filtros.dto.FiltrosRelacoesRequest;
+import br.com.sol7.olimpio.relatorios.filtros.dto.FiltrosRelacoesResponse;
+import br.com.sol7.olimpio.relatorios.filtros.dto.FiltrosRequest;
+import br.com.sol7.olimpio.relatorios.filtros.dto.FiltrosResponse;
+import br.com.sol7.olimpio.relatorios.filtros.entity.Filtros;
+import br.com.sol7.olimpio.relatorios.filtros.repository.FiltrosRepository;
+import br.com.sol7.olimpio.relatorios.grafico.entity.Grafico;
+import br.com.sol7.olimpio.relatorios.mapa.entity.Mapa;
+import br.com.sol7.olimpio.relatorios.organograma.entity.Organograma;
+import br.com.sol7.olimpio.relatorios.tabela.entity.Tabela;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;

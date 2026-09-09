@@ -1,4 +1,8 @@
-package br.com.sol7.olimpio.relatorios.cores;
+package br.com.sol7.olimpio.relatorios.cores.service;
+import br.com.sol7.olimpio.relatorios.cores.dto.CoresRequest;
+import br.com.sol7.olimpio.relatorios.cores.dto.CoresResponse;
+import br.com.sol7.olimpio.relatorios.cores.entity.Cores;
+import br.com.sol7.olimpio.relatorios.cores.repository.CoresRepository;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;

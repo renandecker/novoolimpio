@@ -389,15 +389,17 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
     }
     if (canDelete) {
         actionColumns.push({
-            key: 'excluir',
-            label: 'Excluir',
+            key: 'remover',
+            label: 'Remover',
             render: (item) => (
                 <button
+                    type="button"
                     className="btn-action btn-danger"
-                    title="Excluir"
+                    style={{backgroundColor: '#e53935', borderColor: '#e53935', color: '#fff'}}
+                    title="Remover"
                     onClick={() => setModal({mode: 'delete', item})}
                 >
-                    ✕
+                    −
                 </button>
             ),
         });

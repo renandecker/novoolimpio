@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.relatorios.disponivel;
+import br.com.sol7.olimpio.relatorios.relatorio.controller.RelatorioController;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
 import io.quarkus.hibernate.reactive.panache.Panache;

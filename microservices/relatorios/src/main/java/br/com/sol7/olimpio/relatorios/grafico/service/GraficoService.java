@@ -1,9 +1,17 @@
-package br.com.sol7.olimpio.relatorios.grafico;
+package br.com.sol7.olimpio.relatorios.grafico.service;
+import br.com.sol7.olimpio.relatorios.dimensao.entity.Dimensao;
+import br.com.sol7.olimpio.relatorios.estrutura.entity.Estrutura;
+import br.com.sol7.olimpio.relatorios.grafico.controller.GraficoController;
+import br.com.sol7.olimpio.relatorios.medida.entity.Medida;
 
+import br.com.sol7.olimpio.relatorios.grafico.dto.GraficoDadosResponse;
+import br.com.sol7.olimpio.relatorios.grafico.dto.GraficoRequest;
+import br.com.sol7.olimpio.relatorios.grafico.dto.GraficoResponse;
+import br.com.sol7.olimpio.relatorios.grafico.entity.Grafico;
+import br.com.sol7.olimpio.relatorios.grafico.repository.GraficoRepository;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
-import br.com.sol7.olimpio.relatorios.grafico.dto.GraficoDadosResponse;
 
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;

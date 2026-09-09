@@ -1,4 +1,5 @@
-package br.com.sol7.olimpio.relatorios.extrator;
+package br.com.sol7.olimpio.relatorios.extrator.entity;
+import br.com.sol7.olimpio.relatorios.tabela.entity.Tabela;
 
 import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Column;

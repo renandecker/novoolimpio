@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.relatorios.estrutura;
+package br.com.sol7.olimpio.relatorios.estrutura.dto;
 
 import java.util.Date;
 

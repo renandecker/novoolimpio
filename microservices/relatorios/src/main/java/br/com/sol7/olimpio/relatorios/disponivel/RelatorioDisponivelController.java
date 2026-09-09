@@ -11,11 +11,11 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.core.MediaType;
-import br.com.sol7.olimpio.relatorios.tabela.TabelaService;
-import br.com.sol7.olimpio.relatorios.grafico.GraficoService;
-import br.com.sol7.olimpio.relatorios.mapa.MapaService;
-import br.com.sol7.olimpio.relatorios.organograma.OrganogramaService;
-import br.com.sol7.olimpio.relatorios.painel.PainelService;
+import br.com.sol7.olimpio.relatorios.tabela.service.TabelaService;
+import br.com.sol7.olimpio.relatorios.grafico.service.GraficoService;
+import br.com.sol7.olimpio.relatorios.mapa.service.MapaService;
+import br.com.sol7.olimpio.relatorios.organograma.service.OrganogramaService;
+import br.com.sol7.olimpio.relatorios.painel.service.PainelService;
 
 import java.util.List;
 

@@ -1,4 +1,5 @@
-package br.com.sol7.olimpio.relatorios.dimensao;
+package br.com.sol7.olimpio.relatorios.dimensao.repository;
+import br.com.sol7.olimpio.relatorios.dimensao.entity.Dimensao;
 
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.quarkus.panache.common.Page;
