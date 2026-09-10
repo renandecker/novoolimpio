@@ -10,133 +10,104 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class OcorrenciaComponenteCurricularRepository implements PanacheRepository<OcorrenciaComponenteCurricular> {
 
-    // Migrado de OcorrenciaComponenteCurricularRepository.buscarOcorrenciaPorProfessor (legado) - HQL original:
-    // select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe  where o.ativo = true  and o.professor= ?1 and o.data  between ?2 and ?3  order by o.data
-    public static final String SQL_BUSCAR_OCORRENCIA_POR_PROFESSOR =
-            "SELECT o.* FROM edc_ocorrencia_componente_curricular o INNER JOIN edc_oferecimento_componente_curricular ofe ON ofe.id = o.id_oferecimento_componente_curricular WHERE o.fl_ativo = true and o.id_professor= ?1 and o.data between ?2 and ?3 ORDER BY o.data";
+    // NOTA: as queries nativas originais (SELECT o.* ... INNER JOIN ... com mapeamento para
+    // a entidade) quebravam no Hibernate Reactive com NPE em sqlSelection (HTTP 500).
+    // Todas foram migradas para Panache/JPQL. Os INNER JOINs com ofe eram neutros (sem
+    // filtro em ofe), exceto em ...ComGrupo e ...PorDataUnidade, resolvidos com subquery.
 
-    public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorProfessor(Long professorId, Date inicio, Date fim) {
-        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_OCORRENCIA_POR_PROFESSOR, OcorrenciaComponenteCurricular.class)
-                        .setParameter(1, professorId)
-                        .setParameter(2, inicio)
-                        .setParameter(3, fim)
-                        .getResultList());
+    // HQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe  where o.ativo = true  and o.professor= ?1 and o.data  between ?2 and ?3  order by o.data
+    public Uni<List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorProfessor(Long professorId, Date inicio, Date fim) {
+        if (professorId == null || inicio == null || fim == null) {
+            return Uni.createFrom().item(List.of());
+        }
+        return find("ativo = true and professorId = ?1 and data between ?2 and ?3 order by data",
+                professorId, inicio, fim).list();
     }
 
 
-    // Migrado de OcorrenciaComponenteCurricularRepository.buscarOcorrenciaExtras (legado) - HQL original:
-    // select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe where o.ativo = true and o.aulaCoringa = true and o.oferecimentoComponenteCurricular= ?1 order by o.data
-    public static final String SQL_BUSCAR_OCORRENCIA_EXTRAS =
-            "SELECT o.* FROM edc_ocorrencia_componente_curricular o INNER JOIN edc_oferecimento_componente_curricular ofe ON ofe.id = o.id_oferecimento_componente_curricular WHERE o.fl_ativo = true and o.aula_coringa = true and o.id_oferecimento_componente_curricular= ?1 ORDER BY o.data";
-
-    public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaExtras(Long oferecimentoComponenteCurricularId) {
-        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_OCORRENCIA_EXTRAS, OcorrenciaComponenteCurricular.class)
-                        .setParameter(1, oferecimentoComponenteCurricularId)
-                        .getResultList());
+    // HQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe where o.ativo = true and o.aulaCoringa = true and o.oferecimentoComponenteCurricular= ?1 order by o.data
+    public Uni<List<OcorrenciaComponenteCurricular>> buscarOcorrenciaExtras(Long oferecimentoComponenteCurricularId) {
+        if (oferecimentoComponenteCurricularId == null) {
+            return Uni.createFrom().item(List.of());
+        }
+        return find("ativo = true and aulaCoringa = true and oferecimentoComponenteCurricularId = ?1 order by data",
+                oferecimentoComponenteCurricularId).list();
     }
 
 
-    // Migrado de OcorrenciaComponenteCurricularRepository.buscarOcorrenciaNormais (legado) - HQL original:
-    // select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe where o.ativo = true and o.aulaCoringa = false and o.oferecimentoComponenteCurricular= ?1 order by o.data
-    public static final String SQL_BUSCAR_OCORRENCIA_NORMAIS =
-            "SELECT o.* FROM edc_ocorrencia_componente_curricular o INNER JOIN edc_oferecimento_componente_curricular ofe ON ofe.id = o.id_oferecimento_componente_curricular WHERE o.fl_ativo = true and o.aula_coringa = false and o.id_oferecimento_componente_curricular= ?1 ORDER BY o.data";
-
-    public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaNormais(Long oferecimentoComponenteCurricularId) {
-        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_OCORRENCIA_NORMAIS, OcorrenciaComponenteCurricular.class)
-                        .setParameter(1, oferecimentoComponenteCurricularId)
-                        .getResultList());
+    // HQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe where o.ativo = true and o.aulaCoringa = false and o.oferecimentoComponenteCurricular= ?1 order by o.data
+    public Uni<List<OcorrenciaComponenteCurricular>> buscarOcorrenciaNormais(Long oferecimentoComponenteCurricularId) {
+        if (oferecimentoComponenteCurricularId == null) {
+            return Uni.createFrom().item(List.of());
+        }
+        return find("ativo = true and aulaCoringa = false and oferecimentoComponenteCurricularId = ?1 order by data",
+                oferecimentoComponenteCurricularId).list();
     }
 
 
-    // Migrado de OcorrenciaComponenteCurricularRepository.buscarOcorrenciaPorOferecimentoEDatas (legado) - HQL original:
-    // select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe where o.ativo = true and o.oferecimentoComponenteCurricular= ?1 and o.data  between ?2 and ?3  order by o.data
-    public static final String SQL_BUSCAR_OCORRENCIA_POR_OFERECIMENTO_E_DATAS =
-            "SELECT o.* FROM edc_ocorrencia_componente_curricular o INNER JOIN edc_oferecimento_componente_curricular ofe ON ofe.id = o.id_oferecimento_componente_curricular WHERE o.fl_ativo = true and o.id_oferecimento_componente_curricular= ?1 and o.data between ?2 and ?3 ORDER BY o.data";
-
-    public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorOferecimentoEDatas(Long oferecimentoComponenteCurricularId, Date inicio, Date fim) {
-        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_OCORRENCIA_POR_OFERECIMENTO_E_DATAS, OcorrenciaComponenteCurricular.class)
-                        .setParameter(1, oferecimentoComponenteCurricularId)
-                        .setParameter(2, inicio)
-                        .setParameter(3, fim)
-                        .getResultList());
+    // HQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe where o.ativo = true and o.oferecimentoComponenteCurricular= ?1 and o.data  between ?2 and ?3  order by o.data
+    public Uni<List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorOferecimentoEDatas(Long oferecimentoComponenteCurricularId, Date inicio, Date fim) {
+        if (oferecimentoComponenteCurricularId == null || inicio == null || fim == null) {
+            return Uni.createFrom().item(List.of());
+        }
+        return find("ativo = true and oferecimentoComponenteCurricularId = ?1 and data between ?2 and ?3 order by data",
+                oferecimentoComponenteCurricularId, inicio, fim).list();
     }
 
 
-    // Migrado de OcorrenciaComponenteCurricularRepository.buscarOcorrenciaPorOferecimentoEDatasCoringa (legado) - HQL original:
-    // select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe where o.ativo = true and o.oferecimentoComponenteCurricular= ?1 and o.data  between ?2 and ?3 and o.aulaCoringa = ?4 order by o.data
-    public static final String SQL_BUSCAR_OCORRENCIA_POR_OFERECIMENTO_E_DATAS_CORINGA =
-            "SELECT o.* FROM edc_ocorrencia_componente_curricular o INNER JOIN edc_oferecimento_componente_curricular ofe ON ofe.id = o.id_oferecimento_componente_curricular WHERE o.fl_ativo = true and o.id_oferecimento_componente_curricular= ?1 and o.data between ?2 and ?3 and o.aula_coringa = ?4 ORDER BY o.data";
-
-    public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorOferecimentoEDatasCoringa(Long oferecimentoComponenteCurricularId, Date inicio, Date fim, Boolean coring) {
-        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_OCORRENCIA_POR_OFERECIMENTO_E_DATAS_CORINGA, OcorrenciaComponenteCurricular.class)
-                        .setParameter(1, oferecimentoComponenteCurricularId)
-                        .setParameter(2, inicio)
-                        .setParameter(3, fim)
-                        .setParameter(4, coring)
-                        .getResultList());
+    // HQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe where o.ativo = true and o.oferecimentoComponenteCurricular= ?1 and o.data  between ?2 and ?3 and o.aulaCoringa = ?4 order by o.data
+    public Uni<List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorOferecimentoEDatasCoringa(Long oferecimentoComponenteCurricularId, Date inicio, Date fim, Boolean coring) {
+        if (oferecimentoComponenteCurricularId == null || inicio == null || fim == null || coring == null) {
+            return Uni.createFrom().item(List.of());
+        }
+        return find("ativo = true and oferecimentoComponenteCurricularId = ?1 and data between ?2 and ?3 and aulaCoringa = ?4 order by data",
+                oferecimentoComponenteCurricularId, inicio, fim, coring).list();
     }
 
 
-    // Migrado de OcorrenciaComponenteCurricularRepository.buscarOcorrenciaPorOferecimento (legado) - HQL original:
-    // select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe  where o.ativo = true and ofe = ?1 order by o.data
-    public static final String SQL_BUSCAR_OCORRENCIA_POR_OFERECIMENTO =
-            "SELECT o.* FROM edc_ocorrencia_componente_curricular o INNER JOIN edc_oferecimento_componente_curricular ofe ON ofe.id = o.id_oferecimento_componente_curricular WHERE o.fl_ativo = true and ofe.id = ?1 ORDER BY o.data";
-
-    public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorOferecimento(Long oferecimentoComponenteCurricularId) {
-        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_OCORRENCIA_POR_OFERECIMENTO, OcorrenciaComponenteCurricular.class)
-                        .setParameter(1, oferecimentoComponenteCurricularId)
-                        .getResultList());
+    // HQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe  where o.ativo = true and ofe = ?1 order by o.data
+    public Uni<List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorOferecimento(Long oferecimentoComponenteCurricularId) {
+        if (oferecimentoComponenteCurricularId == null) {
+            return Uni.createFrom().item(List.of());
+        }
+        return find("ativo = true and oferecimentoComponenteCurricularId = ?1 order by data",
+                oferecimentoComponenteCurricularId).list();
     }
 
 
-    // Migrado de OcorrenciaComponenteCurricularRepository.buscarTodasOcorrenciaPorOferecimento (legado) - HQL original:
-    // select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe where ofe = ?1
-    public static final String SQL_BUSCAR_TODAS_OCORRENCIA_POR_OFERECIMENTO =
-            "SELECT o.* FROM edc_ocorrencia_componente_curricular o INNER JOIN edc_oferecimento_componente_curricular ofe ON ofe.id = o.id_oferecimento_componente_curricular WHERE ofe.id = ?1";
-
-    public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarTodasOcorrenciaPorOferecimento(Long oferecimentoComponenteCurricularId) {
-        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_TODAS_OCORRENCIA_POR_OFERECIMENTO, OcorrenciaComponenteCurricular.class)
-                        .setParameter(1, oferecimentoComponenteCurricularId)
-                        .getResultList());
+    // HQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe where ofe = ?1
+    public Uni<List<OcorrenciaComponenteCurricular>> buscarTodasOcorrenciaPorOferecimento(Long oferecimentoComponenteCurricularId) {
+        if (oferecimentoComponenteCurricularId == null) {
+            return Uni.createFrom().item(List.of());
+        }
+        return find("oferecimentoComponenteCurricularId = ?1", oferecimentoComponenteCurricularId).list();
     }
 
 
-    // Migrado de OcorrenciaComponenteCurricularRepository.buscarOcorrenciaPorDataUnidade (legado) - HQL original:
-    // select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe  where o.ativo = true and o.data  between Date(?1) and Date(?2)  and o.oferecimentoComponenteCurricular.unidade in (?3) order by o.oferecimentoComponenteCurricular.id
-    public static final String SQL_BUSCAR_OCORRENCIA_POR_DATA_UNIDADE =
-            "SELECT o.* FROM edc_ocorrencia_componente_curricular o INNER JOIN edc_oferecimento_componente_curricular ofe ON ofe.id = o.id_oferecimento_componente_curricular LEFT JOIN edc_oferecimento_componente_curricular j_o_oferecimentoComponenteCurricular ON j_o_oferecimentoComponenteCurricular.id = o.id_oferecimento_componente_curricular WHERE o.fl_ativo = true and o.data between Date(?1) and Date(?2) and j_o_oferecimentoComponenteCurricular.id_unidade in (?3) ORDER BY j_o_oferecimentoComponenteCurricular.id";
-
-    public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorDataUnidade(Date inicio, Date fim, List<Long> unidadesIds) {
-        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_OCORRENCIA_POR_DATA_UNIDADE, OcorrenciaComponenteCurricular.class)
-                        .setParameter(1, inicio)
-                        .setParameter(2, fim)
-                        .setParameter(3, unidadesIds)
-                        .getResultList());
+    // HQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe  where o.ativo = true and o.data  between Date(?1) and Date(?2)  and o.oferecimentoComponenteCurricular.unidade in (?3) order by o.oferecimentoComponenteCurricular.id
+    public Uni<List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorDataUnidade(Date inicio, Date fim, List<Long> unidadesIds) {
+        if (inicio == null || fim == null || unidadesIds == null || unidadesIds.isEmpty()) {
+            return Uni.createFrom().item(List.of());
+        }
+        return find("ativo = true and data between ?1 and ?2 and oferecimentoComponenteCurricularId in "
+                        + "(select o.id from OferecimentoComponenteCurricular o where o.unidadeId in ?3) "
+                        + "order by oferecimentoComponenteCurricularId",
+                inicio, fim, unidadesIds).list();
     }
 
-    public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorDataUnidade(Date date, List<Long> unidadesIds) {
+    public Uni<List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorDataUnidade(Date date, List<Long> unidadesIds) {
         return buscarOcorrenciaPorDataUnidade(date, date, unidadesIds);
     }
 
 
-    // Migrado de OcorrenciaComponenteCurricularRepository.buscarOcorrenciaPorOferecimentoComGrupo (legado) - HQL original:
-    // select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe  where o.ativo = true and o.aulaCoringa = false and ofe.grupo = ?1 order by o.data
-    public static final String SQL_BUSCAR_OCORRENCIA_POR_OFERECIMENTO_COM_GRUPO =
-            "SELECT o.* FROM edc_ocorrencia_componente_curricular o INNER JOIN edc_oferecimento_componente_curricular ofe ON ofe.id = o.id_oferecimento_componente_curricular WHERE o.fl_ativo = true and o.aula_coringa = false and ofe.id_grupo = ?1 ORDER BY o.data";
-
-    public Uni<java.util.List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorOferecimentoComGrupo(Long grupoId) {
-        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_OCORRENCIA_POR_OFERECIMENTO_COM_GRUPO, OcorrenciaComponenteCurricular.class)
-                        .setParameter(1, grupoId)
-                        .getResultList());
+    // HQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe  where o.ativo = true and o.aulaCoringa = false and ofe.grupo = ?1 order by o.data
+    public Uni<List<OcorrenciaComponenteCurricular>> buscarOcorrenciaPorOferecimentoComGrupo(Long grupoId) {
+        if (grupoId == null) {
+            return Uni.createFrom().item(List.of());
+        }
+        return find("ativo = true and aulaCoringa = false and oferecimentoComponenteCurricularId in "
+                        + "(select o.id from OferecimentoComponenteCurricular o where o.grupoId = ?1) order by data",
+                grupoId).list();
     }
 
 }

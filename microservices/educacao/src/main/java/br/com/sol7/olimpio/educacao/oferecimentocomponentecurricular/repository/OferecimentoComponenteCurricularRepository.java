@@ -513,11 +513,10 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
 
     public Uni<java.util.List<DiaAulaGrupoDTO>> buscarDiasAulaPorGrupo(Long grupoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_DIAS_AULA_POR_GRUPO)
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_DIAS_AULA_POR_GRUPO, Object[].class)
                         .setParameter(1, grupoId)
                         .getResultList())
                 .map(list -> list.stream()
-                        .map(row -> (Object[]) row)
                         .map(arr -> new DiaAulaGrupoDTO(
                                 ((Number) arr[0]).longValue(),
                                 arr[1] != null ? ((Number) arr[1]).longValue() : null,
@@ -530,25 +529,52 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     // Dias de aula de um oferecimento especifico (join table edc_oferecimento_dias_aula) -
     // migrado de DiaAulaService.buscaDiasAulaOferecimentoList (legado).
     public static final String SQL_BUSCAR_DIAS_AULA_POR_OFERECIMENTO =
-            "SELECT DISTINCT da.id, da.id_dia_semana, da.id_turno, da.id_tempo_aula " +
+            "SELECT DISTINCT da.id, da.id_dia_semana, da.id_turno, da.id_tempo_aula, " +
+                    "       te.descricao as turno_descricao, te.inicio as turno_inicio, te.fim as turno_fim, " +
+                    "       ta.descricao as tempo_descricao, ta.minutos_aula as tempo_minutos " +
                     "FROM edc_oferecimento_dias_aula oda " +
                     "JOIN edc_dia_aula da ON da.id = oda.id_dia_aula " +
+                    "LEFT JOIN edc_turno te ON te.id = da.id_turno " +
+                    "LEFT JOIN edc_tempo_aula ta ON ta.id = da.id_tempo_aula " +
                     "WHERE oda.id_oferecimento_componente_curricular = ?1 ORDER BY da.id";
 
-    public Uni<java.util.List<DiaAulaGrupoDTO>> buscarDiasAulaPorOferecimento(Long oferecimentoComponenteCurricularId) {
+    public record DiaAulaCompletoDTO(
+            Long id,
+            Long diaSemanaId,
+            Long turnoEducacaoId,
+            Long tempoAulaId,
+            String turnoDescricao,
+            java.time.LocalTime turnoInicio,
+            java.time.LocalTime turnoFim,
+            String tempoDescricao,
+            Integer tempoMinutos
+    ) {}
+
+    public Uni<java.util.List<DiaAulaCompletoDTO>> buscarDiasAulaPorOferecimento(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_DIAS_AULA_POR_OFERECIMENTO)
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_DIAS_AULA_POR_OFERECIMENTO, Object[].class)
                         .setParameter(1, oferecimentoComponenteCurricularId)
                         .getResultList())
                 .map(list -> list.stream()
-                        .map(row -> (Object[]) row)
-                        .map(arr -> new DiaAulaGrupoDTO(
+                        .map(arr -> new DiaAulaCompletoDTO(
                                 ((Number) arr[0]).longValue(),
                                 arr[1] != null ? ((Number) arr[1]).longValue() : null,
                                 arr[2] != null ? ((Number) arr[2]).longValue() : null,
-                                arr[3] != null ? ((Number) arr[3]).longValue() : null
+                                arr[3] != null ? ((Number) arr[3]).longValue() : null,
+                                (String) arr[4],
+                                toTime(arr[5]),
+                                toTime(arr[6]),
+                                (String) arr[7],
+                                arr[8] != null ? ((Number) arr[8]).intValue() : null
                         ))
                         .toList());
+    }
+
+    private java.time.LocalTime toTime(Object value) {
+        if (value == null) return null;
+        if (value instanceof java.time.LocalTime t) return t;
+        if (value instanceof java.sql.Time t) return t.toLocalTime();
+        return null;
     }
 
     // Migrado de OferecimentoComponenteCurricularService.atualizaDataOferecimento (legado) -

@@ -677,47 +677,40 @@ public class OferecimentoComponenteCurricularService {
     }
 
     // Dias de aula (edc_oferecimento_dias_aula) de todos os oferecimentos de um grupo.
+    // NOTA: as consultas a turno/tempo sao encadeadas sequencialmente (nao em paralelo via
+    // Uni.combine) porque a sessao reativa do Hibernate nao suporta queries concorrentes e
+    // lancava "Illegal pop() with non-matching JdbcValuesSourceProcessingState" (500).
     public Uni<List<DiaAulaResponse>> buscarDiasAulaPorGrupo(Long grupoId) {
         return repository.buscarDiasAulaPorGrupo(grupoId)
-                .flatMap(dias -> Uni.combine().all()
-                        .unis(turnoEducacaoRepository.listAll(), tempoAulaRepository.listAll())
-                        .asTuple()
-                        .map(tuple -> dias.stream().map(d -> {
-                            TurnoEducacao turno = d.turnoEducacaoId() != null
-                                    ? tuple.getItem1().stream().filter(t -> t.id.equals(d.turnoEducacaoId())).findFirst().orElse(null)
-                                    : null;
-                            TempoAula tempo = d.tempoAulaId() != null
-                                    ? tuple.getItem2().stream().filter(t -> t.id.equals(d.tempoAulaId())).findFirst().orElse(null)
-                                    : null;
-                            return new DiaAulaResponse(d.id(), d.diaSemanaId(), d.turnoEducacaoId(), d.tempoAulaId(),
-                                    turno != null ? turno.descricao : null,
-                                    tempo != null ? tempo.descricao : null,
-                                    turno != null ? turno.inicio : null,
-                                    turno != null ? turno.fim : null,
-                                    tempo != null ? tempo.minutos : null);
-                        }).toList()));
+                .flatMap(dias -> turnoEducacaoRepository.listAll()
+                        .flatMap(turnos -> tempoAulaRepository.listAll()
+                                .map(tempos -> dias.stream().map(d -> {
+                                    TurnoEducacao turno = d.turnoEducacaoId() != null
+                                            ? turnos.stream().filter(t -> t.id != null && t.id.equals(d.turnoEducacaoId())).findFirst().orElse(null)
+                                            : null;
+                                    TempoAula tempo = d.tempoAulaId() != null
+                                            ? tempos.stream().filter(t -> t.id != null && t.id.equals(d.tempoAulaId())).findFirst().orElse(null)
+                                            : null;
+                                    return new DiaAulaResponse(d.id(), d.diaSemanaId(), d.turnoEducacaoId(), d.tempoAulaId(),
+                                            turno != null ? turno.descricao : null,
+                                            tempo != null ? tempo.descricao : null,
+                                            turno != null ? turno.inicio : null,
+                                            turno != null ? turno.fim : null,
+                                            tempo != null ? tempo.minutos : null);
+                                }).toList())));
     }
 
-    // Dias de aula de um oferecimento especifico.
+    // Dias de aula de um oferecimento especifico - query unica com joins.
     public Uni<List<DiaAulaResponse>> buscarDiasAulaPorOferecimento(Long oferecimentoComponenteCurricularId) {
         return repository.buscarDiasAulaPorOferecimento(oferecimentoComponenteCurricularId)
-                .flatMap(dias -> Uni.combine().all()
-                        .unis(turnoEducacaoRepository.listAll(), tempoAulaRepository.listAll())
-                        .asTuple()
-                        .map(tuple -> dias.stream().map(d -> {
-                            TurnoEducacao turno = d.turnoEducacaoId() != null
-                                    ? tuple.getItem1().stream().filter(t -> t.id.equals(d.turnoEducacaoId())).findFirst().orElse(null)
-                                    : null;
-                            TempoAula tempo = d.tempoAulaId() != null
-                                    ? tuple.getItem2().stream().filter(t -> t.id.equals(d.tempoAulaId())).findFirst().orElse(null)
-                                    : null;
-                            return new DiaAulaResponse(d.id(), d.diaSemanaId(), d.turnoEducacaoId(), d.tempoAulaId(),
-                                    turno != null ? turno.descricao : null,
-                                    tempo != null ? tempo.descricao : null,
-                                    turno != null ? turno.inicio : null,
-                                    turno != null ? turno.fim : null,
-                                    tempo != null ? tempo.minutos : null);
-                        }).toList()));
+                .map(dias -> dias.stream().map(d -> new DiaAulaResponse(
+                        d.id(), d.diaSemanaId(), d.turnoEducacaoId(), d.tempoAulaId(),
+                        d.turnoDescricao(),
+                        d.tempoDescricao(),
+                        d.turnoInicio(),
+                        d.turnoFim(),
+                        d.tempoMinutos()
+                )).toList());
     }
 
     private DiaAulaResponse toDiaAulaResponse(DiaAula e) {
