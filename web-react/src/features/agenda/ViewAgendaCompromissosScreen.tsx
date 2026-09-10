@@ -2,7 +2,7 @@
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {api} from '../../shared/services/api';
 import {PermissionGate} from '../../shared/services/permissions';
-import {ScheduleWeekView, mondayOf, toIsoDate, parseDate, addDays, type ScheduleEventData} from '../../shared/components/WeeklyGrid';
+import {ScheduleWeekView, mondayOf, toIsoDate, parseDate, addDays, monthRangeForWeek, type ScheduleEventData} from '../../shared/components/WeeklyGrid';
 import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
 import {Tabs} from '../../shared/components/Tabs';
 import {Modal} from '../../shared/components/Modal';
@@ -136,6 +136,8 @@ export default function ViewAgendaCompromissosScreen() {
     const [selectedUnidadeId, setSelectedUnidadeId] = useState<number | ''>('');
     const [searchTerm, setSearchTerm] = useState('');
 
+    const {inicio: rangeInicio, fim: rangeFim} = monthRangeForWeek(weekStart);
+
     const agendasQuery = useQuery({
         queryKey: ['agendas', selectedUnidadeId],
         queryFn: async () => {
@@ -175,9 +177,9 @@ export default function ViewAgendaCompromissosScreen() {
     });
 
     const eventosQuery = useQuery({
-        queryKey: ['compromissos-eventos', selectedAgendaId, weekStart],
+        queryKey: ['compromissos-eventos', selectedAgendaId, rangeInicio, rangeFim],
         queryFn: async () => {
-            const params: Record<string, any> = {inicio: weekStart, fim: toIsoDate(addDays(parseDate(weekStart), 6))};
+            const params: Record<string, any> = {inicio: rangeInicio, fim: rangeFim};
             if (selectedAgendaId) params.agendaId = selectedAgendaId;
             const response = await api.get<Compromisso[]>('/api/view/compromisso/listCompromisso', {params});
             return response.data.map(c => ({

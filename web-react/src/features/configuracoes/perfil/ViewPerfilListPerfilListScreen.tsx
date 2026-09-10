@@ -1,8 +1,8 @@
-﻿import {PermissionGate} from '../../shared/services/permissions';
-import {ModuleTabs} from '../../shared/components/ModuleTabs';
-import type {DataTableColumn} from '../../shared/components/DataTable';
-import {MasterDetail} from '../../shared/components/MasterDetail';
-import type {MasterDetailColumn} from '../../shared/components/MasterDetail';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {ModuleTabs} from '../../../shared/components/ModuleTabs';
+import type {DataTableColumn} from '../../../shared/components/DataTable';
+import {MasterDetail} from '../../../shared/components/MasterDetail';
+import type {MasterDetailColumn} from '../../../shared/components/MasterDetail';
 
 const COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID', width: '60px'},

@@ -1,6 +1,6 @@
-﻿import {PermissionGate} from '../../shared/services/permissions';
-import {ModuleTabs} from '../../shared/components/ModuleTabs';
-import type {DataTableColumn} from '../../shared/components/DataTable';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {ModuleTabs} from '../../../shared/components/ModuleTabs';
+import type {DataTableColumn} from '../../../shared/components/DataTable';
 import {
     CAMPO_SOURCE,
     CAMPO_COLUMNS,
@@ -11,7 +11,7 @@ import {
     UNIDADE_SOURCE,
     UNIDADE_COLUMNS,
     UNIDADE_SEARCH
-} from '../../shared/services/masterDetailSources';
+} from '../../../shared/services/masterDetailSources';
 
 const CONFIGURACAO_PARCELA_COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID da Configuração de Parcela'},

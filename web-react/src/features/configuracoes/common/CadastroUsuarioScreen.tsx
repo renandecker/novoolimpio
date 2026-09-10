@@ -1,28 +1,28 @@
-﻿import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 
 import {useNavigate, useSearchParams} from 'react-router-dom';
 
 import {useQuery} from '@tanstack/react-query';
 
-import {PermissionGate} from '../../shared/services/permissions';
+import {PermissionGate} from '../../../shared/services/permissions';
 
-import {MasterDetail} from '../../shared/components/MasterDetail';
+import {MasterDetail} from '../../../shared/components/MasterDetail';
 
-import {BooleanField} from '../../shared/components/BooleanField';
+import {BooleanField} from '../../../shared/components/BooleanField';
 
-import {Tabs} from '../../shared/components/Tabs';
+import {Tabs} from '../../../shared/components/Tabs';
 
-import type {ApiItem} from '../../features/auth/types';
+import type {ApiItem} from '../../../shared/types/types.ts';
 
-import {api} from '../../shared/services/api';
+import {api} from '../../../shared/services/api';
 
-import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH, AGENDA_SOURCE, AGENDA_COLUMNS, AGENDA_SEARCH} from '../../shared/services/masterDetailSources';
+import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH, AGENDA_SOURCE, AGENDA_COLUMNS, AGENDA_SEARCH} from '../../../shared/services/masterDetailSources';
 
-import {EnderecoCampos} from '../../shared/components/EnderecoForm';
+import {EnderecoCampos} from '../../../shared/components/EnderecoForm';
 
-import type {Endereco} from '../../shared/components/EnderecoForm';
+import type {Endereco} from '../../../shared/components/EnderecoForm';
 
-import type {TipoPessoa} from '../../features/auth/cadastroUsuarioTypes';
+import type {TipoPessoa} from '../../auth/cadastroUsuarioTypes';
 
 import {
 
@@ -42,9 +42,9 @@ import {
 
     toDateInput,
 
-} from '../../features/auth/cadastroUsuarioTypes';
+} from '../../auth/cadastroUsuarioTypes';
 
-import '../../shared/components/AppLayout.css';
+import '../../../shared/components/AppLayout.css';
 
 
 

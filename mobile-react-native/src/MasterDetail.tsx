@@ -1,8 +1,8 @@
 import React, {useMemo, useState} from 'react';
 import {FlatList, Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
 import {useQuery} from '@tanstack/react-query';
-import {api} from './api';
-import type {ApiItem} from './types';
+import {api} from './shared/services/api';
+import type {ApiItem} from './shared/types/types';
 
 export interface MasterDetailColumn {
     key: string;

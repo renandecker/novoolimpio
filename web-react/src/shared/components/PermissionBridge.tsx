@@ -3,7 +3,7 @@ import {useQuery} from '@tanstack/react-query';
 import {useAuth} from '../../features/auth/auth';
 import {api} from '../services/api';
 import {PermissionProvider} from '../services/permissions';
-import type {ModulePermissions} from '../types/index/index/index';
+import type {ModulePermissions} from '../types/index';
 
 export default function PermissionBridge({children}: { children: ReactNode }) {
     const {session} = useAuth();

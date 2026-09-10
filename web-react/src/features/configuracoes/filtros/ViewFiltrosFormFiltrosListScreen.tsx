@@ -1,10 +1,10 @@
-﻿import {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {PermissionGate} from '../../shared/services/permissions';
-import {api} from '../../shared/services/api';
-import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
-import {MasterDetail} from '../../shared/components/MasterDetail';
-import type {ApiItem} from '../../shared/types/types';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {api} from '../../../shared/services/api';
+import {AutoComplete, type AutoCompleteOption} from '../../../shared/components/AutoComplete';
+import {MasterDetail} from '../../../shared/components/MasterDetail';
+import type {ApiItem} from '../../../shared/types/types';
 import {
     ESTRUTURA_SOURCE,
     ESTRUTURA_COLUMNS,
@@ -30,7 +30,7 @@ import {
     PERFIL_SOURCE,
     PERFIL_COLUMNS,
     PERFIL_SEARCH,
-} from '../../shared/services/masterDetailSources';
+} from '../../../shared/services/masterDetailSources';
 
 const TIPO_FILTRO_OPCOES = ['NENHUM', 'NORMAL', 'FAIXA', 'PERIODICO', 'FIXO', 'MULTIPLO'] as const;
 const OPERACAO_OPCOES = ['EQ', 'NOT_EQUAL', 'GREATER_THAN', 'GREATER_THAN_OR_EQUAL', 'LESS_THAN', 'LESS_THAN_OR_EQUAL'] as const;

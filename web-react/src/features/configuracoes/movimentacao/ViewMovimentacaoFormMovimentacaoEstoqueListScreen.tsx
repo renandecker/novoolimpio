@@ -1,5 +1,5 @@
-﻿import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../../shared/components/DataTable';
 
 const MOVIMENTACAO_COLUMNS: DataTableColumn[] = [
     {key: 'valor', label: 'Valor'},

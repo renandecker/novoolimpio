@@ -478,8 +478,9 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                             )}
                             {formasPagamento.length > 1 && (
                                 <Pressable
+                                    style={styles.removeButton}
                                     onPress={() => setFormasPagamento((list) => list.filter((_, i) => i !== idx))}>
-                                    <Text style={styles.removeText}>Remover</Text>
+                                    <Text style={styles.removeButtonText}>Remover</Text>
                                 </Pressable>
                             )}
                         </View>
@@ -607,6 +608,8 @@ const styles = StyleSheet.create({
     error: {color: '#b00020', marginBottom: 6},
     success: {color: '#2e7d32', marginBottom: 6},
     removeText: {color: '#b00020', marginTop: 4},
+    removeButton: {paddingHorizontal: 12, paddingVertical: 8, backgroundColor: '#dc3545', borderRadius: 4, marginTop: 4, alignItems: 'center'},
+    removeButtonText: {color: '#fff', fontSize: 12, fontWeight: '700'},
     subTabsRow: {flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10},
     chip: {
         borderWidth: 1,

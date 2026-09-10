@@ -1,7 +1,7 @@
-﻿import {useNavigate} from 'react-router-dom';
-import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable} from '../../shared/components/DataTable';
-import type {DataTableRowAction} from '../../shared/components/DataTable';
+import {useNavigate} from 'react-router-dom';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {DataTable} from '../../../shared/components/DataTable';
+import type {DataTableRowAction} from '../../../shared/components/DataTable';
 
 export default function ViewRelatoriosListOrganogramaListScreen() {
     const navigate = useNavigate();

@@ -1,8 +1,8 @@
-﻿import {useState} from 'react';
+import {useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {api} from '../../shared/services/api';
-import {PermissionGate} from '../../shared/services/permissions';
-import {Tabs, type TabItem} from '../../shared/components/Tabs';
+import {api} from '../../../shared/services/api';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {Tabs, type TabItem} from '../../../shared/components/Tabs';
 
 
 interface UnidadeRow {

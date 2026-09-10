@@ -1,16 +1,16 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import { PermissionGate } from '../../shared/services/permissions';
+import { PermissionGate } from '../../../shared/services/permissions';
 
-import { api } from '../../shared/services/api';
+import { api } from '../../../shared/services/api';
 
-import { MasterDetail } from '../../shared/components/MasterDetail';
+import { MasterDetail } from '../../../shared/components/MasterDetail';
 
-import { UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH } from '../../shared/services/masterDetailSources';
+import { UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH } from '../../../shared/services/masterDetailSources';
 
-import type { ApiItem } from '../../features/auth/types';
+import type { ApiItem } from '../../../shared/types/types.ts';
 
 
 

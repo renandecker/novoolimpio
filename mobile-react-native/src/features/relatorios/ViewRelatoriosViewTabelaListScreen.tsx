@@ -51,7 +51,7 @@ export default function ViewRelatoriosViewTabelaListScreen() {
                 onFiltersChange={handleFiltersChange}
                 onApplyFilters={handleApplyFilters}
             />
-            <ModuleList path="/api/view/relatorios/viewTabela"/>
+            <ModuleList path="/api/view/relatorios/viewTabela" hideCreate={true} hideUpdate={true} hideDelete={true} hideView={true}/>
         </View>
     );
 }

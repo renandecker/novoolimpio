@@ -191,7 +191,7 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                     data={tabelas}
                                     columns={TABELA_COLS}
                                     actions={[
-                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnblue', onClick: removeTabela},
+                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnred', onClick: removeTabela},
                                     ]}
                                 />
                             </div>
@@ -208,7 +208,7 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                     data={graficos}
                                     columns={GRAFICO_COLS}
                                     actions={[
-                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnblue', onClick: removeGrafico},
+                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnred', onClick: removeGrafico},
                                     ]}
                                 />
                             </div>
@@ -225,7 +225,7 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                     data={mapas}
                                     columns={MAPA_COLS}
                                     actions={[
-                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnblue', onClick: removeMapa},
+                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnred', onClick: removeMapa},
                                     ]}
                                 />
                             </div>

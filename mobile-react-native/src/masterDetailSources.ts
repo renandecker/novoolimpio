@@ -54,7 +54,6 @@ export const AGENDA_COLUMNS: MasterDetailColumn[] = [
     {key: 'atender', label: 'Atender', render: (item: any) => (item?.atender ? 'SIM' : 'NÃO')},
 ];
 export const AGENDA_SEARCH = ['descricao'];
-export const AGENDA_SEARCH = ['descricao'];
 
 export const PESSOA_SOURCE = '/api/view/pessoa/listPessoa';
 export const PESSOA_COLUMNS: MasterDetailColumn[] = [
@@ -93,12 +92,26 @@ export const CURSO_COLUMNS: MasterDetailColumn[] = [
 ];
 export const CURSO_SEARCH = ['sucinto'];
 
-export const GRUPO_SOURCE = '/api/view/grupo/listGrupo';
-export const GRUPO_COLUMNS: MasterDetailColumn[] = [
+export const GRUPO_COMPONENTECOMPONENTE_SOURCE = '/api/educacao/grupo-componente-curricular';
+export const GRUPO_COMPONENTECOMPONENTE_COLUMNS: MasterDetailColumn[] = [
     {key: 'id', label: 'Id'},
-    {key: 'nome', label: 'Nome'},
+    {key: 'descricao', label: 'Descrição'},
 ];
-export const GRUPO_SEARCH = ['nome'];
+export const GRUPO_COMPONENTECOMPONENTE_SEARCH = ['descricao'];
+
+export const TIPO_MATRIZ_CURRICULAR_SOURCE = '/api/educacao/tipo-matriz-curricular';
+export const TIPO_MATRIZ_CURRICULAR_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'Id'},
+    {key: 'descricao', label: 'Descrição'},
+];
+export const TIPO_MATRIZ_CURRICULAR_SEARCH = ['descricao'];
+
+export const MODALIDADE_SOURCE = '/api/educacao/modalidade';
+export const MODALIDADE_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'Id'},
+    {key: 'descricao', label: 'Descrição'},
+];
+export const MODALIDADE_SEARCH = ['descricao'];
 
 export const ETAPAS_SOURCE = '/api/view/etapasCobranca/listEtapasCobranca';
 export const ETAPAS_COLUMNS: MasterDetailColumn[] = [

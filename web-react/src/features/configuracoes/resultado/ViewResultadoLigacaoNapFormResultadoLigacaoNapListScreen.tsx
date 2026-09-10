@@ -1,5 +1,5 @@
-﻿import {PermissionGate} from '../../shared/services/permissions';
-import {ModuleTabs} from '../../shared/components/ModuleTabs';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {ModuleTabs} from '../../../shared/components/ModuleTabs';
 
 export default function ViewResultadoLigacaoNapFormResultadoLigacaoNapListScreen() {
     return (

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef} from 'react';
-import {api} from '../../shared/services/api';
+import {api} from '../../../shared/services/api';
 
 interface CurriculumAttachmentModalProps {
     visible: boolean;
@@ -239,9 +239,11 @@ export function CurriculumAttachmentModal({
                                     flex: '1',
                                     minWidth: '140px',
                                     padding: '14px',
-                                    backgroundColor: '#fff',
+                                    backgroundColor: '#e53935',
                                     borderRadius: '8px',
-                                    border: '1px solid #e74c3c',
+                                    border: '1px solid #e53935',
+                                    color: '#fff',
+                                    fontWeight: 600,
                                     display: 'flex',
                                     justifyContent: 'center',
                                     alignItems: 'center',
@@ -261,9 +263,11 @@ export function CurriculumAttachmentModal({
                             style={{
                                 width: '100%',
                                 padding: '14px',
-                                backgroundColor: '#fff',
+                                backgroundColor: '#e53935',
                                 borderRadius: '8px',
-                                border: '1px solid #e74c3c',
+                                border: '1px solid #e53935',
+                                color: '#fff',
+                                fontWeight: 600,
                                 marginBottom: '12px',
                                 cursor: 'pointer',
                                 display: 'flex',

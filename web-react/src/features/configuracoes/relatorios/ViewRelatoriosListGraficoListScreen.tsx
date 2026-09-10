@@ -1,9 +1,9 @@
-﻿import {useState, useEffect} from 'react';
-import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable} from '../../shared/components/DataTable';
-import {ReportFilters} from '../../shared/components/ReportFilters';
-import type {FiltroRelatorioWrapper} from '../../shared/types/types';
-import {api} from '../../shared/services/api';
+import {useState, useEffect} from 'react';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {DataTable} from '../../../shared/components/DataTable';
+import {ReportFilters} from '../../../shared/components/ReportFilters';
+import type {FiltroRelatorioWrapper} from '../../../shared/types/types';
+import {api} from '../../../shared/services/api';
 
 export default function ViewRelatoriosListGraficoListScreen() {
     const [filtros, setFiltros] = useState<FiltroRelatorioWrapper[]>([]);

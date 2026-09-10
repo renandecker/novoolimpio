@@ -6,19 +6,19 @@ import {X, Calendar, Grid} from 'lucide-react';
 
 import {useNavigate, useSearchParams} from 'react-router-dom';
 
-import {PermissionGate} from '../../shared/services/permissions';
+import {PermissionGate} from '../../../shared/services/permissions';
 
-import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
+import {AutoComplete, type AutoCompleteOption} from '../../../shared/components/AutoComplete';
 
-import {api, useApi} from '../../shared/services/api';
+import {api, useApi} from '../../../shared/services/api';
 
-import {legacyClassName} from '../../shared/components/DataTable';
+import {legacyClassName} from '../../../shared/components/DataTable';
 
 import {format} from 'date-fns';
 
-import {Modal} from '../../shared/components/Modal';
+import {Modal} from '../../../shared/components/Modal';
 
-import {ScheduleWeekView, mondayOf, toIsoDate, type ScheduleEventData} from '../../shared/components/WeeklyGrid';
+import {ScheduleWeekView, mondayOf, toIsoDate, monthRangeForWeek, type ScheduleEventData} from '../../../shared/components/WeeklyGrid';
 
 
 
@@ -990,42 +990,77 @@ const [carregando, setCarregando] = useState(true);
 
 
 
-    const abrirModalOferta = async () => {
-        const d = dataRef.current;
-        if (!d.entity.unidadeId) { alert('Selecione a unidade primeiro'); return; }
-        setModalOfertaOpen(true);
+    const modalOfertaRangeRef = useRef<{inicio: string; fim: string} | null>(null);
+    const modalSalaRangeRef = useRef<{inicio: string; fim: string} | null>(null);
+
+    const fetchModalOferta = useCallback(async (semana: string, d: OferecimentoCCData) => {
+        const {inicio, fim} = monthRangeForWeek(semana);
         setModalOfertaLoading(true);
         try {
             const resp = await api.get('/api/educacao/disponibilidade-oferecimento-curso/schedule-events', {
-                params: {unidadeId: d.entity.unidadeId, inicio: modalOfertaWeekStart, fim: modalOfertaWeekStart}
+                params: {unidadeId: d.entity.unidadeId, inicio, fim}
             });
             setModalOfertaEvents(resp.data ?? []);
+            modalOfertaRangeRef.current = {inicio, fim};
         } catch (e) {
             console.error(e);
             setModalOfertaEvents([]);
         } finally {
             setModalOfertaLoading(false);
         }
-    };
+    }, []);
 
-    const abrirModalSala = async () => {
+    const abrirModalOferta = async () => {
         const d = dataRef.current;
         if (!d.entity.unidadeId) { alert('Selecione a unidade primeiro'); return; }
-        if (!d.entity.salaId) { alert('Selecione a sala primeiro'); return; }
-        setModalSalaOpen(true);
+        setModalOfertaOpen(true);
+        await fetchModalOferta(modalOfertaWeekStart, d);
+    };
+
+    const mudarSemanaModalOferta = useCallback((novaSemana: string) => {
+        setModalOfertaWeekStart(novaSemana);
+        const {inicio, fim} = monthRangeForWeek(novaSemana);
+        if (!modalOfertaRangeRef.current || modalOfertaRangeRef.current.inicio !== inicio || modalOfertaRangeRef.current.fim !== fim) {
+            const d = dataRef.current;
+            if (!d.entity.unidadeId) return;
+            void fetchModalOferta(novaSemana, d);
+        }
+    }, [fetchModalOferta]);
+
+    const fetchModalSala = useCallback(async (semana: string, d: OferecimentoCCData) => {
+        const {inicio, fim} = monthRangeForWeek(semana);
         setModalSalaLoading(true);
         try {
             const resp = await api.get('/api/educacao/disponibilidade-sala/schedule-events', {
-                params: {unidadeId: d.entity.unidadeId, salaId: d.entity.salaId, inicio: modalSalaWeekStart, fim: modalSalaWeekStart}
+                params: {unidadeId: d.entity.unidadeId, salaId: d.entity.salaId, inicio, fim}
             });
             setModalSalaEvents(resp.data ?? []);
+            modalSalaRangeRef.current = {inicio, fim};
         } catch (e) {
             console.error(e);
             setModalSalaEvents([]);
         } finally {
             setModalSalaLoading(false);
         }
+    }, []);
+
+    const abrirModalSala = async () => {
+        const d = dataRef.current;
+        if (!d.entity.unidadeId) { alert('Selecione a unidade primeiro'); return; }
+        if (!d.entity.salaId) { alert('Selecione a sala primeiro'); return; }
+        setModalSalaOpen(true);
+        await fetchModalSala(modalSalaWeekStart, d);
     };
+
+    const mudarSemanaModalSala = useCallback((novaSemana: string) => {
+        setModalSalaWeekStart(novaSemana);
+        const {inicio, fim} = monthRangeForWeek(novaSemana);
+        if (!modalSalaRangeRef.current || modalSalaRangeRef.current.inicio !== inicio || modalSalaRangeRef.current.fim !== fim) {
+            const d = dataRef.current;
+            if (!d.entity.unidadeId || !d.entity.salaId) return;
+            void fetchModalSala(novaSemana, d);
+        }
+    }, [fetchModalSala]);
 
 
 
@@ -1606,7 +1641,7 @@ const [carregando, setCarregando] = useState(true);
             <Modal title="Disponibilidade dos Oferecimentos" open={modalOfertaOpen} onClose={() => setModalOfertaOpen(false)} size="xl">
                 <ScheduleWeekView
                     startDate={modalOfertaWeekStart}
-                    onWeekChange={setModalOfertaWeekStart}
+                    onWeekChange={mudarSemanaModalOferta}
                     events={modalOfertaEvents}
                     loading={modalOfertaLoading}
                     legend={LEGENDA_OFERECIMENTO}
@@ -1615,7 +1650,7 @@ const [carregando, setCarregando] = useState(true);
             <Modal title="Disponibilidade da Sala" open={modalSalaOpen} onClose={() => setModalSalaOpen(false)} size="xl">
                 <ScheduleWeekView
                     startDate={modalSalaWeekStart}
-                    onWeekChange={setModalSalaWeekStart}
+                    onWeekChange={mudarSemanaModalSala}
                     events={modalSalaEvents}
                     loading={modalSalaLoading}
                     legend={LEGENDA_OFERECIMENTO}

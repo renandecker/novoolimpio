@@ -338,7 +338,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                                         renderItem={({item}) => (
                                             <View style={styles.usuarioRow}>
                                                 <Text>{item.nome ?? item.login}</Text>
-                                                <TouchableOpacity onPress={() => removeUsuario(item.id)}>
+                                                <TouchableOpacity style={styles.removeBtnBox} onPress={() => removeUsuario(item.id)}>
                                                     <Text style={styles.removeBtn}>Remover</Text>
                                                 </TouchableOpacity>
                                             </View>
@@ -361,5 +361,6 @@ const styles = StyleSheet.create({
     input: {flex: 1, borderWidth: 1, borderColor: '#ccc', padding: 10, borderRadius: 4, backgroundColor: '#fff'},
     loading: {textAlign: 'center', marginTop: 50, color: '#888'},
     usuarioRow: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#eee'},
-    removeBtn: {color: 'red', fontWeight: 'bold'},
+    removeBtn: {color: '#fff', fontWeight: 'bold', fontSize: 11},
+    removeBtnBox: {backgroundColor: '#dc3545', borderRadius: 4, paddingHorizontal: 10, paddingVertical: 6},
 });

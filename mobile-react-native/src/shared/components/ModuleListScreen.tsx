@@ -90,12 +90,20 @@ export function ModuleList({
                                 params,
                                 extraActions,
                                 outcome: customOutcome,
+                                hideCreate = false,
+                                hideUpdate = false,
+                                hideDelete = false,
+                                hideView = false,
                             }: {
     path: string;
     title?: string;
     params?: Record<string, string | number | boolean | undefined>;
     extraActions?: ModuleListExtraAction[];
     outcome?: string;
+    hideCreate?: boolean;
+    hideUpdate?: boolean;
+    hideDelete?: boolean;
+    hideView?: boolean;
 }) {
     const [sortField, setSortField] = useState<string>('id');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -130,12 +138,12 @@ export function ModuleList({
 
     const screenTitle = title ?? (resource ? entityTitle : toTitle(feature) || 'Lista');
 
-    const canCreate = can(session, 'CREATE', outcome);
-    const canUpdate = can(session, 'UPDATE', outcome);
-    const canDelete = can(session, 'DELETE', outcome);
+    const canCreate = !hideCreate && can(session, 'CREATE', outcome);
+    const canUpdate = !hideUpdate && can(session, 'UPDATE', outcome);
+    const canDelete = !hideDelete && can(session, 'DELETE', outcome);
     const canExecute = can(session, 'EXECUTE', outcome);
     const isAdminUser = isAdmin(session);
-    const canRelatorio = isAdminUser || canExecute;
+    const canRelatorio = !hideView && (isAdminUser || canExecute);
 
     const q = useModulePaged(path, page, size, params, filterParams, sortRequest);
     const items = q.data?.content ?? [];
@@ -302,13 +310,14 @@ export function ModuleList({
                                 <View style={styles.rowActions}>
                                     {extraActions?.map((action) => {
                                         if (action.permission && !can(session, action.permission, outcome)) return null;
+                                        const isRemover = action.key === 'remover' || action.key === 'remove' || action.title === 'Remover';
                                         return (
                                             <Pressable
                                                 key={action.key}
-                                                style={styles.rowButton}
+                                                style={[styles.rowButton, isRemover && styles.dangerButtonSolid]}
                                                 onPress={() => action.onPress(item)}
                                             >
-                                                <Text style={styles.rowButtonText}>{action.icon ? `${action.icon} ` : ''}{action.title}</Text>
+                                                <Text style={[styles.rowButtonText, isRemover && styles.dangerButtonSolidText]}>{action.icon ? `${action.icon} ` : ''}{action.title}</Text>
                                             </Pressable>
                                         );
                                     })}

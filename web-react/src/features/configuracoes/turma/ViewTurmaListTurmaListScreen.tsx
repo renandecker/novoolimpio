@@ -1,17 +1,17 @@
-﻿import {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import type {ReactNode} from 'react';
 
-import {PermissionGate} from '../../shared/services/permissions';
+import {PermissionGate} from '../../../shared/services/permissions';
 
-import {DataTable, type DataTableColumn, type DataTableRowAction, type DataTableToolbarButton} from '../../shared/components/DataTable';
+import {DataTable, type DataTableColumn, type DataTableRowAction, type DataTableToolbarButton} from '../../../shared/components/DataTable';
 
-import {MasterDetail} from '../../shared/components/MasterDetail';
+import {MasterDetail} from '../../../shared/components/MasterDetail';
 
-import {Tabs} from '../../shared/components/Tabs';
+import {Tabs} from '../../../shared/components/Tabs';
 
-import {Wizard} from '../../shared/components/Wizard';
+import {Wizard} from '../../../shared/components/Wizard';
 
-import {api} from '../../shared/services/api';
+import {api} from '../../../shared/services/api';
 
 import {
 
@@ -27,13 +27,13 @@ import {
 
     COMPONENTE_SEARCH,
 
-} from '../../shared/services/masterDetailSources';
+} from '../../../shared/services/masterDetailSources';
 
-import type {ApiItem} from '../../features/auth/types';
+import type {ApiItem} from '../../../shared/types/types.ts';
 
-import {usePermissions} from '../../shared/services/permissions';
+import {usePermissions} from '../../../shared/services/permissions';
 
-import '../../features/professor/GestaoProfessor.css';
+import '../../professor/GestaoProfessor.css';
 
 
 const TURMA_COLUMNS: DataTableColumn[] = [
@@ -45,6 +45,11 @@ const TURMA_COLUMNS: DataTableColumn[] = [
     {key: 'professor_descricao', label: 'Professor'},
     {key: 'sala_descricao', label: 'Sala'},
     {key: 'status', label: 'Status'},
+    {key: 'inscritos', label: 'Inscritos'},
+    {key: 'vagas', label: 'Vagas'},
+    {key: 'cargaHoraria', label: 'C.H.'},
+    {key: 'dataInicio', label: 'Data Início'},
+    {key: 'dataFim', label: 'Data Fim'},
 ];
 
 

@@ -1,9 +1,9 @@
-﻿import {useState} from 'react';
-import {api} from '../../shared/services/api';
-import {PermissionGate} from '../../shared/services/permissions';
-import {useAuth} from '../../features/auth/auth';
-import {Tabs} from '../../shared/components/Tabs';
-import {AutoComplete} from '../../shared/components/AutoComplete';
+import {useState} from 'react';
+import {api} from '../../../shared/services/api';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {useAuth} from '../../auth/auth';
+import {Tabs} from '../../../shared/components/Tabs';
+import {AutoComplete} from '../../../shared/components/AutoComplete';
 import {Plus, Save, X, FilePlus2, Pencil, Trash2} from 'lucide-react';
 
 type RespostaTipo = 'SELECAO' | 'ESCOLHA' | 'TEXTO' | 'ARQUIVO';
@@ -174,7 +174,8 @@ function CriarPergunta() {
                                 }
                             />
                             <button
-                                className="gp-btn gp-btn-acoes"
+                                className="gp-btn gp-btn-acoes btnred"
+                                style={{borderColor: '#e53935', color: '#e53935'}}
                                 onClick={() => removerOpcao(opcao.id)}
                                 title="Remover opção"
                             >
@@ -232,7 +233,8 @@ function CriarPergunta() {
                         <div key={idx} className="gp-anexo-chip">
                             {a.tipo}: {a.nome}
                             <button
-                                className="gp-btn gp-btn-acoes"
+                                className="gp-btn gp-btn-acoes btnred"
+                                style={{borderColor: '#e53935', color: '#e53935'}}
                                 onClick={() => removerAnexo(a.id)}
                                 title="Remover anexo"
                             >

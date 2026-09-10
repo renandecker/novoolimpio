@@ -1,9 +1,9 @@
-﻿import {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {PermissionGate} from '../../shared/services/permissions';
-import {FormLayout, FormTabConfig} from '../../shared/components/FormLayout';
-import {api} from '../../shared/services/api';
-import {API_PATHS} from '../../shared/services/apiPaths';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {FormLayout, FormTabConfig} from '../../../shared/components/FormLayout';
+import {api} from '../../../shared/services/api';
+import {API_PATHS} from '../../../shared/services/apiPaths';
 
 // Mesmas 3 opções de direção do AG Charts Org Chart (ver tela de visualização).
 const DIRECAO_OPTIONS = [

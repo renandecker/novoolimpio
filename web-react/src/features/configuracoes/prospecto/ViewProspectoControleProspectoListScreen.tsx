@@ -1,8 +1,8 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {Info, Sun} from 'lucide-react';
-import { PermissionGate } from '../../shared/services/permissions';
-import { Modal } from '../../shared/components/Modal';
+import { PermissionGate } from '../../../shared/services/permissions';
+import { Modal } from '../../../shared/components/Modal';
 
 interface Campo {
     id: number;

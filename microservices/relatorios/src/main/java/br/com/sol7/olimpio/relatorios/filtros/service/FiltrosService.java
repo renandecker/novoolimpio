@@ -4,6 +4,7 @@ import br.com.sol7.olimpio.relatorios.estrutura.entity.Estrutura;
 import br.com.sol7.olimpio.relatorios.filtros.controller.FiltrosController;
 import br.com.sol7.olimpio.relatorios.filtros.dto.FiltroPermissaoItem;
 import br.com.sol7.olimpio.relatorios.filtros.dto.FiltroRelatorioItem;
+import br.com.sol7.olimpio.relatorios.filtros.dto.FiltroRelatorioWrapperDTO;
 import br.com.sol7.olimpio.relatorios.filtros.dto.FiltrosRelacoesRequest;
 import br.com.sol7.olimpio.relatorios.filtros.dto.FiltrosRelacoesResponse;
 import br.com.sol7.olimpio.relatorios.filtros.dto.FiltrosRequest;
@@ -15,6 +16,8 @@ import br.com.sol7.olimpio.relatorios.mapa.entity.Mapa;
 import br.com.sol7.olimpio.relatorios.organograma.entity.Organograma;
 import br.com.sol7.olimpio.relatorios.tabela.entity.Tabela;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;
@@ -22,6 +25,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
@@ -327,6 +331,73 @@ public class FiltrosService {
     public Uni<Void> buscarDadosTipo() {
         // Obs: logica de UI do controlador JSF legado (JdbcTemplate/RelatorioTabelaDimenaoLazyModel e estado da tela), sem equivalente reativo
         return Uni.createFrom().voidItem();
+    }
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewTabela(Long tabelaId) {
+        return repository.findByTabela(tabelaId)
+                .map(this::toWrapperDTOs);
+    }
+
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForListTabela() {
+        return repository.findAllForListTabela()
+                .map(this::toWrapperDTOs);
+    }
+
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewMapa(Long mapaId) {
+        return repository.findByMapa(mapaId)
+                .map(this::toWrapperDTOs);
+    }
+
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewGraficoBarrasHorizontal(Long graficoId) {
+        return repository.findByGrafico(graficoId)
+                .map(this::toWrapperDTOs);
+    }
+
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForListGrafico() {
+        return repository.findAllForListGrafico()
+                .map(this::toWrapperDTOs);
+    }
+
+    private List<FiltroRelatorioWrapperDTO> toWrapperDTOs(List<Filtros> filtros) {
+        List<FiltroRelatorioWrapperDTO> result = new ArrayList<>();
+        for (Filtros f : filtros) {
+            FiltroRelatorioWrapperDTO.FiltroRelatorioDTO filtroDTO = parseDadosJson(f);
+            boolean selected = filtroDTO != null && filtroDTO.fixo();
+            String informacao = filtroDTO != null ? filtroDTO.informacao() : null;
+            result.add(new FiltroRelatorioWrapperDTO(filtroDTO, selected, informacao));
+        }
+        return result;
+    }
+
+    private FiltroRelatorioWrapperDTO.FiltroRelatorioDTO parseDadosJson(Filtros f) {
+        if (f.dadosJson == null || f.dadosJson.isEmpty()) {
+            return new FiltroRelatorioWrapperDTO.FiltroRelatorioDTO(
+                    f.id, f.nome, false, true, "DINAMICO", null,
+                    new FiltroRelatorioWrapperDTO.DimensaoDTO("DESCRITIVO")
+            );
+        }
+        try {
+            JsonNode json = objectMapper.readTree(f.dadosJson);
+            boolean fixo = json.has("fixo") ? json.get("fixo").asBoolean() : false;
+            boolean exibirFiltro = json.has("exibirFiltro") ? json.get("exibirFiltro").asBoolean() : true;
+            String tipo = json.has("tipo") ? json.get("tipo").asText() : "DINAMICO";
+            String informacao = json.has("informacao") ? json.get("informacao").asText() : null;
+            String tipoInfo = "DESCRITIVO";
+            if (json.has("dimensao") && json.get("dimensao").has("tipoInfo")) {
+                tipoInfo = json.get("dimensao").get("tipoInfo").asText();
+            }
+            return new FiltroRelatorioWrapperDTO.FiltroRelatorioDTO(
+                    f.id, f.nome, fixo, exibirFiltro, tipo, informacao,
+                    new FiltroRelatorioWrapperDTO.DimensaoDTO(tipoInfo)
+            );
+        } catch (Exception e) {
+            return new FiltroRelatorioWrapperDTO.FiltroRelatorioDTO(
+                    f.id, f.nome, false, true, "DINAMICO", null,
+                    new FiltroRelatorioWrapperDTO.DimensaoDTO("DESCRITIVO")
+            );
+        }
     }
 
 }

@@ -57,19 +57,81 @@ public class FiltrosRepository implements PanacheRepository<Filtros> {
     }
 
     public Uni<List<Filtros>> buscarFiltrosTabela(Long tabelaId) {
-        return Uni.createFrom().item(List.of());
+        return findByTabela(tabelaId);
     }
 
     public Uni<List<Filtros>> buscarFiltrosGrafico(Long graficoId) {
-        return Uni.createFrom().item(List.of());
+        return findByGrafico(graficoId);
     }
 
     public Uni<List<Filtros>> buscarFiltrosMapa(Long mapaId) {
-        return Uni.createFrom().item(List.of());
+        return findByMapa(mapaId);
     }
 
     public Uni<List<Filtros>> buscarFiltrosOrganograma(Long organogramaId) {
-        return Uni.createFrom().item(List.of());
+        return findByOrganograma(organogramaId);
+    }
+
+    public Uni<List<Filtros>> findByTabela(Long tabelaId) {
+        String sql = "SELECT f.* FROM rel_filtro f "
+                + "JOIN rel_filtro_tabela ft ON ft.id_filtro = f.id "
+                + "WHERE ft.id_tabela = :tabelaId "
+                + "ORDER BY f.nome";
+        return Panache.getSession().chain(session -> session
+                .createNativeQuery(sql, Filtros.class)
+                .setParameter("tabelaId", tabelaId)
+                .getResultList());
+    }
+
+    public Uni<List<Filtros>> findByGrafico(Long graficoId) {
+        String sql = "SELECT f.* FROM rel_filtro f "
+                + "JOIN rel_filtro_grafico fg ON fg.id_filtro = f.id "
+                + "WHERE fg.id_grafico = :graficoId "
+                + "ORDER BY f.nome";
+        return Panache.getSession().chain(session -> session
+                .createNativeQuery(sql, Filtros.class)
+                .setParameter("graficoId", graficoId)
+                .getResultList());
+    }
+
+    public Uni<List<Filtros>> findByMapa(Long mapaId) {
+        String sql = "SELECT f.* FROM rel_filtro f "
+                + "JOIN rel_filtro_mapa fm ON fm.id_filtro = f.id "
+                + "WHERE fm.id_mapa = :mapaId "
+                + "ORDER BY f.nome";
+        return Panache.getSession().chain(session -> session
+                .createNativeQuery(sql, Filtros.class)
+                .setParameter("mapaId", mapaId)
+                .getResultList());
+    }
+
+    public Uni<List<Filtros>> findByOrganograma(Long organogramaId) {
+        String sql = "SELECT f.* FROM rel_filtro f "
+                + "JOIN rel_filtro_organograma fo ON fo.id_filtro = f.id "
+                + "WHERE fo.id_organograma = :organogramaId "
+                + "ORDER BY f.nome";
+        return Panache.getSession().chain(session -> session
+                .createNativeQuery(sql, Filtros.class)
+                .setParameter("organogramaId", organogramaId)
+                .getResultList());
+    }
+
+    public Uni<List<Filtros>> findAllForListTabela() {
+        String sql = "SELECT DISTINCT f.* FROM rel_filtro f "
+                + "JOIN rel_filtro_tabela ft ON ft.id_filtro = f.id "
+                + "ORDER BY f.nome";
+        return Panache.getSession().chain(session -> session
+                .createNativeQuery(sql, Filtros.class)
+                .getResultList());
+    }
+
+    public Uni<List<Filtros>> findAllForListGrafico() {
+        String sql = "SELECT DISTINCT f.* FROM rel_filtro f "
+                + "JOIN rel_filtro_grafico fg ON fg.id_filtro = f.id "
+                + "ORDER BY f.nome";
+        return Panache.getSession().chain(session -> session
+                .createNativeQuery(sql, Filtros.class)
+                .getResultList());
     }
 
     public Uni<List<Filtros>> buscarFiltrosTabelaComFiltros(Long filtroRelatorioId) {

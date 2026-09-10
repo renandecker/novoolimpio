@@ -1,6 +1,6 @@
-﻿import {useEffect, useMemo, useState} from 'react';
-import {PermissionGate} from '../../shared/services/permissions';
-import {api} from '../../shared/services/api';
+import {useEffect, useMemo, useState} from 'react';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {api} from '../../../shared/services/api';
 
 interface ModuloMenu {
     id: number;

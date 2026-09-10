@@ -1,9 +1,9 @@
-﻿import {useState, useEffect} from 'react';
-import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable} from '../../shared/components/DataTable';
-import {ReportFilters} from '../../shared/components/ReportFilters';
-import type {FiltroRelatorioWrapper} from '../../shared/types/types';
-import {api} from '../../shared/services/api';
+import {useState, useEffect} from 'react';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {DataTable} from '../../../shared/components/DataTable';
+import {ReportFilters} from '../../../shared/components/ReportFilters';
+import type {FiltroRelatorioWrapper} from '../../../shared/types/types';
+import {api} from '../../../shared/services/api';
 
 export default function ViewRelatoriosViewMapaListScreen() {
     const [filtros, setFiltros] = useState<FiltroRelatorioWrapper[]>([]);
@@ -41,7 +41,7 @@ export default function ViewRelatoriosViewMapaListScreen() {
                 <h1>View Mapa</h1>
             </div>
             <ReportFilters filtros={filtros} onFiltersChange={handleFiltersChange} onApplyFilters={handleApplyFilters} />
-            <DataTable path="/api/view/relatorios/viewMapa"/>
+            <DataTable path="/api/relatorios/grafico"/>
         </main>
     </PermissionGate>
 }

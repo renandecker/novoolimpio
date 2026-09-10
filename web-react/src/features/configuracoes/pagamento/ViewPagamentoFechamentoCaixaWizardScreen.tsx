@@ -1,18 +1,18 @@
-﻿import {useState, useEffect, useCallback} from 'react';
+import {useState, useEffect, useCallback} from 'react';
 
 import {useQuery} from '@tanstack/react-query';
 
-import {api} from '../../shared/services/api';
+import {api} from '../../../shared/services/api';
 
-import {useAuth} from '../../features/auth/auth';
+import {useAuth} from '../../auth/auth';
 
-import {PermissionGate} from '../../shared/services/permissions';
+import {PermissionGate} from '../../../shared/services/permissions';
 
-import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
+import {AutoComplete, type AutoCompleteOption} from '../../../shared/components/AutoComplete';
 
-import {Wizard, useWizardData} from '../../shared/components/Wizard';
+import {Wizard, useWizardData} from '../../../shared/components/Wizard';
 
-import './FechamentoCaixa.css';
+import '../FechamentoCaixa.css';
 
 
 

@@ -1,11 +1,11 @@
-﻿import {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable} from '../../shared/components/DataTable';
-import {ReportFilters} from '../../shared/components/ReportFilters';
-import type {DataTableRowAction} from '../../shared/components/DataTable';
-import type {FiltroRelatorioWrapper} from '../../shared/types/types';
-import {api} from '../../shared/services/api';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {DataTable} from '../../../shared/components/DataTable';
+import {ReportFilters} from '../../../shared/components/ReportFilters';
+import type {DataTableRowAction} from '../../../shared/components/DataTable';
+import type {FiltroRelatorioWrapper} from '../../../shared/types/types';
+import {api} from '../../../shared/services/api';
 
 export default function ViewRelatoriosListTabelaListScreen() {
     const navigate = useNavigate();
@@ -33,7 +33,7 @@ export default function ViewRelatoriosListTabelaListScreen() {
             icon: <i className="fa fa-external-link"/>,
             permission: 'EXECUTE',
             onClick: (item) => {
-                navigate(`/view/relatorios/viewTabela?id=${item.id}`);
+                navigate(`/view/relatorios/viewTabela/${item.id}`);
             },
         },
     ];

@@ -1,5 +1,5 @@
-﻿import { PermissionGate } from '../../shared/services/permissions';
-import { DataTable, type DataTableColumn } from '../../shared/components/DataTable';
+import { PermissionGate } from '../../../shared/services/permissions';
+import { DataTable, type DataTableColumn } from '../../../shared/components/DataTable';
 
 /**
  * Tela /view/tipoPausa/listTipoPausa

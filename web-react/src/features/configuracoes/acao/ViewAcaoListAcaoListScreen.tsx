@@ -1,5 +1,5 @@
-﻿import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable} from '../../shared/components/DataTable';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {DataTable} from '../../../shared/components/DataTable';
 
 const COLUMNS = [
     {key: 'id', label: 'Id', sortable: true},

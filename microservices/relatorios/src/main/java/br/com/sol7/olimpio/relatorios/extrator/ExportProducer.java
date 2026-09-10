@@ -11,7 +11,7 @@ import jakarta.inject.Inject;
 public class ExportProducer {
 
     @Inject
-    @Channel("export-requests")
+    @Channel("export-requests-out")
     Emitter<ExportRequest> emitter;
 
     public Uni<Void> enviar(ExportRequest request) {

@@ -1,9 +1,9 @@
-﻿import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../../shared/components/DataTable';
 import {useState, useCallback} from 'react';
-import {api} from '../../shared/services/api';
+import {api} from '../../../shared/services/api';
 import {useQuery} from '@tanstack/react-query';
-import type {ApiItem} from '../../shared/types/types';
+import type {ApiItem} from '../../../shared/types/types';
 
 interface Unidade {
   id: number;

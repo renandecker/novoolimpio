@@ -1,4 +1,4 @@
-﻿import {useRef, useState, useEffect} from 'react';
+import {useRef, useState, useEffect} from 'react';
 
 
 import {
@@ -12,19 +12,23 @@ import {
   ChevronRight,
   FileText,
 } from 'lucide-react';
-import {api} from '../../shared/services/api';
+import {api} from '../../../shared/services/api';
 
-import {PermissionGate, usePermissions} from '../../shared/services/permissions';
+import {PermissionGate, usePermissions} from '../../../shared/services/permissions';
 
-import {useAuth} from '../../features/auth/auth';
+import {useAuth} from '../../auth/auth';
 
-import {Tabs} from '../../shared/components/Tabs';
+import {useQuery} from '@tanstack/react-query';
 
-import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
+import {Tabs} from '../../../shared/components/Tabs';
 
-import {legacyClassName} from '../../shared/components/DataTable';
+import {AutoComplete, type AutoCompleteOption} from '../../../shared/components/AutoComplete';
 
-import '../../features/professor/GestaoProfessor.css';
+import {ScheduleWeekView, mondayOf, toIsoDate, type ScheduleEventData} from '../../../shared/components/WeeklyGrid';
+
+import {legacyClassName} from '../../../shared/components/DataTable';
+
+import '../../professor/GestaoProfessor.css';
 
 
 
@@ -254,7 +258,7 @@ function Painel({
 
                 <span className="gp-panel-titulo">{titulo}</span>
 
-                <span className="gp-panel-setinha">{colapsado ? '<ChevronRight className="icon" />' : '<ChevronDown className="icon" />'}</span>
+                <span className="gp-panel-setinha">{colapsado ? <ChevronRight className="icon" /> : <ChevronDown className="icon" />}</span>
 
             </div>
 
@@ -332,23 +336,61 @@ function Aviso({tipo, texto}: { tipo: 'erro' | 'sucesso'; texto: string }) {
 
 export default function ViewGestaoProfessorGestaoProfessorListScreen() {
 
+    const {session} = useAuth();
+
+    const username = session?.username;
+
+
+
+    const identidadeQuery = useQuery({
+
+        queryKey: ['gestao-professor-identidade', username],
+
+        queryFn: async () =>
+
+            (
+
+                await api.get<{ souProfessor: boolean; professorId: number | null }>('/api/professor/gestao-professor/identidade', {
+
+                    params: {username},
+
+                })
+
+            ).data,
+
+        enabled: !!username,
+
+    });
+
+
+
+    const souProfessor = identidadeQuery.data?.souProfessor === true && !!identidadeQuery.data?.professorId;
+
+    const professorId = identidadeQuery.data?.professorId ?? null;
+
+
+
+    const tabs = [
+
+        {key: 'gestao', label: 'Gestão', content: <GestaoTab/>},
+
+        ...(souProfessor && professorId !== null
+
+            ? [{key: 'disponibilidade', label: 'Disponibilidade do Professor', content: <DisponibilidadeTab professorId={professorId}/>}]
+
+            : []),
+
+    ];
+
+
+
     return (
 
         <main className="gestao-professor">
 
             <h1>Gestão do Professor</h1>
 
-            <Tabs
-
-                tabs={[
-
-                    {key: 'gestao', label: 'Gestão', content: <GestaoTab/>},
-
-                    {key: 'disponibilidade', label: 'Disponibilidade do Professor', content: <DisponibilidadeTab/>},
-
-                ]}
-
-            />
+            <Tabs tabs={tabs}/>
 
         </main>
 
@@ -1967,7 +2009,8 @@ function GestaoTab() {
 
                                             <button
 
-                                                className="gp-btn gp-btn-acoes"
+                                                className="gp-btn gp-btn-acoes btnred"
+                                                style={{borderColor: '#e53935', color: '#e53935'}}
 
                                                 title="Remover anexo"
 
@@ -2197,57 +2240,67 @@ function fmtNumero(v: number | null | undefined): string {
 
 
 
-function DisponibilidadeTab() {
+function DisponibilidadeTab({professorId}: { professorId: number }) {
+
+    const [weekStart, setWeekStart] = useState(() => toIsoDate(mondayOf(new Date())));
+
+
+
+    const eventosQuery = useQuery({
+
+        queryKey: ['gestao-professor-eventos', professorId, weekStart],
+
+        queryFn: async () =>
+
+            (
+
+                await api.get<ScheduleEventData[]>('/api/professor/disponibilidade-professor/schedule-events', {
+
+                    params: {professorId, inicio: weekStart, fim: weekStart},
+
+                })
+
+            ).data,
+
+    });
+
+
+
+    const LEGENDA = [
+
+        {className: 'evento-green', label: 'Disponível'},
+
+        {className: 'evento-black', label: 'Aula (ocupado)'},
+
+        {className: 'evento-blue', label: 'Feriado'},
+
+    ];
+
+
 
     return (
 
         <div className="gp-disponibilidade">
 
-            <div className="gp-legenda">
+            <ScheduleWeekView
 
-        <span className="gp-legenda-item">
+                startDate={weekStart}
 
-          <span className="gp-dot" style={{background: '#32CD32'}}/> Esta disponível
+                onWeekChange={setWeekStart}
 
-        </span>
+                events={eventosQuery.data ?? []}
 
-                <span className="gp-legenda-item">
+                loading={eventosQuery.isLoading}
 
-          <span className="gp-dot" style={{background: '#FFD700'}}/> Aula coringa
+                error={eventosQuery.isError ? 'Erro ao carregar a agenda.' : null}
 
-        </span>
+                legend={LEGENDA}
 
-                <span className="gp-legenda-item">
+            />
 
-          <span className="gp-dot" style={{background: '#000000'}}/> Aula normal
+            {eventosQuery.data && eventosQuery.data.length === 0 && !eventosQuery.isLoading &&
 
-        </span>
-
-                <span className="gp-legenda-item">
-
-          <span className="gp-dot" style={{background: '#FF0000'}}/> Recuperação aula
-
-        </span>
-
-                <span className="gp-legenda-item">
-
-          <span className="gp-dot" style={{background: '#0000CD'}}/> Feriado
-
-        </span>
-
-            </div>
-
-            <p>
-
-                A agenda de disponibilidade do professor é exibida a partir do usuário logado no sistema legado. Para
-
-                visualizá-la
-
-                aqui, informe o professor acima e utilize a grade de horários (requer integração com o contexto de
-
-                login).
-
-            </p>
+                <p className="disp-aviso">Nenhuma aula ou disponibilidade encontrada para o professor nesta semana.</p>}
 
         </div>
 

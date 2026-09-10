@@ -1,8 +1,8 @@
-﻿import {useState} from 'react';
+import {useState} from 'react';
 
-import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable, type DataTableColumn, type DataTableRowAction, type DataTableToolbarButton} from '../../shared/components/DataTable';
-import {api} from '../../shared/services/api';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {DataTable, type DataTableColumn, type DataTableRowAction, type DataTableToolbarButton} from '../../../shared/components/DataTable';
+import {api} from '../../../shared/services/api';
 
 const formatDate = (value: unknown): string => {
     if (value === null || value === undefined || value === '') return '';
@@ -102,6 +102,7 @@ export default function ViewRelatoriosExtratorListScreen() {
             title: 'CSV',
             icon: <i className="fa fa-download" />,
             permission: 'EXECUTE',
+            className: 'btngreen',
             onClick: (item) => download(item, 'CSV'),
         },
         {
@@ -109,6 +110,7 @@ export default function ViewRelatoriosExtratorListScreen() {
             title: 'PDF',
             icon: <i className="fa fa-download" />,
             permission: 'EXECUTE',
+            className: 'btnred',
             onClick: (item) => download(item, 'PDF'),
         },
         {
@@ -116,6 +118,7 @@ export default function ViewRelatoriosExtratorListScreen() {
             title: 'SQL',
             icon: <i className="fa fa-code" />,
             permission: 'EXECUTE',
+            className: 'btn-primary',
             onClick: (item) => setSqlItem(item),
         },
         {
@@ -123,6 +126,7 @@ export default function ViewRelatoriosExtratorListScreen() {
             title: 'Log',
             icon: <i className="fa fa-file-text-o" />,
             permission: 'EXECUTE',
+            className: 'btnyellow',
             onClick: (item) => setLogItem(item),
         },
         {
@@ -144,6 +148,7 @@ export default function ViewRelatoriosExtratorListScreen() {
         {
             label: 'Remove extrações antigas',
             title: 'Marca como removidas as extrações antigas e limpa os arquivos',
+            className: 'btnred',
             onClick: removeAntigos,
         },
     ];
@@ -162,16 +167,18 @@ export default function ViewRelatoriosExtratorListScreen() {
             <main>
                 <h1>Extrator</h1>
                 {notice ? <div style={{margin: '10px 0', padding: '10px', backgroundColor: '#fff3cd', borderRadius: 4}}>{notice}</div> : null}
-                <DataTable
-                    key={revision}
-                    path="/api/view/relatorios/extrator"
-                    columns={EXTRATOR_COLUMNS}
-                    maxMainColumns={EXTRATOR_COLUMNS.length}
-                    hideCreate
-                    hideUpdate
-                    extraToolbarButtons={extraToolbarButtons}
-                    extraRowActions={extraRowActions}
-                />
+<DataTable
+                        key={revision}
+                        path="/api/view/relatorios/extrator"
+                        columns={EXTRATOR_COLUMNS}
+                        maxMainColumns={EXTRATOR_COLUMNS.length}
+                        hideCreate
+                        hideUpdate
+                        hideView
+                        hideDelete
+                        extraToolbarButtons={extraToolbarButtons}
+                        extraRowActions={extraRowActions}
+                    />
 
                 {sqlItem ? (
                     <div style={modalStyle} onClick={() => setSqlItem(null)}>

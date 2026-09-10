@@ -2,9 +2,9 @@ import {useEffect, useState} from 'react';
 
 import {Link, useParams} from 'react-router-dom';
 
-import {aulaApi, AulaTurma} from '../../features/professor/aula';
+import {aulaApi, AulaTurma} from '../../professor/aula';
 
-import '../../features/aluno/AlunoPortal.css';
+import '../../aluno/AlunoPortal.css';
 
 export default function AlunoAulasTurmaScreen() {
     const {oferecimentoId} = useParams<{ oferecimentoId: string }>();

@@ -1,8 +1,8 @@
-﻿import {useState} from 'react';
-import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
-import type {ApiItem} from '../../features/auth/types';
-import {CancelamentoModal} from '../../shared/components/CancelamentoModal';
+import {useState} from 'react';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../../shared/components/DataTable';
+import type {ApiItem} from '../../../shared/types/types.ts';
+import {CancelamentoModal} from '../../../shared/components/CancelamentoModal';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 

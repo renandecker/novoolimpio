@@ -22,7 +22,7 @@ export const useModulePaged = (
     const filtersKey = filters ? JSON.stringify(filters) : '';
     const sortKey = sort ? JSON.stringify(sort) : '';
     const hasFilters = filters && filters.filters && Object.keys(filters.filters).length > 0;
-    const basePath = path.replace(/\/paged\/?$/, '').replace(/\/search\/?$/, '');
+    const basePath = (path || '').replace(/\/paged\/?$/, '').replace(/\/search\/?$/, '');
     const query = useQuery({
         queryKey: [path, hasFilters ? 'search' : 'paged', page, size, paramsKey, filtersKey, sortKey],
         queryFn: async () => {

@@ -4,23 +4,23 @@ import {ArrowLeft, Plus, Search, Trash2, X} from 'lucide-react';
 
 import {useNavigate, useSearchParams} from 'react-router-dom';
 
-import {PermissionGate} from '../../shared/services/permissions';
+import {PermissionGate} from '../../../shared/services/permissions';
 
-import {api, useApi} from '../../shared/services/api';
+import {api, useApi} from '../../../shared/services/api';
 
-import {API_PATHS} from '../../shared/services/apiPaths';
+import {API_PATHS} from '../../../shared/services/apiPaths';
 
-import {Wizard, useWizardData} from '../../shared/components/Wizard';
+import {Wizard, useWizardData} from '../../../shared/components/Wizard';
 
-import {Tabs, type TabItem} from '../../shared/components/Tabs';
+import {Tabs, type TabItem} from '../../../shared/components/Tabs';
 
-import {MasterDetail} from '../../shared/components/MasterDetail';
+import {MasterDetail} from '../../../shared/components/MasterDetail';
 
-import {AutoComplete} from '../../shared/components/AutoComplete';
+import {AutoComplete} from '../../../shared/components/AutoComplete';
 
-import type {ApiItem} from '../../features/auth/types';
+import type {ApiItem} from '../../../shared/types/types.ts';
 
-import {BooleanField} from '../../shared/components/BooleanField';
+import {BooleanField} from '../../../shared/components/BooleanField';
 
 const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
 const num = (v: string): number | null => (v !== '' && !isNaN(Number(v)) ? Number(v) : null);

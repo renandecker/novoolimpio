@@ -1,9 +1,9 @@
-﻿import {PermissionGate} from '../../shared/services/permissions';
-import {api} from '../../shared/services/api';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {api} from '../../../shared/services/api';
 import {useState, useEffect, useCallback, useMemo} from 'react';
-import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
-import {Tabs} from '../../shared/components/Tabs';
-import {Wizard} from '../../shared/components/Wizard';
+import {AutoComplete, type AutoCompleteOption} from '../../../shared/components/AutoComplete';
+import {Tabs} from '../../../shared/components/Tabs';
+import {Wizard} from '../../../shared/components/Wizard';
 
 interface ContratoAutoCompleteResponse {
     id: number;

@@ -106,16 +106,61 @@ public class ViewService {
             "id", "id_pacote", "status", "direcionamento", "id_coordenador",
             "pacote_descricao", "pacote_data_criacao", "acao_data_final", "quantidade_prospecto");
 
+    // Pessoa Fisica / Juridica: base SEMPRE na tabela especifica (pf / pj) com JOIN na bas_pessoa.
+    // Garante que /view/pessoa/listPessoaFisica exiba SOMENTE pessoas fisicas e
+    // /view/pessoa/listPessoaJuridica exiba SOMENTE pessoas juridicas (nunca todas as pessoas).
+    private static final String PESSOA_JURIDICA_SELECT =
+            "SELECT pj.id, pj.id_pessoa, pj.nome_fantasia, pj.razao_social, pj.cnpj, pj.fax, "
+                    + "pj.inscricao_municipal, pj.inscricao_estadual, "
+                    + "p.telefone, p.celular, p.email, p.numero, p.complemento, p.observacao, "
+                    + "p.data_cadastro, p.data_alteracao, p.id_logradouro "
+                    + "FROM bas_pessoa_juridica pj "
+                    + "JOIN bas_pessoa p ON p.id = pj.id_pessoa";
+    private static final List<String> PESSOA_JURIDICA_COLUMNS = List.of(
+            "id", "id_pessoa", "nome_fantasia", "razao_social", "cnpj", "fax",
+            "inscricao_municipal", "inscricao_estadual",
+            "telefone", "celular", "email", "numero", "complemento", "observacao",
+            "data_cadastro", "data_alteracao", "id_logradouro");
+
+    private static final String PESSOA_FISICA_SELECT =
+            "SELECT pf.id, pf.id_pessoa, pf.nome, pf.nome_social, pf.cpf, pf.rg, "
+                    + "pf.nome_referencia, pf.telefone_referencia, pf.celular_referencia, "
+                    + "pf.nome_referencia2, pf.telefone_referencia2, pf.celular_referencia2, "
+                    + "pf.data_emissao_rg, pf.orgao_emissor_rg, pf.id_cidade_origem, "
+                    + "pf.nome_pai, pf.nome_mae, pf.data_nascimento, pf.id_genero, pf.id_etnia, "
+                    + "pf.id_escolaridade, pf.id_estado_civil, pf.facebook, pf.twitter, pf.google_plus, "
+                    + "pf.telefone_comercial, "
+                    + "p.telefone, p.celular, p.email, p.numero, p.complemento, p.observacao, "
+                    + "p.data_cadastro, p.data_alteracao, p.id_logradouro "
+                    + "FROM bas_pessoa_fisica pf "
+                    + "JOIN bas_pessoa p ON p.id = pf.id_pessoa";
+    private static final List<String> PESSOA_FISICA_COLUMNS = List.of(
+            "id", "id_pessoa", "nome", "nome_social", "cpf", "rg",
+            "nome_referencia", "telefone_referencia", "celular_referencia",
+            "nome_referencia2", "telefone_referencia2", "celular_referencia2",
+            "data_emissao_rg", "orgao_emissor_rg", "id_cidade_origem",
+            "nome_pai", "nome_mae", "data_nascimento", "id_genero", "id_etnia",
+            "id_escolaridade", "id_estado_civil", "facebook", "twitter", "google_plus",
+            "telefone_comercial",
+            "telefone", "celular", "email", "numero", "complemento", "observacao",
+            "data_cadastro", "data_alteracao", "id_logradouro");
+
     private record CuratedSelect(String selectSql, List<String> columns) {
     }
 
-    private static final Map<String, CuratedSelect> CURATED_SELECTS = Map.of(
-            "logradouro/listLogradouro", new CuratedSelect(LOGRADOURO_SELECT, LOGRADOURO_COLUMNS),
-            "logradouro/formLogradouro", new CuratedSelect(LOGRADOURO_SELECT, LOGRADOURO_COLUMNS),
-            "meta/listMeta", new CuratedSelect(META_SELECT, META_COLUMNS),
-            "meta/formMeta", new CuratedSelect(META_SELECT, META_COLUMNS),
-            "operacional/listOperacional", new CuratedSelect(OPERACIONAL_LIST_SELECT, OPERACIONAL_LIST_COLUMNS),
-            "operacional/formOperacional", new CuratedSelect(OPERACIONAL_LIST_SELECT, OPERACIONAL_LIST_COLUMNS));
+    private static final Map<String, CuratedSelect> CURATED_SELECTS = Map.ofEntries(
+            Map.entry("logradouro/listLogradouro", new CuratedSelect(LOGRADOURO_SELECT, LOGRADOURO_COLUMNS)),
+            Map.entry("logradouro/formLogradouro", new CuratedSelect(LOGRADOURO_SELECT, LOGRADOURO_COLUMNS)),
+            Map.entry("meta/listMeta", new CuratedSelect(META_SELECT, META_COLUMNS)),
+            Map.entry("meta/formMeta", new CuratedSelect(META_SELECT, META_COLUMNS)),
+            Map.entry("operacional/listOperacional", new CuratedSelect(OPERACIONAL_LIST_SELECT, OPERACIONAL_LIST_COLUMNS)),
+            Map.entry("operacional/formOperacional", new CuratedSelect(OPERACIONAL_LIST_SELECT, OPERACIONAL_LIST_COLUMNS)),
+            Map.entry("pessoa/listPessoaJuridica", new CuratedSelect(PESSOA_JURIDICA_SELECT, PESSOA_JURIDICA_COLUMNS)),
+            Map.entry("pessoa/formPessoaJuridica", new CuratedSelect(PESSOA_JURIDICA_SELECT, PESSOA_JURIDICA_COLUMNS)),
+            Map.entry("pessoa-juridica/listPessoaJuridica", new CuratedSelect(PESSOA_JURIDICA_SELECT, PESSOA_JURIDICA_COLUMNS)),
+            Map.entry("pessoa/listPessoaFisica", new CuratedSelect(PESSOA_FISICA_SELECT, PESSOA_FISICA_COLUMNS)),
+            Map.entry("pessoa/formPessoaFisica", new CuratedSelect(PESSOA_FISICA_SELECT, PESSOA_FISICA_COLUMNS)),
+            Map.entry("pessoa-fisica/listPessoaFisica", new CuratedSelect(PESSOA_FISICA_SELECT, PESSOA_FISICA_COLUMNS)));
 
     public Uni<PagedResponse<Map<String, Object>>> paged(String feature, String resource, int page, int size) {
         int p = Math.max(0, page);

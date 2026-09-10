@@ -1,11 +1,11 @@
-﻿import {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import {useSearchParams, useNavigate} from 'react-router-dom';
-import {PermissionGate} from '../../shared/services/permissions';
-import {MasterDetail} from '../../shared/components/MasterDetail';
-import {Tabs} from '../../shared/components/Tabs';
-import {Wizard, useWizardData} from '../../shared/components/Wizard';
-import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
-import {AutoComplete} from '../../shared/components/AutoComplete';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {MasterDetail} from '../../../shared/components/MasterDetail';
+import {Tabs} from '../../../shared/components/Tabs';
+import {Wizard, useWizardData} from '../../../shared/components/Wizard';
+import {DataTable, type DataTableColumn} from '../../../shared/components/DataTable';
+import {AutoComplete} from '../../../shared/components/AutoComplete';
 import {
     PERFIL_SOURCE,
     PERFIL_COLUMNS,
@@ -28,11 +28,11 @@ import {
     FILTRO_SOURCE,
     FILTRO_COLUMNS,
     FILTRO_SEARCH,
-} from '../../shared/services/masterDetailSources';
-import type {ApiItem} from '../../features/auth/types';
-import {useApi, api} from '../../shared/services/api';
-import {API_PATHS} from '../../shared/services/apiPaths';
-import {FormLayout, FormTabConfig} from '../../shared/components/FormLayout';
+} from '../../../shared/services/masterDetailSources';
+import type {ApiItem} from '../../../shared/types/types.ts';
+import {useApi, api} from '../../../shared/services/api';
+import {API_PATHS} from '../../../shared/services/apiPaths';
+import {FormLayout, FormTabConfig} from '../../../shared/components/FormLayout';
 
 const TIPO_GRAFICO_OPTIONS = [
     {value: 'BARRA_VERTICAL', label: 'Barra Vertical'},

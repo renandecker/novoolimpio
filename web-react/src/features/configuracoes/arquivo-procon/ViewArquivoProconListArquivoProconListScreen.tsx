@@ -1,8 +1,8 @@
-﻿import {useState} from 'react';
-import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
-import type {ApiItem} from '../../features/auth/types';
-import {api} from '../../shared/services/api';
+import {useState} from 'react';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../../shared/components/DataTable';
+import type {ApiItem} from '../../../shared/types/types.ts';
+import {api} from '../../../shared/services/api';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 

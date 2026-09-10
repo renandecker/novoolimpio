@@ -4,21 +4,21 @@ import {useNavigate, useParams, useSearchParams, useLocation} from 'react-router
 
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 
-import {api} from '../../shared/services/api';
+import {api} from '../../../shared/services/api';
 
-import {abrirRelatorio, type RelatorioAberto, type LinhaGrafico, type MapaPontosResponse} from '../../features/relatorios/relatorios';
+import {abrirRelatorio, type RelatorioAberto, type LinhaGrafico, type MapaPontosResponse} from '../../relatorios/relatorios';
 
-import {usePermissions} from '../../shared/services/permissions';
+import {usePermissions} from '../../../shared/services/permissions';
 
-import {ExportButton} from '../../shared/components/ExportButton';
-import {ExportDropdown} from '../../shared/components/ExportDropdown';
-import HelpOverlay from '../../shared/components/HelpOverlay';
+import {ExportButton} from '../../../shared/components/ExportButton';
+import {ExportDropdown} from '../../../shared/components/ExportDropdown';
+import HelpOverlay from '../../../shared/components/HelpOverlay';
 import {FileText, Download} from 'lucide-react';
 
 import GraficoChart from './GraficoChart';
 import MapaView from './MapaView';
 
-import './ReportView.css';
+import '../ReportView.css';
 
 
 

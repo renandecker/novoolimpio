@@ -1,5 +1,5 @@
 ﻿import {api} from '../../shared/services/api';
-import type {PagedResponse} from './types';
+import type {PagedResponse} from '../../shared/types/types';
 
 export type RegraNotificacao = {
     id: number;

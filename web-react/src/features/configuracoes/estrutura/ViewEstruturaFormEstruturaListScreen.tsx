@@ -1,12 +1,12 @@
-﻿import {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import {useSearchParams, useNavigate} from 'react-router-dom';
 
-import {PermissionGate} from '../../shared/services/permissions';
-import {Wizard, useWizardData} from '../../shared/components/Wizard';
-import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
-import {FormLayout} from '../../shared/components/FormLayout';
-import {useApi, api} from '../../shared/services/api';
-import {API_PATHS} from '../../shared/services/apiPaths';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {Wizard, useWizardData} from '../../../shared/components/Wizard';
+import {DataTable, type DataTableColumn} from '../../../shared/components/DataTable';
+import {FormLayout} from '../../../shared/components/FormLayout';
+import {useApi, api} from '../../../shared/services/api';
+import {API_PATHS} from '../../../shared/services/apiPaths';
 
 const COLUNAS_COLUMNS: DataTableColumn[] = [
     {key: 'coluna', label: 'Coluna'},
@@ -125,13 +125,12 @@ export default function ViewEstruturaFormEstruturaListScreen() {
 
     useEffect(() => {
         if (editingId) {
-            loadEstruturaPorId(editingId)
-                .then(async (estrutura: any) => {
+            loadEstruturaPorId(editingId).then(async (estrutura: any) => {
                     updateFields({entity: {...data.entity, ...estrutura}});
                     const [cols, dims, meds, geos] = await Promise.all([
                         loadColunas(),
-                        loadDimensoes(),
-                        loadMedidas(),
+                        loadDimensoes(editingId),
+                        loadMedidas(editingId),
                         loadGeoreferencias(),
                     ]);
                     const colsDaEstrutura = (cols ?? []).filter((c: any) => c.estruturaId === editingId);

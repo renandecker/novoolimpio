@@ -51,7 +51,7 @@ export default function ViewRelatoriosViewGraficoBarrasHorizontalListScreen() {
                 onFiltersChange={handleFiltersChange}
                 onApplyFilters={handleApplyFilters}
             />
-            <ModuleList path="/api/view/relatorios/viewGraficoBarrasHorizontal"/>
+            <ModuleList path="/api/relatorios/grafico"/>
         </View>
     );
 }

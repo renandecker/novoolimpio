@@ -1,20 +1,20 @@
-﻿import {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 
 import {useQuery} from '@tanstack/react-query';
 
-import {api} from '../../shared/services/api';
+import {api} from '../../../shared/services/api';
 
-import {PermissionGate, usePermissions, useCurrentOutcome} from '../../shared/services/permissions';
+import {PermissionGate, usePermissions, useCurrentOutcome} from '../../../shared/services/permissions';
 
-import {PAGE_SIZES} from '../../shared/components/DataTable';
+import {PAGE_SIZES} from '../../../shared/components/DataTable';
 
-import {useModulePaged} from '../../shared/hooks/useModulePaged';
+import {useModulePaged} from '../../../shared/hooks/useModulePaged';
 
-import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
+import {AutoComplete, type AutoCompleteOption} from '../../../shared/components/AutoComplete';
 
-import {CancelamentoModal} from '../../shared/components/CancelamentoModal';
+import {CancelamentoModal} from '../../../shared/components/CancelamentoModal';
 
-import {RowMenu, type RowMenuItem} from '../../shared/components/RowMenu';
+import {RowMenu, type RowMenuItem} from '../../../shared/components/RowMenu';
 
 import {
 
@@ -34,11 +34,11 @@ import {
 
     HistoricoAlunoModal,
 
-} from '../../features/professor/GestaoAlunoModais';
+} from '../../professor/GestaoAlunoModais';
 
-import type {ApiItem} from '../../features/auth/types';
+import type {ApiItem} from '../../../shared/types/types.ts';
 
-import {PerfilModuloPermissions} from '../../shared/hooks/useModulePaged';
+import {PerfilModuloPermissions} from '../../../shared/hooks/useModulePaged';
 
 
 
@@ -208,7 +208,7 @@ const renderValue = (item: ApiItem, key: string) => {
 
         } else {
 
-            return boolVal ? 'SIM' : 'NÃƒO';
+            return boolVal ? 'SIM' : 'NÃO';
 
         }
 
@@ -1230,6 +1230,18 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
                                 },
 
+                                {
+
+                                    key: 'desistente',
+
+                                    label: 'Desistente',
+
+                                    className: 'btnpink',
+
+                                    onSelect: () => abrirPlaceholder('Desistente', 'Notificar aluno desistente.')
+
+                                },
+
                             ];
 
 
@@ -1604,7 +1616,7 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
 
                         <div className="form-grid">
 
-                            <label className="form-field">
+                            <label className="form-field" style={{flex: 1, minWidth: 0}}>
 
                                 <span className="form-label">Aluno</span>
 
@@ -1621,36 +1633,33 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
                                 />
 
                             </label>
+                            <div className="modal-actions" style={{display: 'flex', gap: '0.5rem', alignItems: 'flex-end'}}>
+                                <button
+
+                                    type="button"
+
+                                    className="btn-form-save"
+
+                                    onClick={() => aluno && selecionarAluno(aluno)}
+
+                                    disabled={searching || !aluno}
+
+                                >
+
+                                    {searching ? 'Buscando...' : 'Buscar/Atualizar'}
+
+                                </button>
+
+                                <button type="button" className="btn-form-back" onClick={() => selecionarAluno(null)}>
+
+                                    Limpar campo
+
+                                </button>
+                            </div>
 
                         </div>
 
                         {erro && <p className="form-erro">{erro}</p>}
-
-                        <div className="modal-actions">
-
-                            <button
-
-                                type="button"
-
-                                className="btn-form-save"
-
-                                onClick={() => aluno && selecionarAluno(aluno)}
-
-                                disabled={searching || !aluno}
-
-                            >
-
-                                {searching ? 'Buscando...' : 'Buscar/Atualizar'}
-
-                            </button>
-
-                            <button type="button" className="btn-form-back" onClick={() => selecionarAluno(null)}>
-
-                                Limpar campo
-
-                            </button>
-
-                        </div>
 
 
 

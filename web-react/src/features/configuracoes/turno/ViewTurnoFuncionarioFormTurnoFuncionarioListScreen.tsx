@@ -1,13 +1,13 @@
-﻿import {useState} from 'react';
-import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable} from '../../shared/components/DataTable';
-import {MasterDetail} from '../../shared/components/MasterDetail';
+import {useState} from 'react';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {DataTable} from '../../../shared/components/DataTable';
+import {MasterDetail} from '../../../shared/components/MasterDetail';
 import {
     TURNO_TRABALHO_SOURCE,
     TURNO_TRABALHO_COLUMNS,
     TURNO_TRABALHO_SEARCH,
-} from '../../shared/services/masterDetailSources';
-import type {ApiItem} from '../../features/auth/types';
+} from '../../../shared/services/masterDetailSources';
+import type {ApiItem} from '../../../shared/types/types.ts';
 
 export default function ViewTurnoFuncionarioFormTurnoFuncionarioListScreen() {
     const [turnosTrabalho, setTurnosTrabalho] = useState<ApiItem[]>([]);

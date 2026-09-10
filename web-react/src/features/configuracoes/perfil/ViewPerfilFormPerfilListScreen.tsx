@@ -1,11 +1,11 @@
-﻿import {PermissionGate} from '../../shared/services/permissions';
-import {FormLayout, FormTabConfig} from '../../shared/components/FormLayout';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {FormLayout, FormTabConfig} from '../../../shared/components/FormLayout';
 import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {api} from '../../shared/services/api';
-import {MasterDetail} from '../../shared/components/MasterDetail';
-import type {MasterDetailColumn} from '../../shared/components/MasterDetail';
-import type {ApiItem} from '../../features/auth/types';
+import {api} from '../../../shared/services/api';
+import {MasterDetail} from '../../../shared/components/MasterDetail';
+import type {MasterDetailColumn} from '../../../shared/components/MasterDetail';
+import type {ApiItem} from '../../../shared/types/types.ts';
 
 const toDateInput = (v: unknown): string => {
     if (!v) return '';

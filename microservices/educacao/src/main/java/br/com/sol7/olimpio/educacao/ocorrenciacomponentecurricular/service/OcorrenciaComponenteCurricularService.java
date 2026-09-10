@@ -24,6 +24,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Date;
@@ -89,6 +90,12 @@ public class OcorrenciaComponenteCurricularService {
         return repository.deleteById(id).onItem()
                 .transformToUni(deleted -> deleted ? Uni.createFrom().voidItem()
                         : Uni.createFrom().failure(new NotFoundException("OcorrenciaComponenteCurricular not found")));
+    }
+
+    // @QueryParam Date nunca casa no RESTEasy Reactive (sempre 404); a API recebe
+    // LocalDate (ISO yyyy-MM-dd) e converte para java.util.Date no filtro do DATE.
+    private static Date toDate(LocalDate d) {
+        return d == null ? null : java.sql.Date.valueOf(d);
     }
 
     private void apply(OcorrenciaComponenteCurricular e, OcorrenciaComponenteCurricularRequest r) {
@@ -198,8 +205,8 @@ public class OcorrenciaComponenteCurricularService {
     // public List<OcorrenciaComponenteCurricular> buscarOcorrenciaPorProfessor(Professor professor, Date inicio, Date fim) {
     //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorProfessor(professor, inicio, fim);
     //     }
-    public Uni<List<Long>> buscarOcorrenciaPorProfessor(Long professorId, Date inicio, Date fim) {
-        return repository.buscarOcorrenciaPorProfessor(professorId, inicio, fim).map(list -> list.stream().map(x -> x.id).toList());
+    public Uni<List<Long>> buscarOcorrenciaPorProfessor(Long professorId, LocalDate inicio, LocalDate fim) {
+        return repository.buscarOcorrenciaPorProfessor(professorId, toDate(inicio), toDate(fim)).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -210,8 +217,8 @@ public class OcorrenciaComponenteCurricularService {
     // public List<OcorrenciaComponenteCurricular> buscarOcorrenciaPorOferecimentoEDatas(OferecimentoComponenteCurricular oferecimentoComponenteCurricular, Date inicio, Date fim) {
     //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorOferecimentoEDatas(oferecimentoComponenteCurricular, inicio, fim);
     //     }
-    public Uni<List<Long>> buscarOcorrenciaPorOferecimentoEDatas(Long oferecimentoComponenteCurricularId, Date inicio, Date fim) {
-        return repository.buscarOcorrenciaPorOferecimentoEDatas(oferecimentoComponenteCurricularId, inicio, fim).map(list -> list.stream().map(x -> x.id).toList());
+    public Uni<List<Long>> buscarOcorrenciaPorOferecimentoEDatas(Long oferecimentoComponenteCurricularId, LocalDate inicio, LocalDate fim) {
+        return repository.buscarOcorrenciaPorOferecimentoEDatas(oferecimentoComponenteCurricularId, toDate(inicio), toDate(fim)).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -222,8 +229,8 @@ public class OcorrenciaComponenteCurricularService {
     // public List<OcorrenciaComponenteCurricular> buscarOcorrenciaPorOferecimentoEDatasCoringa(OferecimentoComponenteCurricular oferecimentoComponenteCurricular, Date inicio, Date fim, Boolean coringa) {
     //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorOferecimentoEDatasCoringa(oferecimentoComponenteCurricular, inicio, fim,coringa);
     //     }
-    public Uni<List<Long>> buscarOcorrenciaPorOferecimentoEDatasCoringa(Long oferecimentoComponenteCurricularId, Date inicio, Date fim, Boolean coringa) {
-        return repository.buscarOcorrenciaPorOferecimentoEDatasCoringa(oferecimentoComponenteCurricularId, inicio, fim, coringa).map(list -> list.stream().map(x -> x.id).toList());
+    public Uni<List<Long>> buscarOcorrenciaPorOferecimentoEDatasCoringa(Long oferecimentoComponenteCurricularId, LocalDate inicio, LocalDate fim, Boolean coringa) {
+        return repository.buscarOcorrenciaPorOferecimentoEDatasCoringa(oferecimentoComponenteCurricularId, toDate(inicio), toDate(fim), coringa).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -281,8 +288,8 @@ public class OcorrenciaComponenteCurricularService {
     // public List<OcorrenciaComponenteCurricular> buscarOcorrenciaPorDataUnidade(Date date, List<Unidade> unidades) {
     //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorDataUnidade(date, unidades);
     //     }
-    public Uni<List<Long>> buscarOcorrenciaPorDataUnidade(Date date, List<Long> unidades) {
-        return repository.buscarOcorrenciaPorDataUnidade(date, unidades).map(list -> list.stream().map(x -> x.id).toList());
+    public Uni<List<Long>> buscarOcorrenciaPorDataUnidade(LocalDate date, List<Long> unidades) {
+        return repository.buscarOcorrenciaPorDataUnidade(toDate(date), unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
@@ -292,8 +299,8 @@ public class OcorrenciaComponenteCurricularService {
     // public List<OcorrenciaComponenteCurricular> buscarOcorrenciaPorDataUnidade(Date inicio, Date fim, List<Unidade> unidades) {
     //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorDataUnidade(inicio, fim, unidades);
     //     }
-    public Uni<List<Long>> buscarOcorrenciaPorDataUnidade2(Date inicio, Date fim, List<Long> unidades) {
-        return repository.buscarOcorrenciaPorDataUnidade(inicio, fim, unidades).map(list -> list.stream().map(x -> x.id).toList());
+    public Uni<List<Long>> buscarOcorrenciaPorDataUnidade2(LocalDate inicio, LocalDate fim, List<Long> unidades) {
+        return repository.buscarOcorrenciaPorDataUnidade(toDate(inicio), toDate(fim), unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 

@@ -1,22 +1,22 @@
-﻿import {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 
-import {PermissionGate} from '../../shared/services/permissions';
+import {PermissionGate} from '../../../shared/services/permissions';
 
-import {ModuleTabs} from '../../shared/components/ModuleTabs';
+import {ModuleTabs} from '../../../shared/components/ModuleTabs';
 
-import type {DataTableColumn} from '../../shared/components/DataTable';
+import type {DataTableColumn} from '../../../shared/components/DataTable';
 
-import type {ApiItem} from '../../features/auth/types';
+import type {ApiItem} from '../../../shared/types/types.ts';
 
-import {api} from '../../shared/services/api';
+import {api} from '../../../shared/services/api';
 
-import {AutoComplete} from '../../shared/components/AutoComplete';
+import {AutoComplete} from '../../../shared/components/AutoComplete';
 
-import type {AutoCompleteOption} from '../../shared/components/AutoComplete';
+import type {AutoCompleteOption} from '../../../shared/components/AutoComplete';
 
-import {DataTable} from '../../shared/components/DataTable';
+import {DataTable} from '../../../shared/components/DataTable';
 
-import {formatDate} from '../../shared/utils/dateUtils';
+import {formatDate} from '../../../shared/utils/dateUtils';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 

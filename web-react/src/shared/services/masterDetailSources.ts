@@ -1,4 +1,4 @@
-import type {MasterDetailColumn} from './MasterDetail';
+import type {MasterDetailColumn} from '../components/MasterDetail';
 
 export const UNIDADE_SOURCE = '/api/view/unidade/listUnidade';
 export const UNIDADE_COLUMNS: MasterDetailColumn[] = [
@@ -92,12 +92,26 @@ export const CURSO_COLUMNS: MasterDetailColumn[] = [
 ];
 export const CURSO_SEARCH = ['sucinto'];
 
-export const GRUPO_SOURCE = '/api/view/grupo/listGrupo';
-export const GRUPO_COLUMNS: MasterDetailColumn[] = [
+export const GRUPO_COMPONENTECOMPONENTE_SOURCE = '/api/educacao/grupo-componente-curricular';
+export const GRUPO_COMPONENTECOMPONENTE_COLUMNS: MasterDetailColumn[] = [
     {key: 'id', label: 'ID do Grupo'},
-    {key: 'nome', label: 'Nome'},
+    {key: 'descricao', label: 'Descrição'},
 ];
-export const GRUPO_SEARCH = ['nome'];
+export const GRUPO_COMPONENTECOMPONENTE_SEARCH = ['descricao'];
+
+export const TIPO_MATRIZ_CURRICULAR_SOURCE = '/api/educacao/tipo-matriz-curricular';
+export const TIPO_MATRIZ_CURRICULAR_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'ID do Tipo de Matriz'},
+    {key: 'descricao', label: 'Descrição'},
+];
+export const TIPO_MATRIZ_CURRICULAR_SEARCH = ['descricao'];
+
+export const MODALIDADE_SOURCE = '/api/educacao/modalidade';
+export const MODALIDADE_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'ID da Modalidade'},
+    {key: 'descricao', label: 'Descrição'},
+];
+export const MODALIDADE_SEARCH = ['descricao'];
 
 export const ETAPAS_SOURCE = '/api/view/etapasCobranca/listEtapasCobranca';
 export const ETAPAS_COLUMNS: MasterDetailColumn[] = [
@@ -258,3 +272,10 @@ export const PAINEL_PAINEL_COLUMNS: MasterDetailColumn[] = [
     {key: 'ordem', label: 'Ordem'},
 ];
 export const PAINEL_PAINEL_SEARCH = ['relatorioNome'];
+
+export const GRUPO_SOURCE = '/api/educacao/grupo';
+export const GRUPO_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'ID do Grupo'},
+    {key: 'descricao', label: 'Descrição'},
+];
+export const GRUPO_SEARCH = ['descricao'];

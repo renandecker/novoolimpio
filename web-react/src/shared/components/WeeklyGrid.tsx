@@ -64,6 +64,23 @@ export function fmtDataLong(d: Date): string {
     return `${fmtData(d)}/${d.getFullYear()}`;
 }
 
+export function monthStart(d: Date): Date {
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+
+export function monthEnd(d: Date): Date {
+    return new Date(d.getFullYear(), d.getMonth() + 1, 0);
+}
+
+export function monthRangeForWeek(weekStartIso: string): {inicio: string; fim: string} {
+    const start = parseDate(weekStartIso);
+    const end = addDays(start, 6);
+    return {
+        inicio: toIsoDate(monthStart(start)),
+        fim: toIsoDate(monthEnd(end)),
+    };
+}
+
 function parseEventTime(iso: string): Date | null {
     if (!iso) return null;
     const d = new Date(iso);

@@ -1,7 +1,7 @@
-﻿import React, {useState, useEffect} from 'react';
-import {PermissionGate} from '../../shared/services/permissions';
-import {api} from '../../shared/services/api';
-import {API_PATHS} from '../../shared/services/apiPaths';
+import React, {useState, useEffect} from 'react';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {api} from '../../../shared/services/api';
+import {API_PATHS} from '../../../shared/services/apiPaths';
 
 const TIPOS_SERVICO = [
     {label: 'Por Contato', value: 0},

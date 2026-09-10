@@ -3,7 +3,6 @@ import type {ReactNode} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {api} from '../../shared/services/api';
 import {PAGE_SIZES} from '../../shared/components/DataTable';
-import type {Parcela} from './aluno';
 
 export interface PessoaDados {
     id: number;

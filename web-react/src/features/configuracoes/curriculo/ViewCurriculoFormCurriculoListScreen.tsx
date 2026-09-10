@@ -1,4 +1,4 @@
-﻿import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 
 
@@ -6,15 +6,15 @@ import {X} from 'lucide-react';
 
 import {useNavigate, useSearchParams} from 'react-router-dom';
 
-import {PermissionGate} from '../../shared/services/permissions';
+import {PermissionGate} from '../../../shared/services/permissions';
 
-import {BooleanField} from '../../shared/components/BooleanField';
+import {BooleanField} from '../../../shared/components/BooleanField';
 
-import {MasterDetail} from '../../shared/components/MasterDetail';
+import {MasterDetail} from '../../../shared/components/MasterDetail';
 
-import {useWizardData} from '../../shared/components/Wizard';
+import {useWizardData} from '../../../shared/components/Wizard';
 
-import {Tabs, type TabItem} from '../../shared/components/Tabs';
+import {Tabs, type TabItem} from '../../../shared/components/Tabs';
 
 import {
 
@@ -30,19 +30,37 @@ import {
 
     COMPONENTE_SEARCH,
 
+    GRUPO_COMPONENTECOMPONENTE_SOURCE,
+
+    GRUPO_COMPONENTECOMPONENTE_COLUMNS,
+
+    GRUPO_COMPONENTECOMPONENTE_SEARCH,
+
+    TIPO_MATRIZ_CURRICULAR_SOURCE,
+
+    TIPO_MATRIZ_CURRICULAR_COLUMNS,
+
+    TIPO_MATRIZ_CURRICULAR_SEARCH,
+
+    MODALIDADE_SOURCE,
+
+    MODALIDADE_COLUMNS,
+
+    MODALIDADE_SEARCH,
+
     ATIVIDADE_COMPLEMENTAR_SOURCE,
 
     ATIVIDADE_COMPLEMENTAR_COLUMNS,
 
     ATIVIDADE_COMPLEMENTAR_SEARCH,
 
-} from '../../shared/services/masterDetailSources';
+} from '../../../shared/services/masterDetailSources';
 
-import type {ApiItem} from '../../features/auth/types';
+import type {ApiItem} from '../../../shared/types/types.ts';
 
-import {api, useApi} from '../../shared/services/api';
+import {api, useApi} from '../../../shared/services/api';
 
-import {API_PATHS} from '../../shared/services/apiPaths';
+import {API_PATHS} from '../../../shared/services/apiPaths';
 
 
 
@@ -267,6 +285,12 @@ export default function ViewCurriculoFormCurriculoListScreen() {
     const [searchParams] = useSearchParams();
 
     const idEdicao = searchParams.get('id');
+
+
+
+    const [idGravado, setIdGravado] = useState<number | string | null>(null);
+
+    const edicaoId = idGravado ?? idEdicao;
 
 
 
@@ -644,7 +668,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
 
 
-    const handleComplete = useCallback(async (formData: CurriculoData) => {
+    const handleComplete = useCallback(async (formData: CurriculoData, continuar?: boolean) => {
 
         setSalvando(true);
 
@@ -660,13 +684,13 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
             };
 
-            const salvo = idEdicao
+            const salvo = edicaoId
 
-                ? await curriculoApi.put(idEdicao, payload)
+                ? await curriculoApi.put(edicaoId, payload)
 
                 : await curriculoApi.post(payload);
 
-            const id = (salvo as any)?.id ?? idEdicao;
+            const id = (salvo as any)?.id ?? edicaoId;
 
             if (!id) { alert('Currículo salvo, mas o identificador não foi retornado.'); return; }
 
@@ -837,7 +861,15 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
             alert('Currículo salvo com sucesso!');
 
-            navigate('/view/curriculo/listCurriculo');
+            if (continuar) {
+
+                if (!edicaoId && id) setIdGravado(id);
+
+            } else {
+
+                navigate('/view/curriculo/listCurriculo');
+
+            }
 
         } catch (error) {
 
@@ -851,7 +883,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
         }
 
-    }, [curriculoApi, idEdicao, materialEscolar, requisitos, matriz, unidades, atividadesComplementares, navigate]);
+    }, [curriculoApi, idEdicao, idGravado, materialEscolar, requisitos, matriz, unidades, atividadesComplementares, navigate]);
 
 
 
@@ -1401,35 +1433,129 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
             content: (
 
-                <fieldset className="form-fieldset">
+                <>
 
-                    <legend>Componentes da Matriz Curricular</legend>
+                    <fieldset className="form-fieldset">
 
-                    <MasterDetail
+                        <legend>Componentes da Matriz Curricular</legend>
 
-                        label="Componente Curricular"
+                        <MasterDetail
 
-                        source={COMPONENTE_SOURCE}
+                            label="Componente Curricular"
 
-                        valueKey="id"
+                            source={COMPONENTE_SOURCE}
 
-                        searchKeys={COMPONENTE_SEARCH}
+                            valueKey="id"
 
-                        columns={COMPONENTE_COLUMNS}
+                            searchKeys={COMPONENTE_SEARCH}
 
-                        items={matriz}
+                            columns={COMPONENTE_COLUMNS}
 
-                        onChange={(novos) => {
+                            items={matriz}
 
-                            setMatriz(novos);
+                            onChange={(novos) => {
 
-                            updateField('matrizCurricular', novos);
+                                setMatriz(novos);
 
-                        }}
+                                updateField('matrizCurricular', novos);
 
-                    />
+                            }}
 
-                </fieldset>
+                        />
+
+                    </fieldset>
+
+
+
+                    <div className="form-grid" style={{marginTop: 16}}>
+
+                        <label className="form-field">
+
+                            <span className="form-label">Carga Horária Total do Curso</span>
+
+                            <input className="form-input" disabled value={matriz.reduce((acc, m: any) => acc + (Number(m.cargaHoraria) || 0), 0)}/>
+
+                        </label>
+
+
+
+                        <label className="form-field">
+
+                            <span className="form-label">Tipo de Matriz Curricular</span>
+
+                            <select className="form-input form-select"
+
+                                    value={data.entity.tipoModeloContrato ?? ''}
+
+                                    onChange={(e) => updateField('entity', {...data.entity, tipoModeloContrato: e.target.value ? Number(e.target.value) : undefined})}>
+
+                                <option value="">Selecione</option>
+
+                                <option value="1">Regular</option>
+
+                                <option value="2">Modular</option>
+
+                            </select>
+
+                        </label>
+
+                    </div>
+
+
+
+                    <div className="form-grid" style={{marginTop: 16}}>
+
+                        <label className="form-field">
+
+                            <span className="form-label">Grupo do Componente Curricular</span>
+
+                            <select className="form-input form-select"
+
+                                    value={data.entity.cursoId ?? ''}
+
+                                    onChange={(e) => updateField('entity', {...data.entity, cursoId: e.target.value ? Number(e.target.value) : undefined})}>
+
+                                <option value="">Selecione</option>
+
+                            </select>
+
+                        </label>
+
+
+
+                        <label className="form-field">
+
+                            <span className="form-label">Ordem</span>
+
+                            <input className="form-input" type="number" min={0}
+
+                                   value={data.entity.qtdeIniciando ?? ''}
+
+                                   onChange={(e) => updateField('entity', {...data.entity, qtdeIniciando: e.target.value === '' ? 0 : Number(e.target.value)})}/>
+
+                        </label>
+
+
+
+                        <label className="form-field">
+
+                            <span className="form-label">Modalidade</span>
+
+                            <select className="form-input form-select"
+
+                                    value={data.entity.tipoCursoId ?? ''}
+
+                                    onChange={(e) => updateField('entity', {...data.entity, tipoCursoId: e.target.value ? Number(e.target.value) : undefined})}>
+
+                                <option value="">Selecione</option>
+
+                            </select>
+
+                        </label>
+
+                    </div>
+
+                </>
 
             ),
 
@@ -1445,41 +1571,13 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                 <fieldset className="form-fieldset">
 
-                    <legend>Requisitos da Matriz</legend>
+                    <legend>Requisitos da Matriz Curricular</legend>
 
                     <div className="form-grid">
 
-                        <label className="form-field" style={{gridColumn: 'span 2'}}>
-
-                            <span className="form-label">Descrição *</span>
-
-                            <input className="form-input" value={novoRequisitoDescricao}
-
-                                   onChange={(e) => setNovoRequisitoDescricao(e.target.value)}/>
-
-                        </label>
-
                         <label className="form-field">
 
-                            <span className="form-label">Tipo</span>
-
-                            <select className="form-input form-select" value={novoRequisitoTipo}
-
-                                    onChange={(e) => setNovoRequisitoTipo(e.target.value)}>
-
-                                <option value="PRÉ-REQUISITO">Pré-Requisito</option>
-
-                                <option value="CO-REQUISITO">Co-Requisito</option>
-
-                                <option value="EQUIVALENTE">Equivalente</option>
-
-                            </select>
-
-                        </label>
-
-                        <label className="form-field">
-
-                            <span className="form-label">Componente</span>
+                            <span className="form-label">Componente Curricular *</span>
 
                             <select className="form-input form-select"
 
@@ -1507,35 +1605,31 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                         </label>
 
-                        <label className="form-field">
 
-                            <span className="form-label">Carga Horária Mínima</span>
-
-                            <input className="form-input" type="number" min={0}
-
-                                   value={novoRequisitoCarga}
-
-                                   onChange={(e) => setNovoRequisitoCarga(
-
-                                       e.target.value === '' ? '' : Number(e.target.value),
-
-                                   )}/>
-
-                        </label>
 
                         <label className="form-field">
 
-                            <span className="form-label">Média Mínima</span>
+                            <span className="form-label">Componente Curricular Requisito *</span>
 
-                            <input className="form-input" type="number" min={0} step={0.1}
+                            <select className="form-input form-select"
 
-                                   value={novoRequisitoMedia}
+                                    value={novoRequisitoDescricao}
 
-                                   onChange={(e) => setNovoRequisitoMedia(
+                                    onChange={(e) => setNovoRequisitoDescricao(e.target.value)}>
 
-                                       e.target.value === '' ? '' : Number(e.target.value),
+                                <option value="">Selecione</option>
 
-                                   )}/>
+                                {matriz.map((m) => (
+
+                                    <option key={String(m.id)} value={String((m as any).descricao ?? (m as any).sucinto ?? m.id)}>
+
+                                        {String((m as any).descricao ?? (m as any).sucinto ?? `Componente #${m.id}`)}
+
+                                    </option>
+
+                                ))}
+
+                            </select>
 
                         </label>
 
@@ -1559,15 +1653,9 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                             <tr>
 
-                                <th>Descrição</th>
+                                <th>Componente Curricular</th>
 
-                                <th>Tipo</th>
-
-                                <th>Componente</th>
-
-                                <th>C.H. Mín.</th>
-
-                                <th>Média Mín.</th>
+                                <th>Componente Curricular Requisito</th>
 
                                 <th style={{width: 50}}></th>
 
@@ -1585,15 +1673,9 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                                     <tr key={r.key}>
 
-                                        <td>{r.descricao}</td>
-
-                                        <td>{r.tipoRequisito}</td>
-
                                         <td>{(comp as any)?.descricao ?? (comp as any)?.sucinto ?? '-'}</td>
 
-                                        <td>{r.cargaHorariaMinima ?? '-'}</td>
-
-                                        <td>{r.mediaMinima ?? '-'}</td>
+                                        <td>{r.descricao}</td>
 
                                         <td>
 
@@ -1997,13 +2079,13 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
             <main>
 
-                <h1>{idEdicao ? `Editar Currículo #${idEdicao}` : 'Currículo do Curso'}</h1>
+                <h1>{edicaoId ? `Editar Currículo #${edicaoId}` : 'Currículo do Curso'}</h1>
 
                 <div className="div_form">
 
                     <div className="form-title">
 
-                        {idEdicao ? `Currículo #${idEdicao}` : 'Novo Currículo'}
+                        {edicaoId ? `Currículo #${edicaoId}` : 'Novo Currículo'}
 
                     </div>
 
@@ -2017,9 +2099,17 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                                     title="Salvar registro" disabled={salvando}
 
-                                    onClick={() => void handleComplete(dataRef.current)}>
+                                    onClick={() => void handleComplete(dataRef.current, false)}>
 
-                                {salvando ? 'Salvando...' : 'Gravar'}
+                                {salvando ? 'Salvando...' : 'Salvar'}
+
+                            </button>
+
+                            <button type="button" className="btnstop" title="Salvar e continuar editando"
+
+                                    disabled={salvando} onClick={() => void handleComplete(dataRef.current, true)}>
+
+                                Salvar e Continuar
 
                             </button>
 

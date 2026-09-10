@@ -173,18 +173,19 @@
 
 .photo-upload-remove {
     padding: 0.625rem 1.25rem;
-    background: #fff;
-    border: 1px solid #e74c3c;
+    background: #e53935;
+    border: 1px solid #e53935;
     border-radius: 6px;
     font-size: 0.875rem;
-    font-weight: 500;
-    color: #e74c3c;
+    font-weight: 600;
+    color: #fff;
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
 }
 
 .photo-upload-remove:hover {
-    background: #fdf0f0;
+    background: #c62828;
+    border-color: #c62828;
 }
 
 .photo-camera-content {
@@ -289,13 +290,14 @@
 }
 
 .photo-upload-btn-danger {
-    background: #fff;
-    border: 1px solid #e74c3c;
-    color: #e74c3c;
+    background: #e53935;
+    border: 1px solid #e53935;
+    color: #fff;
 }
 
 .photo-upload-btn-danger:hover:not(:disabled) {
-    background: #fdf0f0;
+    background: #c62828;
+    border-color: #c62828;
 }
 
 .photo-upload-btn-danger:disabled {

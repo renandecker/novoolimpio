@@ -1,5 +1,5 @@
-﻿import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable} from '../../shared/components/DataTable';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {DataTable} from '../../../shared/components/DataTable';
 
 export default function ViewFuncaoFormFuncaoListScreen() {
     return <PermissionGate permission="READ">

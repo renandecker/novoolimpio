@@ -1,6 +1,6 @@
-﻿import {PermissionGate} from '../../shared/services/permissions';
-import {ModuleTabs} from '../../shared/components/ModuleTabs';
-import {COMPONENTE_SOURCE, COMPONENTE_COLUMNS, COMPONENTE_SEARCH} from '../../shared/services/masterDetailSources';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {ModuleTabs} from '../../../shared/components/ModuleTabs';
+import {COMPONENTE_SOURCE, COMPONENTE_COLUMNS, COMPONENTE_SEARCH} from '../../../shared/services/masterDetailSources';
 
 export default function ViewProfessorFormProfessorListScreen() {
     return (

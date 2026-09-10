@@ -226,7 +226,7 @@ export default function ViewRelatoriosFormTabelaListScreen() {
                                     data={dimensoesDescritivas}
                                     columns={DIMENSAO_DESC_COLUMNS}
                                     actions={[
-                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnblue', onClick: removeDimensaoDescritiva},
+                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnred', onClick: removeDimensaoDescritiva},
                                     ]}
                                 />
                             </div>
@@ -244,7 +244,7 @@ export default function ViewRelatoriosFormTabelaListScreen() {
                                     data={dimensoesTempo}
                                     columns={DIMENSAO_TEMPO_COLUMNS}
                                     actions={[
-                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnblue', onClick: removeDimensaoTempo},
+                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnred', onClick: removeDimensaoTempo},
                                     ]}
                                 />
                             </div>
@@ -262,7 +262,7 @@ export default function ViewRelatoriosFormTabelaListScreen() {
                                     data={medidas}
                                     columns={MEDIDA_COLUMNS}
                                     actions={[
-                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnblue', onClick: removeMedida},
+                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnred', onClick: removeMedida},
                                     ]}
                                 />
                             </div>

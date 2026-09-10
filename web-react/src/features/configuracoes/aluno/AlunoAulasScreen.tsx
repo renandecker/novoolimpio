@@ -1,10 +1,10 @@
-﻿import {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 
 import {Link} from 'react-router-dom';
 
-import {aulaApi, TurmaAula} from '../../features/professor/aula';
+import {aulaApi, TurmaAula} from '../../professor/aula';
 
-import '../../features/aluno/AlunoPortal.css';
+import '../../aluno/AlunoPortal.css';
 
 export default function AlunoAulasScreen() {
     const [turmas, setTurmas] = useState<TurmaAula[]>([]);

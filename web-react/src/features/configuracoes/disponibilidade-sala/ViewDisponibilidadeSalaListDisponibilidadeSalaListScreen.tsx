@@ -1,10 +1,10 @@
-﻿import {useState} from 'react';
+import {useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {api} from '../../shared/services/api';
-import {PermissionGate} from '../../shared/services/permissions';
-import {ScheduleWeekView, mondayOf, toIsoDate} from '../../shared/components/WeeklyGrid';
-import type {ScheduleEventData} from '../../shared/components/WeeklyGrid';
-import '../../features/professor/Disponibilidade.css';
+import {api} from '../../../shared/services/api';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {ScheduleWeekView, mondayOf, toIsoDate, monthRangeForWeek} from '../../../shared/components/WeeklyGrid';
+import type {ScheduleEventData} from '../../../shared/components/WeeklyGrid';
+import '../../professor/Disponibilidade.css';
 
 interface UnidadeRow {
     id: number;
@@ -36,6 +36,8 @@ export default function ViewDisponibilidadeSalaListDisponibilidadeSalaListScreen
     const [salaId, setSalaId] = useState('');
     const [weekStart, setWeekStart] = useState(() => toIsoDate(mondayOf(new Date())));
 
+    const {inicio: rangeInicio, fim: rangeFim} = monthRangeForWeek(weekStart);
+
     const unidadesQuery = useQuery({
         queryKey: ['disp-sala-unidades'],
         queryFn: async () => (await api.get<UnidadeRow[]>('/api/view/unidade/listUnidade')).data,
@@ -48,15 +50,15 @@ export default function ViewDisponibilidadeSalaListDisponibilidadeSalaListScreen
     });
 
     const eventosQuery = useQuery({
-        queryKey: ['disp-sala-eventos', unidadeId, salaId, weekStart],
+        queryKey: ['disp-sala-eventos', unidadeId, salaId, rangeInicio, rangeFim],
         queryFn: async () =>
             (
                 await api.get<ScheduleEventData[]>('/api/educacao/disponibilidade-sala/schedule-events', {
                     params: {
                         unidadeId,
                         ...(salaId ? {salaId} : {}),
-                        inicio: weekStart,
-                        fim: weekStart,
+                        inicio: rangeInicio,
+                        fim: rangeFim,
                     },
                 })
             ).data,

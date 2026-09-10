@@ -1,8 +1,8 @@
-﻿import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {api} from '../../shared/services/api';
-import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable, DataTableRowAction} from '../../shared/components/DataTable';
+import {api} from '../../../shared/services/api';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {DataTable, DataTableRowAction} from '../../../shared/components/DataTable';
 
 export default function ListTabelaScreen() {
     const navigate = useNavigate();
@@ -14,7 +14,7 @@ export default function ListTabelaScreen() {
             icon: <i className="fa fa-external-link" />,
             permission: 'EXECUTE',
             onClick: (item) => {
-                navigate(`/view/relatorios/viewTabela?id=${item.id}`);
+                navigate(`/view/relatorios/viewTabela/${item.id}`);
             },
         },
     ];

@@ -1,7 +1,7 @@
-﻿import React from 'react';
+import React from 'react';
 import {useNavigate} from 'react-router-dom';
-import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable, DataTableRowAction} from '../../shared/components/DataTable';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {DataTable, DataTableRowAction} from '../../../shared/components/DataTable';
 
 export default function ListMapaScreen() {
     const navigate = useNavigate();

@@ -70,7 +70,6 @@ import {
     ViewAtividadeComplementarListAtividadeComplementarListScreen,
     ViewAuditoriaFormAuditoriaHistoricoListScreen,
     ViewAuditoriaListAuditoriaListScreen,
-    ViewAuditoriaListAuditoriaHistoricoListScreen,
     ViewBairroFormBairroListScreen,
     ViewBairroListBairroListScreen,
     ViewBandeiraFormBandeiraListScreen,
@@ -338,11 +337,9 @@ ViewComunicacaoListComunicacaoListScreen,
 
     ViewTelefoneFormTelefoneListScreen,
     ViewTelefoneListTelefoneListScreen,
-    ViewTempoAulaFormTempoAulaListScreen,
     ViewTempoAulaListTempoAulaListScreen,
     ViewTipoAcaoFormTipoAcaoListScreen,
     ViewTipoAcaoListTipoAcaoListScreen,
-    ViewTipoAgendaFormTipoAgendaListScreen,
     ViewTipoAgendaListTipoAgendaListScreen,
     ViewTipoAtividadeFormTipoAtividadeListScreen,
     ViewTipoAtividadeListTipoAtividadeListScreen,
@@ -364,7 +361,6 @@ ViewComunicacaoListComunicacaoListScreen,
     ViewTipoUnidadeFormTipoUnidadeListScreen,
     ViewTipoUnidadeListTipoUnidadeListScreen,
 
-    ViewTurmaFormAjusteCalendarioListScreen,
     ViewTurmaListTurmaListScreen,
     ViewTurmaListTurmaFinalizandoListScreen,
     ViewTurnoFormTurnoListScreen,
@@ -458,7 +454,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
            element={<ViewAtividadeComplementarListAtividadeComplementarListScreen/>}/>
     <Route path="/view/auditoria/formAuditoriaHistorico" element={<ViewAuditoriaFormAuditoriaHistoricoListScreen/>}/>
     <Route path="/view/auditoria/listAuditoria" element={<ViewAuditoriaListAuditoriaListScreen/>}/>
-    <Route path="/view/auditoria/listAuditoriaHistorico" element={<ViewAuditoriaListAuditoriaHistoricoListScreen/>}/>
+    
     <Route path="/view/bairro/formBairro" element={<ViewBairroFormBairroListScreen/>}/>
     <Route path="/view/bairro/listBairro" element={<ViewBairroListBairroListScreen/>}/>
     <Route path="/view/bandeira/formBandeira" element={<ViewBandeiraFormBandeiraListScreen/>}/>
@@ -742,7 +738,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/relatorios/viewGraficoPizza" element={<ReportViewScreen/>}/>
     <Route path="/view/relatorios/viewMapa" element={<ReportViewScreen/>}/>
     <Route path="/view/relatorios/viewOrganograma" element={<ReportViewScreen/>}/>
-    <Route path="/view/relatorios/viewTabela" element={<ReportViewScreen/>}/>
+    <Route path="/view/relatorios/viewTabela/:id" element={<ViewRelatoriosViewTabelaListScreen/>}/>
 
     <Route path="/view/resultado/formResultado" element={<ViewResultadoFormResultadoListScreen/>}/>
     <Route path="/view/resultado/listResultado" element={<ViewResultadoListResultadoListScreen/>}/>
@@ -773,11 +769,11 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
 
     <Route path="/view/telefone/formTelefone" element={<ViewTelefoneFormTelefoneListScreen/>}/>
     <Route path="/view/telefone/listTelefone" element={<ViewTelefoneListTelefoneListScreen/>}/>
-    <Route path="/view/tempoAula/formTempoAula" element={<ViewTempoAulaFormTempoAulaListScreen/>}/>
+    
     <Route path="/view/tempoAula/listTempoAula" element={<ViewTempoAulaListTempoAulaListScreen/>}/>
     <Route path="/view/tipoAcao/formTipoAcao" element={<ViewTipoAcaoFormTipoAcaoListScreen/>}/>
     <Route path="/view/tipoAcao/listTipoAcao" element={<ViewTipoAcaoListTipoAcaoListScreen/>}/>
-    <Route path="/view/tipoAgenda/formTipoAgenda" element={<ViewTipoAgendaFormTipoAgendaListScreen/>}/>
+    
     <Route path="/view/tipoAgenda/listTipoAgenda" element={<ViewTipoAgendaListTipoAgendaListScreen/>}/>
     <Route path="/view/tipoAtividade/formTipoAtividade" element={<ViewTipoAtividadeFormTipoAtividadeListScreen/>}/>
     <Route path="/view/tipoAtividade/listTipoAtividade" element={<ViewTipoAtividadeListTipoAtividadeListScreen/>}/>
@@ -799,7 +795,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/tipoUnidade/formTipoUnidade" element={<ViewTipoUnidadeFormTipoUnidadeListScreen/>}/>
     <Route path="/view/tipoUnidade/listTipoUnidade" element={<ViewTipoUnidadeListTipoUnidadeListScreen/>}/>
 
-    <Route path="/view/turma/formAjusteCalendario" element={<ViewTurmaFormAjusteCalendarioListScreen/>}/>
+    
     <Route path="/view/turma/listTurma" element={<ViewTurmaListTurmaListScreen/>}/>
     <Route path="/view/turma/listTurmaFinalizando" element={<ViewTurmaListTurmaFinalizandoListScreen/>}/>
     <Route path="/view/turno/formTurno" element={<ViewTurnoFormTurnoListScreen/>}/>

@@ -1,10 +1,10 @@
-﻿import {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 
 import {Link} from 'react-router-dom';
 
-import {alunoApi, AvaliacaoAluno, formatarData} from '../../features/aluno/aluno';
+import {alunoApi, AvaliacaoAluno, formatarData} from '../../aluno/aluno';
 
-import '../../features/aluno/AlunoPortal.css';
+import '../../aluno/AlunoPortal.css';
 
 
 

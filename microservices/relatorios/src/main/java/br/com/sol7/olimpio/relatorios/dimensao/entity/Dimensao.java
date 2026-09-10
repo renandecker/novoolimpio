@@ -9,10 +9,10 @@ import jakarta.persistence.Table;
 @Table(name = "rel_dimensao")
 public class Dimensao extends PanacheEntity {
 
-    @Column(name = "tipo", columnDefinition = "text")
+    @Column(name = "tipo_dimensao", columnDefinition = "text")
     public String tipo;
 
-    @Column(name = "tipo_info", columnDefinition = "text")
+    @Column(name = "tipo_info_dimensao", columnDefinition = "text")
     public String tipoInfo;
 
     @Column(name = "nome_visualizacao", columnDefinition = "text")

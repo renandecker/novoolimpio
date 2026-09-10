@@ -15,6 +15,7 @@ const ACTIONS = [
     {key: 'notas', label: 'Notas', empty: 'Notas do aluno.'},
     {key: 'presencas', label: 'Presenças', empty: 'Presenças do aluno.'},
     {key: 'historicoAluno', label: 'Histórico aluno', empty: 'Histórico completo do aluno.'},
+    {key: 'desistente', label: 'Desistente', empty: 'Notificar aluno desistente.'},
 ] as
 const ;
 
@@ -30,11 +31,17 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
             <ModuleList path="/api/view/gestaoAluno/gestaoAluno" title="Gestão do Aluno"/>
 
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.actionsRow}>
-                {ACTIONS.map((action) => (
-                    <Pressable key={action.key} style={styles.actionBtn} onPress={() => setOpenAction(action.key)}>
-                        <Text style={styles.actionBtnText}>{action.label}</Text>
-                    </Pressable>
-                ))}
+                {ACTIONS.map((action) => {
+                    let btnStyle = styles.actionBtn;
+                    if (action.key === 'desistente') {
+                        btnStyle = [styles.actionBtn, styles.pinkBtn];
+                    }
+                    return (
+                        <Pressable key={action.key} style={btnStyle} onPress={() => setOpenAction(action.key)}>
+                            <Text style={styles.actionBtnText}>{action.label}</Text>
+                        </Pressable>
+                    );
+                })}
                 <Pressable style={[styles.actionBtn, styles.dangerBtn]} onPress={() => setCancelamentoAberto(true)}>
                     <Text style={styles.actionBtnText}>Cancelamento de Contrato</Text>
                 </Pressable>
@@ -78,6 +85,7 @@ const styles = StyleSheet.create({
         elevation: 3
     },
     dangerBtn: {backgroundColor: '#b93f2a'},
+    pinkBtn: {backgroundColor: '#e91e63'},
     actionBtnText: {color: '#fff', fontWeight: '600', fontSize: 14},
     overlay: {flex: 1, backgroundColor: 'rgba(29, 32, 37, 0.55)', justifyContent: 'center', padding: 16},
     modal: {

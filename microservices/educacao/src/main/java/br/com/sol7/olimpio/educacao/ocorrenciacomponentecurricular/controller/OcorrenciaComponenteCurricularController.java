@@ -8,7 +8,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 
 import java.util.List;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Path("/api/educacao/ocorrencia-componente-curricular")
 @Produces(MediaType.APPLICATION_JSON)
@@ -53,21 +53,21 @@ public class OcorrenciaComponenteCurricularController {
 
     @GET
     @Path("/buscar-ocorrencia-por-professor")
-    public Uni<List<Long>> buscarOcorrenciaPorProfessor(@QueryParam("professorId") Long professorId, @QueryParam("inicio") Date inicio, @QueryParam("fim") Date fim) {
+    public Uni<List<Long>> buscarOcorrenciaPorProfessor(@QueryParam("professorId") Long professorId, @QueryParam("inicio") LocalDate inicio, @QueryParam("fim") LocalDate fim) {
         return service.buscarOcorrenciaPorProfessor(professorId, inicio, fim);
     }
 
 
     @GET
     @Path("/buscar-ocorrencia-por-oferecimento-e-datas")
-    public Uni<List<Long>> buscarOcorrenciaPorOferecimentoEDatas(@QueryParam("oferecimentoComponenteCurricularId") Long oferecimentoComponenteCurricularId, @QueryParam("inicio") Date inicio, @QueryParam("fim") Date fim) {
+    public Uni<List<Long>> buscarOcorrenciaPorOferecimentoEDatas(@QueryParam("oferecimentoComponenteCurricularId") Long oferecimentoComponenteCurricularId, @QueryParam("inicio") LocalDate inicio, @QueryParam("fim") LocalDate fim) {
         return service.buscarOcorrenciaPorOferecimentoEDatas(oferecimentoComponenteCurricularId, inicio, fim);
     }
 
 
     @GET
     @Path("/buscar-ocorrencia-por-oferecimento-e-datas-coringa")
-    public Uni<List<Long>> buscarOcorrenciaPorOferecimentoEDatasCoringa(@QueryParam("oferecimentoComponenteCurricularId") Long oferecimentoComponenteCurricularId, @QueryParam("inicio") Date inicio, @QueryParam("fim") Date fim, @QueryParam("coringa") Boolean coringa) {
+    public Uni<List<Long>> buscarOcorrenciaPorOferecimentoEDatasCoringa(@QueryParam("oferecimentoComponenteCurricularId") Long oferecimentoComponenteCurricularId, @QueryParam("inicio") LocalDate inicio, @QueryParam("fim") LocalDate fim, @QueryParam("coringa") Boolean coringa) {
         return service.buscarOcorrenciaPorOferecimentoEDatasCoringa(oferecimentoComponenteCurricularId, inicio, fim, coringa);
     }
 
@@ -102,14 +102,14 @@ public class OcorrenciaComponenteCurricularController {
 
     @GET
     @Path("/buscar-ocorrencia-por-data-unidade")
-    public Uni<List<Long>> buscarOcorrenciaPorDataUnidade(@QueryParam("date") Date date, @QueryParam("unidades") List<Long> unidades) {
+    public Uni<List<Long>> buscarOcorrenciaPorDataUnidade(@QueryParam("date") LocalDate date, @QueryParam("unidades") List<Long> unidades) {
         return service.buscarOcorrenciaPorDataUnidade(date, unidades);
     }
 
 
     @GET
     @Path("/buscar-ocorrencia-por-data-unidade2")
-    public Uni<List<Long>> buscarOcorrenciaPorDataUnidade2(@QueryParam("inicio") Date inicio, @QueryParam("fim") Date fim, @QueryParam("unidades") List<Long> unidades) {
+    public Uni<List<Long>> buscarOcorrenciaPorDataUnidade2(@QueryParam("inicio") LocalDate inicio, @QueryParam("fim") LocalDate fim, @QueryParam("unidades") List<Long> unidades) {
         return service.buscarOcorrenciaPorDataUnidade2(inicio, fim, unidades);
     }
 

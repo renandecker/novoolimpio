@@ -1,6 +1,6 @@
-﻿import {PermissionGate} from '../../shared/services/permissions';
-import {ModuleTabs} from '../../shared/components/ModuleTabs';
-import {TURMA_SOURCE, TURMA_COLUMNS, TURMA_SEARCH} from '../../shared/services/masterDetailSources';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {ModuleTabs} from '../../../shared/components/ModuleTabs';
+import {TURMA_SOURCE, TURMA_COLUMNS, TURMA_SEARCH} from '../../../shared/services/masterDetailSources';
 
 export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScreen() {
     return (

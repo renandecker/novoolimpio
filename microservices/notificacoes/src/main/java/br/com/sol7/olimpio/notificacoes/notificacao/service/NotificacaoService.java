@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
-@WithTransaction
 public class NotificacaoService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificacaoService.class);
@@ -62,6 +61,7 @@ public class NotificacaoService {
                 .map(this::toResponse);
     }
 
+    @WithTransaction
     public Uni<NotificacaoResponse> create(NotificacaoRequest r) {
         var e = new Notificacao();
         e.username = r.username() == null || r.username().isBlank() ? "admin" : r.username();
@@ -84,6 +84,7 @@ public class NotificacaoService {
                 .replaceWith(() -> toResponse(e));
     }
 
+    @WithTransaction
     public Uni<NotificacaoResponse> update(Long id, NotificacaoRequest r) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Notificacao not found"))
@@ -99,12 +100,14 @@ public class NotificacaoService {
                 .map(this::toResponse);
     }
 
+    @WithTransaction
     public Uni<Void> delete(Long id) {
         return repository.deleteById(id).onItem()
                 .transformToUni(deleted -> deleted ? Uni.createFrom().voidItem()
                         : Uni.createFrom().failure(new NotFoundException("Notificacao not found")));
     }
 
+    @WithTransaction
     public Uni<NotificacaoResponse> marcarLida(Long id, String username) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Notificacao not found"))

@@ -58,7 +58,7 @@ export interface DataTableToolbarButton {
 }
 
 interface DataTableProps {
-    path: string;
+    path?: string;
     columns?: DataTableColumn[];
     params?: Record<string, unknown>;
     module?: string;
@@ -245,7 +245,7 @@ interface FilterModalState {
     filters: SearchFilterRequest;
 }
 
-export function DataTable({path, columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, hideUpdate = false, hideDelete = false, hideView = false, editNavigateTo, createNavigateTo, extraToolbarButtons, extraRowActions}: DataTableProps) {
+export function DataTable({path = '', columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, hideUpdate = false, hideDelete = false, hideView = false, editNavigateTo, createNavigateTo, extraToolbarButtons, extraRowActions}: DataTableProps) {
     const navigate = useNavigate();
     const [sortField, setSortField] = useState<string>('id');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -369,13 +369,17 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
     }
     for (const extra of extraRowActions ?? []) {
         if (extra.permission && !can(extra.permission, screenOutcome)) continue;
+        const isRemover = extra.key === 'remove' || extra.key === 'remover' || extra.title === 'Remover';
+        const extraClass = extra.className ?? (isRemover ? 'btnred' : 'btnstop');
+        const extraStyle = isRemover && !extra.className ? {backgroundColor: '#e53935', borderColor: '#e53935', color: '#fff'} : undefined;
         actionColumns.push({
             key: extra.key,
             label: extra.title,
             render: (item) => (
                 <button
                     type="button"
-                    className={`btn-action ${extra.className ?? 'btnstop'}`}
+                    className={`btn-action ${extraClass}`}
+                    style={extraStyle}
                     title={extra.title}
                     onClick={async () => {
                         await extra.onClick(item);

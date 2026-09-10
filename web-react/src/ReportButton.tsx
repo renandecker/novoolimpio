@@ -119,7 +119,11 @@ export function ReportButton() {
         setOpen(false);
         const tipoKey = (item.tipo || '').toUpperCase();
         const baseRoute = tipoRota[tipoKey] ?? '/view/relatorios/viewTabela';
-        navigate(`${baseRoute}?id=${item.id}`);
+        if (tipoKey === 'TABELA') {
+            navigate(`/view/relatorios/viewTabela/${item.id}`);
+        } else {
+            navigate(`${baseRoute}?id=${item.id}`);
+        }
     };
 
     return (

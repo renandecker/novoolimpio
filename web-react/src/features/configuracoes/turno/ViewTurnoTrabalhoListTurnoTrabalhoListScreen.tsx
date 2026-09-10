@@ -1,6 +1,6 @@
-﻿import { PermissionGate } from '../../shared/services/permissions';
+import { PermissionGate } from '../../../shared/services/permissions';
 import { useNavigate } from 'react-router-dom';
-import { DataTable, type DataTableColumn, type DataTableToolbarButton } from '../../shared/components/DataTable';
+import { DataTable, type DataTableColumn, type DataTableToolbarButton } from '../../../shared/components/DataTable';
 
 
 /**

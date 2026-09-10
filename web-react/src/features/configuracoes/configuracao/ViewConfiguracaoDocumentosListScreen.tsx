@@ -1,9 +1,9 @@
-﻿import {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {api} from '../../shared/services/api';
-import {DataTable, type DataTableProps} from '../../shared/components/DataTable';
-import type {ApiItem} from '../../features/auth/types';
-import {useModulePaged} from '../../shared/hooks/useModulePaged';
+import {api} from '../../../shared/services/api';
+import {DataTable, type DataTableProps} from '../../../shared/components/DataTable';
+import type {ApiItem} from '../../../shared/types/types.ts';
+import {useModulePaged} from '../../../shared/hooks/useModulePaged';
 
 const DOCUMENTOS_COLUMNS = [
     {key: 'nome', label: 'Nome'},

@@ -1,4 +1,4 @@
-﻿import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 
 
@@ -8,17 +8,17 @@ import {useNavigate, useSearchParams} from 'react-router-dom';
 
 import {useQuery} from '@tanstack/react-query';
 
-import {api} from '../../shared/services/api';
+import {api} from '../../../shared/services/api';
 
-import {PermissionGate} from '../../shared/services/permissions';
+import {PermissionGate} from '../../../shared/services/permissions';
 
-import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
+import {AutoComplete, type AutoCompleteOption} from '../../../shared/components/AutoComplete';
 
-import {ScheduleWeekView, mondayOf, toIsoDate} from '../../shared/components/WeeklyGrid';
+import {ScheduleWeekView, mondayOf, toIsoDate} from '../../../shared/components/WeeklyGrid';
 
-import type {ScheduleEventData} from '../../shared/components/WeeklyGrid';
+import type {ScheduleEventData} from '../../../shared/components/WeeklyGrid';
 
-import './OferecimentoCurso.css';
+import '../OferecimentoCurso.css';
 type Opcao = {id: number; label: string};
 
 
@@ -752,9 +752,13 @@ useEffect(() => {
 
                 // Load diasAula from backend (new endpoint)
 
-                const {data: diasAulaData} = await api.get<Array<{diaSemanaId: number; turnoEducacaoId: number; tempoAulaId: number}>>('/api/educacao/oferecimento-componente-curricular/buscar-dias-aula-por-grupo', {params: {grupoId: curso.id}});
+                let diasAulaLoaded: Array<{diaSemanaId: number; turnoEducacaoId: number; tempoAulaId: number}> = [];
 
-                const diasAulaLoaded = (diasAulaData ?? []).map((d) => ({
+                try {
+
+                    const {data: diasAulaData} = await api.get<Array<{diaSemanaId: number; turnoEducacaoId: number; tempoAulaId: number}>>('/api/educacao/oferecimento-componente-curricular/buscar-dias-aula-por-grupo', {params: {grupoId: curso.id}});
+
+                    diasAulaLoaded = (diasAulaData ?? []).map((d) => ({
 
                     diaSemanaId: d.diaSemanaId,
 
@@ -763,6 +767,14 @@ useEffect(() => {
                     tempoAulaId: d.tempoAulaId,
 
                 }));
+
+                } catch (e) {
+
+                    console.warn('Falha ao carregar dias-aula por grupo, reconstruindo via ocorrencias', e);
+
+                    diasAulaLoaded = [];
+
+                }
 
 
 
@@ -2103,6 +2115,10 @@ useEffect(() => {
 
                                 type="button"
 
+                                className="ofc-btn-remove"
+
+                                style={{color: '#dc3545'}}
+
                                 title="Remover"
 
                                 onClick={() => updateField('responsaveis', data.responsaveis.filter((x) => x.id !== r.id))}
@@ -2130,8 +2146,6 @@ useEffect(() => {
     const renderTabDiaAula = () => {
 
         const salaSelecionada = salasDetalhe.find((s) => s.id === data.salaId);
-
-        const curriculoSelecionado = curriculosDetalhe.find((c) => c.id === data.curriculoId);
 
         return (
 
@@ -2204,22 +2218,6 @@ useEffect(() => {
                             </button>
 
                         </div>
-
-                        {salaSelecionada && (
-
-                            <small className="ofc-hint">
-
-                                Capacidade: {salaSelecionada.qtd_alunos ?? 0} alunos
-
-                                {curriculoSelecionado && (curriculoSelecionado.qtd_maxima_alunos ?? 0) > 0
-
-                                    ? ` · Máximo do curso: ${curriculoSelecionado.qtd_maxima_alunos}`
-
-                                    : ''}
-
-                            </small>
-
-                        )}
 
                     </div>
 
@@ -2387,7 +2385,7 @@ useEffect(() => {
 
                             <button type="button" className="btn-primary" onClick={adicionarDiaAula}>Adicionar</button>
 
-                            <button type="button" className="btn-secondary ofc-btn-yellow" onClick={removerTodosDiasAula}
+                            <button type="button" className="btnred" style={{backgroundColor: '#e53935', borderColor: '#e53935', color: '#fff'}} onClick={removerTodosDiasAula}
 
                                     disabled={data.diasAula.length === 0}>
 
@@ -2493,7 +2491,7 @@ useEffect(() => {
 
                         >
 
-                            <span className="ofc-card-toggle">{expandido === turma.componenteCurricularId ? '<ChevronDown className="icon" />' : '<ChevronRight className="icon" />'}</span>
+                            <span className="ofc-card-toggle">{expandido === turma.componenteCurricularId ? <ChevronDown className="icon" /> : <ChevronRight className="icon" />}</span>
 
                             <span className="ofc-card-title">{turma.descricao}</span>
 

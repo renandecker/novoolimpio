@@ -2,7 +2,7 @@ import {useEffect, useRef, useState} from 'react';
 import {MapContainer, TileLayer, Marker, Popup} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import * as L from 'leaflet';
-import './MapaView.css';
+import '../MapaView.css';
 
 type MapaPontosResponse = {
     coordenadaCentro: string;

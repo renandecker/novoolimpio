@@ -1,5 +1,5 @@
 ﻿import {api} from '../../shared/services/api';
-import type {PagedResponse} from './types';
+import type {PagedResponse} from '../../shared/types/types';
 
 // Espelha br.com.sol7.olimpio.control.controllers.basico.UsuarioLogadoController#listFavoritos:
 // combina FavoritoUsuario (favoritos do próprio usuário) + FavoritoPerfil (favoritos do perfil),

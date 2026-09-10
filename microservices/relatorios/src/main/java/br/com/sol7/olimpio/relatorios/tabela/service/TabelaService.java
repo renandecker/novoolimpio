@@ -13,8 +13,11 @@ import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import br.com.sol7.olimpio.relatorios.tabela.dto.TabelaResponse;
 import br.com.sol7.olimpio.relatorios.tabela.dto.TabelaRequest;
@@ -84,6 +87,13 @@ public class TabelaService {
 
     private static final String SQL_COLUNAS = "SELECT tc.ordem, d.nome_visualizacao, d.tipo_info_dimensao, dc.coluna, m.nome_visualizacao, m.tipo_info_medida, mc.coluna FROM rel_tabela_colunas tc LEFT JOIN rel_dimensao d ON d.id = tc.id_dimensao LEFT JOIN rel_coluna dc ON dc.id = d.id_coluna LEFT JOIN rel_medida m ON m.id = tc.id_medida LEFT JOIN rel_coluna mc ON mc.id = m.id_coluna WHERE tc.id_tabela = ?1 ORDER BY tc.ordem, tc.id";
     private static final String SQL_ESTRUTURA = "SELECT e.tabela, e.condicao FROM rel_tabela t INNER JOIN rel_estrutura e ON e.id = t.id_estrutura WHERE t.id = ?1";
+    // Migrado de FiltrosController (extracted_aceso): filtros atuam no WHERE e referenciam a mesma
+    // expressao de rel_coluna.coluna (cortada no " as ") via rel_dimensao do rel_filtro.
+    private static final String SQL_FILTROS = "SELECT f.nome, dc.coluna, f.tipo_filtro, f.operacao, f.data_inicio, f.data_fim, f.periodo_dinamico, f.valor_fixo " +
+            "FROM rel_filtro f " +
+            "LEFT JOIN rel_dimensao d ON d.id = f.id_dimensao " +
+            "LEFT JOIN rel_coluna dc ON dc.id = d.id_coluna " +
+            "WHERE f.id_estrutura = (SELECT e.id FROM rel_tabela t INNER JOIN rel_estrutura e ON e.id = t.id_estrutura WHERE t.id = ?1)";
 
     /**
      * Executa a consulta montada pela estrutura e pelas colunas configuradas, com paginação via LIMIT/OFFSET do PostgreSQL.
@@ -245,10 +255,126 @@ public class TabelaService {
                 .onItem().ifNull().failWith(() -> new NotFoundException("Estrutura da tabela não encontrada"))
                 .onItem().transformToUni(estrutura -> Panache.getSession()
                         .chain(session -> session.createNativeQuery(SQL_COLUNAS).setParameter(1, tabelaId).getResultList())
-                        .map(configuracoes -> {
-                            if (configuracoes.isEmpty()) return "SELECT 1";
-                            return montarSql((Object[]) estrutura, configuracoes).sql();
-                        }));
+                        .onItem().transformToUni(configuracoes -> Panache.getSession()
+                                .chain(session -> session.createNativeQuery(SQL_FILTROS).setParameter(1, tabelaId).getResultList())
+                                .map(configFiltros -> {
+                                    if (configuracoes.isEmpty()) return "SELECT 1";
+                                    Object[] estruturaArr = (Object[]) estrutura;
+                                    SqlMontado montado = montarSql(estruturaArr, configuracoes);
+                                    String base = montado.sql();
+                                    String condicao = texto(estruturaArr[1]);
+                                    String fragmento = montarFiltroSql(configFiltros, filtros);
+                                    if (fragmento == null || fragmento.isEmpty()) return base;
+                                    return base + (condicao.isBlank() ? " WHERE " : " AND ") + fragmento;
+                                })));
+    }
+
+    // Migrado de FiltrosController.aplicarFiltro/ajustafiltro e convertOperationAndValue
+    // (extracted_aceso) + QueryBuilder: monta o predicado WHERE a partir dos filtros vindos do
+    // frontend. Cada entrada do mapa tem o NOME do rel_filtro como chave e
+    // { operation, value [, value2] } como valor.
+    private String montarFiltroSql(List<?> configFiltros, Map<String, Object> filtros) {
+        if (filtros == null || filtros.isEmpty()) return "";
+        Map<String, Object[]> porNome = new HashMap<>();
+        for (Object item : configFiltros) {
+            Object[] cfg = (Object[]) item;
+            String nome = texto(cfg[0]);
+            if (!nome.isEmpty()) porNome.put(nome.trim().toLowerCase(), cfg);
+        }
+        List<String> condicoes = new ArrayList<>();
+        for (Map.Entry<String, Object> entrada : filtros.entrySet()) {
+            Object condicaoObj = entrada.getValue();
+            if (!(condicaoObj instanceof Map<?, ?>)) continue;
+            Map<?, ?> cond = (Map<?, ?>) condicaoObj;
+            Object[] cfg = porNome.get(entrada.getKey().trim().toLowerCase());
+            if (cfg == null) continue;
+            String coluna = semAlias(texto(cfg[1]));
+            if (coluna.isEmpty()) continue;
+            String operador = operador(cond);
+            String valor = texto(cond.get("value"));
+            String valor2 = texto(cond.get("value2"));
+            String tipoFiltro = texto(cfg[2]);
+            String trecho = montarCondicao(coluna, operador, valor, valor2, tipoFiltro);
+            if (trecho != null) condicoes.add(trecho);
+        }
+        return String.join(" AND ", condicoes);
+    }
+
+    private String operador(Map<?, ?> cond) {
+        Object op = cond.get("operation");
+        if (op == null) op = cond.get("operator");
+        return op == null ? "" : op.toString();
+    }
+
+    private String montarCondicao(String coluna, String operador, String valor, String valor2, String tipoFiltro) {
+        if (operador == null || operador.isBlank() || valor == null) return null;
+        String op = normalizarOperador(operador);
+        if (op == null) return null;
+        String dinamico = periodoDinamico(op, coluna, valor);
+        if (dinamico != null) return dinamico;
+        if ("BETWEEN".equals(op)) {
+            if (valor.isBlank() || valor2 == null || valor2.isBlank()) return null;
+            return "cast(" + coluna + " as date) BETWEEN '" + esc(valor) + "' AND '" + esc(valor2) + "'";
+        }
+        if ("IN".equals(op)) {
+            return coluna + " IN (" + listaValores(valor) + ")";
+        }
+        String pattern = patternIlike(op, valor);
+        if (pattern != null) return coluna + " ILIKE '" + esc(pattern) + "'";
+        boolean tempo = "NORMAL".equalsIgnoreCase(tipoFiltro) || "FAIXA".equalsIgnoreCase(tipoFiltro) || "PERIODICO".equalsIgnoreCase(tipoFiltro);
+        if (tempo) return "cast(" + coluna + " as date) " + op + " '" + esc(valor) + "'";
+        return coluna + " " + op + " '" + esc(valor) + "'";
+    }
+
+    private String periodoDinamico(String op, String coluna, String valor) {
+        if (!"=".equals(op)) return null;
+        String v = valor.trim().toUpperCase();
+        return switch (v) {
+            case "HOJE", "DIA ATUAL" -> "cast(" + coluna + " as date) = CURRENT_DATE";
+            case "ONTEM", "DIA ANTERIOR" -> "cast(" + coluna + " as date) = CURRENT_DATE - INTERVAL '1 DAY'";
+            case "ULTIMA_SEMANA", "SEMANA ANTERIOR" -> "date_trunc('week', cast(" + coluna + " as date)) = date_trunc('week', CURRENT_DATE) - INTERVAL '1 week'";
+            case "ULTIMO_MES", "MES ANTERIOR" -> "date_trunc('month', cast(" + coluna + " as date)) = date_trunc('month', CURRENT_DATE) - INTERVAL '1 month'";
+            case "ULTIMO_ANO", "ANO ANTERIOR" -> "date_trunc('year', cast(" + coluna + " as date)) = date_trunc('year', CURRENT_DATE) - INTERVAL '1 year'";
+            case "MES_ATUAL", "MES ATUAL" -> "date_trunc('month', cast(" + coluna + " as date)) = date_trunc('month', CURRENT_DATE)";
+            case "ANO_ATUAL", "ANO ATUAL" -> "date_trunc('year', cast(" + coluna + " as date)) = date_trunc('year', CURRENT_DATE)";
+            default -> null;
+        };
+    }
+
+    private String normalizarOperador(String operador) {
+        if (operador == null) return null;
+        return switch (operador.toUpperCase()) {
+            case "EQUALS", "EQ", "=" -> "=";
+            case "NOT_EQUALS", "NOT_EQUAL", "NE", "!=", "<>" -> "<>";
+            case "GREATER_THAN", "GT", ">" -> ">";
+            case "GREATER_THAN_OR_EQUAL", "GE", ">=" -> ">=";
+            case "LESS_THAN", "LT", "<" -> "<";
+            case "LESS_THAN_OR_EQUAL", "LE", "<=" -> "<=";
+            case "BETWEEN" -> "BETWEEN";
+            case "IN", "IN_LIST" -> "IN";
+            case "CONTAINS" -> "CONTAINS";
+            case "STARTS_WITH" -> "STARTS_WITH";
+            case "ENDS_WITH" -> "ENDS_WITH";
+            default -> null;
+        };
+    }
+
+    private String patternIlike(String op, String valor) {
+        return switch (op) {
+            case "CONTAINS" -> "%" + valor + "%";
+            case "STARTS_WITH" -> valor + "%";
+            case "ENDS_WITH" -> "%" + valor;
+            default -> null;
+        };
+    }
+
+    private String listaValores(String valor) {
+        return Arrays.stream(valor.split(",")).map(String::trim).filter(s -> !s.isEmpty())
+                .map(s -> "'" + esc(s) + "'").collect(Collectors.joining(", "));
+    }
+
+    private String esc(String v) {
+        return v.replace("'", "''");
     }
 
 

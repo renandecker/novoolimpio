@@ -1,13 +1,13 @@
-﻿import {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {PermissionGate} from '../../shared/services/permissions';
-import {MasterDetail} from '../../shared/components/MasterDetail';
-import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
-import {BooleanField} from '../../shared/components/BooleanField';
-import {AGENDA_SOURCE, AGENDA_COLUMNS, AGENDA_SEARCH, TURNO_TRABALHO_SOURCE, TURNO_TRABALHO_COLUMNS, TURNO_TRABALHO_SEARCH, USUARIO_SOURCE, USUARIO_COLUMNS, USUARIO_SEARCH} from '../../shared/services/masterDetailSources';
-import type {ApiItem} from '../../shared/types/types';
-import {api} from '../../shared/services/api';
-import {API_PATHS} from '../../shared/services/apiPaths';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {MasterDetail} from '../../../shared/components/MasterDetail';
+import {AutoComplete, type AutoCompleteOption} from '../../../shared/components/AutoComplete';
+import {BooleanField} from '../../../shared/components/BooleanField';
+import {AGENDA_SOURCE, AGENDA_COLUMNS, AGENDA_SEARCH, TURNO_TRABALHO_SOURCE, TURNO_TRABALHO_COLUMNS, TURNO_TRABALHO_SEARCH, USUARIO_SOURCE, USUARIO_COLUMNS, USUARIO_SEARCH} from '../../../shared/services/masterDetailSources';
+import type {ApiItem} from '../../../shared/types/types';
+import {api} from '../../../shared/services/api';
+import {API_PATHS} from '../../../shared/services/apiPaths';
 
 const requiredMark = <span style={{color: '#C90000', marginLeft: 4}}>*</span>;
 

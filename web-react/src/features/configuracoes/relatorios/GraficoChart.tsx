@@ -15,7 +15,7 @@ import {
     Tooltip,
     Legend
 } from 'recharts';
-import type {LinhaGrafico} from '../../features/relatorios/relatorios';
+import type {LinhaGrafico} from '../../relatorios/relatorios';
 
 type GraficoChartProps = {
     tipo: string;

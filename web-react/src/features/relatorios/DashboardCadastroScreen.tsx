@@ -114,7 +114,7 @@ export default function DashboardCadastroScreen() {
                 <span className="text-2xl p-2 bg-gray-50 rounded-xl">{item.imagem}</span>
                 <button
                   onClick={() => handleRemover(item.id)}
-                  className="text-gray-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                  className="text-red-600 bg-red-50 border border-red-200 p-1.5 rounded-lg hover:bg-red-600 hover:text-white transition-colors" title="Remover"
                 >
                   <Trash2 size={16} />
                 </button>

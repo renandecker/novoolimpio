@@ -1,7 +1,7 @@
-﻿import {PermissionGate} from '../../shared/services/permissions';
-import {ModuleTabs} from '../../shared/components/ModuleTabs';
-import type {DataTableColumn} from '../../shared/components/DataTable';
-import type {ApiItem} from '../../features/auth/types';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {ModuleTabs} from '../../../shared/components/ModuleTabs';
+import type {DataTableColumn} from '../../../shared/components/DataTable';
+import type {ApiItem} from '../../../shared/types/types.ts';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 

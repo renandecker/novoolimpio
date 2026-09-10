@@ -1,8 +1,8 @@
-﻿import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
-import {Wizard, useWizardData} from '../../shared/components/Wizard';
-import {useApi} from '../../shared/services/api';
-import {API_PATHS} from '../../shared/services/apiPaths';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../../shared/components/DataTable';
+import {Wizard, useWizardData} from '../../../shared/components/Wizard';
+import {useApi} from '../../../shared/services/api';
+import {API_PATHS} from '../../../shared/services/apiPaths';
 
 const CANCELAMENTO_REGRA_COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID da Regra de Cancelamento'},

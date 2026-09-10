@@ -1,6 +1,6 @@
-﻿import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable} from '../../shared/components/DataTable';
-import {Tabs} from '../../shared/components/Tabs';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {DataTable} from '../../../shared/components/DataTable';
+import {Tabs} from '../../../shared/components/Tabs';
 
 export default function ViewConfiguracaoFormConfiguracaoParcelaListScreen() {
     return (

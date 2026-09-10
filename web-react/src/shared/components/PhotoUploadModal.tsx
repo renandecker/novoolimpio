@@ -102,7 +102,7 @@ export function PhotoUploadModal({isOpen, onClose, onPhotoUpdate, currentFoto, u
             formData.append('file', file);
             const {data} = await api.put<{foto: string}>('/api/basico/usuario/foto-base64', {foto: ''});
             const uploadRes = await api.post<{foto: string}>('/api/basico/usuario/foto-upload', formData, {
-                headers: {'Content-Type': 'multipart/form-data'},
+                headers: {'Content-Type': false},
             });
             const fotoUrl = uploadRes.data.foto;
             if (fotoUrl) {

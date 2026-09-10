@@ -1,11 +1,11 @@
-﻿import {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {PermissionGate} from '../../shared/services/permissions';
-import {FormLayout, FormTabConfig} from '../../shared/components/FormLayout';
-import {MasterDetail} from '../../shared/components/MasterDetail';
-import type {ApiItem} from '../../features/auth/types';
-import {api} from '../../shared/services/api';
-import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../../shared/services/masterDetailSources';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {FormLayout, FormTabConfig} from '../../../shared/components/FormLayout';
+import {MasterDetail} from '../../../shared/components/MasterDetail';
+import type {ApiItem} from '../../../shared/types/types.ts';
+import {api} from '../../../shared/services/api';
+import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../../../shared/services/masterDetailSources';
 
 const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
 const num = (v: string): number | null => (v !== '' && !isNaN(Number(v)) ? Number(v) : null);

@@ -1,6 +1,6 @@
 import {useMutation} from '@tanstack/react-query';
 import type {AxiosResponse} from 'axios';
-import {executeAction, Action} from './actions';
+import {executeAction, Action} from '../services/actions';
 
 export const useAction = (resource: string, action: Action) =>
     useMutation<AxiosResponse, unknown, string>({

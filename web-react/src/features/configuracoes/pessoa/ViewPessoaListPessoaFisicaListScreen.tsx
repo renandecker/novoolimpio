@@ -1,10 +1,13 @@
-﻿import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {DataTable, type DataTableColumn} from '../../../shared/components/DataTable';
 
 const COLUMNS: DataTableColumn[] = [
     {key: 'nome', label: 'Nome'},
     {key: 'cpf', label: 'CPF'},
     {key: 'rg', label: 'RG'},
+    {key: 'telefone', label: 'Telefone'},
+    {key: 'celular', label: 'Celular'},
+    {key: 'email', label: 'E-mail'},
 ];
 
 export default function ViewPessoaListPessoaFisicaListScreen() {

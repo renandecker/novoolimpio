@@ -1,4 +1,5 @@
 package br.com.sol7.olimpio.relatorios.filtros.controller;
+import br.com.sol7.olimpio.relatorios.filtros.dto.FiltroRelatorioWrapperDTO;
 import br.com.sol7.olimpio.relatorios.filtros.dto.FiltrosRelacoesRequest;
 import br.com.sol7.olimpio.relatorios.filtros.dto.FiltrosRelacoesResponse;
 import br.com.sol7.olimpio.relatorios.filtros.dto.FiltrosRequest;
@@ -127,6 +128,45 @@ public class FiltrosController {
     @Path("/buscar-dados-tipo")
     public Uni<Void> buscarDadosTipo() {
         return service.buscarDadosTipo();
+    }
+
+    @GET
+    @Path("/viewTabela")
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewTabela(@QueryParam("tabelaId") Long tabelaId) {
+        if (tabelaId == null) {
+            return Uni.createFrom().item(List.of());
+        }
+        return service.getFiltersForViewTabela(tabelaId);
+    }
+
+    @GET
+    @Path("/listTabela")
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForListTabela() {
+        return service.getFiltersForListTabela();
+    }
+
+    @GET
+    @Path("/viewMapa")
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewMapa(@QueryParam("mapaId") Long mapaId) {
+        if (mapaId == null) {
+            return Uni.createFrom().item(List.of());
+        }
+        return service.getFiltersForViewMapa(mapaId);
+    }
+
+    @GET
+    @Path("/viewGraficoBarrasHorizontal")
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewGraficoBarrasHorizontal(@QueryParam("graficoId") Long graficoId) {
+        if (graficoId == null) {
+            return Uni.createFrom().item(List.of());
+        }
+        return service.getFiltersForViewGraficoBarrasHorizontal(graficoId);
+    }
+
+    @GET
+    @Path("/listGrafico")
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForListGrafico() {
+        return service.getFiltersForListGrafico();
     }
 
 }

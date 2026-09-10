@@ -1,12 +1,12 @@
 import {useEffect, useState} from 'react';
 
-import {api} from '../../shared/services/api';
+import {api} from '../../../shared/services/api';
 
-import {useAuth} from '../../features/auth/auth';
+import {useAuth} from '../../auth/auth';
 
-import {PermissionGate} from '../../shared/services/permissions';
+import {PermissionGate} from '../../../shared/services/permissions';
 
-import '../../shared/components/Wizard.css';
+import '../../../shared/components/Wizard.css';
 
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 
@@ -1056,7 +1056,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
 
                                                 )}
 
-                                                <button onClick={() => removeFormaPagamento(idx)}
+                                                <button type="button" className="btnred" style={{backgroundColor: '#e53935', borderColor: '#e53935', color: '#fff'}} onClick={() => removeFormaPagamento(idx)}
 
                                                         disabled={formasPagamento.length === 1}>Remover
 

@@ -1,10 +1,10 @@
-﻿import {useState, useEffect} from 'react';
-import {PermissionGate} from '../../shared/services/permissions';
-import {MasterDetail} from '../../shared/components/MasterDetail';
-import {Tabs} from '../../shared/components/Tabs';
-import {Wizard, useWizardData} from '../../shared/components/Wizard';
-import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
-import {AutoComplete} from '../../shared/components/AutoComplete';
+import {useState, useEffect} from 'react';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {MasterDetail} from '../../../shared/components/MasterDetail';
+import {Tabs} from '../../../shared/components/Tabs';
+import {Wizard, useWizardData} from '../../../shared/components/Wizard';
+import {DataTable, type DataTableColumn} from '../../../shared/components/DataTable';
+import {AutoComplete} from '../../../shared/components/AutoComplete';
 import {
     PERFIL_SOURCE,
     PERFIL_COLUMNS,
@@ -27,11 +27,11 @@ import {
     PAINEL_PAINEL_SOURCE,
     PAINEL_PAINEL_COLUMNS,
     PAINEL_PAINEL_SEARCH,
-} from '../../shared/services/masterDetailSources';
-import type {ApiItem} from '../../features/auth/types';
-import {useApi} from '../../shared/services/api';
-import {API_PATHS} from '../../shared/services/apiPaths';
-import {FormLayout, FormTabConfig} from '../../shared/components/FormLayout';
+} from '../../../shared/services/masterDetailSources';
+import type {ApiItem} from '../../../shared/types/types.ts';
+import {useApi} from '../../../shared/services/api';
+import {API_PATHS} from '../../../shared/services/apiPaths';
+import {FormLayout, FormTabConfig} from '../../../shared/components/FormLayout';
 
 const TABELA_COLS: DataTableColumn[] = [
     {key: 'id', label: 'ID'},
@@ -238,7 +238,7 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                                                     data={tabelas}
                                                                     columns={TABELA_COLS}
                                                                     actions={[
-                                                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnblue', onClick: removeTabela},
+                                                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnred', onClick: removeTabela},
                                                                     ]}
                                                                 />
                                                             </div>
@@ -260,7 +260,7 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                                                     data={graficos}
                                                                     columns={GRAFICO_COLS}
                                                                     actions={[
-                                                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnblue', onClick: removeGrafico},
+                                                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnred', onClick: removeGrafico},
                                                                     ]}
                                                                 />
                                                             </div>
@@ -282,7 +282,7 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                                                                     data={mapas}
                                                                     columns={MAPA_COLS}
                                                                     actions={[
-                                                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnblue', onClick: removeMapa},
+                                                                        {key: 'remove', label: 'Remover', icon: 'minus', className: 'btnred', onClick: removeMapa},
                                                                     ]}
                                                                 />
                                                             </div>

@@ -1,6 +1,6 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {api} from './api';
-import type {ApiItem, ApiRequest} from './types';
+import {api} from '../services/api';
+import type {ApiItem, ApiRequest} from '../types/types';
 
 export const useModule = (path: string) => {
     const queryClient = useQueryClient();

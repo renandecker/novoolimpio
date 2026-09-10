@@ -1,9 +1,9 @@
-﻿import {useState} from 'react';
+import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {PermissionGate} from '../../shared/services/permissions';
-import {listRegrasNotificacoes, createRegraNotificacao, deleteRegraNotificacao} from '../../features/notificacoes/regrasNotificacoes';
-import '../../features/notificacoes/NotificacaoScreen.css';
+import {PermissionGate} from '../../../shared/services/permissions';
+import {listRegrasNotificacoes, createRegraNotificacao, deleteRegraNotificacao} from '../../notificacoes/regrasNotificacoes';
+import '../../notificacoes/NotificacaoScreen.css';
 
 const PAGE_SIZES = [10, 20, 50];
 
