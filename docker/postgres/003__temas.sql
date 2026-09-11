@@ -59,5 +59,26 @@ VALUES
     ('le-frog',      'Le Frog',             'primefaces-le-frog',      '#3e7500', '#6db13d', '#3e7500', '#ffffff', '#333333', '#c9e3a8', '#6db13d', '#3e7500', false, true),
     ('overcast',     'Overcast',            'primefaces-overcast',     '#c9c9c9', '#797979', '#c9c9c9', '#ffffff', '#333333', '#d1d1d1', '#797979', '#5c9ccc', false, true),
     ('redmond',      'Redmond',             'primefaces-redmond',      '#5c9ccc', '#3f7faf', '#5c9ccc', '#ffffff', '#333333', '#a6c9e2', '#3f7faf', '#5c9ccc', false, true),
-    ('vader',        'Vader',               'primefaces-vader',        '#121212', '#404040', '#121212', '#303030', '#ffffff', '#555555', '#404040', '#121212', false, true)
+    ('vader',        'Vader',               'primefaces-vader',        '#121212', '#404040', '#121212', '#303030', '#ffffff', '#555555', '#404040', '#121212', false, true),
+    -- 20 Temas Elegantes - Paletas profissionais inspiradas em boas práticas de design
+    ('minimalista-azul', 'Minimalista Azul', 'primefaces-minimalista-azul', '#1a73e8', '#5f6368', '#1a73e8', '#ffffff', '#202124', '#dadce0', '#5f6368', '#1a73e8', false, true),
+    ('premium-ouro', 'Premium Ouro', 'primefaces-premium-ouro', '#d4a574', '#2c2c2c', '#d4a574', '#f5f5f5', '#2c2c2c', '#e8dcc8', '#2c2c2c', '#8b7355', false, true),
+    ('moderno-sage', 'Moderno Verde Sage', 'primefaces-moderno-sage', '#6b8e71', '#c9d6c7', '#6b8e71', '#fcfbf7', '#2c3e2d', '#b8c4b1', '#c9d6c7', '#5a7660', false, true),
+    ('corporativo-grafite', 'Corporativo Grafite', 'primefaces-corporativo-grafite', '#4a4a4a', '#00a8e8', '#4a4a4a', '#ffffff', '#3a3a3a', '#cccccc', '#00a8e8', '#2c2c2c', false, true),
+    ('vibrante-coral', 'Vibrante Rosa Coral', 'primefaces-vibrante-coral', '#ff6b6b', '#ff8e72', '#ff6b6b', '#fff5f3', '#2d3436', '#ffe0d6', '#ff8e72', '#c1415e', false, true),
+    ('luxo-roxo', 'Luxo Roxo Profundo', 'primefaces-luxo-roxo', '#6c4fa1', '#d6cfe2', '#6c4fa1', '#fafaf9', '#3d2d54', '#c9bdd6', '#d6cfe2', '#4a3669', false, true),
+    ('elegante-marinho', 'Elegante Azul Marinho', 'primefaces-elegante-marinho', '#0f3460', '#e94560', '#0f3460', '#f5f5f5', '#ffffff', '#1a4d7a', '#e94560', '#0a1f35', false, true),
+    ('natura-floresta', 'Natura Verde Floresta', 'primefaces-natura-floresta', '#2d5016', '#8bc34a', '#2d5016', '#f0f4e8', '#1a1a1a', '#7a9c59', '#8bc34a', '#1e3a0f', false, true),
+    ('moderno-teal', 'Moderno Teal', 'primefaces-moderno-teal', '#008080', '#ffd700', '#008080', '#f0f8f8', '#1a1a1a', '#b3d9d9', '#ffd700', '#005555', false, true),
+    ('premium-titanio', 'Premium Cinza Titânio', 'primefaces-premium-titanio', '#878787', '#a9d6e5', '#878787', '#f2f2f2', '#2b2b2b', '#d4d4d4', '#a9d6e5', '#595959', false, true),
+    ('boutique-pessego', 'Boutique Rosa Pêssego', 'primefaces-boutique-pessego', '#ffb6a3', '#ffe5d9', '#ffb6a3', '#fffcf9', '#3d2817', '#ffd9c4', '#ffe5d9', '#d17a5a', false, true),
+    ('sofisticado-chumbo', 'Sofisticado Cinza Chumbo', 'primefaces-sofisticado-chumbo', '#36454f', '#a8b8c8', '#36454f', '#f8f8f8', '#ffffff', '#6a7a8a', '#a8b8c8', '#202830', false, true),
+    ('tropical-ceu', 'Tropical Azul Céu', 'primefaces-tropical-ceu', '#00bfff', '#ffa500', '#00bfff', '#fffaf0', '#1a1a1a', '#b3e5fc', '#ffa500', '#0088cc', false, true),
+    ('classico-preto', 'Clássico Preto Elegante', 'primefaces-classico-preto', '#1a1a1a', '#d4af37', '#1a1a1a', '#ffffff', '#1a1a1a', '#e0e0e0', '#d4af37', '#0d0d0d', false, true),
+    ('moderno-cobre', 'Moderno Cobre Quente', 'primefaces-moderno-cobre', '#b87333', '#e8dcc8', '#b87333', '#f9f5f0', '#3d2817', '#d9c4b3', '#e8dcc8', '#8b5a2b', false, true),
+    ('tech-neon', 'Tech Azul Neon', 'primefaces-tech-neon', '#0ea5e9', '#1e293b', '#0ea5e9', '#0f172a', '#e2e8f0', '#334155', '#0ea5e9', '#0284c7', false, true),
+    ('natural-areia', 'Natural Bege Areia', 'primefaces-natural-areia', '#c2b280', '#8b7355', '#c2b280', '#fefdfb', '#3d2817', '#d9cfc9', '#8b7355', '#9d8a6f', false, true),
+    ('vibrante-magenta', 'Vibrante Magenta Profundo', 'primefaces-vibrante-magenta', '#c41e3a', '#ffd700', '#c41e3a', '#f5f5f0', '#1a1a1a', '#f0d9c8', '#ffd700', '#8b0a1a', false, true),
+    ('corporativo-azul-prof', 'Corporativo Azul Profissional', 'primefaces-corporativo-azul-prof', '#003f7f', '#6ca6d4', '#003f7f', '#ffffff', '#2c2c2c', '#b8d4e8', '#6ca6d4', '#002060', false, true),
+    ('minimalista-branco', 'Minimalista Branco Puro', 'primefaces-minimalista-branco', '#f5f5f5', '#666666', '#f5f5f5', '#ffffff', '#1a1a1a', '#e0e0e0', '#666666', '#cccccc', false, true)
 ON CONFLICT (tema) DO NOTHING;
