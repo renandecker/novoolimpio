@@ -111,6 +111,9 @@ export const API_PATHS = {
   asaas: {
     pixEnviarEmail: '/api/asaas/pix/enviar-email',
   },
+  fiserv: {
+    cartaoPessoa: '/api/pagamento/cartao-pessoa',
+  },
   view: {
     usuario: '/api/view/usuario/listUsuario',
     unidade: '/api/view/unidade/listUnidade',

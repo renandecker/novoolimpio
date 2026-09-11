@@ -1,8 +1,8 @@
 import React from 'react';
-import {View, Text, StyleSheet, ScrollView, TouchableOpacity, RadioButton} from 'react-native';
-import {ModuleList} from '../ModuleListScreen';
-import {ModuleWizard} from '../ModuleWizard';
-import {api} from '../api';
+import {View, Text, StyleSheet, ScrollView, TouchableOpacity} from 'react-native';
+import {ModuleList} from '../../../shared/components/ModuleListScreen';
+import {api} from '../../../shared/services/api';
+import {AutoComplete, type AutoCompleteOption} from '../../../shared/components/AutoComplete';
 import {useState, useEffect, useCallback} from 'react';
 
 interface ContratoAutoCompleteResponse {
@@ -25,9 +25,12 @@ interface UnidadeResponse {
 
 interface PessoaFisicaResponse {
     id: number;
+    pessoaId?: number;
     nome: string;
     cpf: string;
 }
+
+type TestemunhaOption = {id: number; label: string};
 
 interface PessoaJuridicaResponse {
     id: number;
@@ -67,14 +70,23 @@ interface FiltroMatricula {
     tipoMatricula: 'GRUPO' | 'LIVRE';
 }
 
-function toAutoCompleteLabel(item: { id: number; nome?: string; nomeFantasia?: string; cpf?: string; cnpj?: string; sucinto?: string; curso?: { nome: string } }): string {
-    return item.nome 
+function toAutoCompleteLabel(item: { id: number; pessoaId?: number; nome?: string; nomeFantasia?: string; cpf?: string; cnpj?: string; sucinto?: string; curso?: { nome: string } }): string {
+    return item.nome
         ? `${item.nome} (${item.cpf || ''})`
         : item.nomeFantasia
         ? `${item.nomeFantasia} (${item.cnpj || ''})`
         : item.sucinto
         ? `${item.sucinto} - ${item.curso?.nome || ''}`
         : `#${item.id}`;
+}
+
+// Referência legado (extracted_aceso abasMatricula.xhtml):
+// completeMethod="#{pessoaFisicaController.autoCompleteTestemunha}",
+// itemLabel="#{pessoa.pessoaFisica.nome} (#{pessoa.pessoaFisica.cpf})", dropdown=true.
+// Contrato.testemunha1/2 referenciam Pessoa (bas_pessoa id) -> usar pessoaId.
+function toTestemunhaOption(item: PessoaFisicaResponse): TestemunhaOption {
+    const pessoaId = item.pessoaId ?? item.id;
+    return { id: pessoaId, label: item.nome ? `${item.nome} (${item.cpf || ''})` : `#${pessoaId}` };
 }
 
 export default function ViewConsultorMatriculaLayoutScreen() {

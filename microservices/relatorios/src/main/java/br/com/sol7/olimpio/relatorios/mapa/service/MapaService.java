@@ -31,14 +31,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
-
-import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -50,9 +44,6 @@ public class MapaService {
 
     @Inject
     MapaRepository repository;
-
-    @Inject
-    DataSource dataSource;
 
     @Inject
     DimensaoService dimensaoService;
@@ -68,10 +59,6 @@ public class MapaService {
 
     @Inject
     EstruturaService estruturaService;
-
-    private JdbcTemplate getJdbcTemplate() {
-        return new JdbcTemplate(dataSource);
-    }
 
     public Uni<List<MapaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -484,7 +471,7 @@ public class MapaService {
 
     private static String semAlias(String coluna) {
         if (coluna == null) return null;
-        String c = coluna.trim();
+        String c = coluna.replaceAll("[\\r\\n]", "").trim();
         int idx = c.toLowerCase().lastIndexOf(" as ");
         return idx >= 0 ? c.substring(0, idx) : c;
     }

@@ -127,12 +127,24 @@ export default function ViewEstruturaFormEstruturaListScreen() {
         if (editingId) {
             loadEstruturaPorId(editingId).then(async (estrutura: any) => {
                     updateFields({entity: {...data.entity, ...estrutura}});
-                    const [cols, dims, meds, geos] = await Promise.all([
+
+                    const [colsRes, dimsRes, medsRes, geosRes] = await Promise.allSettled([
                         loadColunas(),
                         loadDimensoes({estruturaId: editingId}),
                         loadMedidas({estruturaId: editingId}),
                         loadGeoreferencias(),
                     ]);
+
+                    const cols = colsRes.status === 'fulfilled' ? colsRes.value : [];
+                    const dims = dimsRes.status === 'fulfilled' ? dimsRes.value : [];
+                    const meds = medsRes.status === 'fulfilled' ? medsRes.value : [];
+                    const geos = geosRes.status === 'fulfilled' ? geosRes.value : [];
+
+                    if (colsRes.status === 'rejected') console.error('Erro ao carregar colunas:', colsRes.reason);
+                    if (dimsRes.status === 'rejected') console.error('Erro ao carregar dimensões:', dimsRes.reason);
+                    if (medsRes.status === 'rejected') console.error('Erro ao carregar medidas:', medsRes.reason);
+                    if (geosRes.status === 'rejected') console.error('Erro ao carregar georeferências:', geosRes.reason);
+
                     const colsDaEstrutura = (cols ?? []).filter((c: any) => c.estruturaId === editingId);
                     setColunas(colsDaEstrutura);
                     setDimensoes((dims ?? []).filter((d: any) => d.estruturaId === editingId));

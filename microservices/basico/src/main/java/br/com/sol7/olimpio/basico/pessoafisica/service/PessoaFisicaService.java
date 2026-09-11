@@ -171,13 +171,15 @@ public class PessoaFisicaService {
 
 
     // Migrado de PessoaFisicaController.autoCompleteTestemunha (src/main/java/br/com/sol7/olimpio/control/controllers/basico/PessoaFisicaController.java:652, camada controller)
-    // Logica original (adaptar):
-    // public List<Pessoa> autoCompleteTestemunha(String query) {
-    //         return pessoaFisicaService.autoCompleteTestemunha(query);
-    //     }
-    public Uni<List<Long>> autoCompleteTestemunha(String query) {
-        // Obs: depende do usuario logado (unidades disponiveis) para filtrar
-        return Uni.createFrom().item(java.util.List.of());
+    // Referência legado:
+    //   PessoaFisicaService.autoCompleteTestemunha -> repository.autoCompleteTestemunha(query, unidadesDisponiveis)
+    //   Query: Usuario ativo + Pessoa com unidade ativa, filtro nome/cpf, exclui Professor, order by nome
+    //   Uso em view/consultor (abasMatricula.xhtml): completeMethod="#{pessoaFisicaController.autoCompleteTestemunha}"
+    //   com itemLabel "#{pessoa.pessoaFisica.nome} (#{pessoa.pessoaFisica.cpf})"
+    public Uni<List<PessoaFisicaResponse>> autoCompleteTestemunha(String query) {
+        String q = query == null ? "" : query;
+        return repository.autoCompleteTestemunha(q)
+                .map(list -> list.stream().map(this::toResponse).toList());
     }
 
 

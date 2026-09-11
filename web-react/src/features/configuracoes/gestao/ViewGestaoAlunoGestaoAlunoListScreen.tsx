@@ -34,6 +34,8 @@ import {
 
     HistoricoAlunoModal,
 
+    DesistenteModal,
+
 } from '../../professor/GestaoAlunoModais';
 
 import type {ApiItem} from '../../../shared/types/types.ts';
@@ -711,6 +713,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
     }, [searchedIds]);
 
     const [cancelandoId, setCancelandoId] = useState<string | null>(null);
+    const [desistenteContratoId, setDesistenteContratoId] = useState<number | null>(null);
 
     const [placeholder, setPlaceholder] = useState<{ titulo: string; texto: string } | null>(null);
 
@@ -1238,7 +1241,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
                                     className: 'btnpink',
 
-                                    onSelect: () => abrirPlaceholder('Desistente', 'Notificar aluno desistente.')
+                                    onSelect: () => setDesistenteContratoId(contratoId)
 
                                 },
 
@@ -1276,7 +1279,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
 <button
                                             type="button"
-                                            className="btn-row-toggle"
+                                            className="btnblack"
                                             title="Carregar dados do aluno e seus contratos"
                                             disabled={!asRecord(item).id_pessoa}
                                             onClick={() => onBuscarContratos(
@@ -1482,6 +1485,8 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
             {cancelandoId && <CancelamentoModal onClose={() => setCancelandoId(null)}/>}
 
+            {desistenteContratoId && <DesistenteModal contratoId={desistenteContratoId} onClose={() => setDesistenteContratoId(null)}/>}
+
             {placeholder && (
 
                 <div className="modal-overlay" onClick={() => setPlaceholder(null)}>
@@ -1633,7 +1638,7 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
                                 />
 
                             </label>
-                            <div className="modal-actions" style={{display: 'flex', gap: '0.5rem', alignItems: 'flex-end'}}>
+                            <div className="modal-actions" style={{display: 'flex', gap: '0.5rem', alignItems: 'flex-end', justifyContent: 'flex-end', marginLeft: 'auto'}}>
                                 <button
 
                                     type="button"

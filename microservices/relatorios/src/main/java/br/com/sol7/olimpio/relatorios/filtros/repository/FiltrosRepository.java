@@ -264,7 +264,11 @@ public class FiltrosRepository implements PanacheRepository<Filtros> {
     }
 
     public Uni<List<FiltroRelatorioItem>> findGraficos(Long filtroId) {
-        return join("rel_filtro_grafico", "g", "rel_grafico", "id_grafico", filtroId, "g.id", "g.nome");
+        String sql = "SELECT g.id, g.nome FROM rel_filtro_grafico fg "
+                + "JOIN rel_grafico g ON g.id = fg.id_grafico "
+                + "WHERE fg.id_filtro = :id ORDER BY g.nome";
+        return Panache.getSession().chain(session -> session.createNativeQuery(sql).setParameter("id", filtroId).getResultList())
+                .map(FiltrosRepository::toRelatorioItems);
     }
 
     public Uni<List<FiltroRelatorioItem>> findMapas(Long filtroId) {

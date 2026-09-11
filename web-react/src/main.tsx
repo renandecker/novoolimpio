@@ -411,6 +411,7 @@ ViewComunicacaoListComunicacaoListScreen,
     AuditoriaScreen,
     ViewConfiguracaoFinanceiraListConfiguracaoFinanceiraListScreen,
     ViewConfiguracaoFinanceiraFormConfiguracaoFinanceiraListScreen,
+    ViewFiservCartaoPessoaListScreen,
 } from './screens';
 
 import './shared/styles/colors.css';
@@ -665,6 +666,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/pagamento/fechamentoCaixa" element={<ViewPagamentoFechamentoCaixaWizardScreen/>}/>
     <Route path="/view/pagamento/movimentocaixa" element={<ViewPagamentoMovimentocaixaListScreen/>}/>
     <Route path="/view/pagamento/produto" element={<ViewPagamentoProdutoListScreen/>}/>
+    <Route path="/view/fiserv/cartao-pessoa" element={<ViewFiservCartaoPessoaListScreen/>}/>
     <Route path="/view/pais/formPais" element={<ViewPaisFormPaisListScreen/>}/>
     <Route path="/view/pais/listPais" element={<ViewPaisListPaisListScreen/>}/>
     <Route path="/view/perfil/formPerfil" element={<ViewPerfilFormPerfilListScreen/>}/>

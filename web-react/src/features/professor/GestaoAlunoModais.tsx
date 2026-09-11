@@ -1163,6 +1163,113 @@ export function HistoricoAlunoModal({pessoaId, onClose}: GestaoModalProps) {
     );
 }
 
+interface DesistenteModalProps {
+    contratoId: number;
+    onClose: () => void;
+}
+
+export function DesistenteModal({contratoId, onClose}: DesistenteModalProps) {
+    const [motivoId, setMotivoId] = useState<number | ''>('');
+    const [descricao, setDescricao] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState(false);
+
+    const qMotivos = useQuery({
+        queryKey: ['motivos-desistente'],
+        queryFn: async () => (await api.get<{id: number; descricao: string}[]>('/api/view/motivo/listMotivo')).data,
+    });
+
+    const handleSubmit = async () => {
+        if (!motivoId) {
+            setError('Selecione um motivo');
+            return;
+        }
+        if (!descricao.trim()) {
+            setError('Descreva o motivo da desistência');
+            return;
+        }
+        setLoading(true);
+        setError(null);
+        try {
+            await api.post('/api/educacao/desistente', {
+                contratoId,
+                motivoId: Number(motivoId),
+                descricao: descricao.trim(),
+            });
+            setSuccess(true);
+            setTimeout(() => {
+                onClose();
+            }, 1500);
+        } catch (err) {
+            const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error
+                ?? (err as Error)?.message
+                ?? 'Erro ao registrar desistência';
+            setError(msg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (qMotivos.isLoading) return <ModalFrame titulo="Notificar Aluno Desistente" onClose={onClose}><Carregando/></ModalFrame>;
+    if (qMotivos.isError) return <ModalFrame titulo="Notificar Aluno Desistente" onClose={onClose}><Erro
+        mensagem={apiError(qMotivos.error)}/></ModalFrame>;
+
+    const motivos = qMotivos.data ?? [];
+
+    return (
+        <ModalFrame titulo="Notificar Aluno Desistente" onClose={onClose}>
+            {success && (
+                <div style={{padding: '1rem', textAlign: 'center', color: 'green'}}>
+                    <p>Desistência registrada com sucesso!</p>
+                </div>
+            )}
+            {!success && (
+                <>
+                    {error && <p className="form-erro">{error}</p>}
+                    <div className="form-grid" style={{marginBottom: '1rem'}}>
+                        <label className="form-field" style={{flex: 1}}>
+                            <span className="form-label">Motivo *</span>
+                            <select
+                                className="form-input"
+                                value={motivoId}
+                                onChange={(e) => setMotivoId(e.target.value)}
+                                disabled={loading}
+                            >
+                                <option value="">Selecione o motivo...</option>
+                                {motivos.map((m) => (
+                                    <option key={m.id} value={m.id}>{m.descricao}</option>
+                                ))}
+                            </select>
+                        </label>
+                    </div>
+                    <div className="form-grid" style={{marginBottom: '1rem'}}>
+                        <label className="form-field" style={{flex: 1}}>
+                            <span className="form-label">Descrição *</span>
+                            <textarea
+                                className="form-input"
+                                rows={4}
+                                value={descricao}
+                                onChange={(e) => setDescricao(e.target.value)}
+                                placeholder="Descreva o motivo da desistência..."
+                                disabled={loading}
+                            />
+                        </label>
+                    </div>
+                    <div className="modal-actions form-footer" style={{justifyContent: 'flex-end', gap: '0.5rem'}}>
+                        <button type="button" className="btn-form-back" onClick={onClose} disabled={loading}>
+                            Cancelar
+                        </button>
+                        <button type="button" className="btn-form-save" onClick={handleSubmit} disabled={loading}>
+                            {loading ? 'Salvando...' : 'Confirmar Desistência'}
+                        </button>
+                    </div>
+                </>
+            )}
+        </ModalFrame>
+    );
+}
+
 interface PixQrCodeModalProps {
     isOpen: boolean;
     onClose: () => void;

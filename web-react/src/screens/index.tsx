@@ -226,6 +226,7 @@ export { default as ViewPagamentoCodigoVerificadorListScreen } from '../features
 export { default as ViewPagamentoFechamentoCaixaWizardScreen } from '../features/configuracoes/pagamento/ViewPagamentoFechamentoCaixaWizardScreen.tsx';
 export { default as ViewPagamentoMovimentocaixaListScreen } from '../features/configuracoes/pagamento/ViewPagamentoMovimentocaixaListScreen.tsx';
 export { default as ViewPagamentoProdutoListScreen } from '../features/configuracoes/pagamento/ViewPagamentoProdutoListScreen.tsx';
+export { default as ViewFiservCartaoPessoaListScreen } from '../features/configuracoes/pagamento/ViewFiservCartaoPessoaListScreen.tsx';
 export { default as ViewPaisFormPaisListScreen } from '../features/configuracoes/pais/ViewPaisFormPaisListScreen.tsx';
 export { default as ViewPaisListPaisListScreen } from '../features/configuracoes/pais/ViewPaisListPaisListScreen.tsx';
 export { default as ViewPerfilFormPerfilListScreen } from '../features/configuracoes/perfil/ViewPerfilFormPerfilListScreen.tsx';

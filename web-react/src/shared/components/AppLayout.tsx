@@ -7,10 +7,14 @@ import {UserMenu} from './UserMenu';
 import Sidebar from './Sidebar';
 import PageHeader from './PageHeader';
 import {useTheme} from '../context/ThemeContext';
+import {PhotoModalProvider, usePhotoModal} from './PhotoModalContext';
+import {PhotoUploadModal} from './PhotoUploadModal';
 import './AppLayout.css';
 
-export default function AppLayout({children}: { children: ReactNode }) {
+function AppLayoutContent({children}: { children: ReactNode }) {
+    const {session} = useAuth();
     const {tema} = useTheme();
+    const {isOpen, close, currentFoto, username, onPhotoUpdate} = usePhotoModal();
     
     const appLayoutStyle: React.CSSProperties = {
         backgroundImage: tema?.imagemFundo ? `url(${tema.imagemFundo})` : 'none',
@@ -33,7 +37,7 @@ export default function AppLayout({children}: { children: ReactNode }) {
 
     return (
         <div className="app-layout" style={appLayoutStyle}>
-            <Sidebar/>
+            <Sidebar onPhotoAction={() => { if (session) usePhotoModal().open(session.foto, session.username); }} />
             <div className="app-main">
                 <header className="app-header" style={headerStyle}>
                     <div className="app-header-left">
@@ -55,6 +59,21 @@ export default function AppLayout({children}: { children: ReactNode }) {
 
                 <footer className="app-footer" style={footerStyle}/>
             </div>
+            <PhotoUploadModal
+                isOpen={isOpen}
+                onClose={close}
+                onPhotoUpdate={onPhotoUpdate}
+                currentFoto={currentFoto}
+                username={username}
+            />
         </div>
+    );
+}
+
+export default function AppLayout({children}: { children: ReactNode }) {
+    return (
+        <PhotoModalProvider>
+            <AppLayoutContent children={children} />
+        </PhotoModalProvider>
     );
 }

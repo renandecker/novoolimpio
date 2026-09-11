@@ -90,7 +90,7 @@ public class PessoaFisicaController {
 
     @GET
     @Path("/auto-complete-testemunha")
-    public Uni<List<Long>> autoCompleteTestemunha(@QueryParam("query") String query) {
+    public Uni<List<PessoaFisicaResponse>> autoCompleteTestemunha(@QueryParam("query") String query) {
         return service.autoCompleteTestemunha(query);
     }
 

@@ -2,7 +2,7 @@
 import {Link, useNavigate} from 'react-router-dom';
 import {useAuth} from '../../features/auth/auth';
 
-import {PhotoUploadModal} from './PhotoUploadModal';
+import {usePhotoModal} from './PhotoModalContext';
 import './UserMenu.css';
 
 const StarIcon = () => (
@@ -45,12 +45,13 @@ const PowerIcon = () => (
 export function UserMenu() {
     const {session, signOut, refreshSession} = useAuth();
     const navigate = useNavigate();
+    const {open: openPhotoModal, currentFoto, username, onPhotoUpdate} = usePhotoModal();
     const [open, setOpen] = useState(false);
-    const [photoModalOpen, setPhotoModalOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
     const handlePhotoUpdate = (fotoUrl: string) => {
         if (!session) return;
+        onPhotoUpdate(fotoUrl);
         refreshSession({
             accessToken: session.accessToken,
             expiresAt: session.expiresAt,
@@ -187,7 +188,7 @@ export function UserMenu() {
                                 type="button"
                                 className="user-menu-action action-photo"
                                 title="Alterar foto"
-                                onClick={() => { setOpen(false); setPhotoModalOpen(true); }}
+                                onClick={() => { setOpen(false); openPhotoModal(session.foto, session.username); }}
                             >
                                 <span className="action-icon"><CameraIcon /></span>
                                 <span className="action-label">Alterar foto</span>
@@ -206,13 +207,6 @@ export function UserMenu() {
                     </div>
                 )}
             </div>
-            <PhotoUploadModal
-                isOpen={photoModalOpen}
-                onClose={() => setPhotoModalOpen(false)}
-                onPhotoUpdate={handlePhotoUpdate}
-                currentFoto={session.foto}
-                username={session.username}
-            />
         </>
     );
 }

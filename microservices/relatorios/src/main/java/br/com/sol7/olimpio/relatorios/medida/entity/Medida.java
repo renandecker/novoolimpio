@@ -15,10 +15,10 @@ public class Medida extends PanacheEntity {
     @Column(name = "id_estrutura")
     public Long estruturaId;
 
-    @Column(name = "tipo", columnDefinition = "text")
+    @Column(name = "tipo_medida", columnDefinition = "text", nullable = true)
     public String tipo;
 
-    @Column(name = "tipo_info", columnDefinition = "text")
+    @Column(name = "tipo_info_medida", columnDefinition = "text")
     public String tipoInfo;
 
     @Column(name = "nome_visualizacao", columnDefinition = "text")

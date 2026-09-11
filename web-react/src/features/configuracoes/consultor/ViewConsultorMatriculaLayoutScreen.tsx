@@ -25,6 +25,7 @@ interface UnidadeResponse {
 
 interface PessoaFisicaResponse {
     id: number;
+    pessoaId?: number;
     nome: string;
     cpf: string;
 }
@@ -111,6 +112,32 @@ function toAutoCompleteOption(item: { id: number; nome?: string; nomeFantasia?: 
     return { id: item.id, label };
 }
 
+interface CurriculoOption extends AutoCompleteOption {
+    sucinto?: string;
+    cursoNome?: string;
+    tipoCurso?: string;
+    cargaHoraria?: number;
+}
+
+function toCurriculoOption(item: CurriculoResponse): CurriculoOption {
+    const label = [
+        item.sucinto,
+        item.curso?.nome,
+        item.tipoCurso?.descricao ? `(${item.tipoCurso.descricao})` : '',
+        item.cargaHoraria ? `${item.cargaHoraria} H/A` : '',
+    ]
+        .filter(Boolean)
+        .join(' - ');
+    return {
+        id: item.id,
+        label: label || `#${item.id}`,
+        sucinto: item.sucinto,
+        cursoNome: item.curso?.nome,
+        tipoCurso: item.tipoCurso?.descricao,
+        cargaHoraria: item.cargaHoraria,
+    };
+}
+
 function buildParcelas(fp: FormaPagamentoResponse | null, primeira: string, segunda: string, valorTotalParcela: number): ParcelaLinha[] {
     if (!fp || !primeira) return [];
     const vezes = fp.vezes > 0 ? fp.vezes : 1;
@@ -168,7 +195,7 @@ export default function ViewConsultorMatriculaLayoutScreen() {
         if (!query) return [];
         try {
             const response = await api.get<CurriculoResponse[]>('/api/educacao/curriculo/auto-complete-full', { params: { query } });
-            return response.data.map(toAutoCompleteOption);
+            return response.data.map(toCurriculoOption);
         } catch (e) {
             console.error('Erro ao buscar currículos:', e);
             return [];
@@ -206,16 +233,32 @@ export default function ViewConsultorMatriculaLayoutScreen() {
         }
     }, []);
 
+    // Referência legado (extracted_aceso):
+    //  abasMatricula.xhtml -> completeMethod="#{pessoaFisicaController.autoCompleteTestemunha}"
+    //  itemLabel="#{pessoa.pessoaFisica.nome} (#{pessoa.pessoaFisica.cpf})", minQueryLength=3, dropdown=true.
+    //  Backend filtra Usuario ativo por nome/cpf (PessoaFisicaRepository.autoCompleteTestemunha).
+    //  Contrato.testemunha1/2 referenciam Pessoa (bas_pessoa id) -> usar pessoaId quando disponível.
+    const toTestemunhaOption = useCallback((item: PessoaFisicaResponse): AutoCompleteOption => {
+        const pessoaId = item.pessoaId ?? item.id;
+        const label = item.nome ? `${item.nome} (${item.cpf || ''})` : `#${pessoaId}`;
+        return { id: pessoaId, label };
+    }, []);
+
     const loadTestemunhas = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
-        if (!query || query.length < 3) return [];
         try {
-            const response = await api.get<PessoaFisicaResponse[]>('/api/basico/pessoa-fisica/auto-complete-testemunha', { params: { query } });
-            return response.data.map(toAutoCompleteOption);
+            const q = (query || '').trim();
+            // dropdown=true no legado: query vazia lista as 10 primeiras testemunhas
+            const response = await api.get<PessoaFisicaResponse[] | number[]>('/api/basico/pessoa-fisica/auto-complete-testemunha', { params: { query: q } });
+            const data = response.data ?? [];
+            if (data.length > 0 && typeof data[0] === 'number') {
+                return (data as number[]).map(id => ({ id, label: `#${id}` }));
+            }
+            return (data as PessoaFisicaResponse[]).map(toTestemunhaOption);
         } catch (e) {
             console.error('Erro ao buscar testemunhas:', e);
             return [];
         }
-    }, []);
+    }, [toTestemunhaOption]);
 
     const loadGrupos = useCallback(async () => {
         if (!filtro.curriculoId) return;
@@ -433,10 +476,11 @@ export default function ViewConsultorMatriculaLayoutScreen() {
 
     const renderOferecimentosTable = (rows: OferecimentoItem[]) => (
         <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
-                    <tr style={{ background: '#f0f0f0' }}>
+                    <tr style={{ background: '#2f333b', color: '#fff' }}>
                         <th style={{ padding: '8px', textAlign: 'left' }}>Status</th>
+                        <th style={{ padding: '8px', textAlign: 'left' }}>Turma</th>
                         <th style={{ padding: '8px', textAlign: 'left' }}>Unidade</th>
                         <th style={{ padding: '8px', textAlign: 'left' }}>Sala</th>
                         <th style={{ padding: '8px', textAlign: 'left' }}>Componente Curricular</th>
@@ -446,19 +490,20 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                     </tr>
                 </thead>
                 <tbody>
-                    {rows.map(o => (
-                        <tr key={o.id}>
+                    {rows.map((o, i) => (
+                        <tr key={o.id} style={{ background: i % 2 === 0 ? '#ffffff' : '#f7f7f7', borderBottom: '1px solid #e5e5e5' }}>
                             <td style={{ padding: '8px' }}><span className={`status ${o.status}`}>{o.status}</span></td>
+                            <td style={{ padding: '8px' }}>Turma {o.id}</td>
                             <td style={{ padding: '8px' }}>{o.unidade?.sucinto}</td>
                             <td style={{ padding: '8px' }}>{o.sala?.numero}</td>
                             <td style={{ padding: '8px' }}>{o.componenteCurricular?.descricao}</td>
                             <td style={{ padding: '8px' }}>{o.componenteCurricular?.cargaHoraria}H/A</td>
-                            <td style={{ padding: '8px' }}>{o.dataInicio} - {o.dataFim}</td>
+                            <td style={{ padding: '8px', whiteSpace: 'nowrap' }}>{o.dataInicio} - {o.dataFim}</td>
                             <td style={{ padding: '8px' }}>{o.professor?.pessoa?.pessoaFisica?.nome || o.professor?.pessoa?.pessoaJuridica?.nomeFantasia || '-'}</td>
                         </tr>
                     ))}
                     {rows.length === 0 && (
-                        <tr><td colSpan={7} style={{ padding: '8px' }}>Nenhum oferecimento selecionado na etapa de Matrícula.</td></tr>
+                        <tr><td colSpan={8} style={{ padding: '8px' }}>Nenhum oferecimento selecionado na etapa de Matrícula.</td></tr>
                     )}
                 </tbody>
             </table>
@@ -590,10 +635,29 @@ export default function ViewConsultorMatriculaLayoutScreen() {
         </div>
     );
 
-    const renderMatriculaTab = () => (
+    const renderMatriculaTab = () => {
+        const curriculoSelecionado = contrato.curriculo as CurriculoOption | undefined;
+        return (
         <div className="matricula-tab">
-            <div className="curso-info" style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: '20px', alignItems: 'center' }}>
-                <div><strong>Curso:</strong> {contrato.curriculo ? (contrato.curriculo as AutoCompleteOption).label : 'Não selecionado'}</div>
+            <div className="curso-info" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginBottom: '20px', alignItems: 'center' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(140px, 1fr))', gap: '10px', flex: 1, minWidth: '280px' }}>
+                    <div className="info-panel" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: '6px', padding: '10px 12px' }}>
+                        <h4 style={{ margin: '0 0 4px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#7a7a7a' }}>Curso</h4>
+                        <strong style={{ fontSize: '14px', color: '#1d2025' }}>{curriculoSelecionado?.cursoNome || '—'}</strong>
+                    </div>
+                    <div className="info-panel" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: '6px', padding: '10px 12px' }}>
+                        <h4 style={{ margin: '0 0 4px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#7a7a7a' }}>Sucinto</h4>
+                        <strong style={{ fontSize: '14px', color: '#1d2025' }}>{curriculoSelecionado?.sucinto || '—'}</strong>
+                    </div>
+                    <div className="info-panel" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: '6px', padding: '10px 12px' }}>
+                        <h4 style={{ margin: '0 0 4px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#7a7a7a' }}>Tipo Curso</h4>
+                        <strong style={{ fontSize: '14px', color: '#1d2025' }}>{curriculoSelecionado?.tipoCurso || '—'}</strong>
+                    </div>
+                    <div className="info-panel" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: '6px', padding: '10px 12px' }}>
+                        <h4 style={{ margin: '0 0 4px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#7a7a7a' }}>Carga Horária</h4>
+                        <strong style={{ fontSize: '14px', color: '#1d2025' }}>{curriculoSelecionado?.cargaHoraria ? `${curriculoSelecionado.cargaHoraria} H/A` : '—'}</strong>
+                    </div>
+                </div>
                 <button className="btnyellow" style={{ marginLeft: 'auto' }} onClick={() => alert('Matriz curricular ainda não implementada.')}>
                     <i className="fa fa-calculator"/> Matriz Curricular
                 </button>
@@ -687,7 +751,8 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                 {renderOferecimentosTable(matriculaSelecionadas)}
             </div>
         </div>
-    );
+        );
+    };
 
     const renderMaterialTab = () => (
         <div className="material-tab" style={{ padding: '20px' }}>

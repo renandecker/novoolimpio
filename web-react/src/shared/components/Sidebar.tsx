@@ -7,6 +7,10 @@ import './Sidebar.css';
 
 type Modulo = { id: number; antecessorId: number | null; rotulo: string; descricao: string; icone: string; ajuda: string; outcome: string; ordem: number };
 
+interface SidebarProps {
+    onPhotoAction?: () => void;
+}
+
 const SearchIcon = () => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
         <path
@@ -52,7 +56,7 @@ function isHiddenModulo(m: Modulo): boolean {
     return HIDDEN_OUTCOMES.some(p => out.startsWith(p.toLowerCase()));
 }
 
-export default function Sidebar() {
+export default function Sidebar({onPhotoAction}: SidebarProps) {
     const {session} = useAuth();
     const {menuIcon} = useMenuIcon();
     const rawModulos = (session?.modules ?? []) as Modulo[];
@@ -91,10 +95,11 @@ export default function Sidebar() {
 
     const topModulos = modulos.filter(m => m.antecessorId == null).sort((a, b) => a.ordem - b.ordem);
 
-    const flatItems = useMemo(() => {
+const flatItems = useMemo(() => {
         const items: { label: string; parent: string | null; path: string; icon: React.ReactNode; keywords: string }[] = [
             {label: 'Início', parent: null, path: defaultPath, icon: menuIcon('paginainicial'), keywords: 'inicio paginainicial'},
             {label: 'Configuração Documentos', parent: null, path: CONFIGURACAO_DOCUMENTOS_OUTCOME, icon: menuIcon('configuracao documentos'), keywords: 'configuracao documentos relatorios'},
+            {label: 'Fiserv', parent: null, path: '/view/fiserv/cartao-pessoa', icon: menuIcon('fiserv'), keywords: 'fiserv cartao pagamento'},
         ];
         const walk = (modulo: Modulo, parent: string | null) => {
             items.push({
@@ -170,7 +175,7 @@ export default function Sidebar() {
                         </Link>
 
                         {topModulos.map(modulo => (
-                            <SidebarItem key={modulo.id} modulo={modulo} childrenByParent={childrenByParent} depth={0} menuIcon={menuIcon}/>
+                            <SidebarItem key={modulo.id} modulo={modulo} childrenByParent={childrenByParent} depth={0} menuIcon={menuIcon} onPhotoAction={onPhotoAction}/>
                         ))}
                     </>
                 )}
@@ -179,7 +184,7 @@ export default function Sidebar() {
     );
 }
 
-function SidebarItem({modulo, childrenByParent, depth, menuIcon}: { modulo: Modulo; childrenByParent: Map<number, Modulo[]>; depth: number; menuIcon: (rotulo: string, icone?: string) => React.ReactNode }) {
+function SidebarItem({modulo, childrenByParent, depth, menuIcon, onPhotoAction}: { modulo: Modulo; childrenByParent: Map<number, Modulo[]>; depth: number; menuIcon: (rotulo: string, icone?: string) => React.ReactNode; onPhotoAction?: () => void }) {
     const location = useLocation();
     const [open, setOpen] = useState(false);
     const children = childrenByParent.get(modulo.id) ?? [];
@@ -187,8 +192,21 @@ function SidebarItem({modulo, childrenByParent, depth, menuIcon}: { modulo: Modu
     const isSub = depth > 0;
     const outcome = normalizeOutcome(modulo.outcome);
     const active = Boolean(outcome) && location.pathname.includes(outcome);
+    const isPhotoAction = modulo.outcome === '/meus-dados/foto' || modulo.rotulo.toLowerCase() === 'alterar foto';
 
     if (!isGroup) {
+        if (isPhotoAction) {
+            return (
+                <button
+                    className={`sidebar-item ${isSub ? 'sidebar-subitem' : ''}`}
+                    onClick={onPhotoAction}
+                    type="button"
+                >
+                    <span className="sidebar-icon">{menuIcon(modulo.rotulo, modulo.icone)}</span>
+                    <span className="sidebar-label">{modulo.rotulo}</span>
+                </button>
+            );
+        }
         return (
             <Link
                 className={`sidebar-item ${isSub ? 'sidebar-subitem' : ''} ${active ? 'active' : ''}`}
@@ -212,7 +230,7 @@ function SidebarItem({modulo, childrenByParent, depth, menuIcon}: { modulo: Modu
                 <div className="sidebar-submenu">
                     {children.map(child => (
                         <SidebarItem key={child.id} modulo={child} childrenByParent={childrenByParent}
-                                     depth={depth + 1} menuIcon={menuIcon}/>
+                                     depth={depth + 1} menuIcon={menuIcon} onPhotoAction={onPhotoAction}/>
                     ))}
                 </div>
             )}

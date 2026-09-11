@@ -115,6 +115,20 @@ break> "%COMPILE_LOG%" 2>nul
 break> "%DOCKER_LOG%" 2>nul
 
 echo ============================================
+echo  Limpando cache do React (Vite)...
+echo ============================================
+if exist "web-react\node_modules\.vite" (
+    rmdir /s /q "web-react\node_modules\.vite" 2>nul
+    echo   Cache Vite removido.
+) else (
+    echo   Nenhum cache Vite encontrado.
+)
+if exist "web-react\dist" (
+    rmdir /s /q "web-react\dist" 2>nul
+    echo   Pasta dist removida.
+)
+
+echo ============================================
 echo  Verificando compilacao dos microsservicos...
 echo ============================================
 

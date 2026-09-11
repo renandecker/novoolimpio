@@ -73,18 +73,48 @@ public class PessoaFisicaRepository implements PanacheRepository<PessoaFisica> {
 
 
     // Migrado de PessoaFisicaRepository.autoCompleteTestemunha (legado) - HQL original:
-    // select  p from Usuario usu inner join usu.pessoa p inner join p.unidades u where usu.ativo = true and  u in (?2) and  (lower(p.pessoaFisica.nome) like '%' || ?1 || '%' OR p.pessoaFisica.cpf like '%' || ?1 || '%' OR  lower(p.pessoaFisica.nome) like '%' || ?1 || '%' or p.pessoaFisica.cpf like '%' || ?1 || '%' or replace(replace(p.pessoaFisica.cpf,'.',''),'-','') like '%' || ?1 || '%' or lower(p.pessoaFisica.nome||p.pessoaFisica.cpf) like '%' || lower(?1) || '%' or  lower(p.pessoaFisica.nome||' ('||p.pessoaFisica.cpf||')') like '%' || lower(?1) || '%' or  replace(replace(lower(p.pessoaFisica.nome||' '||p.pessoaFisica.cpf),'(',''),')','') like '%' || lower(?1) || '%' )  AND u.ativo = true and p not in (select pr.pessoa from Professor pr) order by p.pessoaFisica.nome
+    // select  p from Usuario usu inner join usu.pessoa p inner join p.unidades u where usu.ativo = true and  u in (?2) and  (lower(p.pessoaFisica.nome) like '%' || ?1 || '%' ...) AND u.ativo = true and p not in (select pr.pessoa from Professor pr) order by p.pessoaFisica.nome
+    // Adaptado para microserviço: retorna PessoaFisica cujo Pessoa possui Usuario ativo.
+    // Filtro por unidade omitido (depende do usuário logado); filtra apenas por nome/cpf.
+    // ItemLabel de referência (legado abasMatricula.xhtml): "#{pessoa.pessoaFisica.nome} (#{pessoa.pessoaFisica.cpf})"
     public static final String SQL_AUTO_COMPLETE_TESTEMUNHA =
-            "SELECT p.* FROM bas_usuario usu INNER JOIN bas_pessoa p ON p.id = usu.id_pessoa INNER JOIN bas_pessoa_unidade p_u_jt ON p_u_jt.id_pessoa = p.id INNER JOIN bas_unidade u ON u.id = p_u_jt.id_unidade LEFT JOIN bas_pessoa_fisica j_p_pessoaFisica ON j_p_pessoaFisica.id_pessoa = p.id WHERE usu.fl_ativo = true and u in (?2) and (lower(j_p_pessoaFisica.nome) like '%' || ?1 || '%' OR j_p_pessoaFisica.cpf like '%' || ?1 || '%' OR lower(j_p_pessoaFisica.nome) like '%' || ?1 || '%' or j_p_pessoaFisica.cpf like '%' || ?1 || '%' or replace(replace(j_p_pessoaFisica.cpf,'.',''),'-','') like '%' || ?1 || '%' or lower(j_p_pessoaFisica.nome||j_p_pessoaFisica.cpf) like '%' || lower(?1) || '%' or lower(j_p_pessoaFisica.nome||' ('||j_p_pessoaFisica.cpf||')') like '%' || lower(?1) || '%' or replace(replace(lower(j_p_pessoaFisica.nome||' '||j_p_pessoaFisica.cpf),'(',''),')','') like '%' || lower(?1) || '%' ) AND u.fl_ativo = true and p not in (select pr.pessoa from Professor pr) ORDER BY j_p_pessoaFisica.nome LIMIT 10";
+            "SELECT pf.* FROM bas_pessoa_fisica pf " +
+            "INNER JOIN bas_pessoa p ON p.id = pf.id_pessoa " +
+            "INNER JOIN bas_usuario usu ON usu.id_pessoa = p.id " +
+            "WHERE usu.fl_ativo = true " +
+            "AND (lower(pf.nome) LIKE ?1 OR pf.cpf LIKE ?2 OR replace(replace(pf.cpf,'.',''),'-','') LIKE ?3 " +
+            "OR lower(pf.nome || ' (' || COALESCE(pf.cpf,'' ) || ')') LIKE ?1) " +
+            "ORDER BY pf.nome LIMIT 10";
 
-    // Atencao: a query original seleciona 'Pessoa', nao 'PessoaFisica'.
-    // Se 'Pessoa' existir como entidade neste microsservico, troque Object por Pessoa.class abaixo.
-    public Uni<java.util.List<Object>> autoCompleteTestemunha(String query, List<Long> unidadesIds) {
+    public static final String SQL_AUTO_COMPLETE_TESTEMUNHA_ALL =
+            "SELECT pf.* FROM bas_pessoa_fisica pf " +
+            "INNER JOIN bas_pessoa p ON p.id = pf.id_pessoa " +
+            "INNER JOIN bas_usuario usu ON usu.id_pessoa = p.id " +
+            "WHERE usu.fl_ativo = true " +
+            "ORDER BY pf.nome LIMIT 10";
+
+    public Uni<java.util.List<PessoaFisica>> autoCompleteTestemunha(String query) {
+        String q = query == null ? "" : query.trim().toLowerCase();
+        if (q.isEmpty()) {
+            return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                    .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_TESTEMUNHA_ALL, PessoaFisica.class)
+                            .getResultList());
+        }
+        String like = "%" + q + "%";
+        String clean = q.replace(".", "").replace("-", "").replace("(", "").replace(")", "").trim();
+        String likeClean = "%" + clean + "%";
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_TESTEMUNHA)
-                        .setParameter(1, query)
-                        .setParameter(2, unidadesIds)
+                .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_TESTEMUNHA, PessoaFisica.class)
+                        .setParameter(1, like)
+                        .setParameter(2, like)
+                        .setParameter(3, likeClean)
                         .getResultList());
+    }
+
+    // Mantido por compatibilidade com chamadas antigas (filtro por unidades).
+    // Delegar para a versão sem filtro de unidade.
+    public Uni<java.util.List<Object>> autoCompleteTestemunha(String query, List<Long> unidadesIds) {
+        return autoCompleteTestemunha(query).map(list -> (java.util.List<Object>) (java.util.List<?>) list);
     }
 
 }
