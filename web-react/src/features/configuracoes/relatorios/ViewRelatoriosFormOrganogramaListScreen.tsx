@@ -19,15 +19,14 @@ const tabs: FormTabConfig[] = [
         key: 'definicao',
         label: 'Definição',
         fields: [
-            {name: 'id', label: 'ID', readOnly: true, span: 1},
-            {name: 'nome', label: 'Nome', required: true, span: 3},
-            {name: 'direcao', label: 'Direção', type: 'select', options: DIRECAO_OPTIONS, required: true, span: 1},
+            {name: 'nome', label: 'Nome', required: true},
+            {name: 'direcao', label: 'Direção', type: 'select', options: DIRECAO_OPTIONS, required: true},
+            {name: 'id', label: 'ID', readOnly: true},
             {
                 name: 'sql',
                 label: 'SQL',
                 type: 'textarea',
                 required: true,
-                span: 4,
                 placeholder: 'select id, parentId, name, job, department, location, status, avatar from <Tabela> where <condição>',
             },
         ],

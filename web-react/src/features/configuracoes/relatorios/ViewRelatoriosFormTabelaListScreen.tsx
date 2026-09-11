@@ -267,8 +267,8 @@ export default function ViewRelatoriosFormTabelaListScreen() {
             key: 'principal',
             label: 'Principal',
             fields: [
-                {name: 'nome', label: 'Nome', required: true, span: 3},
-                {name: 'estruturaId', label: 'Estrutura', type: 'autoComplete', autoCompleteSource: ESTRUTURA_SOURCE, autoCompleteSearchKeys: ESTRUTURA_SEARCH, autoCompleteColumns: ESTRUTURA_COLUMNS, span: 3},
+                {name: 'nome', label: 'Nome', required: true},
+                {name: 'estruturaId', label: 'Estrutura', type: 'autoComplete', autoCompleteSource: ESTRUTURA_SOURCE, autoCompleteSearchKeys: ESTRUTURA_SEARCH, autoCompleteColumns: ESTRUTURA_COLUMNS},
             ],
         },
     ];
@@ -454,8 +454,8 @@ export default function ViewRelatoriosFormTabelaListScreen() {
                                                             key: 'form',
                                                             label: '',
                                                             fields: [
-                                                                {name: 'nome', label: 'Nome *', required: true, span: 2},
-                                                                {name: 'dimensaoId', label: 'Dimensão', type: 'autoComplete', autoCompleteSource: DIMENSAO_SOURCE, autoCompleteSearchKeys: DIMENSAO_SEARCH, autoCompleteColumns: DIMENSAO_COLUMNS, span: 2},
+                                                                {name: 'nome', label: 'Nome *', required: true},
+                                                                {name: 'dimensaoId', label: 'Dimensão', type: 'autoComplete', autoCompleteSource: DIMENSAO_SOURCE, autoCompleteSearchKeys: DIMENSAO_SEARCH, autoCompleteColumns: DIMENSAO_COLUMNS},
                                                             ],
                                                         },
                                                     ]}

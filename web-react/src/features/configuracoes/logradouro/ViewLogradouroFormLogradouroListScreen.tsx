@@ -520,6 +520,16 @@ export default function ViewLogradouroFormLogradouroListScreen() {
 
                             <label className="form-field">
 
+                                <span className="form-label">Tipo</span>
+
+                                <input className="form-input" value={tipo}
+
+                                       onChange={(event) => setTipo(event.target.value)}/>
+
+                            </label>
+
+                            <label className="form-field">
+
                                 <span className="form-label">Estado</span>
 
                                 <AutoComplete placeholder="Digite para buscar (mínimo 3 caracteres)"
@@ -575,16 +585,6 @@ export default function ViewLogradouroFormLogradouroListScreen() {
                                               onChange={setBairro}
 
                                               fetchOptions={buscarBairros}/>
-
-                            </label>
-
-                            <label className="form-field">
-
-                                <span className="form-label">Tipo</span>
-
-                                <input className="form-input" value={tipo}
-
-                                       onChange={(event) => setTipo(event.target.value)}/>
 
                             </label>
 

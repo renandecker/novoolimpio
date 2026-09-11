@@ -25,20 +25,7 @@ interface ViaCepResponse {
     logradouro?: string;
 }
 
-const fullRow: React.CSSProperties = {
-    display: 'grid',
-    gridColumn: '1 / -1',
-    gridTemplateColumns: '160px 1fr',
-    gap: '14px',
-    alignItems: 'center',
-};
-const fullRowTop: React.CSSProperties = {
-    display: 'grid',
-    gridColumn: '1 / -1',
-    gridTemplateColumns: '160px 1fr',
-    gap: '14px',
-    alignItems: 'start',
-};
+const fullRowStyle: React.CSSProperties = {gridColumn: 'span 3'};
 
 export async function buscarCep(cep: string): Promise<Partial<Endereco> | null> {
     const clean = cep.replace(/\D/g, '');
@@ -133,33 +120,6 @@ function EnderecoModal({
                                 </div>
                                 {aviso && <small style={{color: '#c0392b'}}>{aviso}</small>}
                             </label>
-                            <label className="form-field" style={fullRow}>
-                                <span className="form-label">Cidade</span>
-                                <input
-                                    className="form-input"
-                                    placeholder="Cidade"
-                                    value={form.cidade ?? ''}
-                                    onChange={(event) => setForm((prev) => ({...prev, cidade: event.target.value}))}
-                                />
-                            </label>
-                            <label className="form-field" style={fullRow}>
-                                <span className="form-label">Bairro</span>
-                                <input
-                                    className="form-input"
-                                    placeholder="Bairro"
-                                    value={form.bairro ?? ''}
-                                    onChange={(event) => setForm((prev) => ({...prev, bairro: event.target.value}))}
-                                />
-                            </label>
-                            <label className="form-field" style={fullRow}>
-                                <span className="form-label">Logradouro</span>
-                                <input
-                                    className="form-input"
-                                    placeholder="Logradouro"
-                                    value={form.logradouro ?? ''}
-                                    onChange={(event) => setForm((prev) => ({...prev, logradouro: event.target.value}))}
-                                />
-                            </label>
                             <label className="form-field">
                                 <span className="form-label">Número</span>
                                 <input
@@ -170,13 +130,41 @@ function EnderecoModal({
                                     onChange={(event) => setForm((prev) => ({...prev, numero: event.target.value}))}
                                 />
                             </label>
-                            <label className="form-field" style={fullRowTop}>
+                            <label className="form-field">
+                                <span className="form-label">Cidade</span>
+                                <input
+                                    className="form-input"
+                                    placeholder="Cidade"
+                                    value={form.cidade ?? ''}
+                                    onChange={(event) => setForm((prev) => ({...prev, cidade: event.target.value}))}
+                                />
+                            </label>
+                            <label className="form-field">
+                                <span className="form-label">Bairro</span>
+                                <input
+                                    className="form-input"
+                                    placeholder="Bairro"
+                                    value={form.bairro ?? ''}
+                                    onChange={(event) => setForm((prev) => ({...prev, bairro: event.target.value}))}
+                                />
+                            </label>
+                            <label className="form-field">
+                                <span className="form-label">Logradouro</span>
+                                <input
+                                    className="form-input"
+                                    style={fullRowStyle}
+                                    placeholder="Logradouro"
+                                    value={form.logradouro ?? ''}
+                                    onChange={(event) => setForm((prev) => ({...prev, logradouro: event.target.value}))}
+                                />
+                            </label>
+                            <label className="form-field">
                                 <span className="form-label">Complemento</span>
                                 <textarea
                                     className="form-input"
                                     placeholder="Complemento"
                                     rows={3}
-                                    style={{minHeight: '80px'}}
+                                    style={{minHeight: '80px', ...fullRowStyle}}
                                     value={form.complemento ?? ''}
                                     onChange={(event) =>
                                         setForm((prev) => ({...prev, complemento: event.target.value}))
@@ -251,33 +239,6 @@ export function EnderecoCampos({
                 </div>
                 {aviso && <small style={{color: '#c0392b'}}>{aviso}</small>}
             </label>
-            <label className="form-field" style={fullRow}>
-                <span className="form-label">Cidade *</span>
-                <input
-                    className="form-input"
-                    placeholder="Cidade"
-                    value={endereco.cidade ?? ''}
-                    onChange={(event) => atualizar({cidade: event.target.value})}
-                />
-            </label>
-            <label className="form-field" style={fullRow}>
-                <span className="form-label">Bairro *</span>
-                <input
-                    className="form-input"
-                    placeholder="Bairro"
-                    value={endereco.bairro ?? ''}
-                    onChange={(event) => atualizar({bairro: event.target.value})}
-                />
-            </label>
-            <label className="form-field" style={fullRow}>
-                <span className="form-label">Logradouro *</span>
-                <input
-                    className="form-input"
-                    placeholder="Logradouro"
-                    value={endereco.logradouro ?? ''}
-                    onChange={(event) => atualizar({logradouro: event.target.value})}
-                />
-            </label>
             <label className="form-field">
                 <span className="form-label">Número *</span>
                 <input
@@ -288,13 +249,41 @@ export function EnderecoCampos({
                     onChange={(event) => atualizar({numero: event.target.value})}
                 />
             </label>
-            <label className="form-field" style={fullRowTop}>
+            <label className="form-field">
+                <span className="form-label">Cidade *</span>
+                <input
+                    className="form-input"
+                    placeholder="Cidade"
+                    value={endereco.cidade ?? ''}
+                    onChange={(event) => atualizar({cidade: event.target.value})}
+                />
+            </label>
+            <label className="form-field">
+                <span className="form-label">Bairro *</span>
+                <input
+                    className="form-input"
+                    placeholder="Bairro"
+                    value={endereco.bairro ?? ''}
+                    onChange={(event) => atualizar({bairro: event.target.value})}
+                />
+            </label>
+            <label className="form-field">
+                <span className="form-label">Logradouro *</span>
+                <input
+                    className="form-input"
+                    style={fullRowStyle}
+                    placeholder="Logradouro"
+                    value={endereco.logradouro ?? ''}
+                    onChange={(event) => atualizar({logradouro: event.target.value})}
+                />
+            </label>
+            <label className="form-field">
                 <span className="form-label">Complemento</span>
                 <textarea
                     className="form-input"
                     placeholder="Complemento"
                     rows={3}
-                    style={{minHeight: '80px'}}
+                    style={{minHeight: '80px', ...fullRowStyle}}
                     value={endereco.complemento ?? ''}
                     onChange={(event) => atualizar({complemento: event.target.value})}
                 />

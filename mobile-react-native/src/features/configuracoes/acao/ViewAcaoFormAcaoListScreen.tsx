@@ -64,52 +64,58 @@ export default function ViewAcaoFormAcaoListScreen() {
                     label: 'Ação',
                     content: (
                         <ScrollView style={styles.container}>
-                            <View style={styles.fieldRow}>
-                                <Text style={styles.label}>Descrição *</Text>
-                                <TextInput style={styles.input} value={descricao} onChangeText={setDescricao} />
-                            </View>
-
-                            <View style={styles.fieldRow}>
-                                <Text style={styles.label}>Contratante (Responsável) *</Text>
-                                <View style={styles.fieldButtonGroup}>
-                                    <TextInput style={styles.input} value={responsavelId} onChangeText={setResponsavelId} placeholder="ID Responsável" />
-                                    <Button title="+" onPress={() => setShowModal(true)} />
+                            <View style={styles.formRow}>
+                                <View style={styles.fieldHalf}>
+                                    <Text style={styles.label}>Descrição *</Text>
+                                    <TextInput style={styles.input} value={descricao} onChangeText={setDescricao} />
+                                </View>
+                                <View style={styles.fieldHalf}>
+                                    <Text style={styles.label}>Contratante (Responsável) *</Text>
+                                    <View style={styles.fieldButtonGroup}>
+                                        <TextInput style={styles.input} value={responsavelId} onChangeText={setResponsavelId} placeholder="ID Responsável" />
+                                        <Button title="+" onPress={() => setShowModal(true)} />
+                                    </View>
                                 </View>
                             </View>
 
-                            <View style={styles.fieldRow}>
-                                <Text style={styles.label}>Data Coleta</Text>
-                                <TextInput style={styles.input} value={dataColeta} onChangeText={setDataColeta} placeholder="DD/MM/YYYY" />
+                            <View style={styles.formRow}>
+                                <View style={styles.fieldHalf}>
+                                    <Text style={styles.label}>Data Coleta</Text>
+                                    <TextInput style={styles.input} value={dataColeta} onChangeText={setDataColeta} placeholder="DD/MM/YYYY" />
+                                </View>
+                                <View style={styles.fieldHalf}>
+                                    <Text style={styles.label}>Data Inicial Captação</Text>
+                                    <TextInput style={styles.input} value={dataInicial} onChangeText={setDataInicial} placeholder="DD/MM/YYYY" />
+                                </View>
                             </View>
 
-                            <View style={styles.fieldRow}>
-                                <Text style={styles.label}>Data Inicial Captação</Text>
-                                <TextInput style={styles.input} value={dataInicial} onChangeText={setDataInicial} placeholder="DD/MM/YYYY" />
+                            <View style={styles.formRow}>
+                                <View style={styles.fieldHalf}>
+                                    <Text style={styles.label}>Data Final Captação</Text>
+                                    <TextInput style={styles.input} value={dataFinalCaptacao} onChangeText={setDataFinalCaptacao} placeholder="DD/MM/YYYY" />
+                                </View>
+                                <View style={styles.fieldHalf}>
+                                    <Text style={styles.label}>Tipo Ação *</Text>
+                                    <TextInput style={styles.input} value={tipoAcaoId} onChangeText={setTipoAcaoId} placeholder="ID Tipo Ação" />
+                                </View>
                             </View>
 
-                            <View style={styles.fieldRow}>
-                                <Text style={styles.label}>Data Final Captação</Text>
-                                <TextInput style={styles.input} value={dataFinalCaptacao} onChangeText={setDataFinalCaptacao} placeholder="DD/MM/YYYY" />
+                            <View style={styles.formRow}>
+                                <View style={styles.fieldHalf}>
+                                    <Text style={styles.label}>Data Final Cadastro</Text>
+                                    <TextInput style={styles.input} value={dataFinal} onChangeText={setDataFinal} placeholder="DD/MM/YYYY" />
+                                </View>
+                                <View style={styles.fieldHalf}>
+                                    <Text style={styles.label}>Prev. Meta *</Text>
+                                    <TextInput style={styles.input} value={meta} onChangeText={setMeta} keyboardType="numeric" />
+                                </View>
                             </View>
 
-                            <View style={styles.fieldRow}>
-                                <Text style={styles.label}>Tipo Ação *</Text>
-                                <TextInput style={styles.input} value={tipoAcaoId} onChangeText={setTipoAcaoId} placeholder="ID Tipo Ação" />
-                            </View>
-
-                            <View style={styles.fieldRow}>
-                                <Text style={styles.label}>Data Final Cadastro</Text>
-                                <TextInput style={styles.input} value={dataFinal} onChangeText={setDataFinal} placeholder="DD/MM/YYYY" />
-                            </View>
-
-                            <View style={styles.fieldRow}>
-                                <Text style={styles.label}>Prev. Meta *</Text>
-                                <TextInput style={styles.input} value={meta} onChangeText={setMeta} keyboardType="numeric" />
-                            </View>
-
-                            <View style={styles.fieldRow}>
-                                <Text style={styles.label}>Prev. Custo *</Text>
-                                <TextInput style={styles.input} value={custo} onChangeText={setCusto} keyboardType="numeric" />
+                            <View style={styles.formRow}>
+                                <View style={styles.fieldHalf}>
+                                    <Text style={styles.label}>Prev. Custo *</Text>
+                                    <TextInput style={styles.input} value={custo} onChangeText={setCusto} keyboardType="numeric" />
+                                </View>
                             </View>
 
                             <Button title="Salvar" onPress={handleSave} />
@@ -152,8 +158,9 @@ export default function ViewAcaoFormAcaoListScreen() {
 
 const styles = StyleSheet.create({
     container: {padding: 15},
-    fieldRow: {flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12},
+    formRow: {flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12},
+    fieldHalf: {width: '47%'},
     fieldButtonGroup: {flex: 1, flexDirection: 'row', gap: 5},
-    label: {width: 150, fontWeight: 'bold'},
+    label: {fontWeight: 'bold', marginBottom: 4},
     input: {flex: 1, borderWidth: 1, borderColor: '#ccc', padding: 8, borderRadius: 4},
 });

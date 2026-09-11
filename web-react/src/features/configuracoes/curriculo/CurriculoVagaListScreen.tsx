@@ -488,11 +488,11 @@ export default function CurriculoVagaListScreen() {
 
                 </label>
 
-                <label className="form-field" style={{gridColumn: 'span 3'}}>
+                <label className="form-field">
 
                     <span className="form-label">Descrição *</span>
 
-                    <textarea className="form-input" rows={4} value={formData.descricao} onChange={e => updateField('descricao', e.target.value)} />
+                    <textarea className="form-input" rows={4} value={formData.descricao} onChange={e => updateField('descricao', e.target.value)} style={{gridColumn: 'span 3'}} />
 
                     {errors.descricao && <span className="form-erro">{errors.descricao}</span>}
 
@@ -606,7 +606,7 @@ export default function CurriculoVagaListScreen() {
 
                 </label>
 
-                <label className="form-field" style={{gridColumn: 'span 3'}}>
+                <label className="form-field">
 
                     <span className="form-label">Título do E-mail</span>
 
@@ -614,11 +614,11 @@ export default function CurriculoVagaListScreen() {
 
                 </label>
 
-                <label className="form-field" style={{gridColumn: 'span 3'}}>
+                <label className="form-field">
 
                     <span className="form-label">Assunto do E-mail</span>
 
-                    <textarea className="form-input" rows={3} value={formData.assunto_email} onChange={e => updateField('assunto_email', e.target.value)} />
+                    <textarea className="form-input" rows={3} value={formData.assunto_email} onChange={e => updateField('assunto_email', e.target.value)} style={{gridColumn: 'span 3'}} />
 
                 </label>
 

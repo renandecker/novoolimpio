@@ -14,6 +14,7 @@ import br.com.sol7.olimpio.financeiro.shared.VerificarSenhaService;
 import br.com.sol7.olimpio.financeiro.movimentacaofinanceira.service.MovimentacaoFinanceiraService;
 import br.com.sol7.olimpio.financeiro.movimentacaofinanceira.dto.MovimentacaoFinanceiraResponse;
 import br.com.sol7.olimpio.financeiro.movimentacaofinanceira.repository.MovimentacaoFinanceiraRepository;
+import br.com.sol7.olimpio.financeiro.movimentacaofinanceira.entity.TipoPagamento;
 import br.com.sol7.olimpio.financeiro.sangria.service.SangriaService;
 import br.com.sol7.olimpio.financeiro.sangria.dto.SangriaResponse;
 import br.com.sol7.olimpio.financeiro.sangria.dto.SangriaRequest;
@@ -276,52 +277,60 @@ public class CaixaService {
         if (caixaId == null) {
             return Uni.createFrom().failure(new IllegalArgumentException("caixaId é obrigatório"));
         }
-        return Uni.combine().all().unis(
-                movimentacaoRepository.totalPorFormaPagamento(caixaId, "DINHEIRO"),
-                movimentacaoRepository.totalPorFormaPagamento(caixaId, "CHEQUE"),
-                movimentacaoRepository.totalPorFormaPagamento(caixaId, "CARTAO"),
-                movimentacaoRepository.totalPorFormaPagamento(caixaId, "BOLETO"),
-                movimentacaoRepository.totalPorFormaPagamento(caixaId, "TRANFERENCIA"),
-                movimentacaoRepository.totalPorFormaPagamento(caixaId, "PIX"),
-                movimentacaoRepository.totalPorFormaPagamento(caixaId, "DEPOSITO"),
-                movimentacaoRepository.totalTroco(caixaId),
-                movimentacaoRepository.totaisParcela(caixaId),
-                sangriaService.buscarPorCaixa(caixaId),
-                find(caixaId)
-        ).combinedWith(list -> {
-            BigDecimal totalDinheiro = nvl((BigDecimal) list.get(0));
-            BigDecimal totalCheque = nvl((BigDecimal) list.get(1));
-            BigDecimal totalCartao = nvl((BigDecimal) list.get(2));
-            BigDecimal totalBoleto = nvl((BigDecimal) list.get(3));
-            BigDecimal transferencia = nvl((BigDecimal) list.get(4));
-            BigDecimal pix = nvl((BigDecimal) list.get(5));
-            BigDecimal totalTransferencia = transferencia.add(pix);
-            BigDecimal totalDeposito = nvl((BigDecimal) list.get(6));
-            BigDecimal troco = nvl((BigDecimal) list.get(7));
-            Object[] totaisParcela = (Object[]) list.get(8);
-            @SuppressWarnings("unchecked")
-            List<SangriaResponse> sangrias = list.get(9) != null ? (List<SangriaResponse>) list.get(9) : java.util.List.of();
-            CaixaResponse caixa = (CaixaResponse) list.get(10);
+        return movimentacaoRepository.totalPorFormaPagamento(caixaId, TipoPagamento.DINHEIRO)
+                .onFailure().recoverWithItem(BigDecimal.ZERO)
+                .chain(totalDinheiro -> movimentacaoRepository.totalPorFormaPagamento(caixaId, TipoPagamento.CHEQUE)
+                        .onFailure().recoverWithItem(BigDecimal.ZERO)
+                        .chain(totalCheque -> movimentacaoRepository.totalPorFormaPagamento(caixaId, TipoPagamento.CARTAO)
+                                .onFailure().recoverWithItem(BigDecimal.ZERO)
+                                .chain(totalCartao -> movimentacaoRepository.totalPorFormaPagamento(caixaId, TipoPagamento.BOLETO)
+                                        .onFailure().recoverWithItem(BigDecimal.ZERO)
+                                        .chain(totalBoleto -> movimentacaoRepository.totalPorFormaPagamento(caixaId, TipoPagamento.TRANFERENCIA)
+                                                .onFailure().recoverWithItem(BigDecimal.ZERO)
+                                                .chain(transferencia -> movimentacaoRepository.totalPorFormaPagamento(caixaId, TipoPagamento.PIX)
+                                                        .onFailure().recoverWithItem(BigDecimal.ZERO)
+                                                        .chain(pix -> movimentacaoRepository.totalPorFormaPagamento(caixaId, TipoPagamento.DEPOSITO)
+                                                                .onFailure().recoverWithItem(BigDecimal.ZERO)
+                                                                .chain(totalDeposito -> movimentacaoRepository.totalTroco(caixaId)
+                                                                        .onFailure().recoverWithItem(BigDecimal.ZERO)
+                                                                        .chain(troco -> movimentacaoRepository.totaisParcela(caixaId)
+                                                                                .onFailure().recoverWithItem(new Object[] { BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO })
+                                                                                .chain(totaisParcela -> sangriaService.buscarPorCaixa(caixaId)
+                                                                                        .onFailure().recoverWithItem(java.util.List.of())
+                                                                                        .chain(sangrias -> find(caixaId)
+                                                                                                .onFailure().recoverWithUni(e -> Uni.createFrom().failure(new IllegalArgumentException("Caixa não encontrado: " + caixaId)))
+                                                                                                .map(caixa -> {
+                                                                                                    BigDecimal td = nvl(totalDinheiro);
+                                                                                                    BigDecimal tc = nvl(totalCheque);
+                                                                                                    BigDecimal tca = nvl(totalCartao);
+                                                                                                    BigDecimal tb = nvl(totalBoleto);
+                                                                                                    BigDecimal tr = nvl(transferencia).add(nvl(pix));
+                                                                                                    BigDecimal tdep = nvl(totalDeposito);
+                                                                                                    BigDecimal trc = nvl(troco);
+                                                                                                    Object[] tp = totaisParcela;
+                                                                                                    @SuppressWarnings("unchecked")
+                                                                                                    List<SangriaResponse> sng = sangrias != null ? sangrias : java.util.List.of();
+                                                                                                    CaixaResponse cx = caixa;
 
-            BigDecimal totalSangria = sangrias.stream()
-                    .map(s -> s.valor() != null ? s.valor() : BigDecimal.ZERO)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+                                                                                                    BigDecimal totalSangria = sng.stream()
+                                                                                                            .map(s -> s.valor() != null ? s.valor() : BigDecimal.ZERO)
+                                                                                                            .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            BigDecimal valorTotalParcela = totaisParcela != null && totaisParcela.length >= 1 ? toBigDecimalSafe(totaisParcela[0]) : BigDecimal.ZERO;
-            BigDecimal totalDesconto = totaisParcela != null && totaisParcela.length >= 2 ? toBigDecimalSafe(totaisParcela[1]) : BigDecimal.ZERO;
-            BigDecimal totalMultaJuros = totaisParcela != null && totaisParcela.length >= 3 ? toBigDecimalSafe(totaisParcela[2]) : BigDecimal.ZERO;
+                                                                                                    BigDecimal valorTotalParcela = tp != null && tp.length >= 1 ? toBigDecimalSafe(tp[0]) : BigDecimal.ZERO;
+                                                                                                    BigDecimal totalDesconto = tp != null && tp.length >= 2 ? toBigDecimalSafe(tp[1]) : BigDecimal.ZERO;
+                                                                                                    BigDecimal totalMultaJuros = tp != null && tp.length >= 3 ? toBigDecimalSafe(tp[2]) : BigDecimal.ZERO;
 
-            totalDinheiro = nvl(totalDinheiro).subtract(nvl(troco));
-            BigDecimal fundoCaixa = caixa.fundoCaixa() != null ? caixa.fundoCaixa() : BigDecimal.ZERO;
-            BigDecimal totalDinheiroCaixa = nvl(totalDinheiro).add(nvl(fundoCaixa)).subtract(nvl(troco)).subtract(nvl(totalSangria));
+                                                                                                    td = nvl(td).subtract(nvl(trc));
+                                                                                                    BigDecimal fundoCaixa = cx.fundoCaixa() != null ? cx.fundoCaixa() : BigDecimal.ZERO;
+                                                                                                    BigDecimal totalDinheiroCaixa = nvl(td).add(nvl(fundoCaixa)).subtract(nvl(trc)).subtract(nvl(totalSangria));
 
-            return new CaixaTotais(
-                    nvl(totalDinheiro), nvl(totalCheque), nvl(totalCartao), nvl(totalBoleto),
-                    nvl(totalTransferencia), nvl(totalDeposito), nvl(totalSangria), nvl(troco),
-                    nvl(fundoCaixa), nvl(totalDinheiroCaixa),
-                    nvl(valorTotalParcela), nvl(totalDesconto), nvl(totalMultaJuros)
-            );
-        });
+                                                                                                    return new CaixaTotais(
+                                                                                                            nvl(td), nvl(tc), nvl(tca), nvl(tb),
+                                                                                                            nvl(tr), nvl(tdep), nvl(totalSangria), nvl(trc),
+                                                                                                            nvl(fundoCaixa), nvl(totalDinheiroCaixa),
+                                                                                                            nvl(valorTotalParcela), nvl(totalDesconto), nvl(totalMultaJuros)
+                                                                                                    );
+                                                                                                })))))))))));
     }
 
     private static BigDecimal nvl(BigDecimal v) {
@@ -793,56 +802,51 @@ public class CaixaService {
 
     // Gera relatório de caixa para impressão (formato DOCX)
     public Uni<byte[]> imprimirCaixa(Long caixaId) {
-        return Uni.createFrom().item(() -> {
-            try {
-                StringBuilder content = new StringBuilder();
-                
-                CaixaResponse caixa = find(caixaId).await().indefinitely();
-                content.append("RELATÓRIO DE CAIXA\n");
-                content.append("===================\n\n");
-                content.append("Caixa: ").append(caixa.idCaixaUnidade()).append("\n");
-                content.append("Data: ").append(caixa.data() != null ? new SimpleDateFormat("dd/MM/yyyy HH:mm").format(caixa.data()) : "").append("\n");
-                content.append("Fundo de Caixa: R$ ").append(fmtMoeda(caixa.fundoCaixa())).append("\n\n");
-                
-                FechamentoCaixaTotaisResponse totais = totaisFechamento(caixaId).await().indefinitely();
-                content.append("TOTAIS:\n");
-                content.append("Total Dinheiro: R$ ").append(fmtMoeda(totais.totalDinheiro())).append("\n");
-                content.append("Total Cheque: R$ ").append(fmtMoeda(totais.totalCheque())).append("\n");
-                content.append("Total Cartão: R$ ").append(fmtMoeda(totais.totalCartao())).append("\n");
-                content.append("Total Boleto: R$ ").append(fmtMoeda(totais.totalBoleto())).append("\n");
-                content.append("Total Transferência: R$ ").append(fmtMoeda(totais.totalTransferencia())).append("\n");
-                content.append("Total Depósito: R$ ").append(fmtMoeda(totais.totalDeposito())).append("\n");
-                content.append("Total Sangria: R$ ").append(fmtMoeda(totais.totalSangria())).append("\n");
-                content.append("Total Desconto: R$ ").append(fmtMoeda(totais.totalDesconto())).append("\n");
-                content.append("Total Juros/Multa: R$ ").append(fmtMoeda(totais.totalJurosMulta())).append("\n");
-                content.append("Valor Total: R$ ").append(fmtMoeda(totais.totalValor())).append("\n");
-                content.append("Valor Total Caixa: R$ ").append(fmtMoeda(totais.totalValorPagar())).append("\n\n");
-                
-                List<MovimentacaoFinanceiraResponse> movs = buscarMovimentacaoCaixaEntrada(caixaId).await().indefinitely();
-                List<SangriaResponse> sangrias = sangriaService.buscarPorCaixa(caixaId).await().indefinitely();
-                
-                content.append("MOVIMENTAÇÕES:\n");
-                content.append("--------------\n");
-                for (MovimentacaoFinanceiraResponse mov : movs) {
-                    content.append("ID: ").append(mov.id()).append(" | ");
-                    content.append("Aluno: ").append(mov.historico() != null ? mov.historico() : "").append(" | ");
-                    content.append("Valor: R$ ").append(fmtMoeda(mov.valor())).append("\n");
-                }
-                for (SangriaResponse s : sangrias) {
-                    content.append("Sangria: R$ ").append(fmtMoeda(s.valor())).append("\n");
-                }
-                
-                String text = content.toString();
-                byte[] zipHeader = new byte[] {0x50, 0x4B, 0x03, 0x04};
-                byte[] textBytes = text.getBytes("ISO-8859-1");
-                byte[] result = new byte[zipHeader.length + textBytes.length];
-                System.arraycopy(zipHeader, 0, result, 0, zipHeader.length);
-                System.arraycopy(textBytes, 0, result, zipHeader.length, textBytes.length);
-                return result;
-            } catch (Exception e) {
-                throw new RuntimeException("Erro ao imprimir caixa: " + e.getMessage(), e);
-            }
-        });
+        return find(caixaId)
+                .chain(caixa -> totaisFechamento(caixaId)
+                        .chain(totais -> buscarMovimentacaoCaixaEntrada(caixaId)
+                                .chain(movs -> sangriaService.buscarPorCaixa(caixaId)
+                                        .map(sangrias -> {
+                                            StringBuilder content = new StringBuilder();
+                                            content.append("RELATÓRIO DE CAIXA\n");
+                                            content.append("===================\n\n");
+                                            content.append("Caixa: ").append(caixa.idCaixaUnidade()).append("\n");
+                                            content.append("Data: ").append(caixa.data() != null ? new SimpleDateFormat("dd/MM/yyyy HH:mm").format(caixa.data()) : "").append("\n");
+                                            content.append("Fundo de Caixa: R$ ").append(fmtMoeda(caixa.fundoCaixa())).append("\n\n");
+                                            content.append("TOTAIS:\n");
+                                            content.append("Total Dinheiro: R$ ").append(fmtMoeda(totais.totalDinheiro())).append("\n");
+                                            content.append("Total Cheque: R$ ").append(fmtMoeda(totais.totalCheque())).append("\n");
+                                            content.append("Total Cartão: R$ ").append(fmtMoeda(totais.totalCartao())).append("\n");
+                                            content.append("Total Boleto: R$ ").append(fmtMoeda(totais.totalBoleto())).append("\n");
+                                            content.append("Total Transferência: R$ ").append(fmtMoeda(totais.totalTransferencia())).append("\n");
+                                            content.append("Total Depósito: R$ ").append(fmtMoeda(totais.totalDeposito())).append("\n");
+                                            content.append("Total Sangria: R$ ").append(fmtMoeda(totais.totalSangria())).append("\n");
+                                            content.append("Total Desconto: R$ ").append(fmtMoeda(totais.totalDesconto())).append("\n");
+                                            content.append("Total Juros/Multa: R$ ").append(fmtMoeda(totais.totalJurosMulta())).append("\n");
+                                            content.append("Valor Total: R$ ").append(fmtMoeda(totais.totalValor())).append("\n");
+                                            content.append("Valor Total Caixa: R$ ").append(fmtMoeda(totais.totalValorPagar())).append("\n\n");
+                                            content.append("MOVIMENTAÇÕES:\n");
+                                            content.append("--------------\n");
+                                            for (MovimentacaoFinanceiraResponse mov : movs) {
+                                                content.append("ID: ").append(mov.id()).append(" | ");
+                                                content.append("Aluno: ").append(mov.historico() != null ? mov.historico() : "").append(" | ");
+                                                content.append("Valor: R$ ").append(fmtMoeda(mov.valor())).append("\n");
+                                            }
+                                            for (SangriaResponse s : sangrias) {
+                                                content.append("Sangria: R$ ").append(fmtMoeda(s.valor())).append("\n");
+                                            }
+                                            try {
+                                                String text = content.toString();
+                                                byte[] zipHeader = new byte[] {0x50, 0x4B, 0x03, 0x04};
+                                                byte[] textBytes = text.getBytes("ISO-8859-1");
+                                                byte[] result = new byte[zipHeader.length + textBytes.length];
+                                                System.arraycopy(zipHeader, 0, result, 0, zipHeader.length);
+                                                System.arraycopy(textBytes, 0, result, zipHeader.length, textBytes.length);
+                                                return result;
+                                            } catch (Exception e) {
+                                                throw new RuntimeException("Erro ao imprimir caixa: " + e.getMessage(), e);
+                                            }
+                                        }))));
     }
 
     public Uni<byte[]> exportarCaixaComFormato(String format, Long caixaId) {

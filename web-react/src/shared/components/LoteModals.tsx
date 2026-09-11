@@ -148,9 +148,9 @@ export function LoteEmailModal({basePath, etapaKey, etapaId, situacoes, onClose}
                         <span className="form-label">Assunto</span>
                         <input className="form-input" value={modelo?.assunto ?? ''} readOnly/>
                     </label>
-                    <label className="form-field" style={{gridColumn: '1 / -1'}}>
+                    <label className="form-field">
                         <span className="form-label">Mensagem</span>
-                        <textarea className="form-input" rows={8} value={modelo?.mensagem ?? ''} readOnly/>
+                        <textarea className="form-input" rows={8} value={modelo?.mensagem ?? ''} readOnly style={{gridColumn: 'span 3'}}/>
                     </label>
                 </div>
             ),

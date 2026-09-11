@@ -1027,19 +1027,21 @@ function ExportModal({ item, tipo, onClose, onExport, entityTitle }: ExportModal
                         {tipo === 'DOCX' || tipo === 'PDF' ? (
                             <>
                                 <p>Selecione o template para gerar o documento {tipo}:</p>
-                                <div className="form-field">
-                                    <label className="form-label">Template</label>
-                                    <select
-                                        className="form-input form-select"
-                                        value={templateId ?? ''}
-                                        onChange={(e) => setTemplateId(e.target.value ? Number(e.target.value) : undefined)}
-                                        disabled={templates.length === 0 || loading}
-                                    >
-                                        <option value="">-- Selecione um template --</option>
-                                        {templates.map(t => (
-                                            <option key={t.id} value={t.id}>{t.nome}</option>
-                                        ))}
-                                    </select>
+                                <div className="form-grid">
+                                    <label className="form-field">
+                                        <span className="form-label">Template</span>
+                                        <select
+                                            className="form-input form-select"
+                                            value={templateId ?? ''}
+                                            onChange={(e) => setTemplateId(e.target.value ? Number(e.target.value) : undefined)}
+                                            disabled={templates.length === 0 || loading}
+                                        >
+                                            <option value="">-- Selecione um template --</option>
+                                            {templates.map(t => (
+                                                <option key={t.id} value={t.id}>{t.nome}</option>
+                                            ))}
+                                        </select>
+                                    </label>
                                 </div>
                                 {templates.length === 0 && (
                                     <p className="form-empty">Nenhum template disponível. Configure um template DOCX na tela de gestão de templates.</p>

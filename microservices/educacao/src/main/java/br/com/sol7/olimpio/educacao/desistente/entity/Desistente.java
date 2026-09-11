@@ -18,8 +18,10 @@ public class Desistente extends PanacheEntity {
     @Column(name = "data_criacao")
     @Temporal(TemporalType.DATE)
     public Date dataCriacao;
+    @Column(name = "id_pessoa_aluno")
+    public Long pessoaAlunoId;  // referencia a Pessoa Aluno (id, cross-service)
     @Column(name = "id_pessoa_notificou")
-    public Long pessoaFuncionarioId;  // referencia a Pessoa (id, cross-service)
+    public Long pessoaFuncionarioId;  // referencia a Pessoa Funcionario (id, cross-service)
     @Column(name = "id_contrato")
     public Long contratoId;  // referencia a Contrato (id, cross-service)
     @Column(name = "id_motivo")

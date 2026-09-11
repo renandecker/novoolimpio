@@ -232,15 +232,17 @@ export default function ViewTipoPausaListTipoPausaListScreen() {
                   <TextInput style={[styles.input, { backgroundColor: '#f3f4f6' }]} value={String((modal as any).item.id)} editable={false} />
                 </View>
               )}
-              <View style={styles.field}>
-                <Text style={styles.label}>Descrição <Text style={{ color: '#C90000' }}>*</Text></Text>
-                <TextInput style={styles.input} value={descricao} onChangeText={setDescricao} maxLength={255} placeholder="Ex.: Almoço" />
-                <Text style={styles.hint}>3 a 255 caracteres (f:validateLength)</Text>
-              </View>
-              <View style={styles.field}>
-                <Text style={styles.label}>Tempo pausa (segundos) <Text style={{ color: '#C90000' }}>*</Text></Text>
-                <TextInput style={styles.input} value={tempo} onChangeText={handleTempo} keyboardType="number-pad" placeholder="Ex.: 900" />
-                <Text style={styles.hint}>Inteiro — p:keyFilter mask=&quot;int&quot; · obrigatório &quot;Insira o tempo intervalo&quot;</Text>
+              <View style={styles.formRow}>
+                <View style={styles.fieldHalf}>
+                  <Text style={styles.label}>Descrição <Text style={{ color: '#C90000' }}>*</Text></Text>
+                  <TextInput style={styles.input} value={descricao} onChangeText={setDescricao} maxLength={255} placeholder="Ex.: Almoço" />
+                  <Text style={styles.hint}>3 a 255 caracteres (f:validateLength)</Text>
+                </View>
+                <View style={styles.fieldHalf}>
+                  <Text style={styles.label}>Tempo pausa (segundos) <Text style={{ color: '#C90000' }}>*</Text></Text>
+                  <TextInput style={styles.input} value={tempo} onChangeText={handleTempo} keyboardType="number-pad" placeholder="Ex.: 900" />
+                  <Text style={styles.hint}>Inteiro — p:keyFilter mask=&quot;int&quot; · obrigatório &quot;Insira o tempo intervalo&quot;</Text>
+                </View>
               </View>
             </ScrollView>
             <View style={styles.modalActions}>
@@ -288,6 +290,8 @@ const styles = StyleSheet.create({
   closeText: { color: Colors.modalCloseColor, fontSize: Typography.sizes.xxxl, fontWeight: Typography.weights.medium },
   modalScroll: { paddingHorizontal: Spacing.xl, paddingVertical: Spacing.md },
   field: { marginBottom: Spacing.md },
+  formRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md },
+  fieldHalf: { width: '47%' },
   label: { fontSize: Typography.sizes.base, fontWeight: Typography.weights.semibold, color: Colors.textSecondary, marginBottom: Spacing.xs },
   hint: { fontSize: Typography.sizes.sm, color: Colors.textMuted, marginTop: 4 },
   input: { borderWidth: 1, borderColor: Colors.formInputBorder, borderRadius: BorderRadius.lg, padding: Spacing.md, fontSize: Typography.sizes.lg, color: Colors.textPrimary, backgroundColor: Colors.bgSecondary },

@@ -263,8 +263,8 @@ const styles = StyleSheet.create({
     empty: {color: '#888', fontStyle: 'italic', textAlign: 'center'},
     loadingText: {color: '#888', fontSize: 13, marginTop: 8},
     loader: {color: PRIMARY},
-    formGrid: {paddingVertical: 8, gap: 12},
-    formField: {marginBottom: 4},
+    formGrid: {paddingVertical: 8, flexDirection: 'row', flexWrap: 'wrap', gap: 12},
+    formField: {width: '47%', marginBottom: 4},
     formLabel: {fontSize: 13, fontWeight: '700', color: '#2b2b2b', marginBottom: 4},
     formInput: {
         borderWidth: 1,

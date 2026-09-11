@@ -292,19 +292,18 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                 <input className="form-input" value={f.rg} onChange={e=>upd('rg',e.target.value)} placeholder="RG" /></label>
 
             <label className="form-field"><span className="form-label">Nome {requiredMark}</span>
-                <input className="form-input" value={f.nome} onChange={e=>upd('nome',e.target.value)} placeholder="Nome completo" style={{gridColumn:'span 3'}} /></label>
+                <input className="form-input" value={f.nome} onChange={e=>upd('nome',e.target.value)} placeholder="Nome completo" /></label>
             <label className="form-field"><span className="form-label">E-mail {requiredMark}</span>
-                <input className="form-input" type="email" value={f.email} onChange={e=>upd('email',e.target.value)} placeholder="E-mail" style={{gridColumn:'span 3'}} /></label>
+                <input className="form-input" type="email" value={f.email} onChange={e=>upd('email',e.target.value)} placeholder="E-mail" /></label>
 
             <label className="form-field"><span className="form-label">Nome Social {requiredMark}</span>
-                <input className="form-input" value={f.nomeSocial} onChange={e=>upd('nomeSocial',e.target.value)} placeholder="Nome social" style={{gridColumn:'span 3'}} /></label>
-
+                <input className="form-input" value={f.nomeSocial} onChange={e=>upd('nomeSocial',e.target.value)} placeholder="Nome social" /></label>
             <label className="form-field"><span className="form-label">Data Nascimento {requiredMark}</span>
                 <input className="form-input" type="date" value={f.dataNascimento} onChange={e=>upd('dataNascimento',e.target.value)} /></label>
             <label className="form-field"><span className="form-label">Nome do Pai</span>
                 <input className="form-input" value={f.nomePai} onChange={e=>upd('nomePai',e.target.value)} placeholder="Nome do pai" /></label>
             <label className="form-field"><span className="form-label">Nome da Mãe {requiredMark}</span>
-                <input className="form-input" value={f.nomeMae} onChange={e=>upd('nomeMae',e.target.value)} placeholder="Nome da mãe" style={{gridColumn:'span 3'}} /></label>
+                <input className="form-input" value={f.nomeMae} onChange={e=>upd('nomeMae',e.target.value)} placeholder="Nome da mãe" /></label>
 
             {/* Contato */}
             <div style={{gridColumn:'1 / -1', borderTop:'1px solid #e6e6e6', marginTop:8, paddingTop:12, fontWeight:700, fontSize:13, color:'#2f333b'}}>Contato {requiredMark}</div>
@@ -315,16 +314,17 @@ export default function ViewUsuarioFormUsuarioListScreen(){
             <div style={{gridColumn:'1 / -1', display:'flex', alignItems:'center', gap:8, color:'#888', fontSize:12, marginTop:-4}}>Preencha Telefone <b>OU</b> Celular</div>
 
             <label className="form-field"><span className="form-label">Nome Referência {requiredMark}</span>
-                <input className="form-input" value={f.nomeReferencia} onChange={e=>upd('nomeReferencia',e.target.value)} placeholder="Nome referência" style={{gridColumn:'span 3'}} /></label>
+                <input className="form-input" value={f.nomeReferencia} onChange={e=>upd('nomeReferencia',e.target.value)} placeholder="Nome referência" /></label>
             <label className="form-field"><span className="form-label">Telefone Referência</span>
                 <input className="form-input" value={f.telefoneReferencia} onChange={e=>upd('telefoneReferencia',formatPhone(e.target.value))} placeholder="(99) 9999-9999" /></label>
-            <label className="form-field"><span className="form-label">Celular Referência</span>
-                <input className="form-input" value={f.celularReferencia} onChange={e=>upd('celularReferencia',formatPhone(e.target.value))} placeholder="(99) 99999-9999" /></label>
 
             <label className="form-field"><span className="form-label">Nome Referência 2</span>
-                <input className="form-input" value={f.nomeReferencia2} onChange={e=>upd('nomeReferencia2',e.target.value)} placeholder="Nome referência 2" style={{gridColumn:'span 3'}} /></label>
+                <input className="form-input" value={f.nomeReferencia2} onChange={e=>upd('nomeReferencia2',e.target.value)} placeholder="Nome referência 2" /></label>
             <label className="form-field"><span className="form-label">Telefone Referência 2</span>
                 <input className="form-input" value={f.telefoneReferencia2} onChange={e=>upd('telefoneReferencia2',formatPhone(e.target.value))} placeholder="(99) 9999-9999" /></label>
+
+            <label className="form-field"><span className="form-label">Celular Referência</span>
+                <input className="form-input" value={f.celularReferencia} onChange={e=>upd('celularReferencia',formatPhone(e.target.value))} placeholder="(99) 99999-9999" /></label>
             <label className="form-field"><span className="form-label">Celular Referência 2</span>
                 <input className="form-input" value={f.celularReferencia2} onChange={e=>upd('celularReferencia2',formatPhone(e.target.value))} placeholder="(99) 99999-9999" /></label>
 
@@ -384,11 +384,20 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                 </div>
             </label>
             <label className="form-field">
+                <span className="form-label">Número</span>
+                <input
+                    className="form-input"
+                    type="number"
+                    placeholder="Número"
+                    value={enderecos[0]?.numero ?? ''}
+                    onChange={(event) => setEnderecos([{...enderecos[0], numero: event.target.value}])}
+                />
+            </label>
+            <label className="form-field">
                 <span className="form-label">Cidade</span>
                 <input
                     className="form-input"
                     placeholder="Cidade"
-                    style={{gridColumn: 'span 3'}}
                     value={enderecos[0]?.cidade ?? ''}
                     onChange={(event) => setEnderecos([{...enderecos[0], cidade: event.target.value}])}
                 />
@@ -398,7 +407,6 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                 <input
                     className="form-input"
                     placeholder="Bairro"
-                    style={{gridColumn: 'span 3'}}
                     value={enderecos[0]?.bairro ?? ''}
                     onChange={(event) => setEnderecos([{...enderecos[0], bairro: event.target.value}])}
                 />
@@ -411,16 +419,6 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                     style={{gridColumn: 'span 3'}}
                     value={enderecos[0]?.logradouro ?? ''}
                     onChange={(event) => setEnderecos([{...enderecos[0], logradouro: event.target.value}])}
-                />
-            </label>
-            <label className="form-field">
-                <span className="form-label">Número</span>
-                <input
-                    className="form-input"
-                    type="number"
-                    placeholder="Número"
-                    value={enderecos[0]?.numero ?? ''}
-                    onChange={(event) => setEnderecos([{...enderecos[0], numero: event.target.value}])}
                 />
             </label>
             <label className="form-field">
@@ -441,6 +439,8 @@ export default function ViewUsuarioFormUsuarioListScreen(){
         <div className="form-grid">
             <label className="form-field"><span className="form-label">Qtd. filhos &lt; 14 anos</span>
                 <input className="form-input" type="number" value={doc.qtdFilhosMenor14} onChange={e=>updDoc('qtdFilhosMenor14',e.target.value)} placeholder="0" /></label>
+            <label className="form-field"><span className="form-label">Carteira Reservista</span>
+                <input className="form-input" value={doc.carteiraReservista} onChange={e=>updDoc('carteiraReservista',e.target.value)} placeholder="Reservista" /></label>
             <div style={{gridColumn:'1 / -1', height:1, background:'#e6e6e6', margin:'6px 0'}}/>
             <label className="form-field"><span className="form-label">Carteira Trabalho {requiredMark}</span>
                 <input className="form-input" value={doc.ctps} onChange={e=>updDoc('ctps',e.target.value)} placeholder="CTPS" /></label>
@@ -458,8 +458,6 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                 <input className="form-input" value={doc.zona} onChange={e=>updDoc('zona',e.target.value)} placeholder="Zona" /></label>
             <label className="form-field"><span className="form-label">Seção</span>
                 <input className="form-input" value={doc.secao} onChange={e=>updDoc('secao',e.target.value)} placeholder="Seção" /></label>
-            <label className="form-field"><span className="form-label">Carteira Reservista</span>
-                <input className="form-input" value={doc.carteiraReservista} onChange={e=>updDoc('carteiraReservista',e.target.value)} placeholder="Reservista" /></label>
 
             <div style={{gridColumn:'1 / -1', borderTop:'1px solid #e6e6e6', marginTop:8, paddingTop:12}}>
                 <div style={{fontWeight:700, fontSize:13, color:'#2f333b', marginBottom:8}}>Documentos — arquivos com <span style={{color:'#C90000'}}>*</span> são obrigatórios</div>
@@ -490,17 +488,17 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                 <label className="form-field"><span className="form-label">Ativo</span>
                     <BooleanField value={ativo} onChange={setAtivo} /></label>
             )}
+            <label className="form-field"><span className="form-label">Data Admissão</span>
+                <input className="form-input" type="date" value={dataAdmissao} onChange={e=>setDataAdmissao(e.target.value)} /></label>
+
             <label className="form-field"><span className="form-label">Função {requiredMark}</span>
                 <select className="form-input form-select" value={funcaoId} onChange={e=>setFuncaoId(e.target.value)}>
                     <option value="">-- Selecione --</option>
                     {funcoes.map(fu=> <option key={fu.id} value={String(fu.id)}>{fu.descricao}</option>)}
                 </select></label>
-            <label className="form-field"><span className="form-label">Data Admissão</span>
-                <input className="form-input" type="date" value={dataAdmissao} onChange={e=>setDataAdmissao(e.target.value)} /></label>
-
             <label className="form-field">
                 <span className="form-label">Regime</span>
-                <div style={{display:'flex', gap:12, gridColumn:'span 3'}}>
+                <div style={{display:'flex', gap:12}}>
                     <label style={{display:'flex', alignItems:'center', gap:6, fontSize:13}}><input type="radio" checked={mensalista==='M'} onChange={()=>setMensalista('M')} /> Mensalista</label>
                     <label style={{display:'flex', alignItems:'center', gap:6, fontSize:13}}><input type="radio" checked={mensalista==='H'} onChange={()=>setMensalista('H')} /> Horista</label>
                 </div>

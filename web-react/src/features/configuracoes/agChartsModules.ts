@@ -1,6 +1,6 @@
 import {ModuleRegistry, LicenseManager} from 'ag-charts-enterprise';
 
-LicenseManager.setLicenseKey('USING_AG_CHARTS_DEVELOPER_LICENSE');
+// LicenseManager.setLicenseKey('USING_AG_CHARTS_DEVELOPER_LICENSE');
 
 import {
     CartesianChartModule,

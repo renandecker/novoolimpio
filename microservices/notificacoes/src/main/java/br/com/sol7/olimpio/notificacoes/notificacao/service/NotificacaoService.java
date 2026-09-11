@@ -5,6 +5,7 @@ import br.com.sol7.olimpio.notificacoes.notificacao.dto.NotificacaoResponse;
 import br.com.sol7.olimpio.notificacoes.notificacao.entity.Notificacao;
 import br.com.sol7.olimpio.notificacoes.notificacao.repository.NotificacaoRepository;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.quarkus.panache.common.Page;
 import io.smallrye.mutiny.Uni;
@@ -51,6 +52,7 @@ public class NotificacaoService {
                         .map(count -> new PagedResponse<NotificacaoResponse>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
 
+    @WithSession
     public Uni<Long> naoLidas(String username) {
         return repository.count("username = ?1 and lida = false", username);
     }

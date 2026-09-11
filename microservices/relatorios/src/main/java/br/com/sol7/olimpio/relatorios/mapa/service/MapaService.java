@@ -26,6 +26,7 @@ import br.com.sol7.olimpio.relatorios.mapa.dto.RegraPontos;
 import br.com.sol7.olimpio.shared.PagedResponse;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
@@ -40,6 +41,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 @ApplicationScoped
@@ -258,12 +260,12 @@ public class MapaService {
     public Uni<MapaPontosResponse> buscarPontos(Long id) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Mapa not found"))
-                .chain(mapa -> mapaRegraService.findByMapaId(id)
-                        .map(regras -> buildMapaPontosResponse(mapa, regras)));
+                .onItem().transformToUni(mapa -> mapaRegraService.findByMapaId(id)
+                        .onItem().transformToUni(regras -> buildMapaPontosResponse(mapa, regras)));
     }
 
-    private MapaPontosResponse buildMapaPontosResponse(Mapa mapa, List<MapaRegraResponse> regras) {
-        List<RegraPontos> regraPontosList = new ArrayList<>();
+    private Uni<MapaPontosResponse> buildMapaPontosResponse(Mapa mapa, List<MapaRegraResponse> regras) {
+        List<Uni<RegraPontos>> regraPontosUnis = new ArrayList<>();
 
         // Parse center coordinates from mapa.coordenada
         String[] centroCoords = mapa.coordenada != null ? mapa.coordenada.split(",") : new String[0];
@@ -273,136 +275,149 @@ public class MapaService {
         // For each regra, create RegraPontos with actual markers from SQL execution
         for (MapaRegraResponse regra : regras) {
             if (Boolean.TRUE.equals(regra.ativo())) {
-                List<Marcador> marcadores = executarConsultaMarcadores(mapa, regra);
-                regraPontosList.add(new RegraPontos(
+                regraPontosUnis.add(executarConsultaMarcadores(mapa, regra)
+                        .map(marcadores -> new RegraPontos(
+                                regra.id(),
+                                regra.descricao(),
+                                regra.cor() != null ? "#" + regra.cor() : "#ff0000",
+                                regra.markerTamanho() != null ? regra.markerTamanho() : (mapa.markerTamanho != null ? mapa.markerTamanho : 10),
+                                marcadores
+                        )));
+            } else {
+                // Return empty RegraPontos for inactive regras
+                regraPontosUnis.add(Uni.createFrom().item(new RegraPontos(
                         regra.id(),
                         regra.descricao(),
                         regra.cor() != null ? "#" + regra.cor() : "#ff0000",
                         regra.markerTamanho() != null ? regra.markerTamanho() : (mapa.markerTamanho != null ? mapa.markerTamanho : 10),
-                        marcadores
-                ));
+                        new ArrayList<>()
+                )));
             }
         }
 
-        return new MapaPontosResponse(
-                latCentro + "," + lngCentro,
-                mapa.zoom,
-                mapa.altura,
-                mapa.markerTamanho,
-                regraPontosList
-        );
+        return Uni.combine().all().unis(regraPontosUnis).combinedWith(regraPontosList -> new MapaPontosResponse(
+                        latCentro + "," + lngCentro,
+                        mapa.zoom,
+                        mapa.altura,
+                        mapa.markerTamanho,
+                        (List<RegraPontos>) regraPontosList
+                ));
     }
 
-    private List<Marcador> executarConsultaMarcadores(Mapa mapa, MapaRegraResponse regra) {
-        List<Marcador> marcadores = new ArrayList<>();
-        JdbcTemplate jdbcTemplate = getJdbcTemplate();
-
-        try {
-            // Fetch column names from related entities using reactive chains
-            // Medida column
-            String medidaColuna = medidaService.find(regra.medidaId())
-                    .onItem().transform(m -> m.estruturaColunaId())
-                    .onItem().transformToUni(id -> estruturaColunaService.find(id))
-                    .onItem().transform(e -> e.coluna())
-                    .await().indefinitely();
-
-            // MedidaMeta column
-            String medidaMetaColuna = null;
-            if (regra.medidaMetaId() != null) {
-                medidaMetaColuna = medidaService.find(regra.medidaMetaId())
-                        .onItem().transform(m -> m.estruturaColunaId())
-                        .onItem().transformToUni(id -> estruturaColunaService.find(id))
-                        .onItem().transform(e -> e.coluna())
-                        .await().indefinitely();
-            }
-
-            // MedidaMetaDois column
-            String medidaMetaDoisColuna = null;
-            if (regra.medidaMetaDoisId() != null) {
-                medidaMetaDoisColuna = medidaService.find(regra.medidaMetaDoisId())
-                        .onItem().transform(m -> m.estruturaColunaId())
-                        .onItem().transformToUni(id -> estruturaColunaService.find(id))
-                        .onItem().transform(e -> e.coluna())
-                        .await().indefinitely();
-            }
-
-            // Georeferencia column
-            String georeferenciaColuna = georeferenciaService.find(mapa.georeferenciaId)
-                    .onItem().transform(g -> g.estruturaColunaId())
-                    .onItem().transformToUni(id -> estruturaColunaService.find(id))
-                    .onItem().transform(e -> e.coluna())
-                    .await().indefinitely();
-
-            // Estrutura table and condition
-            String estruturaTabela = estruturaService.find(mapa.estruturaId)
-                    .onItem().transform(e -> e.tabela())
-                    .await().indefinitely();
-            String estruturaCondicao = estruturaService.find(mapa.estruturaId)
-                    .onItem().transform(e -> e.condicao())
-                    .await().indefinitely();
-
-            // Dimensao column
-            String dimensaoColuna = null;
-            if (mapa.dimensaoId != null) {
-                dimensaoColuna = dimensaoService.find(mapa.dimensaoId)
-                        .onItem().transform(d -> d.estruturaColunaId())
-                        .onItem().transformToUni(id -> estruturaColunaService.find(id))
-                        .onItem().transform(e -> e.coluna())
-                        .await().indefinitely();
-            }
-
-            if (medidaColuna == null || georeferenciaColuna == null || estruturaTabela == null) {
-                // Missing required configuration
-                return marcadores;
-            }
-
-            String medidaCondicao = buildMedidaCondicao(regra, medidaColuna, medidaMetaColuna, medidaMetaDoisColuna);
-            String colunasSelect;
-            String groupBy;
-
-            if (dimensaoColuna == null || dimensaoColuna.isBlank()) {
-                colunasSelect = "sum(" + medidaColuna + ")";
-                groupBy = "group by 1";
-            } else {
-                colunasSelect = dimensaoColuna + ", sum(" + medidaColuna + ")";
-                groupBy = "group by 1,2";
-            }
-
-            String whereClause;
-            if (estruturaCondicao != null && !estruturaCondicao.isBlank()) {
-                whereClause = " " + estruturaCondicao + " and " + medidaCondicao;
-            } else {
-                whereClause = " where " + medidaCondicao;
-            }
-
-            String sql = "select distinct " + georeferenciaColuna + ", " + colunasSelect +
-                    " " + estruturaTabela + whereClause + " " + groupBy + " limit 1000";
-
-            final String finalDimensaoColuna = dimensaoColuna;
-            jdbcTemplate.query(sql, new RowCallbackHandler() {
-                @Override
-                public void processRow(ResultSet rs) throws SQLException {
-                    String coordenada = rs.getString(1);
-                    if (coordenada != null && COORDENADA_PATTERN.matcher(coordenada).matches()) {
-                        String[] coords = coordenada.split(",");
-                        String latitude = coords.length > 0 ? coords[0].trim() : "0";
-                        String longitude = coords.length > 1 ? coords[1].trim() : "0";
-
-                        String valorFormatado = formatarValor(rs, finalDimensaoColuna != null && !finalDimensaoColuna.isBlank());
-
-                        String popup = buildPopup(coordenada, valorFormatado, finalDimensaoColuna != null && !finalDimensaoColuna.isBlank() ? rs.getString(2) : null);
-
-                        Marcador marcador = new Marcador(latitude, longitude, popup, valorFormatado);
-                        marcadores.add(marcador);
+    private Uni<List<Marcador>> executarConsultaMarcadores(Mapa mapa, MapaRegraResponse regra) {
+        return medidaService.find(regra.medidaId())
+                .onItem().transform(m -> m.estruturaColunaId())
+                .onItem().transformToUni(id -> estruturaColunaService.find(id))
+                .onItem().transform(e -> e.coluna())
+                .chain(medidaColuna -> {
+                    Uni<String> medidaMetaColunaUni = Uni.createFrom().item((String) null);
+                    if (regra.medidaMetaId() != null) {
+                        medidaMetaColunaUni = medidaService.find(regra.medidaMetaId())
+                                .onItem().transform(m -> m.estruturaColunaId())
+                                .onItem().transformToUni(id -> estruturaColunaService.find(id))
+                                .onItem().transform(e -> e.coluna());
                     }
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-            // Return empty list on error
-        }
 
-        return marcadores;
+                    Uni<String> medidaMetaDoisColunaUni = Uni.createFrom().item((String) null);
+                    if (regra.medidaMetaDoisId() != null) {
+                        medidaMetaDoisColunaUni = medidaService.find(regra.medidaMetaDoisId())
+                                .onItem().transform(m -> m.estruturaColunaId())
+                                .onItem().transformToUni(id -> estruturaColunaService.find(id))
+                                .onItem().transform(e -> e.coluna());
+                    }
+
+                    Uni<String> georeferenciaColunaUni = georeferenciaService.find(mapa.georeferenciaId)
+                            .onItem().transform(g -> g.estruturaColunaId())
+                            .onItem().transformToUni(id -> estruturaColunaService.find(id))
+                            .onItem().transform(e -> e.coluna());
+
+                    Uni<String> estruturaTabelaUni = estruturaService.find(mapa.estruturaId)
+                            .onItem().transform(e -> e.tabela());
+                    Uni<String> estruturaCondicaoUni = estruturaService.find(mapa.estruturaId)
+                            .onItem().transform(e -> e.condicao());
+
+                    Uni<String> dimensaoColunaUni = Uni.createFrom().item((String) null);
+                    if (mapa.dimensaoId != null) {
+                        dimensaoColunaUni = dimensaoService.find(mapa.dimensaoId)
+                                .onItem().transform(d -> d.estruturaColunaId())
+                                .onItem().transformToUni(id -> estruturaColunaService.find(id))
+                                .onItem().transform(e -> e.coluna());
+                    }
+
+                    return Uni.combine().all().unis(
+                            Uni.createFrom().item(medidaColuna),
+                            medidaMetaColunaUni,
+                            medidaMetaDoisColunaUni,
+                            georeferenciaColunaUni,
+                            estruturaTabelaUni,
+                            estruturaCondicaoUni,
+                            dimensaoColunaUni
+                    ).asTuple()
+                    .onItem().transformToUni(tuple -> {
+                        String mColuna = semAlias(tuple.getItem1());
+                        String mMetaColuna = semAlias(tuple.getItem2());
+                        String mMetaDoisColuna = semAlias(tuple.getItem3());
+                        String geoColuna = semAlias(tuple.getItem4());
+                        String estTabela = tuple.getItem5();
+                        String estCondicao = tuple.getItem6();
+                        String dimColuna = semAlias(tuple.getItem7());
+
+                        if (mColuna == null || geoColuna == null || estTabela == null) {
+                            return Uni.createFrom().item(new ArrayList<Marcador>());
+                        }
+
+                        String medidaCondicao = buildMedidaCondicao(regra, mColuna, mMetaColuna, mMetaDoisColuna);
+                        String colunasSelect;
+                        String groupBy;
+
+                        if (dimColuna == null || dimColuna.isBlank()) {
+                            colunasSelect = "sum(" + mColuna + ")";
+                            groupBy = "group by 1";
+                        } else {
+                            colunasSelect = dimColuna + ", sum(" + mColuna + ")";
+                            groupBy = "group by 1,2";
+                        }
+
+                        String whereClause;
+                        if (estCondicao != null && !estCondicao.isBlank()) {
+                            whereClause = " " + estCondicao + " and " + medidaCondicao;
+                        } else {
+                            whereClause = " where " + medidaCondicao;
+                        }
+
+                        String sql = "select distinct " + geoColuna + ", " + colunasSelect +
+                                " " + estTabela + whereClause + " " + groupBy + " limit 1000";
+
+                        JdbcTemplate jdbcTemplate = getJdbcTemplate();
+                        return Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> {
+                            List<Marcador> marcadores = new ArrayList<>();
+                            try {
+                                final String finalDimensaoColuna = dimColuna;
+                                jdbcTemplate.query(sql, new RowCallbackHandler() {
+                                    @Override
+                                    public void processRow(ResultSet rs) throws SQLException {
+                                        String coordenada = rs.getString(1);
+                                        if (coordenada != null && COORDENADA_PATTERN.matcher(coordenada).matches()) {
+                                            String[] coords = coordenada.split(",");
+                                            String latitude = coords.length > 0 ? coords[0].trim() : "0";
+                                            String longitude = coords.length > 1 ? coords[1].trim() : "0";
+
+                                            String valorFormatado = formatarValor(rs, finalDimensaoColuna != null && !finalDimensaoColuna.isBlank());
+
+                                            String popup = buildPopup(coordenada, valorFormatado, finalDimensaoColuna != null && !finalDimensaoColuna.isBlank() ? rs.getString(2) : null);
+
+                                             Marcador marcador = new Marcador(latitude, longitude, popup, valorFormatado);
+                                             marcadores.add(marcador);
+                                         }
+                                     }
+                                 });
+                             } catch (Exception e) {
+                                 e.printStackTrace();
+                             }
+                             return marcadores;
+                         }, Infrastructure.getDefaultWorkerPool()));
+                    });
+                });
     }
 
     private String buildMedidaCondicao(MapaRegraResponse regra, String medidaColuna, String medidaMetaColuna, String medidaMetaDoisColuna) {
@@ -465,5 +480,12 @@ public class MapaService {
         }
         popup.append(valorFormatado);
         return popup.toString();
+    }
+
+    private static String semAlias(String coluna) {
+        if (coluna == null) return null;
+        String c = coluna.trim();
+        int idx = c.toLowerCase().lastIndexOf(" as ");
+        return idx >= 0 ? c.substring(0, idx) : c;
     }
 }

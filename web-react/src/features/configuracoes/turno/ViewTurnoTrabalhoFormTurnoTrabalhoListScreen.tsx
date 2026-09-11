@@ -600,165 +600,44 @@ export default function ViewTurnoTrabalhoFormTurnoTrabalhoListScreen() {
 
           {/* h:panelGrid columns=2 table_form */}
 
-          <div className="table_form" style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: '12px 16px', alignItems: 'center' }}>
-
-            {/* Id */}
-
-            <label htmlFor="inputId:id" className="form-label" style={{ fontWeight: 600 }}>
-
-              Id
-
-            </label>
-
-            <input id="inputId:id" className="form-input inputTiny" value={isEdit ? String(editingId) : ''} disabled placeholder="(novo)" style={{ width: 90, background: '#f3f4f6' }} />
-
-
-
-            {/* Descrição * */}
-
-            <label htmlFor="inputDescricao:descricao" className="form-label" style={{ fontWeight: 600 }}>
-
-              Descrição <span style={{ color: '#C90000' }}>*</span>
-
-            </label>
-
-            <input
-
-              id="inputDescricao:descricao"
-
-              className="form-input inputMedium"
-
-              value={descricao}
-
-              onChange={(e) => setDescricao(e.target.value)}
-
-              maxLength={255}
-
-              placeholder="Ex.: Manhã, Tarde, Noite…"
-
-              required
-
-            />
-
-
-
-            {/* Início * mask 99:99 */}
-
-            <label htmlFor="inputInicio" className="form-label" style={{ fontWeight: 600 }}>
-
-              Início <span style={{ color: '#C90000' }}>*</span>
-
-            </label>
-
-            <input
-
-              id="inputInicio"
-
-              className="form-input inputTiny"
-
-              value={inicio}
-
-              onChange={(e) => setInicio(maskHora(e.target.value))}
-
-              placeholder="08:00"
-
-              maxLength={5}
-
-              inputMode="numeric"
-
-              style={{ width: 90 }}
-
-              required
-
-            />
-
-
-
-            {/* Fim * mask 99:99 */}
-
-            <label htmlFor="inputFim" className="form-label" style={{ fontWeight: 600 }}>
-
-              Fim <span style={{ color: '#C90000' }}>*</span>
-
-            </label>
-
-            <input
-
-              id="inputFim"
-
-              className="form-input inputTiny"
-
-              value={fim}
-
-              onChange={(e) => setFim(maskHora(e.target.value))}
-
-              placeholder="12:00"
-
-              maxLength={5}
-
-              inputMode="numeric"
-
-              style={{ width: 90 }}
-
-              required
-
-            />
-
-
-
-            {/* Dia Semana * */}
-
-            <label htmlFor="inputDiaSemana:diaSemana" className="form-label" style={{ fontWeight: 600 }}>
-
-              Dia Semana <span style={{ color: '#C90000' }}>*</span>
-
-            </label>
-
-            <select
-
-              id="inputDiaSemana:diaSemana"
-
-              className="form-input inputMedium"
-
-              value={diaSemanaId}
-
-              onChange={(e) => setDiaSemanaId(e.target.value)}
-
-              required
-
-            >
-
-              <option value="">-- Selecione --</option>
-
-              {diaSemanaOpts.map((o) => (
-
-                <option key={o.id} value={String(o.id)}>
-
-                  {o.nome}
-
-                </option>
-
-              ))}
-
-            </select>
-
-
-
-            {horasParaTrabalhar && (
-
-              <>
-
-                <span className="form-label" style={{ fontWeight: 600, color: '#6b7280' }}>
-
-                  Horas p/ trabalhar
-
-                </span>
-
-                <span style={{ color: '#374151' }}>{horasParaTrabalhar} h</span>
-
-              </>
-
-            )}
+          <div className="form-grid">
+
+              <label className="form-field">
+                  <span className="form-label">Id</span>
+                  <input id="inputId:id" className="form-input inputTiny" value={isEdit ? String(editingId) : ''} disabled placeholder="(novo)" style={{ width: 90, background: '#f3f4f6' }} />
+              </label>
+
+              <label className="form-field">
+                  <span className="form-label">Descrição <span style={{ color: '#C90000' }}>*</span></span>
+                  <input id="inputDescricao:descricao" className="form-input inputMedium" value={descricao} onChange={(e) => setDescricao(e.target.value)} maxLength={255} placeholder="Ex.: Manhã, Tarde, Noite…" required />
+              </label>
+
+              <label className="form-field">
+                  <span className="form-label">Início <span style={{ color: '#C90000' }}>*</span></span>
+                  <input id="inputInicio" className="form-input inputTiny" value={inicio} onChange={(e) => setInicio(maskHora(e.target.value))} placeholder="08:00" maxLength={5} inputMode="numeric" style={{ width: 90 }} required />
+              </label>
+
+              <label className="form-field">
+                  <span className="form-label">Fim <span style={{ color: '#C90000' }}>*</span></span>
+                  <input id="inputFim" className="form-input inputTiny" value={fim} onChange={(e) => setFim(maskHora(e.target.value))} placeholder="12:00" maxLength={5} inputMode="numeric" style={{ width: 90 }} required />
+              </label>
+
+              <label className="form-field">
+                  <span className="form-label">Dia Semana <span style={{ color: '#C90000' }}>*</span></span>
+                  <select id="inputDiaSemana:diaSemana" className="form-input inputMedium" value={diaSemanaId} onChange={(e) => setDiaSemanaId(e.target.value)} required>
+                      <option value="">-- Selecione --</option>
+                      {diaSemanaOpts.map((o) => (
+                          <option key={o.id} value={String(o.id)}>{o.nome}</option>
+                      ))}
+                  </select>
+              </label>
+
+              {horasParaTrabalhar && (
+                  <label className="form-field">
+                      <span className="form-label">Horas p/ trabalhar</span>
+                      <span style={{ color: '#374151' }}>{horasParaTrabalhar} h</span>
+                  </label>
+              )}
 
           </div>
 

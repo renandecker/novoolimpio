@@ -1462,18 +1462,6 @@ export default function CadastroUsuarioScreen() {
 
                     </label>
 
-                    <label className="form-field">
-
-                        <span className="form-label">Celular</span>
-
-                        <input className="form-input" value={form.celularReferencia}
-
-                            onChange={(e) => set('celularReferencia', formatPhone(e.target.value))}
-
-                            placeholder="(99) 99999-9999" />
-
-                    </label>
-
                     <label className="form-field" style={{gridColumn: 'span 2'}}>
 
                         <span className="form-label">Nome Referência 2</span>
@@ -1495,6 +1483,18 @@ export default function CadastroUsuarioScreen() {
                             onChange={(e) => set('telefoneReferencia2', formatPhone(e.target.value))}
 
                             placeholder="(99) 9999-9999" />
+
+                    </label>
+
+                    <label className="form-field">
+
+                        <span className="form-label">Celular</span>
+
+                        <input className="form-input" value={form.celularReferencia}
+
+                            onChange={(e) => set('celularReferencia', formatPhone(e.target.value))}
+
+                            placeholder="(99) 99999-9999" />
 
                     </label>
 
@@ -1848,13 +1848,13 @@ export default function CadastroUsuarioScreen() {
 
             </label>
 
-            <label className="form-field" style={{gridColumn: '1 / -1'}}>
+            <label className="form-field">
 
                 <span className="form-label">Observação</span>
 
                 <textarea className="form-input" placeholder="Observações" rows={4}
 
-                    style={{minHeight: '80px'}}
+                    style={{minHeight: '80px', gridColumn: 'span 3'}}
 
                     value={form.observacao}
 

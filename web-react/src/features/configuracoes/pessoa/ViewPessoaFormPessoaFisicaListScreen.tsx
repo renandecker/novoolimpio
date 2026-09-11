@@ -414,15 +414,15 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
             content:(
 
-                <div className="form-grid" style={{gridTemplateColumns:'1fr 1fr'}}>
+                <div className="form-grid">
 
                     <label className="form-field"><span className="form-label">CPF *</span><input className="form-input" placeholder="999.999.999-99" value={str(initialValues.cpf)} onChange={e=>setInitialValues(p=>({...p, cpf:e.target.value}))}/></label>
 
                     <label className="form-field"><span className="form-label">RG *</span><input className="form-input" placeholder="RG" value={str(initialValues.rg)} onChange={e=>setInitialValues(p=>({...p, rg:e.target.value}))}/></label>
 
-                    <label className="form-field" style={fullRow}><span className="form-label">Nome *</span><input className="form-input" placeholder="Nome completo" style={{width:'100%'}} value={str(initialValues.nome)} onChange={e=>setInitialValues(p=>({...p, nome:e.target.value}))}/></label>
+                    <label className="form-field"><span className="form-label">Nome *</span><input className="form-input" placeholder="Nome completo" style={{width:'100%'}} value={str(initialValues.nome)} onChange={e=>setInitialValues(p=>({...p, nome:e.target.value}))}/></label>
 
-                    <label className="form-field" style={fullRow}><span className="form-label">E-mail *</span><input className="form-input" type="email" placeholder="E-mail" style={{width:'100%'}} value={str(initialValues.email)} onChange={e=>setInitialValues(p=>({...p, email:e.target.value}))}/></label>
+                    <label className="form-field"><span className="form-label">E-mail *</span><input className="form-input" type="email" placeholder="E-mail" style={{width:'100%'}} value={str(initialValues.email)} onChange={e=>setInitialValues(p=>({...p, email:e.target.value}))}/></label>
 
                 </div>
 
@@ -438,21 +438,19 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
                 <div style={{display:'flex', gap:'24px', flexWrap:'wrap'}}>
 
-                    <div className="form-grid" style={{flex:'1 1 520px', gridTemplateColumns:'1fr 1fr'}}>
+                    <div className="form-grid" style={{flex:'1 1 520px'}}>
 
-                        <label className="form-field" style={fullRow}><span className="form-label">Nome Social *</span><input className="form-input" placeholder="Nome social" value={str(initialValues.nomeSocial)} onChange={e=>setInitialValues(p=>({...p, nomeSocial:e.target.value}))}/></label>
+                        <label className="form-field">
 
-                        <label className="form-field"><span className="form-label">Data Nascimento *</span><input className="form-input" type="date" value={str(initialValues.dataNascimento)} onChange={e=>setInitialValues(p=>({...p, dataNascimento:e.target.value}))}/></label>
+                            <span className="form-label">Nome Social *</span>
 
-                        <label className="form-field" style={fullRow}>
-
-                            <span className="form-label">Cidade Origem *</span>
-
-                            <AutoComplete placeholder="Digite 3 letras..." value={cidadeOrigemOpt} onChange={setCidadeOrigemOpt} fetchOptions={fetchCidade} fetchById={fetchCidadeById} />
+                            <input className="form-input" placeholder="Nome social" style={{gridColumn: 'span 3'}} value={str(initialValues.nomeSocial)} onChange={e=>setInitialValues(p=>({...p, nomeSocial:e.target.value}))}/>
 
                         </label>
 
-                        <label className="form-field" style={fullRow}>
+                        <label className="form-field"><span className="form-label">Data Nascimento *</span><input className="form-input" type="date" value={str(initialValues.dataNascimento)} onChange={e=>setInitialValues(p=>({...p, dataNascimento:e.target.value}))}/></label>
+
+                        <label className="form-field">
 
                             <span className="form-label">Gênero</span>
 
@@ -460,7 +458,19 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
                         </label>
 
-                        <label className="form-field" style={fullRow}>
+                        <label className="form-field">
+
+                            <span className="form-label">Cidade Origem *</span>
+
+                            <div style={{gridColumn: 'span 3'}}>
+
+                                <AutoComplete placeholder="Digite 3 letras..." value={cidadeOrigemOpt} onChange={setCidadeOrigemOpt} fetchOptions={fetchCidade} fetchById={fetchCidadeById} />
+
+                            </div>
+
+                        </label>
+
+                        <label className="form-field">
 
                             <span className="form-label">Etnia</span>
 
@@ -468,7 +478,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
                         </label>
 
-                        <label className="form-field" style={fullRow}>
+                        <label className="form-field">
 
                             <span className="form-label">Estado Civil *</span>
 
@@ -476,7 +486,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
                         </label>
 
-                        <label className="form-field" style={fullRow}>
+                        <label className="form-field">
 
                             <span className="form-label">Escolaridade *</span>
 
@@ -486,21 +496,21 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
                         {/* Referências - layout fiel ao xhtml: nome + telefone/celular na mesma linha */}
 
-                        <label className="form-field" style={fullRow}><span className="form-label">Nome Referência *</span><input className="form-input" placeholder="Nome da referência" value={str(initialValues.nomeReferencia)} onChange={e=>setInitialValues(p=>({...p, nomeReferencia:e.target.value}))}/></label>
+                        <label className="form-field"><span className="form-label">Nome Referência *</span><input className="form-input" placeholder="Nome da referência" value={str(initialValues.nomeReferencia)} onChange={e=>setInitialValues(p=>({...p, nomeReferencia:e.target.value}))}/></label>
 
                         <label className="form-field"><span className="form-label">Telefone Referência</span><input className="form-input" placeholder="99-99999999" value={str(initialValues.telefoneReferencia)} onChange={e=>setInitialValues(p=>({...p, telefoneReferencia:e.target.value}))}/></label>
 
-                        <label className="form-field"><span className="form-label">Celular Referência</span><input className="form-input" placeholder="99-999999999" value={str(initialValues.celularReferencia)} onChange={e=>setInitialValues(p=>({...p, celularReferencia:e.target.value}))}/></label>
-
-                        <label className="form-field" style={fullRow}><span className="form-label">Nome Referência 2</span><input className="form-input" placeholder="Nome da referência 2" value={str(initialValues.nomeReferencia2)} onChange={e=>setInitialValues(p=>({...p, nomeReferencia2:e.target.value}))}/></label>
+                        <label className="form-field"><span className="form-label">Nome Referência 2</span><input className="form-input" placeholder="Nome da referência 2" value={str(initialValues.nomeReferencia2)} onChange={e=>setInitialValues(p=>({...p, nomeReferencia2:e.target.value}))}/></label>
 
                         <label className="form-field"><span className="form-label">Telefone Referência 2</span><input className="form-input" placeholder="99-99999999" value={str(initialValues.telefoneReferencia2)} onChange={e=>setInitialValues(p=>({...p, telefoneReferencia2:e.target.value}))}/></label>
 
+                        <label className="form-field"><span className="form-label">Celular Referência</span><input className="form-input" placeholder="99-999999999" value={str(initialValues.celularReferencia)} onChange={e=>setInitialValues(p=>({...p, celularReferencia:e.target.value}))}/></label>
+
                         <label className="form-field"><span className="form-label">Celular Referência 2</span><input className="form-input" placeholder="99-999999999" value={str(initialValues.celularReferencia2)} onChange={e=>setInitialValues(p=>({...p, celularReferencia2:e.target.value}))}/></label>
 
-                        <label className="form-field" style={fullRow}><span className="form-label">Nome do Pai</span><input className="form-input" placeholder="Nome do pai" value={str(initialValues.nomePai)} onChange={e=>setInitialValues(p=>({...p, nomePai:e.target.value}))}/></label>
+                        <label className="form-field"><span className="form-label">Nome do Pai</span><input className="form-input" placeholder="Nome do pai" value={str(initialValues.nomePai)} onChange={e=>setInitialValues(p=>({...p, nomePai:e.target.value}))}/></label>
 
-                        <label className="form-field" style={fullRow}><span className="form-label">Nome da Mãe *</span><input className="form-input" placeholder="Nome da mãe" value={str(initialValues.nomeMae)} onChange={e=>setInitialValues(p=>({...p, nomeMae:e.target.value}))}/></label>
+                        <label className="form-field"><span className="form-label">Nome da Mãe *</span><input className="form-input" placeholder="Nome da mãe" value={str(initialValues.nomeMae)} onChange={e=>setInitialValues(p=>({...p, nomeMae:e.target.value}))}/></label>
 
                     </div>
 
@@ -532,7 +542,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
             content:(
 
-                <div className="form-grid" style={{gridTemplateColumns:'1fr 1fr'}}>
+                <div className="form-grid">
 
                     <label className="form-field"><span className="form-label">Telefone Residencial *</span><input className="form-input" placeholder="99-99999999" value={str(initialValues.telefoneResidencial)} onChange={e=>setInitialValues(p=>({...p, telefoneResidencial:e.target.value}))}/></label>
 
@@ -540,13 +550,13 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
                     <label className="form-field"><span className="form-label">Celular *</span><input className="form-input" placeholder="99-999999999" value={str(initialValues.celular)} onChange={e=>setInitialValues(p=>({...p, celular:e.target.value}))}/></label>
 
-                    <label className="form-field" style={fullRow}><span className="form-label">Facebook</span><input className="form-input" placeholder="facebook.com/usuario" value={str(initialValues.facebook)} onChange={e=>setInitialValues(p=>({...p, facebook:e.target.value}))}/></label>
+                    <label className="form-field"><span className="form-label">Facebook</span><input className="form-input" placeholder="facebook.com/usuario" value={str(initialValues.facebook)} onChange={e=>setInitialValues(p=>({...p, facebook:e.target.value}))}/></label>
 
-                    <label className="form-field" style={fullRow}><span className="form-label">Twitter</span><input className="form-input" placeholder="@usuario" value={str(initialValues.twitter)} onChange={e=>setInitialValues(p=>({...p, twitter:e.target.value}))}/></label>
+                    <label className="form-field"><span className="form-label">Twitter</span><input className="form-input" placeholder="@usuario" value={str(initialValues.twitter)} onChange={e=>setInitialValues(p=>({...p, twitter:e.target.value}))}/></label>
 
-                    <label className="form-field" style={fullRow}><span className="form-label">Google+</span><input className="form-input" placeholder="plus.google.com/usuario" value={str(initialValues.googlePlus)} onChange={e=>setInitialValues(p=>({...p, googlePlus:e.target.value}))}/></label>
+                    <label className="form-field"><span className="form-label">Google+</span><input className="form-input" placeholder="plus.google.com/usuario" value={str(initialValues.googlePlus)} onChange={e=>setInitialValues(p=>({...p, googlePlus:e.target.value}))}/></label>
 
-                    <label className="form-field" style={fullRow}><span className="form-label">Telegram</span><input className="form-input" placeholder="@usuario" value={str(initialValues.telegran)} onChange={e=>setInitialValues(p=>({...p, telegran:e.target.value}))}/></label>
+                    <label className="form-field"><span className="form-label">Telegram</span><input className="form-input" placeholder="@usuario" value={str(initialValues.telegran)} onChange={e=>setInitialValues(p=>({...p, telegran:e.target.value}))}/></label>
 
                 </div>
 
@@ -560,11 +570,11 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
             content:(
 
-                <div className="form-grid" style={{gridTemplateColumns:'1fr 1fr'}}>
+                <div className="form-grid">
 
                     <label className="form-field"><span className="form-label">CEP</span>
 
-                        <div style={{display:'flex', gap:'8px', flexWrap:'wrap'}}>
+                        <div style={{gridColumn: 'span 3', display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
 
                             <input className="form-input" placeholder="99.999-999" style={{width:'120px'}} maxLength={9} value={cep} onChange={e=>setCep(formatCep(e.target.value))} />
 
@@ -580,33 +590,45 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
                     </label>
 
-                    <label className="form-field" style={fullRow}>
+                    <label className="form-field"><span className="form-label">Número *</span><input className="form-input" placeholder="Número" value={numero} onChange={e=>setNumero(e.target.value)}/></label>
+
+                    <label className="form-field">
 
                         <span className="form-label">Cidade</span>
 
-                        <AutoComplete placeholder="Digite 3 letras..." value={cidadeOpt} onChange={setCidadeOpt} fetchOptions={fetchCidadesLog} />
+                        <div>
+
+                            <AutoComplete placeholder="Digite 3 letras..." value={cidadeOpt} onChange={setCidadeOpt} fetchOptions={fetchCidadesLog} />
+
+                        </div>
 
                     </label>
 
-                    <label className="form-field" style={fullRow}>
+                    <label className="form-field">
 
                         <span className="form-label">Bairro</span>
 
-                        <AutoComplete placeholder="Digite 3 letras..." value={bairroOpt} onChange={setBairroOpt} fetchOptions={fetchBairros} />
+                        <div>
+
+                            <AutoComplete placeholder="Digite 3 letras..." value={bairroOpt} onChange={setBairroOpt} fetchOptions={fetchBairros} />
+
+                        </div>
 
                     </label>
 
-                    <label className="form-field" style={fullRow}>
+                    <label className="form-field">
 
                         <span className="form-label">Logradouro</span>
 
-                        <AutoComplete placeholder="Digite 3 letras..." value={logradouroOpt} onChange={o=>{ setLogradouroOpt(o); if(o) setLogradouroId(o.id);}} fetchOptions={fetchLogradouros} />
+                        <div style={{gridColumn: 'span 3'}}>
+
+                            <AutoComplete placeholder="Digite 3 letras..." value={logradouroOpt} onChange={o=>{ setLogradouroOpt(o); if(o) setLogradouroId(o.id);}} fetchOptions={fetchLogradouros} />
+
+                        </div>
 
                     </label>
 
-                    <label className="form-field"><span className="form-label">Número *</span><input className="form-input" placeholder="Número" value={numero} onChange={e=>setNumero(e.target.value)}/></label>
-
-                    <label className="form-field" style={fullRowTop}><span className="form-label">Complemento</span><textarea className="form-input" placeholder="Complemento" rows={3} style={{minHeight:'80px'}} value={complemento} onChange={e=>setComplemento(e.target.value)}/></label>
+                    <label className="form-field"><span className="form-label">Complemento</span><textarea className="form-input" placeholder="Complemento" rows={3} style={{gridColumn: 'span 3', minHeight:'80px'}} value={complemento} onChange={e=>setComplemento(e.target.value)}/></label>
 
                 </div>
 
@@ -626,7 +648,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
                 <div className="form-grid">
 
-                    <label className="form-field" style={fullRowTop}><span className="form-label">Observação</span><textarea className="form-input" placeholder="Observações" rows={5} style={{width:'100%', minHeight:'100px'}} value={str(initialValues.observacao)} onChange={e=>setInitialValues(p=>({...p, observacao:e.target.value}))}/></label>
+                    <label className="form-field"><span className="form-label">Observação</span><textarea className="form-input" placeholder="Observações" rows={5} style={{gridColumn: 'span 3', minHeight:'100px'}} value={str(initialValues.observacao)} onChange={e=>setInitialValues(p=>({...p, observacao:e.target.value}))}/></label>
 
                 </div>
 

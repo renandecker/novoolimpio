@@ -212,59 +212,63 @@ export default function ViewTurnoTrabalhoFormTurnoTrabalhoListScreen() {
       <View style={styles.form}>
         <Text style={styles.formTitle}>Turno de Trabalho</Text>
 
-        <View style={styles.fieldRow}>
-            <Text style={styles.label}>Id</Text>
-            <TextInput style={[styles.input, styles.inputDisabled]} value={isEdit ? String(editingId) : ''} editable={false} placeholder="(novo)" />
+        <View style={styles.formRow}>
+            <View style={styles.fieldHalf}>
+                <Text style={styles.label}>Id</Text>
+                <TextInput style={[styles.input, styles.inputDisabled]} value={isEdit ? String(editingId) : ''} editable={false} placeholder="(novo)" />
+            </View>
+            <View style={styles.fieldHalf}>
+              <Text style={styles.label}>
+                Descrição <Text style={styles.req}>*</Text>
+              </Text>
+              <TextInput style={styles.input} value={descricao} onChangeText={setDescricao} maxLength={255} placeholder="Ex.: Manhã, Tarde..." />
+            </View>
         </View>
 
-        <View style={styles.fieldRow}>
-          <Text style={styles.label}>
-            Descrição <Text style={styles.req}>*</Text>
-          </Text>
-          <TextInput style={styles.input} value={descricao} onChangeText={setDescricao} maxLength={255} placeholder="Ex.: Manhã, Tarde..." />
+        <View style={styles.formRow}>
+            <View style={styles.fieldHalf}>
+              <Text style={styles.label}>
+                Início <Text style={styles.req}>*</Text> (99:99)
+              </Text>
+              <TextInput style={styles.input} value={inicio} onChangeText={(v) => setInicio(maskHora(v))} placeholder="08:00" maxLength={5} keyboardType="numeric" />
+            </View>
+            <View style={styles.fieldHalf}>
+              <Text style={styles.label}>
+                Fim <Text style={styles.req}>*</Text> (99:99)
+              </Text>
+              <TextInput style={styles.input} value={fim} onChangeText={(v) => setFim(maskHora(v))} placeholder="12:00" maxLength={5} keyboardType="numeric" />
+            </View>
         </View>
 
-        <View style={styles.fieldRow}>
-          <Text style={styles.label}>
-            Início <Text style={styles.req}>*</Text> (99:99)
-          </Text>
-          <TextInput style={styles.input} value={inicio} onChangeText={(v) => setInicio(maskHora(v))} placeholder="08:00" maxLength={5} keyboardType="numeric" />
-        </View>
-
-        <View style={styles.fieldRow}>
-          <Text style={styles.label}>
-            Fim <Text style={styles.req}>*</Text> (99:99)
-          </Text>
-          <TextInput style={styles.input} value={fim} onChangeText={(v) => setFim(maskHora(v))} placeholder="12:00" maxLength={5} keyboardType="numeric" />
-        </View>
-
-        <View style={styles.fieldRow}>
-          <Text style={styles.label}>
-            Dia Semana <Text style={styles.req}>*</Text>
-          </Text>
-          <View style={styles.fieldPickerGroup}>
-            <Pressable style={styles.picker} onPress={() => setDiaPickerOpen((o) => !o)}>
-              <Text style={styles.pickerText}>{diaLabel}</Text>
-              <Text style={styles.pickerArrow}>{diaPickerOpen ? '▲' : '▼'}</Text>
-            </Pressable>
-            {diaPickerOpen && (
-              <View style={styles.pickerList}>
-                {diaOpts.map((o) => (
-                  <Pressable
-                    key={o.id}
-                    style={[styles.pickerItem, String(o.id) === diaSemanaId && styles.pickerItemSelected]}
-                    onPress={() => {
-                      setDiaSemanaId(String(o.id));
-                      setDiaPickerOpen(false);
-                    }}
-                  >
-                    <Text style={styles.pickerItemText}>{o.nome}</Text>
-                  </Pressable>
-                ))}
-                {diaOpts.length === 0 && <Text style={styles.empty}>Nenhum dia cadastrado.</Text>}
+        <View style={styles.formRow}>
+            <View style={styles.fieldHalf}>
+              <Text style={styles.label}>
+                Dia Semana <Text style={styles.req}>*</Text>
+              </Text>
+              <View style={styles.fieldPickerGroup}>
+                <Pressable style={styles.picker} onPress={() => setDiaPickerOpen((o) => !o)}>
+                  <Text style={styles.pickerText}>{diaLabel}</Text>
+                  <Text style={styles.pickerArrow}>{diaPickerOpen ? '▲' : '▼'}</Text>
+                </Pressable>
+                {diaPickerOpen && (
+                  <View style={styles.pickerList}>
+                    {diaOpts.map((o) => (
+                      <Pressable
+                        key={o.id}
+                        style={[styles.pickerItem, String(o.id) === diaSemanaId && styles.pickerItemSelected]}
+                        onPress={() => {
+                          setDiaSemanaId(String(o.id));
+                          setDiaPickerOpen(false);
+                        }}
+                      >
+                        <Text style={styles.pickerItemText}>{o.nome}</Text>
+                      </Pressable>
+                    ))}
+                    {diaOpts.length === 0 && <Text style={styles.empty}>Nenhum dia cadastrado.</Text>}
+                  </View>
+                )}
               </View>
-            )}
-          </View>
+            </View>
         </View>
 
         <View style={{ marginTop: 8 }}>
@@ -298,9 +302,10 @@ const styles = StyleSheet.create({
   errorText: { color: '#8A1F1F' },
   form: { backgroundColor: '#fff', borderRadius: 8, padding: 12, borderWidth: 1, borderColor: '#e5e7eb', gap: 6 },
   formTitle: { fontWeight: '800', color: '#374151', marginBottom: 8, fontSize: 15 },
-  fieldRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  fieldPickerGroup: { flex: 1 },
-  label: { fontWeight: '700', color: '#374151', width: 150 },
+  formRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  fieldHalf: { width: '47%' },
+  fieldPickerGroup: { width: '100%' },
+  label: { fontWeight: '700', color: '#374151', marginBottom: 4 },
   req: { color: '#C90000' },
   input: { flex: 1, borderWidth: 1, borderColor: '#d1d5db', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 8, backgroundColor: '#fff' },
   inputDisabled: { backgroundColor: '#f3f4f6', color: '#6b7280' },

@@ -248,7 +248,6 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
     // Step validation functions
     const validateStep1 = useCallback(async (d: FechamentoCaixaData) => {
-        if (!d.usuarioId) return 'Usuário não identificado';
         if (!d.unidadeId) return 'Selecione a unidade';
         if (!d.caixaAberto) {
             if (!d.impressoraId) return 'Selecione a impressora';
@@ -892,46 +891,50 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
             {state.movSubTab === 'extra' && (
                 <View>
-                    <View style={styles.fieldGroup}>
+                    <View style={styles.fieldFull}>
                         <Text style={styles.fieldLabel}>Descrição / Histórico *</Text>
                         <TextInput style={styles.input} value={state.historico}
                                    onChangeText={(v) => setField('historico', v)}
                                    placeholder="Descrição da movimentação"/>
                     </View>
-                    <View style={styles.fieldGroup}>
-                        <Text style={styles.fieldLabel}>Valor *</Text>
-                        <TextInput style={styles.input} value={state.valorExtra}
-                                   onChangeText={(v) => setField('valorExtra', v)} keyboardType="numeric"/>
-                    </View>
-                    <AutoComplete
-                        label="Tipo de Movimento *"
-                        placeholder="Buscar movimento..."
-                        value={state.movimentoId ? {id: Number(state.movimentoId), label: ''} : null}
-                        onChange={(opt) => {
-                            setField('movimentoId', opt ? String(opt.id) : '');
-                            setMovimentoSearch(opt?.label || '');
-                        }}
-                        fetchOptions={fetchMovimento}
-                        minChars={2}
-                        style={styles.autoComplete}
-                    />
-                    <View style={styles.fieldGroup}>
-                        <Text style={styles.fieldLabel}>Forma de Pagamento</Text>
+                    <View style={styles.formRow}>
+                        <View style={styles.fieldHalf}>
+                            <Text style={styles.fieldLabel}>Valor *</Text>
+                            <TextInput style={styles.input} value={state.valorExtra}
+                                       onChangeText={(v) => setField('valorExtra', v)} keyboardType="numeric"/>
+                        </View>
                         <AutoComplete
-                            label=""
-                            placeholder="Tipo"
-                            value={state.tipoPagamentoExtra ? {
-                                id: TIPOS_PAGAMENTO.findIndex(t => t.value === state.tipoPagamentoExtra),
-                                label: state.tipoPagamentoExtra
-                            } : null}
+                            label="Tipo de Movimento *"
+                            placeholder="Buscar movimento..."
+                            value={state.movimentoId ? {id: Number(state.movimentoId), label: ''} : null}
                             onChange={(opt) => {
-                                const tp = TIPOS_PAGAMENTO[opt?.id ?? 0];
-                                if (tp) setField('tipoPagamentoExtra', tp.value);
+                                setField('movimentoId', opt ? String(opt.id) : '');
+                                setMovimentoSearch(opt?.label || '');
                             }}
-                            fetchOptions={async () => TIPOS_PAGAMENTO.map((t, i) => ({id: i, label: t.label}))}
-                            minChars={0}
-                            style={styles.autoCompleteSmall}
+                            fetchOptions={fetchMovimento}
+                            minChars={2}
+                            style={styles.fieldHalf}
                         />
+                    </View>
+                    <View style={styles.formRow}>
+                        <View style={styles.fieldHalf}>
+                            <Text style={styles.fieldLabel}>Forma de Pagamento</Text>
+                            <AutoComplete
+                                label=""
+                                placeholder="Tipo"
+                                value={state.tipoPagamentoExtra ? {
+                                    id: TIPOS_PAGAMENTO.findIndex(t => t.value === state.tipoPagamentoExtra),
+                                    label: state.tipoPagamentoExtra
+                                } : null}
+                                onChange={(opt) => {
+                                    const tp = TIPOS_PAGAMENTO[opt?.id ?? 0];
+                                    if (tp) setField('tipoPagamentoExtra', tp.value);
+                                }}
+                                fetchOptions={async () => TIPOS_PAGAMENTO.map((t, i) => ({id: i, label: t.label}))}
+                                minChars={0}
+                                style={styles.autoCompleteSmall}
+                            />
+                        </View>
                     </View>
                     <Pressable style={styles.primaryButton} onPress={registrarMovimentacaoExtra} disabled={loading}>
                         <Text style={styles.primaryButtonText}>Registrar Movimentação</Text>
@@ -1053,7 +1056,10 @@ const styles = StyleSheet.create({
     scrollView: {flex: 1},
     stepDescription: {color: '#666', marginBottom: 16, fontSize: 14},
     fieldRow: {flexDirection: 'row', gap: 12, flexWrap: 'wrap', marginBottom: 12},
-    fieldGroup: {flex: 1, minWidth: 160, marginBottom: 12},
+    formRow: {flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 12},
+    fieldGroup: {width: '47%', marginBottom: 12},
+    fieldHalf: {width: '47%'},
+    fieldFull: {width: '100%', marginBottom: 12},
     fieldLabel: {fontSize: 12, color: '#555', marginBottom: 4, fontWeight: '500'},
     input: {
         borderWidth: 1,
@@ -1063,8 +1069,8 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         fontSize: 14
     },
-    autoComplete: {flex: 1, minWidth: 160},
-    autoCompleteSmall: {minWidth: 140},
+    autoComplete: {width: '47%'},
+    autoCompleteSmall: {width: '47%'},
     caixaInfo: {
         padding: 16,
         backgroundColor: '#e8f5e9',

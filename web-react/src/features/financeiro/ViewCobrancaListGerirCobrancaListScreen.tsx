@@ -154,7 +154,7 @@ export default function ViewCobrancaListGerirCobrancaListScreen() {
         <div className="div_form">
           <div className="form-title">Gerir Cobrança</div>
           <div className="table_form">
-            <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '16px'}}>
+            <div style={{display: 'grid', gridTemplateColumns: 'minmax(120px,160px) 1fr minmax(120px,160px) 1fr', gap: '16px', marginBottom: '16px'}}>
               <div className="form-field">
                 <label className="form-label" htmlFor="unidade">Unidade</label>
                 <select
@@ -196,7 +196,6 @@ export default function ViewCobrancaListGerirCobrancaListScreen() {
                   placeholder="AAAA"
                   min={2000}
                   max={2100}
-                  style={{width: '100px'}}
                 />
               </div>
             </div>

@@ -304,78 +304,59 @@ export default function ViewEtapasCobrancaFormEtapasCobrancaListScreen() {
 
                 <div className="div_form" style={{width: '100%', maxWidth: 720, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 16}}>
 
-                    <div className="table_form" style={{display: 'grid', gridTemplateColumns: '180px 1fr', gap: '12px 16px', alignItems: 'center'}}>
+                    <div className="form-grid">
 
-                        <label htmlFor="inputId:id" className="form-label" style={{fontWeight: 600}}>Id</label>
-
-                        <input id="inputId:id" className="form-input inputTiny" value={isEdit ? String(editingId) : ''} disabled placeholder="(novo)" style={{width: 90, background: '#f3f4f6'}}/>
-
-
-
-                        <label htmlFor="inputDescricao:descricao" className="form-label" style={{fontWeight: 600}}>Descrição <span style={{color: '#C90000'}}>*</span></label>
-
-                        <input id="inputDescricao:descricao" className="form-input inputLarge" value={descricao} onChange={(e) => setDescricao(e.target.value)} maxLength={255} placeholder="Ex.: Documento de cobrança" required/>
-
-
-
-                        <label htmlFor="inputOrdem:ordem" className="form-label" style={{fontWeight: 600}}>Ordem <span style={{color: '#C90000'}}>*</span></label>
-
-                        <input id="inputOrdem:ordem" className="form-input inputTiny" value={ordem} onChange={(e) => handleOrdemChange(e.target.value)} inputMode="numeric" placeholder="Ex.: 1" style={{width: 120}} required/>
-
-
-
-                        <label className="form-label" style={{fontWeight: 600}}>Todos usuários</label>
-
-                        <label style={{display: 'flex', alignItems: 'center', gap: 8}}>
-
-                            <input type="checkbox" checked={usuario} onChange={(e) => setUsuario(e.target.checked)}/>
-
-                            {usuario ? 'Sim' : 'Não'}
-
+                        <label className="form-field">
+                            <span className="form-label">Id</span>
+                            <input id="inputId:id" className="form-input inputTiny" value={isEdit ? String(editingId) : ''} disabled placeholder="(novo)" style={{width: 90, background: '#f3f4f6'}}/>
                         </label>
 
-
-
-                        <label className="form-label" style={{fontWeight: 600}}>Todos perfis</label>
-
-                        <label style={{display: 'flex', alignItems: 'center', gap: 8}}>
-
-                            <input type="checkbox" checked={perfil} onChange={(e) => setPerfil(e.target.checked)}/>
-
-                            {perfil ? 'Sim' : 'Não'}
-
+                        <label className="form-field">
+                            <span className="form-label">Ordem <span style={{color: '#C90000'}}>*</span></span>
+                            <input id="inputOrdem:ordem" className="form-input inputTiny" value={ordem} onChange={(e) => handleOrdemChange(e.target.value)} inputMode="numeric" placeholder="Ex.: 1" style={{width: 120}} required/>
                         </label>
 
-
-
-                        <label className="form-label" style={{fontWeight: 600}}>Customizado</label>
-
-                        <label style={{display: 'flex', alignItems: 'center', gap: 8}}>
-
-                            <input type="checkbox" checked={customizado} onChange={(e) => setCustomizado(e.target.checked)}/>
-
-                            {customizado ? 'Sim' : 'Não'}
-
+                        <label className="form-field">
+                            <span className="form-label">Descrição <span style={{color: '#C90000'}}>*</span></span>
+                            <input id="inputDescricao:descricao" className="form-input inputLarge" value={descricao} onChange={(e) => setDescricao(e.target.value)} maxLength={255} placeholder="Ex.: Documento de cobrança" required style={{gridColumn: 'span 3'}}/>
                         </label>
 
+                        <label className="form-field">
+                            <span className="form-label">Todos usuários</span>
+                            <label style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                                <input type="checkbox" checked={usuario} onChange={(e) => setUsuario(e.target.checked)}/>
+                                {usuario ? 'Sim' : 'Não'}
+                            </label>
+                        </label>
 
+                        <label className="form-field">
+                            <span className="form-label">Todos perfis</span>
+                            <label style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                                <input type="checkbox" checked={perfil} onChange={(e) => setPerfil(e.target.checked)}/>
+                                {perfil ? 'Sim' : 'Não'}
+                            </label>
+                        </label>
+
+                        <label className="form-field">
+                            <span className="form-label">Customizado</span>
+                            <label style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                                <input type="checkbox" checked={customizado} onChange={(e) => setCustomizado(e.target.checked)}/>
+                                {customizado ? 'Sim' : 'Não'}
+                            </label>
+                        </label>
 
                         {customizado && (
+                            <label className="form-field">
+                                <span className="form-label">Campo de regras (SQL)</span>
+                                <textarea id="inputcampoCustomizado" className="form-input" rows={5} value={campoCustomizado} onChange={(e) => setCampoCustomizado(e.target.value)} placeholder="SELECT ..." style={{gridColumn: 'span 3'}}/>
+                            </label>
+                        )}
 
-                            <>
-
-                                <label htmlFor="inputcampoCustomizado" className="form-label" style={{fontWeight: 600, alignSelf: 'start', paddingTop: 6}}>Campo de regras (SQL)</label>
-
-                                <textarea id="inputcampoCustomizado" className="form-input" rows={5} value={campoCustomizado} onChange={(e) => setCampoCustomizado(e.target.value)} placeholder="SELECT ..."/>
-
-
-
-                                <label htmlFor="inputcampoDetalhes" className="form-label" style={{fontWeight: 600, alignSelf: 'start', paddingTop: 6}}>Descrição na coluna detalhes (SQL)</label>
-
-                                <textarea id="inputcampoDetalhes" className="form-input" rows={5} value={campoDetalhes} onChange={(e) => setCampoDetalhes(e.target.value)} placeholder="SELECT ..."/>
-
-                            </>
-
+                        {customizado && (
+                            <label className="form-field">
+                                <span className="form-label">Descrição na coluna detalhes (SQL)</span>
+                                <textarea id="inputcampoDetalhes" className="form-input" rows={5} value={campoDetalhes} onChange={(e) => setCampoDetalhes(e.target.value)} placeholder="SELECT ..." style={{gridColumn: 'span 3'}}/>
+                            </label>
                         )}
 
                     </div>
@@ -386,37 +367,29 @@ export default function ViewEtapasCobrancaFormEtapasCobrancaListScreen() {
 
                         <div className="form-title" style={{fontWeight: 600, marginBottom: 10}}>Documento</div>
 
-                        <div style={{display: 'grid', gridTemplateColumns: '180px 1fr', gap: '12px 16px', alignItems: 'center'}}>
+                        <div className="form-grid">
 
-                            <label className="form-label" style={{fontWeight: 600}}>Tipo de exportação</label>
+                            <label className="form-field">
+                                <span className="form-label">Tipo de exportação</span>
+                                <div style={{display: 'flex', gap: 16, gridColumn: 'span 3'}}>
+                                    {TIPOS_DOCUMENTO.map((tipo) => (
+                                        <label key={tipo.value} style={{display: 'flex', alignItems: 'center', gap: 6}}>
+                                            <input type="radio" name="tipoModeloDocumento" value={tipo.value} checked={tipoModeloDocumento === tipo.value} onChange={() => setTipoModeloDocumento(tipo.value)}/>
+                                            {tipo.label}
+                                        </label>
+                                    ))}
+                                </div>
+                            </label>
 
-                            <div style={{display: 'flex', gap: 16}}>
+                            <label className="form-field">
+                                <span className="form-label">Nome documento</span>
+                                <input id="inputNomeDocumento" className="form-input" value={nomeDocumento} onChange={(e) => setNomeDocumento(e.target.value)} placeholder="Ex.: cobranca.docx"/>
+                            </label>
 
-                                {TIPOS_DOCUMENTO.map((tipo) => (
-
-                                    <label key={tipo.value} style={{display: 'flex', alignItems: 'center', gap: 6}}>
-
-                                        <input type="radio" name="tipoModeloDocumento" value={tipo.value} checked={tipoModeloDocumento === tipo.value} onChange={() => setTipoModeloDocumento(tipo.value)}/>
-
-                                        {tipo.label}
-
-                                    </label>
-
-                                ))}
-
-                            </div>
-
-
-
-                            <label htmlFor="inputNomeDocumento" className="form-label" style={{fontWeight: 600}}>Nome documento</label>
-
-                            <input id="inputNomeDocumento" className="form-input" value={nomeDocumento} onChange={(e) => setNomeDocumento(e.target.value)} placeholder="Ex.: cobranca.docx"/>
-
-
-
-                            <label htmlFor="inputLocalDocumento" className="form-label" style={{fontWeight: 600}}>Local documento</label>
-
-                            <input id="inputLocalDocumento" className="form-input" value={localDocumento} onChange={(e) => setLocalDocumento(e.target.value)} placeholder="Caminho/URL do documento"/>
+                            <label className="form-field">
+                                <span className="form-label">Local documento</span>
+                                <input id="inputLocalDocumento" className="form-input" value={localDocumento} onChange={(e) => setLocalDocumento(e.target.value)} placeholder="Caminho/URL do documento"/>
+                            </label>
 
                         </div>
 

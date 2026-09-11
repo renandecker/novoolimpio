@@ -85,7 +85,6 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
             fields: [
                 {name: 'nomeSocial', label: 'Nome Social *', required: true},
                 {name: 'dataNascimento', label: 'Data Nascimento *', type: 'date', required: true},
-                {name: 'cidadeOrigem', label: 'Cidade Origem *', type: 'autoComplete', autoCompleteSource:'/api/basico/cidade/autoComplete', required: true},
                 {name: 'generoId', label: 'Gênero', type: 'select', options: [{value:'1',label:'Masculino'},{value:'2',label:'Feminino'},{value:'3',label:'Outro'}]},
                 {name: 'etniaId', label: 'Etnia', type: 'select', options: [{value:'1',label:'Branca'},{value:'2',label:'Preta'},{value:'3',label:'Parda'},{value:'4',label:'Amarela'},{value:'5',label:'Indígena'}]},
                 {name: 'estadoCivilId', label: 'Estado Civil *', type: 'autoComplete', autoCompleteSource:'/api/basico/estado-civil/autoComplete', required: true},
@@ -99,6 +98,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                 {name: 'nomePai', label: 'Nome do Pai'},
                 {name: 'nomeMae', label: 'Nome da Mãe *', required: true},
                 {name: 'foto', label: 'Foto', type: 'text', placeholder: 'Capturar foto / upload'},
+                {name: 'cidadeOrigem', label: 'Cidade Origem *', type: 'autoComplete', autoCompleteSource:'/api/basico/cidade/autoComplete', required: true},
             ],
         },
         {
@@ -107,8 +107,8 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
             // separado da PJ: PJ usa Telefone/Celular/Fax ; PF usa Residencial/Comercial/Celular + redes sociais
             fields: [
                 {name: 'telefoneResidencial', label: 'Telefone Residencial *', type: 'mask', mask: '99-99999999', required: true},
-                {name: 'telefoneComercial', label: 'Telefone Comercial', type: 'mask', mask: '99-99999999'},
                 {name: 'celular', label: 'Celular *', type: 'mask', mask: '99-999999999', required: true},
+                {name: 'telefoneComercial', label: 'Telefone Comercial', type: 'mask', mask: '99-99999999'},
                 {name: 'facebook', label: 'Facebook'},
                 {name: 'twitter', label: 'Twitter'},
                 {name: 'googlePlus', label: 'Google+'},
@@ -125,7 +125,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                 {name: 'bairro', label: 'Bairro', type: 'autoComplete', autoCompleteSource:'/api/basico/bairro/autoComplete', required: true},
                 {name: 'logradouro', label: 'Logradouro', type: 'autoComplete', autoCompleteSource:'/api/basico/logradouro/autoComplete', required: true},
                 {name: 'numero', label: 'Número *', required: true},
-                {name: 'complemento', label: 'Complemento', type: 'textarea'},
+                {name: 'complemento', label: 'Complemento', type: 'textarea', full: true},
             ],
         },
 
@@ -133,7 +133,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
             key: 'outros',
             label: 'Outros',
             fields: [
-                {name: 'observacao', label: 'Observação', type: 'textarea'},
+                {name: 'observacao', label: 'Observação', type: 'textarea', full: true},
             ],
         },
     ];

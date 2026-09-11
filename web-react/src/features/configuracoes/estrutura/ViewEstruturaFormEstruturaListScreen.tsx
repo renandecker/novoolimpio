@@ -129,8 +129,8 @@ export default function ViewEstruturaFormEstruturaListScreen() {
                     updateFields({entity: {...data.entity, ...estrutura}});
                     const [cols, dims, meds, geos] = await Promise.all([
                         loadColunas(),
-                        loadDimensoes(editingId),
-                        loadMedidas(editingId),
+                        loadDimensoes({estruturaId: editingId}),
+                        loadMedidas({estruturaId: editingId}),
                         loadGeoreferencias(),
                     ]);
                     const colsDaEstrutura = (cols ?? []).filter((c: any) => c.estruturaId === editingId);
@@ -280,12 +280,12 @@ export default function ViewEstruturaFormEstruturaListScreen() {
         key: 'principal',
         label: 'Principal',
         fields: [
-            {name: 'nome', label: 'Nome *', required: true, span: 3},
-            {name: 'tabela', label: 'Tabela', span: 3},
-            {name: 'condicao', label: 'Condição', type: 'textarea', span: 4},
-            {name: 'nomeBanco', label: 'Banco', span: 2},
-            {name: 'coordenada', label: 'Coordenada', span: 2},
-            {name: 'zoom', label: 'Zoom', type: 'number', min: 0, span: 2},
+            {name: 'nome', label: 'Nome *', required: true},
+            {name: 'tabela', label: 'Tabela'},
+            {name: 'condicao', label: 'Condição', type: 'textarea'},
+            {name: 'nomeBanco', label: 'Banco'},
+            {name: 'coordenada', label: 'Coordenada'},
+            {name: 'zoom', label: 'Zoom', type: 'number', min: 0},
         ],
     };
 

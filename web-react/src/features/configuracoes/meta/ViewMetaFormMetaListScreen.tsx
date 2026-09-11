@@ -19,8 +19,8 @@ const str = (v: unknown): string => (v === null || v === undefined ? '' : String
 const num = (v: string): number | null => (v !== '' && !isNaN(Number(v)) ? Number(v) : null);
 const bool = (v: unknown): boolean => v === true || v === 'true';
 
-const OPERADOR_OPTIONS: ApiItem[] = [];
-const OPERACIONAL_OPTIONS: ApiItem[] = [];
+const OPERADOR_OPTIONS: Record<string, unknown>[] = [];
+const OPERACIONAL_OPTIONS: Record<string, unknown>[] = [];
 
 export default function ViewMetaFormMetaListScreen() {
     const navigate = useNavigate();
@@ -48,7 +48,7 @@ export default function ViewMetaFormMetaListScreen() {
                 {name: 'dataFinal', label: 'Data Final', type: 'date', span: 1},
                 {name: 'equipe', label: 'Tipo Seleção', type: 'select', options: [{value: 'true', label: 'Equipe'}, {value: 'false', label: 'Operador'}], span: 2},
                 {name: 'operador', label: 'Operador', type: 'select', options: OPERADOR_OPTIONS.map(o => ({value: str(o.id), label: str(o.login)})), span: 2},
-                {name: 'operacional', label: 'Equipe', type: 'select', options: OPERACIONAL_OPTIONS.map(o => ({value: str(o.id), label: `${str(o.pacote?.id)} - ${str(o.pacote?.descricao)}`})), span: 2},
+                {name: 'operacional', label: 'Equipe', type: 'select', options: OPERACIONAL_OPTIONS.map(o => ({value: str(o.id), label: `${str((o.pacote as Record<string, unknown>)?.id)} - ${str((o.pacote as Record<string, unknown>)?.descricao)}`})), span: 2},
             ],
         },
     ];
@@ -66,15 +66,15 @@ export default function ViewMetaFormMetaListScreen() {
                 setEquipe(meta.equipe === true);
                 setInitialValues({
                     id: str(meta.id),
-                    coordenador: str(meta.usuario?.login ?? meta.operador?.login),
+                    coordenador: str((meta.usuario as Record<string, unknown>)?.login ?? (meta.operador as Record<string, unknown>)?.login),
                     meta: num(str(meta.meta)),
                     periodo: meta.periodo === true,
                     data: toDateInput(meta.data),
                     dataInicial: toDateInput(meta.dataInicial),
                     dataFinal: toDateInput(meta.dataFinal),
                     equipe: meta.equipe === true,
-                    operador: str(meta.operador?.id),
-                    operacional: str(meta.operacional?.id),
+                    operador: str((meta.operador as Record<string, unknown>)?.id),
+                    operacional: str((meta.operacional as Record<string, unknown>)?.id),
                 });
             } catch (erro) {
                 console.error('Erro ao carregar meta:', erro);

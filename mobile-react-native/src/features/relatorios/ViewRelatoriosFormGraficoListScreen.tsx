@@ -235,10 +235,10 @@ export default function ViewRelatoriosFormGraficoListScreen() {
                     label: 'Definição',
                     fields: [
                         {name: 'nome', label: 'Nome', required: true},
-                        {name: 'estruturaId', label: 'Estrutura', type: 'autoComplete', autoCompleteSource: ESTRUTURA_SOURCE, autoCompleteSearchKeys: ESTRUTURA_SEARCH, autoCompleteColumns: ESTRUTURA_COLUMNS},
                         {name: 'tipo', label: 'Tipo Gráfico', type: 'select', options: TIPO_GRAFICO_OPTIONS, required: true, onChange: handleTipoGraficoChange},
                         {name: 'ordemGrafico', label: 'Ordenação', type: 'select', options: TIPO_ORDEM_OPTIONS},
                         {name: 'limite', label: 'Limite Gráfico', type: 'number', min: 1, max: 50, help: 'Máximo 50 registros'},
+                        {name: 'estruturaId', label: 'Estrutura', type: 'autoComplete', autoCompleteSource: ESTRUTURA_SOURCE, autoCompleteSearchKeys: ESTRUTURA_SEARCH, autoCompleteColumns: ESTRUTURA_COLUMNS},
                         {name: 'tipoEixo', label: 'Tipo Eixo', type: 'select', options: [
                             {value: '0', label: 'Simples'},
                             {value: '1', label: 'Multi Eixo'},

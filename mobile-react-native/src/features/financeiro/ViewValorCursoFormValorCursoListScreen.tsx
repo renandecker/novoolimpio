@@ -292,26 +292,48 @@ export default function ViewValorCursoFormValorCursoListScreen({route, navigatio
                 {activeTab==='valorCurso' && (
                     <View style={s.card}>
                         <Text style={s.sectionTitle}>Dados Gerais</Text>
-                        <SelectField label="Currículo" required value={f.curriculoId} onChange={v=>upd('curriculoId',v)}
-                            options={curriculos.map((c)=>({value:String(itemId(c)), label:curriculoLabel(c)}))} />
-                        <Field label="Data" required value={f.data} onChange={v=>upd('data',v)} placeholder="AAAA-MM-DD" />
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}>
+                                <SelectField label="Currículo" required value={f.curriculoId} onChange={v=>upd('curriculoId',v)}
+                                    options={curriculos.map((c)=>({value:String(itemId(c)), label:curriculoLabel(c)}))} />
+                            </View>
+                            <View style={s.fieldHalf}>
+                                <Field label="Data" required value={f.data} onChange={v=>upd('data',v)} placeholder="AAAA-MM-DD" />
+                            </View>
+                        </View>
                         <Toggle label="Valor por Hora" value={valorHora} onChange={setValorHora}/>
-                        <Field label={valorHora ? 'Valor Hora' : 'Valor Curso'} required={!valorHora} value={f.valor} onChange={v=>upd('valor',v)} placeholder="0,00" keyboardType="decimal-pad" />
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}>
+                                <Field label={valorHora ? 'Valor Hora' : 'Valor Curso'} required={!valorHora} value={f.valor} onChange={v=>upd('valor',v)} placeholder="0,00" keyboardType="decimal-pad" />
+                            </View>
+                        </View>
                         <Text style={s.sectionTitle}>Cobrança</Text>
-                        <Field label="Juros (%)" value={f.juros} onChange={v=>upd('juros',v)} placeholder="0,00" keyboardType="decimal-pad" />
-                        <Field label="Multa (%)" value={f.multa} onChange={v=>upd('multa',v)} placeholder="0,00" keyboardType="decimal-pad" />
-                        <Field label="Desconto Carnê" value={f.descontoCarne} onChange={v=>upd('descontoCarne',v)} placeholder="0,00" keyboardType="decimal-pad" />
-                        <Field label="Valor Desconto Aluno" value={f.valorDescontoAluno} onChange={v=>upd('valorDescontoAluno',v)} placeholder="0,00" keyboardType="decimal-pad" />
-                        <Field label="Dias SPC" value={f.diasSpc} onChange={v=>upd('diasSpc',v)} placeholder="0" keyboardType="numeric" />
-                        <Field label="Dias Tolerância Multa" value={f.diasToleranciaMulta} onChange={v=>upd('diasToleranciaMulta',v)} placeholder="0" keyboardType="numeric" />
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Juros (%)" value={f.juros} onChange={v=>upd('juros',v)} placeholder="0,00" keyboardType="decimal-pad" /></View>
+                            <View style={s.fieldHalf}><Field label="Multa (%)" value={f.multa} onChange={v=>upd('multa',v)} placeholder="0,00" keyboardType="decimal-pad" /></View>
+                        </View>
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Desconto Carnê" value={f.descontoCarne} onChange={v=>upd('descontoCarne',v)} placeholder="0,00" keyboardType="decimal-pad" /></View>
+                            <View style={s.fieldHalf}><Field label="Valor Desconto Aluno" value={f.valorDescontoAluno} onChange={v=>upd('valorDescontoAluno',v)} placeholder="0,00" keyboardType="decimal-pad" /></View>
+                        </View>
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Dias SPC" value={f.diasSpc} onChange={v=>upd('diasSpc',v)} placeholder="0" keyboardType="numeric" /></View>
+                            <View style={s.fieldHalf}><Field label="Dias Tolerância Multa" value={f.diasToleranciaMulta} onChange={v=>upd('diasToleranciaMulta',v)} placeholder="0" keyboardType="numeric" /></View>
+                        </View>
                         <Toggle label="Cobra Rematrícula" value={cobraRematricula} onChange={setCobraRematricula}/>
                         <Text style={s.sectionTitle}>Parcelamento</Text>
-                        <Field label="% Desc. Juros/Multa" value={f.percDescJurMul} onChange={v=>upd('percDescJurMul',v)} placeholder="0,00" keyboardType="decimal-pad" />
-                        <Field label="% Desc. Valor" value={f.percDescValor} onChange={v=>upd('percDescValor',v)} placeholder="0,00" keyboardType="decimal-pad" />
-                        <Field label="% Valor Mín. Entrada" value={f.percValorMinEntrada} onChange={v=>upd('percValorMinEntrada',v)} placeholder="0,00" keyboardType="decimal-pad" />
-                        <Field label="Prazo Parc. Entrada" value={f.prazoParcEntrada} onChange={v=>upd('prazoParcEntrada',v)} placeholder="0" keyboardType="numeric" />
-                        <Field label="Prazo Parc. Segunda" value={f.prazoParcSegunda} onChange={v=>upd('prazoParcSegunda',v)} placeholder="0" keyboardType="numeric" />
-                        <Field label="Qtde Parcelas" value={f.qtdeParcelas} onChange={v=>upd('qtdeParcelas',v)} placeholder="0" keyboardType="decimal-pad" />
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="% Desc. Juros/Multa" value={f.percDescJurMul} onChange={v=>upd('percDescJurMul',v)} placeholder="0,00" keyboardType="decimal-pad" /></View>
+                            <View style={s.fieldHalf}><Field label="% Desc. Valor" value={f.percDescValor} onChange={v=>upd('percDescValor',v)} placeholder="0,00" keyboardType="decimal-pad" /></View>
+                        </View>
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="% Valor Mín. Entrada" value={f.percValorMinEntrada} onChange={v=>upd('percValorMinEntrada',v)} placeholder="0,00" keyboardType="decimal-pad" /></View>
+                            <View style={s.fieldHalf}><Field label="Prazo Parc. Entrada" value={f.prazoParcEntrada} onChange={v=>upd('prazoParcEntrada',v)} placeholder="0" keyboardType="numeric" /></View>
+                        </View>
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Prazo Parc. Segunda" value={f.prazoParcSegunda} onChange={v=>upd('prazoParcSegunda',v)} placeholder="0" keyboardType="numeric" /></View>
+                            <View style={s.fieldHalf}><Field label="Qtde Parcelas" value={f.qtdeParcelas} onChange={v=>upd('qtdeParcelas',v)} placeholder="0" keyboardType="decimal-pad" /></View>
+                        </View>
                     </View>
                 )}
 
@@ -375,11 +397,14 @@ const s=StyleSheet.create({
     content:{flex:1},
     card:{backgroundColor:Colors.bgSecondary, borderRadius:BorderRadius.lg, padding:Spacing.lg, gap:Spacing.md, ...Shadows.small},
     sectionTitle:{fontSize:13, fontWeight:Typography.weights.bold, color:Colors.textPrimary, textTransform:'uppercase', letterSpacing:0.5, borderTopWidth:1, borderTopColor:Colors.borderLight, paddingTop:10, marginTop:4},
-    field:{flexDirection:'row', alignItems:'center', gap:Spacing.sm},
-    label:{width:130, fontSize:Typography.sizes.sm, fontWeight:Typography.weights.semibold, color:Colors.textPrimary},
+    field:{flexDirection:'column', gap:Spacing.xs},
+    formRow:{flexDirection:'row', flexWrap:'wrap', gap:Spacing.md},
+    fieldHalf:{width:'47%'},
+    fieldFull:{width:'100%'},
+    label:{fontSize:Typography.sizes.sm, fontWeight:Typography.weights.semibold, color:Colors.textPrimary},
     req:{color:Colors.error},
-    input:{flex:1, height:44, borderWidth:1, borderColor:Colors.borderMedium, borderRadius:BorderRadius.md, paddingHorizontal:12, fontSize:Typography.sizes.md, color:Colors.textPrimary, backgroundColor:Colors.bgPrimary},
-    selectGroup:{flex:1, gap:Spacing.xs},
+    input:{height:44, borderWidth:1, borderColor:Colors.borderMedium, borderRadius:BorderRadius.md, paddingHorizontal:12, fontSize:Typography.sizes.md, color:Colors.textPrimary, backgroundColor:Colors.bgPrimary},
+    selectGroup:{gap:Spacing.xs},
     selectBox:{height:44, borderWidth:1, borderColor:Colors.borderMedium, borderRadius:BorderRadius.md, paddingHorizontal:12, flexDirection:'row', alignItems:'center', justifyContent:'space-between', backgroundColor:Colors.bgPrimary},
     selectText:{fontSize:Typography.sizes.md, color:Colors.textPrimary},
     selectArrow:{fontSize:12, color:Colors.textLight},

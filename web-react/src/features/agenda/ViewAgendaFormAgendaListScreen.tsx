@@ -255,7 +255,7 @@ export default function ViewAgendaFormAgendaListScreen() {
                             </label>
                             <label className="form-field">
                                 <span className="form-label">Descrição *</span>
-                                <input className="form-input" maxLength={255} placeholder="Descrição" style={{gridColumn: 'span 2'}}
+                                <input className="form-input" maxLength={255} placeholder="Descrição"
                                        value={form.descricao} onChange={(e) => set('descricao', e.target.value)}/>
                             </label>
                             <label className="form-field">

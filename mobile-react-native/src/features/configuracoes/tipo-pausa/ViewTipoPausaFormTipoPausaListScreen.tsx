@@ -90,17 +90,21 @@ export default function ViewTipoPausaFormTipoPausaListScreen() {
 
       <View style={styles.divForm}>
         <View style={styles.tableForm}>
-          <View style={styles.row}>
-            <Text style={styles.label}>Id</Text>
-            <TextInput style={[styles.input, styles.inputTiny]} value={editingId != null ? String(editingId) : ''} editable={false} placeholder="(novo)" />
+          <View style={styles.formRow}>
+            <View style={styles.fieldHalf}>
+              <Text style={styles.label}>Id</Text>
+              <TextInput style={[styles.input, styles.inputTiny]} value={editingId != null ? String(editingId) : ''} editable={false} placeholder="(novo)" />
+            </View>
+            <View style={styles.fieldHalf}>
+              <Text style={styles.label}>Descrição <Text style={styles.req}>*</Text></Text>
+              <TextInput style={styles.input} value={descricao} onChangeText={setDescricao} maxLength={255} placeholder="Ex.: Almoço" />
+            </View>
           </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Descrição <Text style={styles.req}>*</Text></Text>
-            <TextInput style={[styles.input, styles.inputLarge]} value={descricao} onChangeText={setDescricao} maxLength={255} placeholder="Ex.: Almoço" />
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Tempo pausa (segundos) <Text style={styles.req}>*</Text></Text>
-            <TextInput style={styles.input} value={tempo} onChangeText={handleTempo} keyboardType="number-pad" placeholder="900" />
+          <View style={styles.formRow}>
+            <View style={styles.fieldHalf}>
+              <Text style={styles.label}>Tempo pausa (segundos) <Text style={styles.req}>*</Text></Text>
+              <TextInput style={styles.input} value={tempo} onChangeText={handleTempo} keyboardType="number-pad" placeholder="900" />
+            </View>
           </View>
           <Text style={styles.hint}>Descrição 3-255 caracteres · Tempo inteiro obrigatório (Insira o tempo intervalo)</Text>
         </View>
@@ -132,8 +136,9 @@ const styles = StyleSheet.create({
   okText: { color: '#1E4620' },
   divForm: { backgroundColor: Colors.bgSecondary, borderWidth: 1, borderColor: Colors.borderLight, borderRadius: 12, padding: 16, ...Shadows.medium },
   tableForm: { gap: 12 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  label: { width: 120, fontSize: Typography.sizes.base, fontWeight: Typography.weights.semibold, color: Colors.textSecondary },
+  formRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: Spacing.sm },
+  fieldHalf: { width: '47%' },
+  label: { fontSize: Typography.sizes.base, fontWeight: Typography.weights.semibold, color: Colors.textSecondary, marginBottom: Spacing.xs },
   req: { color: '#C90000' },
   input: { flex: 1, borderWidth: 1, borderColor: Colors.formInputBorder, borderRadius: BorderRadius.lg, padding: Spacing.md, fontSize: Typography.sizes.lg, color: Colors.textPrimary, backgroundColor: Colors.bgSecondary },
   inputTiny: { flex: 0, width: 90, backgroundColor: '#f3f4f6' },

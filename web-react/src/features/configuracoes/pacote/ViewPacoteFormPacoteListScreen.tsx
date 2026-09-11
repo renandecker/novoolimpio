@@ -317,7 +317,7 @@ export default function ViewPacoteFormPacoteListScreen() {
             label: 'Informações',
             content: (
                 <div className="form-grid" style={{padding: 16}}>
-                    <label className="form-field" style={{gridColumn: 'span 2'}}>
+                    <label className="form-field">
                         <span className="form-label">Ação de Campanha *</span>
                         <select className="form-input form-select"
                                 value={str(data.entity.acaoDeCampanhaId)}
@@ -331,7 +331,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                         </select>
                     </label>
 
-                    <label className="form-field" style={{gridColumn: 'span 2'}}>
+                    <label className="form-field">
                         <span className="form-label">Unidade *</span>
                         <select className="form-input form-select"
                                 value={str(data.entity.unidadeId)}
@@ -345,7 +345,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                         </select>
                     </label>
 
-                    <label className="form-field" style={{gridColumn: 'span 2'}}>
+                    <label className="form-field">
                         <span className="form-label">Quantidade de Prospectos *</span>
                         <input className="form-input" type="number" min={1}
                                value={str(data.entity.numeroProspectos)}
@@ -364,7 +364,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                         label: 'Ação',
                         content: (
                             <div className="form-grid" style={{padding: 16}}>
-                                <label className="form-field" style={{gridColumn: 'span 2'}}>
+                                <label className="form-field">
                                     <span className="form-label">Filtrar por Ação</span>
                                     <select className="form-input form-select"
                                             value={str(data.filtrosAcao[0]?.id ?? '')}
@@ -429,7 +429,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                         label: 'Prospecto',
                         content: (
                             <div className="form-grid" style={{padding: 16}}>
-                                <div className="form-field" style={{gridColumn: 'span 2'}}>
+                                <div className="form-field">
                                     <span className="form-label">Filtrar por Nota do Prospecto</span>
                                     <select className="form-input form-select"
                                             value={str(data.filtrosCampo.find(f => f.campo?.nome === 'nota')?.operacao ?? 'EQ')}
@@ -442,7 +442,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                                         {OPERACOES.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                                     </select>
                                 </div>
-                                <div className="form-field" style={{gridColumn: 'span 2'}}>
+                                <div className="form-field">
                                     <span className="form-label">Nota</span>
                                     <input className="form-input" type="number" min={0} max={10} step={1}
                                            value={str(data.filtrosCampo.find(f => f.campo?.nome === 'nota')?.valor ?? '')}
@@ -461,7 +461,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                         label: 'Campos',
                         content: (
                             <div className="form-grid" style={{padding: 16}}>
-                                <label className="form-field" style={{gridColumn: 'span 2'}}>
+                                <label className="form-field">
                                     <span className="form-label">Campo *</span>
                                     <select className="form-input form-select"
                                             value={str(data.filtrosCampo[data.filtrosCampo.length - 1]?.campo?.id ?? '')}
@@ -483,7 +483,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                                     </select>
                                 </label>
 
-                                <label className="form-field" style={{gridColumn: 'span 2'}}>
+                                <label className="form-field">
                                     <span className="form-label">Operação *</span>
                                     <select className="form-input form-select"
                                             value={str(data.filtrosCampo[data.filtrosCampo.length - 1]?.operacao ?? 'EQ')}
@@ -498,7 +498,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                                     </select>
                                 </label>
 
-                                <label className="form-field" style={{gridColumn: 'span 2'}}>
+                                <label className="form-field">
                                     <span className="form-label">Valor *</span>
                                     <input className="form-input"
                                            value={str(data.filtrosCampo[data.filtrosCampo.length - 1]?.valor ?? '')}
@@ -550,7 +550,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                         label: 'Ligação',
                         content: (
                             <div className="form-grid" style={{padding: 16}}>
-                                <label className="form-field" style={{gridColumn: 'span 2'}}>
+                                <label className="form-field">
                                     <span className="form-label">Tipo de Filtro *</span>
                                     <select className="form-input form-select"
                                             value={str(data.filtrosLigacao[data.filtrosLigacao.length - 1]?.tipoFiltro ?? 0)}
@@ -565,7 +565,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                                     </select>
                                 </label>
 
-                                <label className="form-field" style={{gridColumn: 'span 2'}}>
+                                <label className="form-field">
                                     <span className="form-label">Resultado</span>
                                     <select className="form-input form-select"
                                             value={str(data.filtrosLigacao[data.filtrosLigacao.length - 1]?.resultadoContato?.descricao ?? '')}
@@ -584,7 +584,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                                     </select>
                                 </label>
 
-                                <label className="form-field" style={{gridColumn: 'span 2'}}>
+                                <label className="form-field">
                                     <span className="form-label">Operação</span>
                                     <select className="form-input form-select"
                                             value={str(data.filtrosLigacao[data.filtrosLigacao.length - 1]?.operacao ?? 'EQ')}
@@ -599,7 +599,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                                     </select>
                                 </label>
 
-                                <label className="form-field" style={{gridColumn: 'span 2'}}>
+                                <label className="form-field">
                                     <span className="form-label">Data</span>
                                     <input className="form-input" type="date"
                                            value={toDateInput(data.filtrosLigacao[data.filtrosLigacao.length - 1]?.data)}
@@ -612,7 +612,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                                            }} />
                                 </label>
 
-                                <label className="form-field" style={{gridColumn: 'span 2'}}>
+                                <label className="form-field">
                                     <span className="form-label">Quantidade</span>
                                     <input className="form-input" type="number" min={1}
                                            value={str(data.filtrosLigacao[data.filtrosLigacao.length - 1]?.quantidade ?? '')}
@@ -668,7 +668,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                         label: 'Acadêmico',
                         content: (
                             <div className="form-grid" style={{padding: 16}}>
-                                <label className="form-field" style={{gridColumn: 'span 2'}}>
+                                <label className="form-field">
                                     <span className="form-label">Tipo de Filtro *</span>
                                     <select className="form-input form-select"
                                             value={str(data.filtrosAcademico[data.filtrosAcademico.length - 1]?.tipoFiltro ?? 0)}
@@ -683,7 +683,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                                     </select>
                                 </label>
 
-                                <label className="form-field" style={{gridColumn: 'span 2'}}>
+                                <label className="form-field">
                                     <span className="form-label">Curso</span>
                                     <AutoComplete
                                         value={str(data.filtrosAcademico[data.filtrosAcademico.length - 1]?.curriculo?.sucinto ?? '')}
@@ -705,7 +705,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                                     />
                                 </label>
 
-                                <label className="form-field" style={{gridColumn: 'span 2'}}>
+                                <label className="form-field">
                                     <span className="form-label">Componente Curricular</span>
                                     <AutoComplete
                                         value={str(data.filtrosAcademico[data.filtrosAcademico.length - 1]?.componenteCurricular?.descricao ?? '')}
@@ -727,7 +727,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                                     />
                                 </label>
 
-                                <label className="form-field" style={{gridColumn: 'span 2'}}>
+                                <label className="form-field">
                                     <span className="form-label">Status</span>
                                     <select className="form-input form-select"
                                             value={str(data.filtrosAcademico[data.filtrosAcademico.length - 1]?.status ?? '')}
@@ -745,7 +745,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                                     </select>
                                 </label>
 
-                                <label className="form-field" style={{gridColumn: 'span 2'}}>
+                                <label className="form-field">
                                     <span className="form-label">Operação</span>
                                     <select className="form-input form-select"
                                             value={str(data.filtrosAcademico[data.filtrosAcademico.length - 1]?.operacao ?? 'EQ')}
@@ -760,7 +760,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                                     </select>
                                 </label>
 
-                                <label className="form-field" style={{gridColumn: 'span 2'}}>
+                                <label className="form-field">
                                     <span className="form-label">Data</span>
                                     <input className="form-input" type="date"
                                            value={toDateInput(data.filtrosAcademico[data.filtrosAcademico.length - 1]?.data)}
@@ -821,7 +821,7 @@ export default function ViewPacoteFormPacoteListScreen() {
             label: 'Operacional',
             content: (
                 <div className="form-grid" style={{padding: 16}}>
-                    <label className="form-field" style={{gridColumn: 'span 2'}}>
+                    <label className="form-field">
                         <span className="form-label">Direcionamento *</span>
                         <select className="form-input form-select"
                                 value={str(data.operacional.direcionamento ?? '')}
@@ -831,7 +831,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                         </select>
                     </label>
 
-                    <label className="form-field" style={{gridColumn: 'span 2'}}>
+                    <label className="form-field">
                         <span className="form-label">Coordenador</span>
                         <AutoComplete
                             value={str(data.operacional.coordenadorNome ?? '')}
@@ -850,7 +850,7 @@ export default function ViewPacoteFormPacoteListScreen() {
                         />
                     </label>
 
-                    <label className="form-field" style={{gridColumn: 'span 2'}}>
+                    <label className="form-field">
                         <span className="form-label">Equipe (Operadores)</span>
                         <AutoComplete
                             value=""

@@ -58,16 +58,16 @@ const tabs: TabItem[] = [
                     <input className="form-input" placeholder="(99) 9999-9999" />
                 </label>
                 <label className="form-field">
-                    <span className="form-label">Celular Referência</span>
-                    <input className="form-input" placeholder="(99) 99999-9999" />
-                </label>
-                <label className="form-field">
                     <span className="form-label">Nome Referência 2</span>
                     <input className="form-input" placeholder="Nome da referência 2" />
                 </label>
                 <label className="form-field">
                     <span className="form-label">Telefone Referência 2</span>
                     <input className="form-input" placeholder="(99) 9999-9999" />
+                </label>
+                <label className="form-field">
+                    <span className="form-label">Celular Referência</span>
+                    <input className="form-input" placeholder="(99) 99999-9999" />
                 </label>
                 <label className="form-field">
                     <span className="form-label">Celular Referência 2</span>
@@ -207,14 +207,14 @@ const tabs: TabItem[] = [
                     <span className="form-label">Usuário Ativo</span>
                 </div>
                 <label className="form-field">
-                    <span className="form-label">Função *</span>
-                    <select className="form-input form-select" style={{gridColumn: 'span 3'}}>
-                        <option value="">-- Selecione --</option>
-                    </select>
-                </label>
-                <label className="form-field">
                     <span className="form-label">Data Admissão</span>
                     <input className="form-input" type="date" />
+                </label>
+                <label className="form-field">
+                    <span className="form-label">Função *</span>
+                    <select className="form-input form-select">
+                        <option value="">-- Selecione --</option>
+                    </select>
                 </label>
                 <div className="form-field">
                     <span className="form-label">Vínculo</span>
@@ -232,7 +232,7 @@ const tabs: TabItem[] = [
                 </div>
                 <label className="form-field">
                     <span className="form-label">Observação</span>
-                    <textarea className="form-input" placeholder="Observações" rows={3} />
+                    <textarea className="form-input" placeholder="Observações" rows={3} style={{gridColumn: 'span 3', minHeight: '80px'}} />
                 </label>
             </div>
         ),

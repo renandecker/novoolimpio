@@ -29,11 +29,11 @@ public class MovimentacaoFinanceiraRepository implements PanacheRepository<Movim
                     "JOIN fin_tipo_movimento tm ON tm.id = mv.id_tipo_movimento " +
                     "WHERE m.id_caixa = ?1 AND m.forma_pagamento = ?2 AND tm.id in (1,2)";
 
-    public Uni<BigDecimal> totalPorFormaPagamento(Long caixaId, String tipoPagamento) {
+    public Uni<BigDecimal> totalPorFormaPagamento(Long caixaId, TipoPagamento tipoPagamento) {
         return Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_TOTAL_POR_FORMA)
                         .setParameter(1, caixaId)
-                        .setParameter(2, tipoPagamento)
+                        .setParameter(2, tipoPagamento.name())
                         .getSingleResult())
                 .map(v -> v == null ? BigDecimal.ZERO : new BigDecimal(v.toString()));
     }

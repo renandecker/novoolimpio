@@ -252,87 +252,22 @@ export default function ViewTipoPausaFormTipoPausaListScreen() {
 
                 <div className="div_form" style={{ width: '26%', minWidth: 360, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 16 }}>
 
-                    <div className="table_form" style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: '12px 16px', alignItems: 'center' }}>
+                    <div className="form-grid">
 
-                        {/* Id */}
-
-                        <label htmlFor="inputId:id" className="form-label" style={{ fontWeight: 600 }}>
-
-                            Id
-
+                        <label className="form-field">
+                            <span className="form-label">Id</span>
+                            <input id="inputId:id" className="form-input inputTiny" value={isEdit ? String(editingId) : ''} disabled placeholder="(novo)" style={{ width: 90, background: '#f3f4f6' }} />
                         </label>
 
-                        <input
-
-                            id="inputId:id"
-
-                            className="form-input inputTiny"
-
-                            value={isEdit ? String(editingId) : ''}
-
-                            disabled
-
-                            placeholder="(novo)"
-
-                            style={{ width: 90, background: '#f3f4f6' }}
-
-                        />
-
-
-
-                        {/* Descrição * */}
-
-                        <label htmlFor="inputDescricao:descricao" className="form-label" style={{ fontWeight: 600 }}>
-
-                            Descrição <span style={{ color: '#C90000' }}>*</span>
-
+                        <label className="form-field">
+                            <span className="form-label">Tempo pausa (segundos) <span style={{ color: '#C90000' }}>*</span></span>
+                            <input id="qtdeRetorno" className="form-input" value={tempo} onChange={(e) => handleTempoChange(e.target.value)} inputMode="numeric" placeholder="Ex.: 900" required />
                         </label>
 
-                        <input
-
-                            id="inputDescricao:descricao"
-
-                            className="form-input inputLarge"
-
-                            value={descricao}
-
-                            onChange={(e) => setDescricao(e.target.value)}
-
-                            maxLength={255}
-
-                            placeholder="Ex.: Almoço, Café, Banheiro…"
-
-                            required
-
-                        />
-
-
-
-                        {/* Tempo pausa (segundos) * */}
-
-                        <label htmlFor="qtdeRetorno" className="form-label" style={{ fontWeight: 600 }}>
-
-                            Tempo pausa (segundos) <span style={{ color: '#C90000' }}>*</span>
-
+                        <label className="form-field">
+                            <span className="form-label">Descrição <span style={{ color: '#C90000' }}>*</span></span>
+                            <input id="inputDescricao:descricao" className="form-input inputLarge" value={descricao} onChange={(e) => setDescricao(e.target.value)} maxLength={255} placeholder="Ex.: Almoço, Café, Banheiro…" required style={{ gridColumn: 'span 3' }} />
                         </label>
-
-                        <input
-
-                            id="qtdeRetorno"
-
-                            className="form-input"
-
-                            value={tempo}
-
-                            onChange={(e) => handleTempoChange(e.target.value)}
-
-                            inputMode="numeric"
-
-                            placeholder="Ex.: 900"
-
-                            required
-
-                        />
 
                     </div>
 

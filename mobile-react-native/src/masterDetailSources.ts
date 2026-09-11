@@ -223,3 +223,14 @@ export const PAINEL_PAINEL_COLUMNS: MasterDetailColumn[] = [
     {key: 'ordem', label: 'Ordem'},
 ];
 export const PAINEL_PAINEL_SEARCH = ['relatorioNome'];
+
+export const DIA_AULA_SOURCE = '/api/educacao/dia-aula';
+export const DIA_AULA_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'Id'},
+    {key: 'diaSemanaId', label: 'Dia Semana'},
+    {key: 'turnoEducacaoId', label: 'Turno'},
+    {key: 'tempoAulaId', label: 'Tempo Aula'},
+    {key: 'turnoEducacao_descricao', label: 'Turno'},
+    {key: 'tempoAula_descricao', label: 'Tempo'},
+];
+export const DIA_AULA_SEARCH = ['id'];

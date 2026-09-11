@@ -87,20 +87,79 @@ export default function ViewUnidadeFormRedeListScreen() {
         label: tab.label,
         content: (
             <ScrollView style={styles.tabContent}>
-                {tab.fields && tab.fields.map((field) => (
-                    <FormField
-                        key={field.name}
-                        label={field.label}
-                        value={values[field.name] ?? ''}
-                        onChange={(text) => setValues((prev) => ({...prev, [field.name]: text}))}
-                        type={field.type}
-                        placeholder={field.placeholder}
-                        mask={field.mask}
-                        options={field.options}
-                        editable={field.editable !== false}
-                        required={field.required}
-                    />
-                ))}
+                {tab.key === 'geral' ? (
+                    <>
+                        <View style={styles.formRow}>
+                            <FormField
+                                label="ID"
+                                value={values.id ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, id: text}))}
+                                type="text"
+                                editable={false}
+                                style={styles.fieldHalf}
+                            />
+                            <FormField
+                                label="Razão Social"
+                                value={values.razaoSocial ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, razaoSocial: text}))}
+                                required
+                                style={styles.fieldHalf}
+                            />
+                        </View>
+                        <View style={styles.formRow}>
+                            <FormField
+                                label="Nome Fantasia"
+                                value={values.nomeFantasia ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, nomeFantasia: text}))}
+                                required
+                                style={styles.fieldHalf}
+                            />
+                            <FormField
+                                label="CNPJ"
+                                value={values.cnpj ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, cnpj: text}))}
+                                type="text"
+                                mask="99.999.999/9999-99"
+                                required
+                                style={styles.fieldHalf}
+                            />
+                        </View>
+                        <View style={styles.formRow}>
+                            <FormField
+                                label="Usuário"
+                                value={values.usuario ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, usuario: text}))}
+                                type="text"
+                                style={styles.fieldHalf}
+                            />
+                            <FormField
+                                label="Layout"
+                                value={values.layout ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, layout: text}))}
+                                type="text"
+                                style={styles.fieldHalf}
+                            />
+                        </View>
+                    </>
+                ) : (
+                    <>
+                        {tab.fields && tab.fields.map((field) => (
+                            <FormField
+                                key={field.name}
+                                label={field.label}
+                                value={values[field.name] ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, [field.name]: text}))}
+                                type={field.type}
+                                placeholder={field.placeholder}
+                                mask={field.mask}
+                                options={field.options}
+                                editable={field.editable !== false}
+                                required={field.required}
+                                style={styles.fieldFull}
+                            />
+                        ))}
+                    </>
+                )}
                 {tab.isMasterDetail && tab.masterDetailConfig && (
                     <MasterDetail
                         label={tab.masterDetailConfig.label}
@@ -225,8 +284,11 @@ const styles = StyleSheet.create({
     errorBox: {backgroundColor: Colors.errorBg, borderWidth: 1, borderColor: Colors.error, borderRadius: BorderRadius.lg, padding: Spacing.md, margin: Spacing.lg},
     errorText: {color: Colors.error, fontSize: Typography.sizes.base, textAlign: 'center'},
     tabContent: {flex: 1, padding: Spacing.lg},
-    field: {flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: Spacing.md},
-    fieldLabel: {width: 120, fontSize: Typography.sizes.base, fontWeight: Typography.weights.semibold, color: Colors.textSecondary},
+    field: {marginBottom: Spacing.sm},
+    formRow: {flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md, marginBottom: Spacing.sm},
+    fieldHalf: {width: '47%'},
+    fieldFull: {width: '100%'},
+    fieldLabel: {fontSize: Typography.sizes.base, fontWeight: Typography.weights.semibold, color: Colors.textSecondary, marginBottom: Spacing.xs},
     required: {color: Colors.error, marginLeft: 2},
     fieldInput: {flex: 1, borderWidth: 1, borderColor: Colors.formInputBorder, borderRadius: BorderRadius.lg, padding: Spacing.md, fontSize: Typography.sizes.lg, color: Colors.textPrimary, backgroundColor: Colors.bgSecondary},
     selectInput: {backgroundColor: Colors.bgSecondary},

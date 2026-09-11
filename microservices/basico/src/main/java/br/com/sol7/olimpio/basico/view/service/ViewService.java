@@ -93,6 +93,26 @@ public class ViewService {
             "id", "meta", "data", "data_inicial", "data_final", "id_operador", "id_operacional", "id_usuario_lancou_media",
             "operador_login", "operacional_pacote_id", "operacional_pacote_descricao");
 
+    private static final String META_DINAMICA_SELECT =
+            "SELECT md.id, md.ano, md.mes, md.id_loja, md.id_indicador, md.perc_segunda, md.perc_terca, md.perc_quarta, "
+                    + "md.perc_quinta, md.perc_sexta, md.perc_sabado, md.perc_domingo, md.data_atualizacao, "
+                    + "l.sucinto AS unidade_sucinto, i.nome AS indicador_nome "
+                    + "FROM com_meta_dinamica md "
+                    + "LEFT JOIN bas_unidade l ON l.id = md.id_loja "
+                    + "LEFT JOIN com_indicador i ON i.id = md.id_indicador";
+    private static final List<String> META_DINAMICA_COLUMNS = List.of(
+            "id", "ano", "mes", "id_loja", "id_indicador", "perc_segunda", "perc_terca", "perc_quarta",
+            "perc_quinta", "perc_sexta", "perc_sabado", "perc_domingo", "data_atualizacao",
+            "unidade_sucinto", "indicador_nome");
+
+    private static final String INDICADOR_META_DINAMICA_SELECT =
+            "SELECT im.id, im.descricao, im.formato, im.id_indicador, "
+                    + "i.nome AS indicador_nome "
+                    + "FROM com_indicador_meta im "
+                    + "LEFT JOIN com_indicador i ON i.id = im.id_indicador";
+    private static final List<String> INDICADOR_META_DINAMICA_COLUMNS = List.of(
+            "id", "descricao", "formato", "id_indicador", "indicador_nome");
+
     // Operacional list: joins to com_pacote and com_acao_de_campanha for data_criacao and data_final
     private static final String OPERACIONAL_LIST_SELECT =
             "SELECT op.id, op.id_pacote, op.status, op.direcionamento, op.id_coordenador, "
@@ -153,6 +173,9 @@ public class ViewService {
             Map.entry("logradouro/formLogradouro", new CuratedSelect(LOGRADOURO_SELECT, LOGRADOURO_COLUMNS)),
             Map.entry("meta/listMeta", new CuratedSelect(META_SELECT, META_COLUMNS)),
             Map.entry("meta/formMeta", new CuratedSelect(META_SELECT, META_COLUMNS)),
+            Map.entry("meta/listMetaDinamica", new CuratedSelect(META_DINAMICA_SELECT, META_DINAMICA_COLUMNS)),
+            Map.entry("meta/formMetaDinamica", new CuratedSelect(META_DINAMICA_SELECT, META_DINAMICA_COLUMNS)),
+            Map.entry("meta/indicadorMetaDinamica", new CuratedSelect(INDICADOR_META_DINAMICA_SELECT, INDICADOR_META_DINAMICA_COLUMNS)),
             Map.entry("operacional/listOperacional", new CuratedSelect(OPERACIONAL_LIST_SELECT, OPERACIONAL_LIST_COLUMNS)),
             Map.entry("operacional/formOperacional", new CuratedSelect(OPERACIONAL_LIST_SELECT, OPERACIONAL_LIST_COLUMNS)),
             Map.entry("pessoa/listPessoaJuridica", new CuratedSelect(PESSOA_JURIDICA_SELECT, PESSOA_JURIDICA_COLUMNS)),

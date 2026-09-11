@@ -73,65 +73,155 @@ public class FiltrosRepository implements PanacheRepository<Filtros> {
     }
 
     public Uni<List<Filtros>> findByTabela(Long tabelaId) {
-        String sql = "SELECT f.* FROM rel_filtro f "
+        String sql = "SELECT f.id, f.nome, f.fl_fixo, f.fl_exibir, f.tipo_filtro, f.valor_fixo FROM rel_filtro f "
                 + "JOIN rel_filtro_tabela ft ON ft.id_filtro = f.id "
                 + "WHERE ft.id_tabela = :tabelaId "
                 + "ORDER BY f.nome";
         return Panache.getSession().chain(session -> session
-                .createNativeQuery(sql, Filtros.class)
+                .createNativeQuery(sql)
                 .setParameter("tabelaId", tabelaId)
-                .getResultList());
+                .getResultList()
+                .map(list -> {
+                    List<Filtros> result = new ArrayList<>();
+                    for (Object row : list) {
+                        Object[] arr = (Object[]) row;
+                        Filtros f = new Filtros();
+                        f.id = arr[0] != null ? ((Number) arr[0]).longValue() : null;
+                        f.nome = arr[1] != null ? arr[1].toString() : null;
+                        f.flFixo = arr[2] != null ? (Boolean) arr[2] : null;
+                        f.flExibir = arr[3] != null ? (Boolean) arr[3] : null;
+                        f.tipoFiltro = arr[4] != null ? arr[4].toString() : null;
+                        f.valorFixo = arr[5] != null ? arr[5].toString() : null;
+                        result.add(f);
+                    }
+                    return result;
+                }));
     }
 
     public Uni<List<Filtros>> findByGrafico(Long graficoId) {
-        String sql = "SELECT f.* FROM rel_filtro f "
+        String sql = "SELECT f.id, f.nome, f.fl_fixo, f.fl_exibir, f.tipo_filtro, f.valor_fixo FROM rel_filtro f "
                 + "JOIN rel_filtro_grafico fg ON fg.id_filtro = f.id "
                 + "WHERE fg.id_grafico = :graficoId "
                 + "ORDER BY f.nome";
         return Panache.getSession().chain(session -> session
-                .createNativeQuery(sql, Filtros.class)
+                .createNativeQuery(sql)
                 .setParameter("graficoId", graficoId)
-                .getResultList());
+                .getResultList()
+                .map(list -> {
+                    List<Filtros> result = new ArrayList<>();
+                    for (Object row : list) {
+                        Object[] arr = (Object[]) row;
+                        Filtros f = new Filtros();
+                        f.id = arr[0] != null ? ((Number) arr[0]).longValue() : null;
+                        f.nome = arr[1] != null ? arr[1].toString() : null;
+                        f.flFixo = arr[2] != null ? (Boolean) arr[2] : null;
+                        f.flExibir = arr[3] != null ? (Boolean) arr[3] : null;
+                        f.tipoFiltro = arr[4] != null ? arr[4].toString() : null;
+                        f.valorFixo = arr[5] != null ? arr[5].toString() : null;
+                        result.add(f);
+                    }
+                    return result;
+                }));
     }
 
     public Uni<List<Filtros>> findByMapa(Long mapaId) {
-        String sql = "SELECT f.* FROM rel_filtro f "
+        String sql = "SELECT f.id, f.nome, f.fl_fixo, f.fl_exibir, f.tipo_filtro, f.valor_fixo FROM rel_filtro f "
                 + "JOIN rel_filtro_mapa fm ON fm.id_filtro = f.id "
                 + "WHERE fm.id_mapa = :mapaId "
                 + "ORDER BY f.nome";
         return Panache.getSession().chain(session -> session
-                .createNativeQuery(sql, Filtros.class)
+                .createNativeQuery(sql)
                 .setParameter("mapaId", mapaId)
-                .getResultList());
+                .getResultList()
+                .map(list -> {
+                    List<Filtros> result = new ArrayList<>();
+                    for (Object row : list) {
+                        Object[] arr = (Object[]) row;
+                        Filtros f = new Filtros();
+                        f.id = arr[0] != null ? ((Number) arr[0]).longValue() : null;
+                        f.nome = arr[1] != null ? arr[1].toString() : null;
+                        f.flFixo = arr[2] != null ? (Boolean) arr[2] : null;
+                        f.flExibir = arr[3] != null ? (Boolean) arr[3] : null;
+                        f.tipoFiltro = arr[4] != null ? arr[4].toString() : null;
+                        f.valorFixo = arr[5] != null ? arr[5].toString() : null;
+                        result.add(f);
+                    }
+                    return result;
+                }));
     }
 
     public Uni<List<Filtros>> findByOrganograma(Long organogramaId) {
-        String sql = "SELECT f.* FROM rel_filtro f "
+        String sql = "SELECT f.id, f.nome, f.fl_fixo, f.fl_exibir, f.tipo_filtro, f.valor_fixo FROM rel_filtro f "
                 + "JOIN rel_filtro_organograma fo ON fo.id_filtro = f.id "
                 + "WHERE fo.id_organograma = :organogramaId "
                 + "ORDER BY f.nome";
         return Panache.getSession().chain(session -> session
-                .createNativeQuery(sql, Filtros.class)
+                .createNativeQuery(sql)
                 .setParameter("organogramaId", organogramaId)
-                .getResultList());
+                .getResultList()
+                .map(list -> {
+                    List<Filtros> result = new ArrayList<>();
+                    for (Object row : list) {
+                        Object[] arr = (Object[]) row;
+                        Filtros f = new Filtros();
+                        f.id = arr[0] != null ? ((Number) arr[0]).longValue() : null;
+                        f.nome = arr[1] != null ? arr[1].toString() : null;
+                        f.flFixo = arr[2] != null ? (Boolean) arr[2] : null;
+                        f.flExibir = arr[3] != null ? (Boolean) arr[3] : null;
+                        f.tipoFiltro = arr[4] != null ? arr[4].toString() : null;
+                        f.valorFixo = arr[5] != null ? arr[5].toString() : null;
+                        result.add(f);
+                    }
+                    return result;
+                }));
     }
 
     public Uni<List<Filtros>> findAllForListTabela() {
-        String sql = "SELECT DISTINCT f.* FROM rel_filtro f "
+        String sql = "SELECT DISTINCT f.id, f.nome, f.fl_fixo, f.fl_exibir, f.tipo_filtro, f.valor_fixo FROM rel_filtro f "
                 + "JOIN rel_filtro_tabela ft ON ft.id_filtro = f.id "
                 + "ORDER BY f.nome";
         return Panache.getSession().chain(session -> session
-                .createNativeQuery(sql, Filtros.class)
-                .getResultList());
+                .createNativeQuery(sql)
+                .getResultList()
+                .map(list -> {
+                    List<Filtros> result = new ArrayList<>();
+                    for (Object row : list) {
+                        Object[] arr = (Object[]) row;
+                        Filtros f = new Filtros();
+                        f.id = arr[0] != null ? ((Number) arr[0]).longValue() : null;
+                        f.nome = arr[1] != null ? arr[1].toString() : null;
+                        f.flFixo = arr[2] != null ? (Boolean) arr[2] : null;
+                        f.flExibir = arr[3] != null ? (Boolean) arr[3] : null;
+                        f.tipoFiltro = arr[4] != null ? arr[4].toString() : null;
+                        f.valorFixo = arr[5] != null ? arr[5].toString() : null;
+                        result.add(f);
+                    }
+                    return result;
+                }));
     }
 
     public Uni<List<Filtros>> findAllForListGrafico() {
-        String sql = "SELECT DISTINCT f.* FROM rel_filtro f "
+        String sql = "SELECT DISTINCT f.id, f.nome, f.fl_fixo, f.fl_exibir, f.tipo_filtro, f.valor_fixo FROM rel_filtro f "
                 + "JOIN rel_filtro_grafico fg ON fg.id_filtro = f.id "
                 + "ORDER BY f.nome";
         return Panache.getSession().chain(session -> session
-                .createNativeQuery(sql, Filtros.class)
-                .getResultList());
+                .createNativeQuery(sql)
+                .getResultList()
+                .map(list -> {
+                    List<Filtros> result = new ArrayList<>();
+                    for (Object row : list) {
+                        Object[] arr = (Object[]) row;
+                        Filtros f = new Filtros();
+                        f.id = arr[0] != null ? ((Number) arr[0]).longValue() : null;
+                        f.nome = arr[1] != null ? arr[1].toString() : null;
+                        f.flFixo = arr[2] != null ? (Boolean) arr[2] : null;
+                        f.flExibir = arr[3] != null ? (Boolean) arr[3] : null;
+                        f.tipoFiltro = arr[4] != null ? arr[4].toString() : null;
+                        f.valorFixo = arr[5] != null ? arr[5].toString() : null;
+                        result.add(f);
+                    }
+                    return result;
+                }));
     }
 
     public Uni<List<Filtros>> buscarFiltrosTabelaComFiltros(Long filtroRelatorioId) {

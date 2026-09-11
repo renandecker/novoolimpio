@@ -174,7 +174,7 @@ export default function ViewRelatoriosFormDashboardListScreen() {
                     label: 'Definição',
                     fields: [
                         {name: 'nome', label: 'Nome', required: true},
-                        {name: 'descricao', label: 'Descrição', type: 'textarea'},
+                        {name: 'descricao', label: 'Descrição', type: 'textarea', full: true},
                     ],
                     customContent: (
                         <>

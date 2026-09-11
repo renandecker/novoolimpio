@@ -296,11 +296,13 @@ import ViewRelatoriosFormGraficoListScreen from './src/screens/ViewRelatoriosFor
 import ViewRelatoriosFormMapaListScreen from './src/screens/ViewRelatoriosFormMapaListScreen';
 import ViewRelatoriosFormOrganogramaListScreen from './src/screens/ViewRelatoriosFormOrganogramaListScreen';
 import ViewRelatoriosFormTabelaListScreen from './src/screens/ViewRelatoriosFormTabelaListScreen';
+import ViewRelatoriosFormIndicadorGaugeListScreen from './src/features/relatorios/ViewRelatoriosFormIndicadorGaugeListScreen';
 import ViewRelatoriosListDashboardListScreen from './src/screens/ViewRelatoriosListDashboardListScreen';
 import ViewRelatoriosListGraficoListScreen from './src/screens/ViewRelatoriosListGraficoListScreen';
 import ViewRelatoriosListMapaListScreen from './src/screens/ViewRelatoriosListMapaListScreen';
 import ViewRelatoriosListOrganogramaListScreen from './src/screens/ViewRelatoriosListOrganogramaListScreen';
 import ViewRelatoriosListTabelaListScreen from './src/screens/ViewRelatoriosListTabelaListScreen';
+import ViewRelatoriosListIndicadorGaugeListScreen from './src/features/relatorios/ViewRelatoriosListIndicadorGaugeListScreen';
 import ViewRelatoriosViewDashboardListScreen from './src/screens/ViewRelatoriosViewDashboardListScreen';
 import ViewRelatoriosViewGraficoBarrasHorizontalListScreen
     from './src/screens/ViewRelatoriosViewGraficoBarrasHorizontalListScreen';
@@ -314,6 +316,7 @@ import ViewRelatoriosViewMapaListScreen from './src/screens/ViewRelatoriosViewMa
 import ViewRelatoriosViewMapaScreen from './src/features/relatorios/ViewRelatoriosViewMapaScreen';
 import ViewRelatoriosViewOrganogramaListScreen from './src/screens/ViewRelatoriosViewOrganogramaListScreen';
 import ViewRelatoriosViewTabelaListScreen from './src/screens/ViewRelatoriosViewTabelaListScreen';
+import ViewRelatoriosViewIndicadorGaugeScreen from './src/features/relatorios/ViewRelatoriosViewIndicadorGaugeScreen';
 
 import ViewResultadoFormResultadoListScreen from './src/screens/ViewResultadoFormResultadoListScreen';
 import ViewResultadoListResultadoListScreen from './src/screens/ViewResultadoListResultadoListScreen';
@@ -376,7 +379,7 @@ import ViewTipoUnidadeListTipoUnidadeListScreen from './src/screens/ViewTipoUnid
 import ViewTurmaFormAjusteCalendarioListScreen from './src/screens/ViewTurmaFormAjusteCalendarioListScreen';
 import ViewTurmaListTurmaListScreen from './src/screens/ViewTurmaListTurmaListScreen';
 import ViewTurmaListTurmaFinalizandoListScreen from './src/screens/ViewTurmaListTurmaFinalizandoListScreen';
-import ViewTurmaRecriarCalendarioAcademicoListScreen from './src/screens/ViewTurmaRecriarCalendarioAcademicoListScreen';
+
 import ViewTurnoFormTurnoListScreen from './src/screens/ViewTurnoFormTurnoListScreen';
 import ViewTurnoListTurnoListScreen from './src/screens/ViewTurnoListTurnoListScreen';
 
@@ -407,14 +410,7 @@ import ViewValorCursoListValorCursoListScreen from './src/screens/ViewValorCurso
 import ViewValorProdutoFormValorProdutoListScreen from './src/screens/ViewValorProdutoFormValorProdutoListScreen';
 import ViewValorProdutoListValorProdutoListScreen from './src/screens/ViewValorProdutoListValorProdutoListScreen';
 import ViewTemaListTemasListScreen from './src/screens/ViewTemaListTemasListScreen';
-import AlunoDashboardScreen from './src/features/aluno/AlunoDashboardScreen';
-import AlunoBoletimScreen from './src/features/aluno/AlunoBoletimScreen';
-import AlunoFrequenciaScreen from './src/features/aluno/AlunoFrequenciaScreen';
-import AlunoAulasScreen from './src/features/aluno/AlunoAulasScreen';
-import AlunoAulasTurmaScreen from './src/features/aluno/AlunoAulasTurmaScreen';
-import AlunoAulaScreen from './src/features/aluno/AlunoAulaScreen';
-import AlunoFinanceiroScreen from './src/features/aluno/AlunoFinanceiroScreen';
-import ViewCurriculoAttachmentScreen from './src/features/aluno/ViewCurriculoAttachmentScreen';
+
 import MeusDadosScreen from './src/screens/MeusDadosScreen';
 import ViewNotificacaoListNotificacaoListScreen from './src/screens/ViewNotificacaoListNotificacaoListScreen';
 import ViewCategoriaEstoqueListCategoriaListScreen from './src/screens/ViewCategoriaEstoqueListCategoriaListScreen';
@@ -431,14 +427,6 @@ function AppRoutes() {
     return <QueryClientProvider client={q}><NavigationContainer><Stack.Navigator initialRouteName='home'><Stack.Screen
         name='home' component={HomeScreen} options={{headerShown: false}}/>
         <Stack.Screen name='default' component={DefaultListScreen}/>
-        <Stack.Screen name='aluno/portalAluno' component={AlunoDashboardScreen} options={{title: 'Portal Aluno'}}/>
-        <Stack.Screen name='aluno/boletim' component={AlunoBoletimScreen} options={{title: 'Boletim'}}/>
-        <Stack.Screen name='aluno/frequencia' component={AlunoFrequenciaScreen} options={{title: 'Frequência'}}/>
-        <Stack.Screen name='aluno/aulas' component={AlunoAulasScreen} options={{title: 'Aulas'}}/>
-        <Stack.Screen name='aluno/aulas/turma' component={AlunoAulasTurmaScreen} options={{title: 'Aulas da Turma'}}/>
-        <Stack.Screen name='aluno/aulas/aula' component={AlunoAulaScreen} options={{title: 'Detalhe da Aula'}}/>
-        <Stack.Screen name='aluno/financeiro' component={AlunoFinanceiroScreen} options={{title: 'Financeiro'}}/>
-        <Stack.Screen name='aluno/curriculo-anexo' component={ViewCurriculoAttachmentScreen} options={{title: 'Anexar Currículo'}}/>
         <Stack.Screen name='meus-dados' component={MeusDadosScreen} options={{title: 'Meus dados'}}/>
         <Stack.Screen name='view/notificacao/listNotificacao' component={ViewNotificacaoListNotificacaoListScreen}
                       options={{title: 'Notificações'}}/>
@@ -754,11 +742,13 @@ function AppRoutes() {
         <Stack.Screen name='view/relatorios/formMapa' component={ViewRelatoriosFormMapaListScreen}/>
         <Stack.Screen name='view/relatorios/formOrganograma' component={ViewRelatoriosFormOrganogramaListScreen}/>
         <Stack.Screen name='view/relatorios/formTabela' component={ViewRelatoriosFormTabelaListScreen}/>
+        <Stack.Screen name='view/relatorios/formIndicadorGauge' component={ViewRelatoriosFormIndicadorGaugeListScreen}/>
         <Stack.Screen name='view/relatorios/listDashboard' component={ViewRelatoriosListDashboardListScreen}/>
         <Stack.Screen name='view/relatorios/listGrafico' component={ViewRelatoriosListGraficoListScreen}/>
         <Stack.Screen name='view/relatorios/listMapa' component={ViewRelatoriosListMapaListScreen}/>
         <Stack.Screen name='view/relatorios/listOrganograma' component={ViewRelatoriosListOrganogramaListScreen}/>
         <Stack.Screen name='view/relatorios/listTabela' component={ViewRelatoriosListTabelaListScreen}/>
+        <Stack.Screen name='view/relatorios/listIndicadorGauge' component={ViewRelatoriosListIndicadorGaugeListScreen}/>
         <Stack.Screen name='view/relatorios/viewDashboard' component={ViewRelatoriosViewDashboardListScreen}/>
         <Stack.Screen name='view/relatorios/viewGraficoBarrasHorizontal'
                       component={ViewRelatoriosViewGraficoBarrasHorizontalListScreen}/>
@@ -773,6 +763,7 @@ function AppRoutes() {
         <Stack.Screen name='view/relatorios/viewMapa' component={ViewRelatoriosViewMapaScreen}/>
         <Stack.Screen name='view/relatorios/viewOrganograma' component={ViewRelatoriosViewOrganogramaListScreen}/>
         <Stack.Screen name='view/relatorios/viewTabela' component={ViewRelatoriosViewTabelaListScreen}/>
+        <Stack.Screen name='view/relatorios/viewIndicadorGauge/:id' component={ViewRelatoriosViewIndicadorGaugeScreen}/>
 
         <Stack.Screen name='view/resultado/formResultado' component={ViewResultadoFormResultadoListScreen}/>
         <Stack.Screen name='view/resultado/listResultado' component={ViewResultadoListResultadoListScreen}/>
@@ -838,8 +829,6 @@ function AppRoutes() {
         <Stack.Screen name='view/turma/formAjusteCalendario' component={ViewTurmaFormAjusteCalendarioListScreen}/>
         <Stack.Screen name='view/turma/listTurma' component={ViewTurmaListTurmaListScreen}/>
         <Stack.Screen name='view/turma/listTurmaFinalizando' component={ViewTurmaListTurmaFinalizandoListScreen}/>
-        <Stack.Screen name='view/turma/recriarCalendarioAcademico'
-                      component={ViewTurmaRecriarCalendarioAcademicoListScreen}/>
         <Stack.Screen name='view/turno/formTurno' component={ViewTurnoFormTurnoListScreen}/>
         <Stack.Screen name='view/turno/listTurno' component={ViewTurnoListTurnoListScreen}/>
 

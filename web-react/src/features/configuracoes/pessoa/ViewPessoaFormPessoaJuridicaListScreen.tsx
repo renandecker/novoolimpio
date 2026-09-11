@@ -470,9 +470,19 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
 
                     <label className="form-field">
 
+                        <span className="form-label">Inscrição Municipal</span>
+
+                        <input className="form-input" placeholder="Inscrição Municipal"
+
+                               value={form.inscricaoMunicipal} onChange={(e) => set('inscricaoMunicipal', e.target.value)}/>
+
+                    </label>
+
+                    <label className="form-field">
+
                         <span className="form-label">Razão Social *</span>
 
-                        <input className="form-input" placeholder="Razão Social" style={{gridColumn: 'span 3'}}
+                        <input className="form-input" placeholder="Razão Social"
 
                                value={form.razaoSocial} onChange={(e) => set('razaoSocial', e.target.value)}/>
 
@@ -482,7 +492,7 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
 
                         <span className="form-label">Nome Fantasia *</span>
 
-                        <input className="form-input" placeholder="Nome Fantasia" style={{gridColumn: 'span 3'}}
+                        <input className="form-input" placeholder="Nome Fantasia"
 
                                value={form.nomeFantasia} onChange={(e) => set('nomeFantasia', e.target.value)}/>
 
@@ -506,16 +516,6 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
 
                     <label className="form-field">
 
-                        <span className="form-label">Inscrição Municipal</span>
-
-                        <input className="form-input" placeholder="Inscrição Municipal"
-
-                               value={form.inscricaoMunicipal} onChange={(e) => set('inscricaoMunicipal', e.target.value)}/>
-
-                    </label>
-
-                    <label className="form-field">
-
                         <span className="form-label">Inscrição Estadual</span>
 
                         <input className="form-input" placeholder="Inscrição Estadual"
@@ -530,7 +530,7 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
 
                         <input className="form-input" type="email" placeholder="E-mail"
 
-                               style={{gridColumn: 'span 3'}} value={form.email}
+                               value={form.email}
 
                                onChange={(e) => set('email', e.target.value)}/>
 

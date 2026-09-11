@@ -27,7 +27,7 @@ export type MapaPontosResponse = {
 export type RelatorioDisponivel = {
     id: number;
     nome: string;
-    tipo: 'TABELA' | 'GRAFICO' | 'MAPA';
+    tipo: 'TABELA' | 'GRAFICO' | 'MAPA' | 'INDICADOR_GAUGE';
 };
 
 export const listarRelatoriosDisponiveis = async (): Promise<RelatorioDisponivel[]> =>

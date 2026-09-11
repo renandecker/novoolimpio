@@ -104,35 +104,35 @@ export default function ViewUnidadeFormUnidadeListScreen() {
 
             fields: [
 
-                {name: 'id', label: 'ID', type: 'text', readOnly: true, span: 1},
+                {name: 'id', label: 'ID', type: 'text', readOnly: true},
 
-                {name: 'sucinto', label: 'Sucinto', required: true, span: 2},
+                {name: 'sucinto', label: 'Sucinto', required: true},
 
                 {name: 'razaoSocial', label: 'Razão Social', required: true, span: 3},
 
                 {name: 'nomeFantasia', label: 'Nome Fantasia', required: true, span: 3},
 
-                {name: 'CNPJ', label: 'CNPJ', type: 'mask', mask: '99.999.999/9999-99', required: true, span: 2},
+                {name: 'CNPJ', label: 'CNPJ', type: 'mask', mask: '99.999.999/9999-99', required: true},
 
-                {name: 'inscricaoEstadual', label: 'Inscrição Estadual', required: true, span: 3},
-
-                {name: 'layout', label: 'Layout', type: 'autoComplete', autoCompleteSource: '/api/educacao/layout', span: 3},
-
-                {name: 'responsavel', label: 'Responsável', type: 'autoComplete', autoCompleteSource: '/api/basico/pessoa-fisica/autoCompleteAcao', span: 3},
+                {name: 'inscricaoEstadual', label: 'Inscrição Estadual', required: true},
 
                 {name: 'email', label: 'E-mail', type: 'email', required: true, span: 3},
 
-                {name: 'tipoUnidade', label: 'Tipo Unidade', type: 'select', options: TIPO_UNIDADE_OPTIONS, required: true, span: 2},
-
-                {name: 'ativo', label: 'Ativo', type: 'select', options: [{value: 'true', label: 'Sim'}, {value: 'false', label: 'Não'}], span: 1},
-
                 {name: 'emailRH', label: 'E-mail RH', type: 'email', span: 3},
+
+                {name: 'tipoUnidade', label: 'Tipo Unidade', type: 'select', options: TIPO_UNIDADE_OPTIONS, required: true},
+
+                {name: 'ativo', label: 'Ativo', type: 'select', options: [{value: 'true', label: 'Sim'}, {value: 'false', label: 'Não'}]},
+
+                {name: 'responsavel', label: 'Responsável', type: 'autoComplete', autoCompleteSource: '/api/basico/pessoa-fisica/autoCompleteAcao', span: 3},
 
                 {name: 'diretorEnsino', label: 'Diretor de Ensino', span: 3},
 
                 {name: 'coordenador', label: 'Coordenador', span: 3},
 
                 {name: 'registro', label: 'Registro', span: 3},
+
+                {name: 'layout', label: 'Layout', type: 'autoComplete', autoCompleteSource: '/api/educacao/layout', span: 3},
 
             ],
 
@@ -186,17 +186,17 @@ export default function ViewUnidadeFormUnidadeListScreen() {
 
             fields: [
 
-                {name: 'cep', label: 'CEP', type: 'mask', mask: '99.999-999', required: true, span: 1},
+                {name: 'cep', label: 'CEP', type: 'mask', mask: '99.999-999', required: true},
 
-                {name: 'cidade', label: 'Cidade', type: 'autoComplete', autoCompleteSource: '/api/basico/cidade/autoComplete', required: true, span: 2},
+                {name: 'cidade', label: 'Cidade', type: 'autoComplete', autoCompleteSource: '/api/basico/cidade/autoComplete', required: true},
 
-                {name: 'bairro', label: 'Bairro', type: 'autoComplete', autoCompleteSource: '/api/basico/bairro/autoComplete', required: true, span: 2},
+                {name: 'bairro', label: 'Bairro', type: 'autoComplete', autoCompleteSource: '/api/basico/bairro/autoComplete', required: true},
 
                 {name: 'logradouro', label: 'Logradouro', type: 'autoComplete', autoCompleteSource: '/api/basico/logradouro/autoComplete', required: true, span: 3},
 
-                {name: 'numero', label: 'Número', type: 'number', required: true, span: 1},
+                {name: 'numero', label: 'Número', type: 'number', required: true},
 
-                {name: 'regiao', label: 'Região', type: 'autoComplete', autoCompleteSource: '/api/basico/regiao/listAll', required: true, span: 2},
+                {name: 'regiao', label: 'Região', type: 'autoComplete', autoCompleteSource: '/api/basico/regiao/listAll', required: true},
 
                 {name: 'pontoReferencia', label: 'Ponto de Referência', span: 3},
 

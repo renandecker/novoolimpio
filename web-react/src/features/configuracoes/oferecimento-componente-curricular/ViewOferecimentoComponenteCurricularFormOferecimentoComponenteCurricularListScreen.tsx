@@ -439,13 +439,49 @@ const [carregando, setCarregando] = useState(true);
 
                         }));
 
-                        const diaAulaIdsUnicos = [...new Set(minhas.map((o) => o.diaAulaId).filter(Boolean))] as number[];
+                        // Fonte de verdade: join table edc_oferecimento_dias_aula via API existente.
+                        // (antes usava o state `diaAulas` ainda vazio aqui + só ocorrências como fallback,
+                        //  por isso a aba "Dias Aula" vinha vazia na edição).
+                        const diasAulaDoBanco: Array<{
+                            id: number;
+                            diaSemanaId: number;
+                            turnoEducacaoId: number;
+                            tempoAulaId: number;
+                            turnoEducacao_descricao?: string;
+                            tempoAula_descricao?: string;
+                        }> = await (async () => {
+                            try {
+                                const resp = await api.get<Array<{
+                                    id: number;
+                                    diaSemanaId: number;
+                                    turnoEducacaoId: number;
+                                    tempoAulaId: number;
+                                    turnoEducacao_descricao?: string;
+                                    tempoAula_descricao?: string;
+                                }>>('/api/educacao/oferecimento-componente-curricular/buscar-dias-aula-por-oferecimento', {
+                                    params: {oferecimentoComponenteCurricularId: ent?.id ?? Number(idEdicao)}
+                                });
+                                return resp?.data ?? [];
+                            } catch (e) {
+                                console.warn('Erro ao carregar dias de aula do oferecimento (edc_oferecimento_dias_aula):', e);
+                                return [];
+                            }
+                        })();
+                        setExistingDiasAula(diasAulaDoBanco);
 
-                        const diasAulaConfig: DiaAulaConfig[] = diaAulas
-
-                            .filter((da) => diaAulaIdsUnicos.includes(da.id))
-
-                            .map((da) => ({id: da.id, diaSemanaId: da.diaSemanaId, turnoEducacaoId: da.turnoEducacaoId, tempoAulaId: da.tempoAulaId}));
+                        const catalogoDiaAulas: any[] = das?.data ?? [];
+                        let diasAulaConfig: DiaAulaConfig[];
+                        let diaAulaIdsUnicos: number[];
+                        if (diasAulaDoBanco.length) {
+                            diasAulaConfig = diasAulaDoBanco.map((da) => ({id: da.id, diaSemanaId: da.diaSemanaId, turnoEducacaoId: da.turnoEducacaoId, tempoAulaId: da.tempoAulaId}));
+                            diaAulaIdsUnicos = diasAulaDoBanco.map((da) => da.id);
+                        } else {
+                            // Fallback: reconstrói a partir das ocorrências quando o join ainda está vazio.
+                            diaAulaIdsUnicos = [...new Set(minhas.map((o) => o.diaAulaId).filter(Boolean))] as number[];
+                            diasAulaConfig = catalogoDiaAulas
+                                .filter((da) => diaAulaIdsUnicos.includes(da.id))
+                                .map((da) => ({id: da.id, diaSemanaId: da.diaSemanaId, turnoEducacaoId: da.turnoEducacaoId, tempoAulaId: da.tempoAulaId}));
+                        }
 
                         const diasSemanaConfigLoaded = diasAulaConfig.map((c, idx) => ({key: `loaded-${idx}`, ...c}));
 
@@ -466,26 +502,6 @@ const [carregando, setCarregando] = useState(true);
                         });
 
                         setDiasSemanaConfigurados(diasSemanaConfigLoaded);
-
-                        // Load existing dias aula from the offering
-                        if (ent.id) {
-                            try {
-                                const diasAulaResp = await api.get<Array<{
-                                    id: number;
-                                    diaSemanaId: number;
-                                    turnoEducacaoId: number;
-                                    tempoAulaId: number;
-                                    turnoEducacao_descricao?: string;
-                                    tempoAula_descricao?: string;
-                                }>>('/api/educacao/oferecimento-componente-curricular/buscar-dias-aula-por-oferecimento', {
-                                    params: {oferecimentoComponenteCurricularId: ent.id}
-                                });
-                                setExistingDiasAula(diasAulaResp?.data ?? []);
-                            } catch (e) {
-                                console.warn('Erro ao carregar dias de aula do oferecimento:', e);
-                                setExistingDiasAula([]);
-                            }
-                        }
 
                         if (ent.unidadeId) {
 

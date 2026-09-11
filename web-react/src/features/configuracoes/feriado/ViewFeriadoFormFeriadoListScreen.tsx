@@ -344,7 +344,7 @@ export default function ViewFeriadoFormFeriadoListScreen() {
 
                                 <span className="form-label">Descrição *</span>
 
-                                <textarea className="form-input" rows={4} value={descricao}
+                                <textarea className="form-input" rows={4} style={{gridColumn: 'span 3'}} value={descricao}
 
                                           onChange={(event) => setDescricao(event.target.value)}/>
 

@@ -37,9 +37,7 @@ async function fetchModules(accessToken: string): Promise<Module[]> {
     const cached = readMenuCache();
     if (cached && Date.now() - cached.at < MENU_TTL) return cached.modules;
     try {
-        const {data} = await api.get<Module[]>('/api/basico/modulo/menu', {
-            headers: {Authorization: `Bearer ${accessToken}`},
-        });
+        const {data} = await api.get<Module[]>('/api/basico/modulo/menu');
         localStorage.setItem(MENU_KEY, JSON.stringify({at: Date.now(), modules: data}));
         return data;
     } catch {

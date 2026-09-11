@@ -1,17 +1,8 @@
 import React from 'react';
-export { default as AlunoAulasScreen } from '../features/configuracoes/aluno/AlunoAulasScreen.tsx';
-export { default as AlunoAulasTurmaScreen } from '../features/configuracoes/aluno/AlunoAulasTurmaScreen.tsx';
-export { default as AlunoAvaliacaoResponderScreen } from '../features/configuracoes/aluno/AlunoAvaliacaoResponderScreen.tsx';
-export { default as AlunoAvaliacoesScreen } from '../features/configuracoes/aluno/AlunoAvaliacoesScreen.tsx';
-export { default as AlunoBoletimScreen } from '../features/configuracoes/aluno/AlunoBoletimScreen.tsx';
-export { default as AlunoDashboardScreen } from '../features/configuracoes/aluno/AlunoDashboardScreen.tsx';
-export { default as AlunoFinanceiroScreen } from '../features/configuracoes/aluno/AlunoFinanceiroScreen.tsx';
-export { default as AlunoFrequenciaScreen } from '../features/configuracoes/aluno/AlunoFrequenciaScreen.tsx';
 export { default as AsaasClientesListScreen } from '../features/configuracoes/asaas/AsaasClientesListScreen.tsx';
 export { default as AsaasCobrancasListScreen } from '../features/configuracoes/asaas/AsaasCobrancasListScreen.tsx';
 export { default as AsaasParcelasListScreen } from '../features/configuracoes/asaas/AsaasParcelasListScreen.tsx';
 export { default as AuditoriaScreen } from '../features/configuracoes/auditoria/AuditoriaScreen.tsx';
-export { default as AulaAlunoScreen } from '../features/configuracoes/aula/AulaAlunoScreen.tsx';
 export { default as CadastroUsuarioScreen } from '../features/configuracoes/common/CadastroUsuarioScreen.tsx';
 export { default as CurriculoCampoListScreen } from '../features/configuracoes/curriculo/CurriculoCampoListScreen.tsx';
 export { default as CurriculoConfiguracaoListScreen } from '../features/configuracoes/curriculo/CurriculoConfiguracaoListScreen.tsx';
@@ -200,6 +191,7 @@ export { default as ViewMensagemNapFormMensagemNapListScreen } from '../features
 export { default as ViewMensagemNapListMensagemNapListScreen } from '../features/configuracoes/mensagem/ViewMensagemNapListMensagemNapListScreen.tsx';
 export { default as ViewMenuListMapaMenuListScreen } from '../features/configuracoes/menu/ViewMenuListMapaMenuListScreen.tsx';
 export { default as ViewMetaFormMetaListScreen } from '../features/configuracoes/meta/ViewMetaFormMetaListScreen.tsx';
+export { default as ViewMetaFormMetaDinamicaListScreen } from '../features/configuracoes/meta/ViewMetaFormMetaDinamicaListScreen.tsx';
 export { default as ViewMetaIndicadorMetaDinamicaListScreen } from '../features/configuracoes/meta/ViewMetaIndicadorMetaDinamicaListScreen.tsx';
 export { default as ViewMetaListMetaDinamicaListScreen } from '../features/configuracoes/meta/ViewMetaListMetaDinamicaListScreen.tsx';
 export { default as ViewMetaListMetaListScreen } from '../features/configuracoes/meta/ViewMetaListMetaListScreen.tsx';
@@ -276,8 +268,10 @@ export { default as ViewRelatoriosFormGraficoListScreen } from '../features/conf
 export { default as ViewRelatoriosFormMapaListScreen } from '../features/configuracoes/relatorios/ViewRelatoriosFormMapaListScreen.tsx';
 export { default as ViewRelatoriosFormOrganogramaListScreen } from '../features/configuracoes/relatorios/ViewRelatoriosFormOrganogramaListScreen.tsx';
 export { default as ViewRelatoriosFormTabelaListScreen } from '../features/configuracoes/relatorios/ViewRelatoriosFormTabelaListScreen.tsx';
+export { default as ViewRelatoriosFormIndicadorGaugeListScreen } from '../features/relatorios/IndicadorGaugeFormScreen.tsx';
 export { default as ViewRelatoriosListDashboardListScreen } from '../features/configuracoes/relatorios/ViewRelatoriosListDashboardListScreen.tsx';
 export { default as ViewRelatoriosListOrganogramaListScreen } from '../features/configuracoes/relatorios/ViewRelatoriosListOrganogramaListScreen.tsx';
+export { default as ViewRelatoriosListIndicadorGaugeListScreen } from '../features/relatorios/IndicadorGaugeListScreen.tsx';
 export { default as ViewRelatoriosViewDashboardListScreen } from '../features/configuracoes/relatorios/ViewRelatoriosViewDashboardListScreen.tsx';
 export { default as ViewRelatoriosViewGraficoBarrasHorizontalListScreen } from '../features/configuracoes/relatorios/ViewRelatoriosViewGraficoBarrasHorizontalListScreen.tsx';
 export { default as ViewRelatoriosViewGraficoBarrasVerticalListScreen } from '../features/configuracoes/relatorios/ViewRelatoriosViewGraficoBarrasVerticalListScreen.tsx';
@@ -288,6 +282,7 @@ export { default as ViewRelatoriosViewGraficoPizzaListScreen } from '../features
 export { default as ViewRelatoriosViewMapaListScreen } from '../features/configuracoes/relatorios/ViewRelatoriosViewMapaListScreen.tsx';
 export { default as ViewRelatoriosViewOrganogramaListScreen } from '../features/configuracoes/relatorios/ViewRelatoriosViewOrganogramaListScreen.tsx';
 export { default as ViewRelatoriosViewTabelaListScreen } from '../features/configuracoes/relatorios/ViewRelatoriosViewTabelaListScreen.tsx';
+export { default as ViewRelatoriosViewIndicadorGaugeScreen } from '../features/relatorios/IndicadorGaugeViewScreen.tsx';
 
 export { default as ViewResultadoCobrancaFormResultadoCobrancaListScreen } from '../features/configuracoes/resultado/ViewResultadoCobrancaFormResultadoCobrancaListScreen.tsx';
 export { default as ViewResultadoCobrancaListResultadoCobrancaListScreen } from '../features/configuracoes/resultado/ViewResultadoCobrancaListResultadoCobrancaListScreen.tsx';

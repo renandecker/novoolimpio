@@ -5,10 +5,10 @@ const tipoCursoTabs: FormTabConfig[] = [
     {
         key: 'definicao',
         label: 'Definicao',
-        fields: [
-            {name: 'id', label: 'ID', readOnly: true},
-            {name: 'descricao', label: 'Descricao', required: true, span: 3},
-        ],
+            fields: [
+                {name: 'id', label: 'ID', readOnly: true},
+                {name: 'descricao', label: 'Descricao', required: true},
+            ],
     },
 ];
 

@@ -464,135 +464,46 @@ export default function ViewOperacionalFormOperacionalListScreen() {
 
 
 
-                    <div className="table_form" style={{display: 'grid', gridTemplateColumns: '180px 1fr', gap: '12px 16px', alignItems: 'center'}}>
+                    <div className="form-grid">
 
-
-
-                        {/* Id */}
-
-                        <label htmlFor="inputId:id" className="form-label" style={{fontWeight: 600}}>Id</label>
-
-                        <input id="inputId:id" className="form-input inputTiny" value={isEdit ? String(editingId) : ''} disabled placeholder="(novo)" style={{width: 90, background: '#f3f4f6'}} />
-
-
-
-                        {/* Pacote * */}
-
-                        <label htmlFor="inputPacote:pacote" className="form-label" style={{fontWeight: 600}}>
-
-                            Pacote <span style={{color: '#C90000'}}>*</span>
-
+                        <label className="form-field">
+                            <span className="form-label">Id</span>
+                            <input id="inputId:id" className="form-input inputTiny" value={isEdit ? String(editingId) : ''} disabled placeholder="(novo)" style={{width: 90, background: '#f3f4f6'}} />
                         </label>
 
-                        <select
-
-                            id="inputPacote:pacote"
-
-                            className="form-input inputLargeMax"
-
-                            value={pacoteId ?? ''}
-
-                            onChange={e => setPacoteId(e.target.value ? Number(e.target.value) : null)}
-
-                            required
-
-                        >
-
-                            <option value="">-- Selecione --</option>
-
-                            {pacotes.map(p => (
-
-                                <option key={p.id} value={p.id}>{p.descricao}</option>
-
-                            ))}
-
-                        </select>
-
-
-
-                        {/* Direcionamento * */}
-
-                        <label htmlFor="inputDirecionamento:direcionamento" className="form-label" style={{fontWeight: 600}}>
-
-                            Direcionamento <span style={{color: '#C90000'}}>*</span>
-
+                        <label className="form-field">
+                            <span className="form-label">Pacote <span style={{color: '#C90000'}}>*</span></span>
+                            <select id="inputPacote:pacote" className="form-input inputLargeMax" value={pacoteId ?? ''} onChange={e => setPacoteId(e.target.value ? Number(e.target.value) : null)} required>
+                                <option value="">-- Selecione --</option>
+                                {pacotes.map(p => (
+                                    <option key={p.id} value={p.id}>{p.descricao}</option>
+                                ))}
+                            </select>
                         </label>
 
-                        <select
+                        <label className="form-field">
+                            <span className="form-label">Direcionamento <span style={{color: '#C90000'}}>*</span></span>
+                            <select id="inputDirecionamento:direcionamento" className="form-input inputLarge" value={direcionamento} onChange={e => setDirecionamento(e.target.value as Direcionamento)} required>
+                                <option value="">-- Selecione --</option>
+                                {direcionamentoOptions.map(o => (
+                                    <option key={o.value} value={o.value}>{o.label}</option>
+                                ))}
+                            </select>
+                        </label>
 
-                            id="inputDirecionamento:direcionamento"
+                        <label className="form-field">
+                            <span className="form-label">Coordenador</span>
+                            <AutoComplete id="inputCoordenador:coordenador" search={coordenadorSearch} value={coordenadorId ? {id: coordenadorId, login: '', nome: ''} : null} onSelect={u => setCoordenadorId(u?.id ?? null)} onClear={() => setCoordenadorId(null)} getLabel={u => u?.login ?? ''} placeholder="Digite o login do coordenador" style={{width: '100%'}} />
+                        </label>
 
-                            className="form-input inputLarge"
-
-                            value={direcionamento}
-
-                            onChange={e => setDirecionamento(e.target.value as Direcionamento)}
-
-                            required
-
-                        >
-
-                            <option value="">-- Selecione --</option>
-
-                            {direcionamentoOptions.map(o => (
-
-                                <option key={o.value} value={o.value}>{o.label}</option>
-
-                            ))}
-
-                        </select>
-
-
-
-                        {/* Coordenador */}
-
-                        <label htmlFor="inputCoordenador:coordenador" className="form-label" style={{fontWeight: 600}}>Coordenador</label>
-
-                        <AutoComplete
-
-                            id="inputCoordenador:coordenador"
-
-                            search={coordenadorSearch}
-
-                            value={coordenadorId ? {id: coordenadorId, login: '', nome: ''} : null}
-
-                            onSelect={u => setCoordenadorId(u?.id ?? null)}
-
-                            onClear={() => setCoordenadorId(null)}
-
-                            getLabel={u => u?.login ?? ''}
-
-                            placeholder="Digite o login do coordenador"
-
-                            style={{width: '100%'}}
-
-                        />
-
-
-
-                        {/* Status */}
-
-                        <label htmlFor="inputStatus" className="form-label" style={{fontWeight: 600}}>Status</label>
-
-                        <select
-
-                            id="inputStatus"
-
-                            className="form-input"
-
-                            value={status}
-
-                            onChange={e => setStatus(e.target.value as StatusPacote)}
-
-                        >
-
-                            {statusOptions.map(o => (
-
-                                <option key={o.value} value={o.value}>{o.label}</option>
-
-                            ))}
-
-                        </select>
+                        <label className="form-field">
+                            <span className="form-label">Status</span>
+                            <select id="inputStatus" className="form-input" value={status} onChange={e => setStatus(e.target.value as StatusPacote)}>
+                                {statusOptions.map(o => (
+                                    <option key={o.value} value={o.value}>{o.label}</option>
+                                ))}
+                            </select>
+                        </label>
 
                     </div>
 

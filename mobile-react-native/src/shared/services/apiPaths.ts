@@ -13,6 +13,9 @@ export const API_PATHS = {
     georeferencia: '/api/relatorios/georeferencia',
     relatorioDisponiveis: '/api/relatorios/relatorio/disponiveis',
     organograma: '/api/relatorios/organograma',
+    indicadorGauge: '/api/relatorios/indicador-gauge',
+    indicadorGaugeDisponiveis: '/api/relatorios/indicador-gauge/disponiveis',
+    indicadorGaugeExecutar: '/api/relatorios/indicador-gauge/executar',
   },
 } as const;
 

@@ -251,64 +251,134 @@ export default function CadastroUsuarioMobileScreen() {
             <Section title="Dados Pessoais" />
             {tipoPessoa === 'FISICA' ? (
                 <>
-                    <Field label="CPF" value={form.cpf} onChange={(v) => set('cpf', v)}
-                        placeholder="999.999.999-99" format={formatCpf} required />
-                    <Field label="RG" value={form.rg} onChange={(v) => set('rg', v)} placeholder="Registro Geral" />
-                    <Field label="Nome Completo" value={form.nome} onChange={(v) => set('nome', v)}
-                        placeholder="Nome completo" required />
-                    <Field label="Nome Social" value={form.nomeSocial} onChange={(v) => set('nomeSocial', v)}
-                        placeholder="Nome social" />
-                    <Field label="Data Nascimento" value={form.dataNascimento}
-                        onChange={(v) => set('dataNascimento', v)} type="date" required />
-                    <Field label="Cidade Origem" value={form.cidadeOrigem} onChange={(v) => set('cidadeOrigem', v)}
-                        placeholder="Cidade de origem" />
-                    <SelectField label="Gênero" value={form.generoId} options={GENEROS}
-                        onChange={(v) => set('generoId', v)} />
-                    <SelectField label="Etnia" value={form.etniaId} options={etniaOptions}
-                        onChange={(v) => set('etniaId', v)} />
-                    <SelectField label="Estado Civil" value={form.estadoCivilId} options={estadoCivilOptions}
-                        onChange={(v) => set('estadoCivilId', v)} required />
-                    <SelectField label="Escolaridade" value={form.escolaridadeId} options={escolaridadeOptions}
-                        onChange={(v) => set('escolaridadeId', v)} required />
-                    <Field label="Nome do Pai" value={form.nomePai} onChange={(v) => set('nomePai', v)}
-                        placeholder="Nome do pai" />
-                    <Field label="Nome da Mãe" value={form.nomeMae} onChange={(v) => set('nomeMae', v)}
-                        placeholder="Nome da mãe" required />
+                    <View style={s.formRow}>
+                        <View style={s.fieldHalf}>
+                            <Field label="CPF" value={form.cpf} onChange={(v) => set('cpf', v)}
+                                placeholder="999.999.999-99" format={formatCpf} required />
+                        </View>
+                        <View style={s.fieldHalf}>
+                            <Field label="RG" value={form.rg} onChange={(v) => set('rg', v)} placeholder="Registro Geral" />
+                        </View>
+                    </View>
+                    <View style={s.formRow}>
+                        <View style={s.fieldHalf}>
+                            <Field label="Nome Completo" value={form.nome} onChange={(v) => set('nome', v)}
+                                placeholder="Nome completo" required />
+                        </View>
+                        <View style={s.fieldHalf}>
+                            <Field label="Nome Social" value={form.nomeSocial} onChange={(v) => set('nomeSocial', v)}
+                                placeholder="Nome social" />
+                        </View>
+                    </View>
+                    <View style={s.formRow}>
+                        <View style={s.fieldHalf}>
+                            <Field label="Data Nascimento" value={form.dataNascimento}
+                                onChange={(v) => set('dataNascimento', v)} type="date" required />
+                        </View>
+                        <View style={s.fieldHalf}>
+                            <Field label="Cidade Origem" value={form.cidadeOrigem} onChange={(v) => set('cidadeOrigem', v)}
+                                placeholder="Cidade de origem" />
+                        </View>
+                    </View>
+                    <View style={s.formRow}>
+                        <View style={s.fieldHalf}>
+                            <SelectField label="Gênero" value={form.generoId} options={GENEROS}
+                                onChange={(v) => set('generoId', v)} />
+                        </View>
+                        <View style={s.fieldHalf}>
+                            <SelectField label="Etnia" value={form.etniaId} options={etniaOptions}
+                                onChange={(v) => set('etniaId', v)} />
+                        </View>
+                    </View>
+                    <View style={s.formRow}>
+                        <View style={s.fieldHalf}>
+                            <SelectField label="Estado Civil" value={form.estadoCivilId} options={estadoCivilOptions}
+                                onChange={(v) => set('estadoCivilId', v)} required />
+                        </View>
+                        <View style={s.fieldHalf}>
+                            <SelectField label="Escolaridade" value={form.escolaridadeId} options={escolaridadeOptions}
+                                onChange={(v) => set('escolaridadeId', v)} required />
+                        </View>
+                    </View>
+                    <View style={s.formRow}>
+                        <View style={s.fieldHalf}>
+                            <Field label="Nome do Pai" value={form.nomePai} onChange={(v) => set('nomePai', v)}
+                                placeholder="Nome do pai" />
+                        </View>
+                        <View style={s.fieldHalf}>
+                            <Field label="Nome da Mãe" value={form.nomeMae} onChange={(v) => set('nomeMae', v)}
+                                placeholder="Nome da mãe" required />
+                        </View>
+                    </View>
                 </>
             ) : (
                 <>
-                    <Field label="CNPJ" value={form.cnpj} onChange={(v) => set('cnpj', v)}
-                        placeholder="99.999.999/9999-99" format={formatCnpj} required />
-                    <Field label="Razão Social" value={form.razaoSocial} onChange={(v) => set('razaoSocial', v)}
-                        placeholder="Razão social" required />
-                    <Field label="Nome Fantasia" value={form.nomeFantasia} onChange={(v) => set('nomeFantasia', v)}
-                        placeholder="Nome fantasia" />
-                    <Field label="Inscrição Municipal" value={form.inscricaoMunicipal}
-                        onChange={(v) => set('inscricaoMunicipal', v)} placeholder="Inscrição municipal" />
-                    <Field label="Inscrição Estadual" value={form.inscricaoEstadual}
-                        onChange={(v) => set('inscricaoEstadual', v)} placeholder="Inscrição estadual" />
+                    <View style={s.formRow}>
+                        <View style={s.fieldHalf}>
+                            <Field label="CNPJ" value={form.cnpj} onChange={(v) => set('cnpj', v)}
+                                placeholder="99.999.999/9999-99" format={formatCnpj} required />
+                        </View>
+                        <View style={s.fieldHalf}>
+                            <Field label="Inscrição Estadual" value={form.inscricaoEstadual}
+                                onChange={(v) => set('inscricaoEstadual', v)} placeholder="Inscrição estadual" />
+                        </View>
+                    </View>
+                    <View style={s.formRow}>
+                        <View style={s.fieldHalf}>
+                            <Field label="Razão Social" value={form.razaoSocial} onChange={(v) => set('razaoSocial', v)}
+                                placeholder="Razão social" required />
+                        </View>
+                        <View style={s.fieldHalf}>
+                            <Field label="Nome Fantasia" value={form.nomeFantasia} onChange={(v) => set('nomeFantasia', v)}
+                                placeholder="Nome fantasia" />
+                        </View>
+                    </View>
+                    <View style={s.formRow}>
+                        <View style={s.fieldHalf}>
+                            <Field label="Inscrição Municipal" value={form.inscricaoMunicipal}
+                                onChange={(v) => set('inscricaoMunicipal', v)} placeholder="Inscrição municipal" />
+                        </View>
+                    </View>
                 </>
             )}
 
             {tipoPessoa === 'FISICA' && (
                 <>
                     <Section title="Referências" />
-                    <Field label="Nome Referência 1" value={form.nomeReferencia}
-                        onChange={(v) => set('nomeReferencia', v)} placeholder="Nome referência" required />
-                    <Field label="Telefone" value={form.telefoneReferencia}
-                        onChange={(v) => set('telefoneReferencia', v)}
-                        placeholder="(99) 9999-9999" format={formatPhone} />
-                    <Field label="Celular" value={form.celularReferencia}
-                        onChange={(v) => set('celularReferencia', v)}
-                        placeholder="(99) 99999-9999" format={formatPhone} />
-                    <Field label="Nome Referência 2" value={form.nomeReferencia2}
-                        onChange={(v) => set('nomeReferencia2', v)} placeholder="Nome referência 2" />
-                    <Field label="Telefone" value={form.telefoneReferencia2}
-                        onChange={(v) => set('telefoneReferencia2', v)}
-                        placeholder="(99) 9999-9999" format={formatPhone} />
-                    <Field label="Celular" value={form.celularReferencia2}
-                        onChange={(v) => set('celularReferencia2', v)}
-                        placeholder="(99) 99999-9999" format={formatPhone} />
+                    <View style={s.formRow}>
+                        <View style={s.fieldHalf}>
+                            <Field label="Nome Referência 1" value={form.nomeReferencia}
+                                onChange={(v) => set('nomeReferencia', v)} placeholder="Nome referência" required />
+                        </View>
+                        <View style={s.fieldHalf}>
+                            <Field label="Telefone" value={form.telefoneReferencia}
+                                onChange={(v) => set('telefoneReferencia', v)}
+                                placeholder="(99) 9999-9999" format={formatPhone} />
+                        </View>
+                    </View>
+                    <View style={s.formRow}>
+                        <View style={s.fieldHalf}>
+                            <Field label="Celular" value={form.celularReferencia}
+                                onChange={(v) => set('celularReferencia', v)}
+                                placeholder="(99) 99999-9999" format={formatPhone} />
+                        </View>
+                        <View style={s.fieldHalf}>
+                            <Field label="Nome Referência 2" value={form.nomeReferencia2}
+                                onChange={(v) => set('nomeReferencia2', v)} placeholder="Nome referência 2" />
+                        </View>
+                    </View>
+                    <View style={s.formRow}>
+                        <View style={s.fieldHalf}>
+                            <Field label="Telefone" value={form.telefoneReferencia2}
+                                onChange={(v) => set('telefoneReferencia2', v)}
+                                placeholder="(99) 9999-9999" format={formatPhone} />
+                        </View>
+                        <View style={s.fieldHalf}>
+                            <Field label="Celular" value={form.celularReferencia2}
+                                onChange={(v) => set('celularReferencia2', v)}
+                                placeholder="(99) 99999-9999" format={formatPhone} />
+                        </View>
+                    </View>
                 </>
             )}
         </ScrollView>
@@ -321,18 +391,38 @@ export default function CadastroUsuarioMobileScreen() {
             keyboardShouldPersistTaps="handled"
         >
             <Section title="Endereço" />
-            <Field label="CEP" value={form.cep} onChange={(v) => set('cep', v)}
-                placeholder="99999-999" format={formatCep} />
-            <Field label="Logradouro" value={form.logradouro} onChange={(v) => set('logradouro', v)}
-                placeholder="Logradouro" />
-            <Field label="Número" value={form.numero} onChange={(v) => set('numero', v)}
-                placeholder="Número" type="number" />
-            <Field label="Bairro" value={form.bairro} onChange={(v) => set('bairro', v)}
-                placeholder="Bairro" />
-            <Field label="Cidade" value={form.cidade} onChange={(v) => set('cidade', v)}
-                placeholder="Cidade" />
-            <Field label="Complemento" value={form.complemento} onChange={(v) => set('complemento', v)}
-                placeholder="Complemento" multiline />
+            <View style={s.formRow}>
+                <View style={s.fieldHalf}>
+                    <Field label="CEP" value={form.cep} onChange={(v) => set('cep', v)}
+                        placeholder="99999-999" format={formatCep} />
+                </View>
+                <View style={s.fieldHalf}>
+                    <Field label="Número" value={form.numero} onChange={(v) => set('numero', v)}
+                        placeholder="Número" type="number" />
+                </View>
+            </View>
+            <View style={s.formRow}>
+                <View style={s.fieldFull}>
+                    <Field label="Logradouro" value={form.logradouro} onChange={(v) => set('logradouro', v)}
+                        placeholder="Logradouro" />
+                </View>
+            </View>
+            <View style={s.formRow}>
+                <View style={s.fieldHalf}>
+                    <Field label="Bairro" value={form.bairro} onChange={(v) => set('bairro', v)}
+                        placeholder="Bairro" />
+                </View>
+                <View style={s.fieldHalf}>
+                    <Field label="Cidade" value={form.cidade} onChange={(v) => set('cidade', v)}
+                        placeholder="Cidade" />
+                </View>
+            </View>
+            <View style={s.formRow}>
+                <View style={s.fieldFull}>
+                    <Field label="Complemento" value={form.complemento} onChange={(v) => set('complemento', v)}
+                        placeholder="Complemento" multiline />
+                </View>
+            </View>
         </ScrollView>
     );
 
@@ -343,34 +433,65 @@ export default function CadastroUsuarioMobileScreen() {
             keyboardShouldPersistTaps="handled"
         >
             <Section title="Contato" />
-            <Field label="E-mail" value={form.email} onChange={(v) => set('email', v)}
-                placeholder="E-mail" type="email" required />
-            <Field label="Telefone Residencial" value={form.telefoneResidencial}
-                onChange={(v) => set('telefoneResidencial', v)}
-                placeholder="(99) 9999-9999" format={formatPhone} />
-            {tipoPessoa === 'FISICA' && (
-                <Field label="Telefone Comercial" value={form.telefoneComercial}
-                    onChange={(v) => set('telefoneComercial', v)}
-                    placeholder="(99) 9999-9999" format={formatPhone} />
-            )}
-            <Field label="Celular" value={form.celular} onChange={(v) => set('celular', v)}
-                placeholder="(99) 99999-9999" format={formatPhone} />
-            {tipoPessoa === 'JURIDICA' && (
-                <Field label="Fax" value={form.fax} onChange={(v) => set('fax', v)}
-                    placeholder="(99) 9999-9999" format={formatPhone} />
+            <View style={s.formRow}>
+                <View style={s.fieldHalf}>
+                    <Field label="E-mail" value={form.email} onChange={(v) => set('email', v)}
+                        placeholder="E-mail" type="email" required />
+                </View>
+                <View style={s.fieldHalf}>
+                    <Field label="Telefone Residencial" value={form.telefoneResidencial}
+                        onChange={(v) => set('telefoneResidencial', v)}
+                        placeholder="(99) 9999-9999" format={formatPhone} />
+                </View>
+            </View>
+            {tipoPessoa === 'FISICA' ? (
+                <View style={s.formRow}>
+                    <View style={s.fieldHalf}>
+                        <Field label="Telefone Comercial" value={form.telefoneComercial}
+                            onChange={(v) => set('telefoneComercial', v)}
+                            placeholder="(99) 9999-9999" format={formatPhone} />
+                    </View>
+                    <View style={s.fieldHalf}>
+                        <Field label="Celular" value={form.celular} onChange={(v) => set('celular', v)}
+                            placeholder="(99) 99999-9999" format={formatPhone} />
+                    </View>
+                </View>
+            ) : (
+                <View style={s.formRow}>
+                    <View style={s.fieldHalf}>
+                        <Field label="Celular" value={form.celular} onChange={(v) => set('celular', v)}
+                            placeholder="(99) 99999-9999" format={formatPhone} />
+                    </View>
+                    <View style={s.fieldHalf}>
+                        <Field label="Fax" value={form.fax} onChange={(v) => set('fax', v)}
+                            placeholder="(99) 9999-9999" format={formatPhone} />
+                    </View>
+                </View>
             )}
 
             {tipoPessoa === 'FISICA' && (
                 <>
                     <Section title="Redes Sociais" />
-                    <Field label="Facebook" value={form.facebook} onChange={(v) => set('facebook', v)}
-                        placeholder="Facebook" />
-                    <Field label="Twitter" value={form.twitter} onChange={(v) => set('twitter', v)}
-                        placeholder="Twitter" />
-                    <Field label="Google+" value={form.googlePlus} onChange={(v) => set('googlePlus', v)}
-                        placeholder="Google+" />
-                    <Field label="Telegram" value={form.telegram} onChange={(v) => set('telegram', v)}
-                        placeholder="Telegram" />
+                    <View style={s.formRow}>
+                        <View style={s.fieldHalf}>
+                            <Field label="Facebook" value={form.facebook} onChange={(v) => set('facebook', v)}
+                                placeholder="Facebook" />
+                        </View>
+                        <View style={s.fieldHalf}>
+                            <Field label="Twitter" value={form.twitter} onChange={(v) => set('twitter', v)}
+                                placeholder="Twitter" />
+                        </View>
+                    </View>
+                    <View style={s.formRow}>
+                        <View style={s.fieldHalf}>
+                            <Field label="Google+" value={form.googlePlus} onChange={(v) => set('googlePlus', v)}
+                                placeholder="Google+" />
+                        </View>
+                        <View style={s.fieldHalf}>
+                            <Field label="Telegram" value={form.telegram} onChange={(v) => set('telegram', v)}
+                                placeholder="Telegram" />
+                        </View>
+                    </View>
                 </>
             )}
         </ScrollView>
@@ -418,10 +539,16 @@ export default function CadastroUsuarioMobileScreen() {
             keyboardShouldPersistTaps="handled"
         >
             <Section title="Acesso ao Sistema" />
-            <Field label="Login" value={form.login} onChange={(v) => set('login', v)}
-                placeholder="Login do usuário" required />
-            <Field label="Senha" value={form.senha} onChange={(v) => set('senha', v)}
-                placeholder="Senha" type="password" />
+            <View style={s.formRow}>
+                <View style={s.fieldHalf}>
+                    <Field label="Login" value={form.login} onChange={(v) => set('login', v)}
+                        placeholder="Login do usuário" required />
+                </View>
+                <View style={s.fieldHalf}>
+                    <Field label="Senha" value={form.senha} onChange={(v) => set('senha', v)}
+                        placeholder="Senha" type="password" />
+                </View>
+            </View>
             <Section title="Unidades" />
             <View style={s.infoBox}>
                 <Text style={s.infoText}>
@@ -538,6 +665,9 @@ const s = StyleSheet.create({
         letterSpacing: 0.5,
     },
     fieldContainer: {gap: Spacing.xs},
+    formRow: {flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md},
+    fieldHalf: {width: '47%'},
+    fieldFull: {width: '100%'},
     fieldLabel: {
         fontSize: Typography.sizes.sm,
         fontWeight: Typography.weights.semibold,

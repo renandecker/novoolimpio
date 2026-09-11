@@ -1,22 +1,23 @@
 import {useState, useEffect} from 'react';
-import {useParams} from 'react-router-dom';
+import {useParams, useSearchParams} from 'react-router-dom';
+import {useQuery} from '@tanstack/react-query';
 import {PermissionGate} from '../../../shared/services/permissions';
-import {DataTable} from '../../../shared/components/DataTable';
 import {ReportFilters} from '../../../shared/components/ReportFilters';
 import HelpOverlay from '../../../shared/components/HelpOverlay';
 import type {FiltroRelatorioWrapper} from '../../../shared/types/types';
 import {api} from '../../../shared/services/api';
+import {abrirRelatorio} from '../../relatorios/relatorios';
+import '../ReportView.css';
 
 export default function ViewRelatoriosViewTabelaListScreen() {
     const {id} = useParams<{ id: string }>();
+    const [searchParams] = useSearchParams();
     const tabelaId = Number(id);
     const [filtros, setFiltros] = useState<FiltroRelatorioWrapper[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [formato, setFormato] = useState<'PDF' | 'EXCEL'>('PDF');
-    const [exportStatus, setExportStatus] = useState<'idle' | 'processing' | 'completed' | 'error'>('idle');
-    const [extratorId, setExtratorId] = useState<number | null>(null);
-    const [exportError, setExportError] = useState<string>('');
-    const [pollCount, setPollCount] = useState(0);
+    const [loadingFiltros, setLoadingFiltros] = useState(true);
+    const [page, setPage] = useState(0);
+    const [fetchLimit, setFetchLimit] = useState(10);
+    const [dataPage, setDataPage] = useState<{ colunas: string[]; linhas: Record<string, unknown>[]; totalElements: number; totalPages: number } | null>(null);
 
     useEffect(() => {
         const fetchFiltros = async () => {
@@ -28,168 +29,125 @@ export default function ViewRelatoriosViewTabelaListScreen() {
             } catch (error) {
                 console.error('Erro ao carregar filtros:', error);
             } finally {
-                setLoading(false);
+                setLoadingFiltros(false);
             }
         };
         fetchFiltros();
     }, [tabelaId]);
 
+    const report = useQuery({
+        queryKey: ['relatorio-tabela', tabelaId],
+        queryFn: () => abrirRelatorio('TABELA', tabelaId),
+        enabled: Number.isInteger(tabelaId) && tabelaId > 0,
+    });
+
     useEffect(() => {
-        let interval: ReturnType<typeof setInterval>;
-        if (exportStatus === 'processing' && extratorId) {
-            interval = setInterval(async () => {
-                try {
-                    const response = await api.get(`/api/relatorios/extrator/${extratorId}`);
-                    const data = response.data;
-                    if (data.situacao === 'Gerado') {
-                        setExportStatus('completed');
-                        clearInterval(interval);
-                    } else if (data.situacao === 'Erro') {
-                        setExportStatus('error');
-                        setExportError(data.log || 'Erro ao gerar documento');
-                        clearInterval(interval);
-                    }
-                } catch (error) {
-                    console.error('Erro ao verificar status:', error);
-                }
-            }, 2000);
+        setPage(0);
+        setDataPage(null);
+    }, [tabelaId]);
+
+    useEffect(() => {
+        const dados = report.data?.dados;
+        if (!dados || report.data?.tipo !== 'TABELA' || 'regras' in dados) {
+            setDataPage(null);
+            return;
         }
-        return () => {
-            if (interval) clearInterval(interval);
-        };
-    }, [exportStatus, extratorId]);
+        const allRows = dados.linhas || [];
+        const totalElements = allRows.length;
+        const totalPages = Math.max(1, Math.ceil(totalElements / fetchLimit));
+        const safePage = Math.min(page, totalPages - 1);
+        const start = safePage * fetchLimit;
+        const linhas = allRows.slice(start, start + fetchLimit);
+        setDataPage({colunas: dados.colunas || [], linhas, totalElements, totalPages});
+        if (page !== safePage) setPage(safePage);
+    }, [report.data, page, fetchLimit]);
 
     const handleFiltersChange = (newFiltros: FiltroRelatorioWrapper[]) => {
         setFiltros(newFiltros);
-        setExportStatus('idle');
-        setExtratorId(null);
-        setExportError('');
     };
 
     const handleApplyFilters = () => {
-        console.log('Aplicar filtros da tabela');
+        console.log('Aplicar filtros da tabela - recarregar dados');
+        report.refetch();
     };
 
-    const handleFormatoChange = (novoFormato: 'PDF' | 'EXCEL') => {
-        setFormato(novoFormato);
-        setExportStatus('idle');
-        setExtratorId(null);
-        setExportError('');
-    };
+    const nomeRelatorio = report.data?.nome || 'View Tabela';
 
-    const condicoesPara = (f: FiltroRelatorioWrapper): { operation: string; value: string; value2?: string } | null => {
-        if (!f.selected || !f.informacao) return null;
-        const fr = f.filtroRelatorio;
-        if (fr.dimensao.tipoInfo === 'TEMPO') {
-            if (f.informacao.startsWith('Faixa:')) {
-                const [inicio, fim] = f.informacao.replace('Faixa:', '').split(' até ').map(s => s.trim());
-                if (inicio && fim) return {operation: 'BETWEEN', value: inicio, value2: fim};
-            }
-            const valores = f.informacao.replace(/^(Normal|Dinâmico):\s*/, '').trim();
-            const m = valores.match(/^\w+\s+(.+)$/);
-            return {operation: 'EQUALS', value: m ? m[1] : valores};
-        }
-        if (fr.dimensao.tipoInfo === 'DESCRITIVO' && f.informacao.includes(', ')) {
-            return {operation: 'IN', value: f.informacao};
-        }
-        return {operation: 'EQUALS', value: f.informacao};
-    };
+    if (loadingFiltros || report.isLoading) {
+        return <PermissionGate permission="READ"><main className="report-view"><div className="report-view-header"><div className="report-view-header-text"><span className="report-view-type">Tabela</span><h1>Carregando...</h1></div></div></main></PermissionGate>;
+    }
 
-    const handleExport = async () => {
-        try {
-            setExportStatus('processing');
-            setExportError('');
-            const filters: Record<string, { operation: string; value: string; value2?: string }> = {};
-            filtros.forEach(f => {
-                const condicao = condicoesPara(f);
-                if (condicao && condicao.value) {
-                    filters[f.filtroRelatorio.nome] = condicao;
-                }
-            });
-            const response = await api.post('/api/relatorios/extrator/exportar', {
-                tabelaId,
-                usuarioId: 1,
-                tipo: formato,
-                filtros: filters
-            });
-            setExtratorId(response.data.id);
-        } catch (error) {
-            console.error('Erro ao iniciar exportacao:', error);
-            setExportStatus('error');
-            setExportError('Erro ao iniciar exportacao');
-        }
-    };
-
-    const handleDownload = async () => {
-        if (!extratorId) return;
-        try {
-            const response = await api.get(`/api/relatorios/extrator/${extratorId}/arquivo`, {
-                params: { tipo: formato },
-                responseType: 'blob'
-            });
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            const ext = formato === 'EXCEL' ? 'xlsx' : 'pdf';
-            link.setAttribute('download', `${extratorId}.${ext}`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Erro ao baixar arquivo:', error);
-        }
-    };
-
-    if (loading) {
-        return <PermissionGate permission="READ"><main><h1>View Tabela</h1><div>Carregando...</div></main></PermissionGate>;
+    if (report.isError || !report.data) {
+        return <PermissionGate permission="READ"><main className="report-view"><div className="report-view-header"><div className="report-view-header-text"><span className="report-view-type">Tabela</span><h1>Relatório indisponível</h1></div></div></main></PermissionGate>;
     }
 
     return <PermissionGate permission="READ">
-        <main>
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
-                <h1>View Tabela</h1>
-                <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
-                    <div style={{display: 'flex', gap: '4px', alignItems: 'center'}}>
-                        {(['PDF', 'EXCEL'] as const).map(f => (
-                            <button
-                                key={f}
-                                type="button"
-                                disabled={exportStatus === 'processing'}
-                                onClick={() => handleFormatoChange(f)}
-                                style={{height: '34px', padding: '0 12px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 600, borderRadius: '4px', cursor: 'pointer', border: '1px solid #ccc', boxSizing: 'border-box', background: formato === f ? '#2f6f4f' : '#fff', color: formato === f ? '#fff' : '#333'}}
-                            >
-                                {f === 'PDF' ? 'PDF' : 'Excel'}
-                            </button>
-                        ))}
-                    </div>
-                    <button
-                        className="btn-primary"
-                        onClick={handleExport}
-                        disabled={exportStatus === 'processing' || !Number.isInteger(tabelaId) || tabelaId <= 0}
-                        title={exportStatus === 'processing' ? 'Gerando documento...' : 'Exportar todos os dados'}
-                        style={{height: '34px', padding: '0 14px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 600, borderRadius: '4px', border: '1px solid transparent', boxSizing: 'border-box'}}
-                    >
-                        {exportStatus === 'processing' ? 'Gerando...' : 'Exportar'}
-                    </button>
-                    {exportStatus === 'completed' && (
-                        <button
-                            className="btn-primary"
-                            onClick={handleDownload}
-                            title="Baixar documento gerado"
-                            style={{height: '34px', padding: '0 14px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 600, borderRadius: '4px', border: '1px solid transparent', boxSizing: 'border-box'}}
-                        >
-                            Baixar {formato === 'EXCEL' ? 'Excel' : 'PDF'}
-                        </button>
-                    )}
-                    {exportStatus === 'error' && (
-                        <span style={{color: 'red', fontSize: '14px', display: 'flex', alignItems: 'center', height: '34px'}}>{exportError}</span>
-                    )}
+        <main className="report-view">
+            <div className="report-view-header">
+                <div className="report-view-header-text">
+                    <span className="report-view-type">Tabela</span>
+                    <h1>{nomeRelatorio}</h1>
+                </div>
+                <div className="report-view-actions">
                     <HelpOverlay/>
                 </div>
             </div>
-            <ReportFilters filtros={filtros} onFiltersChange={handleFiltersChange} onApplyFilters={handleApplyFilters} />
-            <DataTable path="/api/relatorios/grafico" hideCreate={true} hideUpdate={true} hideDelete={true} hideView={true}/>
+            <div className="report-view-content">
+                <ReportFilters filtros={filtros} onFiltersChange={handleFiltersChange} onApplyFilters={handleApplyFilters} />
+                {dataPage && (
+                    <div className="report-result">
+                        {dataPage.colunas.length === 0 ? (
+                            <p>Este relatório ainda não possui colunas configuradas.</p>
+                        ) : (
+                            <>
+                                <table>
+                                    <thead>
+                                    <tr>{dataPage.colunas.map((column) => <th key={column}>{column}</th>)}</tr>
+                                    </thead>
+                                    <tbody>{dataPage.linhas.length === 0 ? <tr>
+                                        <td colSpan={dataPage.colunas.length}>Nenhum registro encontrado.</td>
+                                    </tr> : dataPage.linhas.map((row, index) => <tr
+                                        key={index}>{dataPage.colunas.map((column) => <td
+                                        key={column}>{String(row[column] ?? '')}</td>)}</tr>)}</tbody>
+                                </table>
+                                {dataPage.totalElements > fetchLimit && (
+                                    <div className="data-table-paginator" style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '8px 0'
+                                    }}>
+                                        <button onClick={() => setPage((p) => Math.max(0, p - 1))}
+                                                disabled={page === 0}>Anterior
+                                        </button>
+                                        <span>Página {page + 1} de {dataPage.totalPages}</span>
+                                        <button
+                                            onClick={() => setPage((p) => Math.min(dataPage.totalPages - 1, p + 1))}
+                                            disabled={page >= dataPage.totalPages - 1}>Próxima
+                                        </button>
+                                        <label>
+                                            Registros por página
+                                            <select value={fetchLimit} onChange={(e) => {
+                                                setFetchLimit(Number(e.target.value));
+                                                setPage(0);
+                                            }}>
+                                                {[10, 20, 50, 100].map((s) => <option key={s}
+                                                                                   value={s}>{s}</option>)}
+                                            </select>
+                                        </label>
+                                        <span>Total: {dataPage.totalElements}</span>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+                )}
+                {!dataPage && report.data?.tipo === 'TABELA' && (
+                    <div className="report-result">
+                        <p>Nenhum registro encontrado.</p>
+                    </div>
+                )}
+            </div>
         </main>
     </PermissionGate>
 }

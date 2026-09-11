@@ -205,7 +205,7 @@ export default function ViewComponenteCurricularFormComponenteCurricularListScre
                     <label className="form-field">
                         <span className="form-label">Ementa *</span>
                         <textarea className="form-input" rows={5} value={data.entity.ementa ?? ''}
-                                  style={{gridColumn: 'span 3', minHeight: '90px'}}
+                                  style={{minHeight: '90px'}}
                                   onChange={(e) => updateField('entity', {...data.entity, ementa: e.target.value})}/>
                     </label>
                     <label className="form-field">

@@ -10,7 +10,7 @@ interface ModuloMenu {
     rotulo: string;
 }
 
-const AG_CHARTS_ENTERPRISE_CDN = 'https://cdn.jsdelivr.net/npm/ag-charts-enterprise@14.1.0/dist/umd/ag-charts-enterprise.min.js';
+const ECHARTS_CDN = 'https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js';
 
 function montarHtml(nodes: {id: number; parentId: number | null; name: string}[]): string {
     const dadosJson = JSON.stringify(nodes).replace(/</g, '\\u003c');
@@ -18,99 +18,83 @@ function montarHtml(nodes: {id: number; parentId: number | null; name: string}[]
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-    <script src="${AG_CHARTS_ENTERPRISE_CDN}"></script>
-  <script>
-    agCharts.LicenseManager.setLicenseKey('USING_AG_CHARTS_DEVELOPER_LICENSE');
-  </script>
+  <script src="${ECHARTS_CDN}"></script>
   <style>
-    html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, Roboto, Arial, sans-serif; }
-    #toolbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; background: #f4f4f4; align-items: center; }
-    #toolbar select, #toolbar button { font-size: 12px; padding: 6px 8px; border-radius: 6px; border: 1px solid #ccc; }
-    #toolbar button { background: #1B65BF; color: #fff; border: none; }
-    #myChart { width: 100%; height: calc(100vh - 96px); }
+    html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, Roboto, Arial, sans-serif; background: #fff; }
+    #toolbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; background: #f4f4f4; align-items: center; border-bottom: 1px solid #ddd; }
+    #toolbar select { font-size: 12px; padding: 6px 8px; border-radius: 6px; border: 1px solid #ccc; }
+    #myChart { width: 100%; height: calc(100vh - 55px); }
   </style>
 </head>
 <body>
   <div id="toolbar">
+    <label style="font-size: 12px; font-weight: bold;">Direção:</label>
     <select id="direcao">
-      <option value="VERTICAL">Vertical</option>
-      <option value="HORIZONTAL">Horizontal</option>
-      <option value="TOGGLE_REVERSE">Toggle Reverse</option>
+      <option value="VERTICAL">Vertical (Top-Bottom)</option>
+      <option value="HORIZONTAL">Horizontal (Left-Right)</option>
+      <option value="TOGGLE_REVERSE">Invertido (Bottom-Top)</option>
     </select>
-    <button id="expandAll">Expand All</button>
-    <button id="collapseAll">Collapse All</button>
-    <select id="noSelecionado"></select>
-    <button id="toggleNo">Toggle Nó</button>
   </div>
   <div id="myChart"></div>
   <script>
-    var dados = ${dadosJson};
-    var collapsed = [];
+    var rawNodes = ${dadosJson};
+    var myChart = echarts.init(document.getElementById('myChart'));
 
-    function idsComFilhos() {
-      var pais = {};
-      dados.forEach(function (n) { if (n.parentId !== null && n.parentId !== undefined && String(n.parentId) !== '') pais[String(n.parentId)] = true; });
-      return Object.keys(pais);
+    function buildTree(nodes) {
+      var map = {};
+      nodes.forEach(function(n) {
+        map[n.id] = { name: n.name, children: [] };
+      });
+      var roots = [];
+      nodes.forEach(function(n) {
+        var node = map[n.id];
+        if (n.parentId !== null && n.parentId !== undefined && String(n.parentId) !== '' && map[n.parentId]) {
+          map[n.parentId].children.push(node);
+        } else {
+          roots.push(node);
+        }
+      });
+      if (roots.length > 1) {
+        return [{ name: 'Menu Principal', children: roots }];
+      }
+      return roots;
     }
 
-    function direcaoParaSerie(direcao) {
-      if (direcao === 'HORIZONTAL') return {direction: 'horizontal', reverse: false};
-      if (direcao === 'TOGGLE_REVERSE') return {direction: 'vertical', reverse: true};
-      return {direction: 'vertical', reverse: false};
-    }
+    function getOption(dir) {
+      var orient = 'TB';
+      if (dir === 'HORIZONTAL') orient = 'LR';
+      if (dir === 'TOGGLE_REVERSE') orient = 'BT';
 
-    function montarOpcoes() {
-      var direcao = document.getElementById('direcao').value;
-      var dr = direcaoParaSerie(direcao);
       return {
-        container: document.getElementById('myChart'),
-        data: dados,
-        initialState: {collapsed: collapsed},
+        tooltip: { trigger: 'item', triggerOn: 'mousemove' },
         series: [{
-          type: 'organization',
-          idKey: 'id',
-          parentIdKey: 'parentId',
-          direction: dr.direction,
-          reverse: dr.reverse,
-          innerSpacing: 20,
-          outerSpacing: 40,
-          depthSpacing: 52,
-          node: {
-            width: 180,
-            cornerRadius: 10,
-            title: {key: 'name', textAlign: 'left', fontSize: 13, fontWeight: 'bold'},
-            itemStyler: function () { return {fill: '#1B65BF', fillOpacity: 0.15, stroke: '#1B65BF', strokeWidth: 2}; },
-          },
-          link: {itemStyler: function () { return {stroke: '#1B65BF'}; }},
-          expander: {text: {showAllChildren: true, showDirectChildren: true}},
-        }],
+          type: 'tree',
+          data: buildTree(rawNodes),
+          top: '5%',
+          left: '12%',
+          bottom: '5%',
+          right: '20%',
+          symbolSize: 12,
+          orient: orient,
+          label: { position: 'left', verticalAlign: 'middle', align: 'right', fontSize: 12, color: '#0f172a' },
+          leaves: { label: { position: 'right', verticalAlign: 'middle', align: 'left' } },
+          emphasis: { focus: 'descendant' },
+          expandAndCollapse: true,
+          animationDuration: 550,
+          animationDurationUpdate: 750,
+          itemStyle: { color: '#1B65BF', borderColor: '#1B65BF' },
+          lineStyle: { color: '#cbd5e1', width: 2, curveness: 0.5 }
+        }]
       };
     }
 
-    var chart = agCharts.AgCharts.create(montarOpcoes());
+    myChart.setOption(getOption('VERTICAL'));
 
-    function atualizar() { chart = agCharts.AgCharts.update(chart, montarOpcoes()); }
-
-    document.getElementById('direcao').addEventListener('change', atualizar);
-
-    var selectNo = document.getElementById('noSelecionado');
-    idsComFilhos().forEach(function (id) {
-      var no = dados.find(function (n) { return String(n.id) === id; });
-      var opt = document.createElement('option');
-      opt.value = id;
-      opt.textContent = no ? (no.name || id) : id;
-      selectNo.appendChild(opt);
+    document.getElementById('direcao').addEventListener('change', function(e) {
+      myChart.setOption(getOption(e.target.value));
     });
 
-    document.getElementById('expandAll').addEventListener('click', function () { collapsed = []; atualizar(); });
-    document.getElementById('collapseAll').addEventListener('click', function () { collapsed = idsComFilhos(); atualizar(); });
-    document.getElementById('toggleNo').addEventListener('click', function () {
-      var id = selectNo.value;
-      if (!id) return;
-      var idx = collapsed.indexOf(id);
-      if (idx >= 0) collapsed.splice(idx, 1); else collapsed.push(id);
-      atualizar();
-    });
+    window.addEventListener('resize', function() { myChart.resize(); });
   </script>
 </body>
 </html>`;
@@ -138,43 +122,69 @@ export default function ViewMenuListMapaMenuListScreen() {
         return () => { ativo = false; };
     }, []);
 
-    const html = useMemo(() => (modulos.length > 0 ? montarHtml(modulos.map(m => ({id: m.id, parentId: m.antecessorId, name: m.rotulo}))) : ''), [modulos]);
+    const nodes = useMemo(() =>
+        modulos.map(m => ({
+            id: m.id,
+            parentId: m.antecessorId,
+            name: m.rotulo,
+        })),
+        [modulos],
+    );
 
-    if (loading) {
-        return (
-            <View style={styles.center}>
-                <ActivityIndicator color={Colors.primary} size="large"/>
-            </View>
-        );
-    }
-
-    if (error) {
-        return (
-            <View style={styles.center}>
-                <Text style={styles.error}>{error}</Text>
-            </View>
-        );
-    }
-
-    if (modulos.length === 0) {
-        return (
-            <View style={styles.center}>
-                <Text style={styles.info}>Nenhum módulo encontrado.</Text>
-            </View>
-        );
-    }
+    const htmlContent = useMemo(() => montarHtml(nodes), [nodes]);
 
     return (
         <View style={styles.container}>
-            <WebView originWhitelist={['*']} source={{html}} style={styles.webview}/>
+            <Text style={styles.title}>Mapa Menu</Text>
+            {loading && <ActivityIndicator size="large" color={Colors.primary} style={{marginTop: 20}} />}
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+            {!loading && nodes.length === 0 ? <Text style={styles.empty}>Nenhum módulo encontrado.</Text> : null}
+
+            {nodes.length > 0 && (
+                <View style={styles.chartContainer}>
+                    <WebView
+                        originWhitelist={['*']}
+                        source={{html: htmlContent}}
+                        style={styles.webView}
+                    />
+                </View>
+            )}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {flex: 1},
-    webview: {flex: 1},
-    center: {flex: 1, alignItems: 'center', justifyContent: 'center', padding: Spacing.lg},
-    info: {fontSize: Typography.sizes.lg, textAlign: 'center'},
-    error: {fontSize: Typography.sizes.lg, color: 'crimson', textAlign: 'center'},
+    container: {
+        flex: 1,
+        backgroundColor: Colors.background,
+        padding: Spacing.md,
+    },
+    title: {
+        fontSize: Typography.fontSizes.lg,
+        fontWeight: 'bold',
+        color: Colors.text,
+        marginBottom: Spacing.md,
+    },
+    error: {
+        color: 'crimson',
+        textAlign: 'center',
+        marginTop: 20,
+    },
+    empty: {
+        textAlign: 'center',
+        color: Colors.textMuted,
+        marginTop: 20,
+    },
+    chartContainer: {
+        flex: 1,
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+    },
+    webView: {
+        flex: 1,
+        backgroundColor: 'transparent',
+    },
 });

@@ -74,7 +74,6 @@ export default function Sidebar() {
         return rawModulos.filter(m => !hiddenIds.has(m.id));
     }, [rawModulos]);
     const defaultPath = session?.defaultOutcome || '/default';
-    const [portalOpen, setPortalOpen] = useState(true);
     const [search, setSearch] = useState('');
 
     const childrenByParent = useMemo(() => {
@@ -97,38 +96,6 @@ export default function Sidebar() {
             {label: 'Início', parent: null, path: defaultPath, icon: menuIcon('paginainicial'), keywords: 'inicio paginainicial'},
             {label: 'Configuração Documentos', parent: null, path: CONFIGURACAO_DOCUMENTOS_OUTCOME, icon: menuIcon('configuracao documentos'), keywords: 'configuracao documentos relatorios'},
         ];
-        if (modulos.length === 0) {
-            items.push(
-                {
-                    label: 'Portal Aluno',
-                    parent: 'Portal Aluno',
-                    path: '/aluno/portalAluno',
-                    icon: menuIcon('dashboard'),
-                    keywords: 'portal aluno dashboard'
-                },
-                {
-                    label: 'Boletim',
-                    parent: 'Portal do aluno',
-                    path: '/aluno/boletim',
-                    icon: menuIcon('boletim'),
-                    keywords: 'portal aluno boletim notas'
-                },
-                {
-                    label: 'Frequência',
-                    parent: 'Portal do aluno',
-                    path: '/aluno/frequencia',
-                    icon: menuIcon('frequencia'),
-                    keywords: 'portal aluno frequencia'
-                },
-                {
-                    label: 'Financeiro',
-                    parent: 'Portal do aluno',
-                    path: '/aluno/financeiro',
-                    icon: menuIcon('financeiro'),
-                    keywords: 'portal aluno financeiro parcelas'
-                },
-            );
-        }
         const walk = (modulo: Modulo, parent: string | null) => {
             items.push({
                 label: modulo.rotulo,
@@ -201,37 +168,7 @@ export default function Sidebar() {
                             <span className="sidebar-icon">{menuIcon('paginainicial')}</span>
                             <span className="sidebar-label">Início</span>
                         </Link>
-                        {modulos.length === 0 && (
-                            <div className="sidebar-group">
-                                <button className="sidebar-item sidebar-group-header"
-                                        onClick={() => setPortalOpen(prev => !prev)}>
-                                    <span className="sidebar-icon">{menuIcon('aluno')}</span>
-                                    <span className="sidebar-label">Portal do aluno</span>
-                                    <span className="sidebar-arrow">{portalOpen ? '▾' : '▸'}</span>
-                                </button>
-                                {portalOpen && (
-                                    <div className="sidebar-submenu">
-                                        <Link className="sidebar-item sidebar-subitem" to="/aluno/portalAluno"><span
-                                            className="sidebar-icon">{menuIcon('dashboard')}</span><span
-                                            className="sidebar-label">Portal Aluno</span></Link>
-                                        <Link className="sidebar-item sidebar-subitem" to="/aluno/boletim"><span
-                                            className="sidebar-icon">{menuIcon('boletim')}</span><span
-                                            className="sidebar-label">Notas</span></Link>
-                                        <Link className="sidebar-item sidebar-subitem" to="/aluno/frequencia"><span
-                                            className="sidebar-icon">{menuIcon('frequencia')}</span><span
-                                            className="sidebar-label">Frequência</span></Link>
-                                        <Link className="sidebar-item sidebar-subitem" to="/aluno/financeiro"><span
-                                            className="sidebar-icon">{menuIcon('financeiro')}</span><span
-                                            className="sidebar-label">Financeiro</span></Link>
-                                         <Link className="sidebar-item sidebar-subitem" to="/aluno/aulas"><span
-                                             className="sidebar-icon">{menuIcon('aulas')}</span><span className="sidebar-label">Aulas</span></Link>
-                                        <Link className="sidebar-item sidebar-subitem" to="/aluno/avaliacoes"><span
-                                            className="sidebar-icon">{menuIcon('avaliacoes')}</span><span
-                                            className="sidebar-label">Avaliações</span></Link>
-                                    </div>
-                                )}
-                            </div>
-                        )}
+
                         {topModulos.map(modulo => (
                             <SidebarItem key={modulo.id} modulo={modulo} childrenByParent={childrenByParent} depth={0} menuIcon={menuIcon}/>
                         ))}

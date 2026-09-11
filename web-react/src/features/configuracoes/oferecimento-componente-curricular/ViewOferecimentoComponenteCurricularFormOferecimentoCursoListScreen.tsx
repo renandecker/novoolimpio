@@ -6,7 +6,7 @@ import {X, ChevronDown, ChevronRight} from 'lucide-react';
 
 import {useNavigate, useSearchParams} from 'react-router-dom';
 
-import {useQuery} from '@tanstack/react-query';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
 
 import {api} from '../../../shared/services/api';
 
@@ -14,9 +14,11 @@ import {PermissionGate} from '../../../shared/services/permissions';
 
 import {AutoComplete, type AutoCompleteOption} from '../../../shared/components/AutoComplete';
 
-import {ScheduleWeekView, mondayOf, toIsoDate} from '../../../shared/components/WeeklyGrid';
+import {ScheduleWeekView, mondayOf, toIsoDate, monthRangeForWeek} from '../../../shared/components/WeeklyGrid';
 
 import type {ScheduleEventData} from '../../../shared/components/WeeklyGrid';
+
+import {Modal} from '../../../shared/components/Modal';
 
 import '../OferecimentoCurso.css';
 type Opcao = {id: number; label: string};
@@ -452,6 +454,11 @@ const LEGENDA_OFERECIMENTO = [
     {className: 'evento-blue', label: 'Outro / Feriado'},
 ];
 
+const LEGENDA_TODAS = [
+    {className: 'evento-blue', label: 'Feriado'},
+    {className: 'evento-yellow', label: 'Aula (todas as salas)'},
+];
+
 const LEGENDA_SALA = [
     {className: 'evento-blue', label: 'Feriado'},
     {className: 'evento-black', label: 'Aula na sala'},
@@ -494,6 +501,14 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
     const [salvando, setSalvando] = useState(false);
 
     const [bloquearProximo, setBloquearProximo] = useState(false);
+
+    const [disponibilidadeModalOpen, setDisponibilidadeModalOpen] = useState(false);
+
+    const [disponibilidadeSalaId, setDisponibilidadeSalaId] = useState<number | null>(null);
+
+    const [disponibilidadeUnidadeId, setDisponibilidadeUnidadeId] = useState<number | null>(null);
+
+    const [disponibilidadeWeekStart, setDisponibilidadeWeekStart] = useState(() => toIsoDate(mondayOf(new Date())));
 
     const hidratadoRef = useRef(false);
 
@@ -590,6 +605,57 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
         queryKey: ['ofc-componentes'],
 
         queryFn: async () => (await api.get<ComponenteRow[]>('/api/educacao/componente-curricular')).data,
+
+    });
+
+
+    const disponibilidadeUnidadesQuery = useQuery({
+
+        queryKey: ['disp-sala-unidades'],
+
+        queryFn: async () => (await api.get<UnidadeRow[]>('/api/view/unidade/listUnidade')).data,
+
+    });
+
+    const disponibilidadeSalasQuery = useQuery({
+
+        queryKey: ['disp-sala-salas', disponibilidadeUnidadeId],
+
+        queryFn: async () => (await api.get<SalaRow[]>('/api/educacao/sala')).data,
+
+        enabled: !!disponibilidadeUnidadeId,
+
+    });
+
+    const {inicio: disponibilidadeRangeInicio, fim: disponibilidadeRangeFim} = monthRangeForWeek(disponibilidadeWeekStart);
+
+    const disponibilidadeEventosQuery = useQuery({
+
+        queryKey: ['disp-sala-eventos', disponibilidadeUnidadeId, disponibilidadeSalaId, disponibilidadeRangeInicio, disponibilidadeRangeFim],
+
+        queryFn: async () =>
+
+            (
+
+                await api.get<ScheduleEventData[]>('/api/educacao/disponibilidade-sala/schedule-events', {
+
+                    params: {
+
+                        unidadeId: disponibilidadeUnidadeId,
+
+                        ...(disponibilidadeSalaId ? {salaId: disponibilidadeSalaId} : {}),
+
+                        inicio: disponibilidadeRangeInicio,
+
+                        fim: disponibilidadeRangeFim,
+
+                    },
+
+                })
+
+            ).data,
+
+        enabled: !!disponibilidadeUnidadeId,
 
     });
 
@@ -733,6 +799,10 @@ const gruposDisponiveis = useMemo(
 useEffect(() => {
 
         if (!emEdicao || hidratadoRef.current) return;
+
+        // Aguarda catálogos (edc_oferecimento_dias_aula depende deles p/ rótulos e turmas);
+        // sem isso a edição hidratava com listas vazias e a aba "Dias de Aula" vinha vazia.
+        if (curriculosQuery.isLoading || salasQuery.isLoading || componentesQuery.isLoading) return;
 
         hidratadoRef.current = true;
 
@@ -1068,7 +1138,7 @@ useEffect(() => {
 
         })();
 
-    }, [emEdicao, id]);
+    }, [emEdicao, id, curriculosQuery.isLoading, salasQuery.isLoading, componentesQuery.isLoading, curriculosQuery.data, salasQuery.data, componentesQuery.data]);
 
 
 
@@ -2209,8 +2279,15 @@ useEffect(() => {
 
                                 title="Disponibilidade da Sala"
 
-                                onClick={() => data.unidadeId && data.salaId ? window.open(`/api/educacao/disponibilidade-sala/schedule-events?unidadeId=${data.unidadeId}&salaId=${data.salaId}`, '_blank') : alert('Selecione uma unidade e uma sala primeiro')}
-
+                                onClick={() => {
+                                    if (!data.unidadeId || !data.salaId) {
+                                        alert('Selecione uma unidade e uma sala primeiro');
+                                        return;
+                                    }
+                                    setDisponibilidadeUnidadeId(data.unidadeId);
+                                    setDisponibilidadeSalaId(data.salaId);
+                                    setDisponibilidadeModalOpen(true);
+                                }}
                             >
 
                                 Disponibilidade
@@ -3062,6 +3139,64 @@ useEffect(() => {
                     </div>
 
                 )}
+
+                <Modal
+                    title="Disponibilidade de Sala"
+                    open={disponibilidadeModalOpen}
+                    onClose={() => setDisponibilidadeModalOpen(false)}
+                    size="xl"
+                >
+                    <div className="disp-screens">
+                        <div className="disp-filtros">
+                            <div className="disp-filtro">
+                                <label htmlFor="disp-sala-unidade-modal">Unidade</label>
+                                <select
+                                    id="disp-sala-unidade-modal"
+                                    className="disp-select"
+                                    value={disponibilidadeUnidadeId ?? ''}
+                                    onChange={(e) => {
+                                        const id = Number(e.target.value) || null;
+                                        setDisponibilidadeUnidadeId(id);
+                                        setDisponibilidadeSalaId(null);
+                                    }}
+                                >
+                                    <option value="">Selecione a unidade</option>
+                                    {(disponibilidadeUnidadesQuery.data ?? []).filter((u) => u.fl_ativo !== false).map((u) => (
+                                        <option key={u.id} value={u.id}>
+                                            {u.nome_fantasia || u.razao_social || `Unidade ${u.id}`}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="disp-filtro">
+                                <label htmlFor="disp-sala-modal">Sala</label>
+                                <select
+                                    id="disp-sala-modal"
+                                    className="disp-select"
+                                    value={disponibilidadeSalaId ?? ''}
+                                    onChange={(e) => setDisponibilidadeSalaId(Number(e.target.value) || null)}
+                                    disabled={!disponibilidadeUnidadeId}
+                                >
+                                    <option value="">Todas as salas</option>
+                                    {(disponibilidadeSalasQuery.data ?? []).filter((s) => s.unidadeId === Number(disponibilidadeUnidadeId)).map((s) => (
+                                        <option key={s.id} value={s.id}>
+                                            {s.numero != null ? `Sala ${s.numero}` : s.sucinto || s.descricao || `Sala ${s.id}`}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        {!disponibilidadeUnidadeId && <p className="disp-aviso">Selecione uma unidade para visualizar a agenda semanal.</p>}
+                        <ScheduleWeekView
+                            startDate={disponibilidadeWeekStart}
+                            onWeekChange={setDisponibilidadeWeekStart}
+                            events={disponibilidadeEventosQuery.data ?? []}
+                            loading={!!disponibilidadeUnidadeId && disponibilidadeEventosQuery.isLoading}
+                            error={disponibilidadeEventosQuery.isError ? 'Erro ao carregar a agenda.' : null}
+                            legend={disponibilidadeSalaId ? LEGENDA_SALA : LEGENDA_TODAS}
+                        />
+                    </div>
+                </Modal>
 
             </main>
 

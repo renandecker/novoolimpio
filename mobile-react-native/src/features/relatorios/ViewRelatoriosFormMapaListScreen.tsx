@@ -257,7 +257,7 @@ export default function ViewRelatoriosFormMapaListScreen() {
                         {name: 'dimensaoId', label: 'Dimensão', type: 'autoComplete', autoCompleteSource: DIMENSAO_SOURCE, autoCompleteSearchKeys: DIMENSAO_SEARCH, autoCompleteColumns: DIMENSAO_COLUMNS},
                         {name: 'medidaId', label: 'Medida', type: 'autoComplete', autoCompleteSource: MEDIDA_SOURCE, autoCompleteSearchKeys: MEDIDA_SEARCH, autoCompleteColumns: MEDIDA_COLUMNS},
                         {name: 'georeferenciaId', label: 'Coordenada (Georreferência)', type: 'autoComplete', autoCompleteSource: GEOREFERENCIA_SOURCE, autoCompleteSearchKeys: GEOREFERENCIA_SEARCH, autoCompleteColumns: GEOREFERENCIA_COLUMNS},
-                        {name: 'coordenada', label: 'Área/Coordenada *', required: true},
+                        {name: 'coordenada', label: 'Área/Coordenada *', required: true, full: true},
                         {name: 'zoom', label: 'Zoom *', type: 'number', required: true, min: 1},
                         {name: 'markerTamanho', label: 'Tamanho Marker *', type: 'number', required: true, min: 1},
                         {name: 'altura', label: 'Altura *', type: 'number', required: true, min: 1},

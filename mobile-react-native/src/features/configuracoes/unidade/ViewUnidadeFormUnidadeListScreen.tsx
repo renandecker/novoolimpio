@@ -151,20 +151,223 @@ export default function ViewUnidadeFormUnidadeListScreen() {
         label: tab.label,
         content: (
             <ScrollView style={styles.tabContent}>
-                {tab.fields && tab.fields.map((field) => (
-                    <FormField
-                        key={field.name}
-                        label={field.label}
-                        value={values[field.name] ?? ''}
-                        onChange={(text) => setValues((prev) => ({...prev, [field.name]: text}))}
-                        type={field.type}
-                        placeholder={field.placeholder}
-                        mask={field.mask}
-                        options={field.options}
-                        editable={field.editable !== false}
-                        required={field.required}
-                    />
-                ))}
+                {tab.key === 'geral' ? (
+                    <>
+                        <View style={styles.formRow}>
+                            <FormField
+                                label="ID"
+                                value={values.id ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, id: text}))}
+                                type="text"
+                                editable={false}
+                                style={styles.fieldHalf}
+                            />
+                            <FormField
+                                label="Sucinto"
+                                value={values.sucinto ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, sucinto: text}))}
+                                required
+                                style={styles.fieldHalf}
+                            />
+                        </View>
+                        <View style={styles.formRow}>
+                            <FormField
+                                label="Razão Social"
+                                value={values.razaoSocial ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, razaoSocial: text}))}
+                                required
+                                style={styles.fieldHalf}
+                            />
+                            <FormField
+                                label="Nome Fantasia"
+                                value={values.nomeFantasia ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, nomeFantasia: text}))}
+                                required
+                                style={styles.fieldHalf}
+                            />
+                        </View>
+                        <View style={styles.formRow}>
+                            <FormField
+                                label="CNPJ"
+                                value={values.CNPJ ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, CNPJ: text}))}
+                                type="text"
+                                mask="99.999.999/9999-99"
+                                required
+                                style={styles.fieldHalf}
+                            />
+                            <FormField
+                                label="Inscrição Estadual"
+                                value={values.inscricaoEstadual ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, inscricaoEstadual: text}))}
+                                required
+                                style={styles.fieldHalf}
+                            />
+                        </View>
+                        <View style={styles.formRow}>
+                            <FormField
+                                label="Layout"
+                                value={values.layout ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, layout: text}))}
+                                type="text"
+                                style={styles.fieldHalf}
+                            />
+                            <FormField
+                                label="Responsável"
+                                value={values.responsavel ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, responsavel: text}))}
+                                type="text"
+                                style={styles.fieldHalf}
+                            />
+                        </View>
+                        <View style={styles.formRow}>
+                            <FormField
+                                label="E-mail"
+                                value={values.email ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, email: text}))}
+                                type="email"
+                                required
+                                style={styles.fieldHalf}
+                            />
+                            <FormField
+                                label="E-mail RH"
+                                value={values.emailRH ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, emailRH: text}))}
+                                type="email"
+                                style={styles.fieldHalf}
+                            />
+                        </View>
+                        <View style={styles.formRow}>
+                            <FormField
+                                label="Tipo Unidade"
+                                value={values.tipoUnidade ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, tipoUnidade: text}))}
+                                type="select"
+                                options={TIPO_UNIDADE_OPTIONS}
+                                required
+                                style={styles.fieldHalf}
+                            />
+                            <FormField
+                                label="Ativo"
+                                value={values.ativo ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, ativo: text}))}
+                                type="select"
+                                options={[{value: 'true', label: 'Sim'}, {value: 'false', label: 'Não'}]}
+                                style={styles.fieldHalf}
+                            />
+                        </View>
+                        <View style={styles.formRow}>
+                            <FormField
+                                label="Diretor de Ensino"
+                                value={values.diretorEnsino ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, diretorEnsino: text}))}
+                                style={styles.fieldHalf}
+                            />
+                            <FormField
+                                label="Coordenador"
+                                value={values.coordenador ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, coordenador: text}))}
+                                style={styles.fieldHalf}
+                            />
+                        </View>
+                        <FormField
+                            label="Registro"
+                            value={values.registro ?? ''}
+                            onChange={(text) => setValues((prev) => ({...prev, registro: text}))}
+                            style={styles.fieldFull}
+                        />
+                    </>
+                ) : tab.key === 'endereco' ? (
+                    <>
+                        <View style={styles.formRow}>
+                            <FormField
+                                label="CEP"
+                                value={values.cep ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, cep: text}))}
+                                type="text"
+                                mask="99.999-999"
+                                required
+                                style={styles.fieldHalf}
+                            />
+                            <FormField
+                                label="Cidade"
+                                value={values.cidade ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, cidade: text}))}
+                                type="text"
+                                required
+                                style={styles.fieldHalf}
+                            />
+                        </View>
+                        <View style={styles.formRow}>
+                            <FormField
+                                label="Bairro"
+                                value={values.bairro ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, bairro: text}))}
+                                type="text"
+                                required
+                                style={styles.fieldHalf}
+                            />
+                            <FormField
+                                label="Número"
+                                value={values.numero ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, numero: text}))}
+                                type="number"
+                                required
+                                style={styles.fieldHalf}
+                            />
+                        </View>
+                        <View style={styles.formRow}>
+                            <FormField
+                                label="Logradouro"
+                                value={values.logradouro ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, logradouro: text}))}
+                                type="text"
+                                required
+                                style={styles.fieldHalf}
+                            />
+                            <FormField
+                                label="Região"
+                                value={values.regiao ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, regiao: text}))}
+                                type="text"
+                                required
+                                style={styles.fieldHalf}
+                            />
+                        </View>
+                        <View style={styles.formRow}>
+                            <FormField
+                                label="Ponto de Referência"
+                                value={values.pontoReferencia ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, pontoReferencia: text}))}
+                                style={styles.fieldHalf}
+                            />
+                            <FormField
+                                label="Área"
+                                value={values.area ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, area: text}))}
+                                style={styles.fieldHalf}
+                            />
+                        </View>
+                    </>
+                ) : (
+                    <>
+                        {tab.fields && tab.fields.map((field) => (
+                            <FormField
+                                key={field.name}
+                                label={field.label}
+                                value={values[field.name] ?? ''}
+                                onChange={(text) => setValues((prev) => ({...prev, [field.name]: text}))}
+                                type={field.type}
+                                placeholder={field.placeholder}
+                                mask={field.mask}
+                                options={field.options}
+                                editable={field.editable !== false}
+                                required={field.required}
+                                style={styles.fieldFull}
+                            />
+                        ))}
+                    </>
+                )}
                 {tab.isMasterDetail && tab.masterDetailConfig && (
                     <MasterDetail
                         label={tab.masterDetailConfig.label}
@@ -344,16 +547,25 @@ const styles = StyleSheet.create({
         padding: Spacing.lg,
     },
     field: {
+        marginBottom: Spacing.sm,
+    },
+    formRow: {
         flexDirection: 'row',
-        alignItems: 'center',
-        gap: Spacing.sm,
-        marginBottom: Spacing.md,
+        flexWrap: 'wrap',
+        gap: Spacing.md,
+        marginBottom: Spacing.sm,
+    },
+    fieldHalf: {
+        width: '47%',
+    },
+    fieldFull: {
+        width: '100%',
     },
     fieldLabel: {
-        width: 130,
         fontSize: Typography.sizes.base,
         fontWeight: Typography.weights.semibold,
         color: Colors.textSecondary,
+        marginBottom: Spacing.xs,
     },
     required: {
         color: Colors.error,

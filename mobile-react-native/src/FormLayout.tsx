@@ -23,6 +23,7 @@ export interface FormFieldConfig {
     autoCompleteSource?: string;
     autoCompleteSearchKeys?: string[];
     autoCompleteColumns?: any[];
+    full?: boolean;
 }
 
 export interface FormTabConfig {
@@ -109,7 +110,7 @@ export function FormLayout({
         });
 
         return (
-            <View key={field.name} style={styles.fieldContainer}>
+            <View key={field.name} style={[styles.fieldContainer, (field.type === 'textarea' || field.full) && styles.fieldFull]}>
                 <Text style={styles.fieldLabel}>
                     {field.label} {field.required && <Text style={styles.requiredStar}>*</Text>}
                 </Text>
@@ -251,16 +252,20 @@ const styles = StyleSheet.create({
         paddingBottom: 100,
     },
     tabContent: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
         gap: Spacing.md,
+        justifyContent: 'space-between',
     },
     fieldContainer: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        gap: Spacing.sm,
+        width: '48%',
+        gap: Spacing.xs,
+    },
+    fieldFull: {
+        width: '100%',
     },
     fieldLabel: {
-        width: 110,
-        paddingTop: 13,
+        alignSelf: 'flex-start',
         fontSize: Typography.sizes.sm,
         fontWeight: Typography.weights.semibold,
         color: Colors.textPrimary,

@@ -73,7 +73,7 @@ export function FormLayout({
         content: tab.content ?? (
             <div className="form-grid">
                 {(tab.fields ?? []).map((field) => (
-                    <label key={field.name} className="form-field" style={{gridColumn: field.span ? `span ${field.span}` : undefined}}>
+                    <label key={field.name} className="form-field">
                         <span className="form-label">
                             {field.label} {field.required && <span style={{color: '#C90000', marginLeft: '2px'}}>*</span>}
                         </span>
@@ -116,12 +116,15 @@ export function FormLayout({
 
 function renderField(field: FormFieldConfig, onChange: (name: string, value: unknown) => void, value: unknown) {
     const currentValue = value ?? '';
+    const fullRow = field.type === 'textarea' || field.span === 3 || field.span === 4;
+    const gridColumnStyle = fullRow ? {gridColumn: 'span 3'} : undefined;
 
     switch (field.type) {
         case 'select':
             return (
                 <select
                     className="form-input form-select"
+                    style={gridColumnStyle}
                     value={String(currentValue)}
                     onChange={(e) => onChange(field.name, e.target.value)}
                     readOnly={field.readOnly}
@@ -137,7 +140,7 @@ function renderField(field: FormFieldConfig, onChange: (name: string, value: unk
             return (
                 <textarea
                     className="form-input"
-                    style={{minHeight: '80px', resize: 'vertical'}}
+                    style={{minHeight: '80px', resize: 'vertical', ...gridColumnStyle}}
                     value={String(currentValue)}
                     onChange={(e) => onChange(field.name, e.target.value)}
                     placeholder={field.placeholder}
@@ -149,6 +152,7 @@ function renderField(field: FormFieldConfig, onChange: (name: string, value: unk
             return (
                 <input
                     className="form-input"
+                    style={gridColumnStyle}
                     type="date"
                     value={String(currentValue)}
                     onChange={(e) => onChange(field.name, e.target.value)}
@@ -160,6 +164,7 @@ function renderField(field: FormFieldConfig, onChange: (name: string, value: unk
             return (
                 <input
                     className="form-input"
+                    style={gridColumnStyle}
                     type="number"
                     value={String(currentValue)}
                     onChange={(e) => onChange(field.name, e.target.value)}
@@ -172,6 +177,7 @@ function renderField(field: FormFieldConfig, onChange: (name: string, value: unk
             return (
                 <input
                     className="form-input"
+                    style={gridColumnStyle}
                     type="email"
                     value={String(currentValue)}
                     onChange={(e) => onChange(field.name, e.target.value)}
@@ -184,6 +190,7 @@ function renderField(field: FormFieldConfig, onChange: (name: string, value: unk
             return (
                 <input
                     className="form-input"
+                    style={gridColumnStyle}
                     type="text"
                     value={String(currentValue)}
                     onChange={(e) => onChange(field.name, e.target.value)}
@@ -195,7 +202,7 @@ function renderField(field: FormFieldConfig, onChange: (name: string, value: unk
 
         case 'autoComplete':
             return (
-                <div className="auto-complete-wrapper">
+                <div className="auto-complete-wrapper" style={gridColumnStyle}>
                     <input
                         className="form-input"
                         type="text"
@@ -216,6 +223,7 @@ function renderField(field: FormFieldConfig, onChange: (name: string, value: unk
             return (
                 <input
                     className="form-input"
+                    style={gridColumnStyle}
                     type="text"
                     value={String(currentValue)}
                     onChange={(e) => onChange(field.name, e.target.value)}

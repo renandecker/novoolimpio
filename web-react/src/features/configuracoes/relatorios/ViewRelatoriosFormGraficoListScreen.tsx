@@ -332,8 +332,8 @@ export default function ViewRelatoriosFormGraficoListScreen() {
                                                                 key: 'principal',
                                                                 label: 'Principal',
                                                                 fields: [
-                                                                    {name: 'nome', label: 'Nome', required: true, span: 3},
-                                                                    {name: 'estruturaId', label: 'Estrutura', type: 'autoComplete', autoCompleteSource: ESTRUTURA_SOURCE, autoCompleteSearchKeys: ESTRUTURA_SEARCH, autoCompleteColumns: ESTRUTURA_COLUMNS, span: 3},
+                                                                {name: 'nome', label: 'Nome', required: true},
+                                                                {name: 'estruturaId', label: 'Estrutura', type: 'autoComplete', autoCompleteSource: ESTRUTURA_SOURCE, autoCompleteSearchKeys: ESTRUTURA_SEARCH, autoCompleteColumns: ESTRUTURA_COLUMNS},
                                                                     {name: 'tipo', label: 'Tipo Gráfico', type: 'select', options: TIPO_GRAFICO_OPTIONS, required: true, onChange: handleTipoGraficoChange},
                                                                     {name: 'ordemGrafico', label: 'Ordenação', type: 'select', options: TIPO_ORDEM_OPTIONS},
                                                                     {name: 'limite', label: 'Limite Gráfico', type: 'number', min: 1, max: 50, help: 'Limite máximo de 50 registros para exibir no gráfico'},
@@ -475,8 +475,8 @@ export default function ViewRelatoriosFormGraficoListScreen() {
                                                             key: 'form',
                                                             label: '',
                                                             fields: [
-                                                                {name: 'nome', label: 'Nome *', required: true, span: 2},
-                                                                {name: 'dimensaoId', label: 'Dimensão', type: 'autoComplete', autoCompleteSource: DIMENSAO_SOURCE, autoCompleteSearchKeys: DIMENSAO_SEARCH, autoCompleteColumns: DIMENSAO_COLUMNS, span: 2},
+                                                                {name: 'nome', label: 'Nome *', required: true},
+                                                                {name: 'dimensaoId', label: 'Dimensão', type: 'autoComplete', autoCompleteSource: DIMENSAO_SOURCE, autoCompleteSearchKeys: DIMENSAO_SEARCH, autoCompleteColumns: DIMENSAO_COLUMNS},
                                                             ],
                                                         },
                                                     ]}

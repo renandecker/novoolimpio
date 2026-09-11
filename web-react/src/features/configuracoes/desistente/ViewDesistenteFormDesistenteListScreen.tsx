@@ -9,19 +9,14 @@ import {API_PATHS} from '../../../shared/services/apiPaths';
 
 
 const DESISTENTE_COLUMNS: DataTableColumn[] = [
-
     {key: 'id', label: 'ID do Desistente'},
-
-    {key: 'matriculaId', label: 'Matrícula'},
-
-    {key: 'motivoId', label: 'Motivo'},
-
-    {key: 'data', label: 'Data'},
-
-    {key: 'observacao', label: 'Observação'},
-
-    {key: 'status', label: 'Status'},
-
+    {key: 'dataCriacao', label: 'Data Desistente'},
+    {key: 'pessoaAlunoId', label: 'Aluno ID'},
+    {key: 'pessoaFuncionarioId', label: 'Funcionário ID'},
+    {key: 'contratoId', label: 'Contrato ID'},
+    {key: 'motivoId', label: 'Motivo ID'},
+    {key: 'descricao', label: 'Observação'},
+    {key: 'ativo', label: 'Status'},
 ];
 
 

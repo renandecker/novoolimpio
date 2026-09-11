@@ -33,12 +33,12 @@ export default function ViewUnidadeFormRedeListScreen() {
             key: 'geral',
             label: 'Geral',
             fields: [
-                {name: 'id', label: 'ID', type: 'text', readOnly: true, span: 1},
+                {name: 'id', label: 'ID', type: 'text', readOnly: true},
                 {name: 'razaoSocial', label: 'Razão Social', required: true, span: 3},
                 {name: 'nomeFantasia', label: 'Nome Fantasia', required: true, span: 3},
-                {name: 'cnpj', label: 'CNPJ', type: 'mask', mask: '99.999.999/9999-99', required: true, span: 2},
-                {name: 'usuario', label: 'Usuário Responsável', type: 'autoComplete', autoCompleteSource: '/api/view/usuario/listUsuario', span: 2},
-                {name: 'layout', label: 'Layout', type: 'autoComplete', autoCompleteSource: '/api/educacao/layout', span: 2},
+                {name: 'cnpj', label: 'CNPJ', type: 'mask', mask: '99.999.999/9999-99', required: true},
+                {name: 'usuario', label: 'Usuário Responsável', type: 'autoComplete', autoCompleteSource: '/api/view/usuario/listUsuario'},
+                {name: 'layout', label: 'Layout', type: 'autoComplete', autoCompleteSource: '/api/educacao/layout'},
             ],
         },
         {

@@ -143,28 +143,15 @@ export default function ViewConsultorFormConsultorListScreen() {
                 <div className="div_form" style={{width: '40%', minWidth: 520, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: 16}}>
                     <div style={{fontWeight: 700, marginBottom: 12, color: '#374151'}}>Consultor</div>
 
-                    <div className="table_form" style={{display: 'grid', gridTemplateColumns: '160px 1fr', gap: '12px 16px', alignItems: 'center'}}>
-                        {/* ID */}
-                        <label htmlFor="inputId:id" className="form-label" style={{fontWeight: 600}}>
-                            ID
+                    <div className="form-grid">
+                        <label className="form-field">
+                            <span className="form-label">ID</span>
+                            <input id="inputId:id" className="form-input inputTiny" value={isEdit ? String(editingId) : ''} disabled placeholder="(novo)" style={{width: 90, background: '#f3f4f6'}} />
                         </label>
-                        <input id="inputId:id" className="form-input inputTiny" value={isEdit ? String(editingId) : ''} disabled placeholder="(novo)" style={{width: 90, background: '#f3f4f6'}} />
-
-                        {/* Usuário (AutoComplete) */}
-                        <label htmlFor="usuario" className="form-label" style={{fontWeight: 600}}>
-                            Usuário {requiredMark}
+                        <label className="form-field">
+                            <span className="form-label">Usuário {requiredMark}</span>
+                            <AutoComplete id="usuario" label="" placeholder="Digite 3+ caracteres para buscar usuário..." value={usuario} onChange={setUsuario} fetchOptions={fetchUsuario} fetchById={fetchUsuarioById} minChars={3} disabled={isEdit} />
                         </label>
-                        <AutoComplete
-                            id="usuario"
-                            label=""
-                            placeholder="Digite 3+ caracteres para buscar usuário..."
-                            value={usuario}
-                            onChange={setUsuario}
-                            fetchOptions={fetchUsuario}
-                            fetchById={fetchUsuarioById}
-                            minChars={3}
-                            disabled={isEdit}
-                        />
                     </div>
 
                     {/* Agendas - MasterDetail */}

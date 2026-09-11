@@ -306,47 +306,75 @@ export default function ViewUsuarioFormUsuarioListScreen({route}: {route?: any})
                 {activeTab==='pessoal' && (
                     <View style={s.card}>
                         <Text style={s.sectionTitle}>Acesso</Text>
-                        <Field label="Login" required value={f.login} onChange={v=>upd('login',v)} placeholder="Login" />
-                        <Field label="Senha" required value={f.senha} onChange={v=>upd('senha',v)} placeholder="Senha" secure />
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Login" required value={f.login} onChange={v=>upd('login',v)} placeholder="Login" /></View>
+                            <View style={s.fieldHalf}><Field label="Senha" required value={f.senha} onChange={v=>upd('senha',v)} placeholder="Senha" secure /></View>
+                        </View>
                         <Text style={s.sectionTitle}>Dados Pessoais</Text>
-                        <Field label="CPF" required value={f.cpf} onChange={v=>upd('cpf',formatCpf(v))} placeholder="999.999.999-99" keyboardType="numeric" />
-                        <Field label="RG" value={f.rg} onChange={v=>upd('rg',v)} placeholder="RG" />
-                        <Field label="Nome" required value={f.nome} onChange={v=>upd('nome',v)} placeholder="Nome completo" />
-                        <Field label="E-mail" required value={f.email} onChange={v=>upd('email',v)} placeholder="E-mail" keyboardType="email-address" />
-                        <Field label="Nome Social" required value={f.nomeSocial} onChange={v=>upd('nomeSocial',v)} placeholder="Nome social" />
-                        <Field label="Data Nascimento" required value={f.dataNascimento} onChange={v=>upd('dataNascimento',v)} placeholder="AAAA-MM-DD" />
-                        <Field label="Nome do Pai" value={f.nomePai} onChange={v=>upd('nomePai',v)} placeholder="Nome do pai" />
-                        <Field label="Nome da Mãe" required value={f.nomeMae} onChange={v=>upd('nomeMae',v)} placeholder="Nome da mãe" />
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="CPF" required value={f.cpf} onChange={v=>upd('cpf',formatCpf(v))} placeholder="999.999.999-99" keyboardType="numeric" /></View>
+                            <View style={s.fieldHalf}><Field label="RG" value={f.rg} onChange={v=>upd('rg',v)} placeholder="RG" /></View>
+                        </View>
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Nome" required value={f.nome} onChange={v=>upd('nome',v)} placeholder="Nome completo" /></View>
+                            <View style={s.fieldHalf}><Field label="E-mail" required value={f.email} onChange={v=>upd('email',v)} placeholder="E-mail" keyboardType="email-address" /></View>
+                        </View>
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Nome Social" required value={f.nomeSocial} onChange={v=>upd('nomeSocial',v)} placeholder="Nome social" /></View>
+                            <View style={s.fieldHalf}><Field label="Data Nascimento" required value={f.dataNascimento} onChange={v=>upd('dataNascimento',v)} placeholder="AAAA-MM-DD" /></View>
+                        </View>
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Nome do Pai" value={f.nomePai} onChange={v=>upd('nomePai',v)} placeholder="Nome do pai" /></View>
+                            <View style={s.fieldHalf}><Field label="Nome da Mãe" required value={f.nomeMae} onChange={v=>upd('nomeMae',v)} placeholder="Nome da mãe" /></View>
+                        </View>
                         <Text style={s.sectionTitle}>Contato</Text>
-                        <Field label="Telefone Residencial" value={f.telefoneResidencial} onChange={v=>upd('telefoneResidencial',formatPhone(v))} placeholder="(99) 9999-9999" keyboardType="phone-pad" />
-                        <Field label="Celular" value={f.celular} onChange={v=>upd('celular',formatPhone(v))} placeholder="(99) 99999-9999" keyboardType="phone-pad" />
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Telefone Residencial" value={f.telefoneResidencial} onChange={v=>upd('telefoneResidencial',formatPhone(v))} placeholder="(99) 9999-9999" keyboardType="phone-pad" /></View>
+                            <View style={s.fieldHalf}><Field label="Celular" value={f.celular} onChange={v=>upd('celular',formatPhone(v))} placeholder="(99) 99999-9999" keyboardType="phone-pad" /></View>
+                        </View>
                         <Text style={s.hint}>Preencha Telefone OU Celular</Text>
-                        <Field label="Nome Referência" required value={f.nomeReferencia} onChange={v=>upd('nomeReferencia',v)} placeholder="Nome referência" />
-                        <Field label="Telefone Referência" value={f.telefoneReferencia} onChange={v=>upd('telefoneReferencia',formatPhone(v))} placeholder="(99) 9999-9999" keyboardType="phone-pad" />
-                        <Field label="Celular Referência" value={f.celularReferencia} onChange={v=>upd('celularReferencia',formatPhone(v))} placeholder="(99) 99999-9999" keyboardType="phone-pad" />
-                        <Field label="Nome Referência 2" value={f.nomeReferencia2} onChange={v=>upd('nomeReferencia2',v)} placeholder="Nome referência 2" />
-                        <Field label="Telefone Referência 2" value={f.telefoneReferencia2} onChange={v=>upd('telefoneReferencia2',formatPhone(v))} placeholder="(99) 9999-9999" keyboardType="phone-pad" />
-                        <Field label="Celular Referência 2" value={f.celularReferencia2} onChange={v=>upd('celularReferencia2',formatPhone(v))} placeholder="(99) 99999-9999" keyboardType="phone-pad" />
-                        <SelectField label="Gênero" value={f.generoId} onChange={v=>upd('generoId',v)} options={generoOptions} />
-                        <SelectField label="Etnia" value={f.etniaId} onChange={v=>upd('etniaId',v)} options={etniaOptions} />
-                        <SelectField label="Estado Civil" required value={f.estadoCivilId} onChange={v=>upd('estadoCivilId',v)} options={estadoCivilOptions} />
-                        <SelectField label="Escolaridade" required value={f.escolaridadeId} onChange={v=>upd('escolaridadeId',v)} options={escolaridadeOptions} />
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Nome Referência" required value={f.nomeReferencia} onChange={v=>upd('nomeReferencia',v)} placeholder="Nome referência" /></View>
+                            <View style={s.fieldHalf}><Field label="Telefone Referência" value={f.telefoneReferencia} onChange={v=>upd('telefoneReferencia',formatPhone(v))} placeholder="(99) 9999-9999" keyboardType="phone-pad" /></View>
+                        </View>
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Celular Referência" value={f.celularReferencia} onChange={v=>upd('celularReferencia',formatPhone(v))} placeholder="(99) 99999-9999" keyboardType="phone-pad" /></View>
+                            <View style={s.fieldHalf}><Field label="Nome Referência 2" value={f.nomeReferencia2} onChange={v=>upd('nomeReferencia2',v)} placeholder="Nome referência 2" /></View>
+                        </View>
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Telefone Referência 2" value={f.telefoneReferencia2} onChange={v=>upd('telefoneReferencia2',formatPhone(v))} placeholder="(99) 9999-9999" keyboardType="phone-pad" /></View>
+                            <View style={s.fieldHalf}><Field label="Celular Referência 2" value={f.celularReferencia2} onChange={v=>upd('celularReferencia2',formatPhone(v))} placeholder="(99) 99999-9999" keyboardType="phone-pad" /></View>
+                        </View>
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><SelectField label="Gênero" value={f.generoId} onChange={v=>upd('generoId',v)} options={generoOptions} /></View>
+                            <View style={s.fieldHalf}><SelectField label="Etnia" value={f.etniaId} onChange={v=>upd('etniaId',v)} options={etniaOptions} /></View>
+                        </View>
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><SelectField label="Estado Civil" required value={f.estadoCivilId} onChange={v=>upd('estadoCivilId',v)} options={estadoCivilOptions} /></View>
+                            <View style={s.fieldHalf}><SelectField label="Escolaridade" required value={f.escolaridadeId} onChange={v=>upd('escolaridadeId',v)} options={escolaridadeOptions} /></View>
+                        </View>
                     </View>
                 )}
 
                 {activeTab==='endereco' && (
                     <View style={s.card}>
                         <Text style={s.sectionTitle}>Endereço</Text>
-<View style={{flexDirection:'row', gap:8, alignItems:'center'}}>
+<View style={s.fieldFull}>
                                 <Text style={s.label}>CEP *</Text>
-                                <TextInput style={[s.input, {flex:1}]} value={cepDraft} onChangeText={v=>setCepDraft(formatCep(v))} placeholder="99.999-999" placeholderTextColor={Colors.textPlaceholder} keyboardType="numeric" maxLength={9}/>
-                                <Pressable style={[s.btnSmall, s.btnYellow]} onPress={handleBuscarCep} disabled={buscandoCep}><Text style={s.btnSmallText}>{buscandoCep?'...':'Busca'}</Text></Pressable>
+                                <View style={{flexDirection:'row', gap:8, alignItems:'center'}}>
+                                    <TextInput style={[s.input, {flex:1}]} value={cepDraft} onChangeText={v=>setCepDraft(formatCep(v))} placeholder="99.999-999" placeholderTextColor={Colors.textPlaceholder} keyboardType="numeric" maxLength={9}/>
+                                    <Pressable style={[s.btnSmall, s.btnYellow]} onPress={handleBuscarCep} disabled={buscandoCep}><Text style={s.btnSmallText}>{buscandoCep?'...':'Busca'}</Text></Pressable>
+                                </View>
                             </View>
-                        <Field label="Cidade" required value={cidadeDraft} onChange={setCidadeDraft} placeholder="Cidade" />
-                        <Field label="Bairro" required value={bairroDraft} onChange={setBairroDraft} placeholder="Bairro" />
-                        <Field label="Logradouro" required value={logradouroDraft} onChange={setLogradouroDraft} placeholder="Logradouro" />
-                        <Field label="Número" required value={numeroDraft} onChange={setNumeroDraft} placeholder="Número" keyboardType="numeric" />
-                        <View style={s.field}><Text style={s.label}>Complemento</Text><TextInput style={[s.input,{height:80, textAlignVertical:'top'}]} value={complementoDraft} onChangeText={setComplementoDraft} placeholder="Complemento" multiline placeholderTextColor={Colors.textPlaceholder}/></View>
+                        <View style={s.fieldFull}><Field label="Logradouro" required value={logradouroDraft} onChange={setLogradouroDraft} placeholder="Logradouro" /></View>
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Cidade" required value={cidadeDraft} onChange={setCidadeDraft} placeholder="Cidade" /></View>
+                            <View style={s.fieldHalf}><Field label="Bairro" required value={bairroDraft} onChange={setBairroDraft} placeholder="Bairro" /></View>
+                        </View>
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Número" required value={numeroDraft} onChange={setNumeroDraft} placeholder="Número" keyboardType="numeric" /></View>
+                        </View>
+                        <View style={s.fieldFull}><Text style={s.label}>Complemento</Text><TextInput style={[s.input,{height:80, textAlignVertical:'top'}]} value={complementoDraft} onChangeText={setComplementoDraft} placeholder="Complemento" multiline placeholderTextColor={Colors.textPlaceholder}/></View>
                         <Pressable style={[s.btn, s.btnGreen]} onPress={addEndereco}><Text style={s.btnText}>Adicionar endereço</Text></Pressable>
                         {enderecos.length>0 && (
                             <View style={{marginTop:12, gap:8}}>
@@ -365,16 +393,26 @@ export default function ViewUsuarioFormUsuarioListScreen({route}: {route?: any})
                 {activeTab==='documentos' && (
                     <View style={s.card}>
                         <Text style={s.sectionTitle}>Dados do Documento</Text>
-                        <Field label="Qtd. filhos < 14 anos" value={doc.qtdFilhosMenor14} onChange={v=>updDoc('qtdFilhosMenor14',v)} placeholder="0" keyboardType="numeric" />
-                        <Field label="Carteira de Trabalho *" value={doc.ctps} onChange={v=>updDoc('ctps',v)} placeholder="CTPS" />
-                        <Field label="Série *" value={doc.serie} onChange={v=>updDoc('serie',v)} placeholder="Série" />
-                        <Field label="PIS *" value={doc.pis} onChange={v=>updDoc('pis',v)} placeholder="999.9999.999-9" keyboardType="numeric" />
-                        <Field label="Data Emissão RG" value={doc.dataEmissaoRg} onChange={v=>updDoc('dataEmissaoRg',v)} placeholder="AAAA-MM-DD" />
-                        <Field label="Órgão Emissor" value={doc.orgaoEmissorRg} onChange={v=>updDoc('orgaoEmissorRg',v)} placeholder="Órgão" />
-                        <Field label="Título Eleitor" value={doc.tituloEleitor} onChange={v=>updDoc('tituloEleitor',v)} placeholder="Título" />
-                        <Field label="Zona" value={doc.zona} onChange={v=>updDoc('zona',v)} placeholder="Zona" />
-                        <Field label="Seção" value={doc.secao} onChange={v=>updDoc('secao',v)} placeholder="Seção" />
-                        <Field label="Carteira Reservista" value={doc.carteiraReservista} onChange={v=>updDoc('carteiraReservista',v)} placeholder="Reservista" />
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Qtd. filhos < 14 anos" value={doc.qtdFilhosMenor14} onChange={v=>updDoc('qtdFilhosMenor14',v)} placeholder="0" keyboardType="numeric" /></View>
+                            <View style={s.fieldHalf}><Field label="Carteira de Trabalho *" value={doc.ctps} onChange={v=>updDoc('ctps',v)} placeholder="CTPS" /></View>
+                        </View>
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Série *" value={doc.serie} onChange={v=>updDoc('serie',v)} placeholder="Série" /></View>
+                            <View style={s.fieldHalf}><Field label="PIS *" value={doc.pis} onChange={v=>updDoc('pis',v)} placeholder="999.9999.999-9" keyboardType="numeric" /></View>
+                        </View>
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Data Emissão RG" value={doc.dataEmissaoRg} onChange={v=>updDoc('dataEmissaoRg',v)} placeholder="AAAA-MM-DD" /></View>
+                            <View style={s.fieldHalf}><Field label="Órgão Emissor" value={doc.orgaoEmissorRg} onChange={v=>updDoc('orgaoEmissorRg',v)} placeholder="Órgão" /></View>
+                        </View>
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Título Eleitor" value={doc.tituloEleitor} onChange={v=>updDoc('tituloEleitor',v)} placeholder="Título" /></View>
+                            <View style={s.fieldHalf}><Field label="Zona" value={doc.zona} onChange={v=>updDoc('zona',v)} placeholder="Zona" /></View>
+                        </View>
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><Field label="Seção" value={doc.secao} onChange={v=>updDoc('secao',v)} placeholder="Seção" /></View>
+                            <View style={s.fieldHalf}><Field label="Carteira Reservista" value={doc.carteiraReservista} onChange={v=>updDoc('carteiraReservista',v)} placeholder="Reservista" /></View>
+                        </View>
                         <Text style={[s.sectionTitle,{marginTop:16}]}>Arquivos — itens com * são obrigatórios</Text>
                         <View style={{gap:10}}>
                             <DocUpload label="Foto 3x4 *" required value={foto3x4} onChange={setFoto3x4}/>
@@ -395,8 +433,10 @@ export default function ViewUsuarioFormUsuarioListScreen({route}: {route?: any})
                     <View style={s.card}>
                         <Text style={s.sectionTitle}>Trabalho</Text>
                         <Toggle label="Ativo" value={ativo} onChange={setAtivo}/>
-                        <SelectField label="Função *" value={funcaoId} onChange={setFuncaoId} options={funcoes.map(f=>({value:String(f.id), label:f.label}))} />
-                        <Field label="Data Admissão" value={dataAdmissao} onChange={setDataAdmissao} placeholder="AAAA-MM-DD" />
+                        <View style={s.formRow}>
+                            <View style={s.fieldHalf}><SelectField label="Função *" value={funcaoId} onChange={setFuncaoId} options={funcoes.map(f=>({value:String(f.id), label:f.label}))} /></View>
+                            <View style={s.fieldHalf}><Field label="Data Admissão" value={dataAdmissao} onChange={setDataAdmissao} placeholder="AAAA-MM-DD" /></View>
+                        </View>
                         <View style={s.field}>
                             <Text style={s.label}>Regime</Text>
                             <View style={{flexDirection:'row', gap:10, flex:1}}>
@@ -470,8 +510,11 @@ const s=StyleSheet.create({
     content:{flex:1},
     card:{backgroundColor:Colors.bgSecondary, borderRadius:BorderRadius.lg, padding:Spacing.lg, gap:Spacing.md, ...Shadows.small},
     sectionTitle:{fontSize:13, fontWeight:Typography.weights.bold, color:Colors.textPrimary, textTransform:'uppercase', letterSpacing:0.5, borderTopWidth:1, borderTopColor:Colors.borderLight, paddingTop:10, marginTop:4},
-    field:{flexDirection:'row', alignItems:'center', gap:Spacing.sm},
-    label:{width:130, fontSize:Typography.sizes.sm, fontWeight:Typography.weights.semibold, color:Colors.textPrimary},
+    field:{flexDirection:'column', gap:Spacing.xs},
+    formRow:{flexDirection:'row', flexWrap:'wrap', gap:Spacing.md},
+    fieldHalf:{width:'47%'},
+    fieldFull:{width:'100%'},
+    label:{fontSize:Typography.sizes.sm, fontWeight:Typography.weights.semibold, color:Colors.textPrimary},
     req:{color:Colors.error},
     input:{flex:1, height:44, borderWidth:1, borderColor:Colors.borderMedium, borderRadius:BorderRadius.md, paddingHorizontal:12, fontSize:Typography.sizes.md, color:Colors.textPrimary, backgroundColor:Colors.bgPrimary},
     selectGroup:{flex:1, gap:Spacing.xs},

@@ -60,16 +60,16 @@ export default function ViewPerfilFormPerfilListScreen() {
             key: 'config',
             label: 'Configurações Gerais',
             fields: [
-                {name: 'id', label: 'ID', type: 'text', readOnly: true, span: 1},
+                {name: 'id', label: 'ID', type: 'text', readOnly: true},
                 {name: 'descricao', label: 'Descrição *', required: true, span: 3},
-                {name: 'hierarquia', label: 'Hierarquia *', type: 'select', options: HIERARQUIA_OPTIONS, required: true, span: 2},
+                {name: 'hierarquia', label: 'Hierarquia *', type: 'select', options: HIERARQUIA_OPTIONS, required: true},
+                {name: 'comunicar', label: 'Comunicar', type: 'select', options: [{value: 'true', label: 'Sim'}, {value: 'false', label: 'Não'}]},
                 {name: 'modulo', label: 'Minha Página Inicial', type: 'select', options: [], span: 3},
-                {name: 'comunicar', label: 'Comunicar', type: 'select', options: [{value: 'true', label: 'Sim'}, {value: 'false', label: 'Não'}], span: 1},
             ],
             content: (
                 <div>
                     <div className="form-grid" style={{marginBottom: '16px'}}>
-                        <label className="form-field" style={{gridColumn: 'span 2'}}>
+                        <label className="form-field">
                             <span className="form-label">Módulo</span>
                             <select className="form-input form-select" value={str(moduloSelecionado.modulo)} onChange={e => setModuloSelecionado({...moduloSelecionado, modulo: e.target.value})}>
                                 <option value="">-- Selecione --</option>
@@ -103,7 +103,7 @@ export default function ViewPerfilFormPerfilListScreen() {
                                 <option value="false">Não</option>
                             </select>
                         </label>
-                        <label className="form-field" style={{gridColumn: 'span 1', display: 'flex', alignItems: 'flex-end'}}>
+                        <label className="form-field" style={{display: 'flex', alignItems: 'flex-end'}}>
                             <button type="button" className="btn-form-save" onClick={() => {
                                 const novo = {...moduloSelecionado, id: Date.now()};
                                 setPerfisModulos([...perfisModulos, novo]);
@@ -127,9 +127,9 @@ export default function ViewPerfilFormPerfilListScreen() {
             key: 'favoritos',
             label: 'Favoritos',
             fields: [
-                {name: 'favorito_nome', label: 'Nome *', required: true, span: 3},
-                {name: 'favorito_modulo', label: 'Módulo', type: 'select', options: [], span: 3},
-                {name: 'favorito_icone', label: 'Ícone', type: 'text', span: 2},
+                {name: 'favorito_nome', label: 'Nome *', required: true},
+                {name: 'favorito_modulo', label: 'Módulo', type: 'select', options: []},
+                {name: 'favorito_icone', label: 'Ícone', type: 'text'},
             ],
             content: (
                 <MasterDetail

@@ -1,16 +1,42 @@
 import React from 'react';
 import {ModuleWizard} from '../ModuleWizard';
+import {DIA_AULA_SOURCE, DIA_AULA_COLUMNS, DIA_AULA_SEARCH} from '../../masterDetailSources';
 
-export default function ViewOferecimentoComponenteCurricularFormOferecimentoComponenteCurricularListScreen() {
+interface FormRouteParams {
+    id?: string | number;
+    entityId?: string | number;
+}
+
+export default function ViewOferecimentoComponenteCurricularFormOferecimentoComponenteCurricularListScreen({
+    route,
+}: {
+    route?: {params?: FormRouteParams};
+}) {
+    const editId = route?.params?.id ?? route?.params?.entityId ?? null;
+
     return (
         <ModuleWizard
+            editId={editId}
             steps={[
                 {
                     key: 'oferecimento',
                     label: 'Componente Curricular',
                     path: '/api/view/oferecimentoComponenteCurricular/formOferecimentoComponenteCurricular'
                 },
-                {key: 'diasAula', label: 'Dias Aula', empty: 'Dias de aula do oferecimento.'},
+                {
+                    key: 'diasAula',
+                    label: 'Dias Aula',
+                    masterDetail: {
+                        label: 'Dias Aula (edc_oferecimento_dias_aula)',
+                        source: DIA_AULA_SOURCE,
+                        valueKey: 'id',
+                        searchKeys: DIA_AULA_SEARCH,
+                        columns: DIA_AULA_COLUMNS,
+                        loadPath: '/api/educacao/oferecimento-componente-curricular/buscar-dias-aula-por-oferecimento',
+                        loadParam: 'oferecimentoComponenteCurricularId',
+                        linkKey: 'id',
+                    },
+                },
                 {key: 'professor', label: 'Professor', empty: 'Professores do oferecimento.', nextLabel: 'Salvar'},
             ]}
         />

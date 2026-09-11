@@ -95,6 +95,9 @@ export const API_PATHS = {
     estruturaColuna: '/api/relatorios/estrutura-coluna',
     relatorioDisponiveis: '/api/relatorios/relatorio/disponiveis',
     organograma: '/api/relatorios/organograma',
+    indicadorGauge: '/api/relatorios/indicador-gauge',
+    indicadorGaugeDisponiveis: '/api/relatorios/indicador-gauge/disponiveis',
+    indicadorGaugeExecutar: '/api/relatorios/indicador-gauge/executar',
   },
   curriculo: {
     vaga: '/api/curriculo/vaga',
@@ -118,6 +121,19 @@ export const API_PATHS = {
     conta: {
       gestaoConta: '/api/view/conta/gestaoConta',
       controlePagamento: '/api/view/conta/controlePagamento',
+    },
+    digitalizacaoDocumento: {
+      digitalizacaoDocumento: '/api/view/digitalizacaoDocumento/digitalizacaoDocumento',
+      turmasDisponiveis: '/api/view/digitalizacaoDocumento/turmasDisponiveis',
+      carregarDiasAula: '/api/view/digitalizacaoDocumento/carregarDiasAula',
+      digitalizacaoChamadas: '/api/view/digitalizacaoDocumento/digitalizacaoChamadas',
+      carregarOcorrencia: '/api/view/digitalizacaoDocumento/carregarOcorrencia',
+      autoCompleteAluno: '/api/view/digitalizacaoDocumento/autoCompleteAluno',
+      carregarDocumentosAluno: '/api/view/digitalizacaoDocumento/carregarDocumentosAluno',
+      salvarDocumentoAluno: '/api/view/digitalizacaoDocumento/salvarDocumentoAluno',
+      inserirArquivo: '/api/view/digitalizacaoDocumento/inserirArquivo',
+      inserirChamada: '/api/view/digitalizacaoDocumento/inserirChamada',
+      salvarChamada: '/api/view/digitalizacaoDocumento/salvarChamada',
     },
   },
 } as const;

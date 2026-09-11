@@ -136,7 +136,8 @@ public class FiltrosController {
         if (tabelaId == null) {
             return Uni.createFrom().item(List.of());
         }
-        return service.getFiltersForViewTabela(tabelaId);
+        return service.getFiltersForViewTabela(tabelaId)
+                .onFailure().invoke(ex -> ex.printStackTrace());
     }
 
     @GET

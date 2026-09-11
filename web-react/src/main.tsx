@@ -226,6 +226,7 @@ ViewComunicacaoListComunicacaoListScreen,
     ViewMensagemNapListMensagemNapListScreen,
     ViewMenuListMapaMenuListScreen,
     ViewMetaFormMetaListScreen,
+    ViewMetaFormMetaDinamicaListScreen,
     ViewMetaIndicadorMetaDinamicaListScreen,
     ViewMetaListMetaListScreen,
     ViewMetaListMetaDinamicaListScreen,
@@ -301,6 +302,7 @@ ViewComunicacaoListComunicacaoListScreen,
     ViewRelatoriosFormMapaListScreen,
     ViewRelatoriosFormOrganogramaListScreen,
     ViewRelatoriosFormTabelaListScreen,
+    ViewRelatoriosFormIndicadorGaugeListScreen,
     ViewRelatoriosListDashboardListScreen,
     ListGraficoScreen,
     ListMapaScreen,
@@ -316,6 +318,8 @@ ViewComunicacaoListComunicacaoListScreen,
     ViewRelatoriosViewMapaListScreen,
     ViewRelatoriosViewOrganogramaListScreen,
     ViewRelatoriosViewTabelaListScreen,
+    ViewRelatoriosListIndicadorGaugeListScreen,
+    ViewRelatoriosViewIndicadorGaugeScreen,
 
     ViewResultadoFormResultadoListScreen,
     ViewResultadoListResultadoListScreen,
@@ -392,15 +396,6 @@ ViewComunicacaoListComunicacaoListScreen,
     ViewValorProdutoListValorProdutoListScreen,
     ViewTemaListTemasListScreen,
     CurriculumAttachmentModal,
-    AlunoDashboardScreen,
-    AlunoBoletimScreen,
-    AlunoFrequenciaScreen,
-    AlunoFinanceiroScreen,
-    AlunoAulasScreen,
-    AlunoAulasTurmaScreen,
-    AlunoAvaliacoesScreen,
-    AlunoAvaliacaoResponderScreen,
-    AulaAlunoScreen,
     MeusDadosScreen,
     IconesListScreen,
     AsaasCobrancasListScreen,
@@ -427,16 +422,6 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     element={<ProtectedRoute/>}><Route path="/auditoria" element={<AuditoriaScreen/>}/><Route path="/view/tema/listTemas"
                                                                                          element={
                                                                                              <ViewTemaListTemasListScreen/>}/>
-    <Route path="/aluno/portalAluno" element={<AlunoDashboardScreen/>}/>
-    <Route path="/aluno/boletim" element={<AlunoBoletimScreen/>}/>
-    <Route path="/aluno/frequencia" element={<AlunoFrequenciaScreen/>}/>
-    <Route path="/aluno/financeiro" element={<AlunoFinanceiroScreen/>}/>
-<Route path="/aluno/aulas" element={<AlunoAulasScreen/>}/>
-    <Route path="/aluno/aulas/turma/:oferecimentoId" element={<AlunoAulasTurmaScreen/>}/>
-    <Route path="/aluno/aulas/aula/:aulaId" element={<AulaAlunoScreen/>}/>
-    <Route path="/aluno/avaliacoes" element={<AlunoAvaliacoesScreen/>}/>
-    <Route path="/aluno/avaliacao/:id" element={<AlunoAvaliacaoResponderScreen/>}/>
-    <Route path="/aluno/curriculo-anexo" element={<AlunoDashboardScreen/>}/>
     <Route path="/meus-dados" element={<MeusDadosScreen/>}/>
     <Route path="/view/acao/formAcao" element={<ViewAcaoFormAcaoListScreen/>}/>
     <Route path="/view/acao/listAcao" element={<ViewAcaoListAcaoListScreen/>}/>
@@ -638,6 +623,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/menu/listMapaMenu" element={<ViewMenuListMapaMenuListScreen/>}/>
     <Route path="/view/icones/listIcones" element={<IconesListScreen/>}/>
     <Route path="/view/meta/formMeta" element={<ViewMetaFormMetaListScreen/>}/>
+    <Route path="/view/meta/formMetaDinamica" element={<ViewMetaFormMetaDinamicaListScreen/>}/>
     <Route path="/view/meta/indicadorMetaDinamica" element={<ViewMetaIndicadorMetaDinamicaListScreen/>}/>
     <Route path="/view/meta/listMeta" element={<ViewMetaListMetaListScreen/>}/>
     <Route path="/view/meta/listMetaDinamica" element={<ViewMetaListMetaDinamicaListScreen/>}/>
@@ -721,12 +707,15 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/relatorios/formGrafico" element={<ViewRelatoriosFormGraficoListScreen/>}/>
     <Route path="/view/relatorios/formMapa" element={<ViewRelatoriosFormMapaListScreen/>}/>
     <Route path="/view/relatorios/formOrganograma" element={<ViewRelatoriosFormOrganogramaListScreen/>}/>
-    <Route path="/view/relatorios/formTabela" element={<ViewRelatoriosFormTabelaListScreen/>}/>
+<Route path="/view/relatorios/formTabela" element={<ViewRelatoriosFormTabelaListScreen/>}/>
+    <Route path="/view/relatorios/formIndicadorGauge" element={<ViewRelatoriosFormIndicadorGaugeListScreen/>}/>
+    <Route path="/view/relatorios/formIndicadorGauge/:id" element={<ViewRelatoriosFormIndicadorGaugeListScreen/>}/>
     <Route path="/view/relatorios/listDashboard" element={<ViewRelatoriosListDashboardListScreen/>}/>
-<Route path="/view/relatorios/listGrafico" element={<ListGraficoScreen/>}/>
-<Route path="/view/relatorios/listMapa" element={<ListMapaScreen/>}/>
-<Route path="/view/relatorios/listOrganograma" element={<ViewRelatoriosListOrganogramaListScreen/>}/>
-<Route path="/view/relatorios/listTabela" element={<ListTabelaScreen/>}/>
+    <Route path="/view/relatorios/listGrafico" element={<ListGraficoScreen/>}/>
+    <Route path="/view/relatorios/listMapa" element={<ListMapaScreen/>}/>
+    <Route path="/view/relatorios/listOrganograma" element={<ViewRelatoriosListOrganogramaListScreen/>}/>
+    <Route path="/view/relatorios/listTabela" element={<ListTabelaScreen/>}/>
+    <Route path="/view/relatorios/listIndicadorGauge" element={<ViewRelatoriosListIndicadorGaugeListScreen/>}/>
     <Route path="/view/relatorios/viewDashboard" element={<ReportViewScreen/>}/>
     <Route path="/view/relatorios/viewGraficoBarrasHorizontal"
            element={<ReportViewScreen/>}/>
@@ -739,6 +728,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/relatorios/viewMapa" element={<ReportViewScreen/>}/>
     <Route path="/view/relatorios/viewOrganograma" element={<ReportViewScreen/>}/>
     <Route path="/view/relatorios/viewTabela/:id" element={<ViewRelatoriosViewTabelaListScreen/>}/>
+    <Route path="/view/relatorios/viewIndicadorGauge/:id" element={<ViewRelatoriosViewIndicadorGaugeScreen/>}/>
 
     <Route path="/view/resultado/formResultado" element={<ViewResultadoFormResultadoListScreen/>}/>
     <Route path="/view/resultado/listResultado" element={<ViewResultadoListResultadoListScreen/>}/>

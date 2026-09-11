@@ -6,7 +6,7 @@ import {alunoApi, formatarData} from '../../aluno/aluno';
 
 import {api} from '../../../shared/services/api';
 
-import {Base64FileUpload} from '../../../shared/components/Base64FileUpload';
+import {PhotoUploadModal} from '../../../shared/components/PhotoUploadModal';
 
 import '../../usuario/MeusDados.css';
 
@@ -119,6 +119,26 @@ export default function MeusDadosScreen() {
     const [error, setError] = useState('');
 
     const [saved, setSaved] = useState(false);
+
+    const [photoModalOpen, setPhotoModalOpen] = useState(false);
+
+    const handlePhotoUpdate = (fotoUrl: string) => {
+        setFoto(fotoUrl);
+        setDados((prev) => ({...prev, foto: fotoUrl}));
+        if (session) {
+            refreshSession({
+                accessToken: session.accessToken,
+                expiresAt: session.expiresAt,
+                username: session.username,
+                permissions: session.permissions,
+                modulePermissions: session.modulePermissions,
+                nome: session.nome,
+                email: session.email,
+                cpf: session.cpf,
+                foto: fotoUrl,
+            });
+        }
+    };
 
 
 
@@ -464,53 +484,27 @@ export default function MeusDadosScreen() {
 
                     <div className="meus-dados-foto-editar">
 
-                        <Base64FileUpload
-
-                            value={foto}
-
-                            onChange={(v) => {
-
-                                setFoto(v);
-
-                                setSaved(false);
-
-                                setError('');
-
-                            }}
-
-                            accept="image/*"
-
-                            label="Foto do perfil (JPG/PNG, máx. 5 MB)"
-
-                            onError={(m) => setError(m)}
-
-                        />
-
                         <button
-
                             type="button"
-
                             className="meus-dados-salvar"
-
-                            onClick={salvarFoto}
-
-                            disabled={saving || foto === (dados.foto || '')}
-
+                            onClick={() => setPhotoModalOpen(true)}
                         >
-
-                            {saving ? 'Salvando...' : 'Salvar foto'}
-
+                            Alterar foto
                         </button>
-
-                        {error && <div className="meus-dados-error" role="alert">{error}</div>}
-
-                        {saved && <span className="meus-dados-ok" role="status">Foto salva com sucesso.</span>}
 
                     </div>
 
                 </div>
 
             </div>
+
+            <PhotoUploadModal
+                isOpen={photoModalOpen}
+                onClose={() => setPhotoModalOpen(false)}
+                onPhotoUpdate={handlePhotoUpdate}
+                currentFoto={foto}
+                username={session?.username}
+            />
 
         </main>
 

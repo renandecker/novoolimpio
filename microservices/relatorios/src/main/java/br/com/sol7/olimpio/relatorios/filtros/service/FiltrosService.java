@@ -98,11 +98,51 @@ public class FiltrosService {
 
     private void apply(Filtros e, FiltrosRequest r) {
         e.nome = r.nome();
+        e.informacao = r.informacao();
+        e.valorFixo = r.valorFixo();
+        e.operacao = r.operacao();
+        e.dataInicio = r.dataInicio();
+        e.dataFim = r.dataFim();
+        e.periodoDinamico = r.periodoDinamico();
+        e.flFixo = r.flFixo();
+        e.flExibir = r.flExibir();
+        e.flTodosGrafico = r.flTodosGrafico();
+        e.flTodosTabela = r.flTodosTabela();
+        e.flTodosMapa = r.flTodosMapa();
+        e.flTodosOrganograma = r.flTodosOrganograma();
+        e.flRede = r.flRede();
+        e.flHierarquia = r.flHierarquia();
+        e.hierarquia = r.hierarquia();
+        e.idEstrutura = r.idEstrutura();
+        e.idDimensao = r.idDimensao();
+        e.tipoFiltro = r.tipoFiltro();
         e.dadosJson = r.dadosJson();
     }
 
     private FiltrosResponse toResponse(Filtros e) {
-        return new FiltrosResponse(e.id, e.nome, e.dadosJson);
+        return new FiltrosResponse(
+                e.id,
+                e.nome,
+                e.informacao,
+                e.valorFixo,
+                e.operacao,
+                e.dataInicio,
+                e.dataFim,
+                e.periodoDinamico,
+                e.flFixo,
+                e.flExibir,
+                e.flTodosGrafico,
+                e.flTodosTabela,
+                e.flTodosMapa,
+                e.flTodosOrganograma,
+                e.flRede,
+                e.flHierarquia,
+                e.hierarquia,
+                e.idEstrutura,
+                e.idDimensao,
+                e.tipoFiltro,
+                e.dadosJson
+        );
     }
 
     public Uni<List<Long>> criarFiltros(List<Integer> ids) {
@@ -372,32 +412,15 @@ public class FiltrosService {
     }
 
     private FiltroRelatorioWrapperDTO.FiltroRelatorioDTO parseDadosJson(Filtros f) {
-        if (f.dadosJson == null || f.dadosJson.isEmpty()) {
-            return new FiltroRelatorioWrapperDTO.FiltroRelatorioDTO(
-                    f.id, f.nome, false, true, "DINAMICO", null,
-                    new FiltroRelatorioWrapperDTO.DimensaoDTO("DESCRITIVO")
-            );
-        }
-        try {
-            JsonNode json = objectMapper.readTree(f.dadosJson);
-            boolean fixo = json.has("fixo") ? json.get("fixo").asBoolean() : false;
-            boolean exibirFiltro = json.has("exibirFiltro") ? json.get("exibirFiltro").asBoolean() : true;
-            String tipo = json.has("tipo") ? json.get("tipo").asText() : "DINAMICO";
-            String informacao = json.has("informacao") ? json.get("informacao").asText() : null;
-            String tipoInfo = "DESCRITIVO";
-            if (json.has("dimensao") && json.get("dimensao").has("tipoInfo")) {
-                tipoInfo = json.get("dimensao").get("tipoInfo").asText();
-            }
-            return new FiltroRelatorioWrapperDTO.FiltroRelatorioDTO(
-                    f.id, f.nome, fixo, exibirFiltro, tipo, informacao,
-                    new FiltroRelatorioWrapperDTO.DimensaoDTO(tipoInfo)
-            );
-        } catch (Exception e) {
-            return new FiltroRelatorioWrapperDTO.FiltroRelatorioDTO(
-                    f.id, f.nome, false, true, "DINAMICO", null,
-                    new FiltroRelatorioWrapperDTO.DimensaoDTO("DESCRITIVO")
-            );
-        }
+        boolean fixo = f.flFixo != null ? f.flFixo : false;
+        boolean exibirFiltro = f.flExibir != null ? f.flExibir : true;
+        String tipo = f.tipoFiltro != null ? f.tipoFiltro : "DINAMICO";
+        String informacao = null;
+        String tipoInfo = "DESCRITIVO";
+        return new FiltroRelatorioWrapperDTO.FiltroRelatorioDTO(
+                f.id, f.nome, fixo, exibirFiltro, tipo, informacao,
+                new FiltroRelatorioWrapperDTO.DimensaoDTO(tipoInfo)
+        );
     }
 
 }

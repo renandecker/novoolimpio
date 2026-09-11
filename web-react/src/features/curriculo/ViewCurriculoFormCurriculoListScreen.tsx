@@ -457,22 +457,6 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                onChange={(e) => updateField('entity', {...data.entity, sigla: e.target.value})}/>
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Curso (vinculado)</span>
-                        <select className="form-input form-select"
-                                value={data.entity.cursoId ?? ''}
-                                onChange={(e) => updateField('entity', {
-                                    ...data.entity,
-                                    cursoId: e.target.value ? Number(e.target.value) : undefined,
-                                })}>
-                            <option value="">Selecione</option>
-                            {cursos.map((c) => (
-                                <option key={String(c.id)} value={String(c.id)}>
-                                    {String((c as any).descricao ?? (c as any).nome ?? `Curso #${c.id}`)}
-                                </option>
-                            ))}
-                        </select>
-                    </label>
-                    <label className="form-field">
                         <span className="form-label">Tipo Curso *</span>
                         <select className="form-input form-select"
                                 value={data.entity.tipoCursoId ?? ''}
@@ -537,6 +521,22 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                })}/>
                     </label>
                     <label className="form-field">
+                        <span className="form-label">Curso (vinculado)</span>
+                        <select className="form-input form-select"
+                                value={data.entity.cursoId ?? ''}
+                                onChange={(e) => updateField('entity', {
+                                    ...data.entity,
+                                    cursoId: e.target.value ? Number(e.target.value) : undefined,
+                                })}>
+                            <option value="">Selecione</option>
+                            {cursos.map((c) => (
+                                <option key={String(c.id)} value={String(c.id)}>
+                                    {String((c as any).descricao ?? (c as any).nome ?? `Curso #${c.id}`)}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+                    <label className="form-field">
                         <span className="form-label">Data Cancelamento</span>
                         <input className="form-input" type="date"
                                value={data.entity.dataCancelamento ?? ''}
@@ -571,12 +571,6 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                onChange={(e) => updateField('entity', {...data.entity, reconhecimento: e.target.value})}/>
                     </label>
                     <label className="form-field">
-                        <span className="form-label">Descrição Diploma</span>
-                        <input className="form-input" style={{gridColumn: 'span 3'}}
-                               value={data.entity.descricaoDiploma ?? ''}
-                               onChange={(e) => updateField('entity', {...data.entity, descricaoDiploma: e.target.value})}/>
-                    </label>
-                    <label className="form-field">
                         <span className="form-label">Escolaridade Mínima</span>
                         <select className="form-input form-select"
                                 value={data.entity.escolaridadeId ?? ''}
@@ -589,6 +583,12 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                 <option key={e2.id} value={e2.id}>{e2.descricao}</option>
                             ))}
                         </select>
+                    </label>
+                    <label className="form-field">
+                        <span className="form-label">Descrição Diploma</span>
+                        <input className="form-input"
+                               value={data.entity.descricaoDiploma ?? ''}
+                               onChange={(e) => updateField('entity', {...data.entity, descricaoDiploma: e.target.value})}/>
                     </label>
                 </div>
             ),
@@ -726,8 +726,8 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                 <fieldset className="form-fieldset">
                     <legend>Requisitos da Matriz</legend>
                     <div className="form-grid">
-                        <label className="form-field" style={{gridColumn: 'span 2'}}>
-                            <span className="form-label">Descrição *</span>
+                        <label className="form-field">
+                        <span className="form-label">Descrição *</span>
                             <input className="form-input" value={novoRequisitoDescricao}
                                    onChange={(e) => setNovoRequisitoDescricao(e.target.value)}/>
                         </label>
@@ -843,8 +843,8 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                 <fieldset className="form-fieldset">
                     <legend>Material Escolar do Curso</legend>
                     <div className="form-grid">
-                        <label className="form-field" style={{gridColumn: 'span 2'}}>
-                            <span className="form-label">Produto / Material *</span>
+                        <label className="form-field">
+                        <span className="form-label">Produto / Material *</span>
                             <input className="form-input" value={novoMaterialProduto}
                                    onChange={(e) => setNovoMaterialProduto(e.target.value)}/>
                         </label>
@@ -966,31 +966,31 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                 <option value={2}>IMPRESSÃO</option>
                             </select>
                         </label>
-                        <label className="form-field" style={{gridColumn: 'span 4'}}>
+                        <label className="form-field">
                             <span className="form-label">Template Contrato</span>
                             <textarea className="form-input" rows={4}
-                                      style={{minHeight: 80}}
+                                      style={{gridColumn: 'span 3', minHeight: 80}}
                                       value={data.entity.templateContrato ?? ''}
                                       onChange={(e) => updateField('entity', {...data.entity, templateContrato: e.target.value})}/>
                         </label>
-                        <label className="form-field" style={{gridColumn: 'span 4'}}>
+                        <label className="form-field">
                             <span className="form-label">Template Certificado</span>
                             <textarea className="form-input" rows={4}
-                                      style={{minHeight: 80}}
+                                      style={{gridColumn: 'span 3', minHeight: 80}}
                                       value={data.entity.templateCertificado ?? ''}
                                       onChange={(e) => updateField('entity', {...data.entity, templateCertificado: e.target.value})}/>
                         </label>
-                        <label className="form-field" style={{gridColumn: 'span 4'}}>
+                        <label className="form-field">
                             <span className="form-label">Template Boletim</span>
                             <textarea className="form-input" rows={4}
-                                      style={{minHeight: 80}}
+                                      style={{gridColumn: 'span 3', minHeight: 80}}
                                       value={data.entity.templateBoletim ?? ''}
                                       onChange={(e) => updateField('entity', {...data.entity, templateBoletim: e.target.value})}/>
                         </label>
-                        <label className="form-field" style={{gridColumn: 'span 4'}}>
+                        <label className="form-field">
                             <span className="form-label">Template Promissória</span>
                             <textarea className="form-input" rows={4}
-                                      style={{minHeight: 80}}
+                                      style={{gridColumn: 'span 3', minHeight: 80}}
                                       value={data.entity.templatePromissoria ?? ''}
                                       onChange={(e) => updateField('entity', {...data.entity, templatePromissoria: e.target.value})}/>
                         </label>

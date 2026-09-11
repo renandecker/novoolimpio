@@ -22,7 +22,7 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext context) {
         String path = context.getUriInfo().getPath();
         if (path.startsWith("/")) path = path.substring(1);
-        if (path.equals("api/login/authenticate") || path.equals("api/login/bootstrap")) return;
+        if (path.equals("api/login/authenticate") || path.equals("api/login/bootstrap") || path.equals("api/basico/modulo/menu")) return;
         String authorization = context.getHeaderString("Authorization");
         if (authorization == null || !authorization.startsWith("Bearer ")) {
             reject(context, Response.Status.UNAUTHORIZED, "Token Bearer ausente");

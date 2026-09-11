@@ -92,23 +92,23 @@ export default function ViewConfiguracaoFormConfiguracaoCaixaListScreen() {
 
                             fields: [
 
-                                {name: 'id', label: 'ID', type: 'number', readOnly: true, span: 1},
+                                {name: 'id', label: 'ID', type: 'number', readOnly: true},
 
-                                {name: 'unidadeId', label: 'Unidade', type: 'select', required: true, options: [], span: 1},
+                                {name: 'unidadeId', label: 'Unidade', type: 'select', required: true, options: []},
 
-                                {name: 'usuarioId', label: 'Usuário', type: 'select', required: true, options: [], span: 1},
+                                {name: 'usuarioId', label: 'Usuário', type: 'select', required: true, options: []},
 
-                                {name: 'responsavelId', label: 'Autorizador / Responsável', type: 'select', required: true, options: [], span: 1},
+                                {name: 'responsavelId', label: 'Autorizador / Responsável', type: 'select', required: true, options: []},
 
-                                {name: 'email', label: 'E-mail', type: 'email', required: true, placeholder: 'email@exemplo.com', span: 2},
+                                {name: 'email', label: 'E-mail', type: 'email', required: true, placeholder: 'email@exemplo.com', span: 3},
 
-                                {name: 'dias', label: 'Dias (Validade 2ª via)', type: 'number', required: true, placeholder: '5', span: 1},
+                                {name: 'dias', label: 'Dias (Validade 2ª via)', type: 'number', required: true, placeholder: '5'},
 
-                                {name: 'impressao', label: 'Impressão / Cota', type: 'number', required: true, placeholder: '1', span: 1},
+                                {name: 'impressao', label: 'Impressão / Cota', type: 'number', required: true, placeholder: '1'},
 
-                                {name: 'fundoCaixa', label: 'Fundo de Caixa', type: 'number', required: true, placeholder: '0.00', span: 1},
+                                {name: 'fundoCaixa', label: 'Fundo de Caixa', type: 'number', required: true, placeholder: '0.00'},
 
-                                {name: 'pagPropriaUnid', label: 'Pagamento Própria Unidade', type: 'select', options: [{value: 'true', label: 'Sim'}, {value: 'false', label: 'Não'}], span: 1},
+                                {name: 'pagPropriaUnid', label: 'Pagamento Própria Unidade', type: 'select', options: [{value: 'true', label: 'Sim'}, {value: 'false', label: 'Não'}]},
 
                             ]
 

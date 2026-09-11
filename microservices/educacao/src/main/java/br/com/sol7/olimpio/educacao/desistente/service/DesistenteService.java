@@ -58,6 +58,7 @@ public class DesistenteService {
     private void apply(Desistente e, DesistenteRequest r) {
         e.descricao = r.descricao();
         e.dataCriacao = r.dataCriacao();
+        e.pessoaAlunoId = r.pessoaAlunoId();
         e.pessoaFuncionarioId = r.pessoaFuncionarioId();
         e.contratoId = r.contratoId();
         e.motivoId = r.motivoId();
@@ -65,7 +66,7 @@ public class DesistenteService {
     }
 
     private DesistenteResponse toResponse(Desistente e) {
-        return new DesistenteResponse(e.id, e.descricao, e.dataCriacao, e.pessoaFuncionarioId, e.contratoId, e.motivoId, e.ativo);
+        return new DesistenteResponse(e.id, e.descricao, e.dataCriacao, e.pessoaAlunoId, e.pessoaFuncionarioId, e.contratoId, e.motivoId, e.ativo);
     }
 }
 

@@ -24,6 +24,7 @@ const tabs: FormTabConfig[] = [
                 label: 'SQL',
                 type: 'textarea',
                 required: true,
+                full: true,
                 placeholder: 'select id, parentId, name, job, department, location, status, avatar from <Tabela> where <condição>',
             },
         ],
