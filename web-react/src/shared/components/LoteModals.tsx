@@ -399,7 +399,7 @@ export function LoteLigacaoModal({basePath, etapaKey, etapaId, situacoes, onClos
                         </div>
                     )}
                     <div className="modal-actions form-footer">
-                        <button type="button" className="btn-form-back" onClick={onClose}>
+                        <button type="button" className="btn-form-back btnyellow" onClick={onClose}>
                             {resultado ? 'Concluir' : 'Cancelar'}
                         </button>
                     </div>

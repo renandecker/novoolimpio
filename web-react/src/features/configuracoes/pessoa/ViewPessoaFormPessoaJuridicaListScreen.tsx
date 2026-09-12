@@ -710,13 +710,13 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
 
                         <div className="form-buttons">
 
-                            <button type="button" className="btnblue" title="Salvar registro"
+                            <button type="button" className="btnstop" title="Salvar registro"
 
                                     disabled={salvando} onClick={() => void salvar(true)}>Gravar
 
                             </button>
 
-                            <button type="button" className="btnstop" title="Salvar e continuar editando"
+                            <button type="button" className="btnblue" title="Salvar e continuar editando"
 
                                     disabled={salvando} onClick={() => void salvar(false)}>
 

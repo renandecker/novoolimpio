@@ -101,8 +101,8 @@ export function ExportButton({reportId, reportType, data, onSuccess}: ExportButt
                                 )}
                                 {error && <p style={{color: 'red'}}>{error}</p>}
                                 <div className="modal-actions form-footer">
-                                    <button type="button" className="btn-form-back" onClick={() => setShowModal(false)}>Cancelar</button>
-                                    <button type="button" className="btn-form-save" onClick={handleExport} disabled={loading || (exportType !== 'EXCEL' && !selectedTemplate)}>
+                                    <button type="button" className="btn-form-back btnyellow" onClick={() => setShowModal(false)}>Cancelar</button>
+                                    <button type="button" className="btnstop" onClick={handleExport} disabled={loading || (exportType !== 'EXCEL' && !selectedTemplate)}>
                                         {loading ? 'Exportando...' : `Exportar ${exportType}`}
                                     </button>
                                 </div>

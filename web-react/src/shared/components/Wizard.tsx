@@ -145,7 +145,7 @@ export function Wizard({
             <div className="wizard-actions">
                 <button
                     type="button"
-                    className="btn-form-back wizard-btn-back"
+                    className="btn-form-back btnyellow wizard-btn-back"
                     onClick={goBack}
                     disabled={index === 0 || isValidating}
                 >
@@ -153,7 +153,7 @@ export function Wizard({
                 </button>
                 <button
                     type="button"
-                    className="btn-form-save wizard-btn-next"
+                    className="btn-form-save btnstop wizard-btn-next"
                     onClick={goNext}
                     disabled={current?.nextDisabled || isValidating}
                 >

@@ -609,19 +609,19 @@ export default function ViewOperacionalFormOperacionalListScreen() {
 
                     <div className="form-footer" style={{display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20, paddingTop: 12, borderTop: '1px solid #e5e7eb'}}>
 
-                        <button type="button" className="btn-form-back" onClick={() => navigate('/view/operacional/listOperacional')} disabled={saving}>
+                        <button type="button" className="btnyellow" onClick={() => navigate('/view/operacional/listOperacional')} disabled={saving}>
 
                             Cancelar
 
                         </button>
 
-                        <button type="button" className="btn-form-save" onClick={() => handleSave(false)} disabled={saving || loading}>
+                        <button type="button" className="btnstop" onClick={() => handleSave(false)} disabled={saving || loading}>
 
                             {saving ? 'Salvando...' : 'Salvar'}
 
                         </button>
 
-                        <button type="button" className="btnstop" onClick={() => handleSave(true)} disabled={saving || loading} title="Salvar e continuar editando">
+                        <button type="button" className="btnblue" onClick={() => handleSave(true)} disabled={saving || loading} title="Salvar e continuar editando">
 
                             Salvar e Continuar
 

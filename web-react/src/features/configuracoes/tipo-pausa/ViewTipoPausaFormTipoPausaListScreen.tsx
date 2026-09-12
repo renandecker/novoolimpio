@@ -287,13 +287,13 @@ export default function ViewTipoPausaFormTipoPausaListScreen() {
 
                     <div className="form-footer" style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20, paddingTop: 12, borderTop: '1px solid #e5e7eb' }}>
 
-                        <button type="button" className="btn-form-back" onClick={() => navigate('/view/tipoPausa/listTipoPausa')} disabled={saving}>
+                        <button type="button" className="btn-form-back btnyellow" onClick={() => navigate('/view/tipoPausa/listTipoPausa')} disabled={saving}>
 
                             Cancelar
 
                         </button>
 
-                        <button type="button" className="btn-form-save" onClick={handleSave} disabled={saving || loading}>
+                        <button type="button" className="btn-form-save btnstop" onClick={handleSave} disabled={saving || loading}>
 
                             {saving ? 'Salvando...' : 'Salvar'}
 

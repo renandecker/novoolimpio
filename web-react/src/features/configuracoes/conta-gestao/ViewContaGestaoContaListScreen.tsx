@@ -399,7 +399,7 @@ export default function ViewContaGestaoContaListScreen() {
                                 <button type="button" className="btn-form-back btnyellow" onClick={handleNew}>
                                     Novo
                                 </button>
-                                <button type="submit" className="btn-form-save btnblue">
+                                <button type="submit" className="btnstop">
                                     {editingId ? 'Atualizar' : 'Salvar'}
                                 </button>
                             </div>

@@ -136,7 +136,7 @@ export default function ViewConsultorFormConsultorListScreen() {
             <main>
                 <div className="page-header">
                     <h1>{isEdit ? `Editar Consultor #${editingId}` : 'Novo Consultor'}</h1>
-                    <button type="button" className="btnblue" onClick={voltar}>Voltar</button>
+                    <button type="button" className="btnyellow" onClick={voltar}>Voltar</button>
                 </div>
                 <div className="p-separator" style={{width: '99%', height: 1, background: '#ddd', margin: '8px 0'}} />
 
@@ -216,9 +216,9 @@ export default function ViewConsultorFormConsultorListScreen() {
 
                     {/* po:formButtons */}
                     <div className="form-footer" style={{display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20, paddingTop: 12, borderTop: '1px solid #e5e7eb'}}>
-                        <button type="button" className="btn-form-back" onClick={voltar}>Cancelar</button>
-                        <button type="button" className="btn-form-save" onClick={() => handleSave(false)}>{isEdit ? 'Salvar' : 'Criar'}</button>
-                        <button type="button" className="btnstop" onClick={() => handleSave(true)} title="Salvar e continuar editando">Salvar e Continuar</button>
+                        <button type="button" className="btnyellow" onClick={voltar}>Cancelar</button>
+                        <button type="button" className="btnstop" onClick={() => handleSave(false)}>{isEdit ? 'Salvar' : 'Criar'}</button>
+                        <button type="button" className="btnblue" onClick={() => handleSave(true)} title="Salvar e continuar editando">Salvar e Continuar</button>
                     </div>
                 </div>
             </main>

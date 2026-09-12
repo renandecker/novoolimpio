@@ -113,7 +113,7 @@ export function ModuleFilter({columns, value, onChange}: ModuleFilterProps) {
                                     })}
                                 </div>
                                 <div className="modal-actions form-footer" style={{marginTop: '16px', display: 'flex', gap: '8px', justifyContent: 'flex-end'}}>
-                                    <button type="button" className="btn-form-back" onClick={() => setOpen(false)}>Cancelar</button>
+                                    <button type="button" className="btn-form-back btnyellow" onClick={() => setOpen(false)}>Cancelar</button>
                                     <button type="button" className="btnorange" onClick={handleClear}>Limpar</button>
                                     <button type="submit" className="btngreen" style={{marginLeft: 'auto'}}>Pesquisar</button>
                                 </div>

@@ -526,7 +526,7 @@ export default function ViewAcaoFormAcaoListScreen() {
 
                         <div style={{marginTop: '15px'}}>
 
-                            <button type="submit" className="btnblue">Salvar</button>
+                            <button type="submit" className="btnstop">Salvar</button>
 
                         </div>
 

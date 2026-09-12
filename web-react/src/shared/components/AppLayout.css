@@ -1228,6 +1228,35 @@
     margin-right: 4px;
 }
 
+/* Fallback global para botões de formulário/modal usados em vários módulos.
+   Caso uma tela específica já defina .btn-form-back/.btn-form-save (ex. OferecimentoCurso.css),
+   as regras locais vencem por carregarem depois. */
+.btn-form-back {
+    padding: 6px 16px;
+    background: linear-gradient(180deg, rgb(252, 197, 116), rgb(250, 165, 35)) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.25) !important;
+    border-radius: 2px;
+    font-size: 13px;
+    cursor: pointer;
+}
+.btn-form-back:hover {
+    background: rgb(250, 165, 35) !important;
+}
+
+.btn-form-save {
+    padding: 6px 16px;
+    background: linear-gradient(180deg, rgb(51, 122, 183), rgb(38, 90, 136)) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.25) !important;
+    border-radius: 2px;
+    font-size: 13px;
+    cursor: pointer;
+}
+.btn-form-save:hover {
+    background: rgb(38, 90, 136) !important;
+}
+
 .modal-title {
     font-weight: bold;
     font-size: 15px;

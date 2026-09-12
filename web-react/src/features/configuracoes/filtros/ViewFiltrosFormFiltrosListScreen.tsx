@@ -316,7 +316,7 @@ export default function ViewFiltrosFormFiltrosListScreen() {
             <main>
                 <div className="page-header" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                     <h1>{isEdit ? `Editar Filtro #${editingId}` : 'Novo Filtro'}</h1>
-                    <button type="button" className="btnblue" onClick={() => navigate('/view/filtros/listFiltros')}>Voltar</button>
+                    <button type="button" className="btnyellow" onClick={() => navigate('/view/filtros/listFiltros')}>Voltar</button>
                 </div>
                 <div style={{height: 1, background: '#ddd', margin: '8px 0'}} />
                 {error && <div style={{background: '#FDE8E8', border: '1px solid #F5C2C2', color: '#8A1F1F', padding: 10, borderRadius: 6, marginBottom: 12}}>{error}</div>}
@@ -521,8 +521,8 @@ export default function ViewFiltrosFormFiltrosListScreen() {
                 </div>
 
                 <div style={{display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20, paddingTop: 12, borderTop: '1px solid #e5e7eb'}}>
-                    <button type="button" className="btn-form-back" onClick={() => navigate('/view/filtros/listFiltros')} disabled={saving}>Cancelar</button>
-                    <button type="button" className="btn-form-save" onClick={handleSave} disabled={saving || loading}>{saving ? 'Salvando...' : 'Salvar'}</button>
+                    <button type="button" className="btnyellow" onClick={() => navigate('/view/filtros/listFiltros')} disabled={saving}>Cancelar</button>
+                    <button type="button" className="btnstop" onClick={handleSave} disabled={saving || loading}>{saving ? 'Salvando...' : 'Salvar'}</button>
                 </div>
             </main>
         </PermissionGate>

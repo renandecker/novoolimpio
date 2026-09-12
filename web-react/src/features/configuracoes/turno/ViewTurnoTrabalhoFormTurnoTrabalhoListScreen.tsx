@@ -689,13 +689,13 @@ export default function ViewTurnoTrabalhoFormTurnoTrabalhoListScreen() {
 
             </button>
 
-            <button type="button" className="btn-form-save" onClick={() => handleSave(false)} disabled={saving || loading}>
+            <button type="button" className="btnstop" onClick={() => handleSave(false)} disabled={saving || loading}>
 
               {saving ? 'Salvando...' : 'Salvar'}
 
             </button>
 
-            <button type="button" className="btnstop" onClick={() => handleSave(true)} disabled={saving || loading} title="Salvar e continuar editando">
+            <button type="button" className="btnblue" onClick={() => handleSave(true)} disabled={saving || loading} title="Salvar e continuar editando">
 
               Salvar e Continuar
 

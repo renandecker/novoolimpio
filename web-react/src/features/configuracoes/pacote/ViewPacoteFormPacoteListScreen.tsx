@@ -912,7 +912,7 @@ export default function ViewPacoteFormPacoteListScreen() {
             <main style={{padding: '20px', maxWidth: '1200px', margin: '0 auto'}}>
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
                     <h1>{idEdicao ? 'Editar Pacote' : 'Novo Pacote'}</h1>
-                    <button className="btn-form-back" onClick={voltar}><ArrowLeft className="icon" /> Voltar</button>
+                    <button className="btn-form-back btnyellow" onClick={voltar}><ArrowLeft className="icon" /> Voltar</button>
                 </div>
 
                 <Wizard

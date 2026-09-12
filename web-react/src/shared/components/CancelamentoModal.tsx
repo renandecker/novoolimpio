@@ -49,7 +49,7 @@ export function CancelamentoModal({onClose}: CancelamentoModalProps) {
                     ]}
                 />
                 <div className="modal-actions form-footer">
-                    <button type="button" className="btn-form-back" onClick={onClose}>
+                    <button type="button" className="btn-form-back btnyellow" onClick={onClose}>
                         Fechar
                     </button>
                 </div>

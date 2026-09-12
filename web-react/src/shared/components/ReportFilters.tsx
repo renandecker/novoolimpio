@@ -368,7 +368,7 @@ return (
                             {renderFilterContent()}
                         </div>
                         <div className="modal-actions form-footer" style={{marginTop: '16px', display: 'flex', gap: '8px', justifyContent: 'flex-end'}}>
-                            <button type="button" className="btn-form-back" onClick={handleClose}>Cancelar</button>
+                            <button type="button" className="btn-form-back btnyellow" onClick={handleClose}>Cancelar</button>
                             <button type="button" className="btnorange" onClick={() => {
                                 if (activeFiltro) {
                                     setFilterStates(prev => {

@@ -698,7 +698,7 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
                         <h3>Excluir registro</h3>
                         <p>Deseja realmente excluir o registro #{modal.item.id}?</p>
                         <div className="modal-actions">
-                            <button className="btnblue" onClick={closeModal}>Cancelar</button>
+                            <button className="btnyellow" onClick={closeModal}>Cancelar</button>
                             <button className="btn-danger" onClick={() => confirmDelete(modal.item)}>Excluir</button>
                         </div>
                     </div>
@@ -727,7 +727,7 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
                                     ))}
                                 </div>
                                 <div className="form-footer" style={{marginTop: '16px'}}>
-                                    <button type="button" className="btn-form-back" onClick={() => setViewModalItem(null)}>Fechar</button>
+                                    <button type="button" className="btn-form-back btnyellow" onClick={() => setViewModalItem(null)}>Fechar</button>
                                 </div>
                             </div>
                         </div>
@@ -929,8 +929,8 @@ function RecordModal({
                             </div>
                         )}
                         <div className="modal-actions form-footer">
-                            <button type="button" className="btn-form-back" onClick={onClose}>Fechar</button>
-                            <button type="submit" className="btn-form-save">{submitLabel}</button>
+                            <button type="button" className="btn-form-back btnyellow" onClick={onClose}>Fechar</button>
+                            <button type="submit" className="btnstop">{submitLabel}</button>
                         </div>
                     </form>
                 </div>
@@ -1051,8 +1051,8 @@ function ExportModal({ item, tipo, onClose, onExport, entityTitle }: ExportModal
                             <p>Clique em Exportar para baixar o arquivo Excel.</p>
                         )}
                         <div className="modal-actions form-footer">
-                            <button type="button" className="btn-form-back" onClick={onClose}>Cancelar</button>
-                            <button type="button" className="btn-form-save" onClick={handleExport} disabled={loading || (tipo !== 'EXCEL' && !templateId)}>
+                            <button type="button" className="btn-form-back btnyellow" onClick={onClose}>Cancelar</button>
+                            <button type="button" className="btnstop" onClick={handleExport} disabled={loading || (tipo !== 'EXCEL' && !templateId)}>
                                 {loading ? 'Gerando...' : `Exportar ${tipo}`}
                             </button>
                         </div>
@@ -1174,7 +1174,7 @@ function FilterModal({columns, initialFilters, onClose, onApply}: FilterModalPro
                             })}
                         </div>
                         <div className="modal-actions form-footer" style={{marginTop: '16px', display: 'flex', gap: '8px', justifyContent: 'flex-end'}}>
-                            <button type="button" className="btn-form-back" onClick={onClose}>Cancelar</button>
+                            <button type="button" className="btn-form-back btnyellow" onClick={onClose}>Cancelar</button>
                             <button type="button" className="btnorange" onClick={handleClear}>Limpar</button>
                             <button type="submit" className="btngreen" style={{marginLeft: 'auto'}}>Pesquisar</button>
                         </div>

@@ -197,7 +197,7 @@ function UsuariosDialog({state, onClose}: { state: UsuariosDialogState; onClose:
                             </tfoot>
                         </table>
                         <div className="modal-actions form-footer">
-                            <button type="button" className="btnblue" title="Salvar usuários da agenda"
+                            <button type="button" className="btnstop" title="Salvar usuários da agenda"
                                     disabled={salvando} onClick={() => void salvar()}>Salvar
                             </button>
                             <button type="button" className="btnyellow" title="Voltar para a lista" onClick={onClose}>

@@ -2894,7 +2894,7 @@ useEffect(() => {
 
                     <div className="page-header-actions">
 
-                        <button className="btn-form-back btnstop" onClick={voltarLista}>Voltar</button>
+                        <button className="btnyellow" onClick={voltarLista}>Voltar</button>
 
                     </div>
 
