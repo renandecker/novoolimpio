@@ -32,24 +32,24 @@ CREATE INDEX IF NOT EXISTS idx_rel_indicador_gauge_created ON public.rel_indicad
 -- =================================================================================================
 -- Trigger para updated_at
 -- =================================================================================================
-DO $$ BEGIN
+DO $do$ BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'set_updated_at') THEN
         CREATE OR REPLACE FUNCTION public.set_updated_at()
-        RETURNS TRIGGER LANGUAGE plpgsql AS $$
+        RETURNS TRIGGER LANGUAGE plpgsql AS $func$
         BEGIN
             NEW.updated_at = CURRENT_TIMESTAMP;
             RETURN NEW;
-        END; $$;
+        END; $func$;
     END IF;
-END $$;
+END $do$;
 
-DO $$ BEGIN
+DO $do$ BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_rel_indicador_gauge_updated_at') THEN
         CREATE TRIGGER trg_rel_indicador_gauge_updated_at
         BEFORE UPDATE ON public.rel_indicador_gauge
         FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
     END IF;
-END $$;
+END $do$;
 
 -- =================================================================================================
 -- Tabela de permissões: Usuários
