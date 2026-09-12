@@ -99,7 +99,7 @@ public class CartaoPessoaService {
         return numero.substring(Math.max(0, numero.length() - 4));
     }
 
-    private CartaoPessoaResponse toResponse(CartaoPessoa e) {
+    public CartaoPessoaResponse toResponse(CartaoPessoa e) {
         return new CartaoPessoaResponse(e.id, e.idPessoa, e.cpf, e.bin, e.ultimosDigitos, e.bandeira,
                 e.nomeTitular, e.validadeMes, e.validadeAno, e.apelido, e.ativo, e.principal, e.dataCadastro);
     }

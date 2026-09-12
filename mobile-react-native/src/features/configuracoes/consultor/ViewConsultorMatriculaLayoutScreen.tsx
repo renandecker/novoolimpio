@@ -104,23 +104,29 @@ export default function ViewConsultorMatriculaLayoutScreen() {
     const [contrato, setContrato] = useState<Record<string, unknown>>({});
     const [matriculaSelecionadas, setMatriculaSelecionadas] = useState<OferecimentoItem[]>([]);
 
-    const loadAlunos = useCallback(async (query: string) => {
-        if (!query || query.length < 3) return;
+    const loadAlunos = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
+        if (!query || query.length < 3) return [];
         try {
             const response = await api.get<ContratoAutoCompleteResponse[]>('/api/educacao/contrato/auto-complete-aluno', { params: { query } });
-            setAlunos(response.data.map(toAutoCompleteLabel).map(l => ({id: l.split(' ')[0] as unknown as number, label: l})));
+            const opts = response.data.map(item => ({ id: item.id, label: item.nome || `#${item.id}` }));
+            setAlunos(opts);
+            return opts;
         } catch (e) {
             console.error('Erro ao buscar alunos:', e);
+            return [];
         }
     }, []);
 
-    const loadCurriculos = useCallback(async (query: string) => {
-        if (!query) return;
+    const loadCurriculos = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
+        if (!query) return [];
         try {
             const response = await api.get<CurriculoResponse[]>('/api/educacao/curriculo/auto-complete-full', { params: { query } });
-            setCurriculos(response.data.map(toAutoCompleteLabel).map(l => ({id: l.split(' ')[0] as unknown as number, label: l})));
+            const opts = response.data.map(item => ({ id: item.id, label: toAutoCompleteLabel(item) }));
+            setCurriculos(opts);
+            return opts;
         } catch (e) {
             console.error('Erro ao buscar currículos:', e);
+            return [];
         }
     }, []);
 
@@ -322,11 +328,20 @@ export default function ViewConsultorMatriculaLayoutScreen() {
         </ScrollView>
     );
 
-    const renderMatriculaTab = () => (
+    const renderMatriculaTab = () => {
+        const curriculo = contrato.curriculo as { label?: string } | undefined;
+        return (
         <ScrollView style={styles.tabContent}>
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Curso Selecionado</Text>
-                <Text>{contrato.curriculo ? (contrato.curriculo as {label: string}).label : 'Não selecionado'}</Text>
+                <View style={{ backgroundColor: '#f9f9f9', borderWidth: 1, borderColor: '#ddd', borderRadius: 6, padding: 12, gap: 6 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Text style={{ fontSize: 12, color: '#666', fontWeight: 'bold' }}>CURSO / SUCINTO</Text>
+                    </View>
+                    <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#1d2025' }}>
+                        {curriculo?.label || 'Nenhum curso selecionado'}
+                    </Text>
+                </View>
             </View>
 
             <View style={styles.section}>
@@ -418,7 +433,8 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                 ))}
             </View>
         </ScrollView>
-    );
+        );
+    };
 
     return (
         <View style={styles.container}>

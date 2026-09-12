@@ -375,34 +375,43 @@ public class MapaService {
                         String sql = "select distinct " + geoColuna + ", " + colunasSelect +
                                 " " + estTabela + whereClause + " " + groupBy + " limit 1000";
 
-                        JdbcTemplate jdbcTemplate = getJdbcTemplate();
-                        return Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> {
-                            List<Marcador> marcadores = new ArrayList<>();
-                            try {
-                                final String finalDimensaoColuna = dimColuna;
-                                jdbcTemplate.query(sql, new RowCallbackHandler() {
-                                    @Override
-                                    public void processRow(ResultSet rs) throws SQLException {
-                                        String coordenada = rs.getString(1);
-                                        if (coordenada != null && COORDENADA_PATTERN.matcher(coordenada).matches()) {
-                                            String[] coords = coordenada.split(",");
-                                            String latitude = coords.length > 0 ? coords[0].trim() : "0";
-                                            String longitude = coords.length > 1 ? coords[1].trim() : "0";
+                        return Panache.getSession().chain(session ->
+                                session.createNativeQuery(sql)
+                                        .setMaxResults(1000)
+                                        .getResultList()
+                                        .onItem().transformToUni(list -> {
+                                            List<Marcador> marcadores = new ArrayList<>();
+                                            for (Object row : list) {
+                                                Object[] rowData = (Object[]) row;
+                                                String coordenada = rowData.length > 0 ? rowData[0].toString() : null;
+                                                String dimensaoValor = rowData.length > 1 ? rowData[1].toString() : null;
 
-                                            String valorFormatado = formatarValor(rs, finalDimensaoColuna != null && !finalDimensaoColuna.isBlank());
+                                                if (coordenada != null && COORDENADA_PATTERN.matcher(coordenada).matches()) {
+                                                    String[] coords = coordenada.split(",");
+                                                    String latitude = coords.length > 0 ? coords[0].trim() : "0";
+                                                    String longitude = coords.length > 1 ? coords[1].trim() : "0";
 
-                                            String popup = buildPopup(coordenada, valorFormatado, finalDimensaoColuna != null && !finalDimensaoColuna.isBlank() ? rs.getString(2) : null);
+                                                    String valorFormatado;
+                                                    if (dimensaoValor != null && !dimensaoValor.isBlank()) {
+                                                        try {
+                                                            BigDecimal val = new BigDecimal(dimensaoValor);
+                                                            valorFormatado = val.setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",");
+                                                        } catch (Exception e) {
+                                                            valorFormatado = dimensaoValor;
+                                                        }
+                                                    } else {
+                                                        valorFormatado = "0,00";
+                                                    }
 
-                                             Marcador marcador = new Marcador(latitude, longitude, popup, valorFormatado);
-                                             marcadores.add(marcador);
-                                         }
-                                     }
-                                 });
-                             } catch (Exception e) {
-                                 e.printStackTrace();
-                             }
-                             return marcadores;
-                         }, Infrastructure.getDefaultWorkerPool()));
+                                                    String popup = buildPopup(coordenada, valorFormatado, dimensaoValor != null ? dimensaoValor : null);
+
+                                                    Marcador marcador = new Marcador(latitude, longitude, popup, valorFormatado);
+                                                    marcadores.add(marcador);
+                                                }
+                                            }
+                                            return Uni.createFrom().item(marcadores);
+                                        })
+                        );
                     });
                 });
     }
@@ -450,14 +459,6 @@ public class MapaService {
             case "LTE" -> medidaColuna + " <= " + meta;
             default -> medidaColuna + " = " + meta;
         };
-    }
-
-    private String formatarValor(ResultSet rs, boolean hasDimensao) throws SQLException {
-        Number valor = hasDimensao ? rs.getBigDecimal(3) : rs.getBigDecimal(2);
-        if (valor == null) return "0";
-
-        // Default to numeric format with 2 decimal places
-        return new BigDecimal(valor.toString()).setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",");
     }
 
     private String buildPopup(String coordenada, String valorFormatado, String dimensaoValor) {

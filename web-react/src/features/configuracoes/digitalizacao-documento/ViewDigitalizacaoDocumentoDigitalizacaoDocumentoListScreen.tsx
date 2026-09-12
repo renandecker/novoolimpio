@@ -22,38 +22,43 @@ interface Contrato {
   pdf: boolean;
 }
 
-interface Turma {
+interface TurmaOption {
   id: number;
-  nomeTurma: () => string;
-  unidade: { sucinto: string };
-  curriculo: { curso: { nome: string } };
-  componenteCurricular: { descricao: string };
-  sala: { numero: string };
-  status: string;
+  sequencia: number;
+  componente: string;
+  unidade: string;
+  curso: string;
+  dataInicio: string;
+  dataFim: string;
 }
 
-interface Chamada {
+interface OcorrenciaItem {
   id: number;
-  chamadaAssinadaImpressa: {
-    id: number;
-    sequencia: number;
-    ativo: boolean;
-    oferecimentoComponenteCurricular: { id: number };
-  };
+  data: string;
+  diaAulaId: number;
+}
+
+interface ChamadaItem {
+  id: number;
   local: string | null;
   pdf: boolean;
+  chamadaAssinadaImpressaId: number;
+  sequencia: number;
+  inicio: string;
+  fim: string;
+  ativo: boolean;
 }
 
-interface OcorrenciaPresenca {
-  data: string;
-  presenca: string;
-  presencaDescricao: string;
-  componente: string;
-}
-
-interface Matricula {
+interface MatriculaItem {
   id: number;
-  contrato: { pessoa: { pessoaFisica: { nome: string } } };
+  pessoaId: number;
+  alunoNome: string;
+}
+
+interface CarregarDiasAulaResponse {
+  ocorrencias: OcorrenciaItem[];
+  chamadas: ChamadaItem[];
+  matriculas: MatriculaItem[];
 }
 
 interface DigitalizacaoChamada {
@@ -85,6 +90,38 @@ interface AutoCompleteOption {
   label: string;
 }
 
+interface AlunoOptionResponse {
+  id: number;
+  nome: string;
+  cpf: string;
+  cnpj: string;
+}
+
+interface OcorrenciaGridItem {
+  id: number;
+  data: string;
+}
+
+interface CadernoItem {
+  id: number;
+  matriculaId: number;
+  ocorrenciaId: number;
+  presenca: string;
+}
+
+interface CarregarOcorrenciaResponse {
+  ocorrencias: OcorrenciaGridItem[];
+  cadernos: CadernoItem[];
+}
+
+interface DocumentoAlunoItem {
+  id: number;
+  nomeDocumento: string;
+  data: string;
+  local: string | null;
+  usuarioLogin: string;
+}
+
 const formatDate = (value: unknown): string => {
   if (value === null || value === undefined) return '';
   const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value));
@@ -94,24 +131,12 @@ const formatDate = (value: unknown): string => {
 
 const CONTRATO_COLUMNS = [
   {key: 'id', label: 'ID'},
-  {key: 'pessoa.pessoaFisica.nome', label: 'Aluno', render: (item: ApiItem) => {
-    const r = item as Record<string, unknown>;
-    const p = r.pessoa as Record<string, unknown> | undefined;
-    const pf = p?.pessoaFisica as Record<string, unknown> | undefined;
-    return String(pf?.nome ?? '');
-  }},
-  {key: 'responsavelString', label: 'Contratante'},
-  {key: 'unidade.sucinto', label: 'Unidade', render: (item: ApiItem) => {
-    const r = item as Record<string, unknown>;
-    const u = r.unidade as Record<string, unknown> | undefined;
-    return String(u?.sucinto ?? '');
-  }},
-  {key: 'curriculo.curso.nome', label: 'Curso', render: (item: ApiItem) => {
-    const r = item as Record<string, unknown>;
-    const c = r.curriculo as Record<string, unknown> | undefined;
-    const cr = c?.curso as Record<string, unknown> | undefined;
-    return String(cr?.nome ?? '');
-  }},
+  {key: 'aluno_nome', label: 'Aluno'},
+  {key: 'responsavel_string', label: 'Contratante'},
+  {key: 'unidade_sucinto', label: 'Unidade'},
+  {key: 'curso_nome', label: 'Curso'},
+  {key: 'local', label: 'Arquivo'},
+  {key: 'pdf', label: 'PDF'},
 ];
 
 const PRESENCA_COR: Record<string, string> = {
@@ -131,21 +156,21 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
   const [selectedContrato, setSelectedContrato] = useState<Contrato | null>(null);
   const [uploadArquivoOpen, setUploadArquivoOpen] = useState(false);
   const [uploadArquivoFile, setUploadArquivoFile] = useState<string>('');
-  const [selectedTurma, setSelectedTurma] = useState<Turma | null>(null);
-  const [diasAula, setDiasAula] = useState<OcorrenciaPresenca[]>([]);
-  const [digitalizacaoChamadas, setDigitalizacaoChamadas] = useState<Chamada[]>([]);
-  const [selectedChamada, setSelectedChamada] = useState<DigitalizacaoChamada | null>(null);
+  const [selectedTurma, setSelectedTurma] = useState<TurmaOption | null>(null);
+  const [diasAula, setDiasAula] = useState<OcorrenciaItem[]>([]);
+  const [digitalizacaoChamadas, setDigitalizacaoChamadas] = useState<ChamadaItem[]>([]);
+  const [selectedChamada, setSelectedChamada] = useState<ChamadaItem | null>(null);
   const [inserirChamadaOpen, setInserirChamadaOpen] = useState(false);
   const [inserirChamadaFile, setInserirChamadaFile] = useState<string>('');
   const [confirmInsertOpen, setConfirmInsertOpen] = useState(false);
-  const [selectedDocumentoAluno, setSelectedDocumentoAluno] = useState<DocumentoAluno | null>(null);
+  const [selectedDocumentoAluno, setSelectedDocumentoAluno] = useState<DocumentoAlunoItem | null>(null);
   const [visualizarDocOpen, setVisualizarDocOpen] = useState(false);
   const [selectedPessoa, setSelectedPessoa] = useState<Pessoa | null>(null);
   const [documentoAlunoNome, setDocumentoAlunoNome] = useState('');
   const [documentoAlunoFile, setDocumentoAlunoFile] = useState<string>('');
-  const [documentosAluno, setDocumentosAluno] = useState<DocumentoAluno[]>([]);
-  const [matriculas, setMatriculas] = useState<Matricula[]>([]);
-  const [ocorrenciaComponenteCurriculars, setOcorrenciaComponenteCurriculars] = useState<OcorrenciaPresenca[]>([]);
+  const [documentosAluno, setDocumentosAluno] = useState<DocumentoAlunoItem[]>([]);
+  const [matriculas, setMatriculas] = useState<MatriculaItem[]>([]);
+  const [ocorrenciaComponenteCurriculars, setOcorrenciaComponenteCurriculars] = useState<OcorrenciaGridItem[]>([]);
   const [loadingTurmas, setLoadingTurmas] = useState(false);
   const [loadingChamadas, setLoadingChamadas] = useState(false);
   const [loadingDocumentos, setLoadingDocumentos] = useState(false);
@@ -154,16 +179,13 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
   const carregarTurmas = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
     setLoadingTurmas(true);
     try {
-      const response = await api.get<ApiItem[]>(API_PATHS.view.digitalizacaoDocumento.turmasDisponiveis, {
+      const response = await api.get<TurmaOption[]>(API_PATHS.view.digitalizacaoDocumento.turmasDisponiveis, {
         params: {query},
       });
-      return response.data.map((item) => {
-        const record = item as Record<string, unknown>;
-        return {
-          id: Number(record.id),
-          label: String(record.nomeTurma ?? record.nome ?? `#${record.id}`),
-        };
-      });
+      return response.data.map((item) => ({
+        id: item.id,
+        label: `${item.componente} - ${item.unidade} - ${item.curso} (Seq: ${item.sequencia})`,
+      }));
     } catch (error) {
       console.error('Erro ao carregar turmas:', error);
       return [];
@@ -174,23 +196,16 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
 
   const onTurmaSelect = useCallback(async (option: AutoCompleteOption | null) => {
     if (option) {
-      const turma: Turma = {
-        id: option.id,
-        nomeTurma: () => option.label,
-        unidade: {sucinto: ''},
-        curriculo: {curso: {nome: ''}},
-        componenteCurricular: {descricao: ''},
-        sala: {numero: ''},
-        status: '',
-      };
+      const turma = { id: option.id, label: option.label } as TurmaOption;
       setSelectedTurma(turma);
       try {
-        const response = await api.post<OcorrenciaPresenca[]>(
+        const response = await api.post<CarregarDiasAulaResponse>(
           API_PATHS.view.digitalizacaoDocumento.carregarDiasAula,
           {oferecimentoComponenteCurricularId: turma.id}
         );
-        setDiasAula(response.data);
-        await carregarDigitalizacaoChamadas(turma.id);
+        setDiasAula(response.data.ocorrencias);
+        setMatriculas(response.data.matriculas);
+        setDigitalizacaoChamadas(response.data.chamadas);
       } catch (error) {
         console.error('Erro ao carregar dias de aula:', error);
       }
@@ -198,32 +213,18 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
       setSelectedTurma(null);
       setDiasAula([]);
       setDigitalizacaoChamadas([]);
+      setMatriculas([]);
     }
   }, []);
 
   const carregarDigitalizacaoChamadas = useCallback(async (turmaId: number) => {
     setLoadingChamadas(true);
     try {
-      const response = await api.get<ApiItem[]>(
+      const response = await api.get<ChamadaItem[]>(
         API_PATHS.view.digitalizacaoDocumento.digitalizacaoChamadas,
         {params: {turmaId}}
       );
-      setDigitalizacaoChamadas(response.data.map((item) => {
-        const record = item as Record<string, unknown>;
-        const cai = record.chamadaAssinadaImpressa as Record<string, unknown> | undefined;
-        const occ = cai?.oferecimentoComponenteCurricular as Record<string, unknown> | undefined;
-        return {
-          id: Number(record.id),
-          chamadaAssinadaImpressa: {
-            id: Number(cai?.id),
-            sequencia: Number(cai?.sequencia),
-            ativo: Boolean(cai?.ativo),
-            oferecimentoComponenteCurricular: {id: Number(occ?.id)},
-          },
-          local: record.local as string | null,
-          pdf: Boolean(record.pdf),
-        } as Chamada;
-      }));
+      setDigitalizacaoChamadas(response.data);
     } catch (error) {
       console.error('Erro ao carregar digitalizações de chamada:', error);
     } finally {
@@ -285,21 +286,11 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
       };
       setSelectedPessoa(pessoa);
       try {
-        const response = await api.get<ApiItem[]>(
+        const response = await api.get<DocumentoAlunoItem[]>(
           API_PATHS.view.digitalizacaoDocumento.carregarDocumentosAluno,
           {params: {pessoaId: pessoa.id}}
         );
-        setDocumentosAluno(response.data.map((item) => {
-          const record = item as Record<string, unknown>;
-          const u = record.usuario as Record<string, unknown> | undefined;
-          return {
-            id: Number(record.id),
-            nomeDocumento: String(record.nomeDocumento),
-            usuario: {login: String(u?.login ?? '')},
-            data: String(record.data ?? ''),
-            local: record.local as string | null,
-          } as DocumentoAluno;
-        }));
+        setDocumentosAluno(response.data);
       } catch (error) {
         console.error('Erro ao carregar documentos do aluno:', error);
       }
@@ -324,7 +315,7 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
     }
   }, [selectedPessoa, documentoAlunoFile, documentoAlunoNome, onAlunoSelect]);
 
-  const handleViewDocument = useCallback((documento: DocumentoAluno) => {
+  const handleViewDocument = useCallback((documento: DocumentoAlunoItem) => {
     setSelectedDocumentoAluno(documento);
     setVisualizarDocOpen(true);
   }, []);
@@ -522,17 +513,12 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                       icon: '📄',
                       onClick: (item) => {
                         const record = item as Record<string, unknown>;
-                        const p = record.pessoa as Record<string, unknown> | undefined;
-                        const pf = p?.pessoaFisica as Record<string, unknown> | undefined;
-                        const u = record.unidade as Record<string, unknown> | undefined;
-                        const c = record.curriculo as Record<string, unknown> | undefined;
-                        const cr = c?.curso as Record<string, unknown> | undefined;
                         setSelectedContrato({
                           id: Number(record.id),
-                          pessoa: {pessoaFisica: {nome: String(pf?.nome ?? '')}},
-                          responsavelString: String(record.responsavelString ?? ''),
-                          unidade: {sucinto: String(u?.sucinto ?? '')},
-                          curriculo: {curso: {nome: String(cr?.nome ?? '')}},
+                          pessoa: {pessoaFisica: {nome: String(record.aluno_nome ?? '')}},
+                          responsavelString: String(record.responsavel_string ?? ''),
+                          unidade: {sucinto: String(record.unidade_sucinto ?? '')},
+                          curriculo: {curso: {nome: String(record.curso_nome ?? '')}},
                           local: record.local as string | null,
                           pdf: Boolean(record.pdf),
                         });
@@ -553,7 +539,7 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                       id="turma"
                       label="Turma"
                       placeholder="Digite para buscar turma..."
-                      value={selectedTurma ? {id: selectedTurma.id, label: selectedTurma.nomeTurma()} : null}
+                      value={selectedTurma ? {id: selectedTurma.id, label: `${selectedTurma.componente} - ${selectedTurma.unidade} - ${selectedTurma.curso}`} : null}
                       onChange={onTurmaSelect}
                       fetchOptions={carregarTurmas}
                       minChars={2}
@@ -563,11 +549,11 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                     <div>
                       <div style={{marginBottom: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.5rem'}}>
                         <div><strong>Turma:</strong> {selectedTurma.id}</div>
-                        <div><strong>Unidade:</strong> {selectedTurma.unidade.sucinto}</div>
-                        <div><strong>Curso:</strong> {selectedTurma.curriculo.curso.nome}</div>
-                        <div><strong>Componente:</strong> {selectedTurma.componenteCurricular.descricao}</div>
-                        <div><strong>Sala:</strong> {selectedTurma.sala.numero}</div>
-                        <div><strong>Status:</strong> {selectedTurma.status}</div>
+                        <div><strong>Unidade:</strong> {selectedTurma.unidade}</div>
+                        <div><strong>Curso:</strong> {selectedTurma.curso}</div>
+                        <div><strong>Componente:</strong> {selectedTurma.componente}</div>
+                        <div><strong>Início:</strong> {formatDate(selectedTurma.dataInicio)}</div>
+                        <div><strong>Fim:</strong> {formatDate(selectedTurma.dataFim)}</div>
                       </div>
                       <div style={{marginBottom: '1rem'}}>
                         <Tabs tabs={[
@@ -581,17 +567,19 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                                     <button
                                       key={chamada.id}
                                       type="button"
-                                      className={`btn-action ${!chamada.local ? 'btnred' : chamada.chamadaAssinadaImpressa.ativo ? 'btnblue' : 'btnorange'}`}
+                                      className={`btn-action ${!chamada.local ? 'btnred' : chamada.ativo ? 'btnblue' : 'btnorange'}`}
                                       style={{padding: '0.5rem 1rem'}}
-                                      title={`${chamada.chamadaAssinadaImpressa.oferecimentoComponenteCurricular.id} - ${chamada.chamadaAssinadaImpressa.sequencia} - ${chamada.chamadaAssinadaImpressa.id}`}
+                                      title={`${chamada.chamadaAssinadaImpressaId} - ${chamada.sequencia}`}
                                       onClick={() => {
-                                        setSelectedChamada({
-                                          id: chamada.id,
-                                          local: chamada.local,
-                                          pdf: chamada.pdf,
-                                          chamadaAssinadaImpressa: chamada.chamadaAssinadaImpressa,
-                                        });
+                                        setSelectedChamada(chamada);
                                         setInserirChamadaOpen(true);
+                                        // Load ocorrencia/presenca grid for this chamada
+                                        api.post<CarregarOcorrenciaResponse>(
+                                          API_PATHS.view.digitalizacaoDocumento.carregarOcorrencia,
+                                          {digitalizacaoChamadaId: chamada.id}
+                                        ).then(response => {
+                                          setOcorrenciaComponenteCurriculars(response.data.ocorrencias);
+                                        }).catch(console.error);
                                       }}
                                       disabled={loadingChamadas}
                                     >
@@ -616,7 +604,7 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                                         <th>Matrícula</th>
                                         <th>Aluno</th>
                                         {ocorrenciaComponenteCurriculars.map((aula) => (
-                                          <th key={aula.data} style={{textAlign: 'center'}}>
+                                          <th key={aula.id} style={{textAlign: 'center'}}>
                                             {formatDate(aula.data)}
                                           </th>
                                         ))}
@@ -626,10 +614,10 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                                       {matriculas.map((matricula) => (
                                         <tr key={matricula.id}>
                                           <td>{matricula.id}</td>
-                                          <td>{matricula.contrato.pessoa.pessoaFisica.nome}</td>
+                                          <td>{matricula.alunoNome}</td>
                                           {ocorrenciaComponenteCurriculars.map((aula) => (
-                                            <td key={aula.data} style={{textAlign: 'center'}}>
-                                              <span className={aula.presenca}>{PRESENCA_COR[aula.presenca] ?? aula.presenca}</span>
+                                            <td key={aula.id} style={{textAlign: 'center'}}>
+                                              <span>-</span>
                                             </td>
                                           ))}
                                         </tr>
@@ -662,12 +650,11 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                       value={selectedPessoa ? {id: selectedPessoa.id, label: `${selectedPessoa.pessoaFisica.nome} (${selectedPessoa.pessoaFisica.cpf})`} : null}
                       onChange={onAlunoSelect}
                       fetchOptions={async (query): Promise<AutoCompleteOption[]> => {
-                        const response = await api.get<ApiItem[]>(API_PATHS.view.digitalizacaoDocumento.autoCompleteAluno, {params: {query}});
-                        return response.data.map((item) => {
-                          const record = item as Record<string, unknown>;
-                          const pf = record.pessoaFisica as Record<string, unknown> | undefined;
-                          return {id: Number(record.id), label: `${pf?.nome} (${pf?.cpf})`};
-                        });
+                        const response = await api.get<AlunoOptionResponse[]>(API_PATHS.view.digitalizacaoDocumento.autoCompleteAluno, {params: {query}});
+                        return response.data.map((item) => ({
+                          id: item.id,
+                          label: `${item.nome} (${item.cpf || item.cnpj})`,
+                        }));
                       }}
                       minChars={2}
                     />
@@ -720,7 +707,7 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                             <tr key={doc.id}>
                               <td>{doc.id}</td>
                               <td>{doc.nomeDocumento}</td>
-                              <td>{doc.usuario.login}</td>
+                              <td>{doc.usuarioLogin}</td>
                               <td>{formatDate(doc.data)}</td>
                               <td>
                                 <button

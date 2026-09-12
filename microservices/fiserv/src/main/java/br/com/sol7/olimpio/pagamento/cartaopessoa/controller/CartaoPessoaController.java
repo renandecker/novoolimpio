@@ -2,7 +2,12 @@ package br.com.sol7.olimpio.pagamento.cartaopessoa.controller;
 
 import br.com.sol7.olimpio.pagamento.cartaopessoa.dto.CadastrarCartaoRequest;
 import br.com.sol7.olimpio.pagamento.cartaopessoa.dto.CartaoPessoaResponse;
+import br.com.sol7.olimpio.pagamento.cartaopessoa.entity.CartaoPessoa;
 import br.com.sol7.olimpio.pagamento.cartaopessoa.service.CartaoPessoaService;
+import br.com.sol7.olimpio.shared.GenericSearchService;
+import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.SearchFilterRequest;
+import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -27,9 +32,28 @@ public class CartaoPessoaController {
     @Inject
     CartaoPessoaService service;
 
+    @Inject
+    GenericSearchService searchService;
+
     @GET
     public Uni<List<CartaoPessoaResponse>> listar(@QueryParam("idPessoa") Long idPessoa) {
         return service.listarPorPessoa(idPessoa);
+    }
+
+    @GET
+    @Path("/paged")
+    @WithSession
+    public Uni<PagedResponse<CartaoPessoaResponse>> listarPaged(@QueryParam("page") int page, @QueryParam("size") int size) {
+        return searchService.search(CartaoPessoa.class, new SearchFilterRequest(null), page, size)
+                .map(this::mapToResponse);
+    }
+
+    @POST
+    @Path("/search")
+    @WithSession
+    public Uni<PagedResponse<CartaoPessoaResponse>> search(SearchFilterRequest request, @QueryParam("page") int page, @QueryParam("size") int size) {
+        return searchService.search(CartaoPessoa.class, request, page, size)
+                .map(this::mapToResponse);
     }
 
     @POST
@@ -41,5 +65,10 @@ public class CartaoPessoaController {
     @Path("/{id}")
     public Uni<Void> inativar(@PathParam("id") Long id, @QueryParam("idPessoa") Long idPessoa) {
         return service.inativar(idPessoa, id);
+    }
+
+    private PagedResponse<CartaoPessoaResponse> mapToResponse(PagedResponse<CartaoPessoa> entityResponse) {
+        List<CartaoPessoaResponse> content = entityResponse.content().stream().map(service::toResponse).toList();
+        return new PagedResponse<>(content, entityResponse.totalElements(), entityResponse.page(), entityResponse.size(), entityResponse.totalPages());
     }
 }

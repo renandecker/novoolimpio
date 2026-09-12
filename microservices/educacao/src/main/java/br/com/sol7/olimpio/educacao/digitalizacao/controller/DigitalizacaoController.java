@@ -1,13 +1,15 @@
 package br.com.sol7.olimpio.educacao.digitalizacao;
 
-import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Path("/api/educacao/digitalizacao")
 @Produces(MediaType.APPLICATION_JSON)
@@ -17,71 +19,88 @@ public class DigitalizacaoController {
     DigitalizacaoService service;
 
     @GET
-    public Uni<List<DigitalizacaoResponse>> list() {
-        return service.list();
-    }
-
-    @GET
-    @Path("/paged")
-    public Uni<PagedResponse<DigitalizacaoResponse>> paged(@QueryParam("page") Integer page, @QueryParam("size") Integer size) {
-        return service.paged(page == null ? 0 : page, size == null ? 10 : size);
-    }
-
-    @GET
-    @Path("/{id}")
-    public Uni<DigitalizacaoResponse> find(@PathParam("id") Long id) {
-        return service.find(id);
+    @Path("/turmasDisponiveis")
+    public Uni<List<DigitalizacaoService.TurmaOption>> turmasDisponiveis(
+            @QueryParam("query") String query) {
+        // unidades would come from authenticated user context
+        return service.turmasDisponiveis(query != null ? query : "", List.of());
     }
 
     @POST
-    public Uni<Response> create(@Valid DigitalizacaoRequest r) {
-        return service.create(r).map(item -> Response.status(Response.Status.CREATED).entity(item).build());
-    }
-
-    @PUT
-    @Path("/{id}")
-    public Uni<DigitalizacaoResponse> update(@PathParam("id") Long id, @Valid DigitalizacaoRequest r) {
-        return service.update(id, r);
-    }
-
-    @DELETE
-    @Path("/{id}")
-    public Uni<Void> delete(@PathParam("id") Long id) {
-        return service.delete(id);
+    @Path("/carregarDiasAula")
+    public Uni<DigitalizacaoService.CarregarDiasAulaResponse> carregarDiasAula(
+            Map<String, Object> body) {
+        Long oferecimentoId = ((Number) body.get("oferecimentoComponenteCurricularId")).longValue();
+        return service.carregarDiasAula(oferecimentoId);
     }
 
     @GET
-    @Path("/carregar-dias-aula")
-    public Uni<Void> carregarDiasAula() {
-        return service.carregarDiasAula();
+    @Path("/digitalizacaoChamadas")
+    public Uni<List<DigitalizacaoService.ChamadaItem>> digitalizacaoChamadas(
+            @QueryParam("turmaId") Long turmaId) {
+        return service.digitalizacaoChamadas(turmaId);
     }
 
-
-    @GET
-    @Path("/carregar-documentos-aluno")
-    public Uni<Void> carregarDocumentosAluno() {
-        return service.carregarDocumentosAluno();
-    }
-
-
-    @GET
-    @Path("/carregar-matriculas")
-    public Uni<Void> carregarMatriculas() {
-        return service.carregarMatriculas();
-    }
-
-
-    @GET
-    @Path("/carregar-ocorrencia")
-    public Uni<Void> carregarOcorrencia(@QueryParam("digitalizacaoChamadaId") Long digitalizacaoChamadaId) {
+    @POST
+    @Path("/carregarOcorrencia")
+    public Uni<DigitalizacaoService.CarregarOcorrenciaResponse> carregarOcorrencia(
+            Map<String, Object> body) {
+        Long digitalizacaoChamadaId = ((Number) body.get("digitalizacaoChamadaId")).longValue();
         return service.carregarOcorrencia(digitalizacaoChamadaId);
     }
 
-
     @GET
-    @Path("/verificar-presenca")
-    public Uni<Long> verificarPresenca(@QueryParam("matriculaId") Long matriculaId, @QueryParam("ocorrenciaComponenteCurricularId") Long ocorrenciaComponenteCurricularId) {
-        return service.verificarPresenca(matriculaId, ocorrenciaComponenteCurricularId);
+    @Path("/autoCompleteAluno")
+    public Uni<List<DigitalizacaoService.AlunoOption>> autoCompleteAluno(
+            @QueryParam("query") String query) {
+        // unidades would come from authenticated user context
+        return service.autoCompleteAluno(query != null ? query : "", List.of());
     }
 
+    @GET
+    @Path("/carregarDocumentosAluno")
+    public Uni<List<DigitalizacaoService.DocumentoAlunoItem>> carregarDocumentosAluno(
+            @QueryParam("pessoaId") Long pessoaId) {
+        return service.carregarDocumentosAluno(pessoaId);
+    }
+
+    @POST
+    @Path("/salvarDocumentoAluno")
+    public Uni<Void> salvarDocumentoAluno(
+            Map<String, Object> body) {
+        Long pessoaId = ((Number) body.get("pessoaId")).longValue();
+        String nomeDocumento = (String) body.get("nomeDocumento");
+        String arquivo = (String) body.get("arquivo");
+        Long usuarioId = 1L; // would come from auth context
+        return service.salvarDocumentoAluno(pessoaId, nomeDocumento, arquivo, usuarioId);
+    }
+
+    @POST
+    @Path("/inserirArquivo")
+    public Uni<Void> inserirArquivo(
+            Map<String, Object> body) {
+        Long contratoId = ((Number) body.get("contratoId")).longValue();
+        String arquivo = (String) body.get("arquivo");
+        Long usuarioId = 1L; // would come from auth context
+        return service.inserirArquivo(contratoId, arquivo, usuarioId);
+    }
+
+    @POST
+    @Path("/inserirChamada")
+    public Uni<Void> inserirChamada(
+            Map<String, Object> body) {
+        Long digitalizacaoChamadaId = ((Number) body.get("digitalizacaoChamadaId")).longValue();
+        String arquivo = (String) body.get("arquivo");
+        Long usuarioId = 1L; // would come from auth context
+        return service.inserirChamada(digitalizacaoChamadaId, arquivo, usuarioId);
+    }
+
+    @POST
+    @Path("/salvarChamada")
+    public Uni<Void> salvarChamada(
+            Map<String, Object> body) {
+        Long digitalizacaoChamadaId = ((Number) body.get("digitalizacaoChamadaId")).longValue();
+        Long usuarioId = 1L; // would come from auth context
+        return service.salvarChamada(digitalizacaoChamadaId, usuarioId);
+    }
 }

@@ -860,9 +860,9 @@ export default function ViewConsultorMatriculaLayoutScreen() {
 
                 <h4>Parcelas Selecionadas</h4>
                 <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                         <thead>
-                            <tr style={{ background: '#f0f0f0' }}>
+                            <tr style={{ background: '#2f333b', color: '#fff' }}>
                                 <th style={{ padding: '8px', textAlign: 'left' }}>Descrição</th>
                                 <th style={{ padding: '8px', textAlign: 'left' }}>Parcela</th>
                                 <th style={{ padding: '8px', textAlign: 'left' }}>Data Vencimento</th>
@@ -870,18 +870,28 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                             </tr>
                         </thead>
                         <tbody>
-                            {parcelas.map(p => (
-                                <tr key={p.parcela}>
+                            {parcelas.map((p, i) => (
+                                <tr key={p.parcela} style={{ background: i % 2 === 0 ? '#ffffff' : '#f7f7f7', borderBottom: '1px solid #e5e5e5' }}>
                                     <td style={{ padding: '8px' }}>{p.descricao}</td>
                                     <td style={{ padding: '8px' }}>{p.parcela}</td>
                                     <td style={{ padding: '8px' }}>{formatDate(p.dataVencimento)}</td>
-                                    <td style={{ padding: '8px', textAlign: 'right' }}>{p.valor.toFixed(2)}</td>
+                                    <td style={{ padding: '8px', textAlign: 'right' }}>R$ {p.valor.toFixed(2)}</td>
                                 </tr>
                             ))}
                             {parcelas.length === 0 && (
                                 <tr><td colSpan={4} style={{ padding: '8px' }}>Nenhuma parcela calculada. Selecione a forma de pagamento.</td></tr>
                             )}
                         </tbody>
+                        {parcelas.length > 0 && (
+                            <tfoot>
+                                <tr style={{ background: '#eaeaea', fontWeight: 'bold' }}>
+                                    <td colSpan={3} style={{ padding: '8px', textAlign: 'right' }}>Total R$</td>
+                                    <td style={{ padding: '8px', textAlign: 'right' }}>
+                                        R$ {parcelas.reduce((acc, p) => acc + p.valor, 0).toFixed(2)}
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        )}
                     </table>
                 </div>
             </div>

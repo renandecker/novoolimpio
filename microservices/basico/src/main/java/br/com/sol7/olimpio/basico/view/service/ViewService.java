@@ -154,6 +154,24 @@ public class ViewService {
                     + "p.data_cadastro, p.data_alteracao, p.id_logradouro "
                     + "FROM bas_pessoa_fisica pf "
                     + "JOIN bas_pessoa p ON p.id = pf.id_pessoa";
+
+    private static final String DIGITALIZACAO_CONTRATOS_SELECT =
+            "SELECT c.id, c.local, c.fl_pdf AS pdf, "
+                    + "pf_aluno.nome AS aluno_nome, "
+                    + "COALESCE(pf_resp.nome, pj_resp.nome_fantasia, '') AS responsavel_string, "
+                    + "u.sucinto AS unidade_sucinto, "
+                    + "curso.nome AS curso_nome "
+                    + "FROM edc_contrato c "
+                    + "LEFT JOIN bas_pessoa p_aluno ON p_aluno.id = c.id_pessoa "
+                    + "LEFT JOIN bas_pessoa_fisica pf_aluno ON pf_aluno.id_pessoa = p_aluno.id "
+                    + "LEFT JOIN bas_pessoa p_resp ON p_resp.id = c.id_responsavel "
+                    + "LEFT JOIN bas_pessoa_fisica pf_resp ON pf_resp.id_pessoa = p_resp.id "
+                    + "LEFT JOIN bas_pessoa_juridica pj_resp ON pj_resp.id_pessoa = p_resp.id "
+                    + "LEFT JOIN bas_unidade u ON u.id = c.id_unidade "
+                    + "LEFT JOIN edc_curriculo cur ON cur.id = c.id_curso "
+                    + "LEFT JOIN edc_curso curso ON curso.id = cur.id_curso";
+    private static final List<String> DIGITALIZACAO_CONTRATOS_COLUMNS = List.of(
+            "id", "local", "pdf", "aluno_nome", "responsavel_string", "unidade_sucinto", "curso_nome");
     private static final List<String> PESSOA_FISICA_COLUMNS = List.of(
             "id", "id_pessoa", "nome", "nome_social", "cpf", "rg",
             "nome_referencia", "telefone_referencia", "celular_referencia",
@@ -183,7 +201,8 @@ public class ViewService {
             Map.entry("pessoa-juridica/listPessoaJuridica", new CuratedSelect(PESSOA_JURIDICA_SELECT, PESSOA_JURIDICA_COLUMNS)),
             Map.entry("pessoa/listPessoaFisica", new CuratedSelect(PESSOA_FISICA_SELECT, PESSOA_FISICA_COLUMNS)),
             Map.entry("pessoa/formPessoaFisica", new CuratedSelect(PESSOA_FISICA_SELECT, PESSOA_FISICA_COLUMNS)),
-            Map.entry("pessoa-fisica/listPessoaFisica", new CuratedSelect(PESSOA_FISICA_SELECT, PESSOA_FISICA_COLUMNS)));
+            Map.entry("pessoa-fisica/listPessoaFisica", new CuratedSelect(PESSOA_FISICA_SELECT, PESSOA_FISICA_COLUMNS)),
+            Map.entry("digitalizacaoDocumento/digitalizacaoDocumento", new CuratedSelect(DIGITALIZACAO_CONTRATOS_SELECT, DIGITALIZACAO_CONTRATOS_COLUMNS)));
 
     public Uni<PagedResponse<Map<String, Object>>> paged(String feature, String resource, int page, int size) {
         int p = Math.max(0, page);
