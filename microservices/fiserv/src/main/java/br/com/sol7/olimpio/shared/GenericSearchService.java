@@ -24,7 +24,7 @@ public class GenericSearchService {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> Uni<PagedResponse<T>> search(Class<T> entityClass, SearchFilterRequest request, int page, int size) {
+    public <T> Uni<PagedResponse<T>> search(Class<T> entityClass, SearchFilterRequest request, int page, int size, String sort, String order) {
         int p = Math.min(Math.max(page, 0), Integer.MAX_VALUE);
         int s = Math.min(Math.max(size, 1), 100);
 
@@ -42,7 +42,8 @@ public class GenericSearchService {
 
         String whereStr = where.toString();
         String entity = entityName(entityClass);
-        String select = "select e from " + entity + " e where " + whereStr;
+        String orderBy = buildOrderBy(entityClass, sort, order);
+        String select = "select e from " + entity + " e where " + whereStr + orderBy;
         String count = "select count(e) from " + entity + " e where " + whereStr;
 
         Uni<List<T>> listUni = Panache.getSession()
@@ -200,5 +201,29 @@ public class GenericSearchService {
             case "false", "0", "n", "nao", "não", "inativo", "i", "no" -> Boolean.FALSE;
             default -> Boolean.valueOf(v);
         };
+    }
+
+    private <T> String buildOrderBy(Class<T> entityClass, String sort, String order) {
+        if (sort == null || sort.isBlank()) {
+            return " order by e.id asc";
+        }
+        String dir = "desc".equalsIgnoreCase(order) ? "desc" : "asc";
+        if (hasField(entityClass, sort)) {
+            return " order by e." + sort + " " + dir;
+        }
+        return " order by e.id asc";
+    }
+
+    private <T> boolean hasField(Class<T> entityClass, String fieldName) {
+        Class<?> clazz = entityClass;
+        while (clazz != null && clazz != Object.class) {
+            try {
+                clazz.getDeclaredField(fieldName);
+                return true;
+            } catch (NoSuchFieldException e) {
+                clazz = clazz.getSuperclass();
+            }
+        }
+        return false;
     }
 }

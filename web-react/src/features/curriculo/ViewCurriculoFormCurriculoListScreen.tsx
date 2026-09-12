@@ -1024,12 +1024,12 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                     <div className="table_form">
                         <Tabs tabs={tabs} initial="curso"/>
                         <div className="form-buttons">
-                            <button type="button" className="btnblue"
+                            <button type="button" className="btnstop"
                                     title="Salvar registro" disabled={salvando}
                                     onClick={() => void handleComplete(dataRef.current, false)}>
                                 {salvando ? 'Salvando...' : 'Salvar'}
                             </button>
-                            <button type="button" className="btnstop" title="Salvar e continuar editando"
+                            <button type="button" className="btnblue" title="Salvar e continuar editando"
                                     disabled={salvando} onClick={() => void handleComplete(dataRef.current, true)}>
                                 Salvar e Continuar
                             </button>

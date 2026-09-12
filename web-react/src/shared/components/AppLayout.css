@@ -1120,6 +1120,104 @@
     background-image: -moz-linear-gradient(top, rgb(185, 63, 42), rgb(185, 63, 42)) !important;
 }
 
+/* ---- Botões: classes globais (réplica das cores do form.css legado) ----
+   Essas classes eram usadas nas telas mas nunca definidas globalmente,
+   então os botões caíam nos estilos padrão (branco) ou no azul do toolbar.
+   Excluímos .gp-btn-acoes, que tem estilo próprio (outline). */
+.btnstop:not(.gp-btn-acoes),
+.btnblue:not(.gp-btn-acoes),
+.btngreen:not(.gp-btn-acoes),
+.btnyellow:not(.gp-btn-acoes),
+.btnred:not(.gp-btn-acoes) {
+    color: #ffffff !important;
+    text-shadow: none;
+    border: 1px solid rgba(0, 0, 0, 0.0980392) rgba(0, 0, 0, 0.0980392) rgba(0, 0, 0, 0.247059) !important;
+    padding: 6px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btnstop:not(.gp-btn-acoes) {
+    background-color: rgb(51, 155, 185) !important;
+    background-image: linear-gradient(180deg, rgb(91, 192, 222) 0%, rgb(51, 155, 185) 100%) !important;
+}
+.btnstop:not(.gp-btn-acoes):hover {
+    background-color: rgb(51, 155, 185) !important;
+    background-image: linear-gradient(180deg, rgb(51, 155, 185) 0%, rgb(51, 155, 185) 100%) !important;
+}
+
+.btnblue:not(.gp-btn-acoes) {
+    background-color: rgb(38, 90, 136) !important;
+    background-image: linear-gradient(180deg, rgb(51, 122, 183) 0%, rgb(38, 90, 136) 100%) !important;
+}
+.btnblue:not(.gp-btn-acoes):hover {
+    background-color: rgb(38, 90, 136) !important;
+    background-image: linear-gradient(180deg, rgb(38, 90, 136) 0%, rgb(38, 90, 136) 100%) !important;
+}
+
+.btngreen:not(.gp-btn-acoes) {
+    background-color: rgb(60, 118, 61) !important;
+    background-image: linear-gradient(180deg, rgb(92, 184, 92) 0%, rgb(60, 118, 61) 100%) !important;
+}
+.btngreen:not(.gp-btn-acoes):hover {
+    background-color: rgb(60, 118, 61) !important;
+    background-image: linear-gradient(180deg, rgb(60, 118, 61) 0%, rgb(60, 118, 61) 100%) !important;
+}
+
+.btnyellow:not(.gp-btn-acoes) {
+    background-color: rgb(250, 165, 35) !important;
+    background-image: linear-gradient(180deg, rgb(252, 197, 116) 0%, rgb(250, 165, 35) 100%) !important;
+}
+.btnyellow:not(.gp-btn-acoes):hover {
+    background-color: rgb(250, 165, 35) !important;
+    background-image: linear-gradient(180deg, rgb(250, 165, 35) 0%, rgb(250, 165, 35) 100%) !important;
+}
+
+.btnred:not(.gp-btn-acoes) {
+    background-color: rgb(185, 63, 42) !important;
+    background-image: linear-gradient(180deg, rgba(255, 83, 56, 0.47) 0%, rgb(185, 63, 42) 100%) !important;
+}
+.btnred:not(.gp-btn-acoes):hover {
+    background-color: rgb(185, 63, 42) !important;
+    background-image: linear-gradient(180deg, rgb(185, 63, 42) 0%, rgb(185, 63, 42) 100%) !important;
+}
+
+/* Botões compactos de ação por registro mantêm o tamanho próprio */
+.btn-action.btnstop,
+.btn-action.btnblue,
+.btn-action.btngreen,
+.btn-action.btnred {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    font-size: 14px;
+    border-radius: 3px;
+}
+
+.btn-action.btnyellow {
+    padding: 0 8px;
+}
+
+/* Rodapé padrão de formulário (FormLayout) */
+.form-footer {
+    display: flex;
+    gap: 4px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #a8d0e6;
+}
+
+.form-footer button {
+    font-size: 13px;
+    padding: 6px 16px;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
 .modal-buttons button {
     font-size: 12px;
     padding: 6px 14px;

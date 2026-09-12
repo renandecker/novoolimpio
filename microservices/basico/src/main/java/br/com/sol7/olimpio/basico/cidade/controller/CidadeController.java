@@ -62,9 +62,9 @@ public class CidadeController {
 
 
     @GET
-    @Path("/auto-complete")
-    public Uni<List<Long>> autoComplete(@QueryParam("query") String query) {
-        return service.autoComplete(query);
+    @Path("/autoComplete")
+    public Uni<List<CidadeResponse>> autoCompleteLegacy(@QueryParam("query") String query) {
+        return service.autoCompleteOpcoes(query == null ? "" : query, null);
     }
 
 

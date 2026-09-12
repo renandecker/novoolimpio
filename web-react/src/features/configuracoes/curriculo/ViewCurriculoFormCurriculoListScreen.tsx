@@ -2095,7 +2095,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                         <div className="form-buttons">
 
-                            <button type="button" className="btnblue"
+                            <button type="button" className="btnstop"
 
                                     title="Salvar registro" disabled={salvando}
 
@@ -2105,7 +2105,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                             </button>
 
-                            <button type="button" className="btnstop" title="Salvar e continuar editando"
+                            <button type="button" className="btnblue" title="Salvar e continuar editando"
 
                                     disabled={salvando} onClick={() => void handleComplete(dataRef.current, true)}>
 

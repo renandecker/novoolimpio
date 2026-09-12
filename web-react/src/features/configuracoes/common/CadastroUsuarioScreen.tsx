@@ -2178,13 +2178,13 @@ export default function CadastroUsuarioScreen() {
 
                         </button>
 
-                        <button type="button" className="btnstop" onClick={() => void salvar(false)} disabled={salvando}>
+                        <button type="button" className="btnblue" onClick={() => void salvar(false)} disabled={salvando}>
 
                             {salvando ? 'Salvando...' : 'Salvar e Continuar'}
 
                         </button>
 
-                        <button type="button" className="btnblue" onClick={() => void salvar(true)} disabled={salvando}>
+                        <button type="button" className="btnstop" onClick={() => void salvar(true)} disabled={salvando}>
 
                             {salvando ? 'Salvando...' : 'Salvar'}
 

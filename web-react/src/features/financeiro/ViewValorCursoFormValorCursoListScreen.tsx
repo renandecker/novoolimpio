@@ -334,8 +334,8 @@ export default function ViewValorCursoFormValorCursoListScreen() {
 
                     <div className="form-buttons" style={{display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16}}>
                         <button type="button" className="btnyellow" onClick={voltar} disabled={salvando}>Voltar</button>
-                        <button type="button" className="btnstop" onClick={() => void salvar(false)} disabled={salvando}>{salvando ? 'Salvando...' : 'Salvar e Continuar'}</button>
-                        <button type="button" className="btnblue" onClick={() => void salvar(true)} disabled={salvando}>{salvando ? 'Salvando...' : 'Salvar'}</button>
+                        <button type="button" className="btnblue" onClick={() => void salvar(false)} disabled={salvando}>{salvando ? 'Salvando...' : 'Salvar e Continuar'}</button>
+                        <button type="button" className="btnstop" onClick={() => void salvar(true)} disabled={salvando}>{salvando ? 'Salvando...' : 'Salvar'}</button>
                     </div>
                 </div>
             </main>

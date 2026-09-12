@@ -101,10 +101,10 @@ export function FormLayout({
             <Tabs tabs={tabItems} initial={tabs[0]?.key} className="form-tabs"/>
 
             <div className="form-footer">
-                <button type="button" className="btn-form-back" onClick={onCancel} disabled={saving}>
+                <button type="button" className="btn-form-back btnyellow" onClick={onCancel} disabled={saving}>
                     {cancelLabel}
                 </button>
-                <button type="button" className="btn-form-save" onClick={handleSubmit} disabled={saving}>
+                <button type="button" className="btn-form-save btnstop" onClick={handleSubmit} disabled={saving}>
                     {saving ? 'Salvando...' : submitLabel}
                 </button>
             </div>

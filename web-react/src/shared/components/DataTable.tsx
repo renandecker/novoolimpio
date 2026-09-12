@@ -512,7 +512,7 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
         <div className="data-table">
             <div className="data-table-toolbar">
                 {canCreate &&
-                <button className="btn-primary btnstop"
+                <button className="btn-primary btnblue"
                         onClick={() => createNavigateTo ? navigate(createNavigateTo) : setModal({mode: 'create'})}>
                     Novo
                 </button>}
@@ -530,7 +530,7 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
                 ))}
                 <button
                     type="button"
-                    className="btngreen"
+                    className="btnyellow"
                     style={{marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px'}}
                     onClick={() => setFilterModal({open: true, filters: filterParams})}
                 >

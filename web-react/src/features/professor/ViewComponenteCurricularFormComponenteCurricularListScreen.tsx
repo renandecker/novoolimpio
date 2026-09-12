@@ -418,11 +418,11 @@ export default function ViewComponenteCurricularFormComponenteCurricularListScre
                     <div className="table_form">
                         <Tabs tabs={tabs} initial="componenteCurricular"/>
                         <div className="form-buttons">
-                            <button type="button" className="btnblue" title="Salvar registro"
+                            <button type="button" className="btnstop" title="Salvar registro"
                                     disabled={salvando} onClick={() => void salvar(true)}>
                                 {salvando ? 'Salvando...' : 'Gravar'}
                             </button>
-                            <button type="button" className="btnstop" title="Salvar e continuar editando"
+                            <button type="button" className="btnblue" title="Salvar e continuar editando"
                                     disabled={salvando} onClick={() => void salvar(false)}>
                                 Salvar e Continuar
                             </button>

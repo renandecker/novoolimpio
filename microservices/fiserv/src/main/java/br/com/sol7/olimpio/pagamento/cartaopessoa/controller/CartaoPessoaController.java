@@ -43,16 +43,18 @@ public class CartaoPessoaController {
     @GET
     @Path("/paged")
     @WithSession
-    public Uni<PagedResponse<CartaoPessoaResponse>> listarPaged(@QueryParam("page") int page, @QueryParam("size") int size) {
-        return searchService.search(CartaoPessoa.class, new SearchFilterRequest(null), page, size)
+    public Uni<PagedResponse<CartaoPessoaResponse>> listarPaged(@QueryParam("page") int page, @QueryParam("size") int size,
+            @QueryParam("sort") String sort, @QueryParam("order") String order) {
+        return searchService.search(CartaoPessoa.class, new SearchFilterRequest(null), page, size, sort, order)
                 .map(this::mapToResponse);
     }
 
     @POST
     @Path("/search")
     @WithSession
-    public Uni<PagedResponse<CartaoPessoaResponse>> search(SearchFilterRequest request, @QueryParam("page") int page, @QueryParam("size") int size) {
-        return searchService.search(CartaoPessoa.class, request, page, size)
+    public Uni<PagedResponse<CartaoPessoaResponse>> search(SearchFilterRequest request, @QueryParam("page") int page, @QueryParam("size") int size,
+            @QueryParam("sort") String sort, @QueryParam("order") String order) {
+        return searchService.search(CartaoPessoa.class, request, page, size, sort, order)
                 .map(this::mapToResponse);
     }
 

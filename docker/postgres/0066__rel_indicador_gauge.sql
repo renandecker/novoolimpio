@@ -182,16 +182,3 @@ FROM (
 )
 ON CONFLICT DO NOTHING;
 
--- =================================================================================================
--- Grants
--- =================================================================================================
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.rel_indicador_gauge TO authenticated;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.rel_indicador_gauge_usuario TO authenticated;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.rel_indicador_gauge_unidade TO authenticated;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.rel_indicador_gauge_perfil TO authenticated;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.rel_indicador_gauge_filtro TO authenticated;
-GRANT USAGE, SELECT ON SEQUENCE public.rel_indicador_gauge_id_seq TO authenticated;
-GRANT USAGE, SELECT ON SEQUENCE public.rel_indicador_gauge_usuario_id_seq TO authenticated;
-GRANT USAGE, SELECT ON SEQUENCE public.rel_indicador_gauge_unidade_id_seq TO authenticated;
-GRANT USAGE, SELECT ON SEQUENCE public.rel_indicador_gauge_perfil_id_seq TO authenticated;
-GRANT USAGE, SELECT ON SEQUENCE public.rel_indicador_gauge_filtro_id_seq TO authenticated;
