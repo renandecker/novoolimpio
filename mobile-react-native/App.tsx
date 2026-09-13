@@ -410,6 +410,14 @@ import ViewValorCursoListValorCursoListScreen from './src/screens/ViewValorCurso
 import ViewValorProdutoFormValorProdutoListScreen from './src/screens/ViewValorProdutoFormValorProdutoListScreen';
 import ViewValorProdutoListValorProdutoListScreen from './src/screens/ViewValorProdutoListValorProdutoListScreen';
 import ViewTemaListTemasListScreen from './src/screens/ViewTemaListTemasListScreen';
+import AlunoDashboardScreen from './src/features/aluno/AlunoDashboardScreen';
+import AlunoBoletimScreen from './src/features/aluno/AlunoBoletimScreen';
+import AlunoFrequenciaScreen from './src/features/aluno/AlunoFrequenciaScreen';
+import AlunoAulasScreen from './src/features/aluno/AlunoAulasScreen';
+import AlunoAulasTurmaScreen from './src/features/aluno/AlunoAulasTurmaScreen';
+import AlunoAulaScreen from './src/features/aluno/AlunoAulaScreen';
+import AlunoFinanceiroScreen from './src/features/aluno/AlunoFinanceiroScreen';
+import ViewCurriculoAttachmentScreen from './src/features/aluno/ViewCurriculoAttachmentScreen';
 
 import MeusDadosScreen from './src/screens/MeusDadosScreen';
 import ViewNotificacaoListNotificacaoListScreen from './src/screens/ViewNotificacaoListNotificacaoListScreen';
@@ -427,6 +435,14 @@ function AppRoutes() {
     return <QueryClientProvider client={q}><NavigationContainer><Stack.Navigator initialRouteName='home'><Stack.Screen
         name='home' component={HomeScreen} options={{headerShown: false}}/>
         <Stack.Screen name='default' component={DefaultListScreen}/>
+        <Stack.Screen name='aluno/portalAluno' component={AlunoDashboardScreen} options={{title: 'Portal Aluno'}}/>
+        <Stack.Screen name='aluno/boletim' component={AlunoBoletimScreen} options={{title: 'Boletim'}}/>
+        <Stack.Screen name='aluno/frequencia' component={AlunoFrequenciaScreen} options={{title: 'Frequência'}}/>
+        <Stack.Screen name='aluno/aulas' component={AlunoAulasScreen} options={{title: 'Aulas'}}/>
+        <Stack.Screen name='aluno/aulas/turma' component={AlunoAulasTurmaScreen} options={{title: 'Aulas da Turma'}}/>
+        <Stack.Screen name='aluno/aulas/aula' component={AlunoAulaScreen} options={{title: 'Detalhe da Aula'}}/>
+        <Stack.Screen name='aluno/financeiro' component={AlunoFinanceiroScreen} options={{title: 'Financeiro'}}/>
+        <Stack.Screen name='aluno/curriculo-anexo' component={ViewCurriculoAttachmentScreen} options={{title: 'Anexar Currículo'}}/>
         <Stack.Screen name='meus-dados' component={MeusDadosScreen} options={{title: 'Meus dados'}}/>
         <Stack.Screen name='view/notificacao/listNotificacao' component={ViewNotificacaoListNotificacaoListScreen}
                       options={{title: 'Notificações'}}/>

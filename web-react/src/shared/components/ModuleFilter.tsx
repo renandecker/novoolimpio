@@ -69,14 +69,14 @@ export function ModuleFilter({columns, value, onChange}: ModuleFilterProps) {
                         <div className="div_form">
                             <div className="form-title">Filtros de Busca</div>
                             <form className="table_form" onSubmit={e => {e.preventDefault(); handleSubmit();}}>
-                                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '12px'}}>
+                                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px'}}>
                                     {effectiveCols.map((column) => {
                                         const op = ops[column.key] ?? 'CONTAINS';
                                         const showBetween = op === 'BETWEEN';
                                         return (
-                                            <div key={column.key} className="form-field" style={{display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                                            <div key={column.key} className="form-field" style={{display: 'flex', flexDirection: 'column', gap: '8px', background: '#fafafa', border: '1px solid #e5e7eb', borderRadius: '10px', padding: '12px'}}>
                                                 <span className="form-label">{column.label}</span>
-                                                <div style={{display: 'flex', gap: '4px', alignItems: 'center'}}>
+                                                <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
                                                     <select
                                                         style={{width: '120px', padding: '4px', fontSize: '12px', border: '1px solid #ccc', borderRadius: '4px'}}
                                                         value={op}

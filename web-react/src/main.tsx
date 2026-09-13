@@ -396,6 +396,15 @@ ViewComunicacaoListComunicacaoListScreen,
     ViewValorProdutoListValorProdutoListScreen,
     ViewTemaListTemasListScreen,
     CurriculumAttachmentModal,
+    AlunoDashboardScreen,
+    AlunoBoletimScreen,
+    AlunoFrequenciaScreen,
+    AlunoFinanceiroScreen,
+    AlunoAulasScreen,
+    AlunoAulasTurmaScreen,
+    AlunoAvaliacoesScreen,
+    AlunoAvaliacaoResponderScreen,
+    AulaAlunoScreen,
     MeusDadosScreen,
     IconesListScreen,
     AsaasCobrancasListScreen,
@@ -423,6 +432,16 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     element={<ProtectedRoute/>}><Route path="/auditoria" element={<AuditoriaScreen/>}/><Route path="/view/tema/listTemas"
                                                                                          element={
                                                                                              <ViewTemaListTemasListScreen/>}/>
+    <Route path="/aluno/portalAluno" element={<AlunoDashboardScreen/>}/>
+    <Route path="/aluno/boletim" element={<AlunoBoletimScreen/>}/>
+    <Route path="/aluno/frequencia" element={<AlunoFrequenciaScreen/>}/>
+    <Route path="/aluno/financeiro" element={<AlunoFinanceiroScreen/>}/>
+    <Route path="/aluno/aulas" element={<AlunoAulasScreen/>}/>
+    <Route path="/aluno/aulas/turma/:oferecimentoId" element={<AlunoAulasTurmaScreen/>}/>
+    <Route path="/aluno/aulas/aula/:aulaId" element={<AulaAlunoScreen/>}/>
+    <Route path="/aluno/avaliacoes" element={<AlunoAvaliacoesScreen/>}/>
+    <Route path="/aluno/avaliacao/:id" element={<AlunoAvaliacaoResponderScreen/>}/>
+    <Route path="/aluno/curriculo-anexo" element={<AlunoDashboardScreen/>}/>
     <Route path="/meus-dados" element={<MeusDadosScreen/>}/>
     <Route path="/view/acao/formAcao" element={<ViewAcaoFormAcaoListScreen/>}/>
     <Route path="/view/acao/listAcao" element={<ViewAcaoListAcaoListScreen/>}/>

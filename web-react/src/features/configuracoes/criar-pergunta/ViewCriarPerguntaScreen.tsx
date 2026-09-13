@@ -319,7 +319,8 @@ function ListarPerguntas() {
                             <th>Tipo</th>
                             <th>Opções</th>
                             <th>Anexos</th>
-                            <th>Ações</th>
+                            <th>Editar</th>
+                            <th>Excluir</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -342,15 +343,17 @@ function ListarPerguntas() {
                                         </span>
                                     ))}
                                 </td>
-                                <td>
-                                    <button className="gp-btn gp-btn-acoes" title="Editar"><Pencil className="icon" /></button>
-                                    <button className="gp-btn gp-btn-acoes" title="Excluir"><Trash2 className="icon" /></button>
-                                </td>
+                                 <td>
+                                     <button className="gp-btn gp-btn-acoes btngreen" title="Editar"><Pencil className="icon" /></button>
+                                 </td>
+                                 <td>
+                                     <button className="gp-btn gp-btn-acoes btnred" title="Excluir"><Trash2 className="icon" /></button>
+                                 </td>
                             </tr>
                         ))}
                         {perguntas.length === 0 && (
                             <tr>
-                                <td colSpan={6} className="gp-vazio">
+                                <td colSpan={7} className="gp-vazio">
                                     Nenhuma pergunta cadastrada.
                                 </td>
                             </tr>

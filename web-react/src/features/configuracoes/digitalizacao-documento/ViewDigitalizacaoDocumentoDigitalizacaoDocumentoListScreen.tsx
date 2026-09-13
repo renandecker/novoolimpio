@@ -699,7 +699,8 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                             <th>Nome</th>
                             <th>Usuário</th>
                             <th>Data</th>
-                            <th>Ações</th>
+                            <th>Informações</th>
+                            <th>Excluir</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -710,27 +711,29 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                               <td>{doc.usuarioLogin}</td>
                               <td>{formatDate(doc.data)}</td>
                               <td>
-                                <button
-                                  type="button"
-                                  className="btn-action btnyellow"
-                                  title="Visualizar"
-                                  onClick={() => handleViewDocument(doc)}
-                                >
-                                  👁
-                                </button>
-                                <button
-                                  type="button"
-                                  className="btn-action btnred"
-                                  title="Remover"
-                                  onClick={() => {
-                                    if (confirm('Deseja realmente excluir este documento?')) {
-                                      api.delete(`${API_PATHS.view.digitalizacaoDocumento.salvarDocumentoAluno}/${doc.id}`).then(() => onAlunoSelect({id: selectedPessoa!.id, label: `${selectedPessoa!.pessoaFisica.nome} (${selectedPessoa!.pessoaFisica.cpf})`}));
-                                    }
-                                  }}
-                                >
-                                  🗑
-                                </button>
-                              </td>
+                                 <button
+                                   type="button"
+                                   className="btn-action btnyellow"
+                                   title="Visualizar"
+                                   onClick={() => handleViewDocument(doc)}
+                                 >
+                                   👁
+                                 </button>
+                               </td>
+                               <td>
+                                 <button
+                                   type="button"
+                                   className="btn-action btnred"
+                                   title="Remover"
+                                   onClick={() => {
+                                     if (confirm('Deseja realmente excluir este documento?')) {
+                                       api.delete(`${API_PATHS.view.digitalizacaoDocumento.salvarDocumentoAluno}/${doc.id}`).then(() => onAlunoSelect({id: selectedPessoa!.id, label: `${selectedPessoa!.pessoaFisica.nome} (${selectedPessoa!.pessoaFisica.cpf})`}));
+                                     }
+                                   }}
+                                 >
+                                   🗑
+                                 </button>
+                               </td>
                             </tr>
                           ))}
                         </tbody>

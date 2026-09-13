@@ -52,7 +52,10 @@ export type BoletimResumo = {
     frequenciaPerc: number | null;
 };
 
-
+export type DashboardData = {
+    matriculas: Matricula[];
+    boletins: BoletimResumo[];
+};
 
 export type Avaliacao = { ordem: number | null; nota: number | null; conceito: string };
 
@@ -134,6 +137,7 @@ export type Frequencia = {
 
 export const alunoApi = {
     perfil: () => api.get<AlunoPerfil>('/api/aluno/perfil').then((r) => r.data),
+    dashboard: () => api.get<DashboardData>('/api/aluno/dashboard').then((r) => r.data),
     matriculas: () => api.get<Matricula[]>('/api/aluno/matriculas').then((r) => r.data),
     boletim: () => api.get<Boletim[]>('/api/aluno/boletim').then((r) => r.data),
     boletimDetalhe: (matriculaId: number) => api.get<Boletim>(`/api/aluno/boletim/${matriculaId}`).then((r) => r.data),

@@ -31,6 +31,30 @@ const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
 
 
+interface OferecimentoRow {
+
+    id?: number;
+
+    dataInicio?: string;
+
+    dataFim?: string;
+
+    dataCancelamento?: string;
+
+    vagas?: number;
+
+    inscritos?: number;
+
+    componenteCurricular_descricao?: string;
+
+    sala_descricao?: string;
+
+    professor_descricao?: string;
+
+}
+
+
+
 const COLUMNS = [
 
     {key: 'id', label: 'ID'},
@@ -57,6 +81,10 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
     const [selecaoDialog, setSelecaoDialog] = useState<{open: boolean; entity: any | null}>({open: false, entity: null});
 
     const [selecionados, setSelecionados] = useState<number[]>([]);
+
+    const [oferecimentos, setOferecimentos] = useState<OferecimentoRow[]>([]);
+
+    const [oferecimentosLoading, setOferecimentosLoading] = useState(false);
 
     const [filter, setFilter] = useState<Record<string, any>>({});
 
@@ -127,9 +155,31 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
 
 
 
-    const handleSelecao = (entity: any) => {
+    const handleSelecao = async (entity: any) => {
+
+        setSelecionados([]);
+
+        setOferecimentos([]);
+
+        setOferecimentosLoading(true);
 
         setSelecaoDialog({open: true, entity});
+
+        try {
+
+            const {data} = await api.get('/api/educacao/oferecimento-curso/listar-oferecimentos', {params: {grupoId: entity.id}});
+
+            setOferecimentos(Array.isArray(data) ? data : []);
+
+        } catch (e) {
+
+            setOferecimentos([]);
+
+        } finally {
+
+            setOferecimentosLoading(false);
+
+        }
 
     };
 
@@ -177,7 +227,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
 
         if (checked) {
 
-            setSelecionados(all.map(item => Number(asRecord(item).id)));
+            setSelecionados(oferecimentos.map(item => Number(item.id)));
 
         } else {
 
@@ -208,6 +258,90 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
     const exportarExcel = (_record: Record<string, unknown>) => {
 
         alert('Exportação Excel não implementada');
+
+    };
+
+
+
+    const irParaEdicao = (ids: number[]) => {
+
+        const grupoId = selecaoDialog.entity?.id;
+
+        if (grupoId == null) return;
+
+        setSelecaoDialog({open: false, entity: null});
+
+        setSelecionados([]);
+
+        window.location.href = `/view/oferecimentoComponenteCurricular/formOferecimentoCurso?id=${grupoId}&ordem=${ids.join(',')}`;
+
+    };
+
+
+
+    const fmtData = (valor: unknown) => valor ? String(valor).slice(0, 10) : '';
+
+
+
+    const ordenarPorInicioOferecimento = () => {
+
+        if (selecionados.length === 0) {
+
+            alert('Selecione algum oferecimento para editar.');
+
+            return;
+
+        }
+
+        const selecionadosOrdenados = oferecimentos
+
+            .filter(o => selecionados.includes(Number(o.id)))
+
+            .sort((a, b) => new Date(String(a.dataInicio ?? '')).getTime() - new Date(String(b.dataInicio ?? '')).getTime());
+
+        irParaEdicao(selecionadosOrdenados.map(o => Number(o.id)));
+
+    };
+
+
+
+    const ordenarPorListagemTabela = () => {
+
+        if (oferecimentos.length === 0) {
+
+            alert('Não existem oferecimentos cadastrados para este grupo.');
+
+            return;
+
+        }
+
+        irParaEdicao(oferecimentos.map(o => Number(o.id)));
+
+    };
+
+
+
+    const ordenarPorSelecionado = () => {
+
+        if (selecionados.length === 0) {
+
+            alert('Selecione algum oferecimento para editar.');
+
+            return;
+
+        }
+
+        irParaEdicao([...selecionados]);
+
+    };
+
+
+
+    const fecharSelecao = () => {
+
+        setSelecaoDialog({open: false, entity: null});
+
+        setSelecionados([]);
 
     };
 
@@ -361,7 +495,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
 
 
 
-                                    const editarItems: RowMenuItem[] = [
+                                    const selecionarItems: RowMenuItem[] = [
 
                                         {
 
@@ -374,6 +508,10 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                                             onSelect: () => handleSelecao(record),
 
                                         },
+
+                                    ];
+
+                                    const editarTodosItems: RowMenuItem[] = [
 
                                         {
 
@@ -439,11 +577,21 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
 
                                                     {acessoEditar && (
 
-                                                        <RowMenu icon={<i className="fa fa-pencil"/>}
+                                                        <>
 
-                                                                 className="btngreen" title="Editar"
+                                                            <RowMenu icon={<i className="fa fa-edit"/>}
 
-                                                                 items={editarItems}/>
+                                                                     className="btnblue" title="Selecionar Oferecimentos para Editar"
+
+                                                                     items={selecionarItems}/>
+
+                                                            <RowMenu icon={<i className="fa fa-pencil"/>}
+
+                                                                     className="btngreen" title="Editar Todos"
+
+                                                                     items={editarTodosItems}/>
+
+                                                        </>
 
                                                     )}
 
@@ -615,7 +763,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
 
                                             <tr>
 
-                                                <th style={{width: '40px'}}><input type="checkbox" checked={selecionados.length === all.length && all.length > 0} onChange={e => selectAll(e.target.checked)}/></th>
+                                                <th style={{width: '40px'}}><input type="checkbox" checked={selecionados.length === oferecimentos.length && oferecimentos.length > 0} onChange={e => selectAll(e.target.checked)}/></th>
 
                                                 <th>Turma</th>
 
@@ -639,11 +787,27 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
 
                                             <tbody>
 
-                                            {all.map((item) => {
+                                            {oferecimentosLoading ? (
 
-                                                const record = asRecord(item);
+                                                <tr>
 
-                                                const itemId = Number(record.id);
+                                                    <td colSpan={9} style={{textAlign: 'center', color: '#666'}}>Carregando oferecimentos...</td>
+
+                                                </tr>
+
+                                            ) : oferecimentos.length === 0 ? (
+
+                                                <tr>
+
+                                                    <td colSpan={9} style={{textAlign: 'center', color: '#666'}}>Nenhum oferecimento cadastrado para este grupo.</td>
+
+                                                </tr>
+
+                                            ) : (
+
+                                                oferecimentos.map((item) => {
+
+                                                const itemId = Number(item.id);
 
                                                 const isSelected = selecionados.includes(itemId);
 
@@ -657,27 +821,29 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
 
                                                         </td>
 
-                                                        <td>{record.id}</td>
+                                                        <td>{item.id}</td>
 
-                                                        <td>{record.componente_curricular_descricao ?? ''}</td>
+                                                        <td>{item.componenteCurricular_descricao ?? ''}</td>
 
-                                                        <td>{record.sala_descricao ?? ''}</td>
+                                                        <td>{item.sala_descricao ?? ''}</td>
 
-                                                        <td>{record.inscritos ?? 0} / {record.vagas ?? 0}</td>
+                                                        <td>{item.inscritos ?? 0} / {item.vagas ?? 0}</td>
 
-                                                        <td>{record.data_inicio ? record.data_inicio.split('T')[0] : ''}</td>
+                                                        <td>{fmtData(item.dataInicio)}</td>
 
-                                                        <td>{record.data_fim ? record.data_fim.split('T')[0] : ''}</td>
+                                                        <td>{fmtData(item.dataFim)}</td>
 
-                                                        <td>{record.data_cancelamento ? record.data_cancelamento.split('T')[0] : ''}</td>
+                                                        <td>{fmtData(item.dataCancelamento)}</td>
 
-                                                        <td>{record.professor_descricao ?? ''}</td>
+                                                        <td>{item.professor_descricao ?? ''}</td>
 
                                                     </tr>
 
                                                 );
 
-                                            })}
+                                            })
+
+                                            )}
 
                                             </tbody>
 
@@ -685,25 +851,25 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
 
                                         <div className="form-footer" style={{marginTop: '16px', display: 'flex', gap: '8px', justifyContent: 'flex-end'}}>
 
-                                            <button type="button" className="btnblue" onClick={() => alert('Ordem pelo início do oferecimento - implementar ordenação')}>
+                                            <button type="button" className="btnblue" onClick={ordenarPorInicioOferecimento}>
 
                                                 Ordem pelo início oferecimento
 
                                             </button>
 
-                                            <button type="button" className="btnstop" onClick={() => alert('Ordem pela listagem tabela - implementar ordenação')}>
+                                            <button type="button" className="btnstop" onClick={ordenarPorListagemTabela}>
 
                                                 Ordem pela listagem tabela
 
                                             </button>
 
-                                            <button type="button" className="btngreen" onClick={() => alert('Ordem conforme selecionando - implementar ordenação')}>
+                                            <button type="button" className="btngreen" onClick={ordenarPorSelecionado}>
 
                                                 Ordem conforme selecionando
 
                                             </button>
 
-                                            <button type="button" className="btn-form-back" onClick={() => { setSelecaoDialog({open: false, entity: null}); setSelecionados([]); }}>
+                                            <button type="button" className="btn-form-back" onClick={fecharSelecao}>
 
                                                 Cancelar
 

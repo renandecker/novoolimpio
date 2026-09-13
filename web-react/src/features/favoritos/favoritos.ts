@@ -17,3 +17,7 @@ export const listarFavoritos = async (page = 0, size = 10, busca?: string): Prom
             size, ...(busca ? {busca} : {})
         }
     })).data;
+
+export const removerFavorito = async (outcome: string): Promise<void> => {
+    await api.delete('/api/basico/favorito-usuario', {params: {outcome}});
+};

@@ -115,6 +115,20 @@
 
 .sidebar-search-result {
     font-size: 13px;
+    padding: 12px 14px;
+    margin: 5px 8px;
+    width: calc(100% - 16px);
+    border-radius: 8px;
+    line-height: 1.5;
+    gap: 12px;
+}
+
+.sidebar-search-result .sidebar-label {
+    line-height: 1.5;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: baseline;
 }
 
 .sidebar-search-parent {

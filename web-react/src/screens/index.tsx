@@ -1,8 +1,17 @@
 import React from 'react';
+export { default as AlunoAulasScreen } from '../features/configuracoes/aluno/AlunoAulasScreen.tsx';
+export { default as AlunoAulasTurmaScreen } from '../features/configuracoes/aluno/AlunoAulasTurmaScreen.tsx';
+export { default as AlunoAvaliacaoResponderScreen } from '../features/configuracoes/aluno/AlunoAvaliacaoResponderScreen.tsx';
+export { default as AlunoAvaliacoesScreen } from '../features/configuracoes/aluno/AlunoAvaliacoesScreen.tsx';
+export { default as AlunoBoletimScreen } from '../features/configuracoes/aluno/AlunoBoletimScreen.tsx';
+export { default as AlunoDashboardScreen } from '../features/configuracoes/aluno/AlunoDashboardScreen.tsx';
+export { default as AlunoFinanceiroScreen } from '../features/configuracoes/aluno/AlunoFinanceiroScreen.tsx';
+export { default as AlunoFrequenciaScreen } from '../features/configuracoes/aluno/AlunoFrequenciaScreen.tsx';
 export { default as AsaasClientesListScreen } from '../features/configuracoes/asaas/AsaasClientesListScreen.tsx';
 export { default as AsaasCobrancasListScreen } from '../features/configuracoes/asaas/AsaasCobrancasListScreen.tsx';
 export { default as AsaasParcelasListScreen } from '../features/configuracoes/asaas/AsaasParcelasListScreen.tsx';
 export { default as AuditoriaScreen } from '../features/configuracoes/auditoria/AuditoriaScreen.tsx';
+export { default as AulaAlunoScreen } from '../features/configuracoes/aula/AulaAlunoScreen.tsx';
 export { default as CadastroUsuarioScreen } from '../features/configuracoes/common/CadastroUsuarioScreen.tsx';
 export { default as CurriculoCampoListScreen } from '../features/configuracoes/curriculo/CurriculoCampoListScreen.tsx';
 export { default as CurriculoConfiguracaoListScreen } from '../features/configuracoes/curriculo/CurriculoConfiguracaoListScreen.tsx';

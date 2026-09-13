@@ -20,6 +20,7 @@ import {useAuth} from './auth';
 import type {ApiItem, SearchFilterRequest, FilterCondition, QueryOperation} from './types';
 import {STRING_OPERATIONS, NUMBER_OPERATIONS} from './types';
 import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from './theme';
+import {RowMenu, type RowMenuItem} from './RowMenu';
 
 const PREFERRED_LABELS = ['nome', 'descricao', 'razao_social', 'nome_fantasia', 'username', 'titulo', 'rotulo', 'sigla', 'sobrenome', 'login', 'uf', 'tema'];
 
@@ -84,11 +85,20 @@ export interface ModuleListExtraAction {
     onPress: (item: ApiItem) => void;
 }
 
+export interface ModuleListActionGroup {
+    icon: React.ReactNode;
+    className: string;
+    title?: string;
+    items: RowMenuItem[];
+    permission?: 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'EXECUTE';
+}
+
 export function ModuleList({
                                 path,
                                 title,
                                 params,
                                 extraActions,
+                                actionGroups,
                                 outcome: customOutcome,
                                 hideCreate = false,
                                 hideUpdate = false,
@@ -99,6 +109,7 @@ export function ModuleList({
     title?: string;
     params?: Record<string, string | number | boolean | undefined>;
     extraActions?: ModuleListExtraAction[];
+    actionGroups?: ModuleListActionGroup[];
     outcome?: string;
     hideCreate?: boolean;
     hideUpdate?: boolean;
@@ -319,6 +330,18 @@ export function ModuleList({
                                             >
                                                 <Text style={[styles.rowButtonText, isRemover && styles.dangerButtonSolidText]}>{action.icon ? `${action.icon} ` : ''}{action.title}</Text>
                                             </Pressable>
+                                        );
+                                    })}
+                                    {actionGroups?.map((group) => {
+                                        if (group.permission && !can(session, group.permission, outcome)) return null;
+                                        return (
+                                            <RowMenu
+                                                key={group.className}
+                                                icon={group.icon}
+                                                className={group.className}
+                                                title={group.title}
+                                                items={group.items}
+                                            />
                                         );
                                     })}
                                     {canUpdate && (
@@ -641,7 +664,12 @@ const styles = StyleSheet.create({
     },
     row: {
         paddingVertical: Spacing.md,
-        borderBottomWidth: 1,
+        paddingHorizontal: Spacing.md,
+        marginHorizontal: Spacing.lg,
+        marginVertical: Spacing.xs,
+        backgroundColor: Colors.bgSecondary,
+        borderRadius: BorderRadius.xl,
+        borderWidth: 1,
         borderColor: Colors.borderLight,
     },
     rowMain: {
@@ -662,14 +690,15 @@ const styles = StyleSheet.create({
     rowActions: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        marginTop: Spacing.xs,
+        marginTop: Spacing.sm,
+        gap: Spacing.sm,
     },
     rowButton: {
         backgroundColor: Colors.primary + '15',
         borderRadius: BorderRadius.md,
         paddingHorizontal: Spacing.md,
-        paddingVertical: Spacing.xs,
-        marginRight: Spacing.xs,
+        paddingVertical: Spacing.sm,
+        marginRight: Spacing.sm,
         marginTop: Spacing.xs,
     },
     dangerButton: {
@@ -900,7 +929,12 @@ const styles = StyleSheet.create({
         marginLeft: Spacing.md,
     },
     filterField: {
-        marginBottom: Spacing.md,
+        marginBottom: Spacing.xl,
+        backgroundColor: Colors.bgPrimary,
+        borderRadius: BorderRadius.xl,
+        padding: Spacing.md,
+        borderWidth: 1,
+        borderColor: Colors.borderLight,
     },
     filterRow: {
         flexDirection: 'column',

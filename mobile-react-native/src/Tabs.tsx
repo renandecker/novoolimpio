@@ -44,7 +44,7 @@ export function Tabs<T extends string = string>({tabs, initial}: TabsProps<T>) {
 const styles = StyleSheet.create({
     container: {flex: 1},
     tabsScroll: {flexGrow: 0, borderBottomWidth: 1, borderBottomColor: '#e0e0e0'},
-    tabsRow: {flexDirection: 'row', paddingHorizontal: 4},
+    tabsRow: {flexDirection: 'row', paddingHorizontal: 8, gap: 8},
     tab: {
         paddingHorizontal: 14,
         paddingVertical: 10,

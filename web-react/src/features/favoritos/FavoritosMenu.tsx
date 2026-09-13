@@ -148,9 +148,9 @@ export function FavoritosMenu() {
                                         className="favoritos-item"
                                         onClick={() => handleItemClick(item.outcome)}
                                     >
-                    <span className="favoritos-item-icon">
-                      <i className={item.icon} aria-hidden="true"/>
-                    </span>
+                                        <span className="favoritos-item-icon">
+                                            <i className={item.icon} aria-hidden="true"/>
+                                        </span>
                                         <span className="favoritos-item-nome">{item.nome}</span>
                                     </button>
                                 ))}

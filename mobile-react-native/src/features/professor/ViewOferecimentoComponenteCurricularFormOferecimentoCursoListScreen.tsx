@@ -5,6 +5,8 @@ import {DIA_AULA_SOURCE, DIA_AULA_COLUMNS, DIA_AULA_SEARCH} from '../../masterDe
 interface FormRouteParams {
     id?: string | number;
     entityId?: string | number;
+    /** IDs dos oferecimentos selecionados na listagem (ordem de edição), separados por vírgula. */
+    ordem?: string;
 }
 
 export default function ViewOferecimentoComponenteCurricularFormOferecimentoCursoListScreen({

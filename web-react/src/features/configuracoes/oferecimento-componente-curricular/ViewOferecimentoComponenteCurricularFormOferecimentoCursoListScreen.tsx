@@ -814,7 +814,21 @@ useEffect(() => {
 
                 const curso = detalhe.curso;
 
-                const ofs = detalhe.oferecimentos ?? [];
+                let ofs = detalhe.oferecimentos ?? [];
+
+                // "ordem" vem da tela de listagem quando o usuário escolhe oferecimentos
+                // (com ordem: inicio do oferecimento, listagem da tabela ou conforme seleção).
+                const ordemParam = searchParams.get('ordem');
+
+                if (ordemParam) {
+
+                    const idsOrdem = ordemParam.split(',').map(s => Number(s.trim())).filter(n => !Number.isNaN(n) && n > 0);
+
+                    const porId = new Map(ofs.map(o => [Number(o.id), o] as const));
+
+                    ofs = idsOrdem.map(oid => porId.get(oid)).filter((o): o is OferecimentoTurmaApi => o !== undefined);
+
+                }
 
                 const primeiro = ofs[0] ?? {};
 
@@ -1138,7 +1152,7 @@ useEffect(() => {
 
         })();
 
-    }, [emEdicao, id, curriculosQuery.isLoading, salasQuery.isLoading, componentesQuery.isLoading, curriculosQuery.data, salasQuery.data, componentesQuery.data]);
+    }, [emEdicao, id, searchParams, curriculosQuery.isLoading, salasQuery.isLoading, componentesQuery.isLoading, curriculosQuery.data, salasQuery.data, componentesQuery.data]);
 
 
 
