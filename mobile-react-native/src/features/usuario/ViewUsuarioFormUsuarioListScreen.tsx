@@ -117,26 +117,38 @@ export default function ViewUsuarioFormUsuarioListScreen({route}: {route?: any})
     });
     const upd=(k:string,v:string)=> setF(p=>({...p,[k]:v}));
 
-    const [enderecos,setEnderecos]=useState<Endereco[]>([]);
-    const [cepDraft,setCepDraft]=useState('');
-    const [cidadeDraft,setCidadeDraft]=useState('');
-    const [bairroDraft,setBairroDraft]=useState('');
-    const [logradouroDraft,setLogradouroDraft]=useState('');
-    const [numeroDraft,setNumeroDraft]=useState('');
-    const [complementoDraft,setComplementoDraft]=useState('');
+    // Endereço - layout fiel ao formPessoaFisica mobile (cep + busca/ajuste/novo + cidade/bairro/logradouro/numero/complemento)
+    const [cep,setCep]=useState('');
+    const [cidade,setCidade]=useState('');
+    const [bairro,setBairro]=useState('');
+    const [logradouro,setLogradouro]=useState('');
+    const [numero,setNumero]=useState('');
+    const [complemento,setComplemento]=useState('');
+    const [logradouroId,setLogradouroId]=useState<number|undefined>();
     const [buscandoCep,setBuscandoCep]=useState(false);
     const handleBuscarCep=async()=>{
+        const clean=cep.replace(/\D/g,'');
+        if(clean.length!==8){ Alert.alert('Aviso','Informe o CEP completo'); return; }
         setBuscandoCep(true);
-        const dados=await buscarCepViaCep(cepDraft);
-        setBuscandoCep(false);
-        if(dados){ if(dados.cidade) setCidadeDraft(dados.cidade); if(dados.bairro) setBairroDraft(dados.bairro); if(dados.logradouro) setLogradouroDraft(dados.logradouro); if(dados.cep) setCepDraft(dados.cep); }
-        else Alert.alert('CEP não encontrado','Verifique o CEP informado.');
+        try{
+            try{
+                const {data}=await api.get<any>(`/api/basico/logradouro/buscar-endereco-por-cep`,{params:{cep:clean}});
+                if(data?.logradouro){
+                    const l=data.logradouro;
+                    setLogradouro(String(l?.descricao ?? '')); setLogradouroId(l?.id);
+                    if(data?.bairro) setBairro(String((data.bairro as any).descricao ?? ''));
+                    if(data?.cidade) setCidade(String((data.cidade as any).nome ?? (data.cidade as any).cidadeEstado ?? ''));
+                    setCep(formatCep(String(l?.cep ?? clean)));
+                    return;
+                }
+            }catch{}
+            const dados=await buscarCepViaCep(clean);
+            if(dados){ if(dados.cidade) setCidade(dados.cidade); if(dados.bairro) setBairro(dados.bairro); if(dados.logradouro) setLogradouro(dados.logradouro); if(dados.cep) setCep(dados.cep); }
+            else Alert.alert('CEP não encontrado','Verifique o CEP informado.');
+        } finally { setBuscandoCep(false); }
     };
-    const addEndereco=()=>{
-        if(!cepDraft && !logradouroDraft){ Alert.alert('Informe CEP ou logradouro'); return; }
-        setEnderecos([...enderecos,{id:Date.now(), cep:cepDraft, cidade:cidadeDraft, bairro:bairroDraft, logradouro:logradouroDraft, numero:numeroDraft, complemento:complementoDraft}]);
-        setCepDraft(''); setCidadeDraft(''); setBairroDraft(''); setLogradouroDraft(''); setNumeroDraft(''); setComplementoDraft('');
-    };
+    const handleAjusteCep=()=>{ Alert.alert('Ajuste','Selecione cidade/bairro/logradouro nos campos abaixo'); };
+    const handleNovoCep=()=>{ setCep(''); setCidade(''); setBairro(''); setLogradouro(''); setNumero(''); setComplemento(''); setLogradouroId(undefined); };
 
     const [doc,setDoc]=useState<Record<string,string>>({qtdFilhosMenor14:'', ctps:'', serie:'', pis:'', dataEmissaoRg:'', orgaoEmissorRg:'', tituloEleitor:'', zona:'', secao:'', carteiraReservista:''});
     const updDoc=(k:string,v:string)=> setDoc(p=>({...p,[k]:v}));
@@ -217,6 +229,28 @@ export default function ViewUsuarioFormUsuarioListScreen({route}: {route?: any})
                     estadoCivilId:pf?.estadoCivilId!=null?String(pf.estadoCivilId):'', escolaridadeId:pf?.escolaridadeId!=null?String(pf.escolaridadeId):'',
                 });
                 setObservacao(String(pes?.observacao??''));
+                // Endereco - carrega dados da edição fiel ao formPessoaFisica (logradouroController)
+                if(pes){
+                    const cepVal=String((pes as any)?.cep ?? ''), numVal=String((pes as any)?.numero ?? ''), compVal=String((pes as any)?.complemento ?? '');
+                    const idLog=(pes as any)?.id_logradouro ?? (pes as any)?.logradouroId;
+                    setNumero(numVal); setComplemento(compVal);
+                    if(idLog){
+                        try{
+                            const logRes=(await api.get<Record<string, unknown>>(`/api/basico/logradouro/${idLog}`)).data;
+                            setLogradouroId(logRes.id as number);
+                            setLogradouro(String((logRes as any)?.descricao ?? ''));
+                            setCep(String((logRes as any)?.cep ?? cepVal) ? formatCep(String((logRes as any)?.cep ?? cepVal)) : formatCep(cepVal));
+                            if((logRes as any)?.id_bairro){
+                                const bRes=(await api.get<Record<string, unknown>>(`/api/basico/bairro/${(logRes as any).id_bairro}`)).data;
+                                setBairro(String((bRes as any)?.descricao ?? ''));
+                                if((bRes as any)?.cidadeId){
+                                    const cRes=(await api.get<Record<string, unknown>>(`/api/basico/cidade/${(bRes as any).cidadeId}`)).data;
+                                    setCidade(String((cRes as any)?.cidadeEstado ?? (cRes as any)?.nome ?? ''));
+                                }
+                            }
+                        }catch{ setCep(cepVal ? formatCep(cepVal) : ''); }
+                    } else if(cepVal) setCep(formatCep(cepVal));
+                }
 
                 try{
                     const apply = (arr:any[], all:ApiItem[]) => { const ids=new Set(arr.map((x:any)=>String(x.id ?? x))); return all.filter(a=>ids.has(String((a as any).id))); };
@@ -267,7 +301,7 @@ export default function ViewUsuarioFormUsuarioListScreen({route}: {route?: any})
             const novoPfId=(resPf.data as Record<string,unknown>)?.id ?? pfId;
 
             const pessoaBody:Record<string,unknown>={...(pessoaOriginal||{}), email:f.email||null, telefone:f.telefoneResidencial||null, celular:f.celular||null,
-                observacao:observacao||null, cep:enderecos[0]?.cep||null, numero:enderecos[0]?.numero||null, complemento:enderecos[0]?.complemento||null };
+                observacao:observacao||null, cep:cep||null, numero:numero||null, complemento:complemento||null, logradouroId:logradouroId||null };
             let novoPesId=pessoaId;
             if(pessoaId) await api.put(`/api/basico/pessoa/${pessoaId}`, pessoaBody);
             else novoPesId=((await api.post('/api/basico/pessoa', pessoaBody)).data as Record<string,unknown>)?.id as number|undefined;
@@ -333,7 +367,6 @@ export default function ViewUsuarioFormUsuarioListScreen({route}: {route?: any})
                             <View style={s.fieldHalf}><Field label="Telefone Residencial" value={f.telefoneResidencial} onChange={v=>upd('telefoneResidencial',formatPhone(v))} placeholder="(99) 9999-9999" keyboardType="phone-pad" /></View>
                             <View style={s.fieldHalf}><Field label="Celular" value={f.celular} onChange={v=>upd('celular',formatPhone(v))} placeholder="(99) 99999-9999" keyboardType="phone-pad" /></View>
                         </View>
-                        <Text style={s.hint}>Preencha Telefone OU Celular</Text>
                         <View style={s.formRow}>
                             <View style={s.fieldHalf}><Field label="Nome Referência" required value={f.nomeReferencia} onChange={v=>upd('nomeReferencia',v)} placeholder="Nome referência" /></View>
                             <View style={s.fieldHalf}><Field label="Telefone Referência" value={f.telefoneReferencia} onChange={v=>upd('telefoneReferencia',formatPhone(v))} placeholder="(99) 9999-9999" keyboardType="phone-pad" /></View>
@@ -360,34 +393,20 @@ export default function ViewUsuarioFormUsuarioListScreen({route}: {route?: any})
                 {activeTab==='endereco' && (
                     <View style={s.card}>
                         <Text style={s.sectionTitle}>Endereço</Text>
-<View style={s.fieldFull}>
-                                <Text style={s.label}>CEP *</Text>
-                                <View style={{flexDirection:'row', gap:8, alignItems:'center'}}>
-                                    <TextInput style={[s.input, {flex:1}]} value={cepDraft} onChangeText={v=>setCepDraft(formatCep(v))} placeholder="99.999-999" placeholderTextColor={Colors.textPlaceholder} keyboardType="numeric" maxLength={9}/>
-                                    <Pressable style={[s.btnSmall, s.btnYellow]} onPress={handleBuscarCep} disabled={buscandoCep}><Text style={s.btnSmallText}>{buscandoCep?'...':'Busca'}</Text></Pressable>
-                                </View>
+                        <View style={s.fieldFull}>
+                            <Text style={s.label}>CEP</Text>
+                            <View style={{flexDirection:'row', gap:8, alignItems:'center'}}>
+                                <TextInput style={[s.input, {flex:1}]} value={cep} onChangeText={v=>setCep(formatCep(v))} placeholder="99.999-999" placeholderTextColor={Colors.textPlaceholder} keyboardType="numeric" maxLength={9}/>
+                                <Pressable style={[s.btnSmall, s.btnYellow]} onPress={handleBuscarCep} disabled={buscandoCep}><Text style={s.btnSmallText}>{buscandoCep?'...':'Busca'}</Text></Pressable>
+                                <Pressable style={[s.btnSmall, s.btnGreen]} onPress={handleAjusteCep}><Text style={s.btnSmallText}>Ajuste</Text></Pressable>
+                                <Pressable style={[s.btnSmall, s.btnRed]} onPress={handleNovoCep}><Text style={s.btnSmallText}>Novo</Text></Pressable>
                             </View>
-                        <View style={s.fieldFull}><Field label="Logradouro" required value={logradouroDraft} onChange={setLogradouroDraft} placeholder="Logradouro" /></View>
-                        <View style={s.formRow}>
-                            <View style={s.fieldHalf}><Field label="Cidade" required value={cidadeDraft} onChange={setCidadeDraft} placeholder="Cidade" /></View>
-                            <View style={s.fieldHalf}><Field label="Bairro" required value={bairroDraft} onChange={setBairroDraft} placeholder="Bairro" /></View>
                         </View>
-                        <View style={s.formRow}>
-                            <View style={s.fieldHalf}><Field label="Número" required value={numeroDraft} onChange={setNumeroDraft} placeholder="Número" keyboardType="numeric" /></View>
-                        </View>
-                        <View style={s.fieldFull}><Text style={s.label}>Complemento</Text><TextInput style={[s.input,{height:80, textAlignVertical:'top'}]} value={complementoDraft} onChangeText={setComplementoDraft} placeholder="Complemento" multiline placeholderTextColor={Colors.textPlaceholder}/></View>
-                        <Pressable style={[s.btn, s.btnGreen]} onPress={addEndereco}><Text style={s.btnText}>Adicionar endereço</Text></Pressable>
-                        {enderecos.length>0 && (
-                            <View style={{marginTop:12, gap:8}}>
-                                {enderecos.map((e,i)=>(
-                                    <View key={String(e.id??i)} style={s.addrCard}>
-                                        <Text style={s.addrText}>{e.cep} — {e.logradouro}, {e.numero} — {e.bairro}, {e.cidade}</Text>
-                                        <Text style={s.addrSub}>{e.complemento}</Text>
-                                        <Pressable onPress={()=>setEnderecos(enderecos.filter((_,idx)=>idx!==i))} style={s.addrRemove}><Text style={s.addrRemoveText}>Remover</Text></Pressable>
-                                    </View>
-                                ))}
-                            </View>
-                        )}
+                        <View style={s.fieldFull}><Field label="Cidade" required value={cidade} onChange={setCidade} placeholder="Digite 3 letras..." /></View>
+                        <View style={s.fieldFull}><Field label="Bairro" required value={bairro} onChange={setBairro} placeholder="Digite 3 letras..." /></View>
+                        <View style={s.fieldFull}><Field label="Logradouro" required value={logradouro} onChange={setLogradouro} placeholder="Digite 3 letras..." /></View>
+                        <View style={s.fieldFull}><Field label="Número" required value={numero} onChange={setNumero} placeholder="Número" keyboardType="numeric" /></View>
+                        <View style={s.fieldFull}><Text style={s.label}>Complemento</Text><TextInput style={[s.input,{height:80, textAlignVertical:'top'}]} value={complemento} onChangeText={setComplemento} placeholder="Complemento" multiline placeholderTextColor={Colors.textPlaceholder}/></View>
                     </View>
                 )}
 
@@ -533,6 +552,7 @@ const s=StyleSheet.create({
     btnSmallText:{color:Colors.textWhite, fontWeight:Typography.weights.bold, fontSize:12},
     btn:{borderRadius:BorderRadius.lg, paddingHorizontal:18, paddingVertical:12, alignItems:'center', minWidth:120, ...Shadows.small},
     btnGreen:{backgroundColor:Colors.btnGreen},
+    btnRed:{backgroundColor:Colors.error},
     btnBlue:{backgroundColor:Colors.primary},
     btnText:{color:Colors.textWhite, fontWeight:Typography.weights.bold, fontSize:13},
     addrCard:{borderWidth:1, borderColor:Colors.borderLight, borderRadius:BorderRadius.md, padding:10, backgroundColor:'#fafafa'},

@@ -25,7 +25,7 @@ final class PasswordHasher {
     static boolean matches(String password, String stored) {
         if (stored != null && stored.startsWith(PLAIN_PREFIX)) {
             String expected = stored.substring(PLAIN_PREFIX.length());
-            return expected.equals(stripNonDigits(password));
+            return expected.equals(password);
         }
         try {
             String[] parts = stored.split("\\$");

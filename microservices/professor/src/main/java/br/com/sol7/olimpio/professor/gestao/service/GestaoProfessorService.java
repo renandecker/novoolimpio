@@ -193,8 +193,7 @@ public class GestaoProfessorService {
             SELECT p.id
             FROM edc_professor p
             INNER JOIN bas_usuario u ON u.id_pessoa = p.id_pessoa
-            INNER JOIN bas_login l ON l.id_usuario = u.id
-            WHERE lower(l.username) = lower(?1) AND p.fl_ativo = true
+            WHERE lower(u.login) = lower(?1) AND p.fl_ativo = true
             LIMIT 1
             """;
         return Uni.createFrom().completionStage(() -> java.util.concurrent.CompletableFuture.supplyAsync(() -> {

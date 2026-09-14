@@ -6,8 +6,10 @@ import {Tabs} from '../../shared/components/Tabs';
 import {MasterDetail} from '../../shared/components/MasterDetail';
 import {BooleanField} from '../../shared/components/BooleanField';
 import {Base64FileUpload} from '../../shared/components/Base64FileUpload';
-import type {Endereco} from '../../shared/components/EnderecoForm';
+import {AutoComplete, AutoCompleteOption} from '../../shared/components/AutoComplete';
 import type {ApiItem} from '../../shared/types/index';
+
+function formatCep(v: string){ const d=v.replace(/\D/g,'').slice(0,8); if(d.length<=5) return d; return `${d.slice(0,5)}-${d.slice(5)}`; }
 import {api} from '../../shared/services/api';
 import {
     PERFIL_SOURCE, PERFIL_COLUMNS, PERFIL_SEARCH,
@@ -24,15 +26,7 @@ const asOptions = (arr: Array<{id: number; descricao?: string; nome?: string}>):
 // ── helpers ──────────────────────────────────────────────────────────
 const requiredMark = <span style={{color:'#C90000',marginLeft:4}}>*</span>;
 
-const sectionTitleStyle: React.CSSProperties = {
-    fontSize: '13px',
-    fontWeight: 700,
-    color: '#2f333b',
-    marginBottom: '12px',
-    marginTop: '16px',
-    letterSpacing: '0.5px',
-    textTransform: 'uppercase' as const,
-};
+
 
 // ── Documento upload card ────────────────────────────────────────────
 function DocCard({label, required, value, onChange}:{label:string; required?:boolean; value:string; onChange:(v:string)=>void}){
@@ -60,8 +54,57 @@ export default function ViewUsuarioFormUsuarioListScreen(){
     });
     const upd = (k:string,v:string)=> setF(p=>({...p,[k]:v}));
 
-    // ── Endereço ─────────────────────────────────────────────────────
-    const [enderecos,setEnderecos]=useState<Endereco[]>([]);
+    // ── Endereço (layout fiel ao formPessoaFisica: cep + busca/ajuste/novo + cidade/bairro/logradouro/numero/complemento) ──
+    const [cep,setCep]=useState('');
+    const [cidadeOpt,setCidadeOpt]=useState<AutoCompleteOption|null>(null);
+    const [bairroOpt,setBairroOpt]=useState<AutoCompleteOption|null>(null);
+    const [logradouroOpt,setLogradouroOpt]=useState<AutoCompleteOption|null>(null);
+    const [numero,setNumero]=useState('');
+    const [complemento,setComplemento]=useState('');
+    const [logradouroId,setLogradouroId]=useState<number|undefined>();
+    const [buscandoCep,setBuscandoCep]=useState(false);
+    const [enderecoAviso,setEnderecoAviso]=useState('');
+
+    const fetchCidadesLog = async (q:string):Promise<AutoCompleteOption[]> => {
+        if(!q) return []; const {data}=await api.get<any[]>(`/api/basico/cidade/autoComplete`,{params:{query:q}}); return data.map((e:any)=>({id:e.id, label:e.cidadeEstado ?? e.nome}));
+    };
+    const fetchBairros = async (q:string):Promise<AutoCompleteOption[]> => {
+        const params:any={query:q}; if(cidadeOpt?.id) params.cidadeId=cidadeOpt.id;
+        const {data}=await api.get<any[]>(`/api/basico/bairro/auto-complete`,{params}); return data.map((e:any)=>({id:e.id, label:e.descricao}));
+    };
+    const fetchLogradouros = async (q:string):Promise<AutoCompleteOption[]> => {
+        const params:any={query:q}; if(bairroOpt?.id) params.bairroId=bairroOpt.id;
+        const {data}=await api.get<any[]>(`/api/basico/logradouro/auto-complete`,{params}); return data.map((e:any)=>({id:e.id, label:e.descricao}));
+    };
+    const buscarCep = async () => {
+        const clean = cep.replace(/\D/g,'');
+        if(clean.length!==8){ setEnderecoAviso('CEP deve ter 8 dígitos'); return; }
+        setBuscandoCep(true); setEnderecoAviso('');
+        try{
+            try{
+                const {data}=await api.get<any>(`/api/basico/logradouro/buscar-endereco-por-cep`,{params:{cep:clean}});
+                if(data?.logradouro){
+                    const l=data.logradouro;
+                    setLogradouroOpt({id:l.id, label:l.descricao}); setLogradouroId(l.id);
+                    if(data.bairro) setBairroOpt({id:data.bairro.id, label:data.bairro.descricao});
+                    if(data.cidade) setCidadeOpt({id:data.cidade.id, label:data.cidade.nome});
+                    setCep(formatCep(l.cep ?? clean));
+                }
+            }catch{
+                const resp = await fetch(`https://viacep.com.br/ws/${clean}/json/`).then(r=>r.json());
+                if(!resp.erro){
+                    const cidades = await fetchCidadesLog(resp.localidade);
+                    const found = cidades.find(c=>c.label.toLowerCase().includes(resp.localidade.toLowerCase()));
+                    if(found) setCidadeOpt(found);
+                    setBairroOpt(resp.bairro ? {id: -1, label: resp.bairro}: null);
+                    setLogradouroOpt(resp.logradouro ? {id: -1, label: resp.logradouro}: null);
+                    setCep(formatCep(resp.cep ?? clean));
+                } else setEnderecoAviso('CEP não encontrado');
+            }
+        } finally { setBuscandoCep(false); }
+    };
+    useEffect(()=>{ if(cidadeOpt) setLogradouroId(undefined); },[cidadeOpt?.id]);
+    useEffect(()=>{ if(bairroOpt) setLogradouroId(undefined); },[bairroOpt?.id]);
 
     // ── Documentos (campos) ──────────────────────────────────────────
     const [doc,setDoc]=useState<Record<string,string>>({
@@ -187,27 +230,27 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                     estadoCivilId:pf?.estadoCivilId!=null?String(pf.estadoCivilId):'', escolaridadeId:pf?.escolaridadeId!=null?String(pf.escolaridadeId):'',
                 });
                 setObservacao(str(pes?.observacao));
-                // endereço
+                // Endereco - carrega dados da edição fiel ao formPessoaFisica (logradouroController)
                 if(pes){
-                    const cep=str(pes.cep), complemento=str(pes.complemento), numero=str(pes.numero);
+                    const cepVal=str(pes.cep), compVal=str(pes.complemento), numVal=str(pes.numero);
                     const idLog = (pes as any).id_logradouro ?? (pes as any).logradouroId as number|undefined;
-                    const enderecosCarregados:Endereco[]=[];
+                    setNumero(numVal); setComplemento(compVal);
                     if(idLog){
                         try{
                             const logRes=(await api.get<Record<string,unknown>>(`/api/basico/logradouro/${idLog}`)).data;
-                            let bairroDesc='',cidadeDesc='';
+                            setLogradouroId(logRes.id as number);
+                            setLogradouroOpt({id: logRes.id as number, label: str(logRes.descricao)});
+                            setCep(str(logRes.cep) ? formatCep(str(logRes.cep)) : formatCep(cepVal));
                             if(logRes.id_bairro){
                                 const bRes=(await api.get<Record<string,unknown>>(`/api/basico/bairro/${logRes.id_bairro}`)).data;
-                                bairroDesc=str(bRes.descricao);
+                                setBairroOpt({id: bRes.id as number, label: str(bRes.descricao)});
                                 if((bRes as any).cidadeId){
                                     const cRes=(await api.get<Record<string,unknown>>(`/api/basico/cidade/${(bRes as any).cidadeId}`)).data;
-                                    cidadeDesc=str((cRes as any).nome ?? cRes.descricao);
+                                    setCidadeOpt({id: cRes.id as number, label: str((cRes as any).cidadeEstado ?? (cRes as any).nome ?? cRes.descricao)});
                                 }
                             }
-                            enderecosCarregados.push({id:idLog, cep:str(logRes.cep)||cep, logradouro:str(logRes.descricao), bairro:bairroDesc, cidade:cidadeDesc, numero, complemento});
-                        }catch{ if(cep||numero||complemento) enderecosCarregados.push({cep,cidade:'',bairro:'',logradouro:'',numero,complemento});}
-                    } else if(cep||numero||complemento) enderecosCarregados.push({cep,cidade:'',bairro:'',logradouro:'',numero,complemento});
-                    setEnderecos(enderecosCarregados);
+                        }catch{ setCep(formatCep(cepVal)); }
+                    } else if(cepVal) setCep(formatCep(cepVal));
                 }
                 // m2m – perfis, agendas, unidades
                 try{
@@ -259,7 +302,7 @@ export default function ViewUsuarioFormUsuarioListScreen(){
             const novoPfId=(resPf.data as Record<string,unknown>)?.id ?? pfId;
 
             const pessoaBody:Record<string,unknown>={...semId(pessoaOriginal), email:f.email||null, telefone:f.telefoneResidencial||null, celular:f.celular||null,
-                observacao:observacao||null, cep:enderecos[0]?.cep||null, numero:enderecos[0]?.numero||null, complemento:enderecos[0]?.complemento||null };
+                observacao:observacao||null, cep:cep||null, numero:numero||null, complemento:complemento||null, logradouroId:logradouroId||null };
             let novoPesId=pessoaId;
             if(pessoaId) await api.put(`/api/basico/pessoa/${pessoaId}`, pessoaBody);
             else novoPesId=((await api.post('/api/basico/pessoa', pessoaBody)).data as Record<string,unknown>)?.id as number|undefined;
@@ -304,7 +347,22 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                 <input className="form-input" value={f.nomePai} onChange={e=>upd('nomePai',e.target.value)} placeholder="Nome do pai" /></label>
             <label className="form-field"><span className="form-label">Nome da Mãe {requiredMark}</span>
                 <input className="form-input" value={f.nomeMae} onChange={e=>upd('nomeMae',e.target.value)} placeholder="Nome da mãe" /></label>
-
+            <label className="form-field"><span className="form-label">Gênero</span>
+                <select className="form-input form-select" value={f.generoId} onChange={e=>upd('generoId',e.target.value)}>
+                    <option value="">-- Selecione --</option>{generoOptions.map(o=> <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select></label>
+            <label className="form-field"><span className="form-label">Etnia</span>
+                <select className="form-input form-select" value={f.etniaId} onChange={e=>upd('etniaId',e.target.value)}>
+                    <option value="">-- Selecione --</option>{etniaOptions.map(o=> <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select></label>
+            <label className="form-field"><span className="form-label">Estado Civil {requiredMark}</span>
+                <select className="form-input form-select" value={f.estadoCivilId} onChange={e=>upd('estadoCivilId',e.target.value)}>
+                    <option value="">-- Selecione --</option>{estadoCivilOptions.map(o=> <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select></label>
+            <label className="form-field"><span className="form-label">Escolaridade {requiredMark}</span>
+                <select className="form-input form-select" value={f.escolaridadeId} onChange={e=>upd('escolaridadeId',e.target.value)}>
+                    <option value="">-- Selecione --</option>{escolaridadeOptions.map(o=> <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select></label>
             {/* Contato */}
             <div style={{gridColumn:'1 / -1', borderTop:'1px solid #e6e6e6', marginTop:8, paddingTop:12, fontWeight:700, fontSize:13, color:'#2f333b'}}>Contato {requiredMark}</div>
             <label className="form-field"><span className="form-label">Telefone Residencial</span>
@@ -327,110 +385,40 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                 <input className="form-input" value={f.celularReferencia} onChange={e=>upd('celularReferencia',formatPhone(e.target.value))} placeholder="(99) 99999-9999" /></label>
             <label className="form-field"><span className="form-label">Celular Referência 2</span>
                 <input className="form-input" value={f.celularReferencia2} onChange={e=>upd('celularReferencia2',formatPhone(e.target.value))} placeholder="(99) 99999-9999" /></label>
-
-            <label className="form-field"><span className="form-label">Gênero</span>
-                <select className="form-input form-select" value={f.generoId} onChange={e=>upd('generoId',e.target.value)}>
-                    <option value="">-- Selecione --</option>{generoOptions.map(o=> <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select></label>
-            <label className="form-field"><span className="form-label">Etnia</span>
-                <select className="form-input form-select" value={f.etniaId} onChange={e=>upd('etniaId',e.target.value)}>
-                    <option value="">-- Selecione --</option>{etniaOptions.map(o=> <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select></label>
-            <label className="form-field"><span className="form-label">Estado Civil {requiredMark}</span>
-                <select className="form-input form-select" value={f.estadoCivilId} onChange={e=>upd('estadoCivilId',e.target.value)}>
-                    <option value="">-- Selecione --</option>{estadoCivilOptions.map(o=> <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select></label>
-            <label className="form-field"><span className="form-label">Escolaridade {requiredMark}</span>
-                <select className="form-input form-select" value={f.escolaridadeId} onChange={e=>upd('escolaridadeId',e.target.value)}>
-                    <option value="">-- Selecione --</option>{escolaridadeOptions.map(o=> <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select></label>
         </div>
     );
 
     const tabEndereco = (
         <div className="form-grid">
-            <div style={sectionTitleStyle}>Endereço Principal</div>
-            <label className="form-field" style={{gridColumn: '1 / -1'}}>
-                <span className="form-label">CEP</span>
-                <div style={{display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'nowrap', width: '100%'}}>
-                    <input
-                        className="form-input"
-                        placeholder="99.999-999"
-                        style={{width: '120px', flexShrink: 0}}
-                        maxLength={9}
-                        value={enderecos[0]?.cep ?? ''}
-                        onChange={(event) => setEnderecos([{...enderecos[0], cep: event.target.value}])}
-                    />
-                    <button type="button" className="btnyellow" onClick={async () => {
-                        const cep = (enderecos[0]?.cep ?? '').replace(/\D/g, '');
-                        if (cep.length === 8) {
-                            try {
-                                const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-                                const data = await res.json();
-                                if (!data.erro) {
-                                    setEnderecos([{
-                                        ...enderecos[0],
-                                        cep: data.cep ? `${data.cep.slice(0,5)}-${data.cep.slice(5)}` : '',
-                                        cidade: data.localidade ?? '',
-                                        bairro: data.bairro ?? '',
-                                        logradouro: data.logradouro ?? '',
-                                    }]);
-                                }
-                            } catch {}
-                        }
-                    }}>
-                        Buscar
-                    </button>
+            <label className="form-field" style={{gridColumn: '1 / -1'}}><span className="form-label">CEP</span>
+                <div style={{display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'nowrap'}}>
+                    <input className="form-input" placeholder="99.999-999" style={{width:'120px', flexShrink: 0}} maxLength={9} value={cep} onChange={e=>setCep(formatCep(e.target.value))} />
+                    <button type="button" className="btnyellow" disabled={buscandoCep} onClick={buscarCep}>{buscandoCep?'Buscando...':'Busca'}</button>
+                    <button type="button" className="btngreen" onClick={()=>{ setEnderecoAviso('Ajuste - selecione cidade/bairro/logradouro nos campos abaixo'); }}>Ajuste</button>
+                    <button type="button" className="btnstop" onClick={()=>{ setCep(''); setCidadeOpt(null); setBairroOpt(null); setLogradouroOpt(null); setNumero(''); setComplemento(''); setLogradouroId(undefined);}}>Novo</button>
                 </div>
+                {enderecoAviso && <small style={{color:'#c0392b'}}>{enderecoAviso}</small>}
             </label>
             <label className="form-field" style={{gridColumn: '1 / -1'}}>
                 <span className="form-label">Cidade</span>
-                <input
-                    className="form-input"
-                    placeholder="Cidade"
-                    value={enderecos[0]?.cidade ?? ''}
-                    onChange={(event) => setEnderecos([{...enderecos[0], cidade: event.target.value}])}
-                />
+                <div>
+                    <AutoComplete placeholder="Digite 3 letras..." value={cidadeOpt} onChange={setCidadeOpt} fetchOptions={fetchCidadesLog} />
+                </div>
             </label>
             <label className="form-field" style={{gridColumn: '1 / -1'}}>
                 <span className="form-label">Bairro</span>
-                <input
-                    className="form-input"
-                    placeholder="Bairro"
-                    value={enderecos[0]?.bairro ?? ''}
-                    onChange={(event) => setEnderecos([{...enderecos[0], bairro: event.target.value}])}
-                />
+                <div>
+                    <AutoComplete placeholder="Digite 3 letras..." value={bairroOpt} onChange={setBairroOpt} fetchOptions={fetchBairros} />
+                </div>
             </label>
             <label className="form-field" style={{gridColumn: '1 / -1'}}>
                 <span className="form-label">Logradouro</span>
-                <input
-                    className="form-input"
-                    placeholder="Logradouro"
-                    value={enderecos[0]?.logradouro ?? ''}
-                    onChange={(event) => setEnderecos([{...enderecos[0], logradouro: event.target.value}])}
-                />
+                <div>
+                    <AutoComplete placeholder="Digite 3 letras..." value={logradouroOpt} onChange={o=>{ setLogradouroOpt(o); if(o) setLogradouroId(o.id);}} fetchOptions={fetchLogradouros} />
+                </div>
             </label>
-            <label className="form-field" style={{gridColumn: '1 / -1'}}>
-                <span className="form-label">Número</span>
-                <input
-                    className="form-input"
-                    type="number"
-                    placeholder="Número"
-                    value={enderecos[0]?.numero ?? ''}
-                    onChange={(event) => setEnderecos([{...enderecos[0], numero: event.target.value}])}
-                />
-            </label>
-            <label className="form-field" style={{gridColumn: '1 / -1'}}>
-                <span className="form-label">Complemento</span>
-                <textarea
-                    className="form-input"
-                    placeholder="Complemento"
-                    rows={3}
-                    style={{minHeight: '80px'}}
-                    value={enderecos[0]?.complemento ?? ''}
-                    onChange={(event) => setEnderecos([{...enderecos[0], complemento: event.target.value}])}
-                />
-            </label>
+            <label className="form-field" style={{gridColumn: '1 / -1'}}><span className="form-label">Número *</span><input className="form-input" placeholder="Número" value={numero} onChange={e=>setNumero(e.target.value)}/></label>
+            <label className="form-field" style={{gridColumn: '1 / -1'}}><span className="form-label">Complemento</span><textarea className="form-input" placeholder="Complemento" rows={3} style={{minHeight:'80px'}} value={complemento} onChange={e=>setComplemento(e.target.value)}/></label>
         </div>
     );
 

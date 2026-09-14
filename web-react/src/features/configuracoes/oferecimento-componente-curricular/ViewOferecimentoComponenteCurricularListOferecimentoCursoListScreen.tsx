@@ -443,7 +443,9 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
 
                                 ))}
 
-                                <th className="col-actions">Ações</th>
+                                <th className="col-actions">Relatórios</th>
+                            <th className="col-actions">Editar</th>
+                            <th className="col-actions">Remover</th>
 
                             </tr>
 
@@ -561,53 +563,38 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
 
                                             ))}
 
-                                            <td className="col-actions">
-
-                                                <div className="row-actions-menu">
-
-                                                    {acessoRelatorios && (
-
-                                                        <RowMenu icon={<i className="fa fa-info-circle"/>}
-
-                                                                 className="btnyellow" title="Relatórios"
-
-                                                                 items={relatoriosItems}/>
-
-                                                    )}
-
-                                                    {acessoEditar && (
-
-                                                        <>
-
-                                                            <RowMenu icon={<i className="fa fa-edit"/>}
-
-                                                                     className="btnblue" title="Selecionar Oferecimentos para Editar"
-
-                                                                     items={selecionarItems}/>
-
-                                                            <RowMenu icon={<i className="fa fa-pencil"/>}
-
-                                                                     className="btngreen" title="Editar Todos"
-
-                                                                     items={editarTodosItems}/>
-
-                                                        </>
-
-                                                    )}
-
-                                                    {acessoRemover && (
-
-                                                        <RowMenu icon={<i className="fa fa-trash"/>}
-
-                                                                 className="btnred" title="Remover"
-
-                                                                 items={removerItems}/>
-
-                                                    )}
-
-                                                </div>
-
-                                            </td>
+                                             <td className="col-actions">
+                                                 <div className="row-actions-menu">
+                                                     {acessoRelatorios && (
+                                                         <RowMenu icon={<i className="fa fa-info-circle"/>}
+                                                                  className="btnyellow" title="Relatórios"
+                                                                  items={relatoriosItems}/>
+                                                     )}
+                                                 </div>
+                                             </td>
+                                             <td className="col-actions">
+                                                 <div className="row-actions-menu">
+                                                     {acessoEditar && (
+                                                         <>
+                                                             <RowMenu icon={<i className="fa fa-edit"/>}
+                                                                      className="btnblue" title="Selecionar Oferecimentos para Editar"
+                                                                      items={selecionarItems}/>
+                                                             <RowMenu icon={<i className="fa fa-pencil"/>}
+                                                                      className="btngreen" title="Editar Todos"
+                                                                      items={editarTodosItems}/>
+                                                         </>
+                                                     )}
+                                                 </div>
+                                             </td>
+                                             <td className="col-actions">
+                                                 <div className="row-actions-menu">
+                                                     {acessoRemover && (
+                                                         <RowMenu icon={<i className="fa fa-trash"/>}
+                                                                  className="btnred" title="Remover"
+                                                                  items={removerItems}/>
+                                                     )}
+                                                 </div>
+                                             </td>
 
                                         </tr>
 

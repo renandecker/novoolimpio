@@ -481,7 +481,9 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
 
                                 ))}
 
-                                <th className="col-actions">Ações</th>
+                                <th className="col-actions">Relatórios</th>
+                            <th className="col-actions">Editar</th>
+                            <th className="col-actions">Remover</th>
 
                             </tr>
 
@@ -617,43 +619,33 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
 
                                             ))}
 
-                                            <td className="col-actions">
-
-                                                <div className="row-actions-menu">
-
-                                                    {acessoRelatorios && (
-
-                                                        <RowMenu icon={<i className="fa fa-info-circle"/>}
-
-                                                                 className="btnyellow" title="Relatórios"
-
-                                                                 items={relatoriosItems}/>
-
-                                                    )}
-
-                                                    {acessoEditar && (
-
-                                                        <RowMenu icon={<i className="fa fa-pencil"/>}
-
-                                                                 className="btngreen" title="Editar"
-
-                                                                 items={editarItems}/>
-
-                                                    )}
-
-                                                    {acessoRemover && (
-
-                                                        <RowMenu icon={<i className="fa fa-trash"/>}
-
-                                                                 className="btnred" title="Remover"
-
-                                                                 items={removerItems}/>
-
-                                                    )}
-
-                                                </div>
-
-                                            </td>
+                                             <td className="col-actions">
+                                                 <div className="row-actions-menu">
+                                                     {acessoRelatorios && (
+                                                         <RowMenu icon={<i className="fa fa-info-circle"/>}
+                                                                  className="btnyellow" title="Relatórios"
+                                                                  items={relatoriosItems}/>
+                                                     )}
+                                                 </div>
+                                             </td>
+                                             <td className="col-actions">
+                                                 <div className="row-actions-menu">
+                                                     {acessoEditar && (
+                                                         <RowMenu icon={<i className="fa fa-pencil"/>}
+                                                                  className="btngreen" title="Editar"
+                                                                  items={editarItems}/>
+                                                     )}
+                                                 </div>
+                                             </td>
+                                             <td className="col-actions">
+                                                 <div className="row-actions-menu">
+                                                     {acessoRemover && (
+                                                         <RowMenu icon={<i className="fa fa-trash"/>}
+                                                                  className="btnred" title="Remover"
+                                                                  items={removerItems}/>
+                                                     )}
+                                                 </div>
+                                             </td>
 
                                         </tr>,
 
@@ -661,7 +653,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
 
                                             <tr key={`${id}-detail`} className="row-detail">
 
-                                                <td colSpan={OFERECIMENTO_COLUMNS.length + 1}>
+                                                 <td colSpan={OFERECIMENTO_COLUMNS.length + 3}>
 
                                                     <div className="master-detail-content">
 
@@ -745,7 +737,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
 
                             <tr>
 
-                                <td colSpan={OFERECIMENTO_COLUMNS.length + 1} className="data-table-paginator">
+                                 <td colSpan={OFERECIMENTO_COLUMNS.length + 3} className="data-table-paginator">
 
                                     <button onClick={() => setPage(current => Math.max(0, current - 1))} disabled={page === 0 || q.isFetching}>
 
