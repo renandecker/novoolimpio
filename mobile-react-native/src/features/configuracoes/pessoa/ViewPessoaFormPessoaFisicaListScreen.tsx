@@ -1,9 +1,11 @@
 import React, {useEffect, useState} from 'react';
+import {Alert} from 'react-native';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import {FormLayout, FormTabConfig} from '../FormLayout';
 import {api} from '../api';
 
 const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
+const formatCep = (v: string): string => { const d = v.replace(/\D/g, '').slice(0, 8); if (d.length <= 5) return d; return `${d.slice(0, 5)}-${d.slice(5)}`; };
 const toDateInput = (v: unknown): string => {
     if (!v) return '';
     const d = new Date(v as string);
@@ -20,6 +22,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
     const idParam = route.params?.id;
 
     const [initialValues, setInitialValues] = useState<Record<string, unknown>>({});
+    const [buscandoCep, setBuscandoCep] = useState(false);
 
     useEffect(()=>{
         if(!idParam) return;
@@ -87,8 +90,8 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
                 {name: 'dataNascimento', label: 'Data Nascimento *', type: 'date', required: true},
                 {name: 'generoId', label: 'Gênero', type: 'select', options: [{value:'1',label:'Masculino'},{value:'2',label:'Feminino'},{value:'3',label:'Outro'}]},
                 {name: 'etniaId', label: 'Etnia', type: 'select', options: [{value:'1',label:'Branca'},{value:'2',label:'Preta'},{value:'3',label:'Parda'},{value:'4',label:'Amarela'},{value:'5',label:'Indígena'}]},
-                {name: 'estadoCivilId', label: 'Estado Civil *', type: 'autoComplete', autoCompleteSource:'/api/basico/estado-civil/autoComplete', required: true},
-                {name: 'escolaridadeId', label: 'Escolaridade *', type: 'autoComplete', autoCompleteSource:'/api/basico/escolaridade/autoComplete', required: true},
+                {name: 'estadoCivilId', label: 'Estado Civil *', type: 'autoComplete', autoCompleteSource:'/api/basico/estado-civil/auto-complete', required: true},
+                {name: 'escolaridadeId', label: 'Escolaridade *', type: 'autoComplete', autoCompleteSource:'/api/basico/escolaridade/auto-complete', required: true},
                 {name: 'nomeReferencia', label: 'Nome Referência *', required: true},
                 {name: 'telefoneReferencia', label: 'Telefone Referência *', type: 'mask', mask: '99-99999999', required: true},
                 {name: 'celularReferencia', label: 'Celular Referência *', type: 'mask', mask: '99-999999999', required: true},
@@ -120,11 +123,35 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
             label: 'Endereço',
             // layout fiel ao colunasPessoaFisica.xhtml: CEP com Busca/Ajuste/Novo + cidade/bairro/logradouro autocomplete + número/complemento
             fields: [
-                {name: 'cep', label: 'CEP', type: 'mask', mask: '99.999-999'},
-                {name: 'cidade', label: 'Cidade', type: 'autoComplete', autoCompleteSource:'/api/basico/cidade/autoComplete', required: true},
-                {name: 'bairro', label: 'Bairro', type: 'autoComplete', autoCompleteSource:'/api/basico/bairro/autoComplete', required: true},
-                {name: 'logradouro', label: 'Logradouro', type: 'autoComplete', autoCompleteSource:'/api/basico/logradouro/autoComplete', required: true},
-                {name: 'numero', label: 'Número *', required: true},
+                {name: 'cep', label: 'CEP', type: 'mask', mask: '99.999-999', full: true, actions: [
+                    {label: 'Busca', disabled: buscandoCep, onPress: async ({value, setValue}) => {
+                        const clean = String(value ?? '').replace(/\D/g, '');
+                        if (clean.length !== 8) { Alert.alert('Aviso', 'Informe o CEP completo'); return; }
+                        setBuscandoCep(true);
+                        try {
+                            const r = await fetch(`https://viacep.com.br/ws/${clean}/json/`);
+                            const d = await r.json();
+                            if (d?.erro) { Alert.alert('Aviso', 'CEP não encontrado'); return; }
+                            setValue('cep', formatCep(String(d?.cep ?? clean)));
+                            if (d?.localidade) setValue('cidade', d.localidade);
+                            if (d?.bairro) setValue('bairro', d.bairro);
+                            if (d?.logradouro) setValue('logradouro', d.logradouro);
+                        } catch { Alert.alert('Erro', 'Falha ao consultar o CEP'); }
+                        finally { setBuscandoCep(false); }
+                    }},
+                    {label: 'Ajuste', onPress: ({value, setValue}) => {
+                        setValue('cep', String(value ?? ''));
+                        Alert.alert('Ajuste', 'Selecione cidade/bairro/logradouro nos campos abaixo');
+                    }},
+                    {label: 'Novo', onPress: ({setValue}) => {
+                        setValue('cep', ''); setValue('cidade', ''); setValue('bairro', '');
+                        setValue('logradouro', ''); setValue('numero', ''); setValue('complemento', '');
+                    }},
+                ]},
+                {name: 'cidade', label: 'Cidade', type: 'autoComplete', autoCompleteSource:'/api/basico/cidade/autoComplete', required: true, full: true},
+                {name: 'bairro', label: 'Bairro', type: 'autoComplete', autoCompleteSource:'/api/basico/bairro/auto-complete', required: true, full: true},
+                {name: 'logradouro', label: 'Logradouro', type: 'autoComplete', autoCompleteSource:'/api/basico/logradouro/auto-complete', required: true, full: true},
+                {name: 'numero', label: 'Número *', required: true, full: true},
                 {name: 'complemento', label: 'Complemento', type: 'textarea', full: true},
             ],
         },

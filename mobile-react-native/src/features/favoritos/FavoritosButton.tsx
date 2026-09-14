@@ -1,22 +1,22 @@
 import React, {useState} from 'react';
-import {Modal, Pressable, StyleSheet, Text, View, TouchableWithoutFeedback} from 'react-native';
+import {Modal, Pressable, StyleSheet, Text, View} from 'react-native';
 import {useQuery} from '@tanstack/react-query';
+import {useNavigation} from '@react-navigation/native';
 import {listarFavoritos} from './favoritos';
-import {moduleIcon} from './moduleIcons';
-import {api} from './api';
-import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from './theme';
+import {moduleIcon} from '../../moduleIcons';
+import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from '../../shared/styles/theme';
 
 const normalizeOutcome = (value: string) => value.replace(/(\.xhtml)+$/i, '').replace(/^\/+|\/+$/g, '') || 'default';
 
 /**
- * Ícone de estrela entre o botão de Relatórios e o menu do usuário, listando os atalhos
- * favoritados pelo usuário — equivalente ao bloco <c:forEach var="favoritos"
+ * Ícone de estrela no topo, listando os atalhos favoritados do usuário logado —
+ * equivalente ao bloco <c:forEach var="favoritos"
  * items="#{usuarioLogadoController.listFavoritos}"><po:panel .../></c:forEach> de header.xhtml
- * (olimpio.zip). Não confundir com o ícone "Favoritos" do menu de usuário, que abre a tela de
- * gerenciamento (listFavoritoUsuario) — aqui é a lista de atalhos em si.
+ * (olimpio.zip). Apenas listagem, sem botões extras dentro do popup.
  */
-export function FavoritosButton({navigateTo}: { navigateTo: (key: string) => void }) {
+export function FavoritosButton({navigateTo}: { navigateTo?: (key: string) => void }) {
     const [open, setOpen] = useState(false);
+    const navigation = useNavigation<any>();
 
     const list = useQuery({
         queryKey: ['favoritos', 'usuarioLogado'],
@@ -26,21 +26,17 @@ export function FavoritosButton({navigateTo}: { navigateTo: (key: string) => voi
 
     const items = list.data ?? [];
 
-    const handleItemPress = (outcome: string) => {
-        setOpen(false);
-        navigateTo(normalizeOutcome(outcome));
+    const go = (key: string) => {
+        if (navigateTo) {
+            navigateTo(key);
+        } else {
+            navigation.navigate(key as never);
+        }
     };
 
-    const handleRemoveFavorite = async (outcome: string) => {
+    const handleItemPress = (outcome: string) => {
         setOpen(false);
-        try {
-            await api.delete(`/api/basico/favorito-usuario`, {
-                params: {outcome},
-            });
-            await listarFavoritos();
-        } catch (error) {
-            console.error('Erro ao remover favorito:', error);
-        }
+        go(normalizeOutcome(outcome));
     };
 
     return (
@@ -54,12 +50,6 @@ export function FavoritosButton({navigateTo}: { navigateTo: (key: string) => voi
                     <View style={styles.dropdown}>
                         <View style={styles.dropdownHeader}>
                             <Text style={styles.dropdownTitle}>Favoritos</Text>
-                            <Pressable onPress={() => {
-                                setOpen(false);
-                                navigateTo('view/favoritoUsuario/listFavoritoUsuario');
-                            }}>
-                                <Text style={styles.manageLink}>Gerenciar</Text>
-                            </Pressable>
                         </View>
                         {list.isLoading && items.length === 0 ? (
                             <Text style={styles.empty}>Carregando...</Text>
@@ -67,20 +57,16 @@ export function FavoritosButton({navigateTo}: { navigateTo: (key: string) => voi
                             <Text style={styles.empty}>Nenhum favorito cadastrado.</Text>
                         ) : (
                             items.map((item, index) => (
-                                <TouchableWithoutFeedback key={`${item.outcome}-${index}`} onPress={() => handleItemPress(item.outcome)}>
-                                    <View style={styles.item}>
-                                        <View style={styles.itemIconContainer}>
-                                            <Text style={styles.itemIcon}>{moduleIcon(item.nome, item.icon)}</Text>
-                                        </View>
-                                        <Text style={styles.itemNome}>{item.nome}</Text>
-                                        <Pressable style={styles.removeButton} onPress={(e) => {
-                                            e.stopPropagation();
-                                            handleRemoveFavorite(item.outcome);
-                                        }}>
-                                            <Text style={styles.removeIcon}>✕</Text>
-                                        </Pressable>
+                                <Pressable
+                                    key={`${item.outcome}-${index}`}
+                                    style={styles.item}
+                                    onPress={() => handleItemPress(item.outcome)}
+                                >
+                                    <View style={styles.itemIconContainer}>
+                                        <Text style={styles.itemIcon}>{moduleIcon(item.nome, item.icon)}</Text>
                                     </View>
-                                </TouchableWithoutFeedback>
+                                    <Text style={styles.itemNome}>{item.nome}</Text>
+                                </Pressable>
                             ))
                         )}
                     </View>
@@ -116,7 +102,7 @@ const styles = StyleSheet.create({
     },
     dropdownHeader: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
         alignItems: 'center',
         marginBottom: Spacing.sm,
         paddingBottom: Spacing.sm,
@@ -128,11 +114,6 @@ const styles = StyleSheet.create({
         fontWeight: Typography.weights.semibold,
         color: Colors.textPrimary,
     },
-    manageLink: {
-        fontSize: Typography.sizes.sm,
-        color: Colors.primary,
-        fontWeight: Typography.weights.medium,
-    },
     empty: {
         color: Colors.textLight,
         fontSize: Typography.sizes.base,
@@ -142,7 +123,6 @@ const styles = StyleSheet.create({
     item: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
         paddingVertical: Spacing.md,
         borderBottomWidth: 1,
         borderColor: Colors.borderLight,
@@ -163,17 +143,5 @@ const styles = StyleSheet.create({
         fontSize: Typography.sizes.lg,
         color: Colors.textPrimary,
         flex: 1,
-    },
-    itemContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-    },
-    removeButton: {
-        padding: Spacing.xs,
-    },
-    removeIcon: {
-        fontSize: Typography.sizes.sm,
-        color: Colors.error,
     },
 });

@@ -3,6 +3,7 @@ import {PermissionGate} from '../../../shared/services/permissions';
 import {DataTable, type DataTableColumn, type DataTableRowAction} from '../../../shared/components/DataTable';
 import type {ApiItem} from '../../../shared/types/types.ts';
 import {api} from '../../../shared/services/api';
+import {swalConfirm} from '../../../shared/components/swal';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -93,7 +94,7 @@ export default function ViewProspectoListProspectoListScreen() {
             className: 'btnblack',
             icon: <i className="fa fa-ban"/>,
             onClick: async (item) => {
-                if (window.confirm('Ao desativar ele não estará no radar e nas ligações. Deseja continuar?')) {
+                if (await swalConfirm('Ao desativar ele não estará no radar e nas ligações. Deseja continuar?', {title: 'Inativar Prospecto', confirmText: 'Inativar', danger: true})) {
                     await api.post(`/api/comercial/prospecto-list/inativar?id=${item.id}`);
                 }
             },

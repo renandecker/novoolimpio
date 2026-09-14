@@ -3,6 +3,7 @@ import {useState} from 'react';
 import {PermissionGate} from '../../../shared/services/permissions';
 import {DataTable, type DataTableColumn, type DataTableRowAction, type DataTableToolbarButton} from '../../../shared/components/DataTable';
 import {api} from '../../../shared/services/api';
+import {swalConfirm} from '../../../shared/components/swal';
 
 const formatDate = (value: unknown): string => {
     if (value === null || value === undefined || value === '') return '';
@@ -38,7 +39,7 @@ export default function ViewRelatoriosExtratorListScreen() {
     const refresh = () => setRevision((r) => r + 1);
 
     const removeAntigos = async () => {
-        if (!window.confirm('Remover todas as extrações antigas (remove CSV/PDF antigos)?')) return;
+        if (!(await swalConfirm('Remover todas as extrações antigas (remove CSV/PDF antigos)?', {title: 'Limpar extrator', confirmText: 'Remover', danger: true}))) return;
         try {
             await api.post('/api/relatorios/extrator/remover');
             notify('Extrator limpo: extrações antigas marcadas como removidas.');
@@ -79,7 +80,7 @@ export default function ViewRelatoriosExtratorListScreen() {
     };
 
     const remover = async (item: any) => {
-        if (!window.confirm(`Deseja realmente excluir a extração #${item.id}?`)) return;
+        if (!(await swalConfirm(`Deseja realmente excluir a extração #${item.id}?`, {title: 'Excluir extração', confirmText: 'Excluir', danger: true}))) return;
         try {
             await api.delete(`/api/relatorios/extrator/${item.id}`);
             notify(`Extração #${item.id} removida.`);

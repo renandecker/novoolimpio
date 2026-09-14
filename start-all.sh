@@ -60,6 +60,13 @@ if $DC ps -q > /dev/null 2>&1; then
 fi
 
 echo "============================================"
+echo " Removendo containers web-react e gateway..."
+echo "============================================"
+
+docker rm -f olimpio-web olimpio-web-react olimpio-gateway 2> /dev/null || true
+echo " Containers web-react e gateway removidos (serao recriados no up)."
+
+echo "============================================"
 echo " Verificando compilacao dos microsservicos..."
 echo "============================================"
 

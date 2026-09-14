@@ -107,6 +107,13 @@ if %errorlevel% equ 0 (
 )
 
 echo ============================================
+echo  Removendo containers web-react e gateway...
+echo ============================================
+
+docker rm -f olimpio-web olimpio-web-react olimpio-gateway >nul 2>&1
+echo  Containers web-react e gateway removidos (serao recriados no up).
+
+echo ============================================
 echo  Limpando logs anteriores...
 echo ============================================
 

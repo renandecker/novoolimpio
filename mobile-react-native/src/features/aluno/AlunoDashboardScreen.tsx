@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, TouchableOpacity, Alert} from 'react-native';
+import {ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import {Alert} from '../../shared/components/SweetAlert';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {alunoApi, BoletimResumo, formatarNota, formatarPercentual} from './aluno';
 import {CurriculumAttachment} from './ViewCurriculoAttachmentScreen';

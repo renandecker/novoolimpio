@@ -18,6 +18,8 @@ import {AutoComplete, AutoCompleteOption} from '../../../shared/components/AutoC
 
 import {useQuery} from '@tanstack/react-query';
 
+import {AjusteLogradouroModal, NovoLogradouroModal, Logradouro} from '../../../shared/components/EnderecoForm';
+
 
 
 const toDateInput = (v: unknown): string => {
@@ -72,15 +74,15 @@ const fetchCidade = async (query: string): Promise<AutoCompleteOption[]> => {
 
 const fetchCidadeById = async (id:number): Promise<AutoCompleteOption|null>=>{ try{ const {data}=await api.get<any>(`/api/basico/cidade/${id}`); return {id:data.id, label:data.cidadeEstado ?? data.nome ?? String(data.id)};}catch{return null;}};
 
-const fetchEstadoCivil = async (query:string):Promise<AutoCompleteOption[]>=>{ const {data}=await api.get<any[]>(`/api/basico/estado-civil/autoComplete`,{params:{query}}); return data.map((e:any)=>({id:e.id, label:e.descricao ?? String(e.id)}));};
+const fetchEstadoCivil = async (query:string):Promise<AutoCompleteOption[]>=>{ const {data}=await api.get<any[]>(`/api/basico/estado-civil/auto-complete`,{params:{query}}); return data.map((e:any)=>({id:e.id, label:e.descricao ?? String(e.id)}));};
 
 const fetchEstadoCivilById = async (id:number):Promise<AutoCompleteOption|null>=>{ try{const {data}=await api.get<any>(`/api/basico/estado-civil/${id}`); return {id:data.id, label:data.descricao ?? String(data.id)};}catch{return null;}};
 
-const fetchEscolaridade = async (q:string):Promise<AutoCompleteOption[]>=>{ const {data}=await api.get<any[]>(`/api/basico/escolaridade/autoComplete`,{params:{query:q}}); return data.map((e:any)=>({id:e.id, label:e.descricao ?? String(e.id)}));};
+const fetchEscolaridade = async (q:string):Promise<AutoCompleteOption[]>=>{ const {data}=await api.get<any[]>(`/api/basico/escolaridade/auto-complete`,{params:{query:q}}); return data.map((e:any)=>({id:e.id, label:e.descricao ?? String(e.id)}));};
 
 const fetchEscolaridadeById = async (id:number):Promise<AutoCompleteOption|null>=>{ try{const {data}=await api.get<any>(`/api/basico/escolaridade/${id}`); return {id:data.id, label:data.descricao ?? String(data.id)};}catch{return null;}};
 
-const fetchEtnia = async (q:string):Promise<AutoCompleteOption[]>=>{ const {data}=await api.get<any[]>(`/api/basico/etnia/autoComplete`,{params:{query:q}}); return data.map((e:any)=>({id:e.id, label:e.descricao ?? String(e.id)}));};
+const fetchEtnia = async (q:string):Promise<AutoCompleteOption[]>=>{ try{const {data}=await api.get<any[]>(`/api/basico/etnia`); const filtered=data.filter((e:any)=>!q || (e.descricao??'').toLowerCase().includes(q.toLowerCase())); return filtered.map((e:any)=>({id:e.id, label:e.descricao ?? String(e.id)}));}catch{return [{id:1,label:'Branca'},{id:2,label:'Preta'},{id:3,label:'Parda'},{id:4,label:'Amarela'},{id:5,label:'Indígena'}];}};
 
 const fetchEtniaById = async (id:number):Promise<AutoCompleteOption|null>=>{ try{const {data}=await api.get<any>(`/api/basico/etnia/${id}`); return {id:data.id, label:data.descricao ?? String(data.id)};}catch{return null;}};
 
@@ -150,6 +152,9 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
     const [enderecoAviso, setEnderecoAviso] = useState('');
 
+    // Modals para Ajuste e Novo Logradouro
+    const [showAjusteModal, setShowAjusteModal] = useState(false);
+    const [showNovoModal, setShowNovoModal] = useState(false);
 
 
     const {data: allUnidades = []} = useQuery({ queryKey:[UNIDADE_SOURCE], queryFn: async () => (await api.get<ApiItem[]>(UNIDADE_SOURCE)).data });
@@ -168,7 +173,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
         const params:any={query:q}; if(cidadeOpt?.id) params.cidadeId=cidadeOpt.id;
 
-        const {data}=await api.get<any[]>(`/api/basico/bairro/autoComplete`,{params}); return data.map((e:any)=>({id:e.id, label:e.descricao}));
+        const {data}=await api.get<any[]>(`/api/basico/bairro/auto-complete`,{params}); return data.map((e:any)=>({id:e.id, label:e.descricao}));
 
     };
 
@@ -176,7 +181,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
         const params:any={query:q}; if(bairroOpt?.id) params.bairroId=bairroOpt.id;
 
-        const {data}=await api.get<any[]>(`/api/basico/logradouro/autoComplete`,{params}); return data.map((e:any)=>({id:e.id, label:e.descricao}));
+        const {data}=await api.get<any[]>(`/api/basico/logradouro/auto-complete`,{params}); return data.map((e:any)=>({id:e.id, label:e.descricao}));
 
     };
 
@@ -192,11 +197,11 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
         try{
 
-            // tenta via logradouroController/buscarEndereco primeiro
+            // tenta via logradouroController/buscarEnderecoPorCep primeiro
 
             try{
 
-                const {data}=await api.get<any>(`/api/basico/logradouro/buscarEndereco`,{params:{cep:clean}});
+                const {data}=await api.get<any>(`/api/basico/logradouro/buscar-endereco-por-cep`,{params:{cep:clean}});
 
                 if(data?.logradouro){
 
@@ -204,9 +209,9 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
                     setLogradouroOpt({id:l.id, label:l.descricao}); setLogradouroId(l.id);
 
-                    if(l.bairro){ const b=await api.get<any>(`/api/basico/bairro/${l.bairro.id ?? l.id_bairro}`); setBairroOpt({id:b.data.id, label:b.data.descricao});}
+                    if(data.bairro){ setBairroOpt({id:data.bairro.id, label:data.bairro.descricao});}
 
-                    if(data.cidade){ setCidadeOpt({id:data.cidade.id, label:data.cidade.cidadeEstado ?? data.cidade.nome});}
+                    if(data.cidade){ setCidadeOpt({id:data.cidade.id, label:data.cidade.nome});}
 
                     setCep(formatCep(l.cep ?? clean));
 
@@ -572,11 +577,11 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
                 <div className="form-grid">
 
-                    <label className="form-field"><span className="form-label">CEP</span>
+                    <label className="form-field" style={{gridColumn: '1 / -1'}}><span className="form-label">CEP</span>
 
-                        <div style={{gridColumn: 'span 3', display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
+                        <div style={{display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'nowrap'}}>
 
-                            <input className="form-input" placeholder="99.999-999" style={{width:'120px'}} maxLength={9} value={cep} onChange={e=>setCep(formatCep(e.target.value))} />
+                            <input className="form-input" placeholder="99.999-999" style={{width:'120px', flexShrink: 0}} maxLength={9} value={cep} onChange={e=>setCep(formatCep(e.target.value))} />
 
                             <button type="button" className="btnyellow" disabled={buscandoCep} onClick={buscarCep}>{buscandoCep?'Buscando...':'Busca'}</button>
 
@@ -590,9 +595,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
                     </label>
 
-                    <label className="form-field"><span className="form-label">Número *</span><input className="form-input" placeholder="Número" value={numero} onChange={e=>setNumero(e.target.value)}/></label>
-
-                    <label className="form-field">
+                    <label className="form-field" style={{gridColumn: '1 / -1'}}>
 
                         <span className="form-label">Cidade</span>
 
@@ -604,7 +607,7 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
                     </label>
 
-                    <label className="form-field">
+                    <label className="form-field" style={{gridColumn: '1 / -1'}}>
 
                         <span className="form-label">Bairro</span>
 
@@ -616,11 +619,11 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
                     </label>
 
-                    <label className="form-field">
+                    <label className="form-field" style={{gridColumn: '1 / -1'}}>
 
                         <span className="form-label">Logradouro</span>
 
-                        <div style={{gridColumn: 'span 3'}}>
+                        <div>
 
                             <AutoComplete placeholder="Digite 3 letras..." value={logradouroOpt} onChange={o=>{ setLogradouroOpt(o); if(o) setLogradouroId(o.id);}} fetchOptions={fetchLogradouros} />
 
@@ -628,7 +631,9 @@ export default function ViewPessoaFormPessoaFisicaListScreen() {
 
                     </label>
 
-                    <label className="form-field"><span className="form-label">Complemento</span><textarea className="form-input" placeholder="Complemento" rows={3} style={{gridColumn: 'span 3', minHeight:'80px'}} value={complemento} onChange={e=>setComplemento(e.target.value)}/></label>
+                    <label className="form-field" style={{gridColumn: '1 / -1'}}><span className="form-label">Número *</span><input className="form-input" placeholder="Número" value={numero} onChange={e=>setNumero(e.target.value)}/></label>
+
+                    <label className="form-field" style={{gridColumn: '1 / -1'}}><span className="form-label">Complemento</span><textarea className="form-input" placeholder="Complemento" rows={3} style={{minHeight:'80px'}} value={complemento} onChange={e=>setComplemento(e.target.value)}/></label>
 
                 </div>
 

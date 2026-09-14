@@ -7,10 +7,10 @@ import {
     Modal,
     Image,
     ActivityIndicator,
-    Alert,
     Platform,
     PermissionsAndroid,
 } from 'react-native';
+import {Alert} from './SweetAlert';
 import * as ImagePicker from 'expo-image-picker';
 import {api} from '../api';
 

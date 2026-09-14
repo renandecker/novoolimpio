@@ -4,6 +4,7 @@ import { DataTable, type DataTableColumn } from '../../shared/components/DataTab
 import { PermissionGate } from '../../shared/services/permissions';
 import { listarIndicadoresGauge, excluirIndicadorGauge, type IndicadorGauge } from './indicadorGauge';
 import type { PagedResponse } from '../../shared/types/types';
+import { swalConfirm } from '../../shared/components/swal';
 
 const COLORS_PREVIEW = [
   '#22c55e', '#eab308', '#ef4444', '#3b82f6', '#a855f7', '#ec4899', '#f97316', '#14b8a6',
@@ -100,7 +101,7 @@ export default function IndicadorGaugeListScreen() {
   }, [page, busca]);
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Tem certeza que deseja excluir este indicador?')) return;
+    if (!(await swalConfirm('Tem certeza que deseja excluir este indicador?', {title: 'Excluir indicador', confirmText: 'Excluir', danger: true}))) return;
     setDeletingId(id);
     try {
       await excluirIndicadorGauge(id);

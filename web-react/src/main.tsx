@@ -16,16 +16,21 @@ if (typeof window !== 'undefined') {
             }
             localStorage.clear();
             sessionStorage.clear();
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(name => caches.delete(name)));
+            }
         } catch (e) {
             console.error('Failed to clear storage:', e);
         }
-        setTimeout(() => window.location.reload(), 100);
+        setTimeout(() => window.location.reload(true as any), 100);
     };
 
     window.addEventListener('error', (event) => {
         const msg = event.error?.message || String(event.error || '');
         if (msg.includes('Corruption: block checksum mismatch') || msg.includes('block checksum mismatch')) {
             handleCorruption();
+            event.preventDefault();
         }
     });
 
@@ -424,6 +429,11 @@ ViewComunicacaoListComunicacaoListScreen,
 } from './screens';
 
 import './shared/styles/colors.css';
+import {alertApp} from './shared/components/swal';
+
+if (typeof window !== 'undefined') {
+    window.alert = alertApp;
+}
 
 const q = new QueryClient();
 createRoot(document.getElementById('root')!).render(<QueryClientProvider

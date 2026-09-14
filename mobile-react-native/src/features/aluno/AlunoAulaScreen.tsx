@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {ActivityIndicator, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Alert} from '../../shared/components/SweetAlert';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {alunoApi, AulaAnexoMobile, AulaDetalheMobile} from './aluno';
 import type {ParamList} from '../../HomeScreen';

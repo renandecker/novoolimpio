@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import {Alert} from '../../../shared/components/SweetAlert';
 import { useNavigation } from '@react-navigation/native';
 import { useModulePaged, PAGE_SIZES } from '../useModulePaged';
 import type { ApiItem, SearchFilterRequest } from '../types';

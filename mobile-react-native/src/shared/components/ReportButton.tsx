@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {Modal, Pressable, StyleSheet, Text, View} from 'react-native';
 import {useQuery} from '@tanstack/react-query';
-import {listarRelatoriosDisponiveis, type RelatorioDisponivel} from './relatorios';
+import {listarRelatoriosDisponiveis, type RelatorioDisponivel} from '../../features/relatorios/relatorios';
 import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from './theme';
 
 const TIPO_ROTA: Record<string, string> = {
@@ -60,7 +60,7 @@ export function ReportButton({navigateTo}: { navigateTo: (key: string) => void }
                 <Pressable style={styles.overlay} onPress={() => setOpen(false)}>
                     <View style={styles.dropdown}>
                         <Text style={styles.dropdownTitle}>Relatórios</Text>
-                        {list.isLoading && items.length === 0 ? (
+                        {items.length === 0 && (list.isPending || list.isFetching) ? (
                             <Text style={styles.empty}>Carregando...</Text>
                         ) : items.length === 0 ? (
                             <Text style={styles.empty}>Nenhum relatório disponível.</Text>

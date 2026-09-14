@@ -44,8 +44,12 @@ public class CartaoPessoaController {
     @Path("/paged")
     @WithSession
     public Uni<PagedResponse<CartaoPessoaResponse>> listarPaged(@QueryParam("page") int page, @QueryParam("size") int size,
-            @QueryParam("sort") String sort, @QueryParam("order") String order) {
-        return searchService.search(CartaoPessoa.class, new SearchFilterRequest(null), page, size, sort, order)
+            @QueryParam("sort") String sort, @QueryParam("order") String order, @QueryParam("idPessoa") Long idPessoa) {
+        SearchFilterRequest filterRequest = null;
+        if (idPessoa != null) {
+            filterRequest = new SearchFilterRequest(java.util.Map.of("idPessoa", new SearchFilterRequest.FilterCondition("EQUALS", idPessoa.toString(), null)));
+        }
+        return searchService.search(CartaoPessoa.class, filterRequest, page, size, sort, order)
                 .map(this::mapToResponse);
     }
 

@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
-import {Alert, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Alert} from '../../../shared/components/SweetAlert';
 import {ModuleList} from '../../../shared/components/ModuleListScreen';
 import {ModuleWizard} from '../../../shared/components/ModuleWizard';
 import ViewConsultorMatriculaLayoutScreen from './ViewConsultorMatriculaLayoutScreen';

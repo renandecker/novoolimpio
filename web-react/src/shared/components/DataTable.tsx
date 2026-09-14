@@ -338,11 +338,11 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
     if (canRelatorio) {
         actionColumns.push({
             key: 'ver',
-            label: 'Ver',
+            label: 'Detalhes',
             render: (item) => (
                 <button
                     className="btn-action btnyellow"
-                    title="Ver"
+                    title="Detalhes"
                     onClick={() => setViewModalItem(item)}
                 >
                     <i className="fa fa-info-circle"/>

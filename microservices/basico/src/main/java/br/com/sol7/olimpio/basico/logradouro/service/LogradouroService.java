@@ -1,8 +1,13 @@
 package br.com.sol7.olimpio.basico.logradouro.service;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
+import br.com.sol7.olimpio.basico.bairro.dto.BairroResponse;
 import br.com.sol7.olimpio.basico.bairro.entity.Bairro;
 import br.com.sol7.olimpio.basico.bairro.repository.BairroRepository;
+import br.com.sol7.olimpio.basico.cidade.dto.CidadeResponse;
+import br.com.sol7.olimpio.basico.cidade.entity.Cidade;
+import br.com.sol7.olimpio.basico.cidade.repository.CidadeRepository;
+import br.com.sol7.olimpio.basico.logradouro.dto.BuscarEnderecoResponse;
 import br.com.sol7.olimpio.basico.logradouro.dto.LogradouroRequest;
 import br.com.sol7.olimpio.basico.logradouro.dto.LogradouroResponse;
 import br.com.sol7.olimpio.basico.logradouro.entity.Logradouro;
@@ -27,6 +32,9 @@ public class LogradouroService {
 
     @Inject
     BairroRepository bairroRepository;
+
+    @Inject
+    CidadeRepository cidadeRepository;
 
     @Inject
     CorreioQualCep correioQualCep;
@@ -495,6 +503,90 @@ public class LogradouroService {
                             });
                 })
                 .onFailure().recoverWithUni(throwable -> Uni.createFrom().voidItem());
+    }
+
+
+    public Uni<BuscarEnderecoResponse> buscarEnderecoPorCep(String cep) {
+        String cepLimpo = cep.replace("-", "").replace(".", "").trim();
+        return correioQualCep.getEndereco(cepLimpo)
+                .onItem().transformToUni(endereco -> {
+                    if (endereco == null || endereco.isBlank()) {
+                        return Uni.createFrom().item(new BuscarEnderecoResponse(null, null, null));
+                    }
+                    return correioQualCep.getBairro(cepLimpo)
+                            .onItem().transformToUni(bairroNome -> {
+                                return correioQualCep.getCidade(cepLimpo)
+                                        .onItem().transformToUni(cidadeNome -> {
+                                            return correioQualCep.getUF(cepLimpo)
+                                                    .onItem().transformToUni(uf -> {
+                                                        return buscarOuCriarEndereco(cepLimpo, endereco, bairroNome, cidadeNome, uf);
+                                                    });
+                                        });
+                            });
+                })
+                .onFailure().recoverWithUni(throwable -> Uni.createFrom().item(new BuscarEnderecoResponse(null, null, null)));
+    }
+
+    private Uni<BuscarEnderecoResponse> buscarOuCriarEndereco(String cep, String endereco, String bairroNome, String cidadeNome, String uf) {
+        return repository.find("cep = ?1", cep).firstResult()
+                .onItem().transformToUni(logradouroExistente -> {
+                    Logradouro logradouro;
+                    if (logradouroExistente != null) {
+                        logradouro = logradouroExistente;
+                        return Uni.createFrom().item(logradouro);
+                    } else {
+                        logradouro = new Logradouro();
+                        logradouro.descricao = endereco;
+                        logradouro.cep = cep;
+                        return repository.persist(logradouro);
+                    }
+                })
+                .onItem().transformToUni(logradouro -> {
+                    if (bairroNome == null || bairroNome.isBlank()) {
+                        return Uni.createFrom().item(new BuscarEnderecoResponse(toResponse(logradouro), null, null));
+                    }
+                    return bairroRepository.find("descricao = ?1", bairroNome).firstResult()
+                            .onItem().transformToUni(bairroExistente -> {
+                                Bairro bairro;
+                                if (bairroExistente != null) {
+                                    bairro = bairroExistente;
+                                    return Uni.createFrom().item(bairro);
+                                } else {
+                                    bairro = new Bairro();
+                                    bairro.descricao = bairroNome;
+                                    if (cidadeNome != null && !cidadeNome.isBlank()) {
+                                        return cidadeRepository.find("nome = ?1", cidadeNome).firstResult()
+                                                .onItem().transformToUni(cidadeExistente -> {
+                                                    if (cidadeExistente != null) {
+                                                        bairro.cidadeId = cidadeExistente.id;
+                                                    }
+                                                    return bairroRepository.persist(bairro);
+                                                });
+                                    } else {
+                                        return bairroRepository.persist(bairro);
+                                    }
+                                }
+                            })
+                            .onItem().transformToUni(bairro -> {
+                                logradouro.bairroId = bairro.id;
+                                return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                                        .chain(session -> session.merge(logradouro))
+                                        .onItem().transformToUni(mergedLogradouro -> {
+                                            if (bairro.cidadeId != null) {
+                                                return cidadeRepository.findById(bairro.cidadeId)
+                                                        .onItem().transform(cidade -> {
+                                                            CidadeResponse cidadeResponse = null;
+                                                            if (cidade != null) {
+                                                                cidadeResponse = new CidadeResponse(cidade.id, cidade.nome, cidade.praca, cidade.area, cidade.ibge, cidade.estadoId);
+                                                            }
+                                                            return new BuscarEnderecoResponse(toResponse(mergedLogradouro), new BairroResponse(bairro.id, bairro.descricao, bairro.cidadeId), cidadeResponse);
+                                                        });
+                                            } else {
+                                                return Uni.createFrom().item(new BuscarEnderecoResponse(toResponse(mergedLogradouro), new BairroResponse(bairro.id, bairro.descricao, bairro.cidadeId), null));
+                                            }
+                                        });
+                            });
+                });
     }
 
 }

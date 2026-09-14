@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Modal,
   Pressable,
@@ -11,6 +10,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import {Alert} from '../../../shared/components/SweetAlert';
 import { useQuery } from '@tanstack/react-query';
 import { useModulePaged } from '../useModulePaged';
 import { api } from '../api';

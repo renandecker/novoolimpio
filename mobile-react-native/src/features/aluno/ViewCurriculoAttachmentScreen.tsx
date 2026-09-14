@@ -7,12 +7,12 @@ import {
     TouchableOpacity,
     Modal,
     ActivityIndicator,
-    Alert,
     Platform,
     PermissionsAndroid,
     TextInput,
     Image,
 } from 'react-native';
+import {Alert} from '../../shared/components/SweetAlert';
 import * as ImagePicker from 'expo-image-picker';
 import {api} from '../../shared/services/api';
 

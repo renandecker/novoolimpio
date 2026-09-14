@@ -8,6 +8,7 @@ import {legacyClassName} from '../../../shared/components/DataTable';
 import {ModuleFilter} from '../../../shared/components/ModuleFilter';
 import BreadCrumb from '../../../shared/components/BreadCrumb';
 import {AlertDialogProvider, useAlertDialog} from '../../../shared/components/AlertDialog';
+import {swalConfirm} from '../../../shared/components/swal';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -88,7 +89,7 @@ export default function ViewContaControlePagamentoListScreen() {
     };
 
     const handleAplicarPago = async (item: ControlePagamentoRow) => {
-        if (!window.confirm('Deseja aplicar como pago?')) return;
+        if (!(await swalConfirm('Deseja aplicar como pago?', {title: 'Aplicar como pago', confirmText: 'Aplicar'}))) return;
         try {
             await api.post(`/api/conta/controlePagamento/${item.id}/aplicar-pago`);
             setNotice('Pagamento aplicado com sucesso');

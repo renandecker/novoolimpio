@@ -350,13 +350,13 @@ export default function ViewUsuarioFormUsuarioListScreen(){
     const tabEndereco = (
         <div className="form-grid">
             <div style={sectionTitleStyle}>Endereço Principal</div>
-            <label className="form-field">
+            <label className="form-field" style={{gridColumn: '1 / -1'}}>
                 <span className="form-label">CEP</span>
-                <div style={{display: 'flex', gap: '8px', width: '100%'}}>
+                <div style={{display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'nowrap', width: '100%'}}>
                     <input
                         className="form-input"
                         placeholder="99.999-999"
-                        style={{width: '120px'}}
+                        style={{width: '120px', flexShrink: 0}}
                         maxLength={9}
                         value={enderecos[0]?.cep ?? ''}
                         onChange={(event) => setEnderecos([{...enderecos[0], cep: event.target.value}])}
@@ -383,7 +383,34 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                     </button>
                 </div>
             </label>
-            <label className="form-field">
+            <label className="form-field" style={{gridColumn: '1 / -1'}}>
+                <span className="form-label">Cidade</span>
+                <input
+                    className="form-input"
+                    placeholder="Cidade"
+                    value={enderecos[0]?.cidade ?? ''}
+                    onChange={(event) => setEnderecos([{...enderecos[0], cidade: event.target.value}])}
+                />
+            </label>
+            <label className="form-field" style={{gridColumn: '1 / -1'}}>
+                <span className="form-label">Bairro</span>
+                <input
+                    className="form-input"
+                    placeholder="Bairro"
+                    value={enderecos[0]?.bairro ?? ''}
+                    onChange={(event) => setEnderecos([{...enderecos[0], bairro: event.target.value}])}
+                />
+            </label>
+            <label className="form-field" style={{gridColumn: '1 / -1'}}>
+                <span className="form-label">Logradouro</span>
+                <input
+                    className="form-input"
+                    placeholder="Logradouro"
+                    value={enderecos[0]?.logradouro ?? ''}
+                    onChange={(event) => setEnderecos([{...enderecos[0], logradouro: event.target.value}])}
+                />
+            </label>
+            <label className="form-field" style={{gridColumn: '1 / -1'}}>
                 <span className="form-label">Número</span>
                 <input
                     className="form-input"
@@ -393,41 +420,13 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                     onChange={(event) => setEnderecos([{...enderecos[0], numero: event.target.value}])}
                 />
             </label>
-            <label className="form-field">
-                <span className="form-label">Cidade</span>
-                <input
-                    className="form-input"
-                    placeholder="Cidade"
-                    value={enderecos[0]?.cidade ?? ''}
-                    onChange={(event) => setEnderecos([{...enderecos[0], cidade: event.target.value}])}
-                />
-            </label>
-            <label className="form-field">
-                <span className="form-label">Bairro</span>
-                <input
-                    className="form-input"
-                    placeholder="Bairro"
-                    value={enderecos[0]?.bairro ?? ''}
-                    onChange={(event) => setEnderecos([{...enderecos[0], bairro: event.target.value}])}
-                />
-            </label>
-            <label className="form-field">
-                <span className="form-label">Logradouro</span>
-                <input
-                    className="form-input"
-                    placeholder="Logradouro"
-                    style={{gridColumn: 'span 3'}}
-                    value={enderecos[0]?.logradouro ?? ''}
-                    onChange={(event) => setEnderecos([{...enderecos[0], logradouro: event.target.value}])}
-                />
-            </label>
-            <label className="form-field">
+            <label className="form-field" style={{gridColumn: '1 / -1'}}>
                 <span className="form-label">Complemento</span>
                 <textarea
                     className="form-input"
                     placeholder="Complemento"
                     rows={3}
-                    style={{gridColumn: 'span 3', minHeight: '80px'}}
+                    style={{minHeight: '80px'}}
                     value={enderecos[0]?.complemento ?? ''}
                     onChange={(event) => setEnderecos([{...enderecos[0], complemento: event.target.value}])}
                 />

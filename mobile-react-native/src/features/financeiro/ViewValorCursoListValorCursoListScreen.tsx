@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
-import {ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View} from 'react-native';
+import {ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View} from 'react-native';
+import {Alert} from '../../shared/components/SweetAlert';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {api} from '../../shared/services/api';
 import type {ApiItem, PagedResponse} from '../../shared/types/types';

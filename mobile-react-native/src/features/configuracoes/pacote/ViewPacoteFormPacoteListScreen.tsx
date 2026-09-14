@@ -1,5 +1,6 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import {View, Text, TextInput, Button, ScrollView, StyleSheet, Alert, FlatList, TouchableOpacity} from 'react-native';
+import {View, Text, TextInput, Button, ScrollView, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
+import {Alert} from '../../../shared/components/SweetAlert';
 import {ModuleTabs} from '../ModuleTabs';
 
 const ACaoDeCampanha = [

@@ -1,7 +1,7 @@
 import React, {useState, useCallback} from 'react';
 import {ModuleList, ModuleListExtraAction} from '../../shared/components/ModuleListScreen';
 import {api} from '../../shared/services/api';
-import {Alert} from 'react-native';
+import {Alert} from '../../../shared/components/SweetAlert';
 
 export default function ViewContaGestaoContaListScreen() {
     const [notice, setNotice] = useState<string>('');

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {Alert} from '../../../shared/components/SweetAlert';
 import { useNavigation } from '@react-navigation/native';
 import { AutoComplete, type AutoCompleteOption } from '../AutoComplete';
 import { MasterDetail } from '../MasterDetail';

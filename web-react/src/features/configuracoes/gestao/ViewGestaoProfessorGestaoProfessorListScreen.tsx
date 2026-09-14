@@ -13,6 +13,7 @@ import {
   FileText,
 } from 'lucide-react';
 import {api} from '../../../shared/services/api';
+import {swalConfirm} from '../../../shared/components/swal';
 
 import {PermissionGate, usePermissions} from '../../../shared/services/permissions';
 
@@ -703,7 +704,7 @@ function GestaoTab() {
 
     async function excluirAula(aula: AulaItem) {
 
-        if (!window.confirm(`Excluir a aula "${aula.nome}"?`)) return;
+        if (!(await swalConfirm(`Excluir a aula "${aula.nome}"?`, {title: 'Excluir aula', confirmText: 'Excluir', danger: true}))) return;
 
         setAviso({tipo: 'sucesso', texto: ''});
 

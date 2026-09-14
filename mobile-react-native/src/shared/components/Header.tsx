@@ -1,6 +1,7 @@
 import React from 'react';
 import {View, StyleSheet, Text} from 'react-native';
 import {UserMenu} from './UserMenu';
+import {FavoritosButton} from '../../features/favoritos/FavoritosButton';
 
 interface HeaderProps {
     title?: string;
@@ -21,6 +22,7 @@ export function Header({title, showBack = false, onBack, style}: HeaderProps) {
                 {title && <Text style={styles.title}>{title}</Text>}
             </View>
             <View style={styles.right}>
+                <FavoritosButton />
                 <UserMenu />
             </View>
         </View>

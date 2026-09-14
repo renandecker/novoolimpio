@@ -1,5 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {ActivityIndicator, Alert, FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {ActivityIndicator, FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Alert} from '../../shared/components/SweetAlert';
+import {RowMenu} from '../../shared/components/RowMenu';
 import {useNavigation} from '@react-navigation/native';
 import {api} from '../../shared/services/api';
 
@@ -155,17 +157,15 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                                     {String(record.unidade_sucinto ?? '')} • {String(record.curso_nome ?? '')}
                                 </Text>
                                 <View style={styles.cardActions}>
-                                    <Pressable style={[styles.btn, styles.btnBlue]} onPress={() => abrirSelecao(id)}>
-                                        <Text style={styles.btnText}>Selecionar Oferecimentos para Editar</Text>
-                                    </Pressable>
-                                    <Pressable
-                                        style={[styles.btn, styles.btnGreen]}
-                                        onPress={() =>
-                                            navigation.navigate('view/oferecimentoComponenteCurricular/formOferecimentoCurso', {id})
-                                        }
-                                    >
-                                        <Text style={styles.btnText}>Editar Todos</Text>
-                                    </Pressable>
+                                    <RowMenu
+                                        icon={<Text style={{fontSize: 20}}>⚙️</Text>}
+                                        className="btnblue"
+                                        title="Ações"
+                                        items={[
+                                            {key: 'selecionar', label: 'Selecionar Oferecimentos para Editar', className: 'btnblue', onSelect: () => abrirSelecao(id)},
+                                            {key: 'editarTodos', label: 'Editar Todos', className: 'btngreen', onSelect: () => navigation.navigate('view/oferecimentoComponenteCurricular/formOferecimentoCurso', {id})},
+                                        ]}
+                                    />
                                 </View>
                             </View>
                         );

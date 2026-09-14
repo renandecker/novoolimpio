@@ -6,6 +6,7 @@ import type {ApiItem} from '../../shared/types/index';
 import type {SearchFilterRequest} from '../../shared/types/types';
 import {legacyClassName} from '../../shared/components/DataTable';
 import {ModuleFilter} from '../../shared/components/ModuleFilter';
+import {swalConfirm} from '../../shared/components/swal';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -223,7 +224,7 @@ const openFluxoCaixa = async (row: CaixaRow) => {
     };
 
     const handleExcluirMovimentacao = async (mov: Movimentacao) => {
-        if (window.confirm(`Excluir movimentação ${mov.id}?`)) {
+        if (await swalConfirm(`Excluir movimentação ${mov.id}?`, {title: 'Excluir movimentação', confirmText: 'Excluir', danger: true})) {
             try {
                 await api.delete(`/api/financeiro/movimentacao-financeira/${mov.id}`);
                 alert('Movimentação excluída com sucesso');
@@ -425,7 +426,7 @@ const openFluxoCaixa = async (row: CaixaRow) => {
                                                                className="btn-action btnred"
                                                                title="Fechar Caixa"
                                                                onClick={async () => {
-                                                                   if (window.confirm('Tem certeza que deseja fechar este caixa?')) {
+                                                                   if (await swalConfirm('Tem certeza que deseja fechar este caixa?', {title: 'Fechar caixa', confirmText: 'Fechar caixa', danger: true})) {
                                                                        try {
                                                                            await api.post(`/api/financeiro/caixa/${caixaRow.id}/fechar`);
                                                                            alert('Caixa fechado com sucesso');

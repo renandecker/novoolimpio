@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {ScrollView, StyleSheet, Text, TextInput, View, Pressable, Alert, Image, Platform} from 'react-native';
+import {ScrollView, StyleSheet, Text, TextInput, View, Pressable, Image, Platform} from 'react-native';
+import {Alert} from '../../shared/components/SweetAlert';
 import {useQuery} from '@tanstack/react-query';
 import {MasterDetail} from '../MasterDetail';
 import {Colors, Spacing, BorderRadius, Typography, Shadows} from '../theme';

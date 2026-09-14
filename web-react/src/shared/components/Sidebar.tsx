@@ -59,6 +59,9 @@ function isHiddenModulo(m: Modulo): boolean {
 export default function Sidebar({onPhotoAction}: SidebarProps) {
     const {session} = useAuth();
     const {menuIcon} = useMenuIcon();
+    const [expanded, setExpanded] = useState(false);
+    const [search, setSearch] = useState('');
+
     const rawModulos = (session?.modules ?? []) as Modulo[];
     // Filtra módulos ocultos e também filhos de módulos ocultos (recursivo)
     const modulos = useMemo(() => {
@@ -78,7 +81,6 @@ export default function Sidebar({onPhotoAction}: SidebarProps) {
         return rawModulos.filter(m => !hiddenIds.has(m.id));
     }, [rawModulos]);
     const defaultPath = session?.defaultOutcome || '/default';
-    const [search, setSearch] = useState('');
 
     const childrenByParent = useMemo(() => {
         const map = new Map<number, Modulo[]>();
@@ -95,7 +97,7 @@ export default function Sidebar({onPhotoAction}: SidebarProps) {
 
     const topModulos = modulos.filter(m => m.antecessorId == null).sort((a, b) => a.ordem - b.ordem);
 
-const flatItems = useMemo(() => {
+    const flatItems = useMemo(() => {
         const items: { label: string; parent: string | null; path: string; icon: React.ReactNode; keywords: string }[] = [
             {label: 'Início', parent: null, path: defaultPath, icon: menuIcon('paginainicial'), keywords: 'inicio paginainicial'},
             {label: 'Configuração Documentos', parent: null, path: CONFIGURACAO_DOCUMENTOS_OUTCOME, icon: menuIcon('configuracao documentos'), keywords: 'configuracao documentos relatorios'},
@@ -126,29 +128,37 @@ const flatItems = useMemo(() => {
     }, [query, flatItems]);
 
     return (
-        <aside className="sidebar">
+        <aside
+            className={`sidebar ${expanded ? 'expanded' : ''}`}
+            onMouseEnter={() => setExpanded(true)}
+            onMouseLeave={() => setExpanded(false)}
+            onFocus={() => setExpanded(true)}
+            onBlur={() => setExpanded(false)}
+        >
             <div className="sidebar-header">
                 <span className="sidebar-logo">O</span>
                 <span className="sidebar-title">Olímpio</span>
             </div>
             <nav className="sidebar-nav">
-                <div className="sidebar-search">
-                    <span className="sidebar-search-icon"><SearchIcon/></span>
-                    <input
-                        type="text"
-                        className="sidebar-search-input"
-                        placeholder="Buscar menu ou tela..."
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        aria-label="Buscar menu ou tela"
-                    />
-                    {search && (
-                        <button type="button" className="sidebar-search-clear" onClick={() => setSearch('')}
-                                aria-label="Limpar busca">
-                            ×
-                        </button>
-                    )}
-                </div>
+                {expanded && (
+                    <div className="sidebar-search">
+                        <span className="sidebar-search-icon"><SearchIcon/></span>
+                        <input
+                            type="text"
+                            className="sidebar-search-input"
+                            placeholder="Buscar menu ou tela..."
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            aria-label="Buscar menu ou tela"
+                        />
+                        {search && (
+                            <button type="button" className="sidebar-search-clear" onClick={() => setSearch('')}
+                                    aria-label="Limpar busca">
+                                ×
+                            </button>
+                        )}
+                    </div>
+                )}
                 {searchResults ? (
                     searchResults.length === 0 ? (
                         <div className="sidebar-search-empty">Nenhum item encontrado</div>

@@ -4,7 +4,15 @@
     align-items: center;
     gap: 8px;
     position: relative;
-    min-width: 240px;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Dentro do form-field (label + input em linha), a combo preenche a coluna 2 sem vazar sobre o label */
+.form-field .autocomplete {
+    min-width: 0;
+    max-width: 100%;
 }
 
 .autocomplete-label {

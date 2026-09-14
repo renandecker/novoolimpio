@@ -1,7 +1,6 @@
 import React, {useMemo, useState} from 'react';
 import {
     ActivityIndicator,
-    Alert,
     FlatList,
     Linking,
     Modal,
@@ -12,14 +11,15 @@ import {
     TextInput,
     View,
 } from 'react-native';
+import {Alert} from './SweetAlert';
 import {useQuery} from '@tanstack/react-query';
-import {PAGE_SIZES, useModulePaged} from './useModulePaged';
-import {executeAction} from './actions';
-import {can, isAdmin} from './permissions';
-import {useAuth} from './auth';
-import type {ApiItem, SearchFilterRequest, FilterCondition, QueryOperation} from './types';
-import {STRING_OPERATIONS, NUMBER_OPERATIONS} from './types';
-import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from './theme';
+import {PAGE_SIZES, useModulePaged} from '../hooks/useModulePaged';
+import {executeAction} from '../services/actions';
+import {can, isAdmin} from '../services/permissions';
+import {useAuth} from '../../features/auth/auth';
+import type {ApiItem, SearchFilterRequest, FilterCondition, QueryOperation} from '../types/types';
+import {STRING_OPERATIONS, NUMBER_OPERATIONS} from '../types/types';
+import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from '../styles/theme';
 import {RowMenu, type RowMenuItem} from './RowMenu';
 
 const PREFERRED_LABELS = ['nome', 'descricao', 'razao_social', 'nome_fantasia', 'username', 'titulo', 'rotulo', 'sigla', 'sobrenome', 'login', 'uf', 'tema'];
@@ -148,6 +148,8 @@ export function ModuleList({
     const entityTitle = toTitle(resource.replace(/^(form|list|colunas)/i, '') || resource);
 
     const screenTitle = title ?? (resource ? entityTitle : toTitle(feature) || 'Lista');
+
+    const {session} = useAuth();
 
     const canCreate = !hideCreate && can(session, 'CREATE', outcome);
     const canUpdate = !hideUpdate && can(session, 'UPDATE', outcome);

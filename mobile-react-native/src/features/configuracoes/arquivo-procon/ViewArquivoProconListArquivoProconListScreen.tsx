@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, ActivityIndicator} from 'react-native';
+import {Alert} from '../../../shared/components/SweetAlert';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import {ModuleList} from '../ModuleListScreen';

@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Alert} from 'react-native';
+import {Alert} from '../../../shared/components/SweetAlert';
 import {useQuery} from '@tanstack/react-query';
 import {api} from '../api';
 import {PermissionGate} from '../permissions';

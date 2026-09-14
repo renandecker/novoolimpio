@@ -8,9 +8,9 @@ import {
     Pressable,
     KeyboardAvoidingView,
     Platform,
-    Alert,
     ActivityIndicator,
 } from 'react-native';
+import {Alert} from '../../shared/components/SweetAlert';
 import {Colors, Spacing, BorderRadius, Typography, Shadows} from '../theme';
 import {Tabs} from '../Tabs';
 import {api} from '../api';

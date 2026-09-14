@@ -7,6 +7,7 @@ import type {SearchFilterRequest} from '../../../shared/types/types';
 import {legacyClassName} from '../../../shared/components/DataTable';
 import {ModuleFilter} from '../../../shared/components/ModuleFilter';
 import BreadCrumb from '../../../shared/components/BreadCrumb';
+import {swalConfirm} from '../../../shared/components/swal';
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
@@ -212,7 +213,7 @@ export default function ViewContaGestaoContaListScreen() {
     };
 
     const handleDelete = async (item: ApiItem) => {
-        if (!window.confirm('Deseja realmente desativar esta conta?')) return;
+        if (!(await swalConfirm('Deseja realmente desativar esta conta?', {title: 'Desativar conta', confirmText: 'Desativar', danger: true}))) return;
         try {
             await api.post(`/api/conta/gestaoConta/${item.id}/situacao`, {ativo: false});
             setNotice('Conta desativada com sucesso');
@@ -233,7 +234,7 @@ export default function ViewContaGestaoContaListScreen() {
     };
 
     const handleCreatePagamentos = async (item: ApiItem) => {
-        if (!window.confirm('Deseja criar pagamentos para esta conta?')) return;
+        if (!(await swalConfirm('Deseja criar pagamentos para esta conta?', {title: 'Criar pagamentos', confirmText: 'Criar'}))) return;
         try {
             await api.post(`/api/conta/gestaoConta/${item.id}/criar-pagamentos`);
             setNotice('Pagamentos criados com sucesso');

@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {Modal, Pressable, StyleSheet, Text, View} from 'react-native';
-import {ModuleList} from '../ModuleListScreen';
-import {CancelamentoModal} from '../CancelamentoModal';
+import {ModuleList} from '../../shared/components/ModuleListScreen';
+import {CancelamentoModal} from '../../shared/components/CancelamentoModal';
 import {RowMenu, type RowMenuItem} from '../../shared/components/RowMenu';
 
 // Actions grouped by category - mirrors <p:menuButton> groups in gestaoAluno.xhtml

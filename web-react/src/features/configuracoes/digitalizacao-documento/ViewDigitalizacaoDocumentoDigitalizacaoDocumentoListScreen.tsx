@@ -11,6 +11,7 @@ import {api} from '../../../shared/services/api';
 import type {ApiItem} from '../../../shared/types/types';
 import {TURMA_SOURCE, TURMA_COLUMNS, TURMA_SEARCH} from '../../../shared/services/masterDetailSources';
 import {API_PATHS} from '../../../shared/services/apiPaths';
+import {swalConfirm} from '../../../shared/components/swal';
 
 interface Contrato {
   id: number;
@@ -725,11 +726,11 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                                    type="button"
                                    className="btn-action btnred"
                                    title="Remover"
-                                   onClick={() => {
-                                     if (confirm('Deseja realmente excluir este documento?')) {
-                                       api.delete(`${API_PATHS.view.digitalizacaoDocumento.salvarDocumentoAluno}/${doc.id}`).then(() => onAlunoSelect({id: selectedPessoa!.id, label: `${selectedPessoa!.pessoaFisica.nome} (${selectedPessoa!.pessoaFisica.cpf})`}));
-                                     }
-                                   }}
+onClick={async () => {
+                                      if (await swalConfirm('Deseja realmente excluir este documento?', {title: 'Excluir documento', confirmText: 'Excluir', danger: true})) {
+                                        api.delete(`${API_PATHS.view.digitalizacaoDocumento.salvarDocumentoAluno}/${doc.id}`).then(() => onAlunoSelect({id: selectedPessoa!.id, label: `${selectedPessoa!.pessoaFisica.nome} (${selectedPessoa!.pessoaFisica.cpf})`}));
+                                      }
+                                    }}
                                  >
                                    🗑
                                  </button>

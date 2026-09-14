@@ -1,5 +1,6 @@
 import React, {useState, useCallback} from 'react';
-import {Alert, Modal, Pressable, StyleSheet, Text, View} from 'react-native';
+import {Modal, Pressable, StyleSheet, Text, View} from 'react-native';
+import {Alert} from '../../shared/components/SweetAlert';
 import {ModuleList, type ModuleListExtraAction} from '../../shared/components/ModuleListScreen';
 import {MasterDetail} from '../../MasterDetail';
 import {Tabs} from '../../Tabs';

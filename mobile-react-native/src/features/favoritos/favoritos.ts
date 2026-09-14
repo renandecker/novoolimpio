@@ -1,4 +1,4 @@
-import {api} from './api';
+import {api} from '../../shared/services/api';
 
 // Espelha br.com.sol7.olimpio.control.controllers.basico.UsuarioLogadoController#listFavoritos:
 // combina FavoritoUsuario (favoritos do próprio usuário) + FavoritoPerfil (favoritos do perfil),

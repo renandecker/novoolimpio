@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {Alert} from '../../../shared/components/SweetAlert';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { api } from '../api';
 import { MasterDetail } from '../MasterDetail';

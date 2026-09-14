@@ -9,6 +9,7 @@ import jakarta.ws.rs.core.*;
 
 import java.util.List;
 
+import br.com.sol7.olimpio.basico.logradouro.dto.BuscarEnderecoResponse;
 import br.com.sol7.olimpio.basico.logradouro.dto.LogradouroRequest;
 import br.com.sol7.olimpio.basico.logradouro.dto.LogradouroResponse;
 import br.com.sol7.olimpio.basico.logradouro.dto.TrocaLogradourosRequest;
@@ -165,6 +166,13 @@ public class LogradouroController {
     @Path("/buscar-endereco")
     public Uni<Void> buscarEndereco() {
         return service.buscarEndereco();
+    }
+
+
+    @GET
+    @Path("/buscar-endereco-por-cep")
+    public Uni<BuscarEnderecoResponse> buscarEnderecoPorCep(@QueryParam("cep") String cep) {
+        return service.buscarEnderecoPorCep(cep);
     }
 
 

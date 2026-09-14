@@ -11,6 +11,12 @@ import {
 } from 'react-native';
 import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from './theme';
 
+export interface FormFieldAction {
+    label: string;
+    disabled?: boolean;
+    onPress: (helpers: {value: unknown; setValue: (name: string, value: unknown) => void; values: Record<string, unknown>}) => void | Promise<void>;
+}
+
 export interface FormFieldConfig {
     name: string;
     label: string;
@@ -24,6 +30,7 @@ export interface FormFieldConfig {
     autoCompleteSearchKeys?: string[];
     autoCompleteColumns?: any[];
     full?: boolean;
+    actions?: FormFieldAction[];
 }
 
 export interface FormTabConfig {
@@ -109,26 +116,64 @@ export function FormLayout({
             keyboardType: field.type === 'number' ? 'numeric' : field.type === 'email' ? 'email-address' : 'default',
         });
 
+        const hasActions = !!field.actions && field.actions.length > 0;
+
+        const renderControl = () => (
+            <View style={styles.fieldControl}>
+                {field.type === 'select' ? (
+                    <View style={styles.selectContainer}>
+                        <TextInput
+                            {...getInputProps()}
+                            style={[styles.fieldInput, styles.selectInput]}
+                            editable={false}
+                        />
+                        <Text style={styles.selectArrow}>▾</Text>
+                    </View>
+                ) : (
+                    <TextInput {...getInputProps()} />
+                )}
+                {fieldError && <Text style={styles.fieldError}>{fieldError}</Text>}
+            </View>
+        );
+
+        const renderControlWithActions = () => (
+            <View style={styles.fieldControl}>
+                <View style={styles.actionRow}>
+                    <View style={styles.actionRowInput}>
+                        {field.type === 'select' ? (
+                            <View style={styles.selectContainer}>
+                                <TextInput
+                                    {...getInputProps()}
+                                    style={[styles.fieldInput, styles.selectInput]}
+                                    editable={false}
+                                />
+                                <Text style={styles.selectArrow}>▾</Text>
+                            </View>
+                        ) : (
+                            <TextInput {...getInputProps()} />
+                        )}
+                    </View>
+                    {field.actions!.map((action, idx) => (
+                        <Pressable
+                            key={`${action.label}-${idx}`}
+                            style={[styles.actionButton, action.disabled && styles.actionButtonDisabled]}
+                            disabled={action.disabled}
+                            onPress={() => action.onPress({value: currentValue, setValue: (name, value) => handleChange(name, value), values})}
+                        >
+                            <Text style={styles.actionButtonText}>{action.label}</Text>
+                        </Pressable>
+                    ))}
+                </View>
+                {fieldError && <Text style={styles.fieldError}>{fieldError}</Text>}
+            </View>
+        );
+
         return (
             <View key={field.name} style={[styles.fieldContainer, (field.type === 'textarea' || field.full) && styles.fieldFull]}>
                 <Text style={styles.fieldLabel}>
                     {field.label} {field.required && <Text style={styles.requiredStar}>*</Text>}
                 </Text>
-                <View style={styles.fieldControl}>
-                    {field.type === 'select' ? (
-                        <View style={styles.selectContainer}>
-                            <TextInput
-                                {...getInputProps()}
-                                style={[styles.fieldInput, styles.selectInput]}
-                                editable={false}
-                            />
-                            <Text style={styles.selectArrow}>▾</Text>
-                        </View>
-                    ) : (
-                        <TextInput {...getInputProps()} />
-                    )}
-                    {fieldError && <Text style={styles.fieldError}>{fieldError}</Text>}
-                </View>
+                {hasActions ? renderControlWithActions() : renderControl()}
             </View>
         );
     };
@@ -311,6 +356,30 @@ const styles = StyleSheet.create({
         fontSize: Typography.sizes.xs,
         color: Colors.danger,
         marginTop: 2,
+    },
+    actionRow: {
+        flexDirection: 'row',
+        gap: Spacing.sm,
+        alignItems: 'center',
+    },
+    actionRowInput: {
+        flex: 1,
+    },
+    actionButton: {
+        height: 44,
+        paddingHorizontal: Spacing.md,
+        borderRadius: BorderRadius.md,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: Colors.primary,
+    },
+    actionButtonDisabled: {
+        opacity: 0.5,
+    },
+    actionButtonText: {
+        color: Colors.textWhite,
+        fontSize: Typography.sizes.sm,
+        fontWeight: Typography.weights.semibold,
     },
     footer: {
         position: 'absolute',

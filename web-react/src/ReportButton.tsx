@@ -101,15 +101,18 @@ export function ReportButton() {
     }, [open]);
 
     const handleOpen = () => {
-        setPage(0);
-        setAllItems([]);
+        if (page !== 0) {
+            setPage(0);
+            setAllItems([]);
+        }
         setSearchTerm('');
         setDebouncedSearch('');
         setOpen(!open);
     };
 
     const totalElements = list.data?.totalElements ?? 0;
-    const hasMore = allItems.length < totalElements;
+    const displayedItems = allItems.length > 0 ? allItems : (list.data?.content ?? []);
+    const hasMore = displayedItems.length < totalElements;
 
     const handleLoadMore = () => {
         setPage((p) => p + 1);
@@ -155,13 +158,13 @@ export function ReportButton() {
                         />
                     </div>
                     <div className="bell-dropdown-list">
-                        {list.isLoading && allItems.length === 0 ? (
+                        {displayedItems.length === 0 && (list.isFetching || list.isPending) ? (
                             <p className="bell-empty">Carregando...</p>
-                        ) : allItems.length === 0 ? (
+                        ) : displayedItems.length === 0 ? (
                             <p className="bell-empty">{isSearching ? 'Nenhum relatório encontrado.' : 'Nenhum relatório disponível.'}</p>
                         ) : (
                             <>
-                                {allItems.map((item) => (
+                                {displayedItems.map((item) => (
                                     <button
                                         key={`${item.tipo}-${item.id}`}
                                         type="button"

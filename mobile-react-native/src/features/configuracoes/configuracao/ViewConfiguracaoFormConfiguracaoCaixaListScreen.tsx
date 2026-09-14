@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, TextInput, ScrollView, StyleSheet, Alert, TouchableOpacity} from 'react-native';
+import {View, Text, TextInput, ScrollView, StyleSheet, TouchableOpacity} from 'react-native';
+import {Alert} from '../../../shared/components/SweetAlert';
 import {api} from '../api';
 
 export default function ViewConfiguracaoFormConfiguracaoCaixaListScreen({navigation, route}: any) {

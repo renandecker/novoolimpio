@@ -1,6 +1,6 @@
-import React, {useRef, useState, useEffect} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, Modal, Platform} from 'react-native';
-import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from './theme';
+import React, {useState} from 'react';
+import {View, Text, StyleSheet, TouchableOpacity, Modal} from 'react-native';
+import {Colors, Spacing, BorderRadius, Typography, Shadows} from '../styles/theme';
 
 export interface RowMenuItem {
     key: string;
@@ -35,25 +35,13 @@ const CLASS_COLORS: Record<string, string> = {
 
 export function RowMenu({icon, className, title, items, triggerStyle}: RowMenuProps) {
     const [open, setOpen] = useState(false);
-    const containerRef = useRef<View>(null);
-
-    useEffect(() => {
-        if (!open) return;
-        const onClickOutside = (event: any) => {
-            if (containerRef.current && !event.target?.isConnected) return;
-            setOpen(false);
-        };
-        document.addEventListener('mousedown', onClickOutside);
-        return () => document.removeEventListener('mousedown', onClickOutside);
-    }, [open]);
 
     if (items.length === 0) return null;
 
     const bgColor = CLASS_COLORS[className] || Colors.primary;
-    const textColor = className === 'btnyellow' ? Colors.goldText : Colors.textWhite;
 
     return (
-        <View ref={containerRef} style={[styles.container, triggerStyle]}>
+        <View style={[styles.container, triggerStyle]}>
             <TouchableOpacity
                 style={[styles.trigger, {backgroundColor: bgColor}]}
                 onPress={() => setOpen(!open)}
@@ -68,8 +56,8 @@ export function RowMenu({icon, className, title, items, triggerStyle}: RowMenuPr
                 transparent={true}
                 onRequestClose={() => setOpen(false)}
             >
-                <TouchableOpacity style={styles.overlay} onPress={() => setOpen(false)} accessible={false}>
-                    <View style={styles.dropdown} onTouchStart={e => e.stopPropagation()}>
+                <TouchableOpacity style={styles.overlay} onPress={() => setOpen(false)} accessible={false} activeOpacity={1}>
+                    <View style={styles.dropdown}>
                         {title && (
                             <View style={styles.dropdownHeader}>
                                 <Text style={styles.dropdownTitle}>{title}</Text>
@@ -78,7 +66,7 @@ export function RowMenu({icon, className, title, items, triggerStyle}: RowMenuPr
                         {items.map((item) => (
                             <TouchableOpacity
                                 key={item.key}
-                                style={[styles.item, item.className && styles[item.className]]}
+                                style={styles.item}
                                 disabled={item.disabled}
                                 onPress={() => {
                                     setOpen(false);

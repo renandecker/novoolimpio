@@ -132,7 +132,7 @@ export function ModuleFilter({columns, value, onChange}: ModuleFilterProps) {
                             <Pressable style={[styles.modalButton, styles.cancelButton]} onPress={() => setVisible(false)}>
                                 <Text style={styles.cancelButtonText}>Cancelar</Text>
                             </Pressable>
-                            <Pressable style={[styles.modalButton, {backgroundColor: Colors.warningBg}]} onPress={clear}>
+                            <Pressable style={[styles.modalButton, {backgroundColor: Colors.error}]} onPress={clear}>
                                 <Text style={styles.cancelButtonText}>Limpar</Text>
                             </Pressable>
                             <Pressable style={[styles.modalButton, styles.saveButton]} onPress={apply}>

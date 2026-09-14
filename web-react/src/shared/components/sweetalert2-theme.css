@@ -1,0 +1,191 @@
+/* ============================================================
+   SweetAlert2 - Tema Olímpio (espelha o AppLayout.css)
+   Usado via ./swal.ts — respeita as variáveis CSS do sistema.
+   ============================================================ */
+
+:root {
+    --swal-font: 'Segoe UI', Arial, sans-serif;
+    --swal-navbar-start: #2f333b;
+    --swal-navbar-end: #24272e;
+    --swal-gold: #c2aa3c;
+    --swal-gold-text: #e8d27a;
+    --swal-blue-start: #337ab7;
+    --swal-blue-end: #265a88;
+    --swal-green-start: #5cb85c;
+    --swal-green-end: #3c7642;
+    --swal-red-start: rgba(255, 83, 56, 0.47);
+    --swal-red-end: #b93f2a;
+    --swal-yellow-start: #fcc574;
+    --swal-yellow-end: #faa523;
+    --swal-overlay: rgba(29, 32, 37, 0.55);
+    --swal-text-dark: #1d2025;
+    --swal-text-body: #333333;
+}
+
+.swal2-container.swal2-backdrop-show,
+.swal2-container.swal2-noanimation {
+    background-color: var(--swal-overlay);
+}
+
+.swal2-container {
+    font-family: var(--swal-font);
+    backdrop-filter: blur(2px);
+}
+
+.swal2-popup {
+    font-family: var(--swal-font);
+    background: #ffffff;
+    border: 3px solid var(--swal-gold);
+    border-radius: 12px;
+    padding: 8px 22px 22px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.swal2-title {
+    color: var(--swal-text-dark);
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    padding-top: 8px;
+}
+
+.swal2-title::after {
+    content: '';
+    display: block;
+    width: 44px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--swal-gold);
+    margin: 10px auto 0;
+}
+
+.swal2-html-container {
+    color: #7a6a1e;
+    font-size: 14px;
+    line-height: 1.5;
+    background: #f0e9c9;
+    border: 1px solid var(--swal-gold);
+    border-left: 4px solid var(--swal-gold);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 14px 16px 4px;
+}
+
+/* ---------- Ícones (cores do tema) ---------- */
+.swal2-icon {
+    border-width: 3px;
+}
+
+.swal2-icon .swal2-icon-content {
+    font-size: 42px;
+}
+
+.swal2-icon.swal2-success {
+    border-color: var(--swal-green-end);
+    color: var(--swal-green-end);
+}
+
+.swal2-icon.swal2-success .swal2-success-ring {
+    border-color: rgba(92, 184, 92, 0.35);
+}
+
+.swal2-icon.swal2-success .swal2-success-line-tip,
+.swal2-icon.swal2-success .swal2-success-line-long {
+    background-color: var(--swal-green-end);
+}
+
+.swal2-icon.swal2-error {
+    border-color: var(--swal-red-end);
+}
+
+.swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
+    background-color: var(--swal-red-end);
+}
+
+.swal2-icon.swal2-warning {
+    border-color: var(--swal-yellow-end);
+    color: var(--swal-yellow-end);
+}
+
+.swal2-icon.swal2-info {
+    border-color: var(--swal-blue-end);
+    color: var(--swal-blue-end);
+}
+
+.swal2-icon.swal2-question {
+    border-color: var(--swal-blue-end);
+    color: var(--swal-blue-end);
+}
+
+/* ---------- Barra superior dourada (padrão do cabeçalho do layout) ---------- */
+.swal2-popup {
+    position: relative;
+}
+
+.swal2-popup::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    border-radius: 8px 8px 0 0;
+    background: linear-gradient(180deg, var(--swal-navbar-start) 0%, var(--swal-navbar-end) 100%);
+    border-bottom: 2px solid var(--swal-gold);
+}
+
+/* ---------- Botões ---------- */
+.swal2-actions {
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.swal2-styled.swal2-confirm,
+.swal2-styled.swal2-cancel {
+    font-family: var(--swal-font);
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 4px;
+    padding: 8px 22px;
+    border: 1px solid rgba(0, 0, 0, 0.18);
+    box-shadow: none;
+    min-width: 110px;
+    transition: filter 0.15s ease;
+}
+
+.swal2-styled.swal2-confirm {
+    background-image: linear-gradient(180deg, #fcc574 0%, #faa523 100%);
+    background-color: #faa523;
+    color: #2f333b;
+}
+
+.swal2-styled.swal2-confirm:hover {
+    filter: brightness(1.08);
+}
+
+.swal2-styled.swal2-confirm:focus {
+    box-shadow: 0 0 0 3px rgba(194, 170, 60, 0.4);
+}
+
+.swal2-styled.swal2-cancel {
+    background-image: linear-gradient(180deg, #ffffff 0%, #f1f1f1 100%);
+    background-color: #ffffff;
+    color: var(--swal-text-body);
+    border-color: #d3d3d3;
+}
+
+.swal2-styled.swal2-cancel:hover {
+    background-image: linear-gradient(180deg, #f7f7f7 0%, #e8e8e8 100%);
+}
+
+/* Confirmação destrutiva (exclusão) */
+.swal2-styled.swal2-confirm.swal-destructive {
+    background-image: linear-gradient(180deg, var(--swal-red-start) 0%, var(--swal-red-end) 100%);
+    background-color: var(--swal-red-end);
+    color: #ffffff;
+}
+
+/* ---------- Timer / detalhes ---------- */
+.swal2-timer-progress-bar {
+    background: linear-gradient(90deg, var(--swal-gold), var(--swal-blue-start));
+}

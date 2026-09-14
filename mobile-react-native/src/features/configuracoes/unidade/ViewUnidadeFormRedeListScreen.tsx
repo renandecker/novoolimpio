@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {Alert, ScrollView, StyleSheet, Text, TextInput, View} from 'react-native';
+import {ScrollView, StyleSheet, Text, TextInput, View} from 'react-native';
+import {Alert} from '../../../shared/components/SweetAlert';
 import {useRoute} from '@react-navigation/native';
 import {api} from '../api';
 import {Colors, Spacing, BorderRadius, Typography, Shadows} from '../theme';

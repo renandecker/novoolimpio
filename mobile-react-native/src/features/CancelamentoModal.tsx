@@ -1,0 +1,1 @@
+export {CancelamentoModal} from '../shared/components/CancelamentoModal';

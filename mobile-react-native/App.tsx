@@ -1,5 +1,6 @@
 import React from 'react';
 import {AuthProvider, useAuth} from './src/auth';
+import {SweetAlertProvider} from './src/shared/components/SweetAlert';
 import LoginScreen from './src/LoginScreen';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -882,7 +883,7 @@ function AppRoutes() {
 }
 
 export default function App() {
-    return <AuthProvider><AuthenticatedApp/></AuthProvider>
+    return <SweetAlertProvider><AuthProvider><AuthenticatedApp/></AuthProvider></SweetAlertProvider>
 }
 
 function AuthenticatedApp() {

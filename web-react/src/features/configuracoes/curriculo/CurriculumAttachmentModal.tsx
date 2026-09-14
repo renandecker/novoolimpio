@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef} from 'react';
 import {api} from '../../../shared/services/api';
+import {swalConfirm} from '../../../shared/components/swal';
 
 interface CurriculumAttachmentModalProps {
     visible: boolean;
@@ -76,7 +77,7 @@ export function CurriculumAttachmentModal({
     };
 
     const removeDocument = async () => {
-        if (!window.confirm('Tem certeza que deseja remover o documento de currículo?')) return;
+        if (!(await swalConfirm('Tem certeza que deseja remover o documento de currículo?', {title: 'Remover documento', confirmText: 'Remover', danger: true}))) return;
         setUploading(true);
         try {
             await api.put(`/api/basico/usuario/curriculo-base64`, {curriculo: ''});

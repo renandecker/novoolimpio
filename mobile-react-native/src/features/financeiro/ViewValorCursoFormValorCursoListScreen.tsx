@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {ScrollView, StyleSheet, Text, TextInput, View, Pressable, Alert, ActivityIndicator} from 'react-native';
+import {ScrollView, StyleSheet, Text, TextInput, View, Pressable, ActivityIndicator} from 'react-native';
+import {Alert} from '../../shared/components/SweetAlert';
 import {useQuery} from '@tanstack/react-query';
 import {api} from '../../shared/services/api';
 import type {ApiItem} from '../../shared/types/types';

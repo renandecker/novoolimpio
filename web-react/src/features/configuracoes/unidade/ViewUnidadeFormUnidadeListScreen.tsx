@@ -124,7 +124,7 @@ export default function ViewUnidadeFormUnidadeListScreen() {
 
                 {name: 'ativo', label: 'Ativo', type: 'select', options: [{value: 'true', label: 'Sim'}, {value: 'false', label: 'Não'}]},
 
-                {name: 'responsavel', label: 'Responsável', type: 'autoComplete', autoCompleteSource: '/api/basico/pessoa-fisica/autoCompleteAcao', span: 3},
+                {name: 'responsavel', label: 'Responsável', type: 'autoComplete', autoCompleteSource: '/api/basico/pessoa-fisica/auto-complete-acao', span: 3},
 
                 {name: 'diretorEnsino', label: 'Diretor de Ensino', span: 3},
 
@@ -190,13 +190,13 @@ export default function ViewUnidadeFormUnidadeListScreen() {
 
                 {name: 'cidade', label: 'Cidade', type: 'autoComplete', autoCompleteSource: '/api/basico/cidade/autoComplete', required: true},
 
-                {name: 'bairro', label: 'Bairro', type: 'autoComplete', autoCompleteSource: '/api/basico/bairro/autoComplete', required: true},
+                {name: 'bairro', label: 'Bairro', type: 'autoComplete', autoCompleteSource: '/api/basico/bairro/auto-complete', required: true},
 
-                {name: 'logradouro', label: 'Logradouro', type: 'autoComplete', autoCompleteSource: '/api/basico/logradouro/autoComplete', required: true, span: 3},
+                {name: 'logradouro', label: 'Logradouro', type: 'autoComplete', autoCompleteSource: '/api/basico/logradouro/auto-complete', required: true, span: 3},
 
                 {name: 'numero', label: 'Número', type: 'number', required: true},
 
-                {name: 'regiao', label: 'Região', type: 'autoComplete', autoCompleteSource: '/api/basico/regiao/listAll', required: true},
+                {name: 'regiao', label: 'Região', type: 'autoComplete', autoCompleteSource: '/api/basico/regiao', required: true},
 
                 {name: 'pontoReferencia', label: 'Ponto de Referência', span: 3},
 
@@ -214,7 +214,7 @@ export default function ViewUnidadeFormUnidadeListScreen() {
 
             fields: [
 
-                {name: 'turnoFuncionario', label: 'Modelo de Turno', type: 'autoComplete', autoCompleteSource: '/api/central/turno-funcionario', span: 3},
+                {name: 'turnoFuncionario', label: 'Modelo de Turno', type: 'autoComplete', autoCompleteSource: '/api/basico/turno-funcionario', span: 3},
 
             ],
 
