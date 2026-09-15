@@ -1,8 +1,10 @@
-﻿import {PermissionGate} from '../../shared/services/permissions';
+﻿import {useState} from 'react';
+import {PermissionGate} from '../../shared/services/permissions';
 import {ModuleTabs} from '../../shared/components/ModuleTabs';
-import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../../shared/services/masterDetailSources';
+import type {AutoCompleteOption} from '../../shared/components/AutoComplete';
 
 export default function ViewValorProdutoFormValorProdutoListScreen() {
+    const [unidade, setUnidade] = useState<AutoCompleteOption | null>(null);
     return (
         <PermissionGate permission="READ">
             <main>
@@ -13,12 +15,10 @@ export default function ViewValorProdutoFormValorProdutoListScreen() {
                         {
                             key: 'unidade',
                             label: 'Unidade',
-                            masterDetail: {
+                            unidadeCombo: {
                                 label: 'Unidade',
-                                source: UNIDADE_SOURCE,
-                                valueKey: 'id',
-                                searchKeys: UNIDADE_SEARCH,
-                                columns: UNIDADE_COLUMNS
+                                value: unidade,
+                                onChange: setUnidade,
                             }
                         },
                         {key: 'formaPagamento', label: 'Forma Pagamento', empty: 'Conteúdo de Forma Pagamento.'},

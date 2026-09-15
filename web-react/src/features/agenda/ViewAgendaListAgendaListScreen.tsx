@@ -20,7 +20,7 @@ const simNao = (chave: string) => (item: ApiItem): ReactNode => {
 const COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'Código'},
     {key: 'descricao', label: 'Descrição'},
-    {key: 'unidade_descricao', label: 'Id_unidade'},
+    {key: 'unidade_descricao', label: 'Unidade'},
     {key: 'tipo_agenda_descricao', label: 'Tipo da Agenda'},
     {key: 'status_compromisso_descricao', label: 'Início Status do Compromisso'},
     {key: 'proprio', label: 'Própria Agenda', render: simNao('proprio')},

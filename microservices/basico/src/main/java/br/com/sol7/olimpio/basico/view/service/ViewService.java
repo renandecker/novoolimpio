@@ -126,6 +126,37 @@ public class ViewService {
             "id", "id_pacote", "status", "direcionamento", "id_coordenador",
             "pacote_descricao", "pacote_data_criacao", "acao_data_final", "quantidade_prospecto");
 
+    // Compromisso list: espelha o listCompromisso.xhtml (colunas de relacionamentos aninhados
+    // + campos de negocio usados pelas acoes por linha: observacao, ativo, prospecto, status/proximo status, resultados).
+    private static final String COMPROMISSO_LIST_SELECT =
+            "SELECT c.id, c.descricao, c.data, c.observacao, c.ativo, c.id_prospecto, "
+                    + "uAgendou.login AS usuario_descricao, "
+                    + "uAtend.login AS atendente_descricao, "
+                    + "uFinalizou.login AS usuario_finalizou_descricao, "
+                    + "a.descricao AS agenda_descricao, "
+                    + "ta.descricao AS tipo_agenda_descricao, "
+                    + "h.hora AS horario_hora, "
+                    + "s.descricao AS status_compromisso_descricao, "
+                    + "s.cor AS status_compromisso_cor, "
+                    + "s.id_prox_status_compromisso AS id_prox_status_compromisso, "
+                    + "ps.descricao AS prox_status_compromisso_descricao, "
+                    + "EXISTS(SELECT 1 FROM bas_compromisso_resultado cr WHERE cr.id_compromisso = c.id) AS tem_resultados "
+                    + "FROM bas_compromisso c "
+                    + "LEFT JOIN bas_usuario uAgendou ON uAgendou.id = c.id_usuario "
+                    + "LEFT JOIN bas_usuario uAtend ON uAtend.id = c.id_atendente "
+                    + "LEFT JOIN bas_usuario uFinalizou ON uFinalizou.id = c.id_usuario_finalizou "
+                    + "LEFT JOIN bas_agenda a ON a.id = c.id_agenda "
+                    + "LEFT JOIN bas_tipo_agenda ta ON ta.id = a.id_tipo_agenda "
+                    + "LEFT JOIN bas_horario h ON h.id = c.id_horario "
+                    + "LEFT JOIN bas_status_compromisso s ON s.id = c.id_status_compromisso "
+                    + "LEFT JOIN bas_status_compromisso ps ON ps.id = s.id_prox_status_compromisso";
+    private static final List<String> COMPROMISSO_LIST_COLUMNS = List.of(
+            "id", "descricao", "data", "observacao", "ativo", "id_prospecto",
+            "usuario_descricao", "atendente_descricao", "usuario_finalizou_descricao",
+            "agenda_descricao", "tipo_agenda_descricao", "horario_hora",
+            "status_compromisso_descricao", "status_compromisso_cor",
+            "id_prox_status_compromisso", "prox_status_compromisso_descricao", "tem_resultados");
+
     // Pessoa Fisica / Juridica: base SEMPRE na tabela especifica (pf / pj) com JOIN na bas_pessoa.
     // Garante que /view/pessoa/listPessoaFisica exiba SOMENTE pessoas fisicas e
     // /view/pessoa/listPessoaJuridica exiba SOMENTE pessoas juridicas (nunca todas as pessoas).
@@ -196,6 +227,7 @@ public class ViewService {
             Map.entry("meta/indicadorMetaDinamica", new CuratedSelect(INDICADOR_META_DINAMICA_SELECT, INDICADOR_META_DINAMICA_COLUMNS)),
             Map.entry("operacional/listOperacional", new CuratedSelect(OPERACIONAL_LIST_SELECT, OPERACIONAL_LIST_COLUMNS)),
             Map.entry("operacional/formOperacional", new CuratedSelect(OPERACIONAL_LIST_SELECT, OPERACIONAL_LIST_COLUMNS)),
+            Map.entry("compromisso/listCompromisso", new CuratedSelect(COMPROMISSO_LIST_SELECT, COMPROMISSO_LIST_COLUMNS)),
             Map.entry("pessoa/listPessoaJuridica", new CuratedSelect(PESSOA_JURIDICA_SELECT, PESSOA_JURIDICA_COLUMNS)),
             Map.entry("pessoa/formPessoaJuridica", new CuratedSelect(PESSOA_JURIDICA_SELECT, PESSOA_JURIDICA_COLUMNS)),
             Map.entry("pessoa-juridica/listPessoaJuridica", new CuratedSelect(PESSOA_JURIDICA_SELECT, PESSOA_JURIDICA_COLUMNS)),

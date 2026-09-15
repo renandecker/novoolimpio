@@ -3,6 +3,8 @@ import type {ReactNode} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {api} from '../services/api';
 import type {ApiItem} from '../types/index';
+import {AutoComplete, AutoCompleteOption} from './AutoComplete';
+import {fetchUnidadeOptions, fetchUnidadeById, UNIDADE_LIST_SOURCE} from './UnidadeCombo';
 
 export interface MasterDetailColumn {
     key: string;
@@ -26,6 +28,7 @@ const toTitle = (value: string) =>
     value
         .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
         .replace(/([a-z\d])([A-Z])/g, '$1 $2')
+        .replace(/_/g, ' ')
         .replace(/^./, (c) => c.toUpperCase());
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
@@ -105,7 +108,7 @@ const deriveColumns = (item: ApiItem): MasterDetailColumn[] => {
         .map((key) => {
             const base = fkBase(key);
             const hasDescription = Boolean(base && record[`${base}_descricao`] !== undefined);
-            return {key, label: hasDescription ? toTitle(base) : toTitle(key)};
+            return {key, label: hasDescription ? toTitle(base) : toTitle(base ?? key)};
         });
 };
 
@@ -122,7 +125,10 @@ export function MasterDetail({
     const [query, setQuery] = useState('');
     const [open, setOpen] = useState(false);
     const [selected, setSelected] = useState<ApiItem | null>(null);
+    const [autoCompleteOpt, setAutoCompleteOpt] = useState<AutoCompleteOption | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+
+    const isUnidade = source === UNIDADE_LIST_SOURCE || source.includes('unidade');
 
     const {data: all = []} = useQuery({
         queryKey: [source, 'master-detail'],
@@ -153,6 +159,7 @@ export function MasterDetail({
         if (!existing) onChange([...items, selected]);
         setSelected(null);
         setQuery('');
+        setAutoCompleteOpt(null);
         setOpen(false);
         inputRef.current?.focus();
     };
@@ -164,6 +171,33 @@ export function MasterDetail({
 
     const removeItem = (item: ApiItem) => {
         onChange(items.filter((i) => String(asRecord(i)[valueKey]) !== String(asRecord(item)[valueKey])));
+    };
+
+    const handleAutoCompleteChange = async (opt: AutoCompleteOption | null) => {
+        setAutoCompleteOpt(opt);
+        if (opt && opt.id) {
+            // busca o item completo no all ou via api se necessário para ter as colunas corretas
+            const found = all.find(i => String(asRecord(i)[valueKey]) === String(opt.id));
+            if (found) {
+                setSelected(found);
+                const desc = detailCols.map((col) => renderValue(found, col.key)).filter(Boolean).join(' - ');
+                setQuery(desc || opt.label);
+            } else {
+                try {
+                    const {data} = await api.get(`${source}/${opt.id}`);
+                    if (data) {
+                        setSelected(data);
+                        setQuery(opt.label);
+                    }
+                } catch {
+                    setSelected({[valueKey]: opt.id, nome: opt.label} as any);
+                    setQuery(opt.label);
+                }
+            }
+        } else {
+            setSelected(null);
+            setQuery('');
+        }
     };
 
     const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem) => ReactNode }> = [
@@ -188,30 +222,46 @@ export function MasterDetail({
         <div className="master-detail">
             <span className="form-label master-detail-label">{label}</span>
             <div className="master-detail-inputs">
-                <div className="master-detail-search">
-                    <input
-                        ref={inputRef}
-                        className="form-input"
-                        value={query}
-                        placeholder="Digite para buscar..."
-                        onFocus={() => setOpen(true)}
-                        onChange={(event) => {
-                            setQuery(event.target.value);
-                            setSelected(null);
-                        }}
-                    />
-                    {open && suggestions.length > 0 && (
-                        <ul className="master-detail-suggestions">
-                            {suggestions.map((item) => (
-                                <li key={String(asRecord(item)[valueKey])}>
-                                    <button type="button" onClick={() => addSuggestion(item)}>
-                                        {detailCols.map((col) => renderValue(item, col.key)).filter(Boolean).join(' - ') || `#${String(asRecord(item)[valueKey])}`}
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
+                {isUnidade ? (
+                    <div style={{flex: 1, display: 'flex', gap: '8px', alignItems: 'center'}}>
+                        <div style={{flex: 1}}>
+                            <AutoComplete
+                                value={autoCompleteOpt}
+                                onChange={handleAutoCompleteChange}
+                                fetchOptions={fetchUnidadeOptions}
+                                fetchById={fetchUnidadeById}
+                                minChars={2}
+                                minDropdownResults={0}
+                                placeholder="Digite para buscar unidade..."
+                            />
+                        </div>
+                    </div>
+                ) : (
+                    <div className="master-detail-search" style={{flex: 1}}>
+                        <input
+                            ref={inputRef}
+                            className="form-input"
+                            value={query}
+                            placeholder="Digite para buscar..."
+                            onFocus={() => setOpen(true)}
+                            onChange={(event) => {
+                                setQuery(event.target.value);
+                                setSelected(null);
+                            }}
+                        />
+                        {open && suggestions.length > 0 && (
+                            <ul className="master-detail-suggestions">
+                                {suggestions.map((item) => (
+                                    <li key={String(asRecord(item)[valueKey])}>
+                                        <button type="button" onClick={() => addSuggestion(item)}>
+                                            {detailCols.map((col) => renderValue(item, col.key)).filter(Boolean).join(' - ') || `#${String(asRecord(item)[valueKey])}`}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                )}
                 <button
                     type="button"
                     className="btn-add"

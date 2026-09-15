@@ -2,8 +2,6 @@ import React from 'react';
 import {ModuleWizard} from '../../shared/components/ModuleWizard';
 import {
     UNIDADE_SOURCE,
-    UNIDADE_COLUMNS,
-    UNIDADE_SEARCH,
     COMPONENTE_SOURCE,
     COMPONENTE_COLUMNS,
     COMPONENTE_SEARCH,
@@ -80,12 +78,10 @@ export default function ViewCurriculoFormCurriculoListScreen({
                 {
                     key: 'unidade',
                     label: 'Unidade',
-                    masterDetail: {
-                        label: 'Unidade',
+                    combo: {
+                        label: 'Unidade *',
                         source: UNIDADE_SOURCE,
                         valueKey: 'id',
-                        searchKeys: UNIDADE_SEARCH,
-                        columns: UNIDADE_COLUMNS,
                         loadPath: '/api/educacao/curriculo-unidade',
                         loadParam: 'curriculoId',
                         linkKey: 'unidadeId',

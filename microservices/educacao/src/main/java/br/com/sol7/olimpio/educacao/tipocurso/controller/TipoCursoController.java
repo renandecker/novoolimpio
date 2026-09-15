@@ -8,6 +8,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Path("/api/educacao/tipo-curso")
 @Produces(MediaType.APPLICATION_JSON)
@@ -54,6 +55,23 @@ public class TipoCursoController {
     @Path("/auto-complete")
     public Uni<List<Long>> autoComplete(@QueryParam("query") String query) {
         return service.autoComplete(query);
+    }
+
+    @GET
+    @Path("/opcoes")
+    public Uni<List<Map<String, Object>>> opcoes(@QueryParam("query") String query) {
+        return service.list().map(list -> {
+            String q = query == null ? "" : query.toLowerCase().trim();
+            return list.stream()
+                    .filter(r -> q.isEmpty() || (r.descricao() != null && r.descricao().toLowerCase().contains(q)))
+                    .map(r -> {
+                        Map<String, Object> m = new java.util.LinkedHashMap<>();
+                        m.put("id", r.id());
+                        m.put("label", r.descricao() != null ? r.descricao() : "#" + r.id());
+                        m.put("descricao", r.descricao());
+                        return m;
+                    }).toList();
+        });
     }
 
 }

@@ -64,6 +64,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
     const [usuarioId, setUsuarioId] = useState('');
     const [unidadeId, setUnidadeId] = useState('');
     const [caixa, setCaixa] = useState<Caixa | null>(null);
+    const [stepIndex, setStepIndex] = useState(0);
     const [loading, setLoading] = useState(false);
     const [erro, setErro] = useState('');
     const [mensagem, setMensagem] = useState('');
@@ -145,6 +146,14 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                 if (caixaId) {
                     const {data} = await api.get<Caixa>(`/api/financeiro/caixa/${caixaId}`);
                     setCaixa(data);
+                    if (data.dataFechamento) {
+                        setMensagem('O caixa do dia já foi fechado e não pode ser aberto novamente hoje.');
+                        setStepIndex(0);
+                    } else {
+                        setStepIndex(1);
+                    }
+                } else {
+                    setStepIndex(0);
                 }
                 const {data: sugerido} = await api.get<number | null>('/api/financeiro/caixa/fundo-caixa-sugerido', {
                     params: {
@@ -169,23 +178,9 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
             });
             setCaixa(data);
             setMensagem('Caixa aberto com sucesso!');
+            setStepIndex(1);
         } catch (e: any) {
             setErro(e?.response?.data?.message ?? 'Ocorreu um erro ao abrir o caixa!');
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    async function reabrirCaixa() {
-        if (!caixa) return;
-        setLoading(true);
-        setErro('');
-        try {
-            const {data} = await api.post<Caixa>(`/api/financeiro/caixa/${caixa.id}/abrir`);
-            setCaixa(data);
-            setMensagem('Caixa aberto com sucesso!');
-        } catch {
-            setErro('Ocorreu um erro ao abrir o caixa!');
         } finally {
             setLoading(false);
         }
@@ -370,17 +365,20 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
                     {loadingUnidade && <ActivityIndicator size="small"/>}
                 </TouchableOpacity>
             </View>
-            {caixa ? (
+            {caixa && caixa.dataFechamento ? (
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Caixa #{caixa.idCaixaUnidade}</Text>
                     <Text>Aberto em: {new Date(caixa.data).toLocaleString('pt-BR')}</Text>
-                    <Text>Status: {caixa.dataFechamento ? 'Fechado' : 'Aberto'}</Text>
+                    <Text>Status: Fechado</Text>
                     <Text>Fundo de caixa: {money(caixa.fundoCaixa)}</Text>
-                    {caixa.dataFechamento && (
-                        <Pressable style={styles.primaryButton} onPress={reabrirCaixa} disabled={loading}>
-                            <RNText style={styles.primaryButtonText}>Abrir caixa novamente</RNText>
-                        </Pressable>
-                    )}
+                    <Text style={[styles.hint, {color: '#b00020'}]}>O caixa do dia já foi fechado e não pode ser aberto novamente hoje.</Text>
+                </View>
+            ) : caixa ? (
+                <View style={styles.card}>
+                    <Text style={styles.cardTitle}>Caixa #{caixa.idCaixaUnidade}</Text>
+                    <Text>Aberto em: {new Date(caixa.data).toLocaleString('pt-BR')}</Text>
+                    <Text>Status: Aberto</Text>
+                    <Text>Fundo de caixa: {money(caixa.fundoCaixa)}</Text>
                 </View>
             ) : (
                 <View>
@@ -565,8 +563,8 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
     );
 
     const steps: WizardStep[] = [
-        {key: 'configuracao', label: 'Configurações impressora', content: passo1, nextDisabled: !caixa},
-        {key: 'movimentacao', label: 'Movimentação Financeira', content: passo2, nextDisabled: !caixa},
+        {key: 'configuracao', label: 'Configurações impressora', content: passo1, nextDisabled: !caixa || !!caixa.dataFechamento},
+        {key: 'movimentacao', label: 'Movimentação Financeira', content: passo2, nextDisabled: !caixa || !!caixa.dataFechamento},
         {key: 'fechamento', label: 'Fechamento Caixa', content: passo3},
     ];
 
@@ -575,7 +573,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
             <Text style={styles.title}>Fechamento Caixa</Text>
             {!!erro && <Text style={styles.error}>{erro}</Text>}
             {!!mensagem && <Text style={styles.success}>{mensagem}</Text>}
-            <Wizard steps={steps} completeLabel="Concluir" onComplete={carregarTotais}/>
+            <Wizard steps={steps} stepIndex={stepIndex} completeLabel="Concluir" onComplete={carregarTotais}/>
         </View>
     );
 }

@@ -35,7 +35,6 @@ function fire(icon: AlertIcon, message?: string, title?: string) {
         title: title || (icon === 'warning' ? 'Atenção' : DEFAULT_TITLES[icon]),
         html: message ? escapeHtml(message) : '',
         confirmButtonText: 'OK',
-        buttonsStyling: false,
         heightAuto: false,
         allowOutsideClick: false,
         allowEscapeKey: false,

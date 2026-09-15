@@ -34,7 +34,7 @@ const renderStatus = (item: ApiItem) => {
 const COLUMNS: DataTableColumn[] = [
     {key: 'pessoa', label: 'Aluno'},
     {key: 'curso', label: 'Curso'},
-    {key: 'unidade', label: 'Id_unidade'},
+    {key: 'unidade', label: 'Unidade'},
     {key: 'unidadeResponsavel', label: 'Unidade Responsável'},
     {key: 'status', label: 'Status', render: renderStatus},
     {key: 'data', label: 'Data', render: (item) => formatDate(asRecord(item).data)},

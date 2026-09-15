@@ -44,7 +44,7 @@ const CONTRATO_COLUMNS: DataTableColumn[] = [
 
     {key: 'curriculo_curso_nome', label: 'Curso'},
 
-    {key: 'unidade_sucinto', label: 'Id_unidade'},
+    {key: 'unidade_sucinto', label: 'Unidade'},
 
     {key: 'valorParcelas', label: 'Valor'},
 
@@ -76,7 +76,7 @@ const MATERIAL_COLUMNS: DataTableColumn[] = [
 
     {key: 'dataCompra', label: 'Data Compra'},
 
-    {key: 'unidadeId', label: 'Id_unidade'},
+    {key: 'unidadeId', label: 'Unidade'},
 
     {key: 'pessoaId', label: 'Pessoa'},
 

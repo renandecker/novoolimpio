@@ -4,12 +4,11 @@ import {useNavigate, useSearchParams} from 'react-router-dom';
 import {PermissionGate} from '../../shared/services/permissions';
 import {BooleanField} from '../../shared/components/BooleanField';
 import {MasterDetail} from '../../shared/components/MasterDetail';
+import {UnidadeCombo, toUnidadeOption} from '../../shared/components/UnidadeCombo';
 import {useWizardData} from '../../shared/components/Wizard';
 import {Tabs, type TabItem} from '../../shared/components/Tabs';
 import {
     UNIDADE_SOURCE,
-    UNIDADE_COLUMNS,
-    UNIDADE_SEARCH,
     COMPONENTE_SOURCE,
     COMPONENTE_COLUMNS,
     COMPONENTE_SEARCH,
@@ -80,7 +79,7 @@ interface CurriculoData {
     };
     matrizCurricular: ApiItem[];
     requisitos: RequisitoItem[];
-    unidades: ApiItem[];
+    unidades: { id: number; label: string } | null;
     materialEscolar: MaterialEscolarItem[];
     atividadesComplementares: ApiItem[];
 }
@@ -147,7 +146,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
     const [salvando, setSalvando] = useState(false);
 
     const [matriz, setMatriz] = useState<ApiItem[]>([]);
-    const [unidades, setUnidades] = useState<ApiItem[]>([]);
+    const [unidades, setUnidades] = useState<{ id: number; label: string } | null>(null);
     const [materialEscolar, setMaterialEscolar] = useState<MaterialEscolarItem[]>([]);
     const [requisitos, setRequisitos] = useState<RequisitoItem[]>([]);
     const [atividadesComplementares, setAtividadesComplementares] = useState<ApiItem[]>([]);
@@ -156,7 +155,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
         entity: {},
         matrizCurricular: [],
         requisitos: [],
-        unidades: [],
+        unidades: null,
         materialEscolar: [],
         atividadesComplementares: [],
     });
@@ -192,21 +191,18 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                         try {
                             const {data: uns} = await api.get<any[]>('/api/educacao/curriculo-unidade', {params: {curriculoId: idEdicao}});
                             const vinc = Array.isArray(uns) ? uns : [];
-                            let uniEnriquecidas: ApiItem[] = vinc.map((u: any) => ({...u, id: u.unidadeId ?? u.id} as unknown as ApiItem));
-                            try {
-                                const todas = await api.get<ApiItem[]>(UNIDADE_SOURCE).then(r => r.data).catch(() => [] as ApiItem[]);
-                                if (todas && todas.length > 0) {
-                                    const porId = new Map((todas as any[]).map((t: any) => [Number(t.id), t]));
-                                    uniEnriquecidas = vinc.map((u: any) => {
-                                        const uid = Number(u.unidadeId ?? u.id);
-                                        const cheia = porId.get(uid);
-                                        return (cheia ? {...cheia, id: uid} : {...u, id: uid}) as unknown as ApiItem;
-                                    });
-                                }
-                            } catch { /* mantem fallback */ }
-                            setUnidades(uniEnriquecidas);
-                            updateField('unidades', uniEnriquecidas);
-                        } catch { setUnidades([]); updateField('unidades', []); }
+                            let unidadeSel: { id: number; label: string } | null = null;
+                            if (vinc.length > 0) {
+                                const uid = Number(vinc[0].unidadeId ?? vinc[0].id);
+                                try {
+                                    const todas = await api.get<ApiItem[]>(UNIDADE_SOURCE).then(r => r.data).catch(() => [] as ApiItem[]);
+                                    const cheia = (todas ?? []).find((t: any) => Number(t.id) === uid);
+                                    unidadeSel = cheia ? toUnidadeOption(cheia as any) ?? {id: uid, label: `#${uid}`} : {id: uid, label: `#${uid}`};
+                                } catch { unidadeSel = {id: uid, label: `#${uid}`}; }
+                            }
+                            setUnidades(unidadeSel);
+                            updateField('unidades', unidadeSel);
+                        } catch { setUnidades(null); updateField('unidades', null); }
 
                         try {
                             const {data: mats} = await api.get<any[]>('/api/educacao/material-escolar-curso', {params: {curriculoId: idEdicao}});
@@ -349,17 +345,14 @@ export default function ViewCurriculoFormCurriculoListScreen() {
             } catch (e) { console.warn('Falha ao sincronizar matriz curricular:', e); }
 
             try {
-                const listaUnidades = (unidades && unidades.length > 0 ? unidades : formData.unidades) ?? [];
-                const idUnidade = (u: any) => Number(u.unidadeId ?? u.unidade_id ?? u.id);
+                const unidadeSel = (unidades?.id ? unidades : formData.unidades) ?? null;
 
                 const {data: atuaisUnidades} = await api.get<any[]>(API_PATHS.basico.curriculoUnidade, {params: {curriculoId: id}});
                 for (const a of atuaisUnidades ?? []) {
-                    if (!listaUnidades.some((u) => idUnidade(u) === Number(a.unidadeId ?? a.id))) {
-                        await api.delete(API_PATHS.basico.curriculoUnidade, {params: {curriculoId: id, unidadeId: a.unidadeId ?? a.id}}).catch(() => undefined);
-                    }
+                    await api.delete(API_PATHS.basico.curriculoUnidade, {params: {curriculoId: id, unidadeId: a.unidadeId ?? a.id}}).catch(() => undefined);
                 }
-                for (const item of listaUnidades) {
-                    await api.post(API_PATHS.basico.curriculoUnidade, {curriculoId: id, unidadeId: idUnidade(item)});
+                if (unidadeSel?.id) {
+                    await api.post(API_PATHS.basico.curriculoUnidade, {curriculoId: id, unidadeId: Number(unidadeSel.id)});
                 }
             } catch (e) { console.warn('Falha ao sincronizar unidades:', e); }
 
@@ -820,17 +813,13 @@ export default function ViewCurriculoFormCurriculoListScreen() {
             label: 'Unidades',
             content: (
                 <fieldset className="form-fieldset">
-                    <legend>Unidades que oferecem o curso</legend>
-                    <MasterDetail
-                        label="Unidade"
-                        source={UNIDADE_SOURCE}
-                        valueKey="id"
-                        searchKeys={UNIDADE_SEARCH}
-                        columns={UNIDADE_COLUMNS}
-                        items={unidades}
-                        onChange={(novos) => {
-                            setUnidades(novos);
-                            updateField('unidades', novos);
+                    <legend>Unidade que oferece o curso</legend>
+                    <UnidadeCombo
+                        label="Unidade *"
+                        value={unidades}
+                        onChange={(opt) => {
+                            setUnidades(opt);
+                            updateField('unidades', opt);
                         }}
                     />
                 </fieldset>

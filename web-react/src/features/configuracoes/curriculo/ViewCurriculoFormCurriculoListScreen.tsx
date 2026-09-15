@@ -12,6 +12,8 @@ import {BooleanField} from '../../../shared/components/BooleanField';
 
 import {MasterDetail} from '../../../shared/components/MasterDetail';
 
+import {UnidadeCombo, toUnidadeOption} from '../../../shared/components/UnidadeCombo';
+
 import {useWizardData} from '../../../shared/components/Wizard';
 
 import {Tabs, type TabItem} from '../../../shared/components/Tabs';
@@ -19,10 +21,6 @@ import {Tabs, type TabItem} from '../../../shared/components/Tabs';
 import {
 
     UNIDADE_SOURCE,
-
-    UNIDADE_COLUMNS,
-
-    UNIDADE_SEARCH,
 
     COMPONENTE_SOURCE,
 
@@ -182,7 +180,7 @@ interface CurriculoData {
 
     requisitos: RequisitoItem[];
 
-    unidades: ApiItem[];
+    unidades: { id: number; label: string } | null;
 
     materialEscolar: MaterialEscolarItem[];
 
@@ -322,7 +320,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
     const [matriz, setMatriz] = useState<ApiItem[]>([]);
 
-    const [unidades, setUnidades] = useState<ApiItem[]>([]);
+    const [unidades, setUnidades] = useState<{ id: number; label: string } | null>(null);
 
     const [materialEscolar, setMaterialEscolar] = useState<MaterialEscolarItem[]>([]);
 
@@ -340,7 +338,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
         requisitos: [],
 
-        unidades: [],
+        unidades: null,
 
         materialEscolar: [],
 
@@ -409,22 +407,19 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                             const {data: uns} = await api.get<any[]>('/api/educacao/curriculo-unidade', {params: {curriculoId: idEdicao}});
 
                             const vinc = Array.isArray(uns) ? uns : [];
-                            let uniEnriquecidas: ApiItem[] = vinc.map((u: any) => ({...u, id: u.unidadeId ?? u.id} as unknown as ApiItem));
-                            try {
-                                const todas = await api.get<ApiItem[]>(UNIDADE_SOURCE).then(r => r.data).catch(() => [] as ApiItem[]);
-                                if (todas && todas.length > 0) {
-                                    const porId = new Map((todas as any[]).map((t: any) => [Number(t.id), t]));
-                                    uniEnriquecidas = vinc.map((u: any) => {
-                                        const uid = Number(u.unidadeId ?? u.id);
-                                        const cheia = porId.get(uid);
-                                        return (cheia ? {...cheia, id: uid} : {...u, id: uid}) as unknown as ApiItem;
-                                    });
-                                }
-                            } catch { /* mantem fallback */ }
-                            setUnidades(uniEnriquecidas);
-                            updateField('unidades', uniEnriquecidas);
+                            let unidadeSel: { id: number; label: string } | null = null;
+                            if (vinc.length > 0) {
+                                const uid = Number(vinc[0].unidadeId ?? vinc[0].id);
+                                try {
+                                    const todas = await api.get<ApiItem[]>(UNIDADE_SOURCE).then(r => r.data).catch(() => [] as ApiItem[]);
+                                    const cheia = (todas ?? []).find((t: any) => Number(t.id) === uid);
+                                    unidadeSel = cheia ? toUnidadeOption(cheia as any) ?? {id: uid, label: `#${uid}`} : {id: uid, label: `#${uid}`};
+                                } catch { unidadeSel = {id: uid, label: `#${uid}`}; }
+                            }
+                            setUnidades(unidadeSel);
+                            updateField('unidades', unidadeSel);
 
-                        } catch { setUnidades([]); updateField('unidades', []); }
+                        } catch { setUnidades(null); updateField('unidades', null); }
 
 
 
@@ -562,9 +557,9 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
     const validateStep5 = useCallback(async (currentData: CurriculoData) => {
 
-        if (!currentData.unidades || currentData.unidades.length === 0) {
+        if (!currentData.unidades?.id) {
 
-            return 'Selecione pelo menos uma unidade para o currículo';
+            return 'Selecione uma unidade para o currículo';
 
         }
 
@@ -731,26 +726,21 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
             try {
 
-                const listaUnidades = (unidades && unidades.length > 0 ? unidades : formData.unidades) ?? [];
-                const idUnidade = (u: any) => Number(u.unidadeId ?? u.unidade_id ?? u.id);
+                const unidadeSel = (unidades?.id ? unidades : formData.unidades) ?? null;
 
                 const {data: atuaisUnidades} = await api.get<any[]>(API_PATHS.basico.curriculoUnidade, {params: {curriculoId: id}});
 
                 for (const a of atuaisUnidades ?? []) {
 
-                    if (!listaUnidades.some((u) => idUnidade(u) === Number(a.unidadeId ?? a.id))) {
+                    // A tabela usa chave composta: remove por curriculoId + unidadeId.
 
-                        // A tabela usa chave composta: remove por curriculoId + unidadeId.
-
-                        await api.delete(API_PATHS.basico.curriculoUnidade, {params: {curriculoId: id, unidadeId: a.unidadeId ?? a.id}}).catch(() => undefined);
-
-                    }
+                    await api.delete(API_PATHS.basico.curriculoUnidade, {params: {curriculoId: id, unidadeId: a.unidadeId ?? a.id}}).catch(() => undefined);
 
                 }
 
-                for (const item of listaUnidades) {
+                if (unidadeSel?.id) {
 
-                    await api.post(API_PATHS.basico.curriculoUnidade, {curriculoId: id, unidadeId: idUnidade(item)});
+                    await api.post(API_PATHS.basico.curriculoUnidade, {curriculoId: id, unidadeId: Number(unidadeSel.id)});
 
                 }
 
@@ -1711,45 +1701,37 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
         {
 
-            key: 'unidades',
+key: 'unidades',
 
-            label: 'Unidades',
+    label: 'Unidades',
 
-            content: (
+    content: (
 
-                <fieldset className="form-fieldset">
+        <fieldset className="form-fieldset">
 
-                    <legend>Unidades que oferecem o curso</legend>
+            <legend>Unidade que oferece o curso</legend>
 
-                    <MasterDetail
+            <UnidadeCombo
 
-                        label="Unidade"
+                label="Unidade *"
 
-                        source={UNIDADE_SOURCE}
+                value={unidades}
 
-                        valueKey="id"
+                onChange={(opt) => {
 
-                        searchKeys={UNIDADE_SEARCH}
+                    setUnidades(opt);
 
-                        columns={UNIDADE_COLUMNS}
+                    updateField('unidades', opt);
 
-                        items={unidades}
+                }}
 
-                        onChange={(novos) => {
+            />
 
-                            setUnidades(novos);
+        </fieldset>
 
-                            updateField('unidades', novos);
+    ),
 
-                        }}
-
-                    />
-
-                </fieldset>
-
-            ),
-
-        },
+},
 
         {
 

@@ -201,7 +201,7 @@ export function AutoComplete({
                                     onMouseEnter={() => setHighlighted(index)}
                                     onClick={() => selecionar(option)}
                                 >
-                                    {option.label || `#${option.id}`}
+                                    {option.label ?? String(option.id)}
                                 </button>
                             </li>
                         ))}

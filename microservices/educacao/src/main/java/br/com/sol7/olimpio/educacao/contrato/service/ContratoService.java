@@ -3,6 +3,8 @@ package br.com.sol7.olimpio.educacao.contrato;
 import br.com.sol7.olimpio.educacao.contrato.dto.ContratoAutoCompleteResponse;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.TupleHelper;
+import jakarta.persistence.Tuple;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -207,10 +209,10 @@ public class ContratoService {
         String q = query.toLowerCase().trim();
         return repository.autoCompleteAlunoNome(q).map(list -> list.stream()
                 .map(row -> {
-                    Object[] arr = (Object[]) row;
-                    Long id = ((Number) arr[0]).longValue();
-                    String nome = arr[1] == null ? "" : arr[1].toString();
-                    return new ContratoAutoCompleteResponse(id, nome);
+                    Tuple t = (Tuple) row;
+                    Long id = TupleHelper.getLong(t, "id");
+                    String nome = TupleHelper.getString(t, "nome");
+                    return new ContratoAutoCompleteResponse(id, nome != null ? nome : "");
                 })
                 .toList());
     }

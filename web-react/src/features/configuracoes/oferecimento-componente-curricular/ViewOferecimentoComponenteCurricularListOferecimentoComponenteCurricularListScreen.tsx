@@ -129,32 +129,27 @@ const OFERECIMENTO_COLUMNS = [
     {key: 'data_inicio', label: 'Data Início', render: (item) => formatDate(asRecord(item).data_inicio)},
 
     {key: 'data_fim', label: 'Data Fim', render: (item) => formatDate(asRecord(item).data_fim)},
-
     {
-
         key: 'replicar',
-
         label: 'Replicar',
-
         render: (item) => (asRecord(item).replicar ? 'Sim' : 'Não'),
-
     },
-
+    {
+        key: 'status',
+        label: 'Status',
+        render: (item) => {
+            const value = String(asRecord(item).status ?? '');
+            const cls = legacyClassName(value);
+            return <span className={cls ?? ''}>{value}</span>;
+        },
+    },
     {
 
-        key: 'status',
+        key: 'aula_coringa',
 
-        label: 'Status',
+        label: 'Aula Coringa',
 
-        render: (item) => {
-
-            const value = String(asRecord(item).status ?? '');
-
-            const cls = legacyClassName(value);
-
-            return <span className={cls ?? ''}>{value}</span>;
-
-        },
+        render: (item) => (asRecord(item).aula_coringa ? 'Sim' : 'Não'),
 
     },
 

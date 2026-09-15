@@ -125,9 +125,9 @@ export default function ViewPessoaFormPessoaJuridicaListScreen() {
                         setValue('logradouro', ''); setValue('numero', ''); setValue('complemento', '');
                     }},
                 ]},
-                {name: 'cidade', label: 'Cidade', type: 'autoComplete', autoCompleteSource:'/api/basico/cidade/autoComplete', required: true, full: true},
-                {name: 'bairro', label: 'Bairro', type: 'autoComplete', autoCompleteSource:'/api/basico/bairro/auto-complete', required: true, full: true},
-                {name: 'logradouro', label: 'Logradouro', type: 'autoComplete', autoCompleteSource:'/api/basico/logradouro/auto-complete', required: true, full: true},
+                {name: 'cidade', label: 'Cidade', type: 'autoComplete', autoCompleteSource:'/api/basico/cidade/opcoes', required: true, full: true},
+                {name: 'bairro', label: 'Bairro', type: 'autoComplete', autoCompleteSource:'/api/basico/bairro/opcoes', required: true, full: true},
+                {name: 'logradouro', label: 'Logradouro', type: 'autoComplete', autoCompleteSource:'/api/basico/logradouro/auto-complete-logradouro-troca-opcoes', required: true, full: true},
                 {name: 'numero', label: 'Número *', required: true, full: true},
                 {name: 'complemento', label: 'Complemento', type: 'textarea', full: true},
             ],

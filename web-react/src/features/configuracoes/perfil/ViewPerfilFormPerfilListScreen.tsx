@@ -63,7 +63,7 @@ export default function ViewPerfilFormPerfilListScreen() {
                 {name: 'id', label: 'ID', type: 'text', readOnly: true},
                 {name: 'descricao', label: 'Descrição *', required: true, span: 3},
                 {name: 'hierarquia', label: 'Hierarquia *', type: 'select', options: HIERARQUIA_OPTIONS, required: true},
-                {name: 'comunicar', label: 'Comunicar', type: 'select', options: [{value: 'true', label: 'Sim'}, {value: 'false', label: 'Não'}]},
+                {name: 'comunicar', label: 'Comunicar', type: 'checkbox'},
                 {name: 'modulo', label: 'Minha Página Inicial', type: 'select', options: [], span: 3},
             ],
             content: (
@@ -75,33 +75,21 @@ export default function ViewPerfilFormPerfilListScreen() {
                                 <option value="">-- Selecione --</option>
                             </select>
                         </label>
-                        <label className="form-field">
+                        <label className="form-field checkbox-field">
+                            <input type="checkbox" className="form-checkbox" checked={moduloSelecionado.novo === true || moduloSelecionado.novo === 'true'} onChange={e => setModuloSelecionado({...moduloSelecionado, novo: e.target.checked})}/>
                             <span className="form-label">Novo</span>
-                            <select className="form-input form-select" value={str(moduloSelecionado.novo)} onChange={e => setModuloSelecionado({...moduloSelecionado, novo: e.target.value === 'true'})}>
-                                <option value="true">Sim</option>
-                                <option value="false">Não</option>
-                            </select>
                         </label>
-                        <label className="form-field">
+                        <label className="form-field checkbox-field">
+                            <input type="checkbox" className="form-checkbox" checked={moduloSelecionado.editar === true || moduloSelecionado.editar === 'true'} onChange={e => setModuloSelecionado({...moduloSelecionado, editar: e.target.checked})}/>
                             <span className="form-label">Editar</span>
-                            <select className="form-input form-select" value={str(moduloSelecionado.editar)} onChange={e => setModuloSelecionado({...moduloSelecionado, editar: e.target.value === 'true'})}>
-                                <option value="true">Sim</option>
-                                <option value="false">Não</option>
-                            </select>
                         </label>
-                        <label className="form-field">
+                        <label className="form-field checkbox-field">
+                            <input type="checkbox" className="form-checkbox" checked={moduloSelecionado.remover === true || moduloSelecionado.remover === 'true'} onChange={e => setModuloSelecionado({...moduloSelecionado, remover: e.target.checked})}/>
                             <span className="form-label">Remover</span>
-                            <select className="form-input form-select" value={str(moduloSelecionado.remover)} onChange={e => setModuloSelecionado({...moduloSelecionado, remover: e.target.value === 'true'})}>
-                                <option value="true">Sim</option>
-                                <option value="false">Não</option>
-                            </select>
                         </label>
-                        <label className="form-field">
+                        <label className="form-field checkbox-field">
+                            <input type="checkbox" className="form-checkbox" checked={moduloSelecionado.relatorio === true || moduloSelecionado.relatorio === 'true'} onChange={e => setModuloSelecionado({...moduloSelecionado, relatorio: e.target.checked})}/>
                             <span className="form-label">Relatório</span>
-                            <select className="form-input form-select" value={str(moduloSelecionado.relatorio)} onChange={e => setModuloSelecionado({...moduloSelecionado, relatorio: e.target.value === 'true'})}>
-                                <option value="true">Sim</option>
-                                <option value="false">Não</option>
-                            </select>
                         </label>
                         <label className="form-field" style={{display: 'flex', alignItems: 'flex-end'}}>
                             <button type="button" className="btn-form-save" onClick={() => {

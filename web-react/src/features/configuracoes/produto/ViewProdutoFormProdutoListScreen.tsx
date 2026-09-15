@@ -1,8 +1,10 @@
+import {useState} from 'react';
 import {PermissionGate} from '../../../shared/services/permissions';
 import {ModuleTabs} from '../../../shared/components/ModuleTabs';
-import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH} from '../../../shared/services/masterDetailSources';
+import type {AutoCompleteOption} from '../../../shared/components/AutoComplete';
 
 export default function ViewProdutoFormProdutoListScreen() {
+    const [unidade, setUnidade] = useState<AutoCompleteOption | null>(null);
     return (
         <PermissionGate permission="READ">
             <main>
@@ -16,13 +18,11 @@ export default function ViewProdutoFormProdutoListScreen() {
                         },
                         {
                             key: 'unidades',
-                            label: 'Unidades',
-                            masterDetail: {
-                                label: 'Unidades',
-                                source: UNIDADE_SOURCE,
-                                valueKey: 'id',
-                                searchKeys: UNIDADE_SEARCH,
-                                columns: UNIDADE_COLUMNS
+                            label: 'Unidade',
+                            unidadeCombo: {
+                                label: 'Unidade',
+                                value: unidade,
+                                onChange: setUnidade,
                             }
                         },
                         {key: 'fornecedores', label: 'Fornecedores', empty: 'Conteúdo de Fornecedores.'},

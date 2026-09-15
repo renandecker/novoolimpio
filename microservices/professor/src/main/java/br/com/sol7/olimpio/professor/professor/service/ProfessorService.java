@@ -7,10 +7,12 @@ import br.com.sol7.olimpio.professor.professor.dto.ProfessorResponse;
 import br.com.sol7.olimpio.professor.professor.dto.ProfessorAutoCompleteResponse;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.TupleHelper;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
@@ -30,7 +32,7 @@ public class ProfessorService {
     public Uni<PagedResponse<ProfessorResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
-        String sql = "SELECT p.id, p.id_pessoa, p.fl_ativo, p.caderno_bola, p.dt_inicio, p.dt_fim, " +
+        String sql = "SELECT p.id AS id, p.id_pessoa AS id_pessoa, p.fl_ativo AS fl_ativo, p.caderno_bola AS caderno_bola, p.dt_inicio AS dt_inicio, p.dt_fim AS dt_fim, " +
                 "COALESCE(pf.nome, pj.nome_fantasia, '') AS nome " +
                 "FROM edc_professor p " +
                 "LEFT JOIN bas_pessoa pes ON pes.id = p.id_pessoa " +
@@ -38,20 +40,20 @@ public class ProfessorService {
                 "LEFT JOIN bas_pessoa_juridica pj ON pj.id_pessoa = pes.id " +
                 "ORDER BY p.id DESC";
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql)
+                .chain(session -> session.createNativeQuery(sql, Tuple.class)
                         .setFirstResult(p * s)
                         .setMaxResults(s)
                         .getResultList())
                 .onItem().transform(list -> list.stream()
-                        .map(tuple -> (Object[]) tuple)
-                        .map(arr -> new ProfessorResponse(
-                                ((Number) arr[0]).longValue(),
-                                arr[1] != null ? ((Number) arr[1]).longValue() : null,
-                                (Boolean) arr[2],
-                                (Boolean) arr[3],
-                                (java.sql.Date) arr[4],
-                                (java.sql.Date) arr[5],
-                                (String) arr[6]
+                        .map(tuple -> (Tuple) tuple)
+                        .map(t -> new ProfessorResponse(
+                                TupleHelper.getLong(t, "id"),
+                                TupleHelper.getLong(t, "id_pessoa"),
+                                TupleHelper.getBoolean(t, "fl_ativo"),
+                                TupleHelper.getBoolean(t, "caderno_bola"),
+                                TupleHelper.getDate(t, "dt_inicio"),
+                                TupleHelper.getDate(t, "dt_fim"),
+                                TupleHelper.getString(t, "nome")
                         ))
                         .toList())
                 .onItem().transformToUni(list -> repository.count()
@@ -102,9 +104,9 @@ public class ProfessorService {
         String q = query.toLowerCase().trim();
         return repository.autoCompleteProfessor(q).map(list -> list.stream()
                 .map(row -> {
-                    Object[] arr = (Object[]) row;
-                    Long id = ((Number) arr[0]).longValue();
-                    String nome = arr[1] == null ? "" : arr[1].toString();
+                    Tuple t = (Tuple) row;
+                    Long id = TupleHelper.getLong(t, "id");
+                    String nome = TupleHelper.getString(t, "nome");
                     return new ProfessorAutoCompleteResponse(id, nome);
                 })
                 .toList());

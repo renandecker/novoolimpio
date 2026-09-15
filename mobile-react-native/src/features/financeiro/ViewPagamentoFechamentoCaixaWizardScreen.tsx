@@ -248,6 +248,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
     // Step validation functions
     const validateStep1 = useCallback(async (d: FechamentoCaixaData) => {
+        if (!d.usuarioId) return 'Usuário não identificado';
         if (!d.unidadeId) return 'Selecione a unidade';
         if (!d.caixaAberto) {
             if (!d.impressoraId) return 'Selecione a impressora';
@@ -537,6 +538,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                             }}
                             fetchOptions={fetchImpressora}
                             minChars={2}
+                            disabled
                             style={styles.autoComplete}
                         />
                         <View style={styles.fieldGroup}>
@@ -546,6 +548,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                 value={state.fundoCaixa}
                                 onChangeText={(v) => setField('fundoCaixa', v)}
                                 keyboardType="numeric"
+                                editable={false}
                                 placeholder="0,00"
                             />
                         </View>

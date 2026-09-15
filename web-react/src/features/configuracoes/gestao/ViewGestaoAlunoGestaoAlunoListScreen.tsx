@@ -340,7 +340,7 @@ const MATRICULA_COLUMNS = [
 
     {key: 'cargaHoraria', label: 'Carga Horária', width: '5%', align: 'center', render: (m: MatriculaContrato) => String(m.cargaHoraria ?? '')},
 
-    {key: 'unidade', label: 'Id_unidade', width: '12%', render: (m: MatriculaContrato) => m.unidade},
+    {key: 'unidade', label: 'Unidade', width: '12%', render: (m: MatriculaContrato) => m.unidade},
 
     {key: 'professor', label: 'Professor', width: '15%', render: (m: MatriculaContrato) => m.professor},
 
@@ -669,115 +669,120 @@ function MatriculasTable({contratoId, acessoTudo, acessoRelatorios, acessoNovo, 
 
                                 </td>
 
-                                {showActionsColumn && (
-
-                                    <td className="col-actions">
-
-                                        <div className="row-actions-menu">
-                                             {acessoTudo && (
-                                                 <RowMenu icon={<i className="fa fa-check"/>} className="btnblue" title="Permissão total"
-                                                          items={[{
-                                                              key: 'alunosTurma',
-                                                              label: 'Alunos da turma',
-                                                              className: 'btnbrown',
-onSelect: () => abrirPlaceholder(
-                                                                   'Alunos da turma',
-                                                                   'Alunos sobre os oferecimentos da matrícula #' + m.id + ' (turma ' + (m.turma ?? '?') + ').'
-                                                               )
-                                                          }]}/>
+                                 {(() => {
+                                     const cancelada = m.statusMatricula === 'CANCELADO';
+                                     return (
+                                         <>
+                                             {showActionsColumn && (
+                                                 <td className="col-actions">
+                                                     <div className="row-actions-menu">
+                                                          {acessoTudo && (
+                                                              <RowMenu icon={<i className="fa fa-check"/>} className="btnblue" title="Permissão total"
+                                                                       items={[{
+                                                                           key: 'alunosTurma',
+                                                                           label: 'Alunos da turma',
+                                                                           className: 'btnbrown',
+                                                                           onSelect: () => abrirPlaceholder(
+                                                                               'Alunos da turma',
+                                                                               'Alunos sobre os oferecimentos da matrícula #' + m.id + ' (turma ' + (m.turma ?? '?') + ').'
+                                                                           )
+                                                                       }]}/>
+                                                          )}
+                                                     </div>
+                                                 </td>
                                              )}
-                                        </div>
-                                    </td>
-                                )}
-                                {acessoRelatorios && (
-                                    <td className="col-actions">
-                                        <div className="row-actions-menu">
-                                            <RowMenu icon={<i className="fa fa-file-text-o"/>} className="btnyellow" title="Relatórios"
-                                                     items={[
-                                                         {
-                                                             key: 'informacoes',
-                                                             label: 'Informações',
-                                                             className: 'btnyellow',
-                                                             onSelect: () => {
-                                                               const turmaLabel = m.turma ?? '?';
-                                                               return abrirPlaceholder('Informações', 'Mais informações da turma ' + turmaLabel + '.');
-                                                           },
-                                                         },
-                                                         {
-                                                             key: 'preCancelamentos',
-                                                             label: 'Pré cancelamentos',
-                                                             className: 'btnorange',
-                                                             onSelect: () => abrirPlaceholder('Pré cancelamentos', 'Pré cancelamentos criados na matrícula.'),
-                                                         },
-{
-                                                              key: 'presencas',
-                                                              label: 'Presenças',
-                                                              className: 'btnbrown',
-                                                              onSelect: () => abrirPlaceholder('Presenças', 'Presenças da matrícula #' + m.id + '.'),
-                                                          },
-                                                          {
-                                                              key: 'notas',
-                                                              label: 'Notas',
-                                                              className: 'btnblack',
-                                                              onSelect: () => abrirPlaceholder('Notas', 'Notas da matrícula #' + m.id + '.'),
-                                                          },
-                                                         ...(m.dataCancelamento ? [{
-                                                             key: 'cancelamentoMatricula',
-                                                             label: 'Cancelamento matricula',
-                                                             className: 'btnred',
-                                                             disabled: true,
-                                                             onSelect: () => abrirPlaceholder('Cancelamento matricula', 'Segunda via do documento de cancelamento.'),
-                                                         }] : []),
-                                                         ...((m.trocaTurma && m.statusMatricula !== 'CANCELADO') ? [{
-                                                             key: 'trocaTurmaSegunda',
-                                                             label: 'Troca turma',
-                                                             className: 'btnblue',
-                                                             disabled: false,
-                                                             onSelect: () => abrirPlaceholder('Troca turma', 'Segunda via troca de turma.'),
-                                                         }] : []),
-                                                     ]}/>
-                                        </div>
-                                    </td>
-                                )}
-                                {acessoNovo && !cancelada && (
-                                    <td className="col-actions">
-                                        <div className="row-actions-menu">
-                                            <RowMenu icon={<i className="fa fa-plus-circle"/>} className="btnstop" title="Novo"
-                                                     items={[{
-                                                         key: 'trocaComponente',
-                                                         label: 'Troca Componente',
-                                                         className: 'btngreen',
-                                                         onSelect: () => abrirPlaceholder('Trocar aluno de Componente', 'Trocar o aluno de componente curricular.'),
-                                                     }]}/>
-                                        </div>
-                                    </td>
-                                )}
-                                {acessoEditar && !cancelada && (
-                                    <td className="col-actions">
-                                        <div className="row-actions-menu">
-                                            <RowMenu icon={<i className="fa fa-pencil"/>} className="btngreen" title="Editar"
-                                                     items={[{
-                                                         key: 'trocaTurma',
-                                                         label: 'Troca Turma',
-                                                         className: 'btnblue',
-                                                         onSelect: () => abrirPlaceholder('Trocar aluno de turma', 'Trocar o aluno de turma.'),
-                                                     }]}/>
-                                        </div>
-                                    </td>
-                                )}
-                                {acessoRemover && (
-                                    <td className="col-actions">
-                                        <div className="row-actions-menu">
-                                            <RowMenu icon={<i className="fa fa-trash"/>} className="btnred" title="Remover"
-                                                     items={[{
-                                                         key: 'cancelamento',
-                                                         label: 'Cancelamento',
-                                                         className: 'btnred',
-                                                         onSelect: () => setCancelando(true),
-                                                     }]}/>
-                                        </div>
-                                    </td>
-                                )}
+                                             {acessoRelatorios && (
+                                                 <td className="col-actions">
+                                                     <div className="row-actions-menu">
+                                                         <RowMenu icon={<i className="fa fa-file-text-o"/>} className="btnyellow" title="Relatórios"
+                                                                  items={[
+                                                                      {
+                                                                          key: 'informacoes',
+                                                                          label: 'Informações',
+                                                                          className: 'btnyellow',
+                                                                          onSelect: () => {
+                                                                            const turmaLabel = m.turma ?? '?';
+                                                                            return abrirPlaceholder('Informações', 'Mais informações da turma ' + turmaLabel + '.');
+                                                                        },
+                                                                      },
+                                                                      {
+                                                                          key: 'preCancelamentos',
+                                                                          label: 'Pré cancelamentos',
+                                                                          className: 'btnorange',
+                                                                          onSelect: () => abrirPlaceholder('Pré cancelamentos', 'Pré cancelamentos criados na matrícula.'),
+                                                                      },
+                                                                      {
+                                                                          key: 'presencas',
+                                                                          label: 'Presenças',
+                                                                          className: 'btnbrown',
+                                                                          onSelect: () => abrirPlaceholder('Presenças', 'Presenças da matrícula #' + m.id + '.'),
+                                                                      },
+                                                                      {
+                                                                          key: 'notas',
+                                                                          label: 'Notas',
+                                                                          className: 'btnblack',
+                                                                          onSelect: () => abrirPlaceholder('Notas', 'Notas da matrícula #' + m.id + '.'),
+                                                                      },
+                                                                      ...(m.dataCancelamento ? [{
+                                                                          key: 'cancelamentoMatricula',
+                                                                          label: 'Cancelamento matricula',
+                                                                          className: 'btnred',
+                                                                          disabled: true,
+                                                                          onSelect: () => abrirPlaceholder('Cancelamento matricula', 'Segunda via do documento de cancelamento.'),
+                                                                      }] : []),
+                                                                      ...((m.trocaTurma && m.statusMatricula !== 'CANCELADO') ? [{
+                                                                          key: 'trocaTurmaSegunda',
+                                                                          label: 'Troca turma',
+                                                                          className: 'btnblue',
+                                                                          disabled: false,
+                                                                          onSelect: () => abrirPlaceholder('Troca turma', 'Segunda via troca de turma.'),
+                                                                      }] : []),
+                                                                  ]}/>
+                                                     </div>
+                                                 </td>
+                                             )}
+                                             {acessoNovo && !cancelada && (
+                                                 <td className="col-actions">
+                                                     <div className="row-actions-menu">
+                                                         <RowMenu icon={<i className="fa fa-plus-circle"/>} className="btnstop" title="Novo"
+                                                                  items={[{
+                                                                      key: 'trocaComponente',
+                                                                      label: 'Troca Componente',
+                                                                      className: 'btngreen',
+                                                                      onSelect: () => abrirPlaceholder('Trocar aluno de Componente', 'Trocar o aluno de componente curricular.'),
+                                                                  }]}/>
+                                                     </div>
+                                                 </td>
+                                             )}
+                                             {acessoEditar && !cancelada && (
+                                                 <td className="col-actions">
+                                                     <div className="row-actions-menu">
+                                                         <RowMenu icon={<i className="fa fa-pencil"/>} className="btngreen" title="Editar"
+                                                                  items={[{
+                                                                      key: 'trocaTurma',
+                                                                      label: 'Troca Turma',
+                                                                      className: 'btnblue',
+                                                                      onSelect: () => abrirPlaceholder('Trocar aluno de turma', 'Trocar o aluno de turma.'),
+                                                                  }]}/>
+                                                     </div>
+                                                 </td>
+                                             )}
+                                             {acessoRemover && (
+                                                 <td className="col-actions">
+                                                     <div className="row-actions-menu">
+                                                         <RowMenu icon={<i className="fa fa-trash"/>} className="btnred" title="Remover"
+                                                                  items={[{
+                                                                      key: 'cancelamento',
+                                                                      label: 'Cancelamento',
+                                                                      className: 'btnred',
+                                                                      onSelect: () => setCancelando(true),
+                                                                  }]}/>
+                                                     </div>
+                                                 </td>
+                                             )}
+                                         </>
+                                     );
+                                 })()}
 
                             </tr>
 
@@ -1421,7 +1426,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
                                         <button
                                             type="button"
-                                            className="btnblack"
+                                            className="btn-action btnblack"
                                             title="Carregar dados do aluno e seus contratos"
                                             disabled={!asRecord(item).id_pessoa}
                                             onClick={() => onBuscarContratos(

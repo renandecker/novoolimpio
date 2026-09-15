@@ -121,7 +121,7 @@ type CaixaRow = {
 const COLUMNS = [
     {key: 'id_caixa_unidade', label: 'Nº Caixa'},
     {key: 'usuario_login', label: 'Usuário'},
-    {key: 'unidade_sucinto', label: 'Id_unidade'},
+    {key: 'unidade_sucinto', label: 'Unidade'},
     {key: 'data', label: 'Data', render: (item: ApiItem) => formatDateTime(asRecord(item).data)},
     {key: 'data_fechamento', label: 'Data Fechamento', render: (item: ApiItem) => asRecord(item).data_fechamento ? formatDateTime(asRecord(item).data_fechamento) : ''},
     {key: 'fundo_caixa', label: 'Fundo de Caixa', render: (item: ApiItem) => formatCurrency(asRecord(item).fundo_caixa)},

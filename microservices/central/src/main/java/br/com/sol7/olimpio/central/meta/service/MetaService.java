@@ -3,11 +3,13 @@ package br.com.sol7.olimpio.central.meta;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.SearchFilterRequest;
 import br.com.sol7.olimpio.shared.GenericSearchService;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import org.hibernate.reactive.mutiny.Mutiny;
@@ -93,19 +95,19 @@ public class MetaService {
             Uni<List<Map<String, Object>>> rows = selectQuery.getResultList().map(list -> {
                 List<Map<String, Object>> out = new ArrayList<>();
                 for (Object rowObj : (List<Object>) list) {
-                    Object[] arr = (Object[]) rowObj;
+                    Tuple t = (Tuple) rowObj;
                     Map<String, Object> m = new LinkedHashMap<>();
-                    m.put("id", arr[0]);
-                    m.put("meta", arr[1]);
-                    m.put("data", arr[2]);
-                    m.put("dataInicial", arr[3]);
-                    m.put("dataFinal", arr[4]);
-                    m.put("operadorId", arr[5]);
-                    m.put("operacionalId", arr[6]);
-                    m.put("usuarioId", arr[7]);
-                    m.put("operadorLogin", arr[8]);
-                    m.put("operacionalPacoteId", arr[9]);
-                    m.put("operacionalPacoteDescricao", arr[10]);
+                    m.put("id", TupleHelper.getLong(t, "id"));
+                    m.put("meta", TupleHelper.getBigDecimal(t, "meta"));
+                    m.put("data", TupleHelper.getDate(t, "data"));
+                    m.put("dataInicial", TupleHelper.getDate(t, "data_inicial"));
+                    m.put("dataFinal", TupleHelper.getDate(t, "data_final"));
+                    m.put("operadorId", TupleHelper.getLong(t, "id_operador"));
+                    m.put("operacionalId", TupleHelper.getLong(t, "id_operacional"));
+                    m.put("usuarioId", TupleHelper.getLong(t, "id_usuario_lancou_media"));
+                    m.put("operadorLogin", TupleHelper.getString(t, "operador_login"));
+                    m.put("operacionalPacoteId", TupleHelper.getLong(t, "operacional_pacote_id"));
+                    m.put("operacionalPacoteDescricao", TupleHelper.getString(t, "operacional_pacote_descricao"));
                     out.add(m);
                 }
                 return out;
@@ -265,7 +267,7 @@ public class MetaService {
             } catch (Exception e) {
                 return Uni.createFrom().item(List.of());
             }
-            String sql = "SELECT u.id, u.login "
+            String sql = "SELECT u.id AS id, u.login AS login "
                     + "FROM bas_usuario u "
                     + "JOIN cen_operacional_usuario cou ON cou.id_usuario = u.id "
                     + "JOIN cen_operacional o ON o.id = cou.id_operacional "
@@ -276,16 +278,16 @@ public class MetaService {
                     + "  WHERE m.data = :data OR (m.data_inicial IS NOT NULL AND m.data_inicial <= :data AND m.data_final >= :data)"
                     + ") "
                     + "ORDER BY u.login";
-            return session.createNativeQuery(sql)
+            return session.createNativeQuery(sql, Tuple.class)
                     .setParameter("coordId", coordenadorId)
                     .setParameter("data", java.sql.Date.valueOf(data))
                     .getResultList().map(list -> {
                         List<Map<String, Object>> out = new ArrayList<>();
                         for (Object rowObj : list) {
-                            Object[] arr = (Object[]) rowObj;
+                            Tuple t = (Tuple) rowObj;
                             Map<String, Object> m = new LinkedHashMap<>();
-                            m.put("id", arr[0]);
-                            m.put("login", arr[1]);
+                            m.put("id", TupleHelper.getLong(t, "id"));
+                            m.put("login", TupleHelper.getString(t, "login"));
                             out.add(m);
                         }
                         return out;
@@ -298,21 +300,21 @@ public class MetaService {
             return Uni.createFrom().item(List.of());
         }
         return Panache.getSession().chain(session -> {
-            String sql = "SELECT o.id, o.id_pacote, cp.descricao "
+            String sql = "SELECT o.id AS id, o.id_pacote AS pacote_id, cp.descricao AS pacote_descricao "
                     + "FROM cen_operacional o "
                     + "LEFT JOIN com_pacote cp ON cp.id = o.id_pacote "
                     + "WHERE o.id_coordenador = :coordId AND o.status = 'INICIADO' "
                     + "ORDER BY o.id";
-            return session.createNativeQuery(sql)
+            return session.createNativeQuery(sql, Tuple.class)
                     .setParameter("coordId", coordenadorId)
                     .getResultList().map(list -> {
                         List<Map<String, Object>> out = new ArrayList<>();
                         for (Object rowObj : list) {
-                            Object[] arr = (Object[]) rowObj;
+                            Tuple t = (Tuple) rowObj;
                             Map<String, Object> m = new LinkedHashMap<>();
-                            m.put("id", arr[0]);
-                            m.put("pacoteId", arr[1]);
-                            m.put("pacoteDescricao", arr[2]);
+                            m.put("id", TupleHelper.getLong(t, "id"));
+                            m.put("pacoteId", TupleHelper.getLong(t, "pacote_id"));
+                            m.put("pacoteDescricao", TupleHelper.getString(t, "pacote_descricao"));
                             out.add(m);
                         }
                         return out;

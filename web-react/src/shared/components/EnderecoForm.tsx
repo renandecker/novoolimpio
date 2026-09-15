@@ -116,22 +116,22 @@ export async function salvarBairro(bairro: Bairro): Promise<Bairro | null> {
 
 export async function buscarCidadesLog(query: string): Promise<AutoCompleteOption[]> {
     if (!query) return [];
-    const {data} = await api.get<any[]>(`/api/basico/cidade/autoComplete`, {params: {query}});
-    return data.map((e: any) => ({id: e.id, label: e.cidadeEstado ?? e.nome ?? String(e.id)}));
+    const {data} = await api.get<any[]>(`/api/basico/cidade/opcoes`, {params: {query}});
+    return data.map((e: any) => ({id: e.id, label: e.nome ?? String(e.id)}));
 }
 
 export async function buscarBairros(query: string, cidadeId?: number): Promise<AutoCompleteOption[]> {
     const params: any = {query};
     if (cidadeId) params.cidadeId = cidadeId;
-    const {data} = await api.get<any[]>(`/api/basico/bairro/auto-complete`, {params});
-    return data.map((e: any) => ({id: e.id, label: e.descricao}));
+    const {data} = await api.get<any[]>(`/api/basico/bairro/opcoes`, {params});
+    return data.map((e: any) => ({id: e.id, label: e.descricao ?? String(e.id)}));
 }
 
 export async function buscarLogradouros(query: string, bairroId?: number): Promise<AutoCompleteOption[]> {
     const params: any = {query};
     if (bairroId) params.bairroId = bairroId;
-    const {data} = await api.get<any[]>(`/api/basico/logradouro/auto-complete`, {params});
-    return data.map((e: any) => ({id: e.id, label: e.descricao}));
+    const {data} = await api.get<any[]>(`/api/basico/logradouro/auto-complete-logradouro-troca-opcoes`, {params});
+    return data.map((e: any) => ({id: e.id, label: e.descricao ?? String(e.id)}));
 }
 
 export interface AutoCompleteOption {

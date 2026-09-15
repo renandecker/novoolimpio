@@ -3,10 +3,12 @@ package br.com.sol7.olimpio.central.turnotrabalho;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.SearchFilterRequest;
 import br.com.sol7.olimpio.shared.GenericSearchService;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import org.hibernate.reactive.mutiny.Mutiny;
@@ -259,15 +261,15 @@ public class TurnoTrabalhoService {
 
     public Uni<List<Map<String, Object>>> listDiaSemana() {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery("SELECT id, nome FROM bas_dia_semana ORDER BY id")
+                .chain(session -> session.createNativeQuery("SELECT id AS id, nome AS nome FROM bas_dia_semana ORDER BY id", Tuple.class)
                         .getResultList()
                         .map(list -> {
                             List<Map<String, Object>> out = new ArrayList<>();
                             for (Object row : list) {
-                                Object[] arr = (Object[]) row;
+                                Tuple t = (Tuple) row;
                                 Map<String, Object> m = new java.util.LinkedHashMap<>();
-                                m.put("id", ((Number) arr[0]).longValue());
-                                m.put("nome", arr[1] == null ? "" : String.valueOf(arr[1]));
+                                m.put("id", TupleHelper.getLong(t, "id"));
+                                m.put("nome", TupleHelper.getString(t, "nome") != null ? TupleHelper.getString(t, "nome") : "");
                                 out.add(m);
                             }
                             if (!out.isEmpty()) return out;
@@ -287,11 +289,11 @@ public class TurnoTrabalhoService {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> {
                     if (query == null || query.trim().isEmpty()) {
-                        return session.createNativeQuery("SELECT id, sucinto, razao_social, nome_fantasia FROM bas_unidade WHERE ativo IS TRUE OR ativo IS NULL ORDER BY sucinto LIMIT 50")
+                        return session.createNativeQuery("SELECT id AS id, sucinto AS sucinto, razao_social AS razao_social, nome_fantasia AS nome_fantasia FROM bas_unidade WHERE ativo IS TRUE OR ativo IS NULL ORDER BY sucinto LIMIT 50", Tuple.class)
                                 .getResultList();
                     } else {
                         String q = "%" + query.toLowerCase() + "%";
-                        return session.createNativeQuery("SELECT id, sucinto, razao_social, nome_fantasia FROM bas_unidade WHERE (ativo IS TRUE OR ativo IS NULL) AND (lower(sucinto) LIKE :q OR lower(razao_social) LIKE :q OR lower(nome_fantasia) LIKE :q OR CAST(id AS TEXT) = :exact) ORDER BY sucinto LIMIT 50")
+                        return session.createNativeQuery("SELECT id AS id, sucinto AS sucinto, razao_social AS razao_social, nome_fantasia AS nome_fantasia FROM bas_unidade WHERE (ativo IS TRUE OR ativo IS NULL) AND (lower(sucinto) LIKE :q OR lower(razao_social) LIKE :q OR lower(nome_fantasia) LIKE :q OR CAST(id AS TEXT) = :exact) ORDER BY sucinto LIMIT 50", Tuple.class)
                                 .setParameter("q", q)
                                 .setParameter("exact", query.trim())
                                 .getResultList();
@@ -300,13 +302,13 @@ public class TurnoTrabalhoService {
                 .map(list -> {
                     List<Map<String, Object>> out = new ArrayList<>();
                     for (Object row : list) {
-                        Object[] arr = (Object[]) row;
+                        Tuple t = (Tuple) row;
                         Map<String, Object> m = new java.util.LinkedHashMap<>();
-                        m.put("id", ((Number) arr[0]).longValue());
-                        m.put("sucinto", arr[1] == null ? "" : String.valueOf(arr[1]));
-                        m.put("razaoSocial", arr[2] == null ? "" : String.valueOf(arr[2]));
-                        m.put("nomeFantasia", arr[3] == null ? "" : String.valueOf(arr[3]));
-                        m.put("label", (arr[1] == null ? "#" + arr[0] : arr[1] + " - " + String.valueOf(arr[2])));
+                        m.put("id", TupleHelper.getLong(t, "id"));
+                        m.put("sucinto", TupleHelper.getString(t, "sucinto") != null ? TupleHelper.getString(t, "sucinto") : "");
+                        m.put("razaoSocial", TupleHelper.getString(t, "razao_social") != null ? TupleHelper.getString(t, "razao_social") : "");
+                        m.put("nomeFantasia", TupleHelper.getString(t, "nome_fantasia") != null ? TupleHelper.getString(t, "nome_fantasia") : "");
+                        m.put("label", (TupleHelper.getString(t, "sucinto") == null ? "#" + TupleHelper.getLong(t, "id") : TupleHelper.getString(t, "sucinto") + " - " + TupleHelper.getString(t, "razao_social")));
                         out.add(m);
                     }
                     return out;

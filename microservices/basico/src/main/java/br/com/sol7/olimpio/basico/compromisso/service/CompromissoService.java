@@ -15,6 +15,7 @@ import java.util.Date;
 
 import br.com.sol7.olimpio.basico.compromisso.dto.CompromissoRequest;
 import br.com.sol7.olimpio.basico.compromisso.dto.CompromissoResponse;
+import br.com.sol7.olimpio.basico.compromisso.dto.ResultadoResponse;
 import br.com.sol7.olimpio.basico.compromisso.entity.Compromisso;
 import br.com.sol7.olimpio.basico.compromisso.repository.CompromissoRepository;
 
@@ -368,6 +369,48 @@ public class CompromissoService {
     //     }
     public Uni<Long> buscarProspectoDoCompromisso(Long compromissoId) {
         return repository.buscarProspectoDoCompromisso(compromissoId).map(list -> list.isEmpty() ? null : ((Number) list.get(0)).longValue());
+    }
+
+    // Migrado de CompromissoController.trocaStatus (linha 317, camada controller)
+    public Uni<CompromissoResponse> trocarStatus(Long compromissoId, Long statusId) {
+        if (statusId == null) {
+            return Uni.createFrom().failure(new jakarta.ws.rs.WebApplicationException(
+                    "Informe o novo status", jakarta.ws.rs.core.Response.Status.BAD_REQUEST));
+        }
+        return repository.findById(compromissoId).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Compromisso not found"))
+                .chain(c -> repository.inserirPessoaStatus(compromissoId, c.statusCompromissoId, statusId)
+                        .chain(() -> repository.modificarStatusCompromisso(compromissoId, statusId)))
+                .chain(() -> find(compromissoId));
+    }
+
+    // Migrado de CompromissoController.proximoStatusCompromisso (linha 603, camada controller)
+    public Uni<CompromissoResponse> proximoStatus(Long compromissoId, String observacao) {
+        return repository.findById(compromissoId).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Compromisso not found"))
+                .chain(c -> repository.buscarProximoStatus(compromissoId)
+                        .onItem().ifNull().failWith(() -> new jakarta.ws.rs.WebApplicationException(
+                                "Este compromisso nao possui proximo status", jakarta.ws.rs.core.Response.Status.BAD_REQUEST))
+                        .chain(proximoId -> repository.buscarStatusAgenda(compromissoId)
+                                .chain(agendaStatusId -> repository.inserirPessoaStatus(compromissoId, c.statusCompromissoId, proximoId)
+                                        .chain(() -> repository.avancarStatus(compromissoId, proximoId,
+                                                agendaStatusId != null && agendaStatusId.equals(proximoId), observacao)))))
+                .chain(() -> find(compromissoId));
+    }
+
+    // Migrado de CompromissoController.fecharAgenda (linha 231, camada controller)
+    public Uni<CompromissoResponse> fechar(Long compromissoId) {
+        return repository.findById(compromissoId).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Compromisso not found"))
+                .chain(c -> repository.fecharCompromisso(compromissoId))
+                .chain(() -> find(compromissoId));
+    }
+
+    public Uni<List<ResultadoResponse>> listarResultados(Long compromissoId) {
+        return repository.buscarResultadosDoCompromisso(compromissoId)
+                .map(list -> list.stream()
+                        .map(row -> new ResultadoResponse(((Number) row[0]).longValue(), (String) row[1]))
+                        .toList());
     }
 
 }

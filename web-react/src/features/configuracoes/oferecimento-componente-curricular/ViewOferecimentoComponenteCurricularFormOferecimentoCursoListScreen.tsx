@@ -1995,37 +1995,25 @@ useEffect(() => {
 
                     <div className="field-row">
 
-                        <label className="ofc-checkbox">
+                        <label className="ofc-toggle">
 
                             <input
+                                type="radio"
+                                name="registraFrequencia"
+                                checked={data.entity?.registraFrequencia !== false}
+                                onChange={() => updateField('entity', {...dataRef.current.entity, registraFrequencia: !data.entity?.registraFrequencia})}
 
-                                type="checkbox"
+                            /> Sim</label>
 
-                                checked={data.registraFrequencia}
-
-                                onChange={(e) => updateField('registraFrequencia', e.target.checked)}
-
-                            />
-
-                            Registra Frequência
-
-                        </label>
-
-                        <label className="ofc-checkbox">
+                        <label className="ofc-toggle">
 
                             <input
+                                type="radio"
+                                name="possuiAvaliacao"
+                                checked={data.entity?.possuiAvaliacao !== false}
+                                onChange={() => updateField('entity', {...dataRef.current.entity, possuiAvaliacao: !data.entity?.possuiAvaliacao})}
 
-                                type="checkbox"
-
-                                checked={data.possuiAvaliacao}
-
-                                onChange={(e) => updateField('possuiAvaliacao', e.target.checked)}
-
-                            />
-
-                            Possui Avaliação
-
-                        </label>
+                            /> Sim</label>
 
                     </div>
 

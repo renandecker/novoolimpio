@@ -14,7 +14,7 @@ import './AppLayout.css';
 function AppLayoutContent({children}: { children: ReactNode }) {
     const {session} = useAuth();
     const {tema} = useTheme();
-    const {isOpen, close, currentFoto, username, onPhotoUpdate} = usePhotoModal();
+    const {isOpen, open, close, currentFoto, username, onPhotoUpdate} = usePhotoModal();
     
     const appLayoutStyle: React.CSSProperties = {
         backgroundImage: tema?.imagemFundo ? `url(${tema.imagemFundo})` : 'none',
@@ -37,7 +37,7 @@ function AppLayoutContent({children}: { children: ReactNode }) {
 
     return (
         <div className="app-layout" style={appLayoutStyle}>
-            <Sidebar onPhotoAction={() => { if (session) usePhotoModal().open(session.foto, session.username); }} />
+            <Sidebar onPhotoAction={() => { if (session) open(session.foto, session.username); }} />
             <div className="app-main">
                 <header className="app-header" style={headerStyle}>
                     <div className="app-header-left">

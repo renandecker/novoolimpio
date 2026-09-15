@@ -220,10 +220,10 @@ export { default as ViewNapListLigacaoNapListScreen } from '../features/configur
 export { default as ViewNapListLoteListScreen } from '../features/configuracoes/nap/ViewNapListLoteListScreen.tsx';
 export { default as ViewNotificacaoListNotificacaoListScreen } from '../features/configuracoes/notificacao/ViewNotificacaoListNotificacaoListScreen.tsx';
 export { default as ViewOferecimentoComponenteCurricularDisponibilidadeOferecimentoListScreen } from '../features/configuracoes/oferecimento-componente-curricular/ViewOferecimentoComponenteCurricularDisponibilidadeOferecimentoListScreen.tsx';
-export { default as ViewOferecimentoComponenteCurricularFormOferecimentoComponenteCurricularListScreen } from '../features/configuracoes/oferecimento-componente-curricular/ViewOferecimentoComponenteCurricularFormOferecimentoComponenteCurricularListScreen.tsx';
 export { default as ViewOferecimentoComponenteCurricularFormOferecimentoCursoListScreen } from '../features/configuracoes/oferecimento-componente-curricular/ViewOferecimentoComponenteCurricularFormOferecimentoCursoListScreen.tsx';
 export { default as ViewOferecimentoComponenteCurricularListOferecimentoComponenteCurricularListScreen } from '../features/configuracoes/oferecimento-componente-curricular/ViewOferecimentoComponenteCurricularListOferecimentoComponenteCurricularListScreen.tsx';
 export { default as ViewOferecimentoComponenteCurricularListOferecimentoCursoListScreen } from '../features/configuracoes/oferecimento-componente-curricular/ViewOferecimentoComponenteCurricularListOferecimentoCursoListScreen.tsx';
+export { default as ViewOferecimentoComponenteCurricularFormOferecimentoComponenteCurricularListScreen } from '../features/configuracoes/oferecimento-componente-curricular/ViewOferecimentoComponenteCurricularFormOferecimentoComponenteCurricularListScreen.tsx';
 export { default as ViewOperacionalFormOperacionalListScreen } from '../features/configuracoes/operacional/ViewOperacionalFormOperacionalListScreen.tsx';
 export { default as ViewOperacionalListOperacionalListScreen } from '../features/configuracoes/operacional/ViewOperacionalListOperacionalListScreen.tsx';
 export { default as ViewPacoteListPacoteListScreen } from '../features/configuracoes/pacote/ViewPacoteListPacoteListScreen.tsx';

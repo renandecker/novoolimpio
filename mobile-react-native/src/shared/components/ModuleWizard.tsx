@@ -4,6 +4,8 @@ import {MasterDetail} from '../../MasterDetail';
 import type {MasterDetailColumn} from '../../MasterDetail';
 import {Wizard} from './Wizard';
 import type {WizardStep} from './Wizard';
+import {UnidadeCombo, toUnidadeOption} from './UnidadeCombo';
+import type {AutoCompleteOption} from './AutoComplete';
 import {api} from '../services/api';
 import type {ApiItem} from '../types/types';
 
@@ -27,12 +29,26 @@ export interface ModuleWizardField {
     secure?: boolean;
 }
 
+export interface ModuleWizardCombo {
+    label: string;
+    source: string;
+    valueKey?: string;
+    /** Endpoint que lista os vínculos existentes do registro em edição (ex.: /api/educacao/curriculo-unidade). */
+    loadPath?: string;
+    /** Query param usado para filtrar os vínculos pelo registro em edição (ex.: curriculoId). */
+    loadParam?: string;
+    /** Campo do item de vínculo que guarda o id do item mestre (ex.: unidadeId). */
+    linkKey?: string;
+    minChars?: number;
+}
+
 export interface ModuleWizardStep {
     key: string;
     label: string;
     path?: string;
     empty?: string;
     masterDetail?: ModuleWizardMasterDetail;
+    combo?: ModuleWizardCombo;
     fields?: ModuleWizardField[];
     nextLabel?: string;
 }
@@ -95,6 +111,26 @@ function MasterDetailStep({
             columns={config.columns}
             items={items}
             onChange={onChange}
+        />
+    );
+}
+
+function ComboStep({
+                      config,
+                      value,
+                      onChange,
+                  }: {
+    config: ModuleWizardCombo;
+    value: AutoCompleteOption | null;
+    onChange: (option: AutoCompleteOption | null) => void;
+}) {
+    return (
+        <UnidadeCombo
+            label={config.label}
+            value={value}
+            onChange={onChange}
+            minChars={config.minChars ?? 0}
+            style={styles.combo}
         />
     );
 }
@@ -174,9 +210,9 @@ function LoadListStep({path}: { path: string }) {
 }
 
 export function ModuleWizard({steps, completeLabel, onSave, editId}: ModuleWizardProps) {
-    const [masterItems, setMasterItems] = useState<Record<string, ApiItem[]>>({});
+    const [masterItems, setMasterItems] = useState<Record<string, unknown>>({});
     const [loading, setLoading] = useState<boolean>(() =>
-        editId != null && steps.some((step) => Boolean(step.masterDetail?.loadPath)),
+        editId != null && steps.some((step) => Boolean((step.masterDetail ?? step.combo)?.loadPath)),
     );
 
     useEffect(() => {
@@ -187,16 +223,17 @@ export function ModuleWizard({steps, completeLabel, onSave, editId}: ModuleWizar
         let cancelled = false;
         setLoading(true);
         (async () => {
-            const next: Record<string, ApiItem[]> = {};
+            const next: Record<string, unknown> = {};
             try {
                 for (const step of steps) {
-                    const md = step.masterDetail;
-                    if (!md?.loadPath || !md.loadParam || !md.linkKey) continue;
-                    const vinculos = (await api.get<ApiItem[]>(md.loadPath, {params: {[md.loadParam]: editId}})).data ?? [];
-                    const todos = (await api.get<ApiItem[]>(md.source)).data ?? [];
-                    const ids = new Set(vinculos.map((vinc) => String(asRecord(vinc)[md.linkKey!])));
-                    const valueKey = md.valueKey ?? 'id';
-                    next[step.key] = todos.filter((item) => ids.has(String(asRecord(item)[valueKey])));
+                    const conf = step.masterDetail ?? step.combo;
+                    if (!conf?.loadPath || !conf.loadParam || !conf.linkKey) continue;
+                    const vinculos = (await api.get<ApiItem[]>(conf.loadPath, {params: {[conf.loadParam]: editId}})).data ?? [];
+                    const todos = (await api.get<ApiItem[]>(conf.source)).data ?? [];
+                    const ids = new Set(vinculos.map((vinc) => String(asRecord(vinc)[conf.linkKey!])));
+                    const valueKey = conf.valueKey ?? 'id';
+                    const selected = todos.filter((item) => ids.has(String(asRecord(item)[valueKey])));
+                    next[step.key] = step.combo ? toUnidadeOption(selected[0]) : selected;
                 }
             } catch (error) {
                 console.error('ModuleWizard: falha ao carregar dados em edição', error);
@@ -212,8 +249,8 @@ export function ModuleWizard({steps, completeLabel, onSave, editId}: ModuleWizar
         // steps é estável por tela; recarrega apenas quando o id de edição muda.
     }, [editId]);
 
-    const updateMasterItems = (stepKey: string, items: ApiItem[]) => {
-        setMasterItems((prev) => ({...prev, [stepKey]: items}));
+    const updateMasterItems = (stepKey: string, value: unknown) => {
+        setMasterItems((prev) => ({...prev, [stepKey]: value}));
     };
 
     const wizardSteps: WizardStep[] = steps.map((step, index) => ({
@@ -222,8 +259,14 @@ export function ModuleWizard({steps, completeLabel, onSave, editId}: ModuleWizar
         content: step.masterDetail ? (
             <MasterDetailStep
                 config={step.masterDetail}
-                items={masterItems[step.key] ?? []}
+                items={(masterItems[step.key] as ApiItem[] | undefined) ?? []}
                 onChange={(items) => updateMasterItems(step.key, items)}
+            />
+        ) : step.combo ? (
+            <ComboStep
+                config={step.combo}
+                value={(masterItems[step.key] as AutoCompleteOption | null | undefined) ?? null}
+                onChange={(option) => updateMasterItems(step.key, option)}
             />
         ) : step.fields ? (
             <FieldsStep fields={step.fields}/>
@@ -275,6 +318,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         backgroundColor: '#ffffff',
     },
+    combo: {width: '100%'},
     list: {flex: 1},
     row: {
         flexDirection: 'row',

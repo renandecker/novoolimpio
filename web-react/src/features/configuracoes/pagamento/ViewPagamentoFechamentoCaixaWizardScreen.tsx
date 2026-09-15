@@ -10,6 +10,8 @@ import {PermissionGate} from '../../../shared/services/permissions';
 
 import {AutoComplete, type AutoCompleteOption} from '../../../shared/components/AutoComplete';
 
+import {UnidadeCombo} from '../../../shared/components/UnidadeCombo';
+
 import {Wizard, useWizardData} from '../../../shared/components/Wizard';
 
 import '../FechamentoCaixa.css';
@@ -316,11 +318,12 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
     const [configCaixaExistente, setConfigCaixaExistente] = useState<boolean>(false);
 
+    const [stepIndex, setStepIndex] = useState<number>(0);
+
 
 
     // AutoComplete fetch functions
 
-    const fetchUnidade = fetchAutoComplete('/api/view/unidade/listUnidade', 'id', 'sucinto', true);
     const fetchImpressora = fetchAutoComplete('/api/view/impressora/listImpressora', 'id', 'descricao', true);
 
     const fetchParcela = fetchAutoComplete('/api/financeiro/parcela/buscar', 'id', 'descricao');
@@ -335,14 +338,6 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
     // AutoComplete fetchById functions (for loading label when value has ID but no label)
 
-
-    const fetchUnidadeById = async (id: number) => {
-
-        const {data} = await api.get(`/api/view/unidade/listUnidade/${id}`);
-
-        return {id: data.id, label: data.sucinto ?? data.nome ?? data.name ?? `#${data.id}`};
-
-    };
 
     const fetchImpressoraById = async (id: number) => {
 
@@ -446,6 +441,8 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
                     updateFields({caixaAberto: false, caixaId: null, fundoCaixa: '', impressoraId: ''});
 
+                    if (!cancelled) setStepIndex(0);
+
                     return;
 
                 }
@@ -468,7 +465,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
                         updateFields({
 
-                            caixaAberto: true,
+                            caixaAberto: Boolean(!caixaData.dataFechamento),
 
                             caixaId: caixaData.id,
 
@@ -477,6 +474,14 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                             impressoraId: String(caixaData.impressoraId ?? ''),
 
                         });
+
+                        if (caixaData.dataFechamento) {
+
+                            setMensagem('O caixa do dia já foi fechado e não pode ser aberto novamente hoje.');
+
+                        }
+
+                        setStepIndex(caixaData.dataFechamento ? 0 : 1);
 
                     }
 
@@ -487,6 +492,8 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                     setCaixa(null);
 
                     updateFields({caixaAberto: false, caixaId: null});
+
+                    setStepIndex(0);
 
                     const {data: sugerido} = await api.get<number | null>('/api/financeiro/caixa/fundo-caixa-sugerido', {
 
@@ -549,6 +556,8 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
         if (!d.unidadeId) return 'Selecione a unidade';
 
         if (!configCaixaExistente) return 'Não há Configuração de Caixa para este usuário/unidade. Cadastre em Configurações antes de abrir o caixa.';
+
+        if (!d.caixaAberto) return 'O caixa do dia ainda não está aberto. Abra o caixa para seguir no fluxo de fechamento.';
 
         return true;
 
@@ -632,6 +641,8 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
             updateFields({caixaAberto: true, caixaId: newCaixa.id});
 
+            setStepIndex(1);
+
             setMensagem('Caixa aberto com sucesso!');
 
         } catch (e: any) {
@@ -639,40 +650,6 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
             setErro(e?.response?.data?.message ?? 'Erro ao abrir o caixa!');
 
         } finally {
-
-            setLoading(false);
-
-        }
-
-    };
-
-
-
-    const reabrirCaixa = async () => {
-
-        if (!caixa) return;
-
-        setLoading(true);
-
-        setErro(null);
-
-        try {
-
-            const {data: reopened} = await api.post<Caixa>(`/api/financeiro/caixa/${caixa.id}/abrir`);
-
-            setCaixa(reopened);
-
-            updateFields({caixaAberto: true, caixaId: reopened.id});
-
-            setMensagem('Caixa reaberto com sucesso!');
-
-        } catch {
-
-            setErro('Erro ao reabrir o caixa!');
-
-        }
-
-        finally {
 
             setLoading(false);
 
@@ -944,7 +921,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
             setCaixa(closed);
 
-            updateFields({caixaAberto: true, caixaId: closed.id});
+            updateFields({caixaAberto: false, caixaId: closed.id});
 
             setMensagem('Caixa fechado com sucesso!');
 
@@ -1010,6 +987,8 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
                     onDataChange={updateFields}
 
+                    stepIndex={stepIndex}
+
                     steps={[
 
                         {
@@ -1017,6 +996,8 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                             key: 'configuracao',
 
                             label: 'Configuração do Caixa',
+
+                            nextDisabled: !data.caixaAberto,
 
                             content: (
 
@@ -1032,21 +1013,15 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
                                     <div className="field-row">
 
-                                        <AutoComplete
+                                        <UnidadeCombo
 
                                             id="unidade"
 
                                             label="Unidade *"
 
-                                            placeholder="Digite para buscar..."
-
                                             value={data.unidadeId ? {id: Number(data.unidadeId), label: ''} : null}
 
                                             onChange={(opt) => updateField('unidadeId', opt ? String(opt.id) : '')}
-
-                                            fetchOptions={fetchUnidade}
-
-                                            fetchById={fetchUnidadeById}
 
                                             minChars={2}
 
@@ -1056,7 +1031,33 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
 
 
-                                    {data.caixaAberto && caixa ? (
+                                    {caixa && caixa.dataFechamento ? (
+
+                                        <div className="caixa-info caixa-info-fechado">
+
+                                            <p>
+
+                                                Caixa <strong>#{caixa.idCaixaUnidade}</strong> aberto em{' '}
+
+                                                {new Date(caixa.data).toLocaleString('pt-BR')} —{' '}
+
+                                                <strong className="status-fechado">Fechado</strong>
+
+                                            </p>
+
+                                            <p>Fundo de caixa: {money(caixa.fundoCaixa)}</p>
+
+                                            <p className="warning">
+
+                                                O caixa do dia já foi fechado e não pode ser aberto novamente
+
+                                                hoje.
+
+                                            </p>
+
+                                        </div>
+
+                                    ) : caixa && data.caixaAberto ? (
 
                                         <div className="caixa-info">
 
@@ -1066,31 +1067,11 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
                                                 {new Date(caixa.data).toLocaleString('pt-BR')} —{' '}
 
-                                                {caixa.dataFechamento ? (
-
-                                                    <strong className="status-fechado">Fechado</strong>
-
-                                                ) : (
-
-                                                    <strong className="status-aberto">Aberto</strong>
-
-                                                )}
+                                                <strong className="status-aberto">Aberto</strong>
 
                                             </p>
 
                                             <p>Fundo de caixa: {money(caixa.fundoCaixa)}</p>
-
-                                            {caixa.dataFechamento && (
-
-                                                <button className="btn-secondary" onClick={reabrirCaixa}
-
-                                                        disabled={loading}>
-
-                                                    Abrir caixa novamente
-
-                                                </button>
-
-                                            )}
 
                                         </div>
 
@@ -1133,6 +1114,8 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
                                                     minChars={2}
 
+                                                    disabled
+
                                                 />
 
                                                 <div className="field-group">
@@ -1149,7 +1132,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
                                                         value={data.fundoCaixa}
 
-                                                        onChange={(e) => updateField('fundoCaixa', e.target.value)}
+                                                        disabled
 
                                                         placeholder="0,00"
 
@@ -1190,6 +1173,8 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                             key: 'movimentacao',
 
                             label: 'Movimentação Financeira',
+
+                            nextDisabled: !data.caixaId,
 
                             content: (
 

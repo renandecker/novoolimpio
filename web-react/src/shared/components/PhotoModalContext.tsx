@@ -2,7 +2,7 @@ import {createContext, useContext, useState, type ReactNode, useCallback} from '
 
 interface PhotoModalContextType {
     isOpen: boolean;
-    open: () => void;
+    open: (foto?: string, user?: string) => void;
     close: () => void;
     currentFoto?: string;
     username?: string;

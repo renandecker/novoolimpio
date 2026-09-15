@@ -2,6 +2,8 @@
 import type {DataTableColumn} from './DataTable';
 import {MasterDetail} from './MasterDetail';
 import type {MasterDetailColumn} from './MasterDetail';
+import {UnidadeCombo} from './UnidadeCombo';
+import type {AutoCompleteOption} from './AutoComplete';
 import {Tabs} from './Tabs';
 import type {TabItem} from './Tabs';
 import {useState} from 'react';
@@ -15,6 +17,12 @@ export interface ModuleTabMasterDetail {
     columns?: MasterDetailColumn[];
 }
 
+export interface ModuleTabUnidadeCombo {
+    label?: string;
+    value: AutoCompleteOption | null;
+    onChange: (option: AutoCompleteOption | null) => void;
+}
+
 export interface ModuleTabItem {
     key: string;
     label: string;
@@ -26,6 +34,7 @@ export interface ModuleTabItem {
     editNavigateTo?: string;
     createNavigateTo?: string;
     masterDetail?: ModuleTabMasterDetail;
+    unidadeCombo?: ModuleTabUnidadeCombo;
 }
 
 function MasterDetailTab({config}: { config: ModuleTabMasterDetail }) {
@@ -43,12 +52,24 @@ function MasterDetailTab({config}: { config: ModuleTabMasterDetail }) {
     );
 }
 
+function UnidadeComboTab({config}: { config: ModuleTabUnidadeCombo }) {
+    return (
+        <UnidadeCombo
+            label={config.label ?? 'Unidade'}
+            value={config.value}
+            onChange={config.onChange}
+        />
+    );
+}
+
 export function ModuleTabs({tabs, initial}: { tabs: ModuleTabItem[]; initial?: string }) {
     const items: TabItem[] = tabs.map((tab) => ({
         key: tab.key,
         label: tab.label,
         content: tab.masterDetail ? (
             <MasterDetailTab config={tab.masterDetail}/>
+        ) : tab.unidadeCombo ? (
+            <UnidadeComboTab config={tab.unidadeCombo}/>
         ) : tab.path ? (
             <DataTable
                 path={tab.path}

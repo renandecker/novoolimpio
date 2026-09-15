@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.Tuple;
 import io.smallrye.mutiny.Uni;
 
 @ApplicationScoped
@@ -143,7 +144,7 @@ public class ContratoRepository implements PanacheRepository<Contrato> {
     }
 
     public static final String SQL_AUTO_COMPLETE_ALUNO_NOME =
-            "SELECT DISTINCT p.id, COALESCE(pf.nome, pj.nome_fantasia, '') FROM edc_contrato c " +
+            "SELECT DISTINCT p.id AS id, COALESCE(pf.nome, pj.nome_fantasia, '') AS nome FROM edc_contrato c " +
                     "INNER JOIN bas_pessoa p ON p.id = c.id_pessoa " +
                     "LEFT JOIN bas_pessoa_fisica pf ON pf.id_pessoa = p.id " +
                     "LEFT JOIN bas_pessoa_juridica pj ON pj.id_pessoa = p.id " +
@@ -152,9 +153,9 @@ public class ContratoRepository implements PanacheRepository<Contrato> {
                     "OR pf.cpf like '%' || ?1 || '%' OR pj.cnpj like '%' || ?1 || '%') " +
                     "ORDER BY COALESCE(pf.nome, pj.nome_fantasia, '') LIMIT 20";
 
-    public Uni<java.util.List<Object>> autoCompleteAlunoNome(String query) {
+    public Uni<java.util.List<Tuple>> autoCompleteAlunoNome(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_ALUNO_NOME)
+                .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_ALUNO_NOME, Tuple.class)
                         .setParameter(1, query)
                         .getResultList());
     }

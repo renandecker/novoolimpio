@@ -6,7 +6,7 @@ import {DataTable} from '../../../shared/components/DataTable';
 
 const COLUMNS = [
 
-    {key: 'unidade_descricao', label: 'Id_unidade'},
+    {key: 'unidade_descricao', label: 'Unidade'},
 
     {key: 'curriculo_descricao', label: 'Curso'},
 

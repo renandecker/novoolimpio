@@ -24,7 +24,7 @@ export default function CurriculoEmpresaUnidadeListScreen() {
 
                         {key: 'id_empresa', label: 'Empresa'},
 
-                        {key: 'id_unidade', label: 'Id_unidade'},
+                        {key: 'id_unidade', label: 'Unidade'},
 
                         {key: 'inicio', label: 'Início'},
 

@@ -6,6 +6,8 @@ import {DataTable, type DataTableColumn} from '../../../shared/components/DataTa
 
 import {MasterDetail} from '../../../shared/components/MasterDetail';
 
+import {UnidadeCombo} from '../../../shared/components/UnidadeCombo';
+
 import {Tabs} from '../../../shared/components/Tabs';
 
 import {useApi} from '../../../shared/services/api';
@@ -68,7 +70,7 @@ interface VagaFormData {
 
     perfis: ApiItem[];
 
-    unidades: ApiItem[];
+    unidade: { id: number; label: string } | null;
 
     empresas: ApiItem[];
 
@@ -91,14 +93,6 @@ const PERFIL_SOURCE = '/api/view/perfil/listPerfil';
 const PERFIL_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'descricao', label: 'Descrição'}];
 
 const PERFIL_SEARCH = ['descricao'];
-
-
-
-const UNIDADE_SOURCE = '/api/view/unidade/listUnidade';
-
-const UNIDADE_COLUMNS = [{key: 'id', label: 'ID'}, {key: 'sucinto', label: 'Sucinto'}, {key: 'razaoSocial', label: 'Razão Social'}, {key: 'nomeFantasia', label: 'Nome Fantasia'}];
-
-const UNIDADE_SEARCH = ['sucinto', 'razaoSocial', 'nomeFantasia'];
 
 
 
@@ -286,7 +280,7 @@ export default function CurriculoVagaListScreen() {
 
         perfis: [],
 
-        unidades: [],
+        unidade: null,
 
         empresas: [],
 
@@ -350,7 +344,7 @@ export default function CurriculoVagaListScreen() {
 
             perfis: (rec.perfis as Array<number> ?? []).map(id => ({id, label: `#${id}`})),
 
-            unidades: (rec.unidades as Array<number> ?? []).map(id => ({id, label: `#${id}`})),
+            unidade: (rec.unidades as Array<number> ?? [])[0] ? {id: (rec.unidades as Array<number> ?? [])[0], label: `#${(rec.unidades as Array<number> ?? [])[0]}`} : null,
 
             empresas: (rec.empresas as Array<number> ?? []).map(id => ({id, label: `#${id}`})),
 
@@ -420,7 +414,7 @@ export default function CurriculoVagaListScreen() {
 
             perfis: formData.perfis.map(p => p.id),
 
-            unidades: formData.unidades.map(u => u.id),
+            unidades: formData.unidade ? [formData.unidade.id] : [],
 
             empresas: formData.empresas.map(e => e.id),
 
@@ -524,34 +518,12 @@ export default function CurriculoVagaListScreen() {
 
                     {errors.vagas && <span className="form-erro">{errors.vagas}</span>}
 
-                </label>
-
-                <label className="form-field">
-
+                </label>                <label className="form-field checkbox-field">
+                    <input type="checkbox" className="form-checkbox" checked={formData.fl_ativo} onChange={e => updateField('fl_ativo', e.target.checked)}/>
                     <span className="form-label">Ativo</span>
-
-                    <select className="form-select" value={String(formData.fl_ativo)} onChange={e => updateField('fl_ativo', e.target.value === 'true')}>
-
-                        <option value="true">Sim</option>
-
-                        <option value="false">Não</option>
-
-                    </select>
-
-                </label>
-
-                <label className="form-field">
-
+                </label>                <label className="form-field checkbox-field">
+                    <input type="checkbox" className="form-checkbox" checked={formData.fl_exibir_vaga} onChange={e => updateField('fl_exibir_vaga', e.target.checked)}/>
                     <span className="form-label">Exibir Vaga</span>
-
-                    <select className="form-select" value={String(formData.fl_exibir_vaga)} onChange={e => updateField('fl_exibir_vaga', e.target.value === 'true')}>
-
-                        <option value="true">Sim</option>
-
-                        <option value="false">Não</option>
-
-                    </select>
-
                 </label>
 
                 <label className="form-field">
@@ -590,20 +562,9 @@ export default function CurriculoVagaListScreen() {
 
         <div className="table_form">
 
-            <div className="form-grid">
-
-                <label className="form-field">
-
+            <div className="form-grid">                <label className="form-field checkbox-field">
+                    <input type="checkbox" className="form-checkbox" checked={formData.fl_email} onChange={e => updateField('fl_email', e.target.checked)}/>
                     <span className="form-label">Enviar por E-mail</span>
-
-                    <select className="form-select" value={String(formData.fl_email)} onChange={e => updateField('fl_email', e.target.value === 'true')}>
-
-                        <option value="true">Sim</option>
-
-                        <option value="false">Não</option>
-
-                    </select>
-
                 </label>
 
                 <label className="form-field">
@@ -636,7 +597,7 @@ export default function CurriculoVagaListScreen() {
 
             <Tabs tabs={[
 
-                {key: 'unidades', label: 'Unidades', content: <MasterDetail label="Unidade" source={UNIDADE_SOURCE} valueKey="id" searchKeys={UNIDADE_SEARCH} columns={UNIDADE_COLUMNS} items={formData.unidades} onChange={items => updateField('unidades', items)} />},
+                {key: 'unidades', label: 'Unidade', content: <UnidadeCombo label="Unidade" value={formData.unidade} onChange={opt => updateField('unidade', opt)} />},
 
                 {key: 'perfis', label: 'Perfis', content: <MasterDetail label="Perfil" source={PERFIL_SOURCE} valueKey="id" searchKeys={PERFIL_SEARCH} columns={PERFIL_COLUMNS} items={formData.perfis} onChange={items => updateField('perfis', items)} />},
 

@@ -2,6 +2,8 @@ package br.com.sol7.olimpio.comercial.campanha;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.TupleHelper;
+import jakarta.persistence.Tuple;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -165,26 +167,26 @@ public class CampanhaService {
     public Uni<List<AcaoDeCampanhaResponse>> listAcoes(Long campanhaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session ->
                 session.createNativeQuery(
-                        "SELECT ac.id, ac.id_tipo_canal, tc.descricao, ac.id_estrategia, e.descricao, ac.data_inicial, ac.data_final " +
+                        "SELECT ac.id AS id, ac.id_tipo_canal AS id_tipo_canal, tc.descricao AS tipo_canal_descricao, ac.id_estrategia AS id_estrategia, e.descricao AS estrategia_descricao, ac.data_inicial AS data_inicial, ac.data_final AS data_final " +
                         "FROM com_acao_de_campanha ac " +
                         "INNER JOIN com_campanha_acao_de_campanha cac ON cac.id_acao_de_campanha = ac.id " +
                         "LEFT JOIN com_tipo_canal tc ON tc.id = ac.id_tipo_canal " +
                         "LEFT JOIN com_estrategia e ON e.id = ac.id_estrategia " +
-                        "WHERE cac.id_campanha = :campId ORDER BY ac.id")
+                        "WHERE cac.id_campanha = :campId ORDER BY ac.id", Tuple.class)
                         .setParameter("campId", campanhaId)
                         .getResultList()
                         .map(list -> {
                             List<AcaoDeCampanhaResponse> out = new ArrayList<>();
                             for (Object row : list) {
-                                Object[] arr = (Object[]) row;
+                                Tuple t = (Tuple) row;
                                 out.add(new AcaoDeCampanhaResponse(
-                                        ((Number) arr[0]).longValue(),
-                                        arr[1] == null ? null : ((Number) arr[1]).longValue(),
-                                        arr[2] == null ? null : String.valueOf(arr[2]),
-                                        arr[3] == null ? null : ((Number) arr[3]).longValue(),
-                                        arr[4] == null ? null : String.valueOf(arr[4]),
-                                        (Date) arr[5],
-                                        (Date) arr[6]
+                                        TupleHelper.getLong(t, "id"),
+                                        TupleHelper.getLong(t, "id_tipo_canal"),
+                                        TupleHelper.getString(t, "tipo_canal_descricao"),
+                                        TupleHelper.getLong(t, "id_estrategia"),
+                                        TupleHelper.getString(t, "estrategia_descricao"),
+                                        TupleHelper.getDate(t, "data_inicial"),
+                                        TupleHelper.getDate(t, "data_final")
                                 ));
                             }
                             return out;
@@ -195,19 +197,19 @@ public class CampanhaService {
     public Uni<List<Map<String, Object>>> listUnidades(Long campanhaId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session ->
                 session.createNativeQuery(
-                        "SELECT u.id, u.sucinto, u.cnpj AS cnpj, u.razao_social FROM bas_unidade u " +
-                        "INNER JOIN com_campanha_unidade cu ON cu.id_unidade = u.id WHERE cu.id_campanha = :campId ORDER BY u.id")
+                        "SELECT u.id AS id, u.sucinto AS sucinto, u.cnpj AS cnpj, u.razao_social AS razao_social FROM bas_unidade u " +
+                        "INNER JOIN com_campanha_unidade cu ON cu.id_unidade = u.id WHERE cu.id_campanha = :campId ORDER BY u.id", Tuple.class)
                         .setParameter("campId", campanhaId)
                         .getResultList()
                         .map(list -> {
                             List<Map<String, Object>> out = new ArrayList<>();
                             for (Object row : list) {
-                                Object[] arr = (Object[]) row;
+                                Tuple t = (Tuple) row;
                                 Map<String, Object> m = new LinkedHashMap<>();
-                                m.put("id", arr[0]);
-                                m.put("sucinto", arr[1]);
-                                m.put("CNPJ", arr[2]);
-                                m.put("razaoSocial", arr[3]);
+                                m.put("id", TupleHelper.getLong(t, "id"));
+                                m.put("sucinto", TupleHelper.getString(t, "sucinto"));
+                                m.put("CNPJ", TupleHelper.getString(t, "cnpj"));
+                                m.put("razaoSocial", TupleHelper.getString(t, "razao_social"));
                                 out.add(m);
                             }
                             return out;

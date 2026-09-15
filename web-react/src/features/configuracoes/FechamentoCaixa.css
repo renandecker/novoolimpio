@@ -213,6 +213,15 @@
     margin: 8px 0;
 }
 
+.caixa-info-fechado {
+    background: #fdecea;
+    border-color: #f5c6cb;
+}
+
+.caixa-info-fechado .warning {
+    margin-top: 10px;
+}
+
 .caixa-config {
     padding: 16px;
     background: #fff3e0;

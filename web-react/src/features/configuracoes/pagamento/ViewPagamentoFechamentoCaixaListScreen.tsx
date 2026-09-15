@@ -10,6 +10,8 @@ import '../../../shared/components/Wizard.css';
 
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 
+import {UnidadeCombo} from '../../../shared/components/UnidadeCombo';
+
 
 
 // ==== Tipos espelhando os DTOs REST de financeiro.zip (módulo caixa) ====
@@ -128,44 +130,6 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
 
     });
 
-    // Combo search for Unidade
-
-    const [unidadeOptions, setUnidadeOptions] = useState<Array<{ id: number; nome: string }>>([]);
-
-    const [loadingUnidade, setLoadingUnidade] = useState(false);
-
-    const unidadeQuery = useQuery({
-
-        queryKey: ['combo-unidade'],
-
-        queryFn: async () => {
-
-            setLoadingUnidade(true);
-
-            try {
-
-                const {data} = await api.get('/api/view/unidade/listUnidade');
-
-                setUnidadeOptions(data.map((u: any) => ({id: u.id, nome: u.sucinto})));
-
-            } catch {
-
-                setUnidadeOptions([]);
-
-            }
-
-            finally {
-
-                setLoadingUnidade(false);
-
-            }
-
-        },
-
-        enabled: false,
-
-    });
-
     // Combo search for Impressora
 
     const [impressoraOptions, setImpressoraOptions] = useState<Array<{ id: number; nome: string }>>([]);
@@ -209,8 +173,6 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
     useEffect(() => {
 
         queryClient.prefetchQuery({queryKey: ['combo-usuario']});
-
-        queryClient.prefetchQuery({queryKey: ['combo-unidade']});
 
         queryClient.prefetchQuery({queryKey: ['combo-impressora']});
 
@@ -788,25 +750,14 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
 
                                     </select></label>
 
-                                    <label>Unidade <select
-
-                                        value={unidadeId}
-
-                                        onChange={(e) => setUnidadeId(e.target.value)}
-
-                                        disabled={loadingUnidade}
-
-                                    >
-
-                                        <option value="">-- Selecione --</option>
-
-                                        {loadingUnidade ? <option>Carregando...</option> : unidadeOptions.map((u) => (
-
-                                            <option key={u.id} value={u.id}>{u.nome}</option>
-
-                                        ))}
-
-                                    </select></label>
+                                    <div className="form-field">
+                                        <UnidadeCombo
+                                            label="Unidade"
+                                            value={unidadeId ? {id: Number(unidadeId), label: ''} : null}
+                                            onChange={(opt) => setUnidadeId(opt ? String(opt.id) : '')}
+                                            minChars={2}
+                                        />
+                                    </div>
 
                                 </div>
 

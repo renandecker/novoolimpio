@@ -12,6 +12,9 @@ import java.util.Date;
 
 import br.com.sol7.olimpio.basico.compromisso.dto.CompromissoRequest;
 import br.com.sol7.olimpio.basico.compromisso.dto.CompromissoResponse;
+import br.com.sol7.olimpio.basico.compromisso.dto.ProximoStatusRequest;
+import br.com.sol7.olimpio.basico.compromisso.dto.ResultadoResponse;
+import br.com.sol7.olimpio.basico.compromisso.dto.TrocaStatusRequest;
 import br.com.sol7.olimpio.basico.compromisso.service.CompromissoService;
 
 @Path("/api/basico/compromisso")
@@ -204,6 +207,30 @@ public class CompromissoController {
     @Path("/atualizar-compromissos-automaticos")
     public Uni<Void> atualizarCompromissosAutomaticos() {
         return service.atualizarCompromissosAutomaticos();
+    }
+
+    @PUT
+    @Path("/{id}/troca-status")
+    public Uni<CompromissoResponse> trocaStatus(@PathParam("id") Long id, TrocaStatusRequest r) {
+        return service.trocarStatus(id, r.statusId());
+    }
+
+    @PUT
+    @Path("/{id}/proximo-status")
+    public Uni<CompromissoResponse> proximoStatus(@PathParam("id") Long id, ProximoStatusRequest r) {
+        return service.proximoStatus(id, r.observacao());
+    }
+
+    @PUT
+    @Path("/{id}/fechar")
+    public Uni<CompromissoResponse> fechar(@PathParam("id") Long id) {
+        return service.fechar(id);
+    }
+
+    @GET
+    @Path("/{id}/resultados")
+    public Uni<List<ResultadoResponse>> listarResultados(@PathParam("id") Long id) {
+        return service.listarResultados(id);
     }
 
 }

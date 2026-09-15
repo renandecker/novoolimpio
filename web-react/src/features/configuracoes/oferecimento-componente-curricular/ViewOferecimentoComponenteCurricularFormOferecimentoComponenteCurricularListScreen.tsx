@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+﻿import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 
 
@@ -19,6 +19,8 @@ import {format} from 'date-fns';
 import {Modal} from '../../../shared/components/Modal';
 
 import {ScheduleWeekView, mondayOf, toIsoDate, monthRangeForWeek, type ScheduleEventData} from '../../../shared/components/WeeklyGrid';
+
+import '../OferecimentoCurso.css';
 
 
 
@@ -777,7 +779,13 @@ const [carregando, setCarregando] = useState(true);
 
 
 
-    const fetchProfessor = async (query: string, diaSemanaId?: number, turnoId?: number, tempoAulaId?: number): Promise<AutoCompleteOption[]> => {
+    
+    const alternarAulaCoringa = (chave: string) => {
+        updateField('ocorrencias', dataRef.current.ocorrencias.map((o) => o.key === chave ? {...o, aulaCoringa: !o.aulaCoringa} : o));
+    };
+
+
+const fetchProfessor = async (query: string, diaSemanaId?: number, turnoId?: number, tempoAulaId?: number): Promise<AutoCompleteOption[]> => {
 
         if (query.length < 3) return [];
 
@@ -1540,13 +1548,13 @@ const [carregando, setCarregando] = useState(true);
 
                                                 </div>
 
-                                                {data.ocorrencias.length > 0 && (
+{data.ocorrencias.length > 0 && (
 
                                                     <table className="data-table" style={{width: '100%', marginTop: 12}}>
 
-                                                        <thead><tr><th>Data</th><th>Dia Semana</th><th>Turno</th><th>Tempo Aula</th><th>Sala</th><th>Ação</th></tr></thead>
+                                                        <thead><tr><th>Data</th><th>Dia Semana</th><th>Turno</th><th>Tempo Aula</th><th>Sala</th><th>Aula coringa</th></tr></thead>
 
-                                                        <tbody>{[...data.ocorrencias].sort((a, b) => a.data.localeCompare(b.data)).map((occ) => {const da = diaAulas.find((x) => x.id === occ.diaAulaId); const sala = salas.find((s) => s.id === occ.salaId); return (<tr key={occ.key}><td>{occ.data}</td><td>{nomeDiaSemana(da?.diaSemanaId)}</td><td>{da?.turnoEducacao_descricao ?? '-'}</td><td>{da?.tempoAula_descricao ?? '-'}</td><td>{sala?.descricao ?? sala?.sucinto ?? occ.salaId}</td><td><button type="button" className="btn-action btnred" onClick={() => removerOcorrencia(occ)}><X className="icon" /></button></td></tr>); })}</tbody>
+                                                        <tbody>{[...data.ocorrencias].sort((a, b) => a.data.localeCompare(b.data)).map((occ) => {const da = diaAulas.find((x) => x.id === occ.diaAulaId); const sala = salas.find((s) => s.id === occ.salaId); return (<tr key={occ.key}><td>{occ.data}</td><td>{nomeDiaSemana(da?.diaSemanaId)}</td><td>{da?.turnoEducacao_descricao ?? '-'}</td><td>{da?.tempoAula_descricao ?? '-'}</td><td>{sala?.descricao ?? sala?.sucinto ?? occ.salaId}</td><td><button type="button" className={"ofc-toggle " + (occ.aulaCoringa ? "ofc-toggle-on" : "")} onClick={() => alternarAulaCoringa(occ.key)}>{occ.aulaCoringa ? "Sim" : "Não"}</button></td></tr>); })}</tbody>
 
                                                     </table>
 
@@ -1680,6 +1688,13 @@ const [carregando, setCarregando] = useState(true);
     );
 
 }
+
+
+
+
+
+
+
 
 
 

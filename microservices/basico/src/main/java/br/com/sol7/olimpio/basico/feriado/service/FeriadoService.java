@@ -14,6 +14,7 @@ import java.util.Date;
 import br.com.sol7.olimpio.basico.feriado.dto.FeriadoAjusteResponse;
 import br.com.sol7.olimpio.basico.feriado.dto.FeriadoRequest;
 import br.com.sol7.olimpio.basico.feriado.dto.FeriadoResponse;
+import br.com.sol7.olimpio.basico.feriado.dto.TurmaFeriadoResponse;
 import br.com.sol7.olimpio.basico.feriado.entity.Feriado;
 import br.com.sol7.olimpio.basico.feriado.entity.FeriadoAjuste;
 import br.com.sol7.olimpio.basico.feriado.producer.FeriadoKafkaProducer;
@@ -453,6 +454,60 @@ public class FeriadoService {
                                     (String) arr[17],
                                     (String) arr[18],
                                     (String) arr[19]
+                            );
+                        }).toList()));
+    }
+
+    public Uni<List<TurmaFeriadoResponse>> turmasPorData(Date data) {
+        String sql = """
+            SELECT 
+                o.id,
+                o.data,
+                ofe.id,
+                g.nome,
+                u.sucinto,
+                c.nome,
+                cc.descricao,
+                ofe.carga_horaria,
+                ofe.status,
+                ofe.inscritos,
+                ofe.vagas,
+                da.nome,
+                tu.descricao,
+                ta.descricao
+            FROM edc_ocorrencia_componente_curricular o
+            JOIN edc_oferecimento_componente_curricular ofe ON ofe.id = o.id_oferecimento_componente_curricular
+            LEFT JOIN edc_grupo g ON g.id = ofe.id_grupo
+            LEFT JOIN bas_unidade u ON u.id = ofe.id_unidade
+            LEFT JOIN edc_curriculo c ON c.id = ofe.id_curso
+            LEFT JOIN edc_componente_curricular cc ON cc.id = ofe.id_componente_curricular
+            LEFT JOIN edc_dia_aula da ON da.id = o.id_dia_aula
+            LEFT JOIN edc_turno tu ON tu.id = da.id_turno
+            LEFT JOIN edc_tempo_aula ta ON ta.id = da.id_tempo_aula
+            WHERE o.data = $1
+            ORDER BY ofe.id, o.data
+        """;
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql)
+                        .setParameter(1, data)
+                        .getResultList()
+                        .map(list -> list.stream().map(row -> {
+                            Object[] arr = (Object[]) row;
+                            return new TurmaFeriadoResponse(
+                                    ((Number) arr[0]).longValue(),
+                                    (Date) arr[1],
+                                    ((Number) arr[2]).longValue(),
+                                    (String) arr[3],
+                                    (String) arr[4],
+                                    (String) arr[5],
+                                    (String) arr[6],
+                                    arr[7] != null ? ((Number) arr[7]).intValue() : null,
+                                    (String) arr[8],
+                                    arr[9] != null ? ((Number) arr[9]).intValue() : null,
+                                    arr[10] != null ? ((Number) arr[10]).intValue() : null,
+                                    (String) arr[11],
+                                    (String) arr[12],
+                                    (String) arr[13]
                             );
                         }).toList()));
     }

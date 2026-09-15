@@ -152,7 +152,7 @@ export function AutoComplete({
                                 ]}
                                 onPress={() => selecionar(option)}
                             >
-                                <Text style={styles.dropdownItemText}>{option.label || `#${option.id}`}</Text>
+                                <Text style={styles.dropdownItemText}>{option.label ?? String(option.id)}</Text>
                             </TouchableOpacity>
                         ))}
                     </ScrollView>

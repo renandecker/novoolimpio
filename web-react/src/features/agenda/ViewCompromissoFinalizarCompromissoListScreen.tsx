@@ -14,7 +14,7 @@ const COMPROMISSO_COLUMNS: DataTableColumn[] = [
 const CONTRATO_COLUMNS: DataTableColumn[] = [
     {key: 'pessoaId', label: 'Pessoa'},
     {key: 'curriculoId', label: 'Curso'},
-    {key: 'unidadeId', label: 'Id_unidade'},
+    {key: 'unidadeId', label: 'Unidade'},
     {key: 'valorParcelas', label: 'Valor'},
     {key: 'ativo', label: 'Ativo'},
     {key: 'data', label: 'Data'},
@@ -30,7 +30,7 @@ const MATRICULA_COLUMNS: DataTableColumn[] = [
 
 const MATERIAL_COLUMNS: DataTableColumn[] = [
     {key: 'dataCompra', label: 'Data Compra'},
-    {key: 'unidadeId', label: 'Id_unidade'},
+    {key: 'unidadeId', label: 'Unidade'},
     {key: 'pessoaId', label: 'Pessoa'},
     {key: 'tipoFormaPagamento', label: 'Forma de Pagamento'},
     {key: 'valor', label: 'Valor'},

@@ -16,6 +16,7 @@ import br.com.sol7.olimpio.basico.feriado.dto.FeriadoRequest;
 import br.com.sol7.olimpio.basico.feriado.dto.FeriadoResponse;
 import br.com.sol7.olimpio.basico.feriado.dto.OcorrenciaFeriadoResponse;
 import br.com.sol7.olimpio.basico.feriado.dto.TrocaFeriadosRequest;
+import br.com.sol7.olimpio.basico.feriado.dto.TurmaFeriadoResponse;
 import br.com.sol7.olimpio.basico.feriado.service.FeriadoService;
 
 @Path("/api/basico/feriado")
@@ -198,5 +199,11 @@ public class FeriadoController {
     @Path("/ajustes/{id}/ocorrencias-nao-ajustar")
     public Uni<List<OcorrenciaFeriadoResponse>> ocorrenciasNaoAjustar(@PathParam("id") Long id) {
         return service.ocorrenciasNaoAjustar(id);
+    }
+
+    @GET
+    @Path("/turmas-por-data")
+    public Uni<List<TurmaFeriadoResponse>> turmasPorData(@QueryParam("data") Date data) {
+        return service.turmasPorData(data);
     }
 }

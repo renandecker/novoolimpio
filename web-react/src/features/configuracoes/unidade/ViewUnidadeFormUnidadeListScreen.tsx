@@ -188,11 +188,11 @@ export default function ViewUnidadeFormUnidadeListScreen() {
 
                 {name: 'cep', label: 'CEP', type: 'mask', mask: '99.999-999', required: true},
 
-                {name: 'cidade', label: 'Cidade', type: 'autoComplete', autoCompleteSource: '/api/basico/cidade/autoComplete', required: true},
+                {name: 'cidade', label: 'Cidade', type: 'autoComplete', autoCompleteSource: '/api/basico/cidade/opcoes', required: true},
 
-                {name: 'bairro', label: 'Bairro', type: 'autoComplete', autoCompleteSource: '/api/basico/bairro/auto-complete', required: true},
+                {name: 'bairro', label: 'Bairro', type: 'autoComplete', autoCompleteSource: '/api/basico/bairro/opcoes', required: true},
 
-                {name: 'logradouro', label: 'Logradouro', type: 'autoComplete', autoCompleteSource: '/api/basico/logradouro/auto-complete', required: true, span: 3},
+                {name: 'logradouro', label: 'Logradouro', type: 'autoComplete', autoCompleteSource: '/api/basico/logradouro/auto-complete-logradouro-troca-opcoes', required: true, span: 3},
 
                 {name: 'numero', label: 'Número', type: 'number', required: true},
 

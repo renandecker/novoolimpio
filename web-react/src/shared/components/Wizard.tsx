@@ -1,4 +1,4 @@
-﻿import {useState, useCallback} from 'react';
+﻿import {useState, useCallback, useEffect} from 'react';
 import type {ReactNode} from 'react';
 import './Wizard.css';
 
@@ -15,6 +15,7 @@ export interface WizardStep {
 interface WizardProps {
     steps: WizardStep[];
     initial?: number;
+    stepIndex?: number;
     completeLabel?: string;
     onComplete?: (data: any) => void;
     initialData?: any;
@@ -31,10 +32,12 @@ interface FlowEvent {
 export function Wizard({
                            steps,
                            initial = 0,
+                           stepIndex,
                            completeLabel = 'Finalizar',
                            onComplete,
                            initialData = {},
                            onDataChange,
+                           onCancel,
                        }: WizardProps) {
     const [index, setIndex] = useState(initial);
     const [data, setData] = useState(initialData);
@@ -42,6 +45,15 @@ export function Wizard({
 
     const current = steps[Math.min(index, steps.length - 1)];
     const last = index >= steps.length - 1;
+
+    useEffect(() => {
+        setData(initialData);
+    }, [initialData]);
+
+    useEffect(() => {
+        if (stepIndex === undefined) return;
+        setIndex(Math.max(0, Math.min(stepIndex, steps.length - 1)));
+    }, [stepIndex, steps.length]);
 
     const updateData = useCallback((newData: any) => {
         const merged = {...data, ...newData};

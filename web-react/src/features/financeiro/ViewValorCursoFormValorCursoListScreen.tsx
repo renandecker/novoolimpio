@@ -3,12 +3,12 @@ import {useNavigate, useSearchParams} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
 import {PermissionGate} from '../../shared/services/permissions';
 import {Tabs} from '../../shared/components/Tabs';
-import {MasterDetail} from '../../shared/components/MasterDetail';
+import {UnidadeCombo} from '../../shared/components/UnidadeCombo';
+import type {AutoCompleteOption} from '../../shared/components/AutoComplete';
 import {BooleanField} from '../../shared/components/BooleanField';
 import type {ApiItem} from '../../shared/types/index';
 import {api} from '../../shared/services/api';
 import {
-    UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH,
     CURSO_SOURCE,
 } from '../../shared/services/masterDetailSources';
 
@@ -132,7 +132,7 @@ export default function ViewValorCursoFormValorCursoListScreen() {
     const [cobraRematricula, setCobraRematricula] = useState(false);
 
     // ── vínculos (abas) ──────────────────────────────────────────────
-    const [unidades, setUnidades] = useState<ApiItem[]>([]);
+    const [unidade, setUnidade] = useState<AutoCompleteOption | null>(null);
     const [formaIds, setFormaIds] = useState<number[]>([]);
     const [descontoIds, setDescontoIds] = useState<number[]>([]);
     const [taxaIds, setTaxaIds] = useState<number[]>([]);
@@ -142,7 +142,6 @@ export default function ViewValorCursoFormValorCursoListScreen() {
 
     // ── opções ───────────────────────────────────────────────────────
     const {data: curriculos = []} = useQuery({queryKey: [CURSO_SOURCE], queryFn: async () => (await api.get<ApiItem[]>(CURSO_SOURCE)).data ?? []});
-    const {data: allUnidades = []} = useQuery({queryKey: [UNIDADE_SOURCE], queryFn: async () => (await api.get<ApiItem[]>(UNIDADE_SOURCE)).data ?? []});
     const {data: formas = []} = useQuery({queryKey: [FORMA_PAGAMENTO_SOURCE], queryFn: async () => (await api.get<ApiItem[]>(FORMA_PAGAMENTO_SOURCE)).data ?? []});
     const {data: descontos = []} = useQuery({queryKey: [DESCONTO_CURSO_SOURCE], queryFn: async () => (await api.get<ApiItem[]>(DESCONTO_CURSO_SOURCE)).data ?? []});
     const {data: taxas = []} = useQuery({queryKey: [TAXA_CURSO_SOURCE], queryFn: async () => (await api.get<ApiItem[]>(TAXA_CURSO_SOURCE)).data ?? []});
@@ -183,7 +182,7 @@ export default function ViewValorCursoFormValorCursoListScreen() {
                     ]);
                     if (!alive) return;
                     const uIds = new Set((u.data ?? []).map(Number));
-                    setUnidades(allUnidades.filter((a) => uIds.has(itemId(a))));
+                    setUnidade(uIds.size ? {id: [...uIds][0], label: ''} : null);
                     setFormaIds((fp.data ?? []).map(Number));
                     setDescontoIds((d.data ?? []).map(Number));
                     setTaxaIds((t.data ?? []).map(Number));
@@ -191,7 +190,7 @@ export default function ViewValorCursoFormValorCursoListScreen() {
             } catch (e) { console.error(e); setError('Erro ao carregar valor do curso.'); }
         })();
         return () => { alive = false; };
-    }, [idParam, allUnidades]);
+    }, [idParam]);
 
     const voltar = () => navigate('/view/valorCurso/listValorCurso');
 
@@ -225,7 +224,7 @@ export default function ViewValorCursoFormValorCursoListScreen() {
             const novoId = (res.data as Record<string, unknown>)?.id ?? (idParam ? Number(idParam) : undefined);
             if (novoId != null) {
                 const vid = Number(novoId);
-                await api.put(`${VALOR_CURSO_API}/${vid}/unidades`, unidades.map(itemId));
+                await api.put(`${VALOR_CURSO_API}/${vid}/unidades`, unidade ? [unidade.id] : []);
                 await api.put(`${VALOR_CURSO_API}/${vid}/formas-pagamento`, formaIds);
                 await api.put(`${VALOR_CURSO_API}/${vid}/descontos`, descontoIds);
                 await api.put(`${VALOR_CURSO_API}/${vid}/taxas`, taxaIds);
@@ -286,14 +285,12 @@ export default function ViewValorCursoFormValorCursoListScreen() {
     const tabUnidade = (
         <div className="form-grid">
             <div style={{gridColumn: '1 / -1'}}>
-                <MasterDetail
+                <UnidadeCombo
+                    id="unidade"
                     label="Unidade"
-                    source={UNIDADE_SOURCE}
-                    valueKey="id"
-                    searchKeys={UNIDADE_SEARCH}
-                    columns={UNIDADE_COLUMNS}
-                    items={unidades}
-                    onChange={setUnidades}
+                    value={unidade}
+                    onChange={setUnidade}
+                    minChars={2}
                 />
             </div>
         </div>

@@ -46,6 +46,8 @@ export interface DataTableRowAction {
     icon?: ReactNode;
     /** Permissão necessária para exibir a ação; quando omitida, sempre exibe. */
     permission?: 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'EXECUTE';
+    /** Visibilidade condicional por linha (ex.: apenas se a linha possui determinado campo). */
+    visible?: (item: ApiItem) => boolean;
     onClick: (item: ApiItem) => void | Promise<void>;
 }
 
@@ -79,12 +81,15 @@ interface DataTableProps {
     extraToolbarButtons?: DataTableToolbarButton[];
     /** Ações extras por linha (ex.: Atualizar/Troca do listLogradouro.xhtml). */
     extraRowActions?: DataTableRowAction[];
+    /** Dados locais para modo sem API (ignora path). */
+    data?: ApiItem[];
 }
 
 const toTitle = (value: string) =>
     value
         .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
         .replace(/([a-z\d])([A-Z])/g, '$1 $2')
+        .replace(/_/g, ' ')
         .replace(/^./, (c) => c.toUpperCase());
 
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
@@ -218,7 +223,7 @@ const deriveColumns = (item: ApiItem) => {
         .map((key) => {
             const base = fkBase(key);
             const hasDescription = Boolean(base && record[`${base}_descricao`] !== undefined);
-            return {key, label: hasDescription ? toTitle(base) : toTitle(key)};
+            return {key, label: hasDescription ? toTitle(base) : toTitle(base ?? key)};
         });
 };
 
@@ -230,7 +235,7 @@ const editableColumns = (item: ApiItem | null, fallback: DataTableColumn[]) => {
         .map((key) => {
             const existing = byKey.get(key);
             if (existing && existing.options) return existing;
-            return {key, label: toTitle(key)};
+            return {key, label: toTitle(fkBase(key) ?? key)};
         });
 };
 
@@ -245,7 +250,7 @@ interface FilterModalState {
     filters: SearchFilterRequest;
 }
 
-export function DataTable({path = '', columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, hideUpdate = false, hideDelete = false, hideView = false, editNavigateTo, createNavigateTo, extraToolbarButtons, extraRowActions}: DataTableProps) {
+export function DataTable({path = '', columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, hideUpdate = false, hideDelete = false, hideView = false, editNavigateTo, createNavigateTo, extraToolbarButtons, extraRowActions, data}: DataTableProps) {
     const navigate = useNavigate();
     const [sortField, setSortField] = useState<string>('id');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -275,7 +280,8 @@ export function DataTable({path = '', columns, params, module = 'basico', outcom
     const routeOutcome = useCurrentOutcome();
     const screenOutcome = outcome ?? routeOutcome;
 
-    const q = useModulePaged(path, page, size, params, filterParams, sortRequest);
+    const hasPath = Boolean(path);
+    const q = hasPath ? useModulePaged(path, page, size, params, filterParams, sortRequest) : {data: {content: data ?? [], totalElements: (data ?? []).length, totalPages: 1}, refetch: () => {}, isLoading: false, isError: false};
     const items = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);
@@ -297,6 +303,7 @@ export function DataTable({path = '', columns, params, module = 'basico', outcom
     const [perfilModuloLoading, setPerfilModuloLoading] = useState(false);
 
     useEffect(() => {
+        if (!hasPath) return;
         const carregarPermissoes = async () => {
             setPerfilModuloLoading(true);
             try {
@@ -309,7 +316,7 @@ export function DataTable({path = '', columns, params, module = 'basico', outcom
             }
         };
         carregarPermissoes();
-    }, [path]);
+    }, [path, hasPath]);
 
     const canCreate = !hideCreate && (can('CREATE', screenOutcome) || (perfilModuloPermissions?.novo ?? false));
     const canUpdate = !hideUpdate && (can('UPDATE', screenOutcome) || (perfilModuloPermissions?.editar ?? false));
@@ -375,20 +382,22 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
         actionColumns.push({
             key: extra.key,
             label: extra.title,
-            render: (item) => (
-                <button
-                    type="button"
-                    className={`btn-action ${extraClass}`}
-                    style={extraStyle}
-                    title={extra.title}
-                    onClick={async () => {
-                        await extra.onClick(item);
-                        q.refetch();
-                    }}
-                >
-                    {extra.icon ?? '⚙'}
-                </button>
-            ),
+            render: (item) => (extra.visible && !extra.visible(item))
+                ? (null as ReactNode)
+                : (
+                    <button
+                        type="button"
+                        className={`btn-action ${extraClass}`}
+                        style={extraStyle}
+                        title={extra.title}
+                        onClick={async () => {
+                            await extra.onClick(item);
+                            q.refetch();
+                        }}
+                    >
+                        {extra.icon ?? '⚙'}
+                    </button>
+                ),
         });
     }
     if (canDelete) {

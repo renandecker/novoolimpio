@@ -3,11 +3,13 @@ package br.com.sol7.olimpio.central.coordenador;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.SearchFilterRequest;
 import br.com.sol7.olimpio.shared.GenericSearchService;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.NotFoundException;
 import org.hibernate.reactive.mutiny.Mutiny;
 
@@ -95,26 +97,26 @@ public class CoordenadorService {
                 List<Map<String,Object>> out = new ArrayList<>();
                 List<?> rawList = (List<?>) list;
                 for (Object rowObj : rawList) {
-                    Object[] arr = (Object[]) rowObj;
+                    Tuple t = (Tuple) rowObj;
                     Map<String,Object> m = new LinkedHashMap<>();
-                    m.put("id", arr[0]);
-                    m.put("id_operador", arr[1]);
-                    m.put("id_coordenador", arr[2]);
-                    m.put("data", arr[3]);
-                    m.put("ligacao", arr[4]);
-                    m.put("meta", arr[5]);
-                    m.put("agendado", arr[6]);
-                    m.put("pausa", arr[7]);
-                    m.put("prioritario", arr[8]);
-                    m.put("operador_login", arr[9]);
-                    m.put("operador_descricao", arr[10] != null ? arr[10] : arr[9]);
-                    m.put("coordenador_login", arr[11]);
-                    m.put("coordenador_descricao", arr[12] != null ? arr[12] : arr[11]);
+                    m.put("id", TupleHelper.getLong(t, "id"));
+                    m.put("id_operador", TupleHelper.getLong(t, "id_operador"));
+                    m.put("id_coordenador", TupleHelper.getLong(t, "id_coordenador"));
+                    m.put("data", TupleHelper.getDate(t, "data"));
+                    m.put("ligacao", TupleHelper.getBigDecimal(t, "ligacao"));
+                    m.put("meta", TupleHelper.getBigDecimal(t, "meta"));
+                    m.put("agendado", TupleHelper.getInteger(t, "agendado"));
+                    m.put("pausa", TupleHelper.getInteger(t, "pausa"));
+                    m.put("prioritario", TupleHelper.getInteger(t, "prioritario"));
+                    m.put("operador_login", TupleHelper.getString(t, "op_login"));
+                    m.put("operador_descricao", TupleHelper.getString(t, "op_nome") != null ? TupleHelper.getString(t, "op_nome") : TupleHelper.getString(t, "op_login"));
+                    m.put("coordenador_login", TupleHelper.getString(t, "coord_login"));
+                    m.put("coordenador_descricao", TupleHelper.getString(t, "coord_nome") != null ? TupleHelper.getString(t, "coord_nome") : TupleHelper.getString(t, "coord_login"));
                     // computed fields placeholders - will be filled async if needed, for now static
                     m.put("turno", "");
                     m.put("situacao", "");
-                    m.put("operador_nome", arr[10]);
-                    m.put("coordenador_nome", arr[12]);
+                    m.put("operador_nome", TupleHelper.getString(t, "op_nome"));
+                    m.put("coordenador_nome", TupleHelper.getString(t, "coord_nome"));
                     out.add(m);
                 }
                 return out;
@@ -160,22 +162,22 @@ public class CoordenadorService {
         String q = query == null ? "" : query.toLowerCase();
         return Panache.getSession().chain(session ->
             session.createNativeQuery(
-                "SELECT u.id, u.login, COALESCE(pf.nome, pj.razao_social, u.login) as nome " +
+                "SELECT u.id AS id, u.login AS login, COALESCE(pf.nome, pj.razao_social, u.login) AS nome " +
                 " FROM bas_usuario u " +
                 " LEFT JOIN bas_pessoa p ON p.id = u.id_pessoa " +
                 " LEFT JOIN bas_pessoa_fisica pf ON pf.id_pessoa = p.id " +
                 " LEFT JOIN bas_pessoa_juridica pj ON pj.id_pessoa = p.id " +
                 " WHERE lower(u.login) LIKE :q OR lower(COALESCE(pf.nome,'')) LIKE :q OR lower(COALESCE(pj.razao_social,'')) LIKE :q " +
-                " ORDER BY u.login LIMIT 20"
+                " ORDER BY u.login LIMIT 20", Tuple.class
             ).setParameter("q", "%" + q + "%").getResultList().map(list -> {
                 List<Map<String,Object>> out = new ArrayList<>();
                 for (Object rowObj : list) {
-                    Object[] arr = (Object[]) rowObj;
+                    Tuple t = (Tuple) rowObj;
                     Map<String,Object> m = new LinkedHashMap<>();
-                    m.put("id", arr[0]);
-                    m.put("login", arr[1]);
-                    m.put("nome", arr[2]);
-                    m.put("label", arr[1] + " - " + arr[2]);
+                    m.put("id", TupleHelper.getLong(t, "id"));
+                    m.put("login", TupleHelper.getString(t, "login"));
+                    m.put("nome", TupleHelper.getString(t, "nome"));
+                    m.put("label", TupleHelper.getString(t, "login") + " - " + TupleHelper.getString(t, "nome"));
                     out.add(m);
                 }
                 return out;
@@ -188,15 +190,15 @@ public class CoordenadorService {
         int diaSemana = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
         return Panache.getSession().chain(session ->
             session.createNativeQuery(
-                "SELECT t.descricao, t.inicio, t.fim FROM cen_turno_trabalho t " +
-                " JOIN cen_turno_usuario tu ON tu.id_turno = t.id WHERE tu.id_usuario = :uid AND t.id_dia_semana = :dia"
+                "SELECT t.descricao AS descricao, t.inicio AS inicio, t.fim AS fim FROM cen_turno_trabalho t " +
+                " JOIN cen_turno_usuario tu ON tu.id_turno = t.id WHERE tu.id_usuario = :uid AND t.id_dia_semana = :dia", Tuple.class
             ).setParameter("uid", operadorId.intValue()).setParameter("dia", diaSemana).getResultList().map(list -> {
                 if (list.isEmpty()) return "";
                 StringBuilder sb = new StringBuilder();
                 for (Object rowObj : list) {
-                    Object[] arr = (Object[]) rowObj;
+                    Tuple t = (Tuple) rowObj;
                     if (sb.length()>0) sb.append(" / ");
-                    sb.append(arr[0]).append(" ").append(arr[1]).append("-").append(arr[2]);
+                    sb.append(TupleHelper.getString(t, "descricao")).append(" ").append(TupleHelper.getString(t, "inicio")).append("-").append(TupleHelper.getString(t, "fim"));
                 }
                 return sb.toString();
             })
@@ -247,29 +249,29 @@ public class CoordenadorService {
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
         return Panache.getSession().chain(session ->
             session.createNativeQuery(
-                "SELECT l.id, l.data_inicial, l.data_final, l.telefone_discado, l.relato, l.id_resultado_contato, rc.descricao as resultado_desc, l.id_ordem_ligacao, ol.id_prospecto, pr.nome as prospecto_nome, l.id_compromisso, c.data as compromisso_data " +
+                "SELECT l.id AS id, l.data_inicial AS data_inicial, l.data_final AS data_final, l.telefone_discado AS telefone_discado, l.relato AS relato, l.id_resultado_contato AS resultado_contato_id, rc.descricao AS resultado_desc, l.id_ordem_ligacao AS ordem_ligacao_id, ol.id_prospecto AS prospecto_id, pr.nome AS prospecto_nome, l.id_compromisso AS compromisso_id, c.data AS compromisso_data " +
                 " FROM cen_ligacao l LEFT JOIN cen_resultado_contato rc ON rc.id = l.id_resultado_contato " +
                 " LEFT JOIN cen_ordem_ligacao ol ON ol.id = l.id_ordem_ligacao " +
                 " LEFT JOIN com_prospecto pr ON pr.id = ol.id_prospecto " +
                 " LEFT JOIN bas_compromisso c ON c.id = l.id_compromisso " +
-                " WHERE l.id_usuario = :op ORDER BY l.data_inicial DESC LIMIT :lim OFFSET :off"
+                " WHERE l.id_usuario = :op ORDER BY l.data_inicial DESC LIMIT :lim OFFSET :off", Tuple.class
             ).setParameter("op", operadorId.intValue()).setParameter("lim", s).setParameter("off", (long)p*s).getResultList().map(list -> {
                 List<Map<String,Object>> out = new ArrayList<>();
                 for (Object rowObj : list) {
-                    Object[] arr = (Object[]) rowObj;
+                    Tuple t = (Tuple) rowObj;
                     Map<String,Object> m = new LinkedHashMap<>();
-                    m.put("id", arr[0]);
-                    m.put("dataInicial", arr[1]);
-                    m.put("dataFinal", arr[2]);
-                    m.put("telefoneDiscado", arr[3]);
-                    m.put("relato", arr[4]);
-                    m.put("resultadoContatoId", arr[5]);
-                    m.put("resultadoDescricao", arr[6]);
-                    m.put("ordemLigacaoId", arr[7]);
-                    m.put("prospectoId", arr[8]);
-                    m.put("prospectoNome", arr[9]);
-                    m.put("compromissoId", arr[10]);
-                    m.put("compromissoData", arr[11]);
+                    m.put("id", TupleHelper.getLong(t, "id"));
+                    m.put("dataInicial", TupleHelper.getDate(t, "data_inicial"));
+                    m.put("dataFinal", TupleHelper.getDate(t, "data_final"));
+                    m.put("telefoneDiscado", TupleHelper.getString(t, "telefone_discado"));
+                    m.put("relato", TupleHelper.getString(t, "relato"));
+                    m.put("resultadoContatoId", TupleHelper.getLong(t, "resultado_contato_id"));
+                    m.put("resultadoDescricao", TupleHelper.getString(t, "resultado_desc"));
+                    m.put("ordemLigacaoId", TupleHelper.getLong(t, "ordem_ligacao_id"));
+                    m.put("prospectoId", TupleHelper.getLong(t, "prospecto_id"));
+                    m.put("prospectoNome", TupleHelper.getString(t, "prospecto_nome"));
+                    m.put("compromissoId", TupleHelper.getLong(t, "compromisso_id"));
+                    m.put("compromissoData", TupleHelper.getDate(t, "compromisso_data"));
                     // tempo calculado no frontend
                     out.add(m);
                 }
@@ -283,16 +285,16 @@ public class CoordenadorService {
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
         return Panache.getSession().chain(session ->
             session.createNativeQuery(
-                "SELECT ol.id, ol.id_prospecto, pr.nome as prospecto_nome FROM cen_ordem_ligacao ol " +
-                " LEFT JOIN com_prospecto pr ON pr.id = ol.id_prospecto WHERE ol.id_operador = :op ORDER BY ol.id DESC LIMIT :lim OFFSET :off"
+                "SELECT ol.id AS id, ol.id_prospecto AS prospecto_id, pr.nome AS prospecto_nome FROM cen_ordem_ligacao ol " +
+                " LEFT JOIN com_prospecto pr ON pr.id = ol.id_prospecto WHERE ol.id_operador = :op ORDER BY ol.id DESC LIMIT :lim OFFSET :off", Tuple.class
             ).setParameter("op", operadorId.intValue()).setParameter("lim", s).setParameter("off", (long)p*s).getResultList().map(list -> {
                 List<Map<String,Object>> out = new ArrayList<>();
                 for (Object rowObj : list) {
-                    Object[] arr = (Object[]) rowObj;
+                    Tuple t = (Tuple) rowObj;
                     Map<String,Object> m = new LinkedHashMap<>();
-                    m.put("id", arr[0]);
-                    m.put("prospectoId", arr[1]);
-                    m.put("prospectoNome", arr[2]);
+                    m.put("id", TupleHelper.getLong(t, "id"));
+                    m.put("prospectoId", TupleHelper.getLong(t, "prospecto_id"));
+                    m.put("prospectoNome", TupleHelper.getString(t, "prospecto_nome"));
                     out.add(m);
                 }
                 return out;
@@ -305,24 +307,24 @@ public class CoordenadorService {
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
         return Panache.getSession().chain(session ->
             session.createNativeQuery(
-                "SELECT fp.id, fp.data, fp.id_ligacao, l.telefone_discado, l.relato, rc.descricao as res_desc, pr.nome as prospecto_nome, l.data_inicial, l.data_final FROM cen_fila_prioritaria fp " +
+                "SELECT fp.id AS id, fp.data AS data, fp.id_ligacao AS ligacao_id, l.telefone_discado AS telefone_discado, l.relato AS relato, rc.descricao AS res_desc, pr.nome AS prospecto_nome, l.data_inicial AS data_inicial, l.data_final AS data_final FROM cen_fila_prioritaria fp " +
                 " LEFT JOIN cen_ligacao l ON l.id = fp.id_ligacao LEFT JOIN cen_resultado_contato rc ON rc.id = l.id_resultado_contato " +
                 " LEFT JOIN cen_ordem_ligacao ol ON ol.id = l.id_ordem_ligacao LEFT JOIN com_prospecto pr ON pr.id = ol.id_prospecto " +
-                " WHERE l.id_usuario = :op ORDER BY fp.data DESC LIMIT :lim OFFSET :off"
+                " WHERE l.id_usuario = :op ORDER BY fp.data DESC LIMIT :lim OFFSET :off", Tuple.class
             ).setParameter("op", operadorId.intValue()).setParameter("lim", s).setParameter("off", (long)p*s).getResultList().map(list -> {
                 List<Map<String,Object>> out = new ArrayList<>();
                 for (Object rowObj : list) {
-                    Object[] arr = (Object[]) rowObj;
+                    Tuple t = (Tuple) rowObj;
                     Map<String,Object> m = new LinkedHashMap<>();
-                    m.put("id", arr[0]);
-                    m.put("data", arr[1]);
-                    m.put("ligacaoId", arr[2]);
-                    m.put("telefoneDiscado", arr[3]);
-                    m.put("relato", arr[4]);
-                    m.put("resultadoDescricao", arr[5]);
-                    m.put("prospectoNome", arr[6]);
-                    m.put("dataInicial", arr[7]);
-                    m.put("dataFinal", arr[8]);
+                    m.put("id", TupleHelper.getLong(t, "id"));
+                    m.put("data", TupleHelper.getDate(t, "data"));
+                    m.put("ligacaoId", TupleHelper.getLong(t, "ligacao_id"));
+                    m.put("telefoneDiscado", TupleHelper.getString(t, "telefone_discado"));
+                    m.put("relato", TupleHelper.getString(t, "relato"));
+                    m.put("resultadoDescricao", TupleHelper.getString(t, "res_desc"));
+                    m.put("prospectoNome", TupleHelper.getString(t, "prospecto_nome"));
+                    m.put("dataInicial", TupleHelper.getDate(t, "data_inicial"));
+                    m.put("dataFinal", TupleHelper.getDate(t, "data_final"));
                     out.add(m);
                 }
                 return out;
@@ -335,22 +337,22 @@ public class CoordenadorService {
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
         return Panache.getSession().chain(session ->
             session.createNativeQuery(
-                "SELECT p.id, p.id_usuario, u.login as usuario_login, p.data_inicial, p.data_final, p.id_tipo_pausa, tp.descricao as tipo_desc, p.observacao, p.fl_estorado FROM cen_pausa p " +
-                " LEFT JOIN bas_usuario u ON u.id = p.id_usuario LEFT JOIN cen_tipo_pausa tp ON tp.id = p.id_tipo_pausa WHERE p.id_operador = :op ORDER BY p.data_inicial DESC LIMIT :lim OFFSET :off"
+                "SELECT p.id AS id, p.id_usuario AS usuario_id, u.login AS usuario_login, p.data_inicial AS data_inicial, p.data_final AS data_final, p.id_tipo_pausa AS tipo_pausa_id, tp.descricao AS tipo_desc, p.observacao AS observacao, p.fl_estorado AS estorado FROM cen_pausa p " +
+                " LEFT JOIN bas_usuario u ON u.id = p.id_usuario LEFT JOIN cen_tipo_pausa tp ON tp.id = p.id_tipo_pausa WHERE p.id_operador = :op ORDER BY p.data_inicial DESC LIMIT :lim OFFSET :off", Tuple.class
             ).setParameter("op", operadorId.intValue()).setParameter("lim", s).setParameter("off", (long)p*s).getResultList().map(list -> {
                 List<Map<String,Object>> out = new ArrayList<>();
                 for (Object rowObj : list) {
-                    Object[] arr = (Object[]) rowObj;
+                    Tuple t = (Tuple) rowObj;
                     Map<String,Object> m = new LinkedHashMap<>();
-                    m.put("id", arr[0]);
-                    m.put("usuarioId", arr[1]);
-                    m.put("usuarioLogin", arr[2]);
-                    m.put("dataInicial", arr[3]);
-                    m.put("dataFinal", arr[4]);
-                    m.put("tipoPausaId", arr[5]);
-                    m.put("tipoPausaDescricao", arr[6]);
-                    m.put("observacao", arr[7]);
-                    m.put("estorado", arr[8]);
+                    m.put("id", TupleHelper.getLong(t, "id"));
+                    m.put("usuarioId", TupleHelper.getLong(t, "usuario_id"));
+                    m.put("usuarioLogin", TupleHelper.getString(t, "usuario_login"));
+                    m.put("dataInicial", TupleHelper.getDate(t, "data_inicial"));
+                    m.put("dataFinal", TupleHelper.getDate(t, "data_final"));
+                    m.put("tipoPausaId", TupleHelper.getLong(t, "tipo_pausa_id"));
+                    m.put("tipoPausaDescricao", TupleHelper.getString(t, "tipo_desc"));
+                    m.put("observacao", TupleHelper.getString(t, "observacao"));
+                    m.put("estorado", TupleHelper.getBoolean(t, "estorado"));
                     out.add(m);
                 }
                 return out;
@@ -363,17 +365,17 @@ public class CoordenadorService {
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
         return Panache.getSession().chain(session ->
             session.createNativeQuery(
-                "SELECT c.id, c.descricao, c.data, c.observacao, sc.descricao as status_desc FROM bas_compromisso c LEFT JOIN bas_status_compromisso sc ON sc.id = c.id_status_compromisso WHERE c.id_usuario = :op OR c.id_atendente = :op ORDER BY c.data DESC LIMIT :lim OFFSET :off"
+                "SELECT c.id AS id, c.descricao AS descricao, c.data AS data, c.observacao AS observacao, sc.descricao AS status_desc FROM bas_compromisso c LEFT JOIN bas_status_compromisso sc ON sc.id = c.id_status_compromisso WHERE c.id_usuario = :op OR c.id_atendente = :op ORDER BY c.data DESC LIMIT :lim OFFSET :off", Tuple.class
             ).setParameter("op", operadorId.intValue()).setParameter("lim", s).setParameter("off", (long)p*s).getResultList().map(list -> {
                 List<Map<String,Object>> out = new ArrayList<>();
                 for (Object rowObj : list) {
-                    Object[] arr = (Object[]) rowObj;
+                    Tuple t = (Tuple) rowObj;
                     Map<String,Object> m = new LinkedHashMap<>();
-                    m.put("id", arr[0]);
-                    m.put("descricao", arr[1]);
-                    m.put("data", arr[2]);
-                    m.put("observacao", arr[3]);
-                    m.put("statusDescricao", arr[4]);
+                    m.put("id", TupleHelper.getLong(t, "id"));
+                    m.put("descricao", TupleHelper.getString(t, "descricao"));
+                    m.put("data", TupleHelper.getDate(t, "data"));
+                    m.put("observacao", TupleHelper.getString(t, "observacao"));
+                    m.put("statusDescricao", TupleHelper.getString(t, "status_desc"));
                     out.add(m);
                 }
                 return out;
@@ -383,14 +385,14 @@ public class CoordenadorService {
 
     public Uni<Map<String,Object>> buscarLigacoesPie(Long operadorId) {
         return Panache.getSession().chain(session ->
-            session.createNativeQuery("SELECT rc.descricao, count(l.id) FROM cen_ligacao l JOIN cen_resultado_contato rc ON rc.id = l.id_resultado_contato WHERE l.id_usuario = :op GROUP BY rc.descricao")
+            session.createNativeQuery("SELECT rc.descricao AS descricao, count(l.id) AS cnt FROM cen_ligacao l JOIN cen_resultado_contato rc ON rc.id = l.id_resultado_contato WHERE l.id_usuario = :op GROUP BY rc.descricao", Tuple.class)
                 .setParameter("op", operadorId.intValue()).getResultList().map(list -> {
                     Map<String,Object> out = new LinkedHashMap<>();
                     long total = 0;
                     for (Object rowObj : list) {
-                        Object[] arr = (Object[]) rowObj;
-                        String desc = String.valueOf(arr[0]);
-                        long cnt = ((Number) arr[1]).longValue();
+                        Tuple t = (Tuple) rowObj;
+                        String desc = TupleHelper.getString(t, "descricao");
+                        long cnt = TupleHelper.getLong(t, "cnt");
                         out.put(desc, cnt);
                         total += cnt;
                     }

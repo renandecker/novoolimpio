@@ -4,6 +4,7 @@ import br.com.sol7.olimpio.professor.professor.entity.Professor;
 import br.com.sol7.olimpio.professor.professor.dto.ProfessorResponse;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.Tuple;
 import io.smallrye.mutiny.Uni;
 
 import java.util.List;
@@ -35,7 +36,9 @@ public class ProfessorRepository implements PanacheRepository<Professor> {
     }
 
     public static final String SQL_AUTO_COMPLETE_PROFESSOR =
-            "SELECT p.*, COALESCE(pf.nome, pj.nome_fantasia, '') AS nome FROM edc_professor p " +
+            "SELECT p.id AS id, p.id_pessoa AS id_pessoa, p.fl_ativo AS fl_ativo, p.caderno_bola AS caderno_bola, p.dt_inicio AS dt_inicio, p.dt_fim AS dt_fim, " +
+                    "COALESCE(pf.nome, pj.nome_fantasia, '') AS nome " +
+                    "FROM edc_professor p " +
                     "LEFT JOIN bas_pessoa pes ON pes.id = p.id_pessoa " +
                     "LEFT JOIN bas_pessoa_fisica pf ON pf.id_pessoa = pes.id " +
                     "LEFT JOIN bas_pessoa_juridica pj ON pj.id_pessoa = pes.id " +
@@ -44,9 +47,9 @@ public class ProfessorRepository implements PanacheRepository<Professor> {
                     "OR pf.cpf like '%' || ?1 || '%' OR pj.cnpj like '%' || ?1 || '%') " +
                     "ORDER BY lower(COALESCE(pf.nome, pj.nome_fantasia, '')) LIMIT 20";
 
-    public Uni<List<Object>> autoCompleteProfessor(String query) {
+    public Uni<List<Tuple>> autoCompleteProfessor(String query) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_PROFESSOR)
+                .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_PROFESSOR, Tuple.class)
                         .setParameter(1, query)
                         .getResultList());
     }

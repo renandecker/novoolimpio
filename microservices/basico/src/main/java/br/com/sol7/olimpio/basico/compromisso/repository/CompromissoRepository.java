@@ -112,8 +112,9 @@ public class CompromissoRepository implements PanacheRepository<Compromisso> {
 
     // Migrado de CompromissoRepository.modificarStatusCompromisso (legado) - HQL original:
     // Update Compromisso c set c.statusCompromisso = ?2 where c = ?1
+    // Correcao: SQL nativo valido (removido o alias 'c.') + data_alteracao = now().
     public static final String SQL_MODIFICAR_STATUS_COMPROMISSO =
-            "UPDATE bas_compromisso SET id_status_compromisso = ?2 WHERE c.id = ?1";
+            "UPDATE bas_compromisso SET id_status_compromisso = ?2, data_alteracao = now() WHERE id = ?1";
 
     public Uni<Integer> modificarStatusCompromisso(Long compromissoId, Long statusId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
@@ -121,6 +122,82 @@ public class CompromissoRepository implements PanacheRepository<Compromisso> {
                         .setParameter(1, compromissoId)
                         .setParameter(2, statusId)
                         .executeUpdate());
+    }
+
+    // Busca o id do proximo status (bas_status_compromisso.id_prox_status_compromisso) do compromisso.
+    public static final String SQL_BUSCAR_PROXIMO_STATUS =
+            "SELECT s.id_prox_status_compromisso FROM bas_compromisso c JOIN bas_status_compromisso s ON s.id = c.id_status_compromisso WHERE c.id = ?1";
+
+    public Uni<Long> buscarProximoStatus(Long compromissoId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_PROXIMO_STATUS)
+                        .setParameter(1, compromissoId)
+                        .getResultList())
+                .map(list -> list.isEmpty() || list.get(0) == null ? null : ((Number) list.get(0)).longValue());
+    }
+
+    // Busca o id_status_compromisso da agenda do compromisso (para decidir se seta data_chegada).
+    public static final String SQL_BUSCAR_STATUS_AGENDA =
+            "SELECT a.id_status_compromisso FROM bas_compromisso c JOIN bas_agenda a ON a.id = c.id_agenda WHERE c.id = ?1";
+
+    public Uni<Long> buscarStatusAgenda(Long compromissoId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_STATUS_AGENDA)
+                        .setParameter(1, compromissoId)
+                        .getResultList())
+                .map(list -> list.isEmpty() || list.get(0) == null ? null : ((Number) list.get(0)).longValue());
+    }
+
+    // Registra o historico de mudanca de status (bas_compromisso_pessoa_status).
+    public static final String SQL_INSERIR_PESSOA_STATUS =
+            "INSERT INTO bas_compromisso_pessoa_status (id_compromisso, id_status_anterior, id_status_proximo, data) VALUES (?1, ?2, ?3, current_date)";
+
+    public Uni<Integer> inserirPessoaStatus(Long compromissoId, Long statusAnteriorId, Long statusProximoId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_INSERIR_PESSOA_STATUS)
+                        .setParameter(1, compromissoId)
+                        .setParameter(2, statusAnteriorId)
+                        .setParameter(3, statusProximoId)
+                        .executeUpdate());
+    }
+
+    // Avanca o compromisso para o proximo status (data_chegada quando o status da agenda for atingido).
+    public static final String SQL_AVANCAR_STATUS =
+            "UPDATE bas_compromisso SET id_status_compromisso = ?2, data_alteracao = now(), " +
+                    "data_chegada = CASE WHEN ?3 THEN now() ELSE data_chegada END, " +
+                    "observacao = COALESCE(?4, observacao) WHERE id = ?1";
+
+    public Uni<Integer> avancarStatus(Long compromissoId, Long proximoStatusId, boolean dataChegada, String observacao) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_AVANCAR_STATUS)
+                        .setParameter(1, compromissoId)
+                        .setParameter(2, proximoStatusId)
+                        .setParameter(3, dataChegada)
+                        .setParameter(4, observacao)
+                        .executeUpdate());
+    }
+
+    // Fechar compromisso (ativo = false).
+    public static final String SQL_FECHAR_COMPROMISSO =
+            "UPDATE bas_compromisso SET ativo = false, data_alteracao = now() WHERE id = ?1";
+
+    public Uni<Integer> fecharCompromisso(Long compromissoId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_FECHAR_COMPROMISSO)
+                        .setParameter(1, compromissoId)
+                        .executeUpdate());
+    }
+
+    // Lista os resultados (id + descricao) vinculados ao compromisso, para a acao "Ver resultados".
+    public static final String SQL_BUSCAR_RESULTADOS_DO_COMPROMISSO =
+            "SELECT r.id, r.descricao FROM bas_compromisso_resultado cr JOIN bas_resultado r ON r.id = cr.id_resultado WHERE cr.id_compromisso = ?1 ORDER BY r.descricao";
+
+    public Uni<List<Object[]>> buscarResultadosDoCompromisso(Long compromissoId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_RESULTADOS_DO_COMPROMISSO)
+                        .setParameter(1, compromissoId)
+                        .getResultList())
+                .map(list -> list.stream().map(row -> (Object[]) row).toList());
     }
 
 
