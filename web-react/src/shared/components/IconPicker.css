@@ -31,10 +31,21 @@
     padding: 20px;
 }
 
+/* Ensure modal content is above overlay background */
 .modal-overlay > .modal {
     width: 100%;
     max-width: 100%;
+    position: relative;
+    z-index: 1;
 }
+
+/* Stacking support for multiple modals (when multiple are open simultaneously) */
+.modal-overlay:has(+ .modal-overlay) { z-index: 1010; }
+.modal-overlay:has(+ .modal-overlay + .modal-overlay) { z-index: 1020; }
+
+/* Fallback: use higher z-index for nested modals */
+.modal-overlay .modal-overlay { z-index: 1010; }
+.modal-overlay .modal-overlay .modal-overlay { z-index: 1020; }
 
 .icon-picker-modal {
     display: flex;

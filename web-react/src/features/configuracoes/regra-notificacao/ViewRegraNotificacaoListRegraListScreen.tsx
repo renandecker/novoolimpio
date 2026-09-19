@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {PermissionGate} from '../../../shared/services/permissions';
 import {listRegrasNotificacoes, createRegraNotificacao, deleteRegraNotificacao} from '../../notificacoes/regrasNotificacoes';
+import {BooleanField} from '../../../shared/components/BooleanField';
 import '../../notificacoes/NotificacaoScreen.css';
 
 const PAGE_SIZES = [10, 20, 50];
@@ -338,11 +339,7 @@ export default function ViewRegraNotificacaoListRegraListScreen() {
                             <div style={{marginBottom: '16px'}}>
                                 <label>Destinatário adicional (Professor)</label>
                                 <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
-                                    <input
-                                        type="checkbox"
-                                        checked={regraForm.destinatarioProfessor}
-                                        onChange={(e) => setRegraForm({...regraForm, destinatarioProfessor: e.target.checked})}
-                                    />
+                                    <BooleanField value={regraForm.destinatarioProfessor} onChange={(v) => setRegraForm({...regraForm, destinatarioProfessor: v})} />
                                     <span style={{fontSize: '13px', color: '#333'}}>Professor também recebe</span>
                                 </div>
                             </div>
@@ -371,11 +368,7 @@ export default function ViewRegraNotificacaoListRegraListScreen() {
                             <div style={{marginBottom: '16px'}}>
                                 <label>Ativo</label>
                                 <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
-                                    <input
-                                        type="checkbox"
-                                        checked={regraForm.ativo}
-                                        onChange={(e) => setRegraForm({...regraForm, ativo: e.target.checked})}
-                                    />
+                                    <BooleanField value={regraForm.ativo} onChange={(v) => setRegraForm({...regraForm, ativo: v})} onText="Ativo" offText="Inativo" />
                                     <span style={{fontSize: '13px', color: '#333'}}>Ativar regra</span>
                                 </div>
                             </div>

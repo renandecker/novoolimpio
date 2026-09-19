@@ -2,6 +2,7 @@ package br.com.sol7.olimpio.educacao.matricula;
 
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.Tuple;
 import io.smallrye.mutiny.Uni;
 
 import java.util.List;
@@ -178,6 +179,59 @@ public class MatriculaRepository implements PanacheRepository<Matricula> {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_QTD_FALTAS_CONSECUTIVAS)
                         .setParameter(1, matriculaId)
+                        .getResultList());
+    }
+
+
+    // Painéis informativos da matrícula (legado MatriculaController.verificaAluno).
+    // Dados da pessoa física: cpf, data de nascimento e data de alteração do cadastro.
+    public static final String SQL_INFO_PESSOA_FISICA =
+            "SELECT pf.cpf AS cpf, to_char(pf.data_nascimento, 'YYYY-MM-DD') AS data_nascimento, " +
+            "to_char(p.data_alteracao, 'YYYY-MM-DD') AS data_alteracao " +
+            "FROM bas_pessoa_fisica pf LEFT JOIN bas_pessoa p ON p.id = pf.id_pessoa " +
+            "WHERE pf.id_pessoa = ?1 LIMIT 1";
+
+    public Uni<java.util.List<Tuple>> buscarInfoPessoaFisica(Long pessoaId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_INFO_PESSOA_FISICA, Tuple.class)
+                        .setParameter(1, pessoaId)
+                        .getResultList());
+    }
+
+    // Financeiro: existe parcela ativa/em atraso - legado ParcelaRepository.obterParcelasAtivasAtrasadas.
+    public static final String SQL_TEM_PARCELA_ATRASADA =
+            "SELECT COUNT(*) AS total FROM fin_parcela pa " +
+            "INNER JOIN edc_contrato c ON c.id = pa.id_contrato " +
+            "INNER JOIN bas_unidade u ON u.id = c.id_unidade " +
+            "WHERE pa.id_pessoa = ?1 AND u.fl_ativo = true AND pa.data_cancelamento IS NULL " +
+            "AND pa.data_vencimento < CURRENT_DATE AND pa.data_pagamento IS NULL";
+
+    public Uni<java.util.List<Tuple>> contarParcelasAtrasadas(Long pessoaId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_TEM_PARCELA_ATRASADA, Tuple.class)
+                        .setParameter(1, pessoaId)
+                        .getResultList());
+    }
+
+    // Aluno: cpf presente na base de alunos antigos - legado CpfAlunosRepository.verificaExistenciaCpf.
+    public static final String SQL_CPF_ALUNO_ANTIGO =
+            "SELECT COUNT(*) AS total FROM bas_cpf_alunos_antigos WHERE cpf = ?1";
+
+    public Uni<java.util.List<Tuple>> contarCpfAlunoAntigo(String cpf) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_CPF_ALUNO_ANTIGO, Tuple.class)
+                        .setParameter(1, cpf)
+                        .getResultList());
+    }
+
+    // Configuração genérica da bas_config (chave/valor).
+    public static final String SQL_VALOR_CONFIG =
+            "SELECT valor AS valor FROM bas_config WHERE chave = ?1 LIMIT 1";
+
+    public Uni<java.util.List<Tuple>> buscarValorConfig(String chave) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_VALOR_CONFIG, Tuple.class)
+                        .setParameter(1, chave)
                         .getResultList());
     }
 

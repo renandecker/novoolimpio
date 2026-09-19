@@ -1,4 +1,4 @@
-﻿import {useEffect, useRef, useState} from 'react';
+﻿import {useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
 import {listarFavoritos} from './favoritos';
@@ -46,6 +46,13 @@ export function FavoritosMenu() {
         navigate(normalizeOutcome(outcome));
     };
 
+    const handleItemKeyDown = (event: ReactKeyboardEvent<HTMLLIElement>, outcome: string) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            handleItemClick(outcome);
+        }
+    };
+
     return (
         <div className="report-container" ref={containerRef}>
             <button
@@ -69,19 +76,23 @@ export function FavoritosMenu() {
                         ) : items.length === 0 ? (
                             <p className="bell-empty">Nenhum favorito cadastrado.</p>
                         ) : (
-                            items.map((item, index) => (
-                                <button
-                                    key={`${item.outcome}-${index}`}
-                                    type="button"
-                                    className="favoritos-item"
-                                    onClick={() => handleItemClick(item.outcome)}
-                                >
-                                    <span className="favoritos-item-icon">
-                                        <i className={item.icon} aria-hidden="true"/>
-                                    </span>
-                                    <span className="favoritos-item-nome">{item.nome}</span>
-                                </button>
-                            ))
+                            <ul className="favoritos-list">
+                                {items.map((item, index) => (
+                                    <li
+                                        key={`${item.outcome}-${index}`}
+                                        className="favoritos-item"
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={() => handleItemClick(item.outcome)}
+                                        onKeyDown={(event) => handleItemKeyDown(event, item.outcome)}
+                                    >
+                                        <span className="favoritos-item-icon">
+                                            <i className={item.icon} aria-hidden="true"/>
+                                        </span>
+                                        <span className="favoritos-item-nome">{item.nome}</span>
+                                    </li>
+                                ))}
+                            </ul>
                         )}
                     </div>
                 </div>

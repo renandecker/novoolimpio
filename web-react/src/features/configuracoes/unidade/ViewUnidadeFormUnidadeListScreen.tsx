@@ -122,7 +122,7 @@ export default function ViewUnidadeFormUnidadeListScreen() {
 
                 {name: 'tipoUnidade', label: 'Tipo Unidade', type: 'select', options: TIPO_UNIDADE_OPTIONS, required: true},
 
-                {name: 'ativo', label: 'Ativo', type: 'select', options: [{value: 'true', label: 'Sim'}, {value: 'false', label: 'Não'}]},
+                {name: 'ativo', label: 'Ativo', type: 'boolean', booleanLabels: {on: 'Ativo', off: 'Inativo'}},
 
                 {name: 'responsavel', label: 'Responsável', type: 'autoComplete', autoCompleteSource: '/api/basico/pessoa-fisica/auto-complete-acao', span: 3},
 

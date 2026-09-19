@@ -93,11 +93,11 @@ function DocUpload({label, required, value, onChange}:{label:string; required?:b
         </View>
     );
 }
-function Toggle({label, value, onChange}:{label:string; value:boolean; onChange:(v:boolean)=>void}){
+function Toggle({label, value, onChange, onText = 'Sim', offText = 'Não'}:{label:string; value:boolean; onChange:(v:boolean)=>void; onText?:string; offText?:string}){
     return (
         <Pressable style={s.toggleRow} onPress={()=>onChange(!value)}>
             <View style={[s.toggleTrack, value && s.toggleTrackOn]}><View style={[s.toggleThumb, value && s.toggleThumbOn]}/></View>
-            <Text style={s.toggleLabel}>{label}: {value?'Sim':'Não'}</Text>
+            <Text style={s.toggleLabel}>{label}: {value?onText:offText}</Text>
         </Pressable>
     );
 }
@@ -452,7 +452,7 @@ export default function ViewUsuarioFormUsuarioListScreen({route}: {route?: any})
                 {activeTab==='trabalho' && (
                     <View style={s.card}>
                         <Text style={s.sectionTitle}>Trabalho</Text>
-                        <Toggle label="Ativo" value={ativo} onChange={setAtivo}/>
+                        <Toggle label="Ativo" value={ativo} onChange={setAtivo} onText="Ativo" offText="Inativo"/>
                         <View style={s.formRow}>
                             <View style={s.fieldHalf}><SelectField label="Função *" value={funcaoId} onChange={setFuncaoId} options={funcoes.map(f=>({value:String(f.id), label:f.label}))} /></View>
                             <View style={s.fieldHalf}><Field label="Data Admissão" value={dataAdmissao} onChange={setDataAdmissao} placeholder="AAAA-MM-DD" /></View>

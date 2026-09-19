@@ -6,6 +6,7 @@ import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.financeiro.caixa.dto.CalculoValorParcelaRequest;
 import br.com.sol7.olimpio.financeiro.caixa.dto.CalculoValorParcelaResponse;
 import br.com.sol7.olimpio.financeiro.caixa.dto.FechamentoCaixaTotaisResponse;
+import br.com.sol7.olimpio.financeiro.caixa.dto.ParcelaSearchResponse;
 import br.com.sol7.olimpio.financeiro.caixa.dto.RegistrarPagamentoParcelaRequest;
 import br.com.sol7.olimpio.financeiro.caixa.entity.Caixa;
 import br.com.sol7.olimpio.financeiro.configuracaocaixa.ConfiguracaoCaixaService;
@@ -192,6 +193,39 @@ public class CaixaService {
                         .setParameter(2, tipoMovimentoId)
                         .getResultList())
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
+    }
+
+    // Busca parcelas por número ou nome do aluno para autocomplete
+    public Uni<List<ParcelaSearchResponse>> buscarParcelas(String query, int limit) {
+        if (query == null || query.isBlank()) {
+            return Uni.createFrom().item(java.util.List.of());
+        }
+        final String sql = "SELECT p.id AS id, " +
+                "       COALESCE(pf.nome, 'Aluno #' || p.id_pessoa) || ' - Parcela ' || p.parcela || ' - Venc: ' || to_char(p.data_vencimento, 'DD/MM/YYYY') || ' - Valor: ' || to_char(p.valor, 'FM999G999G990D00') AS descricao " +
+                "FROM fin_parcela p " +
+                "LEFT JOIN edc_contrato c ON c.id = p.id_contrato " +
+                "LEFT JOIN bas_pessoa pes ON pes.id = p.id_pessoa " +
+                "LEFT JOIN bas_pessoa_fisica pf ON pf.id_pessoa = pes.id " +
+                "WHERE (CAST(p.id AS text) ILIKE '%' || ?1 || '%' " +
+                "       OR CAST(p.parcela AS text) ILIKE '%' || ?1 || '%' " +
+                "       OR pf.nome ILIKE '%' || ?1 || '%' " +
+                "       OR pf.cpf ILIKE '%' || ?1 || '%') " +
+                "AND p.data_cancelamento IS NULL " +
+                "AND p.data_pagamento IS NULL " +
+                "ORDER BY p.data_vencimento " +
+                "LIMIT ?2";
+        return Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql)
+                        .setParameter(1, query)
+                        .setParameter(2, limit)
+                        .getResultList())
+                .map(list -> list.stream().map(row -> {
+                    Object[] o = (Object[]) row;
+                    return new ParcelaSearchResponse(
+                            ((Number) o[0]).longValue(),
+                            (String) o[1]
+                    );
+                }).toList());
     }
 
     // ===== MÉTODOS MIGRADOS DO CAIXACONTROLLER/CAIXASERVICE ORIGINAL =====

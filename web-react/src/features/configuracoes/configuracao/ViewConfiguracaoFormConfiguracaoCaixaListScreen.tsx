@@ -108,7 +108,7 @@ export default function ViewConfiguracaoFormConfiguracaoCaixaListScreen() {
 
                                 {name: 'fundoCaixa', label: 'Fundo de Caixa', type: 'number', required: true, placeholder: '0.00'},
 
-                                {name: 'pagPropriaUnid', label: 'Pagamento Própria Unidade', type: 'select', options: [{value: 'true', label: 'Sim'}, {value: 'false', label: 'Não'}]},
+                                {name: 'pagPropriaUnid', label: 'Pagamento Própria Unidade', type: 'boolean'},
 
                             ]
 

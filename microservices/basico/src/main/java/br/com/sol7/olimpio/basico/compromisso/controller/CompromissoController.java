@@ -221,15 +221,17 @@ public class CompromissoController {
         return service.proximoStatus(id, r.observacao());
     }
 
-    @PUT
-    @Path("/{id}/fechar")
-    public Uni<CompromissoResponse> fechar(@PathParam("id") Long id) {
-        return service.fechar(id);
+    @GET
+    @Path("/buscar-pessoas-por-agenda-ou-unidade")
+    public Uni<List<br.com.sol7.olimpio.basico.pessoa.dto.PessoaResponse>> buscarPessoasPorAgendaOuUnidade(
+            @QueryParam("agendaId") Long agendaId,
+            @QueryParam("unidadeId") Long unidadeId) {
+        return service.buscarPessoasPorAgendaOuUnidade(agendaId, unidadeId);
     }
 
     @GET
     @Path("/{id}/resultados")
-    public Uni<List<ResultadoResponse>> listarResultados(@PathParam("id") Long id) {
+    public Uni<List<br.com.sol7.olimpio.basico.compromisso.dto.ResultadoResponse>> listarResultados(@PathParam("id") Long id) {
         return service.listarResultados(id);
     }
 

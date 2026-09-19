@@ -1,6 +1,7 @@
 ﻿import {ReactNode, useEffect, useState} from 'react';
 import {Tabs} from './Tabs';
 import type {TabItem} from './Tabs';
+import {BooleanField} from './BooleanField';
 
 export interface FormTabConfig {
     key: string;
@@ -12,11 +13,12 @@ export interface FormTabConfig {
 export interface FormFieldConfig {
     name: string;
     label: string;
-    type?: 'text' | 'email' | 'number' | 'date' | 'select' | 'textarea' | 'mask' | 'autoComplete';
+    type?: 'text' | 'email' | 'number' | 'date' | 'select' | 'textarea' | 'mask' | 'autoComplete' | 'boolean';
     required?: boolean;
     placeholder?: string;
     mask?: string;
     options?: Array<{value: string; label: string}>;
+    booleanLabels?: {on: string; off: string};
     span?: 1 | 2 | 3 | 4;
     autoCompleteSource?: string;
     autoCompleteSearchKeys?: string[];
@@ -120,6 +122,17 @@ function renderField(field: FormFieldConfig, onChange: (name: string, value: unk
     const gridColumnStyle = fullRow ? {gridColumn: 'span 3'} : undefined;
 
     switch (field.type) {
+        case 'boolean':
+            return (
+                <BooleanField
+                    value={Boolean(currentValue)}
+                    onChange={(v) => onChange(field.name, v)}
+                    onText={field.booleanLabels?.on ?? 'Sim'}
+                    offText={field.booleanLabels?.off ?? 'Não'}
+                    disabled={field.readOnly}
+                />
+            );
+
         case 'select':
             return (
                 <select

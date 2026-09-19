@@ -91,6 +91,7 @@ export default function IndicadorGaugeListScreen() {
       setData(result);
     } catch (error) {
       console.error('Erro ao carregar indicadores:', error);
+      setData({ content: [], totalElements: 0, totalPages: 0, page: 0, size: 10 });
     } finally {
       setLoading(false);
     }
@@ -126,7 +127,7 @@ export default function IndicadorGaugeListScreen() {
             <p className="text-sm text-gray-500 mt-1">Gerencie indicadores do tipo gauge (velocímetro) com consulta SQL</p>
           </div>
           <a
-            href="/view/relatorios/indicador-gauge/form"
+            href="/view/relatorios/formIndicadorGauge"
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium shadow-sm transition-all self-start"
           >
             <Plus size={18} /> Novo Indicador
@@ -166,14 +167,14 @@ export default function IndicadorGaugeListScreen() {
                     key: 'view',
                     label: 'Visualizar',
                     icon: BarChart2,
-                    onClick: (item) => window.open(`/view/relatorios/indicador-gauge/view/${item.id}`, '_blank'),
+                    onClick: (item) => window.open(`/view/relatorios/formIndicadorGauge/${item.id}`, '_blank'),
                     className: 'bg-blue-100 text-blue-700 hover:bg-blue-200',
                   },
                   {
                     key: 'edit',
                     label: 'Editar',
                     icon: Edit,
-                    onClick: (item) => window.location.href = `/view/relatorios/indicador-gauge/form/${item.id}`,
+                    onClick: (item) => window.location.href = `/view/relatorios/formIndicadorGauge/${item.id}`,
                     className: 'bg-amber-100 text-amber-700 hover:bg-amber-200',
                   },
                   {

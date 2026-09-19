@@ -4,6 +4,7 @@ import {useState, useEffect, useCallback, useMemo} from 'react';
 import {AutoComplete, type AutoCompleteOption} from '../../../shared/components/AutoComplete';
 import {Tabs} from '../../../shared/components/Tabs';
 import {Wizard} from '../../../shared/components/Wizard';
+import {Modal} from '../../../shared/components/Modal';
 
 interface ContratoAutoCompleteResponse {
     id: number;
@@ -156,6 +157,835 @@ function buildParcelas(fp: FormaPagamentoResponse | null, primeira: string, segu
     return rows;
 }
 
+const formatCEP = (v: string) => {
+    const d = v.replace(/\D/g, '').slice(0, 8);
+    if (d.length <= 5) return d;
+    return `${d.slice(0, 5)}-${d.slice(5)}`;
+};
+
+const toDateInput = (v: unknown): string => {
+    if (!v) return '';
+    const d = new Date(v as string);
+    if (isNaN(d.getTime())) return String(v).slice(0, 10);
+    const ano = d.getFullYear();
+    const mes = String(d.getMonth() + 1).padStart(2, '0');
+    const dia = String(d.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
+};
+
+const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
+
+interface PessoaFisicaFormModalProps {
+    open: boolean;
+    mode: 'create' | 'edit';
+    editId: number | null;
+    onClose: () => void;
+    onSaved: (pessoaId: number) => void;
+}
+
+function PessoaFisicaFormModal({open, mode, editId, onClose, onSaved}: PessoaFisicaFormModalProps) {
+    const [carregando, setCarregando] = useState(false);
+    const [salvando, setSalvando] = useState(false);
+    const [erro, setErro] = useState<string | undefined>();
+
+    const [nome, setNome] = useState('');
+    const [cpf, setCpf] = useState('');
+    const [rg, setRg] = useState('');
+    const [email, setEmail] = useState('');
+    const [nomeSocial, setNomeSocial] = useState('');
+    const [dataNascimento, setDataNascimento] = useState('');
+    const [telefoneResidencial, setTelefoneResidencial] = useState('');
+    const [telefoneComercial, setTelefoneComercial] = useState('');
+    const [celular, setCelular] = useState('');
+    const [nomePai, setNomePai] = useState('');
+    const [nomeMae, setNomeMae] = useState('');
+    const [observacao, setObservacao] = useState('');
+    const [nomeReferencia, setNomeReferencia] = useState('');
+    const [telefoneReferencia, setTelefoneReferencia] = useState('');
+    const [celularReferencia, setCelularReferencia] = useState('');
+    const [nomeReferencia2, setNomeReferencia2] = useState('');
+    const [telefoneReferencia2, setTelefoneReferencia2] = useState('');
+    const [celularReferencia2, setCelularReferencia2] = useState('');
+    const [facebook, setFacebook] = useState('');
+    const [twitter, setTwitter] = useState('');
+    const [telegran, setTelegran] = useState('');
+
+    // Endereço
+    const [cep, setCep] = useState('');
+    const [cidadeOpt, setCidadeOpt] = useState<AutoCompleteOption | null>(null);
+    const [bairroOpt, setBairroOpt] = useState<AutoCompleteOption | null>(null);
+    const [logradouroOpt, setLogradouroOpt] = useState<AutoCompleteOption | null>(null);
+    const [numero, setNumero] = useState('');
+    const [complemento, setComplemento] = useState('');
+    const [logradouroId, setLogradouroId] = useState<number | undefined>();
+    const [buscandoCep, setBuscandoCep] = useState(false);
+    const [enderecoAviso, setEnderecoAviso] = useState('');
+
+    // Combos via autocomplete
+    const [generoOpt, setGeneroOpt] = useState<AutoCompleteOption | null>(null);
+    const [etniaOpt, setEtniaOpt] = useState<AutoCompleteOption | null>(null);
+    const [estadoCivilOpt, setEstadoCivilOpt] = useState<AutoCompleteOption | null>(null);
+    const [escolaridadeOpt, setEscolaridadeOpt] = useState<AutoCompleteOption | null>(null);
+    const [cidadeOrigemOpt, setCidadeOrigemOpt] = useState<AutoCompleteOption | null>(null);
+
+    const [pfId, setPfId] = useState<number | undefined>();
+    const [pessoaId, setPessoaId] = useState<number | undefined>();
+    const [pfOriginal, setPfOriginal] = useState<Record<string, unknown> | null>(null);
+    const [pessoaOriginal, setPessoaOriginal] = useState<Record<string, unknown> | null>(null);
+
+    const reset = () => {
+        setNome(''); setCpf(''); setRg(''); setEmail(''); setNomeSocial('');
+        setDataNascimento(''); setTelefoneResidencial(''); setTelefoneComercial('');
+        setCelular(''); setNomePai(''); setNomeMae(''); setObservacao('');
+        setNomeReferencia(''); setTelefoneReferencia(''); setCelularReferencia('');
+        setNomeReferencia2(''); setTelefoneReferencia2(''); setCelularReferencia2('');
+        setFacebook(''); setTwitter(''); setTelegran('');
+        setCep(''); setCidadeOpt(null); setBairroOpt(null); setLogradouroOpt(null);
+        setNumero(''); setComplemento(''); setLogradouroId(undefined); setEnderecoAviso('');
+        setGeneroOpt(null); setEtniaOpt(null); setEstadoCivilOpt(null); setEscolaridadeOpt(null); setCidadeOrigemOpt(null);
+        setPfId(undefined); setPessoaId(undefined); setPfOriginal(null); setPessoaOriginal(null);
+        setErro(undefined);
+    };
+
+    const fetchCidades = async (q: string): Promise<AutoCompleteOption[]> => {
+        if (!q) return [];
+        const {data} = await api.get<any[]>('/api/basico/cidade/autoComplete', {params: {query: q}});
+        return data.map((e: any) => ({id: e.id, label: e.cidadeEstado ?? e.nome}));
+    };
+
+    const fetchBairros = async (q: string): Promise<AutoCompleteOption[]> => {
+        const params: any = {query: q};
+        if (cidadeOpt?.id) params.cidadeId = cidadeOpt.id;
+        const {data} = await api.get<any[]>('/api/basico/bairro/auto-complete', {params});
+        return data.map((e: any) => ({id: e.id, label: e.descricao}));
+    };
+
+    const fetchLogradouros = async (q: string): Promise<AutoCompleteOption[]> => {
+        const params: any = {query: q};
+        if (bairroOpt?.id) params.bairroId = bairroOpt.id;
+        const {data} = await api.get<any[]>('/api/basico/logradouro/auto-complete', {params});
+        return data.map((e: any) => ({id: e.id, label: e.descricao}));
+    };
+
+    const fetchGenero = async (_q: string): Promise<AutoCompleteOption[]> => {
+        try {
+            const {data} = await api.get<any[]>('/api/basico/genero');
+            return data.map((e: any) => ({id: e.id, label: e.descricao ?? String(e.id)}));
+        } catch {
+            return [{id: 1, label: 'Masculino'}, {id: 2, label: 'Feminino'}];
+        }
+    };
+
+    const fetchEtnia = async (_q: string): Promise<AutoCompleteOption[]> => {
+        try {
+            const {data} = await api.get<any[]>('/api/basico/etnia');
+            return data.map((e: any) => ({id: e.id, label: e.descricao ?? String(e.id)}));
+        } catch {
+            return [{id: 1, label: 'Branca'}, {id: 2, label: 'Preta'}, {id: 3, label: 'Parda'}, {id: 4, label: 'Amarela'}, {id: 5, label: 'Indígena'}];
+        }
+    };
+
+    const fetchEstadoCivil = async (q: string): Promise<AutoCompleteOption[]> => {
+        const {data} = await api.get<any[]>('/api/basico/estado-civil/auto-complete', {params: {query: q}});
+        return data.map((e: any) => ({id: e.id, label: e.descricao ?? String(e.id)}));
+    };
+
+    const fetchEscolaridade = async (q: string): Promise<AutoCompleteOption[]> => {
+        const {data} = await api.get<any[]>('/api/basico/escolaridade/auto-complete', {params: {query: q}});
+        return data.map((e: any) => ({id: e.id, label: e.descricao ?? String(e.id)}));
+    };
+
+    const loadDadosPessoa = async () => {
+        if (!editId) {
+            reset();
+            return;
+        }
+        setCarregando(true);
+        try {
+            const pf = (await api.get<Record<string, unknown>>(`/api/basico/pessoa-fisica/${editId}`)).data;
+            let pes: Record<string, unknown> | null = null;
+            if (pf.pessoaId) pes = (await api.get<Record<string, unknown>>(`/api/basico/pessoa/${pf.pessoaId}`)).data;
+
+            setPfId(pf.id as number);
+            setPfOriginal(pf);
+            setPessoaId(pes?.id as number | undefined);
+            setPessoaOriginal(pes);
+
+            setNome(str(pf.nome));
+            setCpf(str(pf.cpf));
+            setRg(str(pf.rg));
+            setEmail(str(pes?.email));
+            setNomeSocial(str(pf.nomeSocial));
+            setDataNascimento(toDateInput(pf.dataNascimento));
+            setTelefoneResidencial(str(pes?.telefone));
+            setTelefoneComercial(str(pf.telefoneComercial));
+            setCelular(str(pes?.celular));
+            setNomePai(str(pf.nomePai));
+            setNomeMae(str(pf.nomeMae));
+            setObservacao(str(pes?.observacao));
+            setNomeReferencia(str(pf.nomeReferencia));
+            setTelefoneReferencia(str(pf.telefoneReferencia));
+            setCelularReferencia(str(pf.celularReferencia));
+            setNomeReferencia2(str(pf.nomeReferencia2));
+            setTelefoneReferencia2(str(pf.telefoneReferencia2));
+            setCelularReferencia2(str(pf.celularReferencia2));
+            setFacebook(str(pf.facebook));
+            setTwitter(str(pf.twitter));
+            setTelegran(str((pes as any)?.telegran ?? (pf as any)?.telegran));
+
+            if (pf.generoId) setGeneroOpt({id: Number(pf.generoId), label: String(pf.generoId)});
+            if (pf.etniaId) setEtniaOpt({id: Number(pf.etniaId), label: String(pf.etniaId)});
+            if (pf.estadoCivilId) setEstadoCivilOpt({id: Number(pf.estadoCivilId), label: String(pf.estadoCivilId)});
+            if (pf.escolaridadeId) setEscolaridadeOpt({id: Number(pf.escolaridadeId), label: String(pf.escolaridadeId)});
+            if (pf.cidadeOrigemId) setCidadeOrigemOpt({id: Number(pf.cidadeOrigemId), label: String(pf.cidadeOrigemId)});
+
+            // Endereço
+            if (pes) {
+                const cepVal = str(pes.cep);
+                const numVal = str(pes.numero);
+                const compVal = str(pes.complemento);
+                const idLog = (pes.id_logradouro ?? (pes as any).logradouroId) as number | undefined;
+                setNumero(numVal);
+                setComplemento(compVal);
+                if (idLog) {
+                    try {
+                        const logRes = (await api.get<Record<string, unknown>>(`/api/basico/logradouro/${idLog}`)).data;
+                        setLogradouroId(logRes.id as number);
+                        setLogradouroOpt({id: logRes.id as number, label: str(logRes.descricao)});
+                        setCep(str(logRes.cep) ? formatCEP(str(logRes.cep)) : formatCEP(cepVal));
+                        if (logRes.id_bairro) {
+                            const bRes = (await api.get<Record<string, unknown>>(`/api/basico/bairro/${logRes.id_bairro}`)).data;
+                            setBairroOpt({id: bRes.id as number, label: str(bRes.descricao)});
+                            if ((bRes as any).cidadeId) {
+                                setCidadeOpt({id: Number((bRes as any).cidadeId), label: String((bRes as any).cidadeId)});
+                            }
+                        }
+                    } catch {
+                        setCep(formatCEP(cepVal));
+                    }
+                } else if (cepVal) setCep(formatCEP(cepVal));
+            }
+        } catch (e) {
+            console.error('Erro ao carregar pessoa física:', e);
+            setErro('Erro ao carregar pessoa física.');
+        } finally {
+            setCarregando(false);
+        }
+    };
+
+    useEffect(() => {
+        if (open) {
+            if (mode === 'create') {
+                reset();
+            } else {
+                setCarregando(true);
+            }
+        }
+    }, [open, mode, editId]);
+
+    useEffect(() => {
+        if (open && mode === 'edit' && editId) {
+            loadDadosPessoa();
+        }
+    }, [open, mode, editId]);
+
+    const buscarCep = async () => {
+        const clean = cep.replace(/\D/g, '');
+        if (clean.length !== 8) { setEnderecoAviso('CEP deve ter 8 dígitos'); return; }
+        setBuscandoCep(true);
+        setEnderecoAviso('');
+        try {
+            try {
+                const {data} = await api.get<any>('/api/basico/logradouro/buscar-endereco-por-cep', {params: {cep: clean}});
+                if (data?.logradouro) {
+                    const l = data.logradouro;
+                    setLogradouroOpt({id: l.id, label: l.descricao});
+                    setLogradouroId(l.id);
+                    if (data.bairro) setBairroOpt({id: data.bairro.id, label: data.bairro.descricao});
+                    if (data.cidade) setCidadeOpt({id: data.cidade.id, label: data.cidade.nome ?? String(data.cidade.id)});
+                    setCep(formatCEP(l.cep ?? clean));
+                }
+            } catch {
+                const resp = await fetch(`https://viacep.com.br/ws/${clean}/json/`).then(r => r.json());
+                if (!resp.erro) {
+                    setEnderecoAviso('');
+                    const cidades = await fetchCidades(resp.localidade);
+                    const found = cidades.find(c => c.label.toLowerCase().includes(resp.localidade.toLowerCase()));
+                    if (found) setCidadeOpt(found);
+                    setBairroOpt(resp.bairro ? {id: -1, label: resp.bairro} : null);
+                    setLogradouroOpt(resp.logradouro ? {id: -1, label: resp.logradouro} : null);
+                    setCep(formatCEP(resp.cep ?? clean));
+                } else setEnderecoAviso('CEP não encontrado');
+            }
+        } finally {
+            setBuscandoCep(false);
+        }
+    };
+
+    const salvar = async () => {
+        if (!nome || !cpf) { setErro('Informe pelo menos Nome e CPF.'); return; }
+        setSalvando(true);
+        setErro(undefined);
+        try {
+            const pfBody: Record<string, unknown> = {
+                ...(pfOriginal ?? {}),
+                nome, cpf, rg: rg || null, nomeSocial: nomeSocial || null,
+                dataNascimento: dataNascimento || null,
+                generoId: generoOpt?.id ?? null,
+                etniaId: etniaOpt?.id ?? null,
+                estadoCivilId: estadoCivilOpt?.id ?? null,
+                escolaridadeId: escolaridadeOpt?.id ?? null,
+                cidadeOrigemId: cidadeOrigemOpt?.id ?? null,
+                nomeReferencia: nomeReferencia || null,
+                telefoneReferencia: telefoneReferencia || null,
+                celularReferencia: celularReferencia || null,
+                nomeReferencia2: nomeReferencia2 || null,
+                telefoneReferencia2: telefoneReferencia2 || null,
+                celularReferencia2: celularReferencia2 || null,
+                nomePai: nomePai || null,
+                nomeMae: nomeMae || null,
+                telefoneComercial: telefoneComercial || null,
+                facebook: facebook || null,
+                twitter: twitter || null,
+                googlePlus: (pfOriginal as any)?.googlePlus ?? null,
+            };
+
+            const respostaPf = pfId
+                ? await api.put(`/api/basico/pessoa-fisica/${pfId}`, pfBody)
+                : await api.post('/api/basico/pessoa-fisica', pfBody);
+            const novoPfId = ((respostaPf.data as Record<string, unknown>)?.id as number | undefined) ?? pfId;
+
+            const pessoaBody: Record<string, unknown> = {
+                ...(pessoaOriginal ?? {}),
+                email: email || null,
+                telefone: telefoneResidencial || null,
+                celular: celular || null,
+                observacao: observacao || null,
+                cep: cep || null,
+                numero: numero || null,
+                complemento: complemento || null,
+                logradouroId: logradouroId || null,
+                telegran: telegran || null,
+            };
+
+            let novoPesId = pessoaId;
+            if (pessoaId) {
+                await api.put(`/api/basico/pessoa/${pessoaId}`, pessoaBody);
+            } else {
+                novoPesId = ((await api.post('/api/basico/pessoa', pessoaBody)).data as Record<string, unknown>)?.id as number | undefined;
+            }
+
+            if (!pfId && novoPesId && novoPfId) {
+                await api.put(`/api/basico/pessoa-fisica/${novoPfId}`, {...pfBody, pessoaId: novoPesId});
+            }
+
+            onSaved(novoPfId ?? 0);
+            onClose();
+        } catch (e) {
+            console.error('Erro ao salvar pessoa física:', e);
+            setErro('Erro ao salvar registro.');
+        } finally {
+            setSalvando(false);
+        }
+    };
+
+    const inputStyle: React.CSSProperties = {width: '100%', padding: '7px 10px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '13px'};
+    const labelStyle: React.CSSProperties = {display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: '#333'};
+    const grid: React.CSSProperties = {display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px'};
+
+    return (
+        <Modal title={mode === 'edit' ? 'Editar Pessoa Física' : 'Criar Pessoa Física'} open={open} onClose={onClose} size="xl">
+            {carregando ? (
+                <div style={{padding: '40px', textAlign: 'center', color: '#777'}}>Carregando dados da pessoa...</div>
+            ) : (
+                <div>
+                    <div style={{maxHeight: '60vh', overflowY: 'auto', paddingRight: '8px'}}>
+                        <div style={grid}>
+                            <div>
+                                <label style={labelStyle}>CPF *</label>
+                                <input className="form-input" style={inputStyle} placeholder="999.999.999-99" value={cpf} onChange={e => setCpf(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>RG *</label>
+                                <input className="form-input" style={inputStyle} placeholder="RG" value={rg} onChange={e => setRg(e.target.value)} />
+                            </div>
+                            <div style={{gridColumn: '1 / -1'}}>
+                                <label style={labelStyle}>Nome *</label>
+                                <input className="form-input" style={inputStyle} placeholder="Nome completo" value={nome} onChange={e => setNome(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>E-mail *</label>
+                                <input className="form-input" style={inputStyle} type="email" placeholder="E-mail" value={email} onChange={e => setEmail(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Nome Social *</label>
+                                <input className="form-input" style={inputStyle} placeholder="Nome social" value={nomeSocial} onChange={e => setNomeSocial(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Data Nascimento *</label>
+                                <input className="form-input" style={inputStyle} type="date" value={dataNascimento} onChange={e => setDataNascimento(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Gênero</label>
+                                <AutoComplete placeholder="Selecione" value={generoOpt} onChange={setGeneroOpt} fetchOptions={fetchGenero} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Etnia</label>
+                                <AutoComplete placeholder="Selecione" value={etniaOpt} onChange={setEtniaOpt} fetchOptions={fetchEtnia} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Estado Civil *</label>
+                                <AutoComplete placeholder="Digite 3 letras..." value={estadoCivilOpt} onChange={setEstadoCivilOpt} fetchOptions={fetchEstadoCivil} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Escolaridade *</label>
+                                <AutoComplete placeholder="Digite 3 letras..." value={escolaridadeOpt} onChange={setEscolaridadeOpt} fetchOptions={fetchEscolaridade} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Cidade Origem *</label>
+                                <AutoComplete placeholder="Digite 3 letras..." value={cidadeOrigemOpt} onChange={setCidadeOrigemOpt} fetchOptions={fetchCidades} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Telefone Residencial *</label>
+                                <input className="form-input" style={inputStyle} placeholder="99-99999999" value={telefoneResidencial} onChange={e => setTelefoneResidencial(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Telefone Comercial</label>
+                                <input className="form-input" style={inputStyle} placeholder="99-99999999" value={telefoneComercial} onChange={e => setTelefoneComercial(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Celular *</label>
+                                <input className="form-input" style={inputStyle} placeholder="99-999999999" value={celular} onChange={e => setCelular(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Nome Referência *</label>
+                                <input className="form-input" style={inputStyle} placeholder="Nome da referência" value={nomeReferencia} onChange={e => setNomeReferencia(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Telefone Referência</label>
+                                <input className="form-input" style={inputStyle} placeholder="99-99999999" value={telefoneReferencia} onChange={e => setTelefoneReferencia(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Nome Referência 2</label>
+                                <input className="form-input" style={inputStyle} placeholder="Nome da referência 2" value={nomeReferencia2} onChange={e => setNomeReferencia2(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Telefone Referência 2</label>
+                                <input className="form-input" style={inputStyle} placeholder="99-99999999" value={telefoneReferencia2} onChange={e => setTelefoneReferencia2(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Celular Referência</label>
+                                <input className="form-input" style={inputStyle} placeholder="99-999999999" value={celularReferencia} onChange={e => setCelularReferencia(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Celular Referência 2</label>
+                                <input className="form-input" style={inputStyle} placeholder="99-999999999" value={celularReferencia2} onChange={e => setCelularReferencia2(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Nome do Pai</label>
+                                <input className="form-input" style={inputStyle} placeholder="Nome do pai" value={nomePai} onChange={e => setNomePai(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Nome da Mãe *</label>
+                                <input className="form-input" style={inputStyle} placeholder="Nome da mãe" value={nomeMae} onChange={e => setNomeMae(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Facebook</label>
+                                <input className="form-input" style={inputStyle} placeholder="facebook.com/usuario" value={facebook} onChange={e => setFacebook(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Twitter</label>
+                                <input className="form-input" style={inputStyle} placeholder="@usuario" value={twitter} onChange={e => setTwitter(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Telegram</label>
+                                <input className="form-input" style={inputStyle} placeholder="@usuario" value={telegran} onChange={e => setTelegran(e.target.value)} />
+                            </div>
+                        </div>
+
+                        <div style={{borderTop: '1px solid #eee', margin: '16px 0', paddingTop: '16px'}}>
+                            <h4 style={{margin: '0 0 12px', fontSize: '14px', fontWeight: 700}}>Endereço</h4>
+                            <div style={grid}>
+                                <div style={{gridColumn: '1 / -1', display: 'flex', gap: '8px', alignItems: 'center'}}>
+                                    <div style={{flex: 1}}>
+                                        <label style={labelStyle}>CEP</label>
+                                        <input className="form-input" style={inputStyle} placeholder="99.999-999" maxLength={9} value={cep} onChange={e => setCep(formatCEP(e.target.value))} />
+                                    </div>
+                                    <button type="button" className="btnyellow" style={{marginTop: '18px'}} disabled={buscandoCep} onClick={buscarCep}>{buscandoCep ? 'Buscando...' : 'Busca'}</button>
+                                </div>
+                                <div style={{gridColumn: '1 / -1'}}>
+                                    <label style={labelStyle}>Cidade</label>
+                                    <AutoComplete placeholder="Digite 3 letras..." value={cidadeOpt} onChange={setCidadeOpt} fetchOptions={fetchCidades} />
+                                </div>
+                                <div style={{gridColumn: '1 / -1'}}>
+                                    <label style={labelStyle}>Bairro</label>
+                                    <AutoComplete placeholder="Digite 3 letras..." value={bairroOpt} onChange={setBairroOpt} fetchOptions={fetchBairros} />
+                                </div>
+                                <div style={{gridColumn: '1 / -1'}}>
+                                    <label style={labelStyle}>Logradouro</label>
+                                    <AutoComplete placeholder="Digite 3 letras..." value={logradouroOpt} onChange={o => { setLogradouroOpt(o); if (o) setLogradouroId(o.id); }} fetchOptions={fetchLogradouros} />
+                                </div>
+                                <div>
+                                    <label style={labelStyle}>Número *</label>
+                                    <input className="form-input" style={inputStyle} placeholder="Número" value={numero} onChange={e => setNumero(e.target.value)} />
+                                </div>
+                                <div>
+                                    <label style={labelStyle}>Complemento</label>
+                                    <input className="form-input" style={inputStyle} placeholder="Complemento" value={complemento} onChange={e => setComplemento(e.target.value)} />
+                                </div>
+                            </div>
+                            {enderecoAviso && <small style={{color: '#c0392b'}}>{enderecoAviso}</small>}
+                        </div>
+
+                        <div style={{gridColumn: '1 / -1'}}>
+                            <label style={labelStyle}>Observação</label>
+                            <textarea className="form-input" style={{...inputStyle, minHeight: '70px'}} rows={3} placeholder="Observações" value={observacao} onChange={e => setObservacao(e.target.value)} />
+                        </div>
+                    </div>
+
+                    {erro && <div style={{color: '#c0392b', marginTop: '10px'}}>{erro}</div>}
+
+                    <div style={{display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '16px', borderTop: '1px solid #eee', paddingTop: '14px'}}>
+                        <button type="button" className="btnyellow" onClick={onClose}>Voltar</button>
+                        <button type="button" className="btnblue" disabled={salvando} onClick={salvar}>
+                            {salvando ? 'Salvando...' : 'Salvar'}
+                        </button>
+                    </div>
+                </div>
+            )}
+        </Modal>
+    );
+}
+
+interface PessoaJuridicaFormModalProps {
+    open: boolean;
+    mode: 'create' | 'edit';
+    editId: number | null;
+    onClose: () => void;
+    onSaved: (pessoaId: number) => void;
+}
+
+function PessoaJuridicaFormModal({open, mode, editId, onClose, onSaved}: PessoaJuridicaFormModalProps) {
+    const [carregando, setCarregando] = useState(false);
+    const [salvando, setSalvando] = useState(false);
+    const [erro, setErro] = useState<string | undefined>();
+
+    const [cnpj, setCnpj] = useState('');
+    const [razaoSocial, setRazaoSocial] = useState('');
+    const [nomeFantasia, setNomeFantasia] = useState('');
+    const [inscricaoMunicipal, setInscricaoMunicipal] = useState('');
+    const [inscricaoEstadual, setInscricaoEstadual] = useState('');
+    const [email, setEmail] = useState('');
+    const [fax, setFax] = useState('');
+    const [telefone, setTelefone] = useState('');
+    const [celular, setCelular] = useState('');
+    const [observacao, setObservacao] = useState('');
+
+    const [cep, setCep] = useState('');
+    const [cidadeOpt, setCidadeOpt] = useState<AutoCompleteOption | null>(null);
+    const [bairroOpt, setBairroOpt] = useState<AutoCompleteOption | null>(null);
+    const [logradouroOpt, setLogradouroOpt] = useState<AutoCompleteOption | null>(null);
+    const [numero, setNumero] = useState('');
+    const [complemento, setComplemento] = useState('');
+    const [logradouroId, setLogradouroId] = useState<number | undefined>();
+    const [buscandoCep, setBuscandoCep] = useState(false);
+    const [enderecoAviso, setEnderecoAviso] = useState('');
+
+    const [pjId, setPjId] = useState<number | undefined>();
+    const [pessoaId, setPessoaId] = useState<number | undefined>();
+    const [pjOriginal, setPjOriginal] = useState<Record<string, unknown> | null>(null);
+    const [pessoaOriginal, setPessoaOriginal] = useState<Record<string, unknown> | null>(null);
+
+    const reset = () => {
+        setCnpj(''); setRazaoSocial(''); setNomeFantasia(''); setInscricaoMunicipal('');
+        setInscricaoEstadual(''); setEmail(''); setFax(''); setTelefone(''); setCelular(''); setObservacao('');
+        setCep(''); setCidadeOpt(null); setBairroOpt(null); setLogradouroOpt(null);
+        setNumero(''); setComplemento(''); setLogradouroId(undefined); setEnderecoAviso('');
+        setPjId(undefined); setPessoaId(undefined); setPjOriginal(null); setPessoaOriginal(null);
+        setErro(undefined);
+    };
+
+    const fetchCidades = async (q: string): Promise<AutoCompleteOption[]> => {
+        if (!q) return [];
+        const {data} = await api.get<any[]>('/api/basico/cidade/autoComplete', {params: {query: q}});
+        return data.map((e: any) => ({id: e.id, label: e.cidadeEstado ?? e.nome}));
+    };
+
+    const fetchBairros = async (q: string): Promise<AutoCompleteOption[]> => {
+        const params: any = {query: q};
+        if (cidadeOpt?.id) params.cidadeId = cidadeOpt.id;
+        const {data} = await api.get<any[]>('/api/basico/bairro/auto-complete', {params});
+        return data.map((e: any) => ({id: e.id, label: e.descricao}));
+    };
+
+    const fetchLogradouros = async (q: string): Promise<AutoCompleteOption[]> => {
+        const params: any = {query: q};
+        if (bairroOpt?.id) params.bairroId = bairroOpt.id;
+        const {data} = await api.get<any[]>('/api/basico/logradouro/auto-complete', {params});
+        return data.map((e: any) => ({id: e.id, label: e.descricao}));
+    };
+
+    const loadDadosPessoa = async () => {
+        if (!editId) { reset(); return; }
+        setCarregando(true);
+        try {
+            const pj = (await api.get<Record<string, unknown>>(`/api/basico/pessoa-juridica/${editId}`)).data;
+            let pes: Record<string, unknown> | null = null;
+            if (pj.pessoaId) pes = (await api.get<Record<string, unknown>>(`/api/basico/pessoa/${pj.pessoaId}`)).data;
+
+            setPjId(pj.id as number);
+            setPjOriginal(pj);
+            setPessoaId(pes?.id as number | undefined);
+            setPessoaOriginal(pes);
+
+            setCnpj(str(pj.cnpj));
+            setRazaoSocial(str(pj.razaoSocial));
+            setNomeFantasia(str(pj.nomeFantasia));
+            setInscricaoMunicipal(str(pj.inscricaoMunicipal));
+            setInscricaoEstadual(str(pj.inscricaoEstadual));
+            setEmail(str(pes?.email));
+            setFax(str(pj.fax));
+            setTelefone(str(pes?.telefone));
+            setCelular(str(pes?.celular));
+            setObservacao(str(pes?.observacao));
+
+            if (pes) {
+                const cepVal = str(pes.cep);
+                const numVal = str(pes.numero);
+                const compVal = str(pes.complemento);
+                const idLog = (pes.id_logradouro ?? (pes as any).logradouroId) as number | undefined;
+                setNumero(numVal);
+                setComplemento(compVal);
+                if (idLog) {
+                    try {
+                        const logRes = (await api.get<Record<string, unknown>>(`/api/basico/logradouro/${idLog}`)).data;
+                        setLogradouroId(logRes.id as number);
+                        setLogradouroOpt({id: logRes.id as number, label: str(logRes.descricao)});
+                        setCep(str(logRes.cep) ? formatCEP(str(logRes.cep)) : formatCEP(cepVal));
+                        if (logRes.id_bairro) {
+                            const bRes = (await api.get<Record<string, unknown>>(`/api/basico/bairro/${logRes.id_bairro}`)).data;
+                            setBairroOpt({id: bRes.id as number, label: str(bRes.descricao)});
+                            if ((bRes as any).cidadeId) {
+                                setCidadeOpt({id: Number((bRes as any).cidadeId), label: String((bRes as any).cidadeId)});
+                            }
+                        }
+                    } catch {
+                        setCep(formatCEP(cepVal));
+                    }
+                } else if (cepVal) setCep(formatCEP(cepVal));
+            }
+        } catch (e) {
+            console.error('Erro ao carregar pessoa jurídica:', e);
+            setErro('Erro ao carregar pessoa jurídica.');
+        } finally {
+            setCarregando(false);
+        }
+    };
+
+    useEffect(() => {
+        if (open) {
+            if (mode === 'create') {
+                reset();
+            } else {
+                setCarregando(true);
+            }
+        }
+    }, [open, mode, editId]);
+
+    useEffect(() => {
+        if (open && mode === 'edit' && editId) {
+            loadDadosPessoa();
+        }
+    }, [open, mode, editId]);
+
+    const buscarCep = async () => {
+        const clean = cep.replace(/\D/g, '');
+        if (clean.length !== 8) { setEnderecoAviso('CEP deve ter 8 dígitos'); return; }
+        setBuscandoCep(true);
+        setEnderecoAviso('');
+        try {
+            try {
+                const {data} = await api.get<any>('/api/basico/logradouro/buscar-endereco-por-cep', {params: {cep: clean}});
+                if (data?.logradouro) {
+                    const l = data.logradouro;
+                    setLogradouroOpt({id: l.id, label: l.descricao});
+                    setLogradouroId(l.id);
+                    if (data.bairro) setBairroOpt({id: data.bairro.id, label: data.bairro.descricao});
+                    if (data.cidade) setCidadeOpt({id: data.cidade.id, label: data.cidade.nome ?? String(data.cidade.id)});
+                    setCep(formatCEP(l.cep ?? clean));
+                }
+            } catch {
+                const resp = await fetch(`https://viacep.com.br/ws/${clean}/json/`).then(r => r.json());
+                if (!resp.erro) {
+                    setEnderecoAviso('');
+                    const cidades = await fetchCidades(resp.localidade);
+                    const found = cidades.find(c => c.label.toLowerCase().includes(resp.localidade.toLowerCase()));
+                    if (found) setCidadeOpt(found);
+                    setBairroOpt(resp.bairro ? {id: -1, label: resp.bairro} : null);
+                    setLogradouroOpt(resp.logradouro ? {id: -1, label: resp.logradouro} : null);
+                    setCep(formatCEP(resp.cep ?? clean));
+                } else setEnderecoAviso('CEP não encontrado');
+            }
+        } finally {
+            setBuscandoCep(false);
+        }
+    };
+
+    const salvar = async () => {
+        if (!razaoSocial || !cnpj) { setErro('Informe pelo menos Razão Social e CNPJ.'); return; }
+        setSalvando(true);
+        setErro(undefined);
+        try {
+            const pjBody: Record<string, unknown> = {
+                ...(pjOriginal ?? {}),
+                cnpj, razaoSocial, nomeFantasia: nomeFantasia || null,
+                inscricaoMunicipal: inscricaoMunicipal || null,
+                inscricaoEstadual: inscricaoEstadual || null,
+                fax: fax || null,
+            };
+
+            const respostaPj = pjId
+                ? await api.put(`/api/basico/pessoa-juridica/${pjId}`, pjBody)
+                : await api.post('/api/basico/pessoa-juridica', pjBody);
+            const novoPjId = ((respostaPj.data as Record<string, unknown>)?.id as number | undefined) ?? pjId;
+
+            const pessoaBody: Record<string, unknown> = {
+                ...(pessoaOriginal ?? {}),
+                email: email || null,
+                telefone: telefone || null,
+                celular: celular || null,
+                observacao: observacao || null,
+                cep: cep || null,
+                numero: numero || null,
+                complemento: complemento || null,
+                logradouroId: logradouroId || null,
+            };
+
+            let novoPesId = pessoaId;
+            if (pessoaId) {
+                await api.put(`/api/basico/pessoa/${pessoaId}`, pessoaBody);
+            } else {
+                novoPesId = ((await api.post('/api/basico/pessoa', pessoaBody)).data as Record<string, unknown>)?.id as number | undefined;
+            }
+
+            if (!pjId && novoPesId && novoPjId) {
+                await api.put(`/api/basico/pessoa-juridica/${novoPjId}`, {...pjBody, pessoaId: novoPesId});
+            }
+
+            onSaved(novoPjId ?? 0);
+            onClose();
+        } catch (e) {
+            console.error('Erro ao salvar pessoa jurídica:', e);
+            setErro('Erro ao salvar registro.');
+        } finally {
+            setSalvando(false);
+        }
+    };
+
+    const inputStyle: React.CSSProperties = {width: '100%', padding: '7px 10px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '13px'};
+    const labelStyle: React.CSSProperties = {display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: '#333'};
+    const grid: React.CSSProperties = {display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px'};
+
+    return (
+        <Modal title={mode === 'edit' ? 'Editar Pessoa Jurídica' : 'Criar Pessoa Jurídica'} open={open} onClose={onClose} size="xl">
+            {carregando ? (
+                <div style={{padding: '40px', textAlign: 'center', color: '#777'}}>Carregando dados da pessoa...</div>
+            ) : (
+                <div>
+                    <div style={{maxHeight: '60vh', overflowY: 'auto', paddingRight: '8px'}}>
+                        <div style={grid}>
+                            <div>
+                                <label style={labelStyle}>CNPJ *</label>
+                                <input className="form-input" style={inputStyle} placeholder="00.000.000/0000-00" value={cnpj} onChange={e => setCnpj(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Razão Social *</label>
+                                <input className="form-input" style={inputStyle} placeholder="Razão social" value={razaoSocial} onChange={e => setRazaoSocial(e.target.value)} />
+                            </div>
+                            <div style={{gridColumn: '1 / -1'}}>
+                                <label style={labelStyle}>Nome Fantasia *</label>
+                                <input className="form-input" style={inputStyle} placeholder="Nome fantasia" value={nomeFantasia} onChange={e => setNomeFantasia(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Inscrição Municipal</label>
+                                <input className="form-input" style={inputStyle} placeholder="Inscrição municipal" value={inscricaoMunicipal} onChange={e => setInscricaoMunicipal(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Inscrição Estadual</label>
+                                <input className="form-input" style={inputStyle} placeholder="Inscrição estadual" value={inscricaoEstadual} onChange={e => setInscricaoEstadual(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>E-mail *</label>
+                                <input className="form-input" style={inputStyle} type="email" placeholder="E-mail" value={email} onChange={e => setEmail(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Fax</label>
+                                <input className="form-input" style={inputStyle} placeholder="Fax" value={fax} onChange={e => setFax(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Telefone</label>
+                                <input className="form-input" style={inputStyle} placeholder="99-99999999" value={telefone} onChange={e => setTelefone(e.target.value)} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Celular</label>
+                                <input className="form-input" style={inputStyle} placeholder="99-999999999" value={celular} onChange={e => setCelular(e.target.value)} />
+                            </div>
+                        </div>
+
+                        <div style={{borderTop: '1px solid #eee', margin: '16px 0', paddingTop: '16px'}}>
+                            <h4 style={{margin: '0 0 12px', fontSize: '14px', fontWeight: 700}}>Endereço</h4>
+                            <div style={grid}>
+                                <div style={{gridColumn: '1 / -1', display: 'flex', gap: '8px', alignItems: 'center'}}>
+                                    <div style={{flex: 1}}>
+                                        <label style={labelStyle}>CEP</label>
+                                        <input className="form-input" style={inputStyle} placeholder="99.999-999" maxLength={9} value={cep} onChange={e => setCep(formatCEP(e.target.value))} />
+                                    </div>
+                                    <button type="button" className="btnyellow" style={{marginTop: '18px'}} disabled={buscandoCep} onClick={buscarCep}>{buscandoCep ? 'Buscando...' : 'Busca'}</button>
+                                </div>
+                                <div style={{gridColumn: '1 / -1'}}>
+                                    <label style={labelStyle}>Cidade</label>
+                                    <AutoComplete placeholder="Digite 3 letras..." value={cidadeOpt} onChange={setCidadeOpt} fetchOptions={fetchCidades} />
+                                </div>
+                                <div style={{gridColumn: '1 / -1'}}>
+                                    <label style={labelStyle}>Bairro</label>
+                                    <AutoComplete placeholder="Digite 3 letras..." value={bairroOpt} onChange={setBairroOpt} fetchOptions={fetchBairros} />
+                                </div>
+                                <div style={{gridColumn: '1 / -1'}}>
+                                    <label style={labelStyle}>Logradouro</label>
+                                    <AutoComplete placeholder="Digite 3 letras..." value={logradouroOpt} onChange={o => { setLogradouroOpt(o); if (o) setLogradouroId(o.id); }} fetchOptions={fetchLogradouros} />
+                                </div>
+                                <div>
+                                    <label style={labelStyle}>Número *</label>
+                                    <input className="form-input" style={inputStyle} placeholder="Número" value={numero} onChange={e => setNumero(e.target.value)} />
+                                </div>
+                                <div>
+                                    <label style={labelStyle}>Complemento</label>
+                                    <input className="form-input" style={inputStyle} placeholder="Complemento" value={complemento} onChange={e => setComplemento(e.target.value)} />
+                                </div>
+                            </div>
+                            {enderecoAviso && <small style={{color: '#c0392b'}}>{enderecoAviso}</small>}
+                        </div>
+
+                        <div style={{gridColumn: '1 / -1'}}>
+                            <label style={labelStyle}>Observação</label>
+                            <textarea className="form-input" style={{...inputStyle, minHeight: '70px'}} rows={3} placeholder="Observações" value={observacao} onChange={e => setObservacao(e.target.value)} />
+                        </div>
+                    </div>
+
+                    {erro && <div style={{color: '#c0392b', marginTop: '10px'}}>{erro}</div>}
+
+                    <div style={{display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '16px', borderTop: '1px solid #eee', paddingTop: '14px'}}>
+                        <button type="button" className="btnyellow" onClick={onClose}>Voltar</button>
+                        <button type="button" className="btnblue" disabled={salvando} onClick={salvar}>
+                            {salvando ? 'Salvando...' : 'Salvar'}
+                        </button>
+                    </div>
+                </div>
+            )}
+        </Modal>
+    );
+}
+
 export default function ViewConsultorMatriculaLayoutScreen() {
     const [verificaMatriculaFinalizada, setVerificaMatriculaFinalizada] = useState(false);
     const [alunos, setAlunos] = useState<AutoCompleteOption[]>([]);
@@ -179,6 +1009,29 @@ export default function ViewConsultorMatriculaLayoutScreen() {
     const [dataSegundaParcela, setDataSegundaParcela] = useState('');
     const [valorCurso, setValorCurso] = useState(0);
     const [parcelas, setParcelas] = useState<ParcelaLinha[]>([]);
+
+    // Info panels state (calculated when pessoa is selected)
+    const [infoPanels, setInfoPanels] = useState<{
+        maioridade: 'DE MAIOR' | 'DE MENOR';
+        financeiro: 'SEM DÍVIDAS' | 'COM DÍVIDAS';
+        aluno: 'SIM' | 'NÃO';
+        atualizarDados: 'SIM' | 'NÃO';
+    }>({
+        maioridade: 'DE MAIOR',
+        financeiro: 'SEM DÍVIDAS',
+        aluno: 'NÃO',
+        atualizarDados: 'NÃO',
+    });
+
+    // Pessoa Fisica Modal state
+    const [showPessoaFisicaModal, setShowPessoaFisicaModal] = useState(false);
+    const [pessoaFisicaModalMode, setPessoaFisicaModalMode] = useState<'create' | 'edit'>('create');
+    const [pessoaFisicaEditId, setPessoaFisicaEditId] = useState<number | null>(null);
+
+    // Pessoa Juridica Modal state
+    const [showPessoaJuridicaModal, setShowPessoaJuridicaModal] = useState(false);
+    const [pessoaJuridicaModalMode, setPessoaJuridicaModalMode] = useState<'create' | 'edit'>('create');
+    const [pessoaJuridicaEditId, setPessoaJuridicaEditId] = useState<number | null>(null);
 
     const loadAlunos = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
         if (!query || query.length < 3) return [];
@@ -340,19 +1193,62 @@ export default function ViewConsultorMatriculaLayoutScreen() {
         setParcelas(buildParcelas(formaPagamento, dataPrimeiraParcela, dataSegundaParcela, valorCurso));
     }, [formaPagamento, dataPrimeiraParcela, dataSegundaParcela, valorCurso]);
 
+    const calcularInfoPanels = useCallback(async (pessoaId: number) => {
+        try {
+            const response = await api.get<{
+                maioridade: 'DE MAIOR' | 'DE MENOR';
+                financeiro: 'SEM DÍVIDAS' | 'COM DÍVIDAS';
+                aluno: 'SIM' | 'NÃO';
+                atualizarDados: 'SIM' | 'NÃO';
+            }>(`/api/educacao/matricula/calcular-info-pessoa-fisica/${pessoaId}`);
+            setInfoPanels(response.data);
+        } catch (e) {
+            console.error('Erro ao calcular info panels:', e);
+            // Fallback defaults
+            setInfoPanels({
+                maioridade: 'DE MAIOR',
+                financeiro: 'SEM DÍVIDAS',
+                aluno: 'NÃO',
+                atualizarDados: 'NÃO',
+            });
+        }
+    }, []);
+
+    const resetInfoPanels = useCallback(() => {
+        setInfoPanels({
+            maioridade: 'DE MAIOR',
+            financeiro: 'SEM DÍVIDAS',
+            aluno: 'NÃO',
+            atualizarDados: 'NÃO',
+        });
+    }, []);
+
     const handleAlunoSelect = (option: AutoCompleteOption | null) => {
-        if (option) setContrato(prev => ({ ...prev, pessoa: option }));
+        if (option) {
+            setContrato(prev => ({ ...prev, pessoa: option }));
+            calcularInfoPanels(option.id);
+        } else {
+            setContrato(prev => ({ ...prev, pessoa: null }));
+            resetInfoPanels();
+        }
     };
 
     const handleCursoSelect = (option: AutoCompleteOption | null) => {
         if (option) {
             setContrato(prev => ({ ...prev, curriculo: option }));
             setFiltro(prev => ({ ...prev, curriculoId: option.id }));
+        } else {
+            setContrato(prev => ({ ...prev, curriculo: null }));
+            setFiltro(prev => ({ ...prev, curriculoId: undefined }));
         }
     };
 
     const handleResponsavelSelect = (option: AutoCompleteOption | null, tipo: 'fisica' | 'juridica') => {
-        if (option) setContrato(prev => ({ ...prev, responsavel: option, tipoContratante: tipo }));
+        if (option) {
+            setContrato(prev => ({ ...prev, responsavel: option, tipoContratante: tipo }));
+        } else {
+            setContrato(prev => ({ ...prev, responsavel: null }));
+        }
     };
 
     const handleUnidadeChange = (unidade: UnidadeResponse | undefined) => {
@@ -515,26 +1411,26 @@ export default function ViewConsultorMatriculaLayoutScreen() {
             <div className="aluno-info" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '20px' }}>
                 <div className="info-panel">
                     <h4>Maioridade</h4>
-                    <span className={`status ${contrato.maioridade ? 'PENDENTE' : 'EM_ANDAMENTO'}`}>
-                        {contrato.maioridade ? 'DE MENOR' : 'DE MAIOR'}
+                    <span className={`status ${infoPanels.maioridade === 'DE MENOR' ? 'PENDENTE' : 'EM_ANDAMENTO'}`}>
+                        {infoPanels.maioridade}
                     </span>
                 </div>
                 <div className="info-panel">
                     <h4>Financeiro</h4>
-                    <span className={`status ${contrato.financeiro ? 'PENDENTE' : 'EM_ANDAMENTO'}`}>
-                        {contrato.financeiro ? 'COM DÍVIDAS' : 'SEM DÍVIDAS'}
+                    <span className={`status ${infoPanels.financeiro === 'COM DÍVIDAS' ? 'PENDENTE' : 'EM_ANDAMENTO'}`}>
+                        {infoPanels.financeiro}
                     </span>
                 </div>
                 <div className="info-panel">
                     <h4>Aluno</h4>
-                    <span className={`status ${contrato.aluno ? 'EM_ANDAMENTO' : 'PENDENTE'}`}>
-                        {contrato.aluno ? 'SIM' : 'NÃO'}
+                    <span className={`status ${infoPanels.aluno === 'SIM' ? 'EM_ANDAMENTO' : 'PENDENTE'}`}>
+                        {infoPanels.aluno}
                     </span>
                 </div>
                 <div className="info-panel">
                     <h4>Atualizar Dados</h4>
-                    <span className={`status ${contrato.dados ? 'PENDENTE' : 'EM_ANDAMENTO'}`}>
-                        {contrato.dados ? 'SIM' : 'NÃO'}
+                    <span className={`status ${infoPanels.atualizarDados === 'SIM' ? 'PENDENTE' : 'EM_ANDAMENTO'}`}>
+                        {infoPanels.atualizarDados}
                     </span>
                 </div>
             </div>
@@ -544,13 +1440,47 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                 <div className="table_form" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
                     <div>
                         <label>Aluno *</label>
-                        <AutoComplete
-                            value={contrato.pessoa as AutoCompleteOption | undefined}
-                            onChange={handleAlunoSelect}
-                            fetchOptions={loadAlunos}
-                            minChars={3}
-                            placeholder="Digite 3+ caracteres..."
-                        />
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
+                            <div style={{ flex: 1 }}>
+                                <AutoComplete
+                                    value={contrato.pessoa as AutoCompleteOption | undefined}
+                                    onChange={handleAlunoSelect}
+                                    fetchOptions={loadAlunos}
+                                    minChars={3}
+                                    placeholder="Digite 3+ caracteres..."
+                                />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <button
+                                    type="button"
+                                    className="btnblue"
+                                    style={{ padding: '8px 12px', fontSize: '12px' }}
+                                    onClick={() => {
+                                        setPessoaFisicaModalMode('create');
+                                        setPessoaFisicaEditId(null);
+                                        setShowPessoaFisicaModal(true);
+                                    }}
+                                >
+                                    Criar Pessoa
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btngreen"
+                                    style={{ padding: '8px 12px', fontSize: '12px' }}
+                                    disabled={!contrato.pessoa}
+                                    onClick={() => {
+                                        const pessoa = contrato.pessoa as AutoCompleteOption;
+                                        if (pessoa) {
+                                            setPessoaFisicaModalMode('edit');
+                                            setPessoaFisicaEditId(pessoa.id);
+                                            setShowPessoaFisicaModal(true);
+                                        }
+                                    }}
+                                >
+                                    Editar Pessoa
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div>
@@ -576,28 +1506,96 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                     <div>
                         <label>Contratante *</label>
                         {contrato.tipoContratante === 'fisica' ? (
-                            <AutoComplete
-                                value={contrato.responsavel as AutoCompleteOption | undefined}
-                                onChange={p => handleResponsavelSelect(p, 'fisica')}
-                                fetchOptions={loadPessoasFisicas}
-                                minChars={3}
-                                placeholder="Digite 3+ caracteres..."
-                            />
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
+                                <div style={{ flex: 1 }}>
+                                    <AutoComplete
+                                        value={contrato.responsavel as AutoCompleteOption | undefined}
+                                        onChange={p => handleResponsavelSelect(p, 'fisica')}
+                                        fetchOptions={loadPessoasFisicas}
+                                        minChars={3}
+                                        placeholder="Digite 3+ caracteres..."
+                                    />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                    <button
+                                        type="button"
+                                        className="btnblue"
+                                        style={{ padding: '8px 12px', fontSize: '12px' }}
+                                        onClick={() => {
+                                            setPessoaFisicaModalMode('create');
+                                            setPessoaFisicaEditId(null);
+                                            setShowPessoaFisicaModal(true);
+                                        }}
+                                    >
+                                        Criar Pessoa
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btngreen"
+                                        style={{ padding: '8px 12px', fontSize: '12px' }}
+                                        disabled={!contrato.responsavel}
+                                        onClick={() => {
+                                            const responsavel = contrato.responsavel as AutoCompleteOption;
+                                            if (responsavel) {
+                                                setPessoaFisicaModalMode('edit');
+                                                setPessoaFisicaEditId(responsavel.id);
+                                                setShowPessoaFisicaModal(true);
+                                            }
+                                        }}
+                                    >
+                                        Editar Pessoa
+                                    </button>
+                                </div>
+                            </div>
                         ) : (
-                            <AutoComplete
-                                value={contrato.responsavel as AutoCompleteOption | undefined}
-                                onChange={p => handleResponsavelSelect(p, 'juridica')}
-                                fetchOptions={loadPessoasJuridicas}
-                                minChars={3}
-                                placeholder="Digite 3+ caracteres..."
-                            />
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
+                                <div style={{ flex: 1 }}>
+                                    <AutoComplete
+                                        value={contrato.responsavel as AutoCompleteOption | undefined}
+                                        onChange={p => handleResponsavelSelect(p, 'juridica')}
+                                        fetchOptions={loadPessoasJuridicas}
+                                        minChars={3}
+                                        placeholder="Digite 3+ caracteres..."
+                                    />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                    <button
+                                        type="button"
+                                        className="btnblue"
+                                        style={{ padding: '8px 12px', fontSize: '12px' }}
+                                        onClick={() => {
+                                            setPessoaJuridicaModalMode('create');
+                                            setPessoaJuridicaEditId(null);
+                                            setShowPessoaJuridicaModal(true);
+                                        }}
+                                    >
+                                        Criar Pessoa
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btngreen"
+                                        style={{ padding: '8px 12px', fontSize: '12px' }}
+                                        disabled={!contrato.responsavel}
+                                        onClick={() => {
+                                            const responsavel = contrato.responsavel as AutoCompleteOption;
+                                            if (responsavel) {
+                                                setPessoaJuridicaModalMode('edit');
+                                                setPessoaJuridicaEditId(responsavel.id);
+                                                setShowPessoaJuridicaModal(true);
+                                            }
+                                        }}
+                                    >
+                                        Editar Pessoa
+                                    </button>
+                                </div>
+                            </div>
                         )}
                     </div>
                 </div>
             </div>
 
             <div className="form-section">
-                <h3>Unidade e Testemunhas</h3>
+                <h3>Unidade</h3>
                 <div className="table_form" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
                     <div>
                         <label>Unidade do Contrato *</label>
@@ -610,6 +1608,11 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                             {unidades.map(u => <option key={u.id} value={String(u.id)}>{u.sucinto}</option>)}
                         </select>
                     </div>
+                </div>
+            </div>
+            <div className="form-section">
+                <h3>Testemunhas</h3>
+                <div className="table_form" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
                     <div>
                         <label>Primeira Testemunha</label>
                         <AutoComplete
@@ -1003,6 +2006,25 @@ export default function ViewConsultorMatriculaLayoutScreen() {
             <PermissionGate permission="READ">
                 <main className="consultor-matricula-layout">
                     {renderFinalizadaPanel()}
+                    <PessoaFisicaFormModal
+                        open={showPessoaFisicaModal}
+                        mode={pessoaFisicaModalMode}
+                        editId={pessoaFisicaEditId}
+                        onClose={() => setShowPessoaFisicaModal(false)}
+                        onSaved={(id) => {
+                            setContrato(prev => ({ ...prev, pessoa: { id, label: `Pessoa ${id}` } }));
+                            calcularInfoPanels(id);
+                        }}
+                    />
+                    <PessoaJuridicaFormModal
+                        open={showPessoaJuridicaModal}
+                        mode={pessoaJuridicaModalMode}
+                        editId={pessoaJuridicaEditId}
+                        onClose={() => setShowPessoaJuridicaModal(false)}
+                        onSaved={(id) => {
+                            setContrato(prev => ({ ...prev, responsavel: { id, label: `Pessoa ${id}` } }));
+                        }}
+                    />
                 </main>
             </PermissionGate>
         );
@@ -1040,6 +2062,25 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                         },
                     ]}
                     onComplete={() => handleFinalizarMatricula()}
+                />
+                <PessoaFisicaFormModal
+                    open={showPessoaFisicaModal}
+                    mode={pessoaFisicaModalMode}
+                    editId={pessoaFisicaEditId}
+                    onClose={() => setShowPessoaFisicaModal(false)}
+                    onSaved={(id) => {
+                        setContrato(prev => ({ ...prev, pessoa: { id, label: `Pessoa ${id}` } }));
+                        calcularInfoPanels(id);
+                    }}
+                />
+                <PessoaJuridicaFormModal
+                    open={showPessoaJuridicaModal}
+                    mode={pessoaJuridicaModalMode}
+                    editId={pessoaJuridicaEditId}
+                    onClose={() => setShowPessoaJuridicaModal(false)}
+                    onSaved={(id) => {
+                        setContrato(prev => ({ ...prev, responsavel: { id, label: `Pessoa ${id}` } }));
+                    }}
                 />
             </main>
         </PermissionGate>

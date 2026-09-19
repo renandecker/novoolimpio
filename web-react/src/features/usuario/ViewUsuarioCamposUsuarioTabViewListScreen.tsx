@@ -69,14 +69,14 @@ export default function ViewUsuarioCamposUsuarioTabViewListScreen(){
                 <div style={{fontWeight:700, marginBottom:6}}>Documentos — aba `documentos`</div>
                 <div>Qtd. filhos &lt; 14 · CTPS* · Série* · PIS* · Data Emissão RG · Órgão Emissor · Título Eleitor · Zona · Seção · Carteira Reservista (se homem)</div>
                 <div style={{marginTop:8, color:'#666'}}>Arquivos: Foto 3x4* · CTPS pág.1/2* · Contrato* · Certidão Nasc. filhos* · Vacinação filhos* · Comprov. Residência* · CPF* · RG frente/verso · Título · Reservista (homem)</div>
-                <div style={{marginTop:8, fontSize:11, color:'#888'}}>Upload via <code>p:fileUpload</code> nos dialogs <code>dialogFoto, dialogCtps1/2, dialogContrato…</code> — implementado com <code>Base64FileUpload</code> em ViewUsuarioFormUsuario.</div>
+                <div style={{marginTop:8, fontSize:11, color:'#888'}}>Upload via <code>p:fileUpload</code> nos dialogs <code>dialogFoto, dialogCtps1/2, dialogContrato…</code> — implementado com <code>FileUploadBase</code> em ViewUsuarioFormUsuario.</div>
             </div>
         </div>
     );
 
     const trabalho = (
         <div className="form-grid">
-            <label className="form-field"><span className="form-label">Ativo</span><BooleanField value={true} onChange={()=>{}} /></label>
+            <label className="form-field"><span className="form-label">Ativo</span><BooleanField value={true} onChange={()=>{}} onText="Ativo" offText="Inativo" /></label>
             <label className="form-field"><span className="form-label">Data Admissão</span><input className="form-input" type="date" /></label>
             <label className="form-field"><span className="form-label">Função *</span><select className="form-input form-select"><option>-- Selecione --</option></select></label>
             <label className="form-field">

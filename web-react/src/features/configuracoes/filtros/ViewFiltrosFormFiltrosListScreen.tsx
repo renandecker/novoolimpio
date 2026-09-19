@@ -3,6 +3,7 @@ import {useNavigate, useSearchParams} from 'react-router-dom';
 import {PermissionGate} from '../../../shared/services/permissions';
 import {api} from '../../../shared/services/api';
 import {AutoComplete, type AutoCompleteOption} from '../../../shared/components/AutoComplete';
+import {BooleanField} from '../../../shared/components/BooleanField';
 import {MasterDetail} from '../../../shared/components/MasterDetail';
 import type {ApiItem} from '../../../shared/types/types';
 import {
@@ -351,9 +352,9 @@ export default function ViewFiltrosFormFiltrosListScreen() {
                                 </div>
                                 <div style={{display: 'flex', alignItems: 'center', gap: 12, paddingTop: 20}}>
                                     <label style={labelStyle}>Fixo</label>
-                                    <input type="checkbox" checked={flFixo} onChange={(e) => setFlFixo(e.target.checked)} />
+                                    <BooleanField value={flFixo} onChange={setFlFixo} />
                                     <label style={labelStyle}>Exibir filtro</label>
-                                    <input type="checkbox" checked={flExibir} onChange={(e) => setFlExibir(e.target.checked)} />
+                                    <BooleanField value={flExibir} onChange={setFlExibir} />
                                 </div>
                                 <div>
                                     <label style={labelStyle}>Valor fixo</label>
@@ -396,11 +397,11 @@ export default function ViewFiltrosFormFiltrosListScreen() {
                             <div style={{fontWeight: 700, marginBottom: 8}}>Rede</div>
                             <div style={{display: 'flex', gap: 24, alignItems: 'center'}}>
                                 <label style={labelStyle}>Exibir rede</label>
-                                <input type="checkbox" checked={flRede} onChange={(e) => setFlRede(e.target.checked)} />
+                                <BooleanField value={flRede} onChange={setFlRede} />
                                 {flRede && (
                                     <>
                                         <label style={labelStyle}>Exibir hierarquia</label>
-                                        <input type="checkbox" checked={flHierarquia} onChange={(e) => setFlHierarquia(e.target.checked)} />
+                                        <BooleanField value={flHierarquia} onChange={setFlHierarquia} />
                                         {flHierarquia && (
                                             <>
                                                 <label style={labelStyle}>Hierarquia</label>
@@ -415,10 +416,10 @@ export default function ViewFiltrosFormFiltrosListScreen() {
                         <div style={panelStyle}>
                             <div style={{fontWeight: 700, marginBottom: 8}}>Relatório – todos</div>
                             <div style={{display: 'flex', gap: 24, alignItems: 'center', flexWrap: 'wrap'}}>
-                                <label style={labelStyle}>Mapas <input type="checkbox" checked={flTodosMapa} onChange={(e) => setFlTodosMapa(e.target.checked)} /></label>
-                                <label style={labelStyle}>Gráficos <input type="checkbox" checked={flTodosGrafico} onChange={(e) => setFlTodosGrafico(e.target.checked)} /></label>
-                                <label style={labelStyle}>Tabelas <input type="checkbox" checked={flTodosTabela} onChange={(e) => setFlTodosTabela(e.target.checked)} /></label>
-                                <label style={labelStyle}>Organogramas <input type="checkbox" checked={flTodosOrganograma} onChange={(e) => setFlTodosOrganograma(e.target.checked)} /></label>
+                                <label style={labelStyle}>Mapas <BooleanField value={flTodosMapa} onChange={setFlTodosMapa} /></label>
+                                <label style={labelStyle}>Gráficos <BooleanField value={flTodosGrafico} onChange={setFlTodosGrafico} /></label>
+                                <label style={labelStyle}>Tabelas <BooleanField value={flTodosTabela} onChange={setFlTodosTabela} /></label>
+                                <label style={labelStyle}>Organogramas <BooleanField value={flTodosOrganograma} onChange={setFlTodosOrganograma} /></label>
                             </div>
                         </div>
                     </div>

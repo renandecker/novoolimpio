@@ -12,6 +12,7 @@ import {usePermissions} from '../../../shared/services/permissions';
 
 import {ExportButton} from '../../../shared/components/ExportButton';
 import {ExportDropdown} from '../../../shared/components/ExportDropdown';
+import {BooleanField} from '../../../shared/components/BooleanField';
 import HelpOverlay from '../../../shared/components/HelpOverlay';
 import {FileText, Download} from 'lucide-react';
 
@@ -685,11 +686,11 @@ function ReportEditor({type, id, initial, onClose, onSaved}: { type: ReportType;
 
                         {typeof value === 'boolean' ? (
 
-                            <input type="checkbox" checked={value} onChange={(event) => setValues((previous) => ({
+                            <BooleanField value={value} onChange={(checked) => setValues((previous) => ({
 
                                 ...previous,
 
-                                [key]: event.target.checked
+                                [key]: checked
 
                             }))}/>
 

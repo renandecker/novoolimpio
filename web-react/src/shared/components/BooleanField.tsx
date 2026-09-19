@@ -1,4 +1,6 @@
-﻿interface BooleanFieldProps {
+﻿import './BooleanField.css';
+
+interface BooleanFieldProps {
     value: boolean;
     onChange: (value: boolean) => void;
     onText?: string;
@@ -16,19 +18,17 @@ export function BooleanField({
                                  disabled = false,
                              }: BooleanFieldProps) {
     return (
-        <label className={`boolean-field ${disabled ? 'boolean-field-disabled' : ''}`}>
-            <input
-                type="checkbox"
-                className="boolean-field-input"
-                checked={value}
+        <div className={`boolean-field ${disabled ? 'boolean-field-disabled' : ''}`}>
+            <button
+                type="button"
+                className={`boolean-field-toggle ${value ? 'boolean-field-toggle-on' : ''}`}
                 disabled={disabled}
-                onChange={(event) => onChange(event.target.checked)}
-            />
-            <span className="boolean-field-track" aria-hidden="true">
-        <span className="boolean-field-thumb"/>
-      </span>
-            <span className="boolean-field-text">{value ? onText : offText}</span>
+                aria-pressed={value}
+                onClick={() => onChange(!value)}
+            >
+                <span className="boolean-field-toggle-text">{value ? onText : offText}</span>
+            </button>
             {label && <span className="boolean-field-label">{label}</span>}
-        </label>
+        </div>
     );
 }

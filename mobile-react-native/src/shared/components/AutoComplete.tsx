@@ -23,6 +23,7 @@ interface AutoCompleteProps {
     onChange: (option: AutoCompleteOption | null) => void;
     fetchOptions: (query: string) => Promise<AutoCompleteOption[]>;
     minChars?: number;
+    minDropdownResults?: number;
     disabled?: boolean;
     style?: any;
 }
@@ -34,6 +35,7 @@ export function AutoComplete({
                                  onChange,
                                  fetchOptions,
                                  minChars = 2,
+                                 minDropdownResults = 10,
                                  disabled = false,
                                  style,
                              }: AutoCompleteProps) {
@@ -125,10 +127,29 @@ export function AutoComplete({
                         <Text style={styles.btnClearText}>✕</Text>
                     </TouchableOpacity>
                 )}
-                <TouchableOpacity style={styles.btnDropdown} onPress={() => {
-                    if (text.trim().length >= minChars) pesquisar(text);
-                    inputRef.current?.focus();
-                }} disabled={disabled} accessibilityLabel="Listar opções">
+                <TouchableOpacity
+                    style={styles.btnDropdown}
+                    onPress={() => {
+                        if (disabled) return;
+                        if (timerRef.current) clearTimeout(timerRef.current);
+                        setLoading(true);
+                        fetchOptions('')
+                            .then((resultado) => {
+                                const limited = resultado.slice(0, minDropdownResults);
+                                setOptions(limited);
+                                setOpen(true);
+                                setHighlighted(limited.length > 0 ? 0 : -1);
+                            })
+                            .catch(() => {
+                                setOptions([]);
+                                setOpen(false);
+                            })
+                            .finally(() => setLoading(false));
+                        inputRef.current?.focus();
+                    }}
+                    disabled={disabled}
+                    accessibilityLabel="Listar opções"
+                >
                     <Text style={styles.btnDropdownText}>▾</Text>
                 </TouchableOpacity>
             </View>

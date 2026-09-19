@@ -3,6 +3,7 @@ import {ModuleTabs, ModuleTabItem} from '../../../shared/components/ModuleTabs';
 import {DataTable, DataTableColumn} from '../../../shared/components/DataTable';
 import {useState, useEffect} from 'react';
 import {api} from '../../../shared/services/api';
+import {BooleanField} from '../../../shared/components/BooleanField';
 import type {ApiItem} from '../../../shared/types/types.ts';
 
 const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
@@ -220,11 +221,7 @@ export default function ViewMetaIndicadorMetaDinamicaListScreen() {
                             </div>
                             <div>
                                 <label style={{display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold'}}>
-                                    <input
-                                        type="checkbox"
-                                        checked={todosMeses}
-                                        onChange={(e) => setTodosMeses(e.target.checked)}
-                                    />
+                                    <BooleanField value={todosMeses} onChange={setTodosMeses} />
                                     Todos os meses
                                 </label>
                             </div>

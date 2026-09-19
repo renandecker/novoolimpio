@@ -10,6 +10,8 @@ import {UnidadeCombo} from '../../../shared/components/UnidadeCombo';
 
 import {Tabs} from '../../../shared/components/Tabs';
 
+import {BooleanField} from '../../../shared/components/BooleanField';
+
 import {useApi} from '../../../shared/services/api';
 
 import {API_PATHS} from '../../../shared/services/apiPaths';
@@ -518,12 +520,13 @@ export default function CurriculoVagaListScreen() {
 
                     {errors.vagas && <span className="form-erro">{errors.vagas}</span>}
 
-                </label>                <label className="form-field checkbox-field">
-                    <input type="checkbox" className="form-checkbox" checked={formData.fl_ativo} onChange={e => updateField('fl_ativo', e.target.checked)}/>
+                </label>                <label className="form-field">
                     <span className="form-label">Ativo</span>
-                </label>                <label className="form-field checkbox-field">
-                    <input type="checkbox" className="form-checkbox" checked={formData.fl_exibir_vaga} onChange={e => updateField('fl_exibir_vaga', e.target.checked)}/>
+                    <BooleanField value={formData.fl_ativo} onChange={v => updateField('fl_ativo', v)} onText="Ativo" offText="Inativo"/>
+                </label>
+                <label className="form-field">
                     <span className="form-label">Exibir Vaga</span>
+                    <BooleanField value={formData.fl_exibir_vaga} onChange={v => updateField('fl_exibir_vaga', v)} />
                 </label>
 
                 <label className="form-field">
@@ -562,9 +565,9 @@ export default function CurriculoVagaListScreen() {
 
         <div className="table_form">
 
-            <div className="form-grid">                <label className="form-field checkbox-field">
-                    <input type="checkbox" className="form-checkbox" checked={formData.fl_email} onChange={e => updateField('fl_email', e.target.checked)}/>
+            <div className="form-grid">                <label className="form-field">
                     <span className="form-label">Enviar por E-mail</span>
+                    <BooleanField value={formData.fl_email} onChange={v => updateField('fl_email', v)} />
                 </label>
 
                 <label className="form-field">

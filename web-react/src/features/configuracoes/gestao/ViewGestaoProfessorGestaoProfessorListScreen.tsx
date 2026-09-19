@@ -29,6 +29,8 @@ import {ScheduleWeekView, mondayOf, toIsoDate, type ScheduleEventData} from '../
 
 import {legacyClassName} from '../../../shared/components/DataTable';
 
+import {BooleanField} from '../../../shared/components/BooleanField';
+
 import '../../professor/GestaoProfessor.css';
 
 
@@ -1364,17 +1366,15 @@ function GestaoTab() {
 
                                 <label>
 
-                                    <input
+                                    <BooleanField
 
-                                        type="checkbox"
+                                        value={todasChamadas}
 
-                                        checked={todasChamadas}
+                                        onChange={(checked) => {
 
-                                        onChange={(e) => {
+                                            setTodasChamadas(checked);
 
-                                            setTodasChamadas(e.target.checked);
-
-                                            if (e.target.checked) setQtdDias(caderno.ocorrencias.length);
+                                            if (checked) setQtdDias(caderno.ocorrencias.length);
 
                                         }}
 

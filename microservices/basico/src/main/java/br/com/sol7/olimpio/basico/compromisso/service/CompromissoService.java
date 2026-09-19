@@ -380,8 +380,13 @@ public class CompromissoService {
         return repository.findById(compromissoId).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Compromisso not found"))
                 .chain(c -> repository.inserirPessoaStatus(compromissoId, c.statusCompromissoId, statusId)
-                        .chain(() -> repository.modificarStatusCompromisso(compromissoId, statusId)))
-                .chain(() -> find(compromissoId));
+                        .chain(() -> repository.modificarStatusCompromisso(compromissoId, statusId))
+                        // O UPDATE nativo contorna o contexto de persistencia: recarrega a
+                        // entidade antes de responder, senao o find() abaixo devolveria o
+                        // estado anterior (stale read).
+                        .chain(() -> io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                                .chain(s -> s.refresh(c)))
+                        .replaceWith(() -> toResponse(c)));
     }
 
     // Migrado de CompromissoController.proximoStatusCompromisso (linha 603, camada controller)
@@ -394,23 +399,53 @@ public class CompromissoService {
                         .chain(proximoId -> repository.buscarStatusAgenda(compromissoId)
                                 .chain(agendaStatusId -> repository.inserirPessoaStatus(compromissoId, c.statusCompromissoId, proximoId)
                                         .chain(() -> repository.avancarStatus(compromissoId, proximoId,
-                                                agendaStatusId != null && agendaStatusId.equals(proximoId), observacao)))))
-                .chain(() -> find(compromissoId));
+                                                agendaStatusId != null && agendaStatusId.equals(proximoId), observacao))
+                                        .chain(() -> io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                                                .chain(s -> s.refresh(c)))
+                                        .replaceWith(() -> toResponse(c)))));
     }
 
     // Migrado de CompromissoController.fecharAgenda (linha 231, camada controller)
     public Uni<CompromissoResponse> fechar(Long compromissoId) {
         return repository.findById(compromissoId).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Compromisso not found"))
-                .chain(c -> repository.fecharCompromisso(compromissoId))
-                .chain(() -> find(compromissoId));
+                .chain(c -> repository.fecharCompromisso(compromissoId)
+                        .chain(() -> io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                                .chain(s -> s.refresh(c)))
+                        .replaceWith(() -> toResponse(c)));
     }
 
-    public Uni<List<ResultadoResponse>> listarResultados(Long compromissoId) {
-        return repository.buscarResultadosDoCompromisso(compromissoId)
-                .map(list -> list.stream()
-                        .map(row -> new ResultadoResponse(((Number) row[0]).longValue(), (String) row[1]))
-                        .toList());
+    public Uni<List<br.com.sol7.olimpio.basico.compromisso.dto.ResultadoResponse>> listarResultados(Long id) {
+        return repository.buscarResultadosDoCompromisso(id)
+                .map(list -> list.stream().map(row -> new br.com.sol7.olimpio.basico.compromisso.dto.ResultadoResponse(
+                        row[0] != null ? ((Number) row[0]).longValue() : null,
+                        row[1] != null ? row[1].toString() : null
+                )).toList());
+    }
+
+    @Inject
+    br.com.sol7.olimpio.basico.pessoa.repository.PessoaRepository pessoaRepository;
+
+    @Inject
+    br.com.sol7.olimpio.basico.agenda.repository.AgendaRepository agendaRepository;
+
+    public Uni<List<br.com.sol7.olimpio.basico.pessoa.dto.PessoaResponse>> buscarPessoasPorAgendaOuUnidade(Long agendaId, Long unidadeId) {
+        if (agendaId != null) {
+            return agendaRepository.findById(agendaId)
+                    .chain(agenda -> {
+                        if (agenda == null || agenda.unidadeId == null) {
+                            return pessoaRepository.listAll().map(list -> list.stream().map(p -> new br.com.sol7.olimpio.basico.pessoa.dto.PessoaResponse(p.id, p.numero, p.complemento, p.email, p.telefone, p.celular, p.foto, p.observacao, p.comunicado, p.logradouroId, p.dataCadastro, p.dataAlteracao)).toList());
+                        }
+                        return pessoaRepository.find("unidadeId", agenda.unidadeId).list()
+                                .map(list -> list.stream().map(p -> new br.com.sol7.olimpio.basico.pessoa.dto.PessoaResponse(p.id, p.numero, p.complemento, p.email, p.telefone, p.celular, p.foto, p.observacao, p.comunicado, p.logradouroId, p.dataCadastro, p.dataAlteracao)).toList());
+                    });
+        }
+        if (unidadeId != null) {
+            return pessoaRepository.find("unidadeId", unidadeId).list()
+                    .map(list -> list.stream().map(p -> new br.com.sol7.olimpio.basico.pessoa.dto.PessoaResponse(p.id, p.numero, p.complemento, p.email, p.telefone, p.celular, p.foto, p.observacao, p.comunicado, p.logradouroId, p.dataCadastro, p.dataAlteracao)).toList());
+        }
+        return pessoaRepository.listAll()
+                .map(list -> list.stream().map(p -> new br.com.sol7.olimpio.basico.pessoa.dto.PessoaResponse(p.id, p.numero, p.complemento, p.email, p.telefone, p.celular, p.foto, p.observacao, p.comunicado, p.logradouroId, p.dataCadastro, p.dataAlteracao)).toList());
     }
 
 }

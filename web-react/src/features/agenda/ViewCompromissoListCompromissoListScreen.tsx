@@ -212,12 +212,14 @@ export default function ViewCompromissoListCompromissoListScreen() {
 
                 {observacaoItem && (
                     <div className="modal-overlay" onClick={() => setObservacaoItem(null)}>
-                        <div className="modal" onClick={(e) => e.stopPropagation()} style={{width: '500px'}}>
-                            <h3>Observação</h3>
-                            <p><strong>{String(asRecord(observacaoItem).descricao ?? '')}</strong></p>
-                            <p>{String(asRecord(observacaoItem).observacao ?? '')}</p>
-                            <div className="modal-actions" style={{marginTop: '16px'}}>
-                                <button className="btnblue" onClick={() => setObservacaoItem(null)}>Fechar</button>
+                        <div className="modal form-modal" onClick={(e) => e.stopPropagation()} style={{maxWidth: '500px'}}>
+                            <div className="div_form">
+                                <div className="form-title">Observação</div>
+                                <p><strong>{String(asRecord(observacaoItem).descricao ?? '')}</strong></p>
+                                <p>{String(asRecord(observacaoItem).observacao ?? '')}</p>
+                                <div className="form-footer">
+                                    <button className="btnblue" onClick={() => setObservacaoItem(null)}>Fechar</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -225,21 +227,23 @@ export default function ViewCompromissoListCompromissoListScreen() {
 
                 {resultadosModal && (
                     <div className="modal-overlay" onClick={() => setResultadosModal(null)}>
-                        <div className="modal" onClick={(e) => e.stopPropagation()} style={{width: '500px'}}>
-                            <h3>Resultados do Compromisso #{resultadosModal.item.id}</h3>
-                            {loadingResultados ? (
-                                <p>Carregando...</p>
-                            ) : resultadosModal.list.length === 0 ? (
-                                <p>Nenhum resultado vinculado.</p>
-                            ) : (
-                                <ul>
-                                    {resultadosModal.list.map((r) => (
-                                        <li key={r.id}>{r.descricao}</li>
-                                    ))}
-                                </ul>
-                            )}
-                            <div className="modal-actions" style={{marginTop: '16px'}}>
-                                <button className="btnblue" onClick={() => setResultadosModal(null)}>Fechar</button>
+                        <div className="modal form-modal" onClick={(e) => e.stopPropagation()} style={{maxWidth: '500px'}}>
+                            <div className="div_form">
+                                <div className="form-title">Resultados do Compromisso #{resultadosModal.item.id}</div>
+                                {loadingResultados ? (
+                                    <p>Carregando...</p>
+                                ) : resultadosModal.list.length === 0 ? (
+                                    <p>Nenhum resultado vinculado.</p>
+                                ) : (
+                                    <ul>
+                                        {resultadosModal.list.map((r) => (
+                                            <li key={r.id}>{r.descricao}</li>
+                                        ))}
+                                    </ul>
+                                )}
+                                <div className="form-footer">
+                                    <button className="btnblue" onClick={() => setResultadosModal(null)}>Fechar</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -247,7 +251,7 @@ export default function ViewCompromissoListCompromissoListScreen() {
 
                 {trocaStatusItem && (
                     <div className="modal-overlay" onClick={() => setTrocaStatusItem(null)}>
-                        <div className="modal form-modal" onClick={(e) => e.stopPropagation()} style={{width: '450px'}}>
+                        <div className="modal form-modal" onClick={(e) => e.stopPropagation()} style={{maxWidth: '450px'}}>
                             <div className="div_form">
                                 <div className="form-title">Troca de Status - Compromisso #{trocaStatusItem.id}</div>
                                 <div className="table_form">
@@ -265,7 +269,7 @@ export default function ViewCompromissoListCompromissoListScreen() {
                                             ))}
                                         </select>
                                     </label>
-                                    <div className="modal-actions form-footer">
+                                    <div className="form-footer">
                                         <button type="button" className="btn-form-back btnyellow" onClick={() => setTrocaStatusItem(null)}>Cancelar</button>
                                         <button type="button" className="btnstop" onClick={confirmarTrocaStatus} disabled={saving}>Salvar</button>
                                     </div>
@@ -277,7 +281,7 @@ export default function ViewCompromissoListCompromissoListScreen() {
 
                 {proximoStatusItem && (
                     <div className="modal-overlay" onClick={() => setProximoStatusItem(null)}>
-                        <div className="modal form-modal" onClick={(e) => e.stopPropagation()} style={{width: '450px'}}>
+                        <div className="modal form-modal" onClick={(e) => e.stopPropagation()} style={{maxWidth: '450px'}}>
                             <div className="div_form">
                                 <div className="form-title">Próximo Status - Compromisso #{proximoStatusItem.id}</div>
                                 <div className="table_form">
@@ -296,7 +300,7 @@ export default function ViewCompromissoListCompromissoListScreen() {
                                             disabled={saving}
                                         />
                                     </label>
-                                    <div className="modal-actions form-footer">
+                                    <div className="form-footer">
                                         <button type="button" className="btn-form-back btnyellow" onClick={() => setProximoStatusItem(null)}>Cancelar</button>
                                         <button type="button" className="btngreen" onClick={confirmarProximoStatus} disabled={saving}>Confirmar</button>
                                     </div>

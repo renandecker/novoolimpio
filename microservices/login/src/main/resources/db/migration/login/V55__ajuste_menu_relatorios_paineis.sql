@@ -26,7 +26,8 @@ DELETE FROM public.bas_modulo WHERE id IN (SELECT id FROM to_delete);
 -- 3) Cria novo submenu "Painéis" sob "Relatórios" (id 230) caso não exista
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
 SELECT nextval('public.bas_modulo_id_seq'), (SELECT id FROM public.bas_modulo WHERE rotulo = 'Relatórios' LIMIT 1), 'Painéis', 'Painéis', 'fa fa-th-large', NULL, NULL, 100
-WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE rotulo = 'Painéis' AND id_modulo = (SELECT id FROM public.bas_modulo WHERE rotulo = 'Relatórios' LIMIT 1));
+WHERE (SELECT id FROM public.bas_modulo WHERE rotulo = 'Relatórios' LIMIT 1) IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE rotulo = 'Painéis' AND id_modulo = (SELECT id FROM public.bas_modulo WHERE rotulo = 'Relatórios' LIMIT 1));
 
 -- 4) Move Dashboard para ser filho do novo "Painéis" e garante perfis de acesso
 DO $$
@@ -47,7 +48,7 @@ BEGIN
         INSERT INTO public.bas_perfil_modulo (id_perfil, id_modulo, editar, remover, relatorio, novo, id)
         SELECT p.id, v_paineis_id, TRUE, TRUE, TRUE, TRUE, nextval('public.bas_perfil_modulo_id_seq')
         FROM public.bas_perfil p
-        WHERE lower(p.descricao) = 'administrador'
+        WHERE upper(trim(p.hierarquia)) = 'ADMIN'
         AND NOT EXISTS (
             SELECT 1 FROM public.bas_perfil_modulo pm
             WHERE pm.id_perfil = p.id AND pm.id_modulo = v_paineis_id
@@ -57,7 +58,7 @@ BEGIN
         INSERT INTO public.bas_perfil_modulo (id_perfil, id_modulo, editar, remover, relatorio, novo, id)
         SELECT p.id, v_dashboard_id, TRUE, TRUE, TRUE, TRUE, nextval('public.bas_perfil_modulo_id_seq')
         FROM public.bas_perfil p
-        WHERE lower(p.descricao) = 'administrador'
+        WHERE upper(trim(p.hierarquia)) = 'ADMIN'
         AND NOT EXISTS (
             SELECT 1 FROM public.bas_perfil_modulo pm
             WHERE pm.id_perfil = p.id AND pm.id_modulo = v_dashboard_id

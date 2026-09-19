@@ -3,7 +3,7 @@ import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {api} from '../../shared/services/api';
 import {PermissionGate} from '../../shared/services/permissions';
 import {ScheduleWeekView, mondayOf, toIsoDate, parseDate, addDays, monthRangeForWeek, type ScheduleEventData} from '../../shared/components/WeeklyGrid';
-import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
+import {DataTable, type DataTableColumn, type DataTableRowAction} from '../../shared/components/DataTable';
 import {Tabs} from '../../shared/components/Tabs';
 import {Modal} from '../../shared/components/Modal';
 import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
@@ -134,7 +134,7 @@ export default function ViewAgendaCompromissosScreen() {
     const [weekStart, setWeekStart] = useState(() => toIsoDate(mondayOf(new Date())));
     const [selectedAgendaId, setSelectedAgendaId] = useState<number | ''>('');
     const [selectedUnidadeId, setSelectedUnidadeId] = useState<number | ''>('');
-    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedPessoa, setSelectedPessoa] = useState<AutoCompleteOption | null>(null);
 
     const {inicio: rangeInicio, fim: rangeFim} = monthRangeForWeek(weekStart);
 
@@ -162,6 +162,32 @@ export default function ViewAgendaCompromissosScreen() {
         queryFn: async () => (await api.get<Array<{id: number; nome: string; pessoaFisica?: {nome: string; cpf: string}; pessoaJuridica?: {nomeFantasia: string; cnpj: string}}>>('/api/view/pessoa/listPessoa')).data,
     });
 
+    const pessoasByUnidadeQuery = useQuery({
+        queryKey: ['pessoas-by-unidade', selectedAgendaId],
+        queryFn: async () => {
+            const agenda = agendasQuery.data?.find(a => a.id === selectedAgendaId);
+            if (!agenda?.unidade?.id) return [];
+            const response = await api.get<Array<{id: number; nome: string; pessoaFisica?: {nome: string; cpf: string}; pessoaJuridica?: {nomeFantasia: string; cnpj: string}}>>('/api/view/pessoa/listPessoa', {
+                params: {unidadeId: agenda.unidade.id}
+            });
+            return response.data;
+        },
+        enabled: !!selectedAgendaId && !!agendasQuery.data?.find(a => a.id === selectedAgendaId)?.unidade?.id,
+    });
+
+    const fetchPessoaOptions = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
+        const list = pessoasByUnidadeQuery.data || pessoasOptionsQuery.data || [];
+        const filtered = query.trim()
+            ? list.filter(p => getPessoaNome(p).toLowerCase().includes(query.trim().toLowerCase()))
+            : list;
+        return filtered.slice(0, 50).map(p => ({id: p.id, label: getPessoaNome(p)}));
+    }, [pessoasByUnidadeQuery.data, pessoasOptionsQuery.data]);
+
+    const fetchPessoaById = useCallback(async (id: number): Promise<AutoCompleteOption | null> => {
+        const pessoa = (pessoasByUnidadeQuery.data || pessoasOptionsQuery.data || []).find(p => p.id === id);
+        return pessoa ? {id: pessoa.id, label: getPessoaNome(pessoa)} : null;
+    }, [pessoasByUnidadeQuery.data, pessoasOptionsQuery.data]);
+
     const tiposCompromisso = tiposCompromissoQuery.data || [];
     const pessoasOptions = pessoasOptionsQuery.data || [];
 
@@ -177,10 +203,11 @@ export default function ViewAgendaCompromissosScreen() {
     });
 
     const eventosQuery = useQuery({
-        queryKey: ['compromissos-eventos', selectedAgendaId, rangeInicio, rangeFim],
+        queryKey: ['compromissos-eventos', selectedAgendaId, rangeInicio, rangeFim, selectedPessoa?.id],
         queryFn: async () => {
             const params: Record<string, any> = {inicio: rangeInicio, fim: rangeFim};
             if (selectedAgendaId) params.agendaId = selectedAgendaId;
+            if (selectedPessoa?.id) params.pessoaId = selectedPessoa.id;
             const response = await api.get<Compromisso[]>('/api/view/compromisso/listCompromisso', {params});
             return response.data.map(c => ({
                 id: c.id,
@@ -188,7 +215,7 @@ export default function ViewAgendaCompromissosScreen() {
                 start: `${c.data}T${c.horario?.hora || '00:00'}`,
                 end: `${c.data}T${c.horario?.hora || '00:00'}`,
                 allDay: false,
-                styleClass: getStatusClass(c.statusCompromisso),
+                styleClass: selectedPessoa?.id ? 'evento-green' : getStatusClass(c.statusCompromisso),
                 ocorrenciaId: c.id,
             })) as ScheduleEventData[];
         },
@@ -196,11 +223,8 @@ export default function ViewAgendaCompromissosScreen() {
     });
 
     const [selectedCompromisso, setSelectedCompromisso] = useState<Compromisso | null>(null);
-    const [showDetails, setShowDetails] = useState(false);
-    const [showForm, setShowForm] = useState(false);
-    const [showChangeStatus, setShowChangeStatus] = useState(false);
-    const [showCloseCompromisso, setShowCloseCompromisso] = useState(false);
-    const [showNextStatus, setShowNextStatus] = useState(false);
+    type ModalType = 'details' | 'form' | 'changeStatus' | 'closeCompromisso' | 'nextStatus' | null;
+    const [openModal, setOpenModal] = useState<ModalType>(null);
     const [formData, setFormData] = useState<Partial<Compromisso> & {resultadoSelecionado?: {id: number; label: string} | null; testemunhaSelecionada?: {id: number; label: string} | null}>({resultadoSelecionado: null, testemunhaSelecionada: null});
     const [isEditing, setIsEditing] = useState(false);
     const [formHorarios, setFormHorarios] = useState<Horario[]>([]);
@@ -265,7 +289,7 @@ export default function ViewAgendaCompromissosScreen() {
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['compromissos']});
             queryClient.invalidateQueries({queryKey: ['compromissos-eventos']});
-            setShowForm(false);
+            setOpenModal(null);
             setFormData({});
         },
     });
@@ -279,7 +303,7 @@ export default function ViewAgendaCompromissosScreen() {
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['compromissos']});
             queryClient.invalidateQueries({queryKey: ['compromissos-eventos']});
-            setShowForm(false);
+            setOpenModal(null);
             setFormData({});
             setIsEditing(false);
         },
@@ -293,7 +317,7 @@ export default function ViewAgendaCompromissosScreen() {
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['compromissos']});
             queryClient.invalidateQueries({queryKey: ['compromissos-eventos']});
-            setShowChangeStatus(false);
+            setOpenModal(null);
         },
     });
 
@@ -304,7 +328,7 @@ export default function ViewAgendaCompromissosScreen() {
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['compromissos']});
             queryClient.invalidateQueries({queryKey: ['compromissos-eventos']});
-            setShowCloseCompromisso(false);
+            setOpenModal(null);
         },
     });
 
@@ -316,7 +340,7 @@ export default function ViewAgendaCompromissosScreen() {
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['compromissos']});
             queryClient.invalidateQueries({queryKey: ['compromissos-eventos']});
-            setShowNextStatus(false);
+            setOpenModal(null);
             setNextStatusResultados([]);
             setNextStatusAtendente(null);
             setNextStatusTestemunhas([]);
@@ -328,7 +352,7 @@ export default function ViewAgendaCompromissosScreen() {
         try {
             const response = await api.get<Compromisso>(`/api/basico/compromisso/${compromissoId}`);
             setSelectedCompromisso(response.data);
-            setShowDetails(true);
+            setOpenModal('details');
         } catch (error) {
             console.error('Erro ao carregar detalhes:', error);
         }
@@ -339,7 +363,7 @@ export default function ViewAgendaCompromissosScreen() {
         setFormHorarios([]);
         setFormTipoHorario('unidade');
         setIsEditing(false);
-        setShowForm(true);
+        setOpenModal('form');
     }, []);
 
     const openEditForm = useCallback((compromisso: Compromisso) => {
@@ -358,7 +382,7 @@ export default function ViewAgendaCompromissosScreen() {
         if (compromisso.agenda?.id && compromisso.data) {
             loadHorarios(compromisso.agenda.id, compromisso.data, formTipoHorario);
         }
-        setShowForm(true);
+        setOpenModal('form');
     }, [loadHorarios, formTipoHorario]);
 
     const handleEventClick = useCallback((event: ScheduleEventData) => {
@@ -373,12 +397,13 @@ export default function ViewAgendaCompromissosScreen() {
             ativo: true,
             data: date,
             agenda: agendasQuery.data?.find(a => a.id === selectedAgendaId),
+            pessoa: selectedPessoa?.id ? pessoasOptionsQuery.data?.find(p => p.id === selectedPessoa.id) as unknown as Compromisso['pessoa'] : undefined,
         });
         setFormTipoHorario('unidade');
         setIsEditing(false);
         loadHorarios(selectedAgendaId, date, 'unidade');
-        setShowForm(true);
-    }, [selectedAgendaId, agendasQuery.data, loadHorarios]);
+        setOpenModal('form');
+    }, [selectedAgendaId, agendasQuery.data, loadHorarios, selectedPessoa, pessoasOptionsQuery.data]);
 
     const handleRowClick = useCallback((compromisso: Compromisso) => {
         fetchCompromissoDetails(compromisso.id);
@@ -387,30 +412,34 @@ export default function ViewAgendaCompromissosScreen() {
     const handleOpenChangeStatus = useCallback((compromisso: Compromisso) => {
         if (!compromisso.ativo) return;
         setSelectedCompromisso(compromisso);
-        setShowChangeStatus(true);
+        setOpenModal('changeStatus');
     }, []);
 
     const handleOpenCloseCompromisso = useCallback((compromisso: Compromisso) => {
         if (!compromisso.ativo) return;
         setSelectedCompromisso(compromisso);
-        setShowCloseCompromisso(true);
+        setOpenModal('closeCompromisso');
     }, []);
 
     const handleOpenNextStatus = useCallback((compromisso: Compromisso) => {
         if (!compromisso.ativo || !compromisso.statusCompromisso?.proxStatusCompromisso) return;
         setSelectedCompromisso(compromisso);
         setNextStatusResultados(compromisso.resultados || []);
-        setShowNextStatus(true);
+        setOpenModal('nextStatus');
     }, []);
 
     const LEGENDA = useMemo(() => {
         const statuses = agendasQuery.data?.flatMap(a => a.status || []) || [];
         const unique = new Map(statuses.map(s => [s.descricao, s]));
-        return Array.from(unique.values()).map(s => ({
+        const base = Array.from(unique.values()).map(s => ({
             className: getStatusClass(s),
             label: s.descricao,
         }));
-    }, [agendasQuery.data]);
+        if (selectedPessoa?.id) {
+            return [{className: 'evento-green', label: `Pessoa: ${selectedPessoa.label}`}, ...base];
+        }
+        return base;
+    }, [agendasQuery.data, selectedPessoa]);
 
     const COLUMNS: DataTableColumn[] = useMemo(() => [
         {key: 'id', label: 'ID'},
@@ -426,16 +455,70 @@ export default function ViewAgendaCompromissosScreen() {
     ], []);
 
     const filteredCompromissos = useMemo(() => {
-        if (!searchTerm) return compromissosQuery.data || [];
-        const term = searchTerm.toLowerCase();
-        return (compromissosQuery.data || []).filter(c =>
-            c.descricao?.toLowerCase().includes(term) ||
-            getPessoaNome(c.pessoa).toLowerCase().includes(term) ||
-            c.agenda?.descricao?.toLowerCase().includes(term) ||
-            c.statusCompromisso?.descricao?.toLowerCase().includes(term) ||
-            c.usuario?.login?.toLowerCase().includes(term)
-        );
-    }, [compromissosQuery.data, searchTerm]);
+        const result = compromissosQuery.data || [];
+        if (selectedPessoa?.id) {
+            return result.filter(c => c.pessoa?.id === selectedPessoa.id);
+        }
+        return result;
+    }, [compromissosQuery.data, selectedPessoa]);
+
+    const asRecord = (item: Compromisso) => item as unknown as Record<string, unknown>;
+
+    const extraRowActions: DataTableRowAction[] = useMemo(() => [
+        {
+            key: 'observacao',
+            title: 'Observação',
+            className: 'btnyellow',
+            icon: <i className="fa fa-info-circle"/>,
+            visible: (item) => Boolean(asRecord(item).observacao),
+            onClick: (item) => handleRowClick(item),
+        },
+        {
+            key: 'resultados',
+            title: 'Ver Resultados',
+            className: 'btnyellow',
+            icon: <i className="fa fa-search"/>,
+            visible: (item) => Boolean(asRecord(item).resultados?.length),
+            onClick: (item) => handleRowClick(item),
+        },
+        {
+            key: 'prospecto',
+            title: 'Prospecto',
+            className: 'btnstop',
+            icon: <i className="fa fa-external-link"/>,
+            visible: (item) => {
+                const rec = asRecord(item);
+                return rec.ativo !== false && rec.prospecto !== null && rec.prospecto !== undefined;
+            },
+            onClick: () => {},
+        },
+        {
+            key: 'trocaStatus',
+            title: 'Troca Status',
+            className: 'btnorange',
+            icon: <i className="fa fa-exchange"/>,
+            permission: 'CREATE',
+            onClick: (item) => handleOpenChangeStatus(item),
+        },
+        {
+            key: 'proximoStatus',
+            title: 'Próximo Status',
+            className: 'btngreen',
+            icon: <i className="fa fa-forward"/>,
+            permission: 'UPDATE',
+            visible: (item) => asRecord(item).statusCompromisso?.proxStatusCompromisso !== null && asRecord(item).statusCompromisso?.proxStatusCompromisso !== undefined,
+            onClick: (item) => handleOpenNextStatus(item),
+        },
+        {
+            key: 'fechar',
+            title: 'Fechar',
+            className: 'btnblack',
+            icon: <i className="fa fa-times"/>,
+            permission: 'DELETE',
+            visible: (item) => asRecord(item).ativo !== false,
+            onClick: (item) => handleOpenCloseCompromisso(item),
+        },
+    ], []);
 
     return (
         <PermissionGate permission="READ">
@@ -488,7 +571,7 @@ export default function ViewAgendaCompromissosScreen() {
                             <option value="calendar">📅 Calendário</option>
                             <option value="list">📋 Lista</option>
                         </select>
-                        <button className="btn btn-primary" onClick={openCreateForm}>
+                        <button className="btnblue" onClick={openCreateForm}>
                             + Novo Compromisso
                         </button>
                     </div>
@@ -512,31 +595,49 @@ export default function ViewAgendaCompromissosScreen() {
                     </div>
 
                     <div className="filter-group search-group">
-                        <label>Buscar</label>
-                        <input
-                            type="text"
-                            placeholder="Buscar por descrição, pessoa, agenda, status..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="search-input"
+                        <label>Pessoa</label>
+                        <AutoComplete
+                            id="pessoa-filter"
+                            value={selectedPessoa}
+                            onChange={(opt: AutoCompleteOption | null) => setSelectedPessoa(opt)}
+                            fetchOptions={fetchPessoaOptions}
+                            fetchById={fetchPessoaById}
+                            minChars={2}
+                            minDropdownResults={50}
+                            placeholder="Buscar pessoa... (combo + autocomplete)"
                         />
+                        {selectedPessoa && (
+                            <button
+                                type="button"
+                                className="btnyellow"
+                                onClick={() => setSelectedPessoa(null)}
+                                title="Limpar filtro pessoa"
+                            >
+                                Limpar ✕
+                            </button>
+                        )}
                     </div>
 
 {viewMode === 'calendar' && (
                         <div className="filter-group">
                             <label>Semana</label>
                             <div className="week-nav">
-                                <button onClick={() => setWeekStart(toIsoDate(addDays(parseDate(weekStart), -7)))}>‹ Anterior</button>
+                                <button className="btnstop" onClick={() => setWeekStart(toIsoDate(addDays(parseDate(weekStart), -7)))}>‹ Anterior</button>
                                 <span>{formatDateBR(weekStart)} - {formatDateBR(toIsoDate(addDays(parseDate(weekStart), 6)))}</span>
-                                <button onClick={() => setWeekStart(toIsoDate(addDays(parseDate(weekStart), 7)))}>Próximo ›</button>
-                                <button onClick={() => setWeekStart(toIsoDate(mondayOf(new Date())))} className="btn-today">Hoje</button>
+                                <button className="btnstop" onClick={() => setWeekStart(toIsoDate(addDays(parseDate(weekStart), 7)))}>Próximo ›</button>
+                                <button className="btnblue" onClick={() => setWeekStart(toIsoDate(mondayOf(new Date())))}>Hoje</button>
                             </div>
                         </div>
                     )}
                 </div>
 
                 {viewMode === 'calendar' ? (
-                    <div className="calendar-view">
+                    <div className={`calendar-view${selectedPessoa ? ' pessoa-filtrada' : ''}`}>
+                        {selectedPessoa && (
+                            <div className="filtro-pessoa-ativo">
+                                Filtrando por pessoa: <strong>{selectedPessoa.label}</strong> — eventos em <span className="status-badge evento-green">verde</span>
+                            </div>
+                        )}
                         {selectedAgendaId ? (
                             <ScheduleWeekView
                                 startDate={weekStart}
@@ -562,13 +663,7 @@ export default function ViewAgendaCompromissosScreen() {
                             loading={compromissosQuery.isLoading}
                             error={compromissosQuery.isError ? 'Erro ao carregar compromissos.' : null}
                             onRowClick={handleRowClick}
-                            rowActions={[
-                                {label: 'Ver detalhes', icon: '👁', onClick: handleRowClick, variant: 'primary'},
-                                {label: 'Editar', icon: '✏️', onClick: openEditForm, variant: 'secondary', disabled: (c) => !c.ativo},
-                                {label: 'Próximo Status', icon: '➡️', onClick: handleOpenNextStatus, variant: 'success', disabled: (c) => !c.ativo || !c.statusCompromisso?.proxStatusCompromisso},
-                                {label: 'Trocar Status', icon: '🔄', onClick: handleOpenChangeStatus, variant: 'warning', disabled: (c) => !c.ativo},
-                                {label: 'Fechar', icon: '❌', onClick: handleOpenCloseCompromisso, variant: 'danger', disabled: (c) => !c.ativo},
-                            ]}
+                            extraRowActions={extraRowActions}
                             expandableRows
                             renderExpandedRow={(compromisso) => (
                                 <div className="expanded-row">
@@ -620,589 +715,470 @@ export default function ViewAgendaCompromissosScreen() {
                     </div>
                 )}
 
-                {showDetails && selectedCompromisso && (
+                {openModal === 'details' && selectedCompromisso && (
                     <Modal
                         title={`Compromisso #${selectedCompromisso.id} - Detalhes`}
-                        open={showDetails}
-                        onClose={() => setShowDetails(false)}
+                        open={openModal === 'details'}
+                        onClose={() => setOpenModal(null)}
                         size="lg"
                     >
-                        <h:form id="formCompromissoAgenda">
-                            <p:growl autoUpdate="true" showDetail="true" sticky="true" life="50000" edisplay="true" globalOnly="true"
-                                     escape="false"/>
-
-                            <pe:blockUI target="mainForm" widgetVar="blockUIdetalheCompromisso">
-                                <h:panelGrid styleClass="semBorda" style="vertical-align: top" columns="2">
-                                    Carregando detalhes compromisso, aguarde...
-                                    <h:graphicImage value="/resources/images/ajaxloading.gif"/>
-                                </h:panelGrid>
-                            </pe:blockUI>
-
-                            <p:dataTable var="comp" rendered="#{calendarioAgendaController.tipoEvento eq false}"
-                                         rowsPerPageTemplate="10,15" rows="10"
-                                         value="#{calendarioAgendaController.compromissos}" emptyMessage="" paginator="true"
-                                         paginatorPosition="bottom"
-                                         paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
-
-                                <p:ajax event="rowToggle" listener="#{calendarioAgendaController.buscarDetalhes}"
-                                        update="detalhesCompromiso"
-                                        onstart="test();PF('blockUIdetalheCompromisso').block();"
-                                        oncomplete="PF('blockUIdetalheCompromisso').unblock();"/>
-
-                                <p:column exportable="false" style="width:5%">
-                                    <p:rowToggler/>
-                                </p:column>
-
-                                <p:column style="width:10%" headerText="#{msg['entity.id']}">
-                                    <h:outputText value="#{comp.id}"/>
-                                </p:column>
-
-                                <p:column style="width: 15%" headerText="#{msg['entity.visitante']}">
-                                    <h:outputText value="#{comp.descricao}"/>
-                                </p:column>
-
-                                <p:column style="width: 10%" headerText="#{msg['entity.horario']}">
-                                    <h:outputText value="#{comp.horario.hora}"/>
-                                </p:column>
-
-                                <p:column style="width: 15%" headerText="#{msg['entity.usuario']}">
-                                    <h:outputText value="#{comp.usuario.login}"/>
-                                </p:column>
-
-                                <p:column style="width: 15%" headerText="#{msg['entity.atendente']}">
-                                    <h:outputText value="#{comp.atendente.login}"/>
-                                </p:column>
-
-                                <p:column style="width: 15%" headerText="Finalizou">
-                                    <h:outputText value="#{comp.usuarioFinalizou.login}"/>
-                                </p:column>
-
-                                <p:column style="width:200px; text-align: right;" exportable="false">
-                                    <p:commandButton id="chartBtnobservacao" type="button" style="float: right; z-index:100"
-                                                     title="#{msg['entity.observacao']}"
-                                                     styleClass="btnyellow" icon="ui-icon-help"
-                                     rendered="#{comp.observacao ne null and comp.observacao ne ''}"/>
-                                    <p:overlayPanel id="chartPanelobservacao" for="chartBtnobservacao" hideEffect="fade">
-                                        <p:scrollPanel mode="native" style="width:200px;height:200px">
-                                            <h:outputText style="white-space:normal !important" escape="false"
-                                                          value="#{comp.observacao}"/>
-                                        </p:scrollPanel>
-                                    </p:overlayPanel>
-
-                                    <p:commandButton icon="ui-icon-search" title="#{msg['button.compromisso.view']}"
-                                     rendered="#{compromissoController.verificaResultados(comp)}"
-                                     actionListener="#{compromissoController.setEntity(comp)}"
-                                     styleClass="btnyellow"
-                                     oncomplete="PF('detailView2').show();" update=":poolForm:detailView2">
-                                        <f:setPropertyActionListener value="#{calendarioAgendaController.agenda}"
-                                                     target="#{compromissoController.agenda}"/>
-                                    </p:commandButton>
-
-                                    <p:commandButton icon="ui-icon-newwin" title="#{msg['button.compromisso.prospecto']}"
-                                     actionListener="#{compromissoController.carregarProspectoParaVisualizacao(comp)}"
-                                     rendered="#{comp.ativo eq true and comp.prospecto ne null}"
-                                     styleClass="btnstop"
-                                     oncomplete="PF('detailProspecto').show();" update=":poolForm:detailProspecto">
-                                        <f:setPropertyActionListener value="#{calendarioAgendaController.agenda}"
-                                                     target="#{compromissoController.agenda}"/>
-                                    </p:commandButton>
-
-                                    <p:commandButton icon="ui-icon-transferthick-e-w" styleClass="btnorange"
-                                     rendered="#{comp.ativo eq true and calendarioAgendaController.usuarioAgenda.alterar}"
-                                     title="Troca de Stratus Compromisso" onsuccess="PF('trocaStatus').show();"
-                                     update=":formtrocaStatus" style="margin-left: 5px;">
-                                        <f:setPropertyActionListener value="#{comp}" target="#{compromissoController.entity}"/>
-                                        <f:setPropertyActionListener value="#{comp.statusCompromisso}"
-                                                     target="#{compromissoController.statusCompromisso}"/>
-                                        <f:setPropertyActionListener value="#{calendarioAgendaController.agenda}"
-                                                     target="#{compromissoController.agenda}"/>
-                                    </p:commandButton>
-
-                                    <p:commandButton
-                                        title="Mudar #{comp.statusCompromisso.descricao} para #{comp.statusCompromisso.proxStatusCompromisso.descricao}"
-                                        update=":formproximoStatus" oncomplete="PF('proximoStatus').show();"
-                                        icon="ui-icon-transfer-2-e"
-                                        action="#{compromissoController.obterCompromissoSchedule(comp)}"
-                                        rendered="#{comp.ativo eq true and calendarioAgendaController.usuarioAgenda.atender and
-                                              comp.statusCompromisso.proxStatusCompromisso ne null}" styleClass="btngreen">
-                                        <f:setPropertyActionListener value="#{calendarioAgendaController.agenda}"
-                                                     target="#{compromissoController.agenda}"/>
-                                    </p:commandButton>
-
-                                    <p:commandButton update=":formfecharCompromisso" oncomplete="PF('fecharCopromisso').show();"
-                                                     icon="ui-icon-close"
-                                     rendered="#{comp.id eq calendarioAgendaController.usuarioAgenda.usuario.id and calendarioAgendaController.usuarioAgenda.fechar and comp.ativo eq true }">
-                                        <f:setPropertyActionListener value="#{comp}" target="#{compromissoController.entity}"
-                                         styleClass="btnblack"/>
-                                        <f:setPropertyActionListener value="#{calendarioAgendaController.agenda}"
-                                                     target="#{compromissoController.agenda}"/>
-                                    </p:commandButton>
-                                </p:column>
-
-                                <p:rowExpansion>
-                                    <p:dataTable id="detalhesCompromiso" var="detalhesCompromiso"
-                                                 value="#{calendarioAgendaController.compromissoPessoaStatuses}"
-                                                 emptyMessage="#{msg['global.nenhumRegistro']}">
-                                        <p:column style="width: 20%" headerText="#{msg['entity.usuario']} alterou">
-                                            <h:outputText value="#{detalhesCompromiso.usuario.pessoaFisica.nome}"/>
-                                        </p:column>
-
-                                        <p:column style="width: 15%"
-                                              headerText="#{msg['entity.descricao']}  #{msg['entity.pessoa']}">
-                                            <h:outputText value="#{detalhesCompromiso.statusCompromissoAnterior.descricaoPessoa}"/>
-                                        </p:column>
-
-                                        <p:column style="width: 20%" headerText="#{msg['entity.usuario']} destino">
-                                            <h:outputText value="#{detalhesCompromiso.pessoa.pessoaFisica.nome}"/>
-                                        </p:column>
-
-                                        <p:column style="width: 15%" headerText="#{msg['entity.data']}">
-                                            <h:outputText value="#{detalhesCompromiso.data}">
-                                                <f:convertDateTime pattern="dd/MM/yyyy" locale="pt" timeZone="America/Sao_Paulo"/>
-                                            </h:outputText>
-                                        </p:column>
-
-                                        <p:column style="width: 15%" headerText="#{msg['entity.statusAnterior']}">
-                                            <h:outputText value="#{detalhesCompromiso.statusCompromissoAnterior.descricao}"
-                                                          styleClass="#{detalhesCompromiso.statusCompromissoAnterior.cor}"/>
-                                        </p:column>
-
-                                        <p:column style="width: 15%" headerText="#{msg['entity.statusSeguinte']} anterior">
-                                            <h:outputText value="#{detalhesCompromiso.statusCompromissoProximo.descricao}"
-                                                          styleClass="#{detalhesCompromiso.statusCompromissoProximo.cor}"/>
-                                        </p:column>
-                                    </p:dataTable>
-                                </p:rowExpansion>
-                            </p:dataTable>
-
-                            <p:panel style="text-align: center;border: none"
-                                     rendered="#{calendarioAgendaController.tipoEvento eq true}">
-                                <p:outputLabel value="Feriado: #{calendarioAgendaController.descricaoCompromisso}"/>
-                                <br/>
-                                <br/>
-                                <p:commandButton value="OK" onclick="PF('telaCompromissoDialogo').hide();" immediate="true"
-                                                 type="button"/>
-                            </p:panel>
-                        </h:form>
+                        <div className="details-content">
+                            <div className="detail-grid">
+                                <div className="detail-item">
+                                    <label>ID</label>
+                                    <span>{selectedCompromisso.id}</span>
+                                </div>
+                                <div className="detail-item">
+                                    <label>Descrição / Visitante</label>
+                                    <span>{selectedCompromisso.descricao}</span>
+                                </div>
+                                <div className="detail-item">
+                                    <label>Agenda</label>
+                                    <span>{selectedCompromisso.agenda?.descricao || ''}</span>
+                                </div>
+                                <div className="detail-item">
+                                    <label>Data</label>
+                                    <span>{formatDateBR(selectedCompromisso.data)}</span>
+                                </div>
+                                <div className="detail-item">
+                                    <label>Horário</label>
+                                    <span>{selectedCompromisso.horario?.hora || ''}</span>
+                                </div>
+                                <div className="detail-item">
+                                    <label>Pessoa</label>
+                                    <span>{getPessoaNome(selectedCompromisso.pessoa)}</span>
+                                </div>
+                                <div className="detail-item">
+                                    <label>Tipo de Compromisso</label>
+                                    <span>{selectedCompromisso.tipoCompromisso?.descricao || ''}</span>
+                                </div>
+                                <div className="detail-item">
+                                    <label>Status</label>
+                                    <span><span className={`status-badge ${selectedCompromisso.statusCompromisso?.cor}`}>{selectedCompromisso.statusCompromisso?.descricao || ''}</span></span>
+                                </div>
+                                <div className="detail-item">
+                                    <label>Agendou por</label>
+                                    <span>{selectedCompromisso.usuario?.login || ''}</span>
+                                </div>
+                                <div className="detail-item">
+                                    <label>Atendente</label>
+                                    <span>{selectedCompromisso.atendente?.login || ''}</span>
+                                </div>
+                                <div className="detail-item">
+                                    <label>Finalizou por</label>
+                                    <span>{selectedCompromisso.usuarioFinalizou?.login || ''}</span>
+                                </div>
+                                <div className="detail-item full-width">
+                                    <label>Observação</label>
+                                    <span>{selectedCompromisso.observacao || '—'}</span>
+                                </div>
+                            </div>
+                            {selectedCompromisso.compromissoStatusUsuarios && selectedCompromisso.compromissoStatusUsuarios.length > 0 && (
+                                <div className="detail-section">
+                                    <h4>Histórico de Status</h4>
+                                    <table className="history-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Usuário</th>
+                                                <th>Pessoa</th>
+                                                <th>Data</th>
+                                                <th>Status Anterior</th>
+                                                <th>Status Próximo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {selectedCompromisso.compromissoStatusUsuarios.map((h, i) => (
+                                                <tr key={i}>
+                                                    <td>{h.usuario?.pessoaFisica?.nome}</td>
+                                                    <td>{h.pessoa?.pessoaFisica?.nome}</td>
+                                                    <td>{formatDateBR(h.data)}</td>
+                                                    <td><span className={`status-badge ${h.statusCompromissoAnterior.cor}`}>{h.statusCompromissoAnterior.descricao}</span></td>
+                                                    <td><span className={`status-badge ${h.statusCompromissoProximo.cor}`}>{h.statusCompromissoProximo.descricao}</span></td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                            {selectedCompromisso.resultados && selectedCompromisso.resultados.length > 0 && (
+                                <div className="detail-section">
+                                    <h4>Resultados</h4>
+                                    <ul>
+                                        {selectedCompromisso.resultados.map((r, i) => (
+                                            <li key={i}>{r.descricao}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
                     </Modal>
                 )}
 
-                {showForm && (
+{openModal === 'form' && (
                     <Modal
-                        title={isEditing ? 'Editar Compromisso' : 'Novo Compromisso'}
-                        open={showForm}
-                        onClose={() => { setShowForm(false); setFormData({}); setIsEditing(false); }}
+                        title={isEditing ? 'Editar Compromisso' : 'Cadastrar compromisso'}
+                        open={openModal === 'form'}
+                        onClose={() => { setOpenModal(null); setFormData({}); setIsEditing(false); setFormHorarios([]); setFormTipoHorario('unidade'); }}
                         size="lg"
                     >
                         <form onSubmit={(e) => { e.preventDefault(); isEditing ? updateCompromissoMutation.mutate(formData as any) : createCompromissoMutation.mutate(formData); }} className="form-compromisso">
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Agenda *</label>
-                                    <AutoComplete
-                                        value={formData.agenda ? {id: formData.agenda.id, label: formData.agenda.descricao} : null}
-                                        onChange={(opt: AutoCompleteOption | null) => {
-                                            const agenda = opt?.id ? agendasQuery.data?.find(a => a.id === opt.id) : null;
-                                            handleAgendaChange(agenda || null);
-                                        }}
-                                        fetchOptions={fetchAgendaOptions}
-                                        fetchById={fetchAgendaById}
-                                        minChars={1}
-                                        minDropdownResults={50}
-                                        required
-                                        placeholder="Selecione a agenda"
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Data *</label>
-                                    <input
-                                        type="text"
-                                        value={formData.data ? formatDateBR(formData.data) : ''}
-                                        onChange={(e) => {
-                                            const dateStr = e.target.value.trim();
-                                            if (!dateStr) {
-                                                setFormData(prev => ({...prev, data: ''}));
-                                                 return;
-                                            }
-                                            const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
-                                            if (!match) return;
-                                            const date = new Date(`${match[1]}-${match[2]}-${match[3]}`);
-                                            if (isNaN(date.getTime())) return;
-                                            const formatted = `${match[3]}/${match[2]}/${match[1]}`;
-                                            setFormData(prev => ({...prev, data: formatted}));
-                                            
-                                            if (formData.agenda?.id) {
-                                                loadHorarios(formData.agenda.id, formatted, formTipoHorario);
-                                            }
-                                        }}
-                                        required
-                                    />
-                                    <small className="form-hint">Formato: dd/MM/yyyy</small>
-                                </div>
-                            </div>
-
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Tipo de Horário</label>
-                                    <div className="radio-group">
-                                        <label><input type="radio" name="tipoHorario" value="unidade" checked={formTipoHorario === 'unidade'} onChange={() => handleTipoHorarioChange('unidade')} /> Unidade</label>
-                                        <label><input type="radio" name="tipoHorario" value="pessoa" checked={formTipoHorario === 'pessoa'} onChange={() => handleTipoHorarioChange('pessoa')} /> Pessoa</label>
+                            <div className="form-grid-layout">
+                                <div className="form-row-grid">
+                                    <label className="form-label-grid">Agenda *</label>
+                                    <div className="form-control-grid">
+                                        <AutoComplete
+                                            value={formData.agenda ? {id: formData.agenda.id, label: formData.agenda.descricao} : null}
+                                            onChange={(opt: AutoCompleteOption | null) => {
+                                                const agenda = opt?.id ? agendasQuery.data?.find(a => a.id === opt.id) : null;
+                                                handleAgendaChange(agenda || null);
+                                            }}
+                                            fetchOptions={fetchAgendaOptions}
+                                            fetchById={fetchAgendaById}
+                                            minChars={1}
+                                            minDropdownResults={50}
+                                            required
+                                            placeholder="Selecione a agenda"
+                                        />
                                     </div>
                                 </div>
-                                <div className="form-group">
-                                    <label>Horário *</label>
-                                    <select
-                                        value={formData.horario?.id || ''}
-                                        onChange={(e) => setFormData(prev => ({...prev, horario: formHorarios.find(h => h.id === Number(e.target.value))}))}
-                                        required
-                                        disabled={formHorarios.length === 0}
-                                    >
-                                        <option value="">Selecione um horário</option>
-                                        {formHorarios.map(h => (
-                                            <option key={h.id} value={h.id}>{h.hora}</option>
-                                        ))}
-                                    </select>
-                                    {formHorarios.length === 0 && <span className="form-hint">Selecione agenda e data para carregar horários</span>}
+
+                                <div className="form-row-grid">
+                                    <label className="form-label-grid">Data *</label>
+                                    <div className="form-control-grid">
+                                        <input
+                                            type="text"
+                                            className="form-input-grid"
+                                            value={formData.data ? formatDateBR(formData.data) : ''}
+                                            onChange={(e) => {
+                                                const dateStr = e.target.value.trim();
+                                                if (!dateStr) {
+                                                    setFormData(prev => ({...prev, data: ''}));
+                                                    setFormHorarios([]);
+                                                    return;
+                                                }
+                                                const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(dateStr);
+                                                if (!match) return;
+                                                const formatted = `${match[1]}/${match[2]}/${match[3]}`;
+                                                setFormData(prev => ({...prev, data: formatted}));
+                                                if (formData.agenda?.id) {
+                                                    loadHorarios(formData.agenda.id, formatted, formTipoHorario);
+                                                }
+                                            }}
+                                            required
+                                            placeholder="dd/MM/yyyy"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-row-grid">
+                                    <label className="form-label-grid">Tipo de Horário</label>
+                                    <div className="form-control-grid">
+                                        <div className="radio-group">
+                                            <label><input type="radio" name="tipoHorario" value="2" checked={formTipoHorario === 'pessoa'} onChange={() => handleTipoHorarioChange('pessoa')} /> Pessoa</label>
+                                            <label><input type="radio" name="tipoHorario" value="1" checked={formTipoHorario === 'unidade'} onChange={() => handleTipoHorarioChange('unidade')} /> Unidade</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="form-row-grid">
+                                    <label className="form-label-grid">Horário *</label>
+                                    <div className="form-control-grid">
+                                        <select
+                                            className="form-select-grid"
+                                            value={formData.horario?.id || ''}
+                                            onChange={(e) => setFormData(prev => ({...prev, horario: formHorarios.find(h => h.id === Number(e.target.value))}))}
+                                            required
+                                            disabled={formHorarios.length === 0}
+                                        >
+                                            <option value="">Selecione</option>
+                                            {formHorarios.map(h => (
+                                                <option key={h.id} value={h.id}>{h.hora}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="form-row-grid">
+                                    <label className="form-label-grid">Tipo de Compromisso</label>
+                                    <div className="form-control-grid">
+                                        <select
+                                            className="form-select-grid"
+                                            value={formData.tipoCompromisso?.id || ''}
+                                            onChange={(e) => {
+                                                const tipo = tiposCompromisso.find(t => t.id === Number(e.target.value));
+                                                setFormData(prev => ({...prev, tipoCompromisso: tipo}));
+                                            }}
+                                        >
+                                            <option value="">Selecione</option>
+                                            {tiposCompromisso.map(t => (
+                                                <option key={t.id} value={t.id}>{t.descricao}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="form-row-grid">
+                                    <label className="form-label-grid">Pessoa</label>
+                                    <div className="form-control-grid">
+                                        <AutoComplete
+                                            value={formData.pessoa ? {id: formData.pessoa.id, label: getPessoaNome(formData.pessoa)} : null}
+                                            onChange={(opt) => {
+                                                const pessoasList = pessoasByUnidadeQuery.data || pessoasOptionsQuery.data || [];
+                                                const pessoa = pessoasList.find(p => p.id === opt?.id);
+                                                setFormData(prev => ({...prev, pessoa: pessoa || null}));
+                                            }}
+                                            fetchOptions={async (query) => {
+                                                const pessoasList = pessoasByUnidadeQuery.data || pessoasOptionsQuery.data || [];
+                                                if (!query) return pessoasList.slice(0, 20).map(p => ({id: p.id, label: getPessoaNome(p)}));
+                                                return pessoasList.filter(p => getPessoaNome(p).toLowerCase().includes(query.toLowerCase())).slice(0, 20).map(p => ({id: p.id, label: getPessoaNome(p)}));
+                                            }}
+                                            fetchById={async (id) => {
+                                                const pessoasList = pessoasByUnidadeQuery.data || pessoasOptionsQuery.data || [];
+                                                const p = pessoasList.find(p => p.id === id);
+                                                return p ? {id: p.id, label: getPessoaNome(p)} : null;
+                                            }}
+                                            minChars={2}
+                                            placeholder="Buscar pessoa..."
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-row-grid">
+                                    <label className="form-label-grid">Descrição *</label>
+                                    <div className="form-control-grid">
+                                        <input
+                                            type="text"
+                                            className="form-input-grid"
+                                            value={formData.descricao || ''}
+                                            onChange={(e) => setFormData(prev => ({...prev, descricao: e.target.value}))}
+                                            required
+                                            placeholder="Descrição"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-row-grid">
+                                    <label className="form-label-grid">Observação</label>
+                                    <div className="form-control-grid">
+                                        <textarea
+                                            className="form-textarea-grid"
+                                            value={formData.observacao || ''}
+                                            onChange={(e) => setFormData(prev => ({...prev, observacao: e.target.value}))}
+                                            rows={3}
+                                            placeholder="Observação"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Tipo de Compromisso</label>
-                                    <select
-                                        value={formData.tipoCompromisso?.id || ''}
-                                        onChange={(e) => {
-                                            const tipo = tiposCompromisso.find(t => t.id === Number(e.target.value));
-                                            setFormData(prev => ({...prev, tipoCompromisso: tipo}));
-                                        }}
-                                    >
-                                        <option value="">Selecione o tipo</option>
-                                        {tiposCompromisso.map(t => (
-                                            <option key={t.id} value={t.id}>{t.descricao}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="form-group">
-                                    <label>Pessoa</label>
-                                    <AutoComplete
-                                        value={formData.pessoa ? {id: formData.pessoa.id, label: getPessoaNome(formData.pessoa)} : null}
-                                        onChange={(opt) => {
-                                            const pessoa = pessoasOptions.find(p => p.id === opt?.id);
-                                            setFormData(prev => ({...prev, pessoa: pessoa || null}));
-                                        }}
-                                        fetchOptions={async (query) => {
-                                            if (!query) return pessoasOptions.slice(0, 20).map(p => ({id: p.id, label: getPessoaNome(p)}));
-                                            return pessoasOptions.filter(p => getPessoaNome(p).toLowerCase().includes(query.toLowerCase())).slice(0, 20).map(p => ({id: p.id, label: getPessoaNome(p)}));
-                                        }}
-                                        fetchById={async (id) => {
-                                            const p = pessoasOptions.find(p => p.id === id);
-                                            return p ? {id: p.id, label: getPessoaNome(p)} : null;
-                                        }}
-                                        minChars={2}
-                                        placeholder="Buscar pessoa..."
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="form-group full-width">
-                                <label>Descrição / Visitante *</label>
-                                <input
-                                    type="text"
-                                    value={formData.descricao || ''}
-                                    onChange={(e) => setFormData(prev => ({...prev, descricao: e.target.value}))}
-                                    required
-                                    placeholder="Descrição do compromisso ou nome do visitante"
-                                />
-                            </div>
-
-                            <div className="form-group full-width">
-                                <label>Observação</label>
-                                <textarea
-                                    value={formData.observacao || ''}
-                                    onChange={(e) => setFormData(prev => ({...prev, observacao: e.target.value}))}
-                                    rows={3}
-                                    placeholder="Observações adicionais..."
-                                />
-                            </div>
-
-                            <div className="form-actions">
-                                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setFormData({}); setIsEditing(false); }}>Cancelar</button>
-                                <button type="submit" className="btn btn-primary" disabled={createCompromissoMutation.isPending || updateCompromissoMutation.isPending}>
-                                    {isEditing ? 'Salvar' : 'Criar'}
+                            <div className="form-actions-grid">
+                                <button type="submit" className="btn btn-primary btn-save-compromisso" disabled={createCompromissoMutation.isPending || updateCompromissoMutation.isPending}>
+                                    Salvar
                                 </button>
                             </div>
                         </form>
                     </Modal>
                 )}
 
-                {showChangeStatus && selectedCompromisso && (
+{openModal === 'changeStatus' && selectedCompromisso && (
                     <Modal
                         title={`Trocar Status - Compromisso #${selectedCompromisso.id}`}
-                        open={showChangeStatus}
-                        onClose={() => setShowChangeStatus(false)}
+                        open={openModal === 'changeStatus'}
+                        onClose={() => setOpenModal(null)}
                         size="md"
                     >
-                        <h:form id="formtrocaStatus">
-                            <p:growl autoUpdate="true" showDetail="true" sticky="true" life="50000" edisplay="true" globalOnly="true"
-                                     escape="false"/>
-
-                            <p:outputLabel
-                                    value="#{msg['alterstatus.compromisso.compromisso']} #{compromissoController.entity.id} ?"
-                                    rendered="#{compromissoController.entity.statusCompromisso.alguem eq true}"/>
-                            <br/>
-                            <p:outputLabel
-                                    value="#{msg['alterstatus.compromisso.compromisso']} #{compromissoController.entity.id} ?"
-                                    rendered="#{compromissoController.entity.statusCompromisso.alguem eq false}"/>
-
-                            <p:separator style="width: 99%"
-                                         rendered="#{compromissoController.entity.statusCompromisso.alguem eq true}"/>
-
-                            <h:panelGrid columns="5">
-                                <c:forEach var="imageName" items="#{compromissoController.entity.statusCompromisso.statusModulos}">
-                                    <p:commandButton value="#{imageName.modulo.rotulo}" icon="#{imageName.modulo.icone}"
-                                     ajax="false"
-                                     action="#{compromissoController.acessoUrl(imageName.modulo.outcome)}"
-                                     styleClass="#{imageName.cor}"/>
-
-                                </c:forEach>
-                            </h:panelGrid>
-                            <br/>
-                            <p:outputLabel for="atendente" value="#{compromissoController.entity.statusCompromisso.descricaoPessoa}"
-                                           style="margin-right: 2px"
-                                           rendered="#{compromissoController.entity.statusCompromisso.alguem eq true}"/>
-                            <p:autoComplete id="atendente" required="true"
-                                            rendered="#{compromissoController.entity.statusCompromisso.alguem eq true}"
-                                            scrollHeight="300" forceSelection="true"
-                                            completeMethod="#{compromissoController.autoCompleteComUnidadeDiaSemana}"
-                                            value="#{compromissoController.entity.atendente}" var="entity"
-                                            itemValue="#{entity}" itemLabel="#{entity.login}" converter="#{usuarioConverter}"
-                                            dropdown="true"/>
-                            <br/><br/><br/>
-
-                            <p:dataList value="#{compromissoController.entity.compromissoStatusUsuarios}" var="comStaUsu"
-                                        rendered="#{compromissoController.entity.statusCompromisso.alguem eq true and compromissoController.entity.compromissoStatusUsuarios.size() ne 0}"
-                                        type="ordered">
-                                <f:facet name="header">
-                                    Testemunhas
-                                </f:facet>
-                                <p:autoComplete required="true" scrollHeight="300" forceSelection="true"
-                                                completeMethod="#{compromissoController.autoCompleteComUnidadeDiaSemana}"
-                                                value="#{comStaUsu.usuario}" var="entity" dropdown="true"
-                                                itemValue="#{entity}" itemLabel="#{entity.login}" converter="#{usuario}"/>
-                            </p:dataList>
-
-                            <br/>
-                            <br/>
-                            <br/>
-
-                            <p:panelGrid columns="1" styleClass="div_form" style="width: 30%;"
-                                         rendered="#{compromissoController.apresentarLancamento(compromissoController.entity.statusCompromisso)}">
-                                <f:facet name="header">
-                                    <p:outputLabel/>
-                                </f:facet>
-
-                                <h:panelGrid columns="2" styleClass="table_form">
-                                    <p:outputLabel for="inputObservacao" value="#{msg['entity.observacao']}"/>
-                                    <p:inputTextarea id="inputObservacao" value="#{compromissoController.entity.observacao}"
-                                     rows="3" cols="65"/>
-                                </h:panelGrid>
-
-                                <h:panelGrid id="resultados_fields" columns="3" styleClass="table_form">
-                                    <p:outputLabel value="#{msg['entity.resultado']}"/>
-                                    <p:selectOneMenu id="inputResultado" styleClass="inputLarge"
-                                     value="#{compromissoController.resultadoSelecionado}"
-                                     converter="#{resultadoConverter}">
-                                        <f:selectItem itemLabel="Selecione" itemValue=""/>
-                                        <f:selectItems var="entity" itemValue="#{entity}" itemLabel="#{entity.descricao}"
-                                                     value="#{compromissoController.listaResultadosDisponiveis}"/>
-                                    </p:selectOneMenu>
-
-                                    <p:commandButton id="btn_add" icon="ui-icon-plus"
-                                     update="resultadosPanel resultados_fields :mainForm"
-                                     process="resultados_fields" action="#{compromissoController.reinit}">
-                                        <p:collector value="#{compromissoController.resultadoSelecionado}"
-                                     addTo="#{compromissoController.listaResultados}" unique="true"/>
-                                    </p:commandButton>
-                                </h:panelGrid>
-
-                                <p:outputPanel id="resultadosPanel">
-                                    <p:dataTable value="#{compromissoController.listaResultados}" var="entity"
-                                                 emptyMessage="#{msg['global.nenhumRegistroSelecionado']}">
-
-                                        <ui:include src="#{resultadoController.colunas}"/>
-
-                                        <p:column style="width:40px;">
-                                            <p:commandButton id="btn_rem" immediate="true" styleClass="btnred" icon="ui-icon-minus"
-                                             update="inputResultados:resultadosPanel"
-                                             actionListener="#{compromissoController.remove(entity)}"
-                                             process="inputResultados:resultadosPanel" ajax="false"/>
-                                        </p:column>
-                                    </p:dataTable>
-                                </p:outputPanel>
-
-                                <f:facet name="footer">
-                                    <p:commandButton
-                                        rendered="#{compromissoController.venda() eq false and not empty compromissoController.listaResultados}"
-                                        id="finalizar" icon="ui-icon-check"
-                                        action="#{compromissoController.finalizarCompromisso}"
-                                        value="#{msg['button.finalizarAtendimento']}" ajax="false"/>
-                                    <p:commandButton
-                                        rendered="#{compromissoController.venda() eq false and not empty compromissoController.listaResultados}"
-                                        icon="ui-icon-arrowthick-1-w" value="#{msg['button.back']}" ajax="false"
-                                        action="/default"/>
-                                </f:facet>
-                            </p:panelGrid>
-                        </h:form>
+                        <div className="modal-content">
+                            <p>Deseja alterar o status do compromisso <strong>#{selectedCompromisso.id}</strong>?</p>
+                            <div className="form-group">
+                                <label>Novo Status</label>
+                                <select
+                                    value={formData.statusCompromisso?.id || ''}
+                                    onChange={(e) => {
+                                        const status = statusOptions.find(s => s.id === Number(e.target.value));
+                                        setFormData(prev => ({...prev, statusCompromisso: status}));
+                                    }}
+                                >
+                                    <option value="">Selecione o status</option>
+                                    {statusOptions.map(s => (
+                                        <option key={s.id} value={s.id}>{s.descricao}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="modal-actions">
+                                <button type="button" className="btn-form-back" onClick={() => setOpenModal(null)}>Cancelar</button>
+                                <button type="button" className="btn-form-save" onClick={() => {
+                                    if (formData.statusCompromisso?.id) {
+                                        changeStatusMutation.mutate({compromissoId: selectedCompromisso.id, statusId: formData.statusCompromisso.id});
+                                    }
+                                }} disabled={changeStatusMutation.isPending}>
+                                    Confirmar
+                                </button>
+                            </div>
+                        </div>
                     </Modal>
                 )}
 
-                {showCloseCompromisso && selectedCompromisso && (
+                {openModal === 'closeCompromisso' && selectedCompromisso && (
                     <Modal
                         title={`Fechar Compromisso #${selectedCompromisso.id}`}
-                        open={showCloseCompromisso}
-                        onClose={() => setShowCloseCompromisso(false)}
+                        open={openModal === 'closeCompromisso'}
+                        onClose={() => setOpenModal(null)}
                         size="md"
                     >
-                        <h:form id="formfecharCompromisso">
-                            <p:growl autoUpdate="true" showDetail="true" sticky="true" life="50000" edisplay="true" globalOnly="true"
-                                     escape="false"/>
-
-                            <p:outputLabel value="#{msg['close.compromisso.compromisso']} #{compromissoController.entity.id} ?"/>
-                            <br/>
-                            <br/>
-                            <p:panelGrid columns="2" styleClass="semBorda2" style="width: 99%">
-                                <f:facet name="header">
-                                    <p:commandButton value="#{msg['button.dialog.yes']}" styleClass="btnblue"
-                                     onsuccess="PF('fecharCopromisso').hide();" ajax="true"
-                                     update=":formCompromissoAgenda"
-                                     actionListener="#{compromissoController.fecharAgenda(compromissoController.entity)}">
-                                        <f:setPropertyActionListener value="#{true}"
-                                                     target="#{calendarioAgendaController.alterado}"/>
-                                    </p:commandButton>
-                                    <p:commandButton value="#{msg['button.dialog.no']}" onclick="PF('fecharCopromisso').hide();"
-                                     styleClass="btnred" type="button"/>
-                                </f:facet>
-                            </p:panelGrid>
-                        </h:form>
+                        <div className="modal-content">
+                            <p>Deseja realmente fechar o compromisso <strong>#{selectedCompromisso.id}</strong>?</p>
+                            <p className="warning">Esta ação não pode ser desfeita.</p>
+                            <div className="modal-actions">
+                                <button type="button" className="btn-form-back" onClick={() => setOpenModal(null)}>Não</button>
+                                <button type="button" className="btn-danger" onClick={() => closeCompromissoMutation.mutate(selectedCompromisso.id)} disabled={closeCompromissoMutation.isPending}>
+                                    Sim, Fechar
+                                </button>
+                            </div>
+                        </div>
                     </Modal>
                 )}
 
-                {showNextStatus && selectedCompromisso && (
+                {openModal === 'nextStatus' && selectedCompromisso && (
                     <Modal
                         title={`Próximo Status - Compromisso #${selectedCompromisso.id}`}
-                        open={showNextStatus}
-                        onClose={() => setShowNextStatus(false)}
+                        open={openModal === 'nextStatus'}
+                        onClose={() => { setOpenModal(null); setNextStatusResultados([]); setNextStatusAtendente(null); setNextStatusTestemunhas([]); setNextStatusObservacao(''); }}
                         size="lg"
                     >
-                        <h:form id="formproximoStatus">
-                            <p:growl autoUpdate="true" showDetail="true" sticky="true" life="50000" edisplay="true" globalOnly="true"
-                                     escape="false"/>
+                        <div className="next-status-wizard">
+                            <div className="wizard-header">
+                                <p><strong>Compromisso:</strong> {selectedCompromisso.descricao}</p>
+                                <p><strong>Status Atual:</strong> {selectedCompromisso.statusCompromisso?.descricao}</p>
+                                <p><strong>Próximo Status:</strong> {selectedCompromisso.statusCompromisso?.proxStatusCompromisso?.descricao}</p>
+                                {selectedCompromisso.statusCompromisso?.alguem && <p className="requires-attendant">Este status requer atendente e testemunhas.</p>}
+                                {selectedCompromisso.statusCompromisso?.statusModulos && selectedCompromisso.statusCompromisso.statusModulos.length > 0 && <p className="requires-resultados">Selecione os resultados do atendimento.</p>}
+                            </div>
 
-                            <p:outputLabel value="#{msg['confirm.compromisso.compromisso']} #{compromissoController.entity.id} ?"
-                                           rendered="#{compromissoController.entity.statusCompromisso.alguem eq true}"/>
-                            <br/>
-                            <p:outputLabel
-                                    value="#{msg['alterstatus.compromisso.compromisso']} #{compromissoController.entity.id} ?"
-                                    rendered="#{compromissoController.entity.statusCompromisso.alguem eq false}"/>
+                            <div className="wizard-section">
+                                <h4>Resultados do Atendimento</h4>
+                                <div className="resultados-manager">
+                                    <div className="add-resultado">
+                                        <div className="autocomplete-wrapper">
+                                            <AutoComplete
+                                                value={formData.resultadoSelecionado || null}
+                                                onChange={(opt) => setFormData(prev => ({...prev, resultadoSelecionado: opt}))}
+                                                fetchOptions={async (query) => {
+                                                    if (!query) return [];
+                                                    return nextStatusResultados
+                                                        .filter(r => r.descricao.toLowerCase().includes(query.toLowerCase()))
+                                                        .map(r => ({id: r.id, label: r.descricao}));
+                                                }}
+                                                fetchById={async (id) => {
+                                                    const r = nextStatusResultados.find(r => r.id === id);
+                                                    return r ? {id: r.id, label: r.descricao} : null;
+                                                }}
+                                                minChars={1}
+                                                placeholder="Adicionar resultado..."
+                                            />
+                                        </div>
+                                    </div>
+                                    <ul className="resultados-list">
+                                        {nextStatusResultados.map((r, i) => (
+                                            <li key={i}>
+                                                {r.descricao}
+                                                <button type="button" className="btn-remove" onClick={() => setNextStatusResultados(prev => prev.filter((_, idx) => idx !== i))}>×</button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
 
-                            <p:separator style="width: 99%"
-                                         rendered="#{compromissoController.entity.statusCompromisso.alguem eq true}"/>
+                            {selectedCompromisso.statusCompromisso?.alguem && (
+                                <div className="wizard-section">
+                                    <h4>Atendente</h4>
+                                    <div className="autocomplete-wrapper">
+                                        <AutoComplete
+                                            value={nextStatusAtendente ? {id: nextStatusAtendente.id, label: nextStatusAtendente.login} : null}
+                                            onChange={(opt) => setNextStatusAtendente(opt ? {id: opt.id, login: opt.label, nome: ''} : null)}
+                                            fetchOptions={async (query) => {
+                                                if (!query) return usuariosOptions.slice(0, 20).map(u => ({id: u.id, label: u.login}));
+                                                return usuariosOptions
+                                                    .filter(u => u.login.toLowerCase().includes(query.toLowerCase()) || u.nome.toLowerCase().includes(query.toLowerCase()))
+                                                    .slice(0, 20)
+                                                    .map(u => ({id: u.id, label: u.login}));
+                                            }}
+                                            fetchById={async (id) => {
+                                                const u = usuariosOptions.find(u => u.id === id);
+                                                return u ? {id: u.id, label: u.login} : null;
+                                            }}
+                                            minChars={1}
+                                            placeholder="Selecionar atendente..."
+                                        />
+                                    </div>
+                                </div>
+                            )}
 
-                            <h:panelGrid columns="5">
-                                <c:forEach var="imageName" items="#{compromissoController.entity.statusCompromisso.statusModulos}">
-                                    <p:commandButton value="#{imageName.modulo.rotulo}" icon="#{imageName.modulo.icone}"
-                                     ajax="false"
-                                     action="#{compromissoController.acessoUrl(imageName.modulo.outcome)}"
-                                     styleClass="#{imageName.cor}"/>
+                            {selectedCompromisso.statusCompromisso?.alguem && (
+                                <div className="wizard-section">
+                                    <h4>Testemunhas</h4>
+                                    <div className="testemunhas-manager">
+                                        <div className="add-resultado">
+                                            <div className="autocomplete-wrapper">
+                                                <AutoComplete
+                                                    value={null}
+                                                    onChange={(opt) => {
+                                                        if (opt) {
+                                                            setNextStatusTestemunhas(prev => [...prev, {id: opt.id, login: opt.label, nome: ''}]);
+                                                        }
+                                                    }}
+                                                    fetchOptions={async (query) => {
+                                                        if (!query) return usuariosOptions.slice(0, 20).map(u => ({id: u.id, label: u.login}));
+                                                        return usuariosOptions
+                                                            .filter(u => u.login.toLowerCase().includes(query.toLowerCase()) || u.nome.toLowerCase().includes(query.toLowerCase()))
+                                                            .slice(0, 20)
+                                                            .map(u => ({id: u.id, label: u.login}));
+                                                    }}
+                                                    fetchById={async (id) => {
+                                                        const u = usuariosOptions.find(u => u.id === id);
+                                                        return u ? {id: u.id, label: u.login} : null;
+                                                    }}
+                                                    minChars={1}
+                                                    placeholder="Adicionar testemunha..."
+                                                />
+                                            </div>
+                                        </div>
+                                        <ul className="testemunhas-list">
+                                            {nextStatusTestemunhas.map((t, i) => (
+                                                <li key={i}>
+                                                    {t.login}
+                                                    <button type="button" className="btn-remove" onClick={() => setNextStatusTestemunhas(prev => prev.filter((_, idx) => idx !== i))}>×</button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            )}
 
-                                </c:forEach>
-                            </h:panelGrid>
-                            <br/>
-                            <p:outputLabel for="atendente" value="#{compromissoController.entity.statusCompromisso.descricaoPessoa}"
-                                           style="margin-right: 2px"
-                                           rendered="#{compromissoController.entity.statusCompromisso.alguem eq true}"/>
-                            <p:autoComplete id="atendente" required="true"
-                                            rendered="#{compromissoController.entity.statusCompromisso.alguem eq true}"
-                                            scrollHeight="300" forceSelection="true"
-                                            completeMethod="#{compromissoController.autoCompleteComUnidadeDiaSemana}"
-                                            value="#{compromissoController.entity.atendente}" var="entity"
-                                            itemValue="#{entity}" itemLabel="#{entity.login}" converter="#{usuarioConverter}"
-                                            dropdown="true"/>
-                            <br/><br/><br/>
+                            <div className="wizard-section">
+                                <h4>Observação</h4>
+                                <textarea
+                                    value={nextStatusObservacao}
+                                    onChange={(e) => setNextStatusObservacao(e.target.value)}
+                                    rows={3}
+                                    placeholder="Observações sobre o atendimento..."
+                                />
+                            </div>
 
-                            <p:dataList value="#{compromissoController.entity.compromissoStatusUsuarios}" var="comStaUsu"
-                                        rendered="#{compromissoController.entity.statusCompromisso.alguem eq true and compromissoController.entity.compromissoStatusUsuarios.size() ne 0}"
-                                        type="ordered">
-                                <f:facet name="header">
-                                    Testemunhas
-                                </f:facet>
-                                <p:autoComplete required="true" scrollHeight="300" forceSelection="true"
-                                                completeMethod="#{compromissoController.autoCompleteComUnidadeDiaSemana}"
-                                                value="#{comStaUsu.usuario}" var="entity" dropdown="true"
-                                                itemValue="#{entity}" itemLabel="#{entity.login}" converter="#{usuario}"/>
-                            </p:dataList>
-
-                            <br/>
-                            <br/>
-                            <br/>
-
-                            <p:panelGrid columns="1" styleClass="div_form" style="width: 30%;"
-                                         rendered="#{compromissoController.apresentarLancamento(compromissoController.entity.statusCompromisso)}">
-                                <f:facet name="header">
-                                    <p:outputLabel/>
-                                </f:facet>
-
-                                <h:panelGrid columns="2" styleClass="table_form">
-                                    <p:outputLabel for="inputObservacao" value="#{msg['entity.observacao']}"/>
-                                    <p:inputTextarea id="inputObservacao" value="#{compromissoController.entity.observacao}"
-                                     rows="3" cols="65"/>
-                                </h:panelGrid>
-
-                                <h:panelGrid id="resultados_fields" columns="3" styleClass="table_form">
-                                    <p:outputLabel value="#{msg['entity.resultado']}"/>
-                                    <p:selectOneMenu id="inputResultado" styleClass="inputLarge"
-                                     value="#{compromissoController.resultadoSelecionado}"
-                                     converter="#{resultadoConverter}">
-                                        <f:selectItem itemLabel="Selecione" itemValue=""/>
-                                        <f:selectItems var="entity" itemValue="#{entity}" itemLabel="#{entity.descricao}"
-                                                     value="#{compromissoController.listaResultadosDisponiveis}"/>
-                                    </p:selectOneMenu>
-
-                                    <p:commandButton id="btn_add" icon="ui-icon-plus"
-                                     update="resultadosPanel resultados_fields :mainForm"
-                                     process="resultados_fields" action="#{compromissoController.reinit}">
-                                        <p:collector value="#{compromissoController.resultadoSelecionado}"
-                                     addTo="#{compromissoController.listaResultados}" unique="true"/>
-                                    </p:commandButton>
-                                </h:panelGrid>
-
-                                <p:outputPanel id="resultadosPanel">
-                                    <p:dataTable value="#{compromissoController.listaResultados}" var="entity"
-                                 emptyMessage="#{msg['global.nenhumRegistroSelecionado']}">
-
-                                        <ui:include src="#{resultadoController.colunas}"/>
-
-                                        <p:column style="width:40px;">
-                                            <p:commandButton id="btn_rem" immediate="true" styleClass="btnred" icon="ui-icon-minus"
-                                             update="inputResultados:resultadosPanel"
-                                             actionListener="#{compromissoController.remove(entity)}"
-                                             process="inputResultados:resultadosPanel" ajax="false"/>
-                                        </p:column>
-                                    </p:dataTable>
-                                </p:outputPanel>
-
-                                <f:facet name="footer">
-                                    <p:commandButton
-                                        rendered="#{compromissoController.venda() eq false and not empty compromissoController.listaResultados}"
-                                        id="finalizar" icon="ui-icon-check"
-                                        action="#{compromissoController.finalizarCompromisso}"
-                                        value="#{msg['button.finalizarAtendimento']}" ajax="false"/>
-                                    <p:commandButton
-                                        rendered="#{compromissoController.venda() eq false and not empty compromissoController.listaResultados}"
-                                        icon="ui-icon-arrowthick-1-w" value="#{msg['button.back']}" ajax="false"
-                                        action="/default"/>
-                                </f:facet>
-                            </p:panelGrid>
-                        </h:form>
+                            <div className="modal-actions">
+                                <button type="button" className="btn-form-back" onClick={() => { setOpenModal(null); setNextStatusResultados([]); setNextStatusAtendente(null); setNextStatusTestemunhas([]); setNextStatusObservacao(''); }}>Cancelar</button>
+                                <button type="button" className="btn-form-save" onClick={() => {
+                                    nextStatusMutation.mutate({
+                                        compromissoId: selectedCompromisso.id,
+                                        observacao: nextStatusObservacao,
+                                        resultadoIds: nextStatusResultados.map(r => r.id),
+                                        atendenteId: nextStatusAtendente?.id,
+                                        testemunhaIds: nextStatusTestemunhas.map(t => t.id),
+                                    });
+                                }} disabled={nextStatusMutation.isPending}>
+                                    Confirmar
+                                </button>
+                            </div>
+                        </div>
                     </Modal>
                 )}
 

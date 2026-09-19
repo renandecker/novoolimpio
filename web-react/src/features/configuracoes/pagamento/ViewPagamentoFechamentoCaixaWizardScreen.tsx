@@ -175,127 +175,72 @@ function fetchAutoComplete(path: string, valueKey: string, labelKey: string, all
 
 
 interface FechamentoCaixaData {
-
     // Step 1 - Configuração
-
     usuarioId: string;
-
     unidadeId: string;
-
     impressoraId: string;
-
     fundoCaixa: string;
-
     caixaAberto: boolean;
-
     caixaId: number | null;
 
-
-
     // Step 2 - Movimentação
-
     movSubTab: 'parcela' | 'extra' | 'sangria';
 
-
-
     // Parcela
-
+    numeroLancamento: string;
+    alunoId: string;
+    parcelasAluno: Array<any>;
     parcelaId: string;
-
     valorParcela: string;
-
     dataVencimento: string;
-
     parcelaSequencia: string;
-
     percentualDesconto: string;
-
     percentualMulta: string;
-
     percentualJuros: string;
-
     diasTolerancia: string;
-
     formasPagamento: FormaPagamentoLinha[];
-
     calculo: ParcelaCalculo | null;
 
-
-
     // Extra
-
     historico: string;
-
     valorExtra: string;
-
     movimentoId: string;
-
     tipoPagamentoExtra: TipoPagamento;
 
-
-
     // Sangria
-
     valorSangria: string;
 
-
-
     // Step 3 - Fechamento
-
     totais: FechamentoCaixaTotais | null;
-
 }
 
-
-
 const initialData: FechamentoCaixaData = {
-
     usuarioId: '',
-
     unidadeId: '',
-
     impressoraId: '',
-
     fundoCaixa: '',
-
     caixaAberto: false,
-
     caixaId: null,
-
     movSubTab: 'parcela',
-
+    numeroLancamento: '',
+    alunoId: '',
+    parcelasAluno: [],
     parcelaId: '',
-
     valorParcela: '',
-
     dataVencimento: '',
-
     parcelaSequencia: '1',
-
     percentualDesconto: '0',
-
     percentualMulta: '2',
-
     percentualJuros: '1',
-
     diasTolerancia: '0',
-
     formasPagamento: [{tipoPagamento: 'DINHEIRO', valor: '', documento: ''}],
-
     calculo: null,
-
     historico: '',
-
     valorExtra: '',
-
     movimentoId: '',
-
     tipoPagamentoExtra: 'DINHEIRO',
-
     valorSangria: '',
-
     totais: null,
-
 };
 
 
@@ -324,9 +269,89 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
     // AutoComplete fetch functions
 
-    const fetchImpressora = fetchAutoComplete('/api/view/impressora/listImpressora', 'id', 'descricao', true);
+    const fetchAlunoPagamento = fetchAutoComplete('/api/financeiro/caixa/auto-complete-aluno-pagamento-pendente', 'id', 'nome');
+    const fetchAlunoPagamentoById = async (id: number) => {
+        const {data} = await api.get(`/api/view/pessoa/listPessoaFisica/${id}`);
+        return {id: data.id, label: data.nome ?? `#${data.id}`};
+    };
 
-    const fetchParcela = fetchAutoComplete('/api/financeiro/parcela/buscar', 'id', 'descricao');
+    const buscarNumeroParcela = async () => {
+        if (!data.numeroLancamento) return;
+        setLoading(true);
+        setErro(null);
+        try {
+            const {data: parc} = await api.get(`/api/financeiro/caixa/buscar-numero-parcela`, {
+                params: {numeroLancamento: Number(data.numeroLancamento), caixaId: caixa?.id, caixaUnico: false}
+            });
+            if (parc) {
+                updateFields({
+                    parcelaId: String(parc.id || data.numeroLancamento),
+                    valorParcela: String(parc.valor || ''),
+                    dataVencimento: parc.dataVencimento ? parc.dataVencimento.substring(0, 10) : '',
+                    parcelaSequencia: String(parc.parcelaSequencia ?? 1),
+                    percentualDesconto: String(parc.desconto ?? 0),
+                    percentualMulta: String(parc.multa ?? 2),
+                    percentualJuros: String(parc.juros ?? 1),
+                    diasTolerancia: String(parc.diasTolerancia ?? 0),
+                });
+                await calcularValoresFor(parc.valor, parc.dataVencimento, parc.parcelaSequencia, parc.desconto, parc.multa, parc.juros, parc.diasTolerancia);
+            }
+        } catch {
+            setErro('Parcela não encontrada.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const buscarParcelasAluno = async () => {
+        if (!data.alunoId) return;
+        setLoading(true);
+        setErro(null);
+        try {
+            const {data: list} = await api.get(`/api/financeiro/caixa/buscar-parcelas-aluno`, {
+                params: {alunoId: Number(data.alunoId)}
+            });
+            updateField('parcelasAluno', list || []);
+        } catch {
+            setErro('Erro ao buscar parcelas do aluno.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const selecionarParcelaLista = async (parc: any) => {
+        updateFields({
+            parcelaId: String(parc.id),
+            valorParcela: String(parc.valor || ''),
+            dataVencimento: parc.dataVencimento ? parc.dataVencimento.substring(0, 10) : '',
+            parcelaSequencia: String(parc.parcelaSequencia ?? 1),
+            percentualDesconto: String(parc.desconto ?? 0),
+            percentualMulta: String(parc.multa ?? 2),
+            percentualJuros: String(parc.juros ?? 1),
+            diasTolerancia: String(parc.diasTolerancia ?? 0),
+        });
+        await calcularValoresFor(parc.valor, parc.dataVencimento, parc.parcelaSequencia, parc.desconto, parc.multa, parc.juros, parc.diasTolerancia);
+    };
+
+    const calcularValoresFor = async (val: any, venc: any, seq: any, desc: any, multa: any, juros: any, dias: any) => {
+        try {
+            const {data: calc} = await api.post<ParcelaCalculo>('/api/financeiro/caixa/calcular-valores-parcela', {
+                valor: Number(val || 0),
+                dataVencimento: venc || null,
+                parcelaSequencia: Number(seq || 0),
+                percentualDesconto: Number(desc || 0),
+                percentualMulta: Number(multa || 0),
+                percentualJuros: Number(juros || 0),
+                diasToleranciaMulta: Number(dias || 0),
+                feriadoNoDiaAnteriorVencimento: false,
+            });
+            updateField('calculo', calc);
+        } catch {
+            setErro('Não foi possível calcular os valores da parcela.');
+        }
+    };
+
+    const fetchParcela = fetchAutoComplete('/api/financeiro/caixa/buscar-parcelas', 'id', 'descricao');
 
     const fetchMovimento = fetchAutoComplete('/api/view/movimento/listMovimento', 'id', 'descricaocompleta');
 
@@ -349,10 +374,14 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
     const fetchParcelaById = async (id: number) => {
 
-        const {data} = await api.get(`/api/financeiro/parcela/${id}`);
+        const {data} = await api.get<Array<{id: number; descricao: string}>>('/api/financeiro/caixa/buscar-parcelas', {
+            params: {q: String(id), limit: 1},
+        });
 
-        return {id: data.id, label: data.descricao ?? data.description ?? `#${data.id}`};
-
+        if (data && data.length > 0) {
+            return {id: data[0].id, label: data[0].descricao};
+        }
+        return {id, label: `#${id}`};
     };
 
     const fetchMovimentoById = async (id: number) => {
@@ -408,16 +437,43 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
     }, [session?.username]);
 
 
+    // Carrega automaticamente a primeira unidade disponível do usuário
+    // (comportamento similar ao CaixaController.java original)
+    useEffect(() => {
+        const usuarioId = data.usuarioId;
+        if (!usuarioId) return;
+        let cancelled = false;
+        (async () => {
+            try {
+                const {data: unidades} = await api.get<Array<{id: number}>>('/api/basico/usuario/buscar-unidades-disponiveis', {
+                    params: {usuarioId: Number(usuarioId)},
+                });
+                if (!cancelled && unidades && unidades.length > 0) {
+                    // Se já não há unidade selecionada, seleciona a primeira disponível
+                    if (!data.unidadeId) {
+                        updateField('unidadeId', String(unidades[0].id));
+                    }
+                }
+            } catch (err) {
+                console.warn('Erro ao carregar unidades disponíveis do usuário:', err);
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [data.usuarioId]);
+
+
 
     // Load caixa when usuario/unidade change
 
     useEffect(() => {
 
-        const usuarioId = data.usuarioId;
+        const usuarioId = data.usuarioId ? Number(data.usuarioId) : null;
 
-        const unidadeId = data.unidadeId;
+        const unidadeId = data.unidadeId ? Number(data.unidadeId) : null;
 
-        if (!usuarioId || !unidadeId) return;
+        if (!usuarioId || isNaN(usuarioId) || !unidadeId || isNaN(unidadeId)) return;
 
         let cancelled = false;
 
@@ -1226,163 +1282,209 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
 
 
-                                    {data.movSubTab === 'parcela' && (
+                                     {data.movSubTab === 'parcela' && (
+
+                                         <div className="sub-content">
+
+                                             <div className="field-row">
+
+                                                 <div className="field-group" style={{display: 'flex', alignItems: 'flex-end', gap: '8px'}}>
+                                                     <div style={{flex: 1}}>
+                                                         <label>Nº Parcela</label>
+                                                         <input
+                                                             type="number"
+                                                             placeholder="Nº Parcela..."
+                                                             value={data.numeroLancamento}
+                                                             onChange={(e) => updateField('numeroLancamento', e.target.value)}
+                                                         />
+                                                     </div>
+                                                     <button className="btn-secondary" onClick={buscarNumeroParcela} title="Buscar Parcela" style={{padding: '10px 14px'}}>
+                                                         🔍
+                                                     </button>
+                                                 </div>
+
+                                                 <div className="field-group" style={{display: 'flex', alignItems: 'flex-end', gap: '8px'}}>
+                                                     <div style={{flex: 1}}>
+                                                         <AutoComplete
+                                                             id="aluno"
+                                                             label="Buscar Aluno"
+                                                             placeholder="Nome ou CPF do aluno..."
+                                                             value={data.alunoId ? {
+                                                                 id: Number(data.alunoId),
+                                                                 label: `Aluno #${data.alunoId}`
+                                                             } : null}
+                                                             onChange={(opt) => updateField('alunoId', opt ? String(opt.id) : '')}
+                                                             fetchOptions={fetchAlunoPagamento}
+                                                             fetchById={fetchAlunoPagamentoById}
+                                                             minChars={2}
+                                                         />
+                                                     </div>
+                                                     <button className="btn-secondary" onClick={buscarParcelasAluno} title="Buscar Parcelas do Aluno" style={{padding: '10px 14px'}}>
+                                                         🔍
+                                                     </button>
+                                                 </div>
 
-                                        <div className="sub-content">
+                                             </div>
 
-                                            <div className="field-row">
+                                             {data.parcelasAluno && data.parcelasAluno.length > 0 && (
+                                                 <div style={{margin: '12px 0'}}>
+                                                     <h3>Parcelas do Aluno</h3>
+                                                     <table className="calculo-table" style={{width: '100%'}}>
+                                                         <thead>
+                                                             <tr>
+                                                                 <th>Ação</th>
+                                                                 <th>Nº</th>
+                                                                 <th>Vencimento</th>
+                                                                 <th>Valor</th>
+                                                                 <th>Situação</th>
+                                                             </tr>
+                                                         </thead>
+                                                         <tbody>
+                                                             {data.parcelasAluno.map((p: any, idx: number) => (
+                                                                 <tr key={idx}>
+                                                                     <td>
+                                                                         <button className="btn-secondary" onClick={() => selecionarParcelaLista(p)} style={{padding: '4px 8px'}}>
+                                                                             Selecionar
+                                                                         </button>
+                                                                     </td>
+                                                                     <td>{p.parcelaSequencia}</td>
+                                                                     <td>{p.dataVencimento ? p.dataVencimento.substring(0, 10) : ''}</td>
+                                                                     <td>{money(p.valor)}</td>
+                                                                     <td>{p.situacao || 'Aberta'}</td>
+                                                                 </tr>
+                                                             ))}
+                                                         </tbody>
+                                                     </table>
+                                                 </div>
+                                             )}
 
-                                                <AutoComplete
+                                             <div className="field-row">
 
-                                                    id="parcela"
+                                                 <div className="field-group">
 
-                                                    label="Nº Parcela / Buscar Aluno *"
+                                                     <label>Valor da Parcela</label>
 
-                                                    placeholder="Número da parcela ou nome do aluno..."
+                                                     <input
 
-                                                    value={data.parcelaId ? {
+                                                         type="number"
 
-                                                        id: Number(data.parcelaId),
+                                                         step="0.01"
 
-                                                        label: `Parcela #${data.parcelaId}`
+                                                         value={data.valorParcela}
 
-                                                    } : null}
+                                                         disabled
 
-                                                    onChange={(opt) => updateField('parcelaId', opt ? String(opt.id) : '')}
+                                                     />
 
-                                                    fetchOptions={fetchParcela}
+                                                 </div>
 
-                                                    fetchById={fetchParcelaById}
+                                                 <div className="field-group">
 
-                                                    minChars={2}
+                                                     <label>Data Vencimento</label>
 
-                                                />
+                                                     <input
 
-                                                <div className="field-group">
+                                                         type="date"
 
-                                                    <label>Valor da Parcela</label>
+                                                         value={data.dataVencimento}
 
-                                                    <input
+                                                         disabled
 
-                                                        type="number"
+                                                     />
 
-                                                        step="0.01"
+                                                 </div>
 
-                                                        value={data.valorParcela}
+                                                 <div className="field-group">
 
-                                                        onChange={(e) => updateField('valorParcela', e.target.value)}
+                                                     <label>Nº Parcela (0 = entrada)</label>
 
-                                                    />
+                                                     <input
 
-                                                </div>
+                                                         type="number"
 
-                                                <div className="field-group">
+                                                         value={data.parcelaSequencia}
 
-                                                    <label>Data Vencimento</label>
+                                                         disabled
 
-                                                    <input
+                                                     />
 
-                                                        type="date"
+                                                 </div>
 
-                                                        value={data.dataVencimento}
+                                             </div>
 
-                                                        onChange={(e) => updateField('dataVencimento', e.target.value)}
 
-                                                    />
 
-                                                </div>
+                                             <div className="field-row">
 
-                                                <div className="field-group">
+                                                 <div className="field-group">
 
-                                                    <label>Nº Parcela (0 = entrada)</label>
+                                                     <label>% Desconto</label>
 
-                                                    <input
+                                                     <input
 
-                                                        type="number"
+                                                         type="number"
 
-                                                        value={data.parcelaSequencia}
+                                                         step="0.01"
 
-                                                        onChange={(e) => updateField('parcelaSequencia', e.target.value)}
+                                                         value={data.percentualDesconto}
 
-                                                    />
+                                                         disabled
 
-                                                </div>
+                                                     />
 
-                                            </div>
+                                                 </div>
 
+                                                 <div className="field-group">
 
+                                                     <label>% Multa</label>
 
-                                            <div className="field-row">
+                                                     <input
 
-                                                <div className="field-group">
+                                                         type="number"
 
-                                                    <label>% Desconto</label>
+                                                         step="0.01"
 
-                                                    <input
+                                                         value={data.percentualMulta}
 
-                                                        type="number"
+                                                         disabled
 
-                                                        step="0.01"
+                                                     />
 
-                                                        value={data.percentualDesconto}
+                                                 </div>
 
-                                                        onChange={(e) => updateField('percentualDesconto', e.target.value)}
+                                                 <div className="field-group">
 
-                                                    />
+                                                     <label>% Juros a.m.</label>
 
-                                                </div>
+                                                     <input
 
-                                                <div className="field-group">
+                                                         type="number"
 
-                                                    <label>% Multa</label>
+                                                         step="0.01"
 
-                                                    <input
+                                                         value={data.percentualJuros}
 
-                                                        type="number"
+                                                         disabled
 
-                                                        step="0.01"
+                                                     />
 
-                                                        value={data.percentualMulta}
+                                                 </div>
 
-                                                        onChange={(e) => updateField('percentualMulta', e.target.value)}
+                                                 <div className="field-group">
 
-                                                    />
+                                                     <label>Dias tolerância</label>
 
-                                                </div>
+                                                     <input
 
-                                                <div className="field-group">
+                                                         type="number"
 
-                                                    <label>% Juros a.m.</label>
+                                                         value={data.diasTolerancia}
 
-                                                    <input
+                                                         disabled
 
-                                                        type="number"
+                                                     />
 
-                                                        step="0.01"
-
-                                                        value={data.percentualJuros}
-
-                                                        onChange={(e) => updateField('percentualJuros', e.target.value)}
-
-                                                    />
-
-                                                </div>
-
-                                                <div className="field-group">
-
-                                                    <label>Dias tolerância</label>
-
-                                                    <input
-
-                                                        type="number"
-
-                                                        value={data.diasTolerancia}
-
-                                                        onChange={(e) => updateField('diasTolerancia', e.target.value)}
-
-                                                    />
-
-                                                </div>
+                                                 </div>
 
                                             </div>
 

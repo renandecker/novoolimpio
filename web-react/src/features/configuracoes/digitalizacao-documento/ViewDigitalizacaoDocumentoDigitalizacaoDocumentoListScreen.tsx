@@ -6,7 +6,7 @@ import {MasterDetail} from '../../../shared/components/MasterDetail';
 import {Tabs} from '../../../shared/components/Tabs';
 import {Modal} from '../../../shared/components/Modal';
 import {AutoComplete} from '../../../shared/components/AutoComplete';
-import {Base64FileUpload} from '../../../shared/components/Base64FileUpload';
+import {FileUploadBase} from '../../../shared/components/FileUploadBase';
 import {api} from '../../../shared/services/api';
 import type {ApiItem} from '../../../shared/types/types';
 import {TURMA_SOURCE, TURMA_COLUMNS, TURMA_SEARCH} from '../../../shared/services/masterDetailSources';
@@ -332,10 +332,22 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
       >
         <div>
           <p>O arquivo só pode ser no formato PNG com o código do contrato, caso seja mais de uma página será ('contrato'-página)</p>
-          <Base64FileUpload
-            value={uploadArquivoFile}
-            onChange={handleUploadArquivo}
+          <FileUploadBase
+            files={uploadArquivoFile ? [{name: 'arquivo', size: 0}] as any : []}
+            onFilesChange={async (newFiles) => {
+              if (newFiles.length > 0) {
+                const file = newFiles[0];
+                const reader = new FileReader();
+                reader.onload = () => handleUploadArquivo(String(reader.result));
+                reader.readAsDataURL(file);
+              } else {
+                setUploadArquivoFile('');
+              }
+            }}
             accept=".pdf,.jpg,.jpeg,.png"
+            allowsMultiple={false}
+            maxSizeMb={10}
+            showPreview={true}
           />
           {selectedContrato.local && (
             <div style={{marginTop: '1rem', textAlign: 'center'}}>
@@ -372,10 +384,22 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                 <p>'Código Turma'-'Sequência Chamada Assinada'-'Código Chamada Assinada'</p>
                 {!selectedChamada.local && (
                   <>
-                    <Base64FileUpload
-                      value={inserirChamadaFile}
-                      onChange={handleInserirChamada}
+                    <FileUploadBase
+                      files={inserirChamadaFile ? [{name: 'arquivo', size: 0}] as any : []}
+                      onFilesChange={async (newFiles) => {
+                        if (newFiles.length > 0) {
+                          const file = newFiles[0];
+                          const reader = new FileReader();
+                          reader.onload = () => handleInserirChamada(String(reader.result));
+                          reader.readAsDataURL(file);
+                        } else {
+                          setInserirChamadaFile('');
+                        }
+                      }}
                       accept=".pdf,.jpg,.jpeg,.png"
+                      allowsMultiple={false}
+                      maxSizeMb={10}
+                      showPreview={true}
                     />
                     <button
                       type="button"
@@ -679,10 +703,22 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                             />
                           </label>
                         </div>
-                        <Base64FileUpload
-                          value={documentoAlunoFile}
-                          onChange={setDocumentoAlunoFile}
+                        <FileUploadBase
+                          files={documentoAlunoFile ? [{name: 'arquivo', size: 0}] as any : []}
+                          onFilesChange={async (newFiles) => {
+                            if (newFiles.length > 0) {
+                              const file = newFiles[0];
+                              const reader = new FileReader();
+                              reader.onload = () => setDocumentoAlunoFile(String(reader.result));
+                              reader.readAsDataURL(file);
+                            } else {
+                              setDocumentoAlunoFile('');
+                            }
+                          }}
                           accept=".pdf,.jpg,.jpeg,.png"
+                          allowsMultiple={false}
+                          maxSizeMb={10}
+                          showPreview={false}
                         />
                         <button
                           type="button"

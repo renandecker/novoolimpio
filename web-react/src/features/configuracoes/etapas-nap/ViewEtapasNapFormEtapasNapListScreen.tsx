@@ -6,6 +6,8 @@ import {PermissionGate} from '../../../shared/services/permissions';
 
 import {api} from '../../../shared/services/api';
 
+import {BooleanField} from '../../../shared/components/BooleanField';
+
 
 
 const API = '/api/educacao/etapas-nap';
@@ -323,26 +325,17 @@ export default function ViewEtapasNapFormEtapasNapListScreen() {
 
                         <label className="form-field">
                             <span className="form-label">Todos usuários</span>
-                            <label style={{display: 'flex', alignItems: 'center', gap: 8}}>
-                                <input type="checkbox" checked={usuario} onChange={(e) => setUsuario(e.target.checked)}/>
-                                {usuario ? 'Sim' : 'Não'}
-                            </label>
+                            <BooleanField value={usuario} onChange={setUsuario} />
                         </label>
 
                         <label className="form-field">
                             <span className="form-label">Todos perfis</span>
-                            <label style={{display: 'flex', alignItems: 'center', gap: 8}}>
-                                <input type="checkbox" checked={perfil} onChange={(e) => setPerfil(e.target.checked)}/>
-                                {perfil ? 'Sim' : 'Não'}
-                            </label>
+                            <BooleanField value={perfil} onChange={setPerfil} />
                         </label>
 
                         <label className="form-field">
                             <span className="form-label">Customizado</span>
-                            <label style={{display: 'flex', alignItems: 'center', gap: 8}}>
-                                <input type="checkbox" checked={customizado} onChange={(e) => setCustomizado(e.target.checked)}/>
-                                {customizado ? 'Sim' : 'Não'}
-                            </label>
+                            <BooleanField value={customizado} onChange={setCustomizado} />
                         </label>
 
                         {customizado && (

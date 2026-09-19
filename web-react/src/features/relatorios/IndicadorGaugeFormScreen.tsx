@@ -67,7 +67,7 @@ export default function IndicadorGaugeFormScreen() {
         });
       }).catch(() => {
         alert('Erro ao carregar indicador');
-        navigate('/view/relatorios/indicador-gauge/list');
+        navigate('/view/relatorios/listIndicadorGauge');
       });
     }
   }, [id, isEditing, loadIndicador, navigate]);
@@ -130,7 +130,7 @@ export default function IndicadorGaugeFormScreen() {
         await saveIndicador(payload);
       }
       alert(isEditing ? 'Indicador atualizado com sucesso!' : 'Indicador criado com sucesso!');
-      navigate('/view/relatorios/indicador-gauge/list');
+      navigate('/view/relatorios/listIndicadorGauge');
     } catch (error) {
       console.error('Erro ao salvar:', error);
       alert('Erro ao salvar indicador');
@@ -368,7 +368,7 @@ export default function IndicadorGaugeFormScreen() {
       ]}
       initialValues={entity}
       onSubmit={(vals) => setEntity({ ...entity, ...vals })}
-      onCancel={() => navigate('/view/relatorios/indicador-gauge/list')}
+      onCancel={() => navigate('/view/relatorios/listIndicadorGauge')}
       submitLabel="Salvar"
       cancelLabel="Voltar"
       submitDisabled={salvando}

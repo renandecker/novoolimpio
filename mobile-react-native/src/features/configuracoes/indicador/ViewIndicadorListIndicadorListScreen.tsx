@@ -1,6 +1,6 @@
 import React from 'react';
-import {ModuleList} from '../ModuleListScreen';
+import ViewRelatoriosListIndicadorGaugeListScreen from '../../relatorios/ViewRelatoriosListIndicadorGaugeListScreen';
 
 export default function ViewIndicadorListIndicadorListScreen() {
-    return <ModuleList path="/api/view/indicador/listIndicador"/>;
+    return <ViewRelatoriosListIndicadorGaugeListScreen />;
 }

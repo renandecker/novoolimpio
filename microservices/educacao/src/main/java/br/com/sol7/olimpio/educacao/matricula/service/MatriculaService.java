@@ -1,13 +1,17 @@
 package br.com.sol7.olimpio.educacao.matricula;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
+import br.com.sol7.olimpio.educacao.contrato.ContratoRepository;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.TupleHelper;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
@@ -18,6 +22,9 @@ public class MatriculaService {
 
     @Inject
     MatriculaRepository repository;
+
+    @Inject
+    ContratoRepository contratoRepository;
 
     public Uni<List<MatriculaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -309,6 +316,78 @@ public class MatriculaService {
         // Obs: condicao removida (depende de outro microservico): m.oferecimentoComponenteCurricular.status <> 'CANCELADA'
         // Obs: condicao removida (depende de outro microservico): m.contrato.ativo = false
         return repository.find("contratoId = ?1 and dataCancelamento is not null", contratoId).list().map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+
+    // Migrado de MatriculaController.verificaAluno (legado). Retorna os paineis informativos
+    // exibidos ao selecionar um aluno na tela de matricula.
+    public Uni<InfoPessoaFisicaResponse> calcularInfoPessoaFisica(Long pessoaId) {
+        return repository.buscarInfoPessoaFisica(pessoaId).chain(rows -> {
+            Tuple row = rows == null || rows.isEmpty() ? null : rows.get(0);
+            String cpf = TupleHelper.getString(row, "cpf");
+            LocalDate dataNascimento = parseLocalDate(TupleHelper.getString(row, "data_nascimento"));
+            LocalDate dataAlteracao = parseLocalDate(TupleHelper.getString(row, "data_alteracao"));
+
+            Uni<Boolean> temContratoUni = contratoRepository.validaAluno(pessoaId)
+                    .map(list -> list != null && !list.isEmpty());
+            Uni<Boolean> cpfAntigoUni = cpf == null || cpf.isBlank()
+                    ? Uni.createFrom().item(false)
+                    : repository.contarCpfAlunoAntigo(cpf).map(result -> contarTotal(result) > 0);
+            Uni<Boolean> financeiroUni = repository.contarParcelasAtrasadas(pessoaId)
+                    .map(result -> contarTotal(result) > 0);
+            Uni<Integer> diasUni = repository.buscarValorConfig("DIAS_ATUALIZAR_ALUNO")
+                    .map(result -> parseDias(result == null || result.isEmpty() ? null : result.get(0)));
+
+            return Uni.combine().all().unis(temContratoUni, cpfAntigoUni, financeiroUni, diasUni).asTuple()
+                    .map(combinado -> {
+                        boolean aluno = Boolean.TRUE.equals(combinado.getItem1())
+                                || Boolean.TRUE.equals(combinado.getItem2());
+                        boolean financeiro = Boolean.TRUE.equals(combinado.getItem3());
+                        // Menor de idade quando ainda nao completou 18 anos.
+                        boolean deMenor = dataNascimento != null
+                                && dataNascimento.plusYears(18).isAfter(LocalDate.now());
+                        // Precisa atualizar quando nunca foi alterado ou esta desatualizado ha mais de N dias.
+                        boolean atualizar = dataAlteracao == null
+                                || dataAlteracao.isBefore(LocalDate.now().minusDays(combinado.getItem4()));
+
+                        return new InfoPessoaFisicaResponse(
+                                deMenor ? "DE MENOR" : "DE MAIOR",
+                                financeiro ? "COM DÍVIDAS" : "SEM DÍVIDAS",
+                                aluno ? "SIM" : "NÃO",
+                                atualizar ? "SIM" : "NÃO");
+                    });
+        });
+    }
+
+    private static long contarTotal(List<Tuple> rows) {
+        if (rows == null || rows.isEmpty()) {
+            return 0L;
+        }
+        Long total = TupleHelper.getLong(rows.get(0), "total");
+        return total == null ? 0L : total;
+    }
+
+    private static int parseDias(Tuple row) {
+        String valor = TupleHelper.getString(row, "valor");
+        if (valor == null || valor.isBlank()) {
+            return 0;
+        }
+        try {
+            return Math.max(0, Integer.parseInt(valor.trim()));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private static LocalDate parseLocalDate(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(value.length() > 10 ? value.substring(0, 10) : value);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 }

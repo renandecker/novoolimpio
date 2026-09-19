@@ -4,7 +4,7 @@ import {Link} from 'react-router-dom';
 
 import {alunoApi, AulaAluno, BoletimResumo, formatarNota, formatarPercentual} from '../../aluno/aluno';
 
-import {Base64FileUpload} from '../../../shared/components/Base64FileUpload';
+import {SingleFileUploader} from '../../../shared/components/SingleFileUploader';
 
 import {CurriculumAttachmentModal} from '../curriculo/CurriculumAttachmentModal';
 
@@ -234,16 +234,21 @@ export default function AlunoDashboardScreen() {
 
                 <p style={{color: '#666', marginBottom: 16}}>Upload de documento de currículo do aluno.</p>
 
-                <Base64FileUpload
-
-                    value={curriculoFileBase64 || ''}
-
-                    onChange={(dataUrl) => setCurriculoFileBase64(dataUrl)}
-
+                <SingleFileUploader
                     accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-
-                    label="Documento de Currículo"
-
+                    maxSizeMb={10}
+                    onFileSelect={(file) => {
+                        if (file) {
+                            setCurriculoFileName(file.name);
+                            const reader = new FileReader();
+                            reader.onload = () => setCurriculoFileBase64(String(reader.result));
+                            reader.readAsDataURL(file);
+                        } else {
+                            setCurriculoFileBase64(null);
+                            setCurriculoFileName('');
+                        }
+                    }}
+                    showPreview={false}
                 />
 
                 {curriculoFileBase64 && (

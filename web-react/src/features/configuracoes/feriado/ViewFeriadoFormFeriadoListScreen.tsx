@@ -10,6 +10,8 @@ import {AutoComplete} from '../../../shared/components/AutoComplete';
 
 import type {AutoCompleteOption} from '../../../shared/components/AutoComplete';
 
+import {BooleanField} from '../../../shared/components/BooleanField';
+
 
 const apiErrorMessage = (error: unknown): string =>
     (error as { response?: { data?: { error?: string } } })?.response?.data?.error
@@ -250,20 +252,17 @@ export default function ViewFeriadoFormFeriadoListScreen() {
                                     value={dataFeriado}
                                     onChange={(event) => { setMensagem(''); setDataFeriado(event.target.value); }}/>
                             </label>
-                            <label className="form-field checkbox-field">
-                                <input type="checkbox" className="form-checkbox" checked={feriadoFixo}
-                                    onChange={(event) => setFeriadoFixo(event.target.checked)}/>
+                            <label className="form-field">
                                 <span className="form-label">Feriado Fixo</span>
+                                <BooleanField value={feriadoFixo} onChange={setFeriadoFixo} />
                             </label>
-                            <label className="form-field checkbox-field">
-                                <input type="checkbox" className="form-checkbox" checked={nacional}
-                                    onChange={(event) => { setNacional(event.target.checked); if (event.target.checked) setUnidades([]); }}/>
+                            <label className="form-field">
                                 <span className="form-label">Nacional (Todas Unidades)</span>
+                                <BooleanField value={nacional} onChange={(v) => { setNacional(v); if (v) setUnidades([]); }} />
                             </label>
-                            <label className="form-field checkbox-field">
-                                <input type="checkbox" className="form-checkbox" checked={todosCursos}
-                                    onChange={(event) => { setTodosCursos(event.target.checked); if (event.target.checked) setTipoCursos([]); }}/>
+                            <label className="form-field">
                                 <span className="form-label">Todos Tipos de Curso</span>
+                                <BooleanField value={todosCursos} onChange={(v) => { setTodosCursos(v); if (v) setTipoCursos([]); }} />
                             </label>
                             {!todosCursos && (
                                 <>

@@ -38,23 +38,41 @@ export default function ViewArquivoProconListArquivoProconListScreen() {
         setUploading(true);
         setMessage('');
 
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            try {
-                const base64Content = e.target?.result as string;
-                await api.post('/api/comercial/arquivo-procon/upload', {
-                    fileName: file.name,
-                    fileData: base64Content,
+        try {
+            const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB
+            const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+            const uploadId = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+            for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+                const start = chunkIndex * CHUNK_SIZE;
+                const end = Math.min(start + CHUNK_SIZE, file.size);
+                const chunk = file.slice(start, end);
+
+                const base64Chunk = await new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result as string);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(chunk);
                 });
-                setMessage('Arquivo enviado com sucesso para processamento via Kafka!');
-                window.location.reload();
-            } catch (error: any) {
-                setMessage(`Erro ao enviar arquivo: ${error?.response?.data?.error || error.message}`);
-            } finally {
-                setUploading(false);
+
+                setMessage(`Enviando parte ${chunkIndex + 1} de ${totalChunks}...`);
+
+                await api.post('/api/comercial/arquivo-procon/upload-chunk', {
+                    uploadId,
+                    fileName: file.name,
+                    chunkIndex,
+                    totalChunks,
+                    fileData: base64Chunk,
+                });
             }
-        };
-        reader.readAsDataURL(file);
+
+            setMessage('Arquivo enviado e montado com sucesso no diretório temporário para processamento via Kafka!');
+            window.location.reload();
+        } catch (error: any) {
+            setMessage(`Erro ao enviar arquivo: ${error?.response?.data?.error || error.message}`);
+        } finally {
+            setUploading(false);
+        }
     };
 
     return (

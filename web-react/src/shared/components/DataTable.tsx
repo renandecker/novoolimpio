@@ -10,7 +10,6 @@ import {executeAction, type Action} from '../services/actions';
 import {usePermissions, useCurrentOutcome} from '../services/permissions';
 import {useAuth} from '../../features/auth/auth';
 import {BooleanField} from './BooleanField';
-import {Base64FileUpload} from './Base64FileUpload';
 import {PerfilModuloPermissions} from '../hooks/useModulePaged';
 import {IconPickerButton} from './IconPickerModal';
 import './IconPicker.css';

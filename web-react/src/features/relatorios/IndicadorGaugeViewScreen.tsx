@@ -91,10 +91,10 @@ export default function IndicadorGaugeViewScreen() {
       <div className="p-12 text-center">
         <Database className="mx-auto text-gray-300" size={48} />
         <p className="mt-4 text-gray-500">{error || 'Indicador não encontrado'}</p>
-        <button
-          onClick={() => navigate('/view/relatorios/indicador-gauge/list')}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
+<button
+              onClick={() => navigate('/view/relatorios/listIndicadorGauge')}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
           Voltar à Lista
         </button>
       </div>
@@ -112,7 +112,7 @@ export default function IndicadorGaugeViewScreen() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate('/view/relatorios/indicador-gauge/list')}
+              onClick={() => navigate('/view/relatorios/listIndicadorGauge')}
               className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               aria-label="Voltar"
             >
@@ -140,7 +140,7 @@ export default function IndicadorGaugeViewScreen() {
               <Download size={20} />
             </button>
             <button
-              onClick={() => window.open(`/view/relatorios/indicador-gauge/form/${id}`, '_blank')}
+              onClick={() => window.open(`/view/relatorios/formIndicadorGauge/${id}`, '_blank')}
               className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               aria-label="Editar"
             >

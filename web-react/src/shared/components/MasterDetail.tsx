@@ -231,7 +231,6 @@ export function MasterDetail({
                                 fetchOptions={fetchUnidadeOptions}
                                 fetchById={fetchUnidadeById}
                                 minChars={2}
-                                minDropdownResults={0}
                                 placeholder="Digite para buscar unidade..."
                             />
                         </div>

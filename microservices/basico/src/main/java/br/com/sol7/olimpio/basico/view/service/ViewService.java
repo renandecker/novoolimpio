@@ -94,11 +94,11 @@ public class ViewService {
             "operador_login", "operacional_pacote_id", "operacional_pacote_descricao");
 
     private static final String META_DINAMICA_SELECT =
-            "SELECT md.id, md.ano, md.mes, md.id_loja, md.id_indicador, md.perc_segunda, md.perc_terca, md.perc_quarta, "
+            "SELECT md.id, md.ano, md.mes, md.id_unidade AS id_loja, md.id_indicador, md.perc_segunda, md.perc_terca, md.perc_quarta, "
                     + "md.perc_quinta, md.perc_sexta, md.perc_sabado, md.perc_domingo, md.data_atualizacao, "
                     + "l.sucinto AS unidade_sucinto, i.nome AS indicador_nome "
                     + "FROM com_meta_dinamica md "
-                    + "LEFT JOIN bas_unidade l ON l.id = md.id_loja "
+                    + "LEFT JOIN bas_unidade l ON l.id = md.id_unidade "
                     + "LEFT JOIN com_indicador i ON i.id = md.id_indicador";
     private static final List<String> META_DINAMICA_COLUMNS = List.of(
             "id", "ano", "mes", "id_loja", "id_indicador", "perc_segunda", "perc_terca", "perc_quarta",
@@ -112,6 +112,29 @@ public class ViewService {
                     + "LEFT JOIN com_indicador i ON i.id = im.id_indicador";
     private static final List<String> INDICADOR_META_DINAMICA_COLUMNS = List.of(
             "id", "descricao", "formato", "id_indicador", "indicador_nome");
+
+    private static final String INDICADOR_META_DINAMICA_VALORES_SELECT =
+            "SELECT mv.id, mv.valor, im.descricao AS indicadorMeta_descricao, im.formato, "
+                    + "i.nome AS indicador_nome, mv.id_meta_dinamica, mv.id_indicador_meta "
+                    + "FROM com_meta_valor mv "
+                    + "JOIN com_indicador_meta im ON im.id = mv.id_indicador_meta "
+                    + "LEFT JOIN com_indicador i ON i.id = im.id_indicador";
+    private static final List<String> INDICADOR_META_DINAMICA_VALORES_COLUMNS = List.of(
+            "id", "valor", "indicadorMeta_descricao", "formato", "indicador_nome", "id_meta_dinamica", "id_indicador_meta");
+
+    private static final String META_DIA_NAOUTIL_SELECT =
+            "SELECT mdnu.id, mdnu.dia, mdnu.id_meta AS id_meta_dinamica "
+                    + "FROM com_meta_dia_naoutil mdnu";
+    private static final List<String> META_DIA_NAOUTIL_COLUMNS = List.of(
+            "id", "dia", "id_meta_dinamica");
+
+    private static final String META_SEMANA_DINAMICA_SELECT =
+            "SELECT msd.id, msd.semana, msd.percentual_semana AS percentualSemana, msd.valor_semana AS valorSemana, "
+                    + "msd.id_meta_valor AS id_meta_valor, mv.id_meta_dinamica, mv.id_indicador_meta "
+                    + "FROM com_meta_semana msd "
+                    + "JOIN com_meta_valor mv ON mv.id = msd.id_meta_valor";
+    private static final List<String> META_SEMANA_DINAMICA_COLUMNS = List.of(
+            "id", "semana", "percentualSemana", "valorSemana", "id_meta_valor", "id_meta_dinamica", "id_indicador_meta");
 
     // Operacional list: joins to com_pacote and com_acao_de_campanha for data_criacao and data_final
     private static final String OPERACIONAL_LIST_SELECT =
@@ -225,6 +248,9 @@ public class ViewService {
             Map.entry("meta/listMetaDinamica", new CuratedSelect(META_DINAMICA_SELECT, META_DINAMICA_COLUMNS)),
             Map.entry("meta/formMetaDinamica", new CuratedSelect(META_DINAMICA_SELECT, META_DINAMICA_COLUMNS)),
             Map.entry("meta/indicadorMetaDinamica", new CuratedSelect(INDICADOR_META_DINAMICA_SELECT, INDICADOR_META_DINAMICA_COLUMNS)),
+            Map.entry("meta/indicadorMetaDinamica/valores", new CuratedSelect(INDICADOR_META_DINAMICA_VALORES_SELECT, INDICADOR_META_DINAMICA_VALORES_COLUMNS)),
+            Map.entry("meta/indicadorMetaDinamica/diasNaoUteis", new CuratedSelect(META_DIA_NAOUTIL_SELECT, META_DIA_NAOUTIL_COLUMNS)),
+            Map.entry("meta/indicadorMetaDinamica/diarizacao", new CuratedSelect(META_SEMANA_DINAMICA_SELECT, META_SEMANA_DINAMICA_COLUMNS)),
             Map.entry("operacional/listOperacional", new CuratedSelect(OPERACIONAL_LIST_SELECT, OPERACIONAL_LIST_COLUMNS)),
             Map.entry("operacional/formOperacional", new CuratedSelect(OPERACIONAL_LIST_SELECT, OPERACIONAL_LIST_COLUMNS)),
             Map.entry("compromisso/listCompromisso", new CuratedSelect(COMPROMISSO_LIST_SELECT, COMPROMISSO_LIST_COLUMNS)),

@@ -32,10 +32,12 @@ public class NotificacaoService {
     @Inject
     NotificacaoKafkaProducer kafkaProducer;
 
+    @WithSession
     public Uni<List<NotificacaoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
     }
 
+    @WithSession
     public Uni<PagedResponse<NotificacaoResponse>> paged(int page, int size) {
         int p = Math.max(0, page);
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
@@ -44,6 +46,7 @@ public class NotificacaoService {
                         .map(count -> new PagedResponse<NotificacaoResponse>(items.stream().map(this::toResponse).toList(), count, p, s)));
     }
 
+    @WithSession
     public Uni<PagedResponse<NotificacaoResponse>> minhas(String username, int page, int size) {
         int p = Math.max(0, page);
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 20;
@@ -57,6 +60,7 @@ public class NotificacaoService {
         return repository.count("username = ?1 and lida = false", username);
     }
 
+    @WithSession
     public Uni<NotificacaoResponse> find(Long id) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Notificacao not found"))

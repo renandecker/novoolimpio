@@ -1,6 +1,6 @@
 import React from 'react';
-import {View, Text, StyleSheet, ScrollView, TouchableOpacity} from 'react-native';
-import {ModuleList} from '../../../shared/components/ModuleListScreen';
+import {View, Text, StyleSheet, ScrollView, TouchableOpacity, Pressable} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import {api} from '../../../shared/services/api';
 import {AutoComplete, type AutoCompleteOption} from '../../../shared/components/AutoComplete';
 import {useState, useEffect, useCallback} from 'react';
@@ -30,10 +30,9 @@ interface PessoaFisicaResponse {
     cpf: string;
 }
 
-type TestemunhaOption = {id: number; label: string};
-
 interface PessoaJuridicaResponse {
     id: number;
+    pessoaId?: number;
     nomeFantasia: string;
     cnpj: string;
 }
@@ -70,6 +69,30 @@ interface FiltroMatricula {
     tipoMatricula: 'GRUPO' | 'LIVRE';
 }
 
+interface ContratoState {
+    pessoa?: AutoCompleteOption | null;
+    curriculo?: AutoCompleteOption | null;
+    responsavel?: AutoCompleteOption | null;
+    unidade?: AutoCompleteOption | null;
+    testemunha1?: AutoCompleteOption | null;
+    testemunha2?: AutoCompleteOption | null;
+    tipoContratante?: 'fisica' | 'juridica';
+}
+
+interface InfoPessoaFisicaResponse {
+    maioridade: 'DE MAIOR' | 'DE MENOR';
+    financeiro: 'SEM DÍVIDAS' | 'COM DÍVIDAS';
+    aluno: 'SIM' | 'NÃO';
+    atualizarDados: 'SIM' | 'NÃO';
+}
+
+const INFO_PANELS_DEFAULT: InfoPessoaFisicaResponse = {
+    maioridade: 'DE MAIOR',
+    financeiro: 'SEM DÍVIDAS',
+    aluno: 'NÃO',
+    atualizarDados: 'NÃO',
+};
+
 function toAutoCompleteLabel(item: { id: number; pessoaId?: number; nome?: string; nomeFantasia?: string; cpf?: string; cnpj?: string; sucinto?: string; curso?: { nome: string } }): string {
     return item.nome
         ? `${item.nome} (${item.cpf || ''})`
@@ -84,33 +107,45 @@ function toAutoCompleteLabel(item: { id: number; pessoaId?: number; nome?: strin
 // completeMethod="#{pessoaFisicaController.autoCompleteTestemunha}",
 // itemLabel="#{pessoa.pessoaFisica.nome} (#{pessoa.pessoaFisica.cpf})", dropdown=true.
 // Contrato.testemunha1/2 referenciam Pessoa (bas_pessoa id) -> usar pessoaId.
-function toTestemunhaOption(item: PessoaFisicaResponse): TestemunhaOption {
+function toPessoaFisicaOption(item: PessoaFisicaResponse): AutoCompleteOption {
     const pessoaId = item.pessoaId ?? item.id;
     return { id: pessoaId, label: item.nome ? `${item.nome} (${item.cpf || ''})` : `#${pessoaId}` };
 }
 
+function toPessoaJuridicaOption(item: PessoaJuridicaResponse): AutoCompleteOption {
+    const pessoaId = item.pessoaId ?? item.id;
+    return { id: pessoaId, label: item.nomeFantasia ? `${item.nomeFantasia} (${item.cnpj || ''})` : `#${pessoaId}` };
+}
+
+function badgeColor(value: string, kind: keyof InfoPessoaFisicaResponse): string {
+    switch (kind) {
+        case 'maioridade':
+            return value === 'DE MENOR' ? '#c0392b' : '#27ae60';
+        case 'financeiro':
+            return value === 'COM DÍVIDAS' ? '#c0392b' : '#27ae60';
+        case 'aluno':
+            return value === 'SIM' ? '#27ae60' : '#c0392b';
+        default:
+            return value === 'SIM' ? '#c0392b' : '#27ae60';
+    }
+}
+
 export default function ViewConsultorMatriculaLayoutScreen() {
+    const navigation: any = useNavigation();
     const [activeTab, setActiveTab] = useState<'contrato' | 'matricula'>('contrato');
-    const [alunos, setAlunos] = useState<{id: number; label: string}[]>([]);
-    const [curriculos, setCurriculos] = useState<{id: number; label: string}[]>([]);
-    const [unidades, setUnidades] = useState<UnidadeResponse[]>([]);
-    const [pessoasFisicas, setPessoasFisicas] = useState<{id: number; label: string}[]>([]);
-    const [pessoasJuridicas, setPessoasJuridicas] = useState<{id: number; label: string}[]>([]);
-    const [testemunhas, setTestemunhas] = useState<{id: number; label: string}[]>([]);
     const [grupos, setGrupos] = useState<OferecimentoGrupo[]>([]);
     const [ofertasLivre, setOfertasLivre] = useState<OferecimentoItem[]>([]);
     const [filtro, setFiltro] = useState<FiltroMatricula>({ tipoMatricula: 'LIVRE' });
     const [loading, setLoading] = useState(false);
-    const [contrato, setContrato] = useState<Record<string, unknown>>({});
+    const [contrato, setContrato] = useState<ContratoState>({ tipoContratante: 'fisica' });
     const [matriculaSelecionadas, setMatriculaSelecionadas] = useState<OferecimentoItem[]>([]);
+    const [infoPanels, setInfoPanels] = useState<InfoPessoaFisicaResponse>(INFO_PANELS_DEFAULT);
 
     const loadAlunos = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
-        if (!query || query.length < 3) return [];
+        if (query && query.length < 3) return [];
         try {
             const response = await api.get<ContratoAutoCompleteResponse[]>('/api/educacao/contrato/auto-complete-aluno', { params: { query } });
-            const opts = response.data.map(item => ({ id: item.id, label: item.nome || `#${item.id}` }));
-            setAlunos(opts);
-            return opts;
+            return response.data.map(item => ({ id: item.id, label: item.nome || `#${item.id}` }));
         } catch (e) {
             console.error('Erro ao buscar alunos:', e);
             return [];
@@ -118,54 +153,58 @@ export default function ViewConsultorMatriculaLayoutScreen() {
     }, []);
 
     const loadCurriculos = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
-        if (!query) return [];
         try {
             const response = await api.get<CurriculoResponse[]>('/api/educacao/curriculo/auto-complete-full', { params: { query } });
-            const opts = response.data.map(item => ({ id: item.id, label: toAutoCompleteLabel(item) }));
-            setCurriculos(opts);
-            return opts;
+            return response.data.map(item => ({ id: item.id, label: toAutoCompleteLabel(item) }));
         } catch (e) {
             console.error('Erro ao buscar currículos:', e);
             return [];
         }
     }, []);
 
-    const loadUnidades = useCallback(async () => {
+    const loadUnidades = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
         try {
             const response = await api.get<UnidadeResponse[]>('/api/basico/unidade');
-            setUnidades(response.data);
+            const termo = (query || '').toLowerCase();
+            return response.data
+                .filter(u => !termo || (u.sucinto || '').toLowerCase().includes(termo))
+                .map(u => ({ id: u.id, label: u.sucinto || `#${u.id}` }));
         } catch (e) {
             console.error('Erro ao buscar unidades:', e);
+            return [];
         }
     }, []);
 
-    const loadPessoasFisicas = useCallback(async (query: string) => {
-        if (!query || query.length < 3) return;
+    const loadPessoasFisicas = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
+        if (query && query.length < 3) return [];
         try {
             const response = await api.get<PessoaFisicaResponse[]>('/api/basico/pessoa-fisica/auto-complete-todos', { params: { query } });
-            setPessoasFisicas(response.data.map(toAutoCompleteLabel).map(l => ({id: l.split(' ')[0] as unknown as number, label: l})));
+            return response.data.map(toPessoaFisicaOption);
         } catch (e) {
             console.error('Erro ao buscar pessoas físicas:', e);
+            return [];
         }
     }, []);
 
-    const loadPessoasJuridicas = useCallback(async (query: string) => {
-        if (!query || query.length < 3) return;
+    const loadPessoasJuridicas = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
+        if (query && query.length < 3) return [];
         try {
             const response = await api.get<PessoaJuridicaResponse[]>('/api/basico/pessoa-juridica/auto-complete-todos', { params: { query } });
-            setPessoasJuridicas(response.data.map(toAutoCompleteLabel).map(l => ({id: l.split(' ')[0] as unknown as number, label: l})));
+            return response.data.map(toPessoaJuridicaOption);
         } catch (e) {
             console.error('Erro ao buscar pessoas jurídicas:', e);
+            return [];
         }
     }, []);
 
-    const loadTestemunhas = useCallback(async (query: string) => {
-        if (!query || query.length < 3) return;
+    const loadTestemunhas = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
+        if (query && query.length < 3) return [];
         try {
             const response = await api.get<PessoaFisicaResponse[]>('/api/basico/pessoa-fisica/auto-complete-testemunha', { params: { query } });
-            setTestemunhas(response.data.map(toAutoCompleteLabel).map(l => ({id: l.split(' ')[0] as unknown as number, label: l})));
+            return response.data.map(toPessoaFisicaOption);
         } catch (e) {
             console.error('Erro ao buscar testemunhas:', e);
+            return [];
         }
     }, []);
 
@@ -204,10 +243,6 @@ export default function ViewConsultorMatriculaLayoutScreen() {
     }, [filtro]);
 
     useEffect(() => {
-        loadUnidades();
-    }, [loadUnidades]);
-
-    useEffect(() => {
         if (filtro.tipoMatricula === 'GRUPO') {
             loadGrupos();
         } else {
@@ -215,30 +250,61 @@ export default function ViewConsultorMatriculaLayoutScreen() {
         }
     }, [filtro, loadGrupos, loadOfertasLivre]);
 
-    const handleAlunoSelect = (option: {id: number; label: string} | null) => {
-        if (option) setContrato(prev => ({ ...prev, pessoa: option }));
-    };
+    const calcularInfoPanels = useCallback(async (pessoaId: number) => {
+        try {
+            const response = await api.get<InfoPessoaFisicaResponse>(`/api/educacao/matricula/calcular-info-pessoa-fisica/${pessoaId}`);
+            setInfoPanels(response.data);
+        } catch (e) {
+            console.error('Erro ao calcular info panels:', e);
+            setInfoPanels(INFO_PANELS_DEFAULT);
+        }
+    }, []);
 
-    const handleCursoSelect = (option: {id: number; label: string} | null) => {
+    const resetInfoPanels = useCallback(() => setInfoPanels(INFO_PANELS_DEFAULT), []);
+
+    // Ao retornar do cadastro/edição de pessoa, atualiza os painéis do aluno selecionado.
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            const pessoa = contrato.pessoa;
+            if (pessoa) calcularInfoPanels(pessoa.id);
+        });
+        return unsubscribe;
+    }, [navigation, contrato.pessoa, calcularInfoPanels]);
+
+    const handleAlunoSelect = (option: AutoCompleteOption | null) => {
         if (option) {
-            setContrato(prev => ({ ...prev, curriculo: option }));
-            setFiltro(prev => ({ ...prev, curriculoId: option.id }));
+            setContrato(prev => ({ ...prev, pessoa: option }));
+            calcularInfoPanels(option.id);
+        } else {
+            setContrato(prev => ({ ...prev, pessoa: null }));
+            resetInfoPanels();
         }
     };
 
-    const handleResponsavelSelect = (option: {id: number; label: string} | null, tipo: 'fisica' | 'juridica') => {
-        if (option) setContrato(prev => ({ ...prev, responsavel: option, tipoContratante: tipo }));
+    const handleCursoSelect = (option: AutoCompleteOption | null) => {
+        setContrato(prev => ({ ...prev, curriculo: option }));
+        setFiltro(prev => ({ ...prev, curriculoId: option?.id }));
     };
 
-    const handleUnidadeChange = (unidade: UnidadeResponse | undefined) => {
-        if (unidade) {
-            setContrato(prev => ({ ...prev, unidade }));
-            setFiltro(prev => ({ ...prev, unidadeId: unidade.id }));
-        }
+    const handleResponsavelSelect = (option: AutoCompleteOption | null) => {
+        setContrato(prev => ({ ...prev, responsavel: option }));
     };
 
-    const handleTestemunhaSelect = (option: {id: number; label: string} | null, num: 1 | 2) => {
-        if (option) setContrato(prev => ({ ...prev, [`testemunha${num}`]: option }));
+    const handleUnidadeChange = (option: AutoCompleteOption | null) => {
+        setContrato(prev => ({ ...prev, unidade: option }));
+        setFiltro(prev => ({ ...prev, unidadeId: option?.id }));
+    };
+
+    const handleTestemunhaSelect = (option: AutoCompleteOption | null, num: 1 | 2) => {
+        setContrato(prev => ({ ...prev, [`testemunha${num}`]: option }));
+    };
+
+    const abrirPessoaFisica = (id?: number) => {
+        navigation.navigate('view/pessoa/formPessoaFisica' as never, (id ? { id } : {}) as never);
+    };
+
+    const abrirPessoaJuridica = (id?: number) => {
+        navigation.navigate('view/pessoa/formPessoaJuridica' as never, (id ? { id } : {}) as never);
     };
 
     const handleGrupoSelect = (grupo: OferecimentoGrupo) => {
@@ -260,68 +326,159 @@ export default function ViewConsultorMatriculaLayoutScreen() {
         }
     };
 
-    const handleFiltroChange = (key: keyof FiltroMatricula, value: unknown) => {
-        setFiltro(prev => ({ ...prev, [key]: value }));
-    };
-
     const handleTipoMatriculaChange = (tipo: 'GRUPO' | 'LIVRE') => {
         setFiltro(prev => ({ ...prev, tipoMatricula: tipo }));
     };
+
+    const renderInfoPanel = (label: string, value: string, kind: keyof InfoPessoaFisicaResponse) => (
+        <View style={[styles.panelBadge, { borderColor: badgeColor(value, kind) }]}>
+            <Text style={styles.panelBadgeLabel}>{label}</Text>
+            <Text style={[styles.panelBadgeValue, { color: badgeColor(value, kind) }]}>{value}</Text>
+        </View>
+    );
+
+    const renderRadio = (label: string, checked: boolean, onPress: () => void) => (
+        <Pressable style={styles.radioItem} onPress={onPress}>
+            <View style={[styles.radioOuter, checked && styles.radioOuterChecked]}>
+                {checked && <View style={styles.radioInner} />}
+            </View>
+            <Text>{label}</Text>
+        </Pressable>
+    );
 
     const renderContratoTab = () => (
         <ScrollView style={styles.tabContent}>
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Dados do Aluno</Text>
-                <View style={styles.row}>
+                <View style={styles.fieldRow}>
                     <View style={styles.field}>
-                        <Text style={styles.label}>Aluno *</Text>
-                        <ModuleList path="/api/educacao/contrato/auto-complete-aluno" />
+                        <AutoComplete
+                            label="Aluno *"
+                            value={contrato.pessoa ?? null}
+                            onChange={handleAlunoSelect}
+                            fetchOptions={loadAlunos}
+                            minChars={3}
+                        />
                     </View>
-                    <View style={styles.field}>
-                        <Text style={styles.label}>Curso *</Text>
-                        <ModuleList path="/api/educacao/curriculo/auto-complete-full" />
-                    </View>
+                    <TouchableOpacity style={styles.actionBtn} onPress={() => abrirPessoaFisica()}>
+                        <Text style={styles.actionBtnText}>Novo</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.actionBtn, !contrato.pessoa && styles.actionBtnDisabled]}
+                        disabled={!contrato.pessoa}
+                        onPress={() => contrato.pessoa && abrirPessoaFisica(contrato.pessoa.id)}
+                    >
+                        <Text style={styles.actionBtnText}>Editar</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.panelsRow}>
+                    {renderInfoPanel('Maioridade', infoPanels.maioridade, 'maioridade')}
+                    {renderInfoPanel('Financeiro', infoPanels.financeiro, 'financeiro')}
+                    {renderInfoPanel('Aluno', infoPanels.aluno, 'aluno')}
+                    {renderInfoPanel('Atualizar Dados', infoPanels.atualizarDados, 'atualizarDados')}
+                </View>
+                <View style={styles.field}>
+                    <AutoComplete
+                        label="Curso *"
+                        value={contrato.curriculo ?? null}
+                        onChange={handleCursoSelect}
+                        fetchOptions={loadCurriculos}
+                        minChars={2}
+                    />
                 </View>
             </View>
 
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Tipo de Contratante</Text>
                 <View style={styles.radioGroup}>
-                    <View style={styles.radioItem}>
-                        <RadioButton value="fisica" status={contrato.tipoContratante === 'fisica' ? 'checked' : 'unchecked'} onPress={() => setContrato(prev => ({ ...prev, tipoContratante: 'fisica' }))} />
-                        <Text>Pessoa Física</Text>
-                    </View>
-                    <View style={styles.radioItem}>
-                        <RadioButton value="juridica" status={contrato.tipoContratante === 'juridica' ? 'checked' : 'unchecked'} onPress={() => setContrato(prev => ({ ...prev, tipoContratante: 'juridica' }))} />
-                        <Text>Pessoa Jurídica</Text>
-                    </View>
+                    {renderRadio('Pessoa Física', contrato.tipoContratante === 'fisica', () => setContrato(prev => ({ ...prev, tipoContratante: 'fisica', responsavel: null })))}
+                    {renderRadio('Pessoa Jurídica', contrato.tipoContratante === 'juridica', () => setContrato(prev => ({ ...prev, tipoContratante: 'juridica', responsavel: null })))}
                 </View>
-                <View style={styles.field}>
-                    <Text style={styles.label}>Contratante *</Text>
-                    {contrato.tipoContratante === 'fisica' ? (
-                        <ModuleList path="/api/basico/pessoa-fisica/auto-complete-todos" />
+                <View style={styles.fieldRow}>
+                    <View style={styles.field}>
+                        {contrato.tipoContratante === 'juridica' ? (
+                            <AutoComplete
+                                label="Contratante *"
+                                value={contrato.responsavel ?? null}
+                                onChange={handleResponsavelSelect}
+                                fetchOptions={loadPessoasJuridicas}
+                                minChars={3}
+                            />
+                        ) : (
+                            <AutoComplete
+                                label="Contratante *"
+                                value={contrato.responsavel ?? null}
+                                onChange={handleResponsavelSelect}
+                                fetchOptions={loadPessoasFisicas}
+                                minChars={3}
+                            />
+                        )}
+                    </View>
+                    {contrato.tipoContratante === 'juridica' ? (
+                        <>
+                            <TouchableOpacity style={styles.actionBtn} onPress={() => abrirPessoaJuridica()}>
+                                <Text style={styles.actionBtnText}>Novo</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.actionBtn, !contrato.responsavel && styles.actionBtnDisabled]}
+                                disabled={!contrato.responsavel}
+                                onPress={() => contrato.responsavel && abrirPessoaJuridica(contrato.responsavel.id)}
+                            >
+                                <Text style={styles.actionBtnText}>Editar</Text>
+                            </TouchableOpacity>
+                        </>
                     ) : (
-                        <ModuleList path="/api/basico/pessoa-juridica/auto-complete-todos" />
+                        <>
+                            <TouchableOpacity style={styles.actionBtn} onPress={() => abrirPessoaFisica()}>
+                                <Text style={styles.actionBtnText}>Novo</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.actionBtn, !contrato.responsavel && styles.actionBtnDisabled]}
+                                disabled={!contrato.responsavel}
+                                onPress={() => contrato.responsavel && abrirPessoaFisica(contrato.responsavel.id)}
+                            >
+                                <Text style={styles.actionBtnText}>Editar</Text>
+                            </TouchableOpacity>
+                        </>
                     )}
                 </View>
             </View>
 
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Unidade e Testemunhas</Text>
+                <Text style={styles.sectionTitle}>Unidade</Text>
                 <View style={styles.row}>
                     <View style={styles.field}>
-                        <Text style={styles.label}>Unidade do Contrato *</Text>
-                        <ModuleList path="/api/basico/unidade" />
+                        <AutoComplete
+                            label="Unidade do Contrato *"
+                            value={contrato.unidade ?? null}
+                            onChange={handleUnidadeChange}
+                            fetchOptions={loadUnidades}
+                            minChars={0}
+                            minDropdownResults={50}
+                        />
+                    </View>
+                </View>
+                <Text style={styles.sectionTitle}>Testemunhas</Text>
+                <View style={styles.row}>
+                    <View style={styles.field}>
+                        <AutoComplete
+                            label="Primeira Testemunha"
+                            value={contrato.testemunha1 ?? null}
+                            onChange={option => handleTestemunhaSelect(option, 1)}
+                            fetchOptions={loadTestemunhas}
+                            minChars={3}
+                        />
                     </View>
                 </View>
                 <View style={styles.row}>
                     <View style={styles.field}>
-                        <Text style={styles.label}>Primeira Testemunha</Text>
-                        <ModuleList path="/api/basico/pessoa-fisica/auto-complete-testemunha" />
-                    </View>
-                    <View style={styles.field}>
-                        <Text style={styles.label}>Segunda Testemunha</Text>
-                        <ModuleList path="/api/basico/pessoa-fisica/auto-complete-testemunha" />
+                        <AutoComplete
+                            label="Segunda Testemunha"
+                            value={contrato.testemunha2 ?? null}
+                            onChange={option => handleTestemunhaSelect(option, 2)}
+                            fetchOptions={loadTestemunhas}
+                            minChars={3}
+                        />
                     </View>
                 </View>
             </View>
@@ -329,7 +486,7 @@ export default function ViewConsultorMatriculaLayoutScreen() {
     );
 
     const renderMatriculaTab = () => {
-        const curriculo = contrato.curriculo as { label?: string } | undefined;
+        const curriculo = contrato.curriculo;
         return (
         <ScrollView style={styles.tabContent}>
             <View style={styles.section}>
@@ -348,19 +505,19 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                 <Text style={styles.sectionTitle}>Filtro Busca</Text>
                 <View style={styles.row}>
                     <View style={styles.field}>
-                        <Text style={styles.label}>Unidade</Text>
-                        <ModuleList path="/api/basico/unidade" />
+                        <AutoComplete
+                            label="Unidade"
+                            value={contrato.unidade ?? null}
+                            onChange={handleUnidadeChange}
+                            fetchOptions={loadUnidades}
+                            minChars={0}
+                            minDropdownResults={50}
+                        />
                     </View>
                 </View>
                 <View style={styles.radioGroup}>
-                    <View style={styles.radioItem}>
-                        <RadioButton value="GRUPO" status={filtro.tipoMatricula === 'GRUPO' ? 'checked' : 'unchecked'} onPress={() => handleTipoMatriculaChange('GRUPO')} />
-                        <Text>Grupo</Text>
-                    </View>
-                    <View style={styles.radioItem}>
-                        <RadioButton value="LIVRE" status={filtro.tipoMatricula === 'LIVRE' ? 'checked' : 'unchecked'} onPress={() => handleTipoMatriculaChange('LIVRE')} />
-                        <Text>Livre</Text>
-                    </View>
+                    {renderRadio('Grupo', filtro.tipoMatricula === 'GRUPO', () => handleTipoMatriculaChange('GRUPO'))}
+                    {renderRadio('Livre', filtro.tipoMatricula === 'LIVRE', () => handleTipoMatriculaChange('LIVRE'))}
                 </View>
                 <TouchableOpacity style={styles.button} onPress={() => filtro.tipoMatricula === 'GRUPO' ? loadGrupos() : loadOfertasLivre()}>
                     <Text style={styles.buttonText}>Filtrar</Text>
@@ -403,7 +560,7 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                     ) : (
                         <View>
                             {ofertasLivre.map(oferta => (
-                                <View key={oferta.id} style={[styles.ofertaItem, oferta.selected && styles.ofertaItemSelected]}>
+                                <TouchableOpacity key={oferta.id} style={[styles.ofertaItem, oferta.selected && styles.ofertaItemSelected]} onPress={() => handleOfertaSelect(oferta)}>
                                     <View style={styles.ofertaHeader}>
                                         <View style={styles.ofertaStatus}>
                                             <Text style={{fontWeight: 'bold'}}>{oferta.status}</Text>
@@ -415,7 +572,7 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                                             <Text>{oferta.dataInicio} - {oferta.dataFim}</Text>
                                         </View>
                                     </View>
-                                </View>
+                                </TouchableOpacity>
                             ))}
                         </View>
                     )}
@@ -462,10 +619,21 @@ const styles = StyleSheet.create({
     section: {marginBottom: 20},
     sectionTitle: {fontSize: 18, fontWeight: 'bold', marginBottom: 12, color: '#333'},
     row: {flexDirection: 'row', gap: 12},
+    fieldRow: {flexDirection: 'row', gap: 8, alignItems: 'flex-start'},
     field: {flex: 1},
     label: {fontSize: 14, color: '#666', marginBottom: 4},
     radioGroup: {flexDirection: 'row', gap: 16, marginVertical: 8},
-    radioItem: {flexDirection: 'row', alignItems: 'center', gap: 4},
+    radioItem: {flexDirection: 'row', alignItems: 'center', gap: 6},
+    radioOuter: {width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: '#999', alignItems: 'center', justifyContent: 'center'},
+    radioOuterChecked: {borderColor: '#007AFF'},
+    radioInner: {width: 9, height: 9, borderRadius: 5, backgroundColor: '#007AFF'},
+    actionBtn: {backgroundColor: '#007AFF', paddingVertical: 10, paddingHorizontal: 12, borderRadius: 4, marginBottom: 12},
+    actionBtnDisabled: {backgroundColor: '#b0c4de'},
+    actionBtnText: {color: '#fff', fontWeight: 'bold', fontSize: 13},
+    panelsRow: {flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12},
+    panelBadge: {borderWidth: 1, borderRadius: 6, paddingVertical: 6, paddingHorizontal: 10, minWidth: 110, backgroundColor: '#fff'},
+    panelBadgeLabel: {fontSize: 11, color: '#666'},
+    panelBadgeValue: {fontSize: 13, fontWeight: 'bold'},
     button: {backgroundColor: '#007AFF', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 4, alignSelf: 'flex-start', marginTop: 8},
     buttonText: {color: '#fff', fontWeight: 'bold'},
     blueButton: {backgroundColor: '#007AFF'},

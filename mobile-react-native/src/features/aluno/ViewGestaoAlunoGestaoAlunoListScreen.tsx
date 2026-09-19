@@ -73,7 +73,7 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
 
     return (
         <View style={styles.container}>
-            <ModuleList path="/api/view/gestaoAluno/gestaoAluno" title="Gestão do Aluno"/>
+            <ModuleList path="/api/view/gestaoAluno/gestaoAluno"/>
 
             <View style={styles.actionsRow}>
                 {ACTION_GROUPS.map((group) => (

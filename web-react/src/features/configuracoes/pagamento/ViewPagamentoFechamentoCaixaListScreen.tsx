@@ -200,7 +200,10 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
 
     useEffect(() => {
 
-        if (!usuarioId || !unidadeId) return;
+        const uId = usuarioId ? Number(usuarioId) : null;
+        const unId = unidadeId ? Number(unidadeId) : null;
+
+        if (!uId || isNaN(uId) || !unId || isNaN(unId)) return;
 
         (async () => {
 
@@ -208,7 +211,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
 
                 const {data: caixaId} = await api.get<number | null>('/api/financeiro/caixa/buscar-abertura-caixa-com-usuario-unidade', {
 
-                    params: {usuarioId, unidadeId},
+                    params: {usuarioId: uId, unidadeId: unId},
 
                 });
 

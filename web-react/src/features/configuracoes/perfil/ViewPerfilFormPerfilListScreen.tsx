@@ -6,6 +6,7 @@ import {api} from '../../../shared/services/api';
 import {MasterDetail} from '../../../shared/components/MasterDetail';
 import type {MasterDetailColumn} from '../../../shared/components/MasterDetail';
 import type {ApiItem} from '../../../shared/types/types.ts';
+import {BooleanField} from '../../../shared/components/BooleanField';
 
 const toDateInput = (v: unknown): string => {
     if (!v) return '';
@@ -75,21 +76,21 @@ export default function ViewPerfilFormPerfilListScreen() {
                                 <option value="">-- Selecione --</option>
                             </select>
                         </label>
-                        <label className="form-field checkbox-field">
-                            <input type="checkbox" className="form-checkbox" checked={moduloSelecionado.novo === true || moduloSelecionado.novo === 'true'} onChange={e => setModuloSelecionado({...moduloSelecionado, novo: e.target.checked})}/>
+                        <label className="form-field">
                             <span className="form-label">Novo</span>
+                            <BooleanField value={moduloSelecionado.novo === true || moduloSelecionado.novo === 'true'} onChange={v => setModuloSelecionado({...moduloSelecionado, novo: v})} />
                         </label>
-                        <label className="form-field checkbox-field">
-                            <input type="checkbox" className="form-checkbox" checked={moduloSelecionado.editar === true || moduloSelecionado.editar === 'true'} onChange={e => setModuloSelecionado({...moduloSelecionado, editar: e.target.checked})}/>
+                        <label className="form-field">
                             <span className="form-label">Editar</span>
+                            <BooleanField value={moduloSelecionado.editar === true || moduloSelecionado.editar === 'true'} onChange={v => setModuloSelecionado({...moduloSelecionado, editar: v})} />
                         </label>
-                        <label className="form-field checkbox-field">
-                            <input type="checkbox" className="form-checkbox" checked={moduloSelecionado.remover === true || moduloSelecionado.remover === 'true'} onChange={e => setModuloSelecionado({...moduloSelecionado, remover: e.target.checked})}/>
+                        <label className="form-field">
                             <span className="form-label">Remover</span>
+                            <BooleanField value={moduloSelecionado.remover === true || moduloSelecionado.remover === 'true'} onChange={v => setModuloSelecionado({...moduloSelecionado, remover: v})} />
                         </label>
-                        <label className="form-field checkbox-field">
-                            <input type="checkbox" className="form-checkbox" checked={moduloSelecionado.relatorio === true || moduloSelecionado.relatorio === 'true'} onChange={e => setModuloSelecionado({...moduloSelecionado, relatorio: e.target.checked})}/>
+                        <label className="form-field">
                             <span className="form-label">Relatório</span>
+                            <BooleanField value={moduloSelecionado.relatorio === true || moduloSelecionado.relatorio === 'true'} onChange={v => setModuloSelecionado({...moduloSelecionado, relatorio: v})} />
                         </label>
                         <label className="form-field" style={{display: 'flex', alignItems: 'flex-end'}}>
                             <button type="button" className="btn-form-save" onClick={() => {

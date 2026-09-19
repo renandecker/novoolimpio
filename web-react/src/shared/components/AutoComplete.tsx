@@ -97,25 +97,22 @@ export function AutoComplete({
 
     const abrirDropdown = useCallback(() => {
         if (disabled) return;
-        if (text.trim().length >= minChars) {
-            pesquisar(text);
-        } else {
-            setCarregando(true);
-            fetchOptions('')
-                .then((resultado) => {
-                    const limited = resultado.slice(0, minDropdownResults);
-                    setOptions(limited);
-                    setOpen(true);
-                    setHighlighted(limited.length > 0 ? 0 : -1);
-                })
-                .catch(() => {
-                    setOptions([]);
-                    setOpen(false);
-                })
-                .finally(() => setCarregando(false));
-        }
+        if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+        setCarregando(true);
+        fetchOptions('')
+            .then((resultado) => {
+                const limited = resultado.slice(0, minDropdownResults);
+                setOptions(limited);
+                setOpen(true);
+                setHighlighted(limited.length > 0 ? 0 : -1);
+            })
+            .catch(() => {
+                setOptions([]);
+                setOpen(false);
+            })
+            .finally(() => setCarregando(false));
         inputRef.current?.focus();
-    }, [disabled, minChars, minDropdownResults, pesquisar, fetchOptions, text]);
+    }, [disabled, minDropdownResults, fetchOptions]);
 
     function selecionar(option: AutoCompleteOption) {
         onChange(option);

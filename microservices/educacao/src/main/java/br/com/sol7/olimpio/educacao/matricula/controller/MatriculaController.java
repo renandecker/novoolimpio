@@ -154,4 +154,11 @@ public class MatriculaController {
         return service.buscarMatriculasCanceladas(contratoId);
     }
 
+
+    @GET
+    @Path("/calcular-info-pessoa-fisica/{pessoaId}")
+    public Uni<InfoPessoaFisicaResponse> calcularInfoPessoaFisica(@PathParam("pessoaId") Long pessoaId) {
+        return service.calcularInfoPessoaFisica(pessoaId);
+    }
+
 }

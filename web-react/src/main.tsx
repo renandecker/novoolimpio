@@ -625,8 +625,10 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/horarioPeriodo/listHorarioPeriodo" element={<ViewHorarioPeriodoListHorarioPeriodoListScreen/>}/>
     <Route path="/view/impressora/formImpressora" element={<ViewImpressoraFormImpressoraListScreen/>}/>
     <Route path="/view/impressora/listImpressora" element={<ViewImpressoraListImpressoraListScreen/>}/>
-    <Route path="/view/indicador/formIndicador" element={<ViewIndicadorFormIndicadorListScreen/>}/>
-    <Route path="/view/indicador/listIndicador" element={<ViewIndicadorListIndicadorListScreen/>}/>
+    <Route path="/view/indicador/listIndicadorGauge" element={<ViewRelatoriosListIndicadorGaugeListScreen/>}/>
+    <Route path="/view/indicador/formIndicadorGauge" element={<ViewRelatoriosFormIndicadorGaugeListScreen/>}/>
+    <Route path="/view/indicador/formIndicadorGauge/:id" element={<ViewRelatoriosFormIndicadorGaugeListScreen/>}/>
+    <Route path="/view/indicador/viewIndicadorGauge/:id" element={<ViewRelatoriosViewIndicadorGaugeScreen/>}/>
     <Route path="/view/ligacao/ligacao" element={<ViewLigacaoLigacaoListScreen/>}/>
     <Route path="/view/login/login" element={<ViewLoginLoginListScreen/>}/>
     <Route path="/view/logradouro/formLogradouro" element={<ViewLogradouroFormLogradouroListScreen/>}/>

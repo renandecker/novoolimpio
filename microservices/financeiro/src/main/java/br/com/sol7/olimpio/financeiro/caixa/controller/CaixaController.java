@@ -19,6 +19,8 @@ import java.math.BigDecimal;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
+import br.com.sol7.olimpio.financeiro.caixa.dto.ParcelaSearchResponse;
+
 @Path("/api/financeiro/caixa")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -70,6 +72,12 @@ public class CaixaController {
     @Path("/auto-complete-aluno-pagamento-pendente")
     public Uni<List<Long>> autoCompleteAlunoPagamentoPendente(@QueryParam("query") String query) {
         return service.autoCompleteAlunoPagamentoPendente(query);
+    }
+
+    @GET
+    @Path("/buscar-parcelas")
+    public Uni<List<ParcelaSearchResponse>> buscarParcelas(@QueryParam("q") String query, @QueryParam("limit") Integer limit) {
+        return service.buscarParcelas(query, limit == null ? 20 : limit);
     }
 
 

@@ -90,7 +90,10 @@ interface FechamentoCaixaData {
     // Step 2 - Movimentação
     movSubTab: 'parcela' | 'extra' | 'sangria';
 
-    // Parcela
+    // Parcela fields
+    numeroLancamento: string;
+    alunoId: string;
+    parcelasAluno: Array<any>;
     parcelaId: string;
     valorParcela: string;
     dataVencimento: string;
@@ -175,7 +178,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
     const fetchUsuario = fetchAutoComplete('/api/view/usuario/listUsuario', 'id', 'nome');
     const fetchUnidade = fetchAutoComplete('/api/view/unidade/listUnidade', 'id', 'sucinto');
     const fetchImpressora = fetchAutoComplete('/api/view/impressora/listImpressora', 'id', 'descricao');
-    const fetchParcela = fetchAutoComplete('/api/financeiro/parcela/buscar', 'id', 'descricao');
+    const fetchParcela = fetchAutoComplete('/api/financeiro/caixa/buscar-parcelas', 'id', 'descricao');
     const fetchMovimento = fetchAutoComplete('/api/view/movimento/listMovimento', 'id', 'descricaocompleta');
 
     // Resolve o usuário da sessão logada
@@ -202,9 +205,38 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
         };
     }, []);
 
+
+    // Carrega automaticamente a primeira unidade disponível do usuário
+    // (comportamento similar ao CaixaController.java original)
+    useEffect(() => {
+        const usuarioId = state.usuarioId;
+        if (!usuarioId) return;
+        let cancelled = false;
+        (async () => {
+            try {
+                const {data: unidades} = await api.get<Array<{id: number}>>('/api/basico/usuario/buscar-unidades-disponiveis', {
+                    params: {usuarioId: Number(usuarioId)},
+                });
+                if (!cancelled && unidades && unidades.length > 0) {
+                    // Se já não há unidade selecionada, seleciona a primeira disponível
+                    if (!state.unidadeId) {
+                        setState(s => ({...s, unidadeId: String(unidades[0].id)}));
+                    }
+                }
+            } catch (err) {
+                console.warn('Erro ao carregar unidades disponíveis do usuário:', err);
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [state.usuarioId]);
+
     // Load caixa when usuario/unidade change
     useEffect(() => {
-        if (!state.usuarioId || !state.unidadeId) return;
+        const usuarioId = state.usuarioId ? Number(state.usuarioId) : null;
+        const unidadeId = state.unidadeId ? Number(state.unidadeId) : null;
+        if (!usuarioId || isNaN(usuarioId) || !unidadeId || isNaN(unidadeId)) return;
         let cancelled = false;
         (async () => {
             try {
@@ -596,19 +628,19 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                             style={styles.autoComplete}
                         />
                         <View style={styles.fieldGroup}>
-                            <Text style={styles.fieldLabel}>Valor</Text>
+                            <Text style={styles.fieldLabel}>Valor da Parcela</Text>
                             <TextInput style={styles.input} value={state.valorParcela}
-                                       onChangeText={(v) => setField('valorParcela', v)} keyboardType="numeric"/>
+                                       editable={false} keyboardType="numeric"/>
                         </View>
                         <View style={styles.fieldGroup}>
-                            <Text style={styles.fieldLabel}>Vencimento</Text>
+                            <Text style={styles.fieldLabel}>Data Vencimento</Text>
                             <TextInput style={styles.input} value={state.dataVencimento}
-                                       onChangeText={(v) => setField('dataVencimento', v)} placeholder="AAAA-MM-DD"/>
+                                       editable={false} placeholder="AAAA-MM-DD"/>
                         </View>
                         <View style={styles.fieldGroup}>
                             <Text style={styles.fieldLabel}>Nº Parcela (0 = entrada)</Text>
                             <TextInput style={styles.input} value={state.parcelaSequencia}
-                                       onChangeText={(v) => setField('parcelaSequencia', v)} keyboardType="numeric"/>
+                                       editable={false} keyboardType="numeric"/>
                         </View>
                     </View>
 
@@ -616,22 +648,22 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                         <View style={styles.fieldGroup}>
                             <Text style={styles.fieldLabel}>% Desconto</Text>
                             <TextInput style={styles.input} value={state.percentualDesconto}
-                                       onChangeText={(v) => setField('percentualDesconto', v)} keyboardType="numeric"/>
+                                       editable={false} keyboardType="numeric"/>
                         </View>
                         <View style={styles.fieldGroup}>
                             <Text style={styles.fieldLabel}>% Multa</Text>
                             <TextInput style={styles.input} value={state.percentualMulta}
-                                       onChangeText={(v) => setField('percentualMulta', v)} keyboardType="numeric"/>
+                                       editable={false} keyboardType="numeric"/>
                         </View>
                         <View style={styles.fieldGroup}>
                             <Text style={styles.fieldLabel}>% Juros a.m.</Text>
                             <TextInput style={styles.input} value={state.percentualJuros}
-                                       onChangeText={(v) => setField('percentualJuros', v)} keyboardType="numeric"/>
+                                       editable={false} keyboardType="numeric"/>
                         </View>
                         <View style={styles.fieldGroup}>
                             <Text style={styles.fieldLabel}>Dias tolerância</Text>
                             <TextInput style={styles.input} value={state.diasTolerancia}
-                                       onChangeText={(v) => setField('diasTolerancia', v)} keyboardType="numeric"/>
+                                       editable={false} keyboardType="numeric"/>
                         </View>
                     </View>
 

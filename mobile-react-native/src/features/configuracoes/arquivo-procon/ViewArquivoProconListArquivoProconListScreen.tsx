@@ -17,15 +17,32 @@ export default function ViewArquivoProconListArquivoProconListScreen() {
             const file = res.assets[0];
             setUploading(true);
 
-            const base64 = await FileSystem.readAsStringAsync(file.uri, {encoding: FileSystem.EncodingType.Base64});
-            const fileData = `data:text/csv;base64,${base64}`;
+            // Read entire file content as base64 or chunks using expo FileSystem if needed
+            // For React Native Expo, we can read chunks or split the base64 string
+            const base64Full = await FileSystem.readAsStringAsync(file.uri, {encoding: FileSystem.EncodingType.Base64});
+            const binaryString = atob(base64Full);
+            const fileSize = binaryString.length;
+            const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB
+            const totalChunks = Math.ceil(fileSize / CHUNK_SIZE);
+            const uploadId = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
-            await api.post('/api/comercial/arquivo-procon/upload', {
-                fileName: file.name,
-                fileData,
-            });
+            for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+                const start = chunkIndex * CHUNK_SIZE;
+                const end = Math.min(start + CHUNK_SIZE, fileSize);
+                const chunkBinary = binaryString.substring(start, end);
+                const chunkBase64 = btoa(chunkBinary);
+                const fileData = `data:text/csv;base64,${chunkBase64}`;
 
-            Alert.alert('Sucesso', 'Arquivo enviado com sucesso para processamento via Kafka!');
+                await api.post('/api/comercial/arquivo-procon/upload-chunk', {
+                    uploadId,
+                    fileName: file.name || 'arquivo.csv',
+                    chunkIndex,
+                    totalChunks,
+                    fileData,
+                });
+            }
+
+            Alert.alert('Sucesso', 'Arquivo enviado em partes e processado via Kafka com sucesso!');
         } catch (error: any) {
             Alert.alert('Erro', error?.response?.data?.error || error.message);
         } finally {

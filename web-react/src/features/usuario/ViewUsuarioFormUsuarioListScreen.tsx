@@ -5,7 +5,7 @@ import {PermissionGate} from '../../shared/services/permissions';
 import {Tabs} from '../../shared/components/Tabs';
 import {MasterDetail} from '../../shared/components/MasterDetail';
 import {BooleanField} from '../../shared/components/BooleanField';
-import {Base64FileUpload} from '../../shared/components/Base64FileUpload';
+import {FileUploadBase} from '../../shared/components/FileUploadBase';
 import {AutoComplete, AutoCompleteOption} from '../../shared/components/AutoComplete';
 import type {ApiItem} from '../../shared/types/index';
 
@@ -30,10 +30,30 @@ const requiredMark = <span style={{color:'#C90000',marginLeft:4}}>*</span>;
 
 // ── Documento upload card ────────────────────────────────────────────
 function DocCard({label, required, value, onChange}:{label:string; required?:boolean; value:string; onChange:(v:string)=>void}){
+    const [files, setFiles] = useState<File[]>([]);
+
+    const handleFilesChange = async (newFiles: File[]) => {
+        setFiles(newFiles);
+        if (newFiles.length > 0) {
+            const reader = new FileReader();
+            reader.onload = () => onChange(String(reader.result));
+            reader.readAsDataURL(newFiles[0]);
+        } else {
+            onChange('');
+        }
+    };
+
     return (
         <div style={{display:'flex', flexDirection:'column', gap:6, border:'1px solid #e0e0e0',borderRadius:6,padding:12,background:'#fafafa'}}>
             <span className="form-label" style={{fontWeight:700,fontSize:12}}>{label} {required && requiredMark}</span>
-            <Base64FileUpload value={value} onChange={onChange} accept="image/*,application/pdf" label={label} />
+            <FileUploadBase
+                files={files}
+                onFilesChange={handleFilesChange}
+                accept="image/*,application/pdf"
+                allowsMultiple={false}
+                maxSizeMb={5}
+                showPreview={true}
+            />
         </div>
     );
 }
@@ -473,7 +493,7 @@ export default function ViewUsuarioFormUsuarioListScreen(){
         <div className="form-grid">
             {!idParam ? null : (
                 <label className="form-field"><span className="form-label">Ativo</span>
-                    <BooleanField value={ativo} onChange={setAtivo} /></label>
+                    <BooleanField value={ativo} onChange={setAtivo} onText="Ativo" offText="Inativo" /></label>
             )}
             <label className="form-field"><span className="form-label">Data Admissão</span>
                 <input className="form-input" type="date" value={dataAdmissao} onChange={e=>setDataAdmissao(e.target.value)} /></label>

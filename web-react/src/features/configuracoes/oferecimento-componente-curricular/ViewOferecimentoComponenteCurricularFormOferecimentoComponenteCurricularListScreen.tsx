@@ -18,6 +18,8 @@ import {format} from 'date-fns';
 
 import {Modal} from '../../../shared/components/Modal';
 
+import {BooleanField} from '../../../shared/components/BooleanField';
+
 import {ScheduleWeekView, mondayOf, toIsoDate, monthRangeForWeek, type ScheduleEventData} from '../../../shared/components/WeeklyGrid';
 
 import '../OferecimentoCurso.css';
@@ -1220,13 +1222,9 @@ const fetchProfessor = async (query: string, diaSemanaId?: number, turnoId?: num
 
                                                     <div className="form-field">
 
-                                                        <span className="form-label">Criar nova sequência</span>
+<span className="form-label">Criar nova sequência</span>
 
-                                                        <label style={{display: 'flex', gap: 6, alignItems: 'center'}}>
-
-                                                            <input type="checkbox" checked={data.novoGrupo} onChange={(ev) => updateField('novoGrupo', ev.target.checked)}/> Sim
-
-                                                        </label>
+                                                        <BooleanField value={data.novoGrupo} onChange={(v) => updateField('novoGrupo', v)} />
 
                                                     </div>
 
@@ -1304,7 +1302,7 @@ const fetchProfessor = async (query: string, diaSemanaId?: number, turnoId?: num
 
                                                             <label className="form-field"><span className="form-label">Dias a Replicar</span><input type="number" min={1} className="form-input" value={data.entity.diasReplicar ?? ''} onChange={(ev) => updateField('entity.diasReplicar', Number(ev.target.value))}/></label>
 
-                                                            <div className="form-field"><span className="form-label">Detalhar Replicação</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={!!data.entity.detalharReplicacao} onChange={(ev) => updateField('entity.detalharReplicacao', ev.target.checked)}/> Sim</label></div>
+                                                            <div className="form-field"><span className="form-label">Detalhar Replicação</span><BooleanField value={!!data.entity.detalharReplicacao} onChange={(v) => updateField('entity.detalharReplicacao', v)} /></div>
 
                                                             {data.entity.detalharReplicacao && (
 
@@ -1582,9 +1580,9 @@ const fetchProfessor = async (query: string, diaSemanaId?: number, turnoId?: num
 
                                                     <label className="form-field"><span className="form-label">Vagas</span><input type="number" className="form-input" value={data.entity.vagas ?? ''} onChange={(ev) => updateField('entity', {...dataRef.current.entity, vagas: Number(ev.target.value)})}/><button type="button" className="btnblue" onClick={ajustarVagas}>Ajustar Vagas</button></label>
 
-                                                    <label className="form-field"><span className="form-label">Registra Frequência</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={data.entity.registraFrequencia !== false} onChange={(ev) => updateField('entity', {...dataRef.current.entity, registraFrequencia: ev.target.checked})}/> Sim</label></label>
+<label className="form-field"><span className="form-label">Registra Frequência</span><BooleanField value={data.entity.registraFrequencia !== false} onChange={(v) => updateField('entity', {...dataRef.current.entity, registraFrequencia: v})} /></label>
 
-                                                    <label className="form-field"><span className="form-label">Possui Avaliação</span><label style={{display: 'flex', gap: 6, alignItems: 'center'}}><input type="checkbox" checked={data.entity.possuiAvaliacao !== false} onChange={(ev) => updateField('entity', {...dataRef.current.entity, possuiAvaliacao: ev.target.checked})}/> Sim</label></label>
+                                                    <label className="form-field"><span className="form-label">Possui Avaliação</span><BooleanField value={data.entity.possuiAvaliacao !== false} onChange={(v) => updateField('entity', {...dataRef.current.entity, possuiAvaliacao: v})} /></label>
 
                                                     <button type="button" className="btn-action btnyellow" style={{gridColumn: 'span 2'}} onClick={abrirModalOferta}>
 

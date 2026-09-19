@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {ScrollView, StyleSheet, Text, TextInput, View} from 'react-native';
+import {ScrollView, StyleSheet, Text, TextInput, View, Pressable} from 'react-native';
 import {Alert} from '../../../shared/components/SweetAlert';
 import {useRoute} from '@react-navigation/native';
 import {useQuery} from '@tanstack/react-query';
@@ -26,6 +26,16 @@ const semId = (obj: Record<string, unknown> | null): Record<string, unknown> => 
 const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
 const num = (v: string): number | null => (v !== '' && !isNaN(Number(v)) ? Number(v) : null);
 const bool = (v: unknown): boolean => v === true || v === 'true';
+
+function Toggle({label, value, onChange, onText = 'Sim', offText = 'Não'}: {label: string; value: boolean; onChange: (v: boolean) => void; onText?: string; offText?: string}) {
+    return (
+        <Pressable style={styles.toggleRow} onPress={() => onChange(!value)}>
+            <Text style={styles.fieldLabel}>{label}</Text>
+            <View style={[styles.toggleTrack, value && styles.toggleTrackOn]}><View style={[styles.toggleThumb, value && styles.toggleThumbOn]}/></View>
+            <Text style={styles.toggleLabel}>{value ? onText : offText}</Text>
+        </Pressable>
+    );
+}
 
 function FormField({label, value, onChange, type = 'text', placeholder, mask, options, editable = true, required = false, style}: {
     label: string;
@@ -248,14 +258,9 @@ export default function ViewUnidadeFormUnidadeListScreen() {
                                 required
                                 style={styles.fieldHalf}
                             />
-                            <FormField
-                                label="Ativo"
-                                value={values.ativo ?? ''}
-                                onChange={(text) => setValues((prev) => ({...prev, ativo: text}))}
-                                type="select"
-                                options={[{value: 'true', label: 'Sim'}, {value: 'false', label: 'Não'}]}
-                                style={styles.fieldHalf}
-                            />
+                            <View style={styles.fieldHalf}>
+                                <Toggle label="Ativo" value={bool(values.ativo)} onChange={(v) => setValues((prev) => ({...prev, ativo: String(v)}))} onText="Ativo" offText="Inativo"/>
+                            </View>
                         </View>
                         <View style={styles.formRow}>
                             <FormField
@@ -584,6 +589,38 @@ const styles = StyleSheet.create({
     },
     selectInput: {
         backgroundColor: Colors.bgSecondary,
+    },
+    toggleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        paddingVertical: 6,
+    },
+    toggleTrack: {
+        width: 44,
+        height: 26,
+        borderRadius: 13,
+        backgroundColor: Colors.toggleOff,
+        padding: 2,
+        justifyContent: 'center',
+    },
+    toggleTrackOn: {
+        backgroundColor: Colors.toggleOn,
+    },
+    toggleThumb: {
+        width: 22,
+        height: 22,
+        borderRadius: 11,
+        backgroundColor: Colors.toggleThumb,
+        ...Shadows.small,
+    },
+    toggleThumbOn: {
+        alignSelf: 'flex-end',
+    },
+    toggleLabel: {
+        fontSize: 13,
+        color: Colors.textPrimary,
+        fontWeight: Typography.weights.medium,
     },
     footer: {
         flexDirection: 'row',

@@ -61,6 +61,7 @@ export default function Sidebar({onPhotoAction}: SidebarProps) {
     const {menuIcon} = useMenuIcon();
     const [expanded, setExpanded] = useState(false);
     const [search, setSearch] = useState('');
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
 
     const rawModulos = (session?.modules ?? []) as Modulo[];
     // Filtra módulos ocultos e também filhos de módulos ocultos (recursivo)
@@ -118,6 +119,27 @@ export default function Sidebar({onPhotoAction}: SidebarProps) {
     }, [modulos, childrenByParent, topModulos, defaultPath, menuIcon]);
 
     const query = search.trim().toLowerCase();
+    
+    // Função para filtrar a árvore mantendo a hierarquia
+    const filterTree = (items: Modulo[], parentLabel: string | null = null): { modulo: Modulo; children: any[] }[] => {
+        if (!query) return [];
+        const tokens = query.split(/\s+/);
+        return items
+            .map(m => {
+                const children = filterTree(childrenByParent.get(m.id) ?? [], m.rotulo);
+                const haystack = `${m.rotulo} ${m.descricao} ${m.outcome} ${parentLabel ?? ''}`.toLowerCase();
+                const matches = tokens.every(t => haystack.includes(t));
+                if (matches || children.length > 0) {
+                    return { modulo: m, children };
+                }
+                return null;
+            })
+            .filter((x): x is { modulo: Modulo; children: any[] } => x !== null);
+    };
+
+    const searchTree = useMemo(() => filterTree(topModulos), [query, topModulos, childrenByParent]);
+    
+    // Para resultados de busca flat (compatibilidade com código existente)
     const searchResults = useMemo(() => {
         if (!query) return null;
         const tokens = query.split(/\s+/);
@@ -129,52 +151,46 @@ export default function Sidebar({onPhotoAction}: SidebarProps) {
 
     return (
         <aside
-            className={`sidebar ${expanded ? 'expanded' : ''}`}
+            className={`sidebar ${expanded ? 'expanded' : 'collapsed'}`}
             onMouseEnter={() => setExpanded(true)}
-            onMouseLeave={() => setExpanded(false)}
-            onFocus={() => setExpanded(true)}
-            onBlur={() => setExpanded(false)}
+            onMouseLeave={() => { if (!isSearchFocused) setExpanded(false); }}
         >
             <div className="sidebar-header">
                 <span className="sidebar-logo">O</span>
                 <span className="sidebar-title">Olímpio</span>
             </div>
             <nav className="sidebar-nav">
-                {expanded && (
-                    <div className="sidebar-search">
-                        <span className="sidebar-search-icon"><SearchIcon/></span>
-                        <input
-                            type="text"
-                            className="sidebar-search-input"
-                            placeholder="Buscar menu ou tela..."
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            aria-label="Buscar menu ou tela"
-                        />
-                        {search && (
-                            <button type="button" className="sidebar-search-clear" onClick={() => setSearch('')}
-                                    aria-label="Limpar busca">
-                                ×
-                            </button>
-                        )}
-                    </div>
-                )}
-                {searchResults ? (
-                    searchResults.length === 0 ? (
+                <div className="sidebar-search">
+                    <span className="sidebar-search-icon"><SearchIcon/></span>
+                    <input
+                        type="text"
+                        className="sidebar-search-input"
+                        placeholder="Buscar menu ou tela..."
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        aria-label="Buscar menu ou tela"
+                        onFocus={() => { setExpanded(true); setIsSearchFocused(true); }}
+                        onBlur={() => setIsSearchFocused(false)}
+                    />
+                    {search && (
+                        <button type="button" className="sidebar-search-clear" onClick={() => setSearch('')}
+                                aria-label="Limpar busca">
+                            ×
+                        </button>
+                    )}
+                </div>
+                {query ? (
+                    searchTree.length === 0 ? (
                         <div className="sidebar-search-empty">Nenhum item encontrado</div>
                     ) : (
-                        searchResults.map((item, index) => (
-                            <Link
-                                key={`${item.path}-${item.label}-${index}`}
-                                className="sidebar-item sidebar-search-result"
-                                to={item.path || '#'}
-                            >
-                                <span className="sidebar-icon">{item.icon}</span>
-                                <span className="sidebar-label">
-                                    {item.parent && <span className="sidebar-search-parent">{item.parent} › </span>}
-                                    {item.label}
-                                </span>
-                            </Link>
+                        searchTree.map((node, index) => (
+                            <SearchTreeItem
+                                key={`${node.modulo.id}-${index}`}
+                                node={node}
+                                childrenByParent={childrenByParent}
+                                menuIcon={menuIcon}
+                                onPhotoAction={onPhotoAction}
+                            />
                         ))
                     )
                 ) : (
@@ -191,6 +207,59 @@ export default function Sidebar({onPhotoAction}: SidebarProps) {
                 )}
             </nav>
         </aside>
+    );
+}
+
+function SearchTreeItem({node, childrenByParent, menuIcon, onPhotoAction}: { node: { modulo: Modulo; children: any[] }; childrenByParent: Map<number, Modulo[]>; menuIcon: (rotulo: string, icone?: string) => React.ReactNode; onPhotoAction?: () => void }) {
+    const location = useLocation();
+    const [open, setOpen] = useState(true); // Começa aberto na busca
+    const { modulo, children } = node;
+    const isGroup = children.length > 0;
+    const outcome = normalizeOutcome(modulo.outcome);
+    const active = Boolean(outcome) && location.pathname.includes(outcome);
+    const isPhotoAction = modulo.outcome === '/meus-dados/foto' || modulo.rotulo.toLowerCase() === 'alterar foto';
+
+    if (!isGroup) {
+        if (isPhotoAction) {
+            return (
+                <button
+                    className="sidebar-item sidebar-search-result"
+                    onClick={onPhotoAction}
+                    type="button"
+                >
+                    <span className="sidebar-icon">{menuIcon(modulo.rotulo, modulo.icone)}</span>
+                    <span className="sidebar-label">{modulo.rotulo}</span>
+                </button>
+            );
+        }
+        return (
+            <Link
+                className={`sidebar-item sidebar-search-result ${active ? 'active' : ''}`}
+                to={outcome || '#'}
+            >
+                <span className="sidebar-icon">{menuIcon(modulo.rotulo, modulo.icone)}</span>
+                <span className="sidebar-label">{modulo.rotulo}</span>
+            </Link>
+        );
+    }
+
+    return (
+        <div className="sidebar-group">
+            <button className="sidebar-item sidebar-group-header sidebar-search-result"
+                    onClick={() => setOpen(prev => !prev)}>
+                <span className="sidebar-icon">{menuIcon(modulo.rotulo, modulo.icone)}</span>
+                <span className="sidebar-label">{modulo.rotulo}</span>
+                <span className="sidebar-arrow">{open ? '▾' : '▸'}</span>
+            </button>
+            {open && (
+                <div className="sidebar-submenu">
+                    {children.map(child => (
+                        <SearchTreeItem key={child.modulo.id} node={child} childrenByParent={childrenByParent}
+                                         menuIcon={menuIcon} onPhotoAction={onPhotoAction}/>
+                    ))}
+                </div>
+            )}
+        </div>
     );
 }
 

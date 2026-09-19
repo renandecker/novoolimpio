@@ -1,0 +1,47 @@
+.boolean-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.boolean-field-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color, #ddd);
+    background: var(--input-bg, #fff);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.boolean-field-toggle-on {
+    background: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+}
+
+.boolean-field-toggle:hover:not(:disabled) {
+    background: var(--table-hover-bg, #f8f9fa);
+    border-color: #ccc;
+}
+
+.boolean-field-toggle:hover:not(:disabled).boolean-field-toggle-on {
+    background: #c3e6cb;
+    border-color: #23923a;
+}
+
+.boolean-field-toggle:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.boolean-field-label {
+    font-size: 12px;
+    color: var(--text-secondary, #666);
+}

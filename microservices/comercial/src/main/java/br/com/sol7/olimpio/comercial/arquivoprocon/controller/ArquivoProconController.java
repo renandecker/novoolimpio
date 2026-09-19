@@ -34,9 +34,9 @@ public class ArquivoProconController {
     }
 
     @POST
-    @Path("/upload")
-    public Uni<Response> upload(ArquivoProconUploadRequest r) {
-        return service.uploadAndProduce(r).map(item -> Response.status(Response.Status.ACCEPTED).entity(item).build());
+    @Path("/upload-chunk")
+    public Uni<Response> uploadChunk(ArquivoProconChunkRequest r) {
+        return service.uploadChunkAndProduce(r).map(item -> Response.status(Response.Status.ACCEPTED).entity(item).build());
     }
 
     @PUT

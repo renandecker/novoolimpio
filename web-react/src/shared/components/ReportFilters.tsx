@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react';
 import type {FiltroRelatorioWrapper, FilterDimensionType, TempoFilterState, DescritivoFilterState, FixoFilterState, FilterState, QueryOperation, FiltroRelatorio} from '../types/types';
 import {STRING_OPERATIONS} from '../types/types';
 import {Modal} from './Modal';
+import {BooleanField} from './BooleanField';
 
 interface ReportFiltersProps {
     filtros: FiltroRelatorioWrapper[];
@@ -322,12 +323,11 @@ export function ReportFilters({filtros, onFiltersChange, onApplyFilters}: Report
         return (
             <div className="form-field">
                 <label style={{display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer'}}>
-                    <input
-                        type="checkbox"
-                        checked={state.selected}
-                        onChange={e => setFilterStates(prev => ({
+                    <BooleanField
+                        value={state.selected}
+                        onChange={selected => setFilterStates(prev => ({
                             ...prev,
-                            [fr.id]: {...state, selected: e.target.checked},
+                            [fr.id]: {...state, selected},
                         }))}
                     />
                     <span>Aplicar filtro fixo: {fr.nome}</span>

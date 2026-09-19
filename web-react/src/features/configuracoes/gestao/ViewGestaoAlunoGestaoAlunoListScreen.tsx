@@ -1757,11 +1757,11 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
 
             <main>
 
-                <h1>Gestão de Aluno</h1>
+
 
                 <section className="div_form">
 
-                    <div className="form-title">Gestão do Aluno</div>
+
 
                     <div className="table_form">
 
@@ -1785,11 +1785,11 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
 
                             </label>
                             <div className="modal-actions" style={{display: 'flex', gap: '0.5rem', alignItems: 'flex-end', justifyContent: 'flex-end', marginLeft: 'auto'}}>
-                                <button
+                                 <button
 
                                     type="button"
 
-                                    className="btn-form-save"
+                                    className="btnblue"
 
                                     onClick={() => aluno && selecionarAluno(aluno)}
 
@@ -1801,7 +1801,7 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
 
                                 </button>
 
-                                <button type="button" className="btn-form-back" onClick={() => selecionarAluno(null)}>
+                                <button type="button" className="btnyellow" onClick={() => selecionarAluno(null)}>
 
                                     Limpar campo
 

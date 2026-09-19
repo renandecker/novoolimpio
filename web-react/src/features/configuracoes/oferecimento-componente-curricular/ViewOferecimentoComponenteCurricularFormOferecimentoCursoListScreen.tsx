@@ -20,6 +20,8 @@ import type {ScheduleEventData} from '../../../shared/components/WeeklyGrid';
 
 import {Modal} from '../../../shared/components/Modal';
 
+import {BooleanField} from '../../../shared/components/BooleanField';
+
 import '../OferecimentoCurso.css';
 type Opcao = {id: number; label: string};
 
@@ -1819,15 +1821,13 @@ useEffect(() => {
 
                     <label className="ofc-checkbox">
 
-                        <input
+                        <BooleanField
 
-                            type="checkbox"
-
-                            checked={data.novoGrupo}
+                            value={data.novoGrupo}
 
                             disabled={(gruposDisponiveis.length === 0 && !data.novoGrupo)}
 
-                            onChange={(e) => updateFields({novoGrupo: e.target.checked, grupoId: null})}
+                            onChange={(checked) => updateFields({novoGrupo: checked, grupoId: null})}
 
                         />
 
