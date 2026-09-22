@@ -274,6 +274,7 @@ export { default as ViewRegraNotificacaoListRegraListScreen } from '../features/
 export { default as ViewRelatoriosDocumentosListScreen } from '../features/configuracoes/relatorios/ViewRelatoriosDocumentosListScreen.tsx';
 export { default as ViewRelatoriosExtratorListScreen } from '../features/configuracoes/relatorios/ViewRelatoriosExtratorListScreen.tsx';
 export { default as ViewRelatoriosFormDashboardListScreen } from '../features/configuracoes/relatorios/ViewRelatoriosFormDashboardListScreen.tsx';
+export { default as DashboardMontagemScreen } from '../features/relatorios/DashboardMontagemScreen.tsx';
 export { default as ViewRelatoriosFormGraficoListScreen } from '../features/configuracoes/relatorios/ViewRelatoriosFormGraficoListScreen.tsx';
 export { default as ViewRelatoriosFormMapaListScreen } from '../features/configuracoes/relatorios/ViewRelatoriosFormMapaListScreen.tsx';
 export { default as ViewRelatoriosFormOrganogramaListScreen } from '../features/configuracoes/relatorios/ViewRelatoriosFormOrganogramaListScreen.tsx';

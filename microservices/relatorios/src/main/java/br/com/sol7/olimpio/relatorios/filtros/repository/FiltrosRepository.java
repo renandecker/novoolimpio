@@ -100,6 +100,66 @@ public class FiltrosRepository implements PanacheRepository<Filtros> {
                 }));
     }
 
+    public Uni<List<Filtros>> findByTabelaWithPermissions(Long tabelaId, Long usuarioId, Long estruturaId) {
+        String sql = """
+            SELECT DISTINCT f.id AS id, f.nome AS nome, f.fl_fixo AS fl_fixo, f.fl_exibir AS fl_exibir,
+                   f.tipo_filtro AS tipo_filtro, f.valor_fixo AS valor_fixo,
+                   f.fl_hierarquia AS fl_hierarquia, f.hierarquia AS hierarquia,
+                   f.id_estrutura AS id_estrutura, f.id_dimensao AS id_dimensao,
+                   d.tipo_info_dimensao AS dimensao_tipo_info
+            FROM rel_filtro f
+            LEFT JOIN rel_filtro_tabela filtab ON (f.id = filtab.id_filtro)
+            LEFT JOIN rel_filtro_usuario filusu ON (f.id = filusu.id_filtro)
+            LEFT JOIN bas_usuario usu ON (filusu.id_usuario = usu.id AND usu.id = :usuarioId)
+            LEFT JOIN rel_filtro_perfil filper ON (f.id = filper.id_filtro)
+            LEFT JOIN bas_usuario_perfil per ON (filper.id_perfil = per.id_perfil AND per.id_usuario = :usuarioId)
+            LEFT JOIN rel_filtro_unidade filuni ON (f.id = filuni.id_filtro)
+            LEFT JOIN bas_usuario_unidade uni ON (uni.id_unidade = filuni.id_unidade AND uni.id_usuario = :usuarioId)
+            LEFT JOIN bas_usuario u ON (u.id = :usuarioId)
+            LEFT JOIN rel_dimensao d ON (d.id = f.id_dimensao)
+            -- Using correct column name tipo_info_dimensao
+            WHERE f.id_estrutura = :estruturaId
+              AND (f.fl_todos_tabela = true OR (f.fl_todos_tabela = false AND filtab.id_tabela = :tabelaId))
+              AND (
+                    (f.fl_hierarquia = false OR (f.hierarquia = u.hierarquia AND f.fl_hierarquia = true))
+                    AND (
+                        (filusu.id_usuario IS NOT NULL)
+                        OR (filper.id_perfil IS NOT NULL)
+                        OR (filuni.id_unidade IS NOT NULL)
+                        OR (f.fl_todos_perfis = true AND f.fl_todos_unidades = true AND f.fl_todos_usuarios = true)
+                    )
+                  )
+            ORDER BY f.nome
+            """;
+        return Panache.getSession().chain(session -> session
+                .createNativeQuery(sql, Tuple.class)
+                .setParameter("tabelaId", tabelaId)
+                .setParameter("usuarioId", usuarioId)
+                .setParameter("estruturaId", estruturaId)
+                .getResultList()
+                .map(list -> {
+                    List<Filtros> result = new ArrayList<>();
+                    for (Object row : list) {
+                        Tuple t = (Tuple) row;
+                        Filtros f = new Filtros();
+                        f.id = TupleHelper.getLong(t, "id");
+                        f.nome = TupleHelper.getString(t, "nome");
+                        f.flFixo = TupleHelper.getBoolean(t, "fl_fixo");
+                        f.flExibir = TupleHelper.getBoolean(t, "fl_exibir");
+                        f.tipoFiltro = TupleHelper.getString(t, "tipo_filtro");
+                        f.valorFixo = TupleHelper.getString(t, "valor_fixo");
+                        f.idDimensao = TupleHelper.getLong(t, "id_dimensao");
+                        // Store dimensao tipoInfo in a transient field or use dadosJson
+                        String dimensaoTipoInfo = TupleHelper.getString(t, "dimensao_tipo_info");
+                        if (dimensaoTipoInfo != null) {
+                            f.dadosJson = dimensaoTipoInfo;
+                        }
+                        result.add(f);
+                    }
+                    return result;
+                }));
+    }
+
     public Uni<List<Filtros>> findByGrafico(Long graficoId) {
         String sql = "SELECT f.id AS id, f.nome AS nome, f.fl_fixo AS fl_fixo, f.fl_exibir AS fl_exibir, f.tipo_filtro AS tipo_filtro, f.valor_fixo AS valor_fixo FROM rel_filtro f "
                 + "JOIN rel_filtro_grafico fg ON fg.id_filtro = f.id "

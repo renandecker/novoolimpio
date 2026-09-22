@@ -1,8 +1,8 @@
-package br.com.sol7.olimpio.educacao.lote.kafka;
+package br.com.sol7.olimpio.educacao.lote.rabbitmq;
 
 /**
  * Cópia compatível (mesmo JSON) de {@code NotificacaoMessage} do
- * notificacoes-service, trafegada nos tópicos
+ * notificacoes-service, trafegada nos exchanges
  * {@code olimpio.notificacao.{email,mobile,web}}.
  *
  * <p>Os fluxos de lote do NAP publicam aqui: e-mail entrega no

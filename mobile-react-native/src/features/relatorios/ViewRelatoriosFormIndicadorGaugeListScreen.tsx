@@ -1,46 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { FormLayout, FormTabConfig } from '../FormLayout';
-import { AutoComplete } from '../AutoComplete';
-import { useApi } from '../../shared/services/api';
-import { API_PATHS } from '../../shared/services/apiPaths';
-import { DataTable } from '../DataTable';
-import { MasterDetail } from '../MasterDetail';
-import type { ApiItem } from '../types';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TextInput,
+    ScrollView,
+    Pressable,
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
+    Alert,
+} from 'react-native';
+import { api } from '../../shared/services/api';
+import { GaugeChart, GAUGE_COLORS, type GaugeConfig } from './GaugeChart';
 
-const NR_OF_LEVELS_OPTIONS = [
-    { value: '2', label: '2 Níveis' },
-    { value: '3', label: '3 Níveis' },
-    { value: '4', label: '4 Níveis' },
-    { value: '5', label: '5 Níveis' },
-];
-
+const NR_OF_LEVELS_OPTIONS = [2, 3, 4, 5];
 const ARC_WIDTH_OPTIONS = [
-    { value: '0.1', label: 'Fino (0.1)' },
-    { value: '0.2', label: 'Médio-fino (0.2)' },
-    { value: '0.3', label: 'Médio (0.3)' },
-    { value: '0.4', label: 'Médio-grosso (0.4)' },
-    { value: '0.5', label: 'Grosso (0.5)' },
+    { value: 0.1, label: '0.1' },
+    { value: 0.2, label: '0.2' },
+    { value: 0.3, label: '0.3' },
+    { value: 0.4, label: '0.4' },
+    { value: 0.5, label: '0.5' },
+];
+const TIPO_EXIBICAO_OPTIONS: { value: GaugeConfig['tipoExibicao']; label: string }[] = [
+    { value: 'valor', label: 'Valor' },
+    { value: 'percentual', label: 'Percentual' },
+    { value: 'ambos', label: 'Valor + %' },
 ];
 
-const GAUGE_COLORS = [
-    '#22c55e', '#16a34a', '#15803d', '#166534',
-    '#84cc16', '#65a30d', '#4d7c0f', '#3f6212',
-    '#eab308', '#ca8a04', '#a16207', '#854d0e',
-    '#f59e0b', '#d97706', '#b45309', '#92400e',
-    '#ef4444', '#dc2626', '#b91c1c', '#991b1b',
-    '#f43f5e', '#e11d48', '#be123c', '#9f1239',
-    '#ec4899', '#db2777', '#be185d', '#9d174d',
-    '#a855f7', '#9333ea', '#7e22ce', '#6b21a8',
-    '#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6',
-    '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af',
-    '#06b6d4', '#0891b2', '#0e7490', '#155e75',
-    '#14b8a6', '#0d9488', '#0f766e', '#115e59',
-    '#f97316', '#ea580c', '#c2410c', '#9a3412',
-];
-
-const COLOR_OPTIONS = GAUGE_COLORS.map(color => ({ value: color, label: color }));
-
-const DEFAULT_CONFIG = {
+const DEFAULT_CONFIG: GaugeConfig = {
     nrOfLevels: 3,
     colors: ['#22c55e', '#eab308', '#ef4444'],
     arcWidth: 0.3,
@@ -49,461 +37,626 @@ const DEFAULT_CONFIG = {
     needleColor: '#475569',
     needleBaseColor: '#475569',
     animate: true,
+    tipoExibicao: 'valor',
 };
 
-const EXAMPLE_SQL = `SELECT 
+const EXAMPLE_SQL = `SELECT
     COALESCE(SUM(valor_total), 0) AS valor_atual,
     0 AS valor_minimo,
     50000 AS valor_maximo -- Meta predefinida
 FROM vendas
 WHERE DATE_TRUNC('month', data_venda) = DATE_TRUNC('month', CURRENT_DATE);`;
 
-interface IndicadorGaugeFormData {
-    entity: {
-        id?: number;
-        nome?: string;
-        sql?: string;
-        configuracao?: {
-            nrOfLevels: number;
-            colors: string[];
-            arcWidth: number;
-            percent: number;
-            textColor: string;
-            needleColor: string;
-            needleBaseColor: string;
-            animate: boolean;
-        };
-    };
-    usuarios: ApiItem[];
-    unidades: ApiItem[];
-    perfis: ApiItem[];
-    filtros: any[];
+interface GaugeTestResult {
+    valorAtual: number;
+    valorMinimo: number;
+    valorMaximo: number;
 }
 
-export default function ViewRelatoriosFormIndicadorGaugeListScreen() {
-    const [usuarios, setUsuarios] = useState<ApiItem[]>([]);
-    const [unidades, setUnidades] = useState<ApiItem[]>([]);
-    const [perfis, setPerfis] = useState<ApiItem[]>([]);
-    const [filtros, setFiltros] = useState<any[]>([]);
-    const [testResult, setTestResult] = useState<{ valorAtual: number; valorMinimo: number; valorMaximo: number } | null>(null);
+function parseConfiguracao(raw: unknown): GaugeConfig {
+    if (!raw) return { ...DEFAULT_CONFIG };
+    try {
+        const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        return { ...DEFAULT_CONFIG, ...parsed };
+    } catch {
+        return { ...DEFAULT_CONFIG };
+    }
+}
+
+export default function ViewRelatoriosFormIndicadorGaugeListScreen({
+    route,
+    navigation,
+}: {
+    route: { params?: { id?: number | string } };
+    navigation: any;
+}) {
+    const idParam = route.params?.id != null ? Number(route.params.id) : null;
+    const isEditing = idParam != null;
+
+    const [nome, setNome] = useState('');
+    const [sql, setSql] = useState(EXAMPLE_SQL);
+    const [config, setConfig] = useState<GaugeConfig>({ ...DEFAULT_CONFIG });
+    const [loading, setLoading] = useState(isEditing);
     const [testing, setTesting] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [testResult, setTestResult] = useState<GaugeTestResult | null>(null);
 
-    const { post: saveIndicador, put: updateIndicador, get: loadIndicador } = useApi('/api/relatorios/indicador-gauge');
-    const { post: saveFiltro } = useApi(API_PATHS.relatorios.filtro);
-    const { delete: deleteFiltro } = useApi(API_PATHS.relatorios.filtro);
+    useEffect(() => {
+        if (!isEditing || idParam == null) return;
+        setLoading(true);
+        api.get<{ nome: string; sql: string; configuracao: unknown }>(`/api/relatorios/indicador-gauge/${idParam}`)
+            .then((resp) => {
+                const data = resp.data;
+                setNome(data.nome ?? '');
+                setSql(data.sql ?? '');
+                setConfig(parseConfiguracao(data.configuracao));
+            })
+            .catch((err) => {
+                console.error('Erro ao carregar indicador:', err);
+                Alert.alert('Erro', 'Não foi possível carregar o indicador.');
+            })
+            .finally(() => setLoading(false));
+    }, [idParam, isEditing]);
 
-    const [entity, setEntity] = useState<IndicadorGaugeFormData['entity']>({
-        nome: '',
-        sql: EXAMPLE_SQL,
-        configuracao: { ...DEFAULT_CONFIG },
-    });
-    const [filtroNome, setFiltroNome] = useState('');
-    const [filtroDimensao, setFiltroDimensao] = useState<any>(null);
-
-    const isEditing = !!entity.id;
-
-    const handleConfigChange = <K extends keyof IndicadorGaugeFormData['entity']['configuracao']>(
-        key: K,
-        value: IndicadorGaugeFormData['entity']['configuracao'][K]
-    ) => {
-        setEntity(prev => ({
-            ...prev,
-            configuracao: { ...prev.configuracao!, [key]: value },
-        }));
+    const setConfigField = <K extends keyof GaugeConfig>(key: K, value: GaugeConfig[K]) => {
+        setConfig((prev) => ({ ...prev, [key]: value }));
     };
 
-    const handleColorChange = (index: number, color: string) => {
-        const colors = [...(entity.configuracao?.colors ?? DEFAULT_CONFIG.colors)];
+    const setColor = (index: number, color: string) => {
+        const colors = [...config.colors];
         colors[index] = color;
-        handleConfigChange('colors', colors);
-    };
-
-    const addNivel = () => {
-        if (entity.configuracao && entity.configuracao.nrOfLevels < 5) {
-            const newColors = [...entity.configuracao.colors, DEFAULT_CONFIG.colors[entity.configuracao.nrOfLevels % DEFAULT_CONFIG.colors.length]];
-            handleConfigChange('nrOfLevels', entity.configuracao.nrOfLevels + 1);
-            handleConfigChange('colors', newColors);
-        }
-    };
-
-    const removeNivel = () => {
-        if (entity.configuracao && entity.configuracao.nrOfLevels > 2) {
-            const newColors = entity.configuracao.colors.slice(0, -1);
-            handleConfigChange('nrOfLevels', entity.configuracao.nrOfLevels - 1);
-            handleConfigChange('colors', newColors);
-        }
+        setConfigField('colors', colors);
     };
 
     const handleTestSql = async () => {
-        if (!entity.sql?.trim()) {
-            alert('Informe a consulta SQL');
+        if (!sql.trim()) {
+            Alert.alert('Atenção', 'Informe a consulta SQL.');
             return;
         }
         setTesting(true);
         try {
-            const resp = await fetch('/api/relatorios/indicador-gauge/executar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sql: entity.sql }),
-            });
-            if (resp.ok) {
-                const result = await resp.json();
-                setTestResult(result);
-            } else {
-                alert('Erro ao executar SQL');
-            }
+            const resp = await api.post<GaugeTestResult>('/api/relatorios/indicador-gauge/executar', { sql });
+            setTestResult(resp.data);
         } catch (error) {
             console.error('Erro ao testar SQL:', error);
-            alert('Erro ao executar SQL. Verifique a sintaxe.');
+            Alert.alert('Erro', 'SQL inválido. Confira a sintaxe e os comandos permitidos.');
         } finally {
             setTesting(false);
         }
     };
 
     const handleSubmit = async () => {
-        if (!entity.nome || entity.nome.length < 3) {
-            alert('Nome deve ter pelo menos 3 caracteres');
+        if (nome.trim().length < 3) {
+            Alert.alert('Atenção', 'Nome deve ter pelo menos 3 caracteres.');
             return;
         }
-        if (!entity.sql?.trim()) {
-            alert('Informe a consulta SQL');
+        if (!sql.trim()) {
+            Alert.alert('Atenção', 'Informe a consulta SQL.');
             return;
         }
-        if (!entity.configuracao?.colors?.length || entity.configuracao.colors.length < 2) {
-            alert('Configure pelo menos 2 cores');
+        if (!config.colors.length || config.colors.length < 2) {
+            Alert.alert('Atenção', 'Configure pelo menos 2 cores.');
             return;
         }
 
+        const payload = {
+            nome: nome.trim(),
+            sql: sql.trim(),
+            configuracao: JSON.stringify(config),
+        };
+
+        setSaving(true);
         try {
-            const payload = {
-                nome: entity.nome,
-                sql: entity.sql,
-                configuracao: entity.configuracao,
-                usuarios,
-                unidades,
-                perfis,
-                filtros,
-            };
-
-            if (isEditing) {
-                await updateIndicador(entity.id!, payload);
-                alert('Indicador atualizado com sucesso!');
+            if (isEditing && idParam != null) {
+                await api.put(`/api/relatorios/indicador-gauge/${idParam}`, payload);
+                Alert.alert('Sucesso', 'Indicador atualizado com sucesso!');
             } else {
-                await saveIndicador(payload);
-                alert('Indicador criado com sucesso!');
+                await api.post('/api/relatorios/indicador-gauge', payload);
+                Alert.alert('Sucesso', 'Indicador criado com sucesso!');
             }
+            navigation.goBack();
         } catch (error) {
             console.error('Erro ao salvar indicador:', error);
-            alert('Erro ao salvar indicador');
+            Alert.alert('Erro', 'Não foi possível salvar o indicador.');
+        } finally {
+            setSaving(false);
         }
     };
 
-    const addFiltro = async () => {
-        if (!filtroNome.trim() || !filtroDimensao) {
-            alert('Informe nome e dimensão para o filtro');
-            return;
-        }
-        try {
-            const resp = await saveFiltro({
-                nome: filtroNome,
-                dimensaoId: filtroDimensao.id,
-                estruturaId: 0,
-            });
-            setFiltros([...filtros, resp.data]);
-            setFiltroNome('');
-            setFiltroDimensao(null);
-        } catch (error) {
-            console.error('Erro ao adicionar filtro:', error);
-            alert('Erro ao adicionar filtro');
-        }
+    const addNivel = () => {
+        if (config.nrOfLevels >= 5) return;
+        const newColors = [...config.colors, GAUGE_COLORS[(config.nrOfLevels) % GAUGE_COLORS.length]];
+        setConfig({ ...config, nrOfLevels: config.nrOfLevels + 1, colors: newColors });
     };
 
-    const removeFiltro = async (filtro: any) => {
-        try {
-            await deleteFiltro(filtro.id);
-            setFiltros(filtros.filter(f => f.id !== filtro.id));
-        } catch (error) {
-            console.error('Erro ao remover filtro:', error);
-            alert('Erro ao remover filtro');
-        }
+    const removeNivel = () => {
+        if (config.nrOfLevels <= 2) return;
+        setConfig({ ...config, nrOfLevels: config.nrOfLevels - 1, colors: config.colors.slice(0, -1) });
     };
 
-    const config = entity.configuracao ?? DEFAULT_CONFIG;
+    if (loading) {
+        return (
+            <View style={styles.center}>
+                <ActivityIndicator size="large" color="#3a85bd" />
+                <Text style={styles.centerText}>Carregando...</Text>
+            </View>
+        );
+    }
+
+    const previewValue = testResult
+        ? testResult.valorAtual
+        : config.percent;
+    const previewMin = testResult?.valorMinimo ?? 0;
+    const previewMax = testResult?.valorMaximo ?? 100;
 
     return (
-        <FormLayout
-            title={isEditing ? 'Editar Indicador Gauge' : 'Novo Indicador Gauge'}
-            tabs={[
-                {
-                    key: 'definicao',
-                    label: 'Definição',
-                    fields: [
-                        { name: 'nome', label: 'Nome do Indicador *', required: true },
-                        {
-                            name: 'sql',
-                            label: 'Consulta SQL *',
-                            type: 'textarea',
-                            required: true,
-                            rows: 10,
-                            help: 'O SQL deve retornar 3 colunas: valor_atual, valor_minimo, valor_maximo',
-                        },
-                    ],
-                    customContent: (
-                        <>
-                            <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                                <h4 style={{ marginBottom: '12px', fontSize: '14px', fontWeight: '600', color: '#334155' }}>Testar Consulta SQL</h4>
-                                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
-                                    <button
-                                        type="button"
-                                        onClick={handleTestSql}
-                                        disabled={testing || !entity.sql?.trim()}
-                                        style={{
-                                            padding: '10px 16px',
-                                            backgroundColor: testing || !entity.sql?.trim() ? '#94a3b8' : '#22c55e',
-                                            color: '#fff',
-                                            borderRadius: '8px',
-                                            fontSize: '14px',
-                                            fontWeight: '600',
-                                            border: 'none',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                        }}
-                                    >
-                                        {testing ? '⏳ Testando...' : '▶ Testar SQL'}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setEntity(prev => ({ ...prev, sql: EXAMPLE_SQL }))}
-                                        style={{
-                                            padding: '10px 16px',
-                                            backgroundColor: '#f1f5f9',
-                                            color: '#334155',
-                                            borderRadius: '8px',
-                                            fontSize: '14px',
-                                            fontWeight: '600',
-                                            border: 'none',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                        }}
-                                    >
-                                        📋 Usar Exemplo
-                                    </button>
-                                </div>
-                                {testResult && (
-                                    <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '12px' }}>
-                                        <div style={{ fontSize: '12px', fontWeight: '600', color: '#166534', marginBottom: '8px' }}>Resultado do Teste</div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-                                            <div>
-                                                <div style={{ fontSize: '11px', color: '#166534', fontWeight: '600' }}>Valor Atual</div>
-                                                <div style={{ fontSize: '16px', fontWeight: '700', color: '#15803d', fontFamily: 'monospace' }}>{testResult.valorAtual.toLocaleString('pt-BR')}</div>
-                                            </div>
-                                            <div>
-                                                <div style={{ fontSize: '11px', color: '#166534', fontWeight: '600' }}>Valor Mínimo</div>
-                                                <div style={{ fontSize: '16px', fontWeight: '700', color: '#15803d', fontFamily: 'monospace' }}>{testResult.valorMinimo.toLocaleString('pt-BR')}</div>
-                                            </div>
-                                            <div>
-                                                <div style={{ fontSize: '11px', color: '#166534', fontWeight: '600' }}>Valor Máximo</div>
-                                                <div style={{ fontSize: '16px', fontWeight: '700', color: '#15803d', fontFamily: 'monospace' }}>{testResult.valorMaximo.toLocaleString('pt-BR')}</div>
-                                            </div>
-                                            <div>
-                                                <div style={{ fontSize: '11px', color: '#166534', fontWeight: '600' }}>Percentual</div>
-                                                <div style={{ fontSize: '16px', fontWeight: '700', color: '#2563eb', fontFamily: 'monospace' }}>
-                                                    {((testResult.valorAtual - testResult.valorMinimo) / (testResult.valorMaximo - testResult.valorMinimo) * 100).toFixed(1)}%
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </>
-                    ),
-                },
-                {
-                    key: 'aparencia',
-                    label: 'Aparência',
-                    fields: [
-                        { name: 'configuracao.nrOfLevels', label: 'Níveis de Cor *', type: 'select', options: NR_OF_LEVELS_OPTIONS, required: true },
-                        { name: 'configuracao.arcWidth', label: 'Largura do Arco *', type: 'select', options: ARC_WIDTH_OPTIONS, required: true },
-                        { name: 'configuracao.animate', label: 'Animar', type: 'boolean', booleanLabels: { on: 'Sim', off: 'Não' } },
-                    ],
-                    customContent: (
-                        <div style={{ marginTop: '20px' }}>
-                            <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '12px' }}>Cores dos Níveis</h4>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                {Array.from({ length: config.nrOfLevels }, (_, i) => i).map((levelIndex) => (
-                                    <div key={levelIndex} style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
-                                            <div
-                                                style={{
-                                                    width: '44px',
-                                                    height: '44px',
-                                                    borderRadius: '10px',
-                                                    backgroundColor: config.colors[levelIndex] ?? DEFAULT_CONFIG.colors[levelIndex],
-                                                    border: '2px solid #e2e8f0',
-                                                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                                }}
-                                            />
-                                            <select
-                                                value={config.colors[levelIndex] ?? DEFAULT_CONFIG.colors[levelIndex]}
-                                                onChange={(e) => handleColorChange(levelIndex, e.target.value)}
-                                                style={{
-                                                    flex: 1,
-                                                    minWidth: '150px',
-                                                    padding: '10px 12px',
-                                                    border: '1px solid #cbd5e1',
-                                                    borderRadius: '8px',
-                                                    fontSize: '14px',
-                                                    backgroundColor: '#fff',
-                                                    color: '#1e293b',
-                                                }}
-                                            >
-                                                {COLOR_OPTIONS.map(opt => (
-                                                    <option key={opt.value} value={opt.value} style={{ backgroundColor: opt.value, color: '#fff' }}>
-                                                        {opt.value}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <input
-                                            type="color"
-                                            value={config.colors[levelIndex] ?? DEFAULT_CONFIG.colors[levelIndex]}
-                                            onChange={(e) => handleColorChange(levelIndex, e.target.value)}
-                                            style={{
-                                                width: '50px',
-                                                height: '36px',
-                                                borderRadius: '8px',
-                                                border: '1px solid #cbd5e1',
-                                                cursor: 'pointer',
-                                            }}
-                                            title="Escolher cor personalizada"
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                            <div style={{ display: 'flex', gap: '10px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e2e8f0' }}>
-                                <button
-                                    type="button"
-                                    onClick={addNivel}
-                                    disabled={config.nrOfLevels >= 5}
-                                    style={{
-                                        padding: '10px 16px',
-                                        backgroundColor: config.nrOfLevels >= 5 ? '#f1f5f9' : '#3b82f6',
-                                        color: config.nrOfLevels >= 5 ? '#94a3b8' : '#fff',
-                                        borderRadius: '8px',
-                                        fontSize: '14px',
-                                        fontWeight: '600',
-                                        border: 'none',
-                                    }}
-                                >
-                                    ➕ Adicionar Nível
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={removeNivel}
-                                    disabled={config.nrOfLevels <= 2}
-                                    style={{
-                                        padding: '10px 16px',
-                                        backgroundColor: config.nrOfLevels <= 2 ? '#f1f5f9' : '#ef4444',
-                                        color: config.nrOfLevels <= 2 ? '#94a3b8' : '#fff',
-                                        borderRadius: '8px',
-                                        fontSize: '14px',
-                                        fontWeight: '600',
-                                        border: 'none',
-                                    }}
-                                >
-                                    ➖ Remover Nível
-                                </button>
-                            </div>
-                        </div>
-                    ),
-                },
-                {
-                    key: 'cores-avancadas',
-                    label: 'Cores Avançadas',
-                    fields: [
-                        { name: 'configuracao.textColor', label: 'Cor do Texto', type: 'color' },
-                        { name: 'configuracao.needleColor', label: 'Cor do Ponteiro', type: 'color' },
-                        { name: 'configuracao.needleBaseColor', label: 'Cor da Base do Ponteiro', type: 'color' },
-                    ],
-                },
-                {
-                    key: 'permissao',
-                    label: 'Permissão',
-                    fields: [],
-                    customContent: (
-                        <>
-                            <div style={{ marginBottom: '20px' }}>
-                                <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '12px' }}>Usuários</h4>
-                                <MasterDetail
-                                    label="Usuário"
-                                    source={API_PATHS.view.usuario}
-                                    valueKey="id"
-                                    searchKeys={['login', 'nome']}
-                                    columns={[{ key: 'login', label: 'Login' }, { key: 'nome', label: 'Nome' }]}
-                                    items={usuarios}
-                                    onChange={setUsuarios}
+        <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.container}
+        >
+            <View style={styles.header}>
+                <Text style={styles.headerTitle}>{isEditing ? 'Editar Indicador Gauge' : 'Novo Indicador Gauge'}</Text>
+            </View>
+
+            <ScrollView contentContainerStyle={styles.content}>
+                <Text style={styles.sectionTitle}>Definição</Text>
+
+                <Text style={styles.label}>Nome do Indicador *</Text>
+                <TextInput
+                    style={styles.input}
+                    value={nome}
+                    onChangeText={setNome}
+                    placeholder="Ex: Meta de Vendas Mensal"
+                />
+
+                <Text style={styles.label}>Consulta SQL *</Text>
+                <TextInput
+                    style={[styles.input, styles.sqlInput]}
+                    value={sql}
+                    onChangeText={setSql}
+                    multiline
+                    textAlignVertical="top"
+                    placeholder="SELECT ..."
+                />
+                <Text style={styles.help}>
+                    O SQL deve retornar 3 colunas: valor_atual, valor_minimo, valor_maximo (apenas SELECT/WITH, sem INSERT/UPDATE/DELETE).
+                </Text>
+
+                <View style={styles.rowButtons}>
+                    <Pressable
+                        style={[styles.actionButton, styles.testButton, testing && { opacity: 0.5 }]}
+                        disabled={testing}
+                        onPress={handleTestSql}
+                    >
+                        <Text style={styles.testButtonText}>{testing ? 'Testando...' : 'Testar SQL'}</Text>
+                    </Pressable>
+                    <Pressable style={[styles.actionButton, styles.exampleButton]} onPress={() => setSql(EXAMPLE_SQL)}>
+                        <Text style={styles.exampleButtonText}>Usar Exemplo</Text>
+                    </Pressable>
+                </View>
+
+                {testResult && (
+                    <View style={styles.testResult}>
+                        <Text style={styles.testResultTitle}>Resultado do Teste</Text>
+                        <View style={styles.testResultGrid}>
+                            <View style={styles.testResultItem}>
+                                <Text style={styles.testResultLabel}>Valor Atual</Text>
+                                <Text style={styles.testResultValue}>{testResult.valorAtual.toLocaleString('pt-BR')}</Text>
+                            </View>
+                            <View style={styles.testResultItem}>
+                                <Text style={styles.testResultLabel}>Valor Mínimo</Text>
+                                <Text style={styles.testResultValue}>{testResult.valorMinimo.toLocaleString('pt-BR')}</Text>
+                            </View>
+                            <View style={styles.testResultItem}>
+                                <Text style={styles.testResultLabel}>Valor Máximo</Text>
+                                <Text style={styles.testResultValue}>{testResult.valorMaximo.toLocaleString('pt-BR')}</Text>
+                            </View>
+                            <View style={styles.testResultItem}>
+                                <Text style={styles.testResultLabel}>Percentual</Text>
+                                <Text style={[styles.testResultValue, { color: '#2563eb' }]}>
+                                    {(((testResult.valorAtual - testResult.valorMinimo) / (testResult.valorMaximo - testResult.valorMinimo)) * 100).toFixed(1)}%
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
+                )}
+
+                <Text style={styles.sectionTitle}>Aparência</Text>
+
+                <Text style={styles.label}>Tipo de Exibição *</Text>
+                <View style={styles.segmentRow}>
+                    {TIPO_EXIBICAO_OPTIONS.map((opt) => {
+                        const active = (config.tipoExibicao ?? 'valor') === opt.value;
+                        return (
+                            <Pressable
+                                key={opt.value}
+                                style={[styles.segment, active && styles.segmentActive]}
+                                onPress={() => setConfigField('tipoExibicao', opt.value)}
+                            >
+                                <Text style={[styles.segmentText, active && styles.segmentTextActive]}>{opt.label}</Text>
+                            </Pressable>
+                        );
+                    })}
+                </View>
+
+                <Text style={styles.label}>Níveis de Cor *</Text>
+                <View style={styles.segmentRow}>
+                    {NR_OF_LEVELS_OPTIONS.map((n) => {
+                        const active = config.nrOfLevels === n;
+                        return (
+                            <Pressable
+                                key={n}
+                                style={[styles.segment, active && styles.segmentActive]}
+                                onPress={() => setConfigField('nrOfLevels', n)}
+                            >
+                                <Text style={[styles.segmentText, active && styles.segmentTextActive]}>{n} níveis</Text>
+                            </Pressable>
+                        );
+                    })}
+                </View>
+
+                <Text style={styles.label}>Largura do Arco *</Text>
+                <View style={styles.segmentRow}>
+                    {ARC_WIDTH_OPTIONS.map((opt) => {
+                        const active = config.arcWidth === opt.value;
+                        return (
+                            <Pressable
+                                key={opt.value}
+                                style={[styles.segment, active && styles.segmentActive]}
+                                onPress={() => setConfigField('arcWidth', opt.value)}
+                            >
+                                <Text style={[styles.segmentText, active && styles.segmentTextActive]}>{opt.label}</Text>
+                            </Pressable>
+                        );
+                    })}
+                </View>
+
+                <Text style={styles.label}>Animar</Text>
+                <View style={styles.segmentRow}>
+                    <Pressable
+                        style={[styles.segment, config.animate && styles.segmentActive]}
+                        onPress={() => setConfigField('animate', true)}
+                    >
+                        <Text style={[styles.segmentText, config.animate && styles.segmentTextActive]}>Sim</Text>
+                    </Pressable>
+                    <Pressable
+                        style={[styles.segment, !config.animate && styles.segmentActive]}
+                        onPress={() => setConfigField('animate', false)}
+                    >
+                        <Text style={[styles.segmentText, !config.animate && styles.segmentTextActive]}>Não</Text>
+                    </Pressable>
+                </View>
+
+                <Text style={styles.sectionTitle}>Cores dos Níveis</Text>
+                {Array.from({ length: config.nrOfLevels }, (_, i) => i).map((levelIndex) => (
+                    <View key={levelIndex} style={styles.colorRow}>
+                        <View
+                            style={[styles.colorSwatch, { backgroundColor: config.colors[levelIndex] ?? DEFAULT_CONFIG.colors[levelIndex] }]}
+                        />
+                        <Text style={styles.colorLabel}>Nível {levelIndex + 1}</Text>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.colorOptions}>
+                            {GAUGE_COLORS.map((color) => (
+                                <Pressable
+                                    key={color}
+                                    style={[
+                                        styles.colorOption,
+                                        { backgroundColor: color },
+                                        (config.colors[levelIndex] ?? DEFAULT_CONFIG.colors[levelIndex]) === color && styles.colorOptionActive,
+                                    ]}
+                                    onPress={() => setColor(levelIndex, color)}
                                 />
-                            </div>
-                            <div style={{ marginBottom: '20px' }}>
-                                <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '12px' }}>Unidades</h4>
-                                <MasterDetail
-                                    label="Unidade"
-                                    source={API_PATHS.view.unidade}
-                                    valueKey="id"
-                                    searchKeys={['sucinto', 'razaoSocial', 'nomeFantasia']}
-                                    columns={[{ key: 'sucinto', label: 'Sucinto' }, { key: 'nomeFantasia', label: 'Nome Fantasia' }]}
-                                    items={unidades}
-                                    onChange={setUnidades}
-                                />
-                            </div>
-                            <div style={{ marginBottom: '20px' }}>
-                                <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#334155', marginBottom: '12px' }}>Perfis</h4>
-                                <MasterDetail
-                                    label="Perfil"
-                                    source={API_PATHS.basico.perfil}
-                                    valueKey="id"
-                                    searchKeys={['descricao']}
-                                    columns={[{ key: 'descricao', label: 'Descrição' }]}
-                                    items={perfis}
-                                    onChange={setPerfis}
-                                />
-                            </div>
-                        </>
-                    ),
-                },
-                {
-                    key: 'filtros',
-                    label: 'Filtros',
-                    fields: [
-                        { name: 'nome', label: 'Nome *', required: true },
-                        { name: 'dimensaoId', label: 'Dimensão', type: 'autoComplete', autoCompleteSource: '/api/relatorios/dimensao', autoCompleteSearchKeys: ['nomeVisualizacao', 'nome'], autoCompleteColumns: [{ key: 'id', label: 'ID' }, { key: 'nomeVisualizacao', label: 'Nome Visualização' }] },
-                    ],
-                    customContent: (
-                        <>
-                            <DataTable
-                                data={filtros}
-                                columns={[
-                                    { key: 'id', label: 'ID' },
-                                    { key: 'nome', label: 'Nome' },
-                                    { key: 'estruturaNome', label: 'Estrutura' },
-                                    { key: 'dimensaoNome', label: 'Dimensão' },
-                                ]}
-                                actions={[
-                                    { key: 'remove', label: 'Remover', icon: 'trash', className: 'btnred', onClick: removeFiltro },
-                                ]}
-                            />
-                        </>
-                    ),
-                    nextLabel: 'Concluir',
-                },
-            ]}
-            initialValues={entity}
-            onSubmit={handleSubmit}
-            onCancel={() => console.log('Cancelar')}
-            submitLabel="Salvar"
-            cancelLabel="Voltar"
-        />
+                            ))}
+                        </ScrollView>
+                    </View>
+                ))}
+                <View style={styles.rowButtons}>
+                    <Pressable style={[styles.actionButton, styles.addButton]} onPress={addNivel}>
+                        <Text style={styles.addButtonText}>+ Adicionar Nível</Text>
+                    </Pressable>
+                    <Pressable style={[styles.actionButton, styles.removeButton]} onPress={removeNivel}>
+                        <Text style={styles.removeButtonText}>- Remover Nível</Text>
+                    </Pressable>
+                </View>
+
+                <Text style={styles.sectionTitle}>Cores Avançadas</Text>
+                <Text style={styles.label}>Cor do Texto</Text>
+                <TextInput
+                    style={styles.input}
+                    value={config.textColor}
+                    onChangeText={(value) => setConfigField('textColor', value)}
+                />
+                <Text style={styles.label}>Cor do Ponteiro</Text>
+                <TextInput
+                    style={styles.input}
+                    value={config.needleColor}
+                    onChangeText={(value) => setConfigField('needleColor', value)}
+                />
+                <Text style={styles.label}>Cor da Base do Ponteiro</Text>
+                <TextInput
+                    style={styles.input}
+                    value={config.needleBaseColor}
+                    onChangeText={(value) => setConfigField('needleBaseColor', value)}
+                />
+
+                <Text style={styles.sectionTitle}>Pré-visualização</Text>
+                <View style={styles.previewBox}>
+                    <Text style={styles.previewTitle}>{nome || 'Indicador Gauge'}</Text>
+                    <GaugeChart
+                        config={config}
+                        value={previewValue}
+                        minValue={previewMin}
+                        maxValue={previewMax}
+                        label={nome}
+                    />
+                </View>
+            </ScrollView>
+
+            <View style={styles.footer}>
+                <Pressable style={[styles.button, styles.cancelButton]} onPress={() => navigation.goBack()} disabled={saving}>
+                    <Text style={styles.cancelButtonText}>Voltar</Text>
+                </Pressable>
+                <Pressable style={[styles.button, styles.saveButton]} onPress={handleSubmit} disabled={saving}>
+                    <Text style={styles.saveButtonText}>{saving ? 'Salvando...' : 'Salvar'}</Text>
+                </Pressable>
+            </View>
+        </KeyboardAvoidingView>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#f8fafc',
+    },
+    center: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f8fafc',
+    },
+    centerText: {
+        color: '#64748b',
+        fontSize: 14,
+        marginTop: 8,
+    },
+    header: {
+        padding: 16,
+        backgroundColor: '#fff',
+        borderBottomWidth: 1,
+        borderBottomColor: '#e2e8f0',
+    },
+    headerTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#1e293b',
+    },
+    content: {
+        padding: 16,
+        paddingBottom: 110,
+    },
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#334155',
+        marginTop: 20,
+        marginBottom: 12,
+    },
+    label: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#475569',
+        marginBottom: 6,
+        marginTop: 10,
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#cbd5e1',
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        fontSize: 14,
+        backgroundColor: '#fff',
+        color: '#1e293b',
+    },
+    sqlInput: {
+        minHeight: 140,
+        fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace' }),
+    },
+    help: {
+        fontSize: 12,
+        color: '#64748b',
+        marginTop: 6,
+    },
+    rowButtons: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+        marginTop: 10,
+    },
+    actionButton: {
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        borderRadius: 8,
+    },
+    testButton: {
+        backgroundColor: '#16a34a',
+    },
+    testButtonText: {
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: 13,
+    },
+    exampleButton: {
+        backgroundColor: '#e2e8f0',
+    },
+    exampleButtonText: {
+        color: '#475569',
+        fontWeight: '600',
+        fontSize: 13,
+    },
+    addButton: {
+        backgroundColor: '#2563eb',
+    },
+    addButtonText: {
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: 13,
+    },
+    removeButton: {
+        backgroundColor: '#fee2e2',
+    },
+    removeButtonText: {
+        color: '#dc2626',
+        fontWeight: '600',
+        fontSize: 13,
+    },
+    testResult: {
+        backgroundColor: '#f0fdf4',
+        borderWidth: 1,
+        borderColor: '#bbf7d0',
+        borderRadius: 8,
+        padding: 12,
+        marginTop: 10,
+    },
+    testResultTitle: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: '#166534',
+        marginBottom: 8,
+    },
+    testResultGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    },
+    testResultItem: {
+        minWidth: '45%',
+    },
+    testResultLabel: {
+        fontSize: 11,
+        fontWeight: '600',
+        color: '#166534',
+    },
+    testResultValue: {
+        fontSize: 15,
+        fontWeight: '700',
+        color: '#15803d',
+        fontFamily: 'monospace',
+        marginTop: 2,
+    },
+    segmentRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 6,
+        marginTop: 4,
+    },
+    segment: {
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 8,
+        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: '#cbd5e1',
+    },
+    segmentActive: {
+        backgroundColor: '#2563eb',
+        borderColor: '#2563eb',
+    },
+    segmentText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#475569',
+    },
+    segmentTextActive: {
+        color: '#fff',
+    },
+    colorRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+        padding: 10,
+        marginBottom: 8,
+    },
+    colorSwatch: {
+        width: 36,
+        height: 36,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+    },
+    colorLabel: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#64748b',
+        width: 70,
+    },
+    colorOptions: {
+        gap: 6,
+        alignItems: 'center',
+    },
+    colorOption: {
+        width: 26,
+        height: 26,
+        borderRadius: 6,
+        borderWidth: 2,
+        borderColor: 'transparent',
+    },
+    colorOptionActive: {
+        borderColor: '#1e293b',
+    },
+    previewBox: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+        alignItems: 'center',
+        padding: 14,
+        marginTop: 8,
+    },
+    previewTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#334155',
+        marginBottom: 8,
+    },
+    footer: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        gap: 10,
+        padding: 14,
+        backgroundColor: '#fff',
+        borderTopWidth: 1,
+        borderTopColor: '#e2e8f0',
+    },
+    button: {
+        borderRadius: 8,
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        minWidth: 100,
+        alignItems: 'center',
+    },
+    cancelButton: {
+        backgroundColor: '#e2e8f0',
+    },
+    cancelButtonText: {
+        color: '#475569',
+        fontWeight: '600',
+        fontSize: 14,
+    },
+    saveButton: {
+        backgroundColor: '#2563eb',
+    },
+    saveButtonText: {
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: 14,
+    },
+});

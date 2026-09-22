@@ -30,6 +30,7 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+import org.jboss.logging.Logger;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -41,6 +42,8 @@ import java.util.regex.Pattern;
 @ApplicationScoped
 @WithTransaction
 public class MapaService {
+
+    private static final Logger LOG = Logger.getLogger(MapaService.class);
 
     @Inject
     MapaRepository repository;
@@ -248,7 +251,11 @@ public class MapaService {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Mapa not found"))
                 .onItem().transformToUni(mapa -> mapaRegraService.findByMapaId(id)
-                        .onItem().transformToUni(regras -> buildMapaPontosResponse(mapa, regras)));
+                        .onItem().transformToUni(regras -> buildMapaPontosResponse(mapa, regras)))
+                .onFailure().recoverWithItem(throwable -> {
+                    LOG.error("Erro ao buscar pontos do mapa " + id, throwable);
+                    return new MapaPontosResponse("0,0", "10", 400, 10, new ArrayList<>());
+                });
     }
 
     private Uni<MapaPontosResponse> buildMapaPontosResponse(Mapa mapa, List<MapaRegraResponse> regras) {
@@ -413,6 +420,10 @@ public class MapaService {
                                         })
                         );
                     });
+                })
+                .onFailure().recoverWithItem(throwable -> {
+                    LOG.error("Erro ao executar consulta de marcadores para regra " + regra.id(), throwable);
+                    return new ArrayList<Marcador>();
                 });
     }
 

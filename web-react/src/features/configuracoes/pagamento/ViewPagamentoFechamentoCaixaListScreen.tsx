@@ -1124,15 +1124,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
 
 
 
-                                <div className="wizard-actions">
-
-                                    <button className="wizard-btn-back" onClick={() => goToStep(0)}>Voltar</button>
-
-                                    <button className="wizard-btn-next" onClick={() => goToStep(2)}>Ir para Fechamento
-
-                                    </button>
-
-                                </div>
+                                {/* Navegação Anterior/Próximo removida da tela de fechamento de caixa */}
 
                             </section>
 
@@ -1249,8 +1241,6 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
 
 
                                 <div className="wizard-actions">
-
-                                    <button className="wizard-btn-back" onClick={() => goToStep(1)}>Voltar</button>
 
                                     <button onClick={carregarTotais} disabled={loading}>Atualizar totais</button>
 

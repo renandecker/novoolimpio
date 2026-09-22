@@ -30,5 +30,37 @@ export type RelatorioDisponivel = {
     tipo: 'TABELA' | 'GRAFICO' | 'MAPA' | 'INDICADOR_GAUGE';
 };
 
+export type LinhaGrafico = {
+    categoria?: string;
+    valor?: number;
+    [key: string]: unknown;
+};
+
+export type GraficoDados = {
+    id: number;
+    nome: string;
+    tipo: string;
+    ordemGrafico?: string;
+    exibirPercentual: boolean;
+    exibirLegenda: boolean;
+    exibirValor: boolean;
+    valorAcumulado: boolean;
+    limite: number;
+    posicao?: string;
+    linhas: LinhaGrafico[];
+    linhasCombinado?: LinhaGrafico[];
+};
+
+export type RelatorioAberto = {
+    id: number;
+    nome: string;
+    tipo: string;
+    configuracao: Record<string, unknown>;
+    dados: GraficoDados | MapaPontosResponse | null;
+};
+
 export const listarRelatoriosDisponiveis = async (): Promise<RelatorioDisponivel[]> =>
     (await api.get(API_PATHS.relatorios.relatorioDisponiveis)).data;
+
+export const abrirRelatorio = async (tipo: string, id: number): Promise<RelatorioAberto> =>
+    (await api.get<RelatorioAberto>(`${API_PATHS.relatorios.relatorioDisponiveis}/${tipo}/${id}`)).data;

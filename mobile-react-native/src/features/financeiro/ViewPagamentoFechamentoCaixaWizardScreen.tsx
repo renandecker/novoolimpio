@@ -1076,10 +1076,12 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
             )}
 
             <Wizard
+                data={state}
                 initialData={state}
                 onDataChange={setFields}
                 steps={steps}
                 onComplete={fecharCaixa}
+                hideNavButtons
             />
         </View>
     );

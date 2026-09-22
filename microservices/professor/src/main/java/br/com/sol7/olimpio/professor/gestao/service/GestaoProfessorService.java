@@ -10,18 +10,12 @@ import jakarta.ws.rs.NotFoundException;
 import org.hibernate.reactive.mutiny.Mutiny;
 
 import java.math.BigDecimal;
-import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import javax.sql.DataSource;
 
 @ApplicationScoped
 @WithTransaction
 public class GestaoProfessorService {
-
-    @Inject
-    @io.quarkus.agroal.DataSource("aula")
-    DataSource aulaDataSource;
 
     private static final SimpleDateFormat DIA = new SimpleDateFormat("dd/MM/yyyy");
 
@@ -69,6 +63,61 @@ public class GestaoProfessorService {
                     " AND o.fl_ativo = true " +
                     " AND ccc.presenca IN ('n','a','m','p','t') " +
                     " ORDER BY lower(COALESCE(pf.nome, pj.nome_fantasia, '')), o.data, o.id";
+
+    private static final String SQL_INFO_TURMA =
+            "SELECT off.id, " +
+                    " COALESCE(pf.nome, pj.nome_fantasia, ''), " +
+                    " COALESCE(pes.telefone, ''), " +
+                    " COALESCE(pes.celular, ''), " +
+                    " COALESCE(pes.email, ''), " +
+                    " COALESCE(un.sucinto, ''), " +
+                    " COALESCE(grp.nome, ''), " +
+                    " COALESCE(c.nome, ''), " +
+                    " COALESCE(cc.descricao, ''), " +
+                    " COALESCE(off.status, '') " +
+                    " FROM edc_oferecimento_componente_curricular off " +
+                    " INNER JOIN edc_professor p ON p.id = off.id_professor " +
+                    " LEFT JOIN bas_pessoa pes ON pes.id = p.id_pessoa " +
+                    " LEFT JOIN bas_pessoa_fisica pf ON pf.id_pessoa = pes.id " +
+                    " LEFT JOIN bas_pessoa_juridica pj ON pj.id_pessoa = pes.id " +
+                    " LEFT JOIN bas_unidade un ON un.id = off.id_unidade " +
+                    " LEFT JOIN edc_grupo grp ON grp.id = off.id_grupo " +
+                    " INNER JOIN edc_curriculo cur ON cur.id = off.id_curso " +
+                    " INNER JOIN edc_curso c ON c.id = cur.id_curso " +
+                    " INNER JOIN edc_componente_curricular cc ON cc.id = off.id_componente_curricular " +
+                    " WHERE off.id = ?1";
+
+    private static final String SQL_INFO_DIAS_AULA =
+            "SELECT DISTINCT o.data, COALESCE(ds.nome, ''), t.inicio, t.fim, COALESCE(s.numero, 0) " +
+                    " FROM edc_ocorrencia_componente_curricular o " +
+                    " LEFT JOIN edc_dia_aula da ON da.id = o.id_dia_aula " +
+                    " LEFT JOIN bas_dia_semana ds ON ds.id = da.id_dia_semana " +
+                    " LEFT JOIN edc_turno t ON t.id = da.id_turno " +
+                    " LEFT JOIN edc_sala s ON s.id = o.id_sala " +
+                    " WHERE o.id_oferecimento_componente_curricular = ?1 " +
+                    " ORDER BY o.data";
+
+    private static final String SQL_INFO_ALUNOS =
+            "SELECT m.id, " +
+                    " COALESCE(pf.nome, pj.nome_fantasia, ''), " +
+                    " COALESCE(pf.cpf, ''), " +
+                    " COALESCE(pes.telefone, ''), " +
+                    " COALESCE(pes.celular, ''), " +
+                    " COALESCE(rf.nome, rpj.nome_fantasia, ''), " +
+                    " COALESCE(rf.cpf, ''), " +
+                    " COALESCE(rpes.telefone, ''), " +
+                    " COALESCE(rpes.celular, '') " +
+                    " FROM edc_matricula m " +
+                    " INNER JOIN edc_contrato con ON con.id = m.id_contrato " +
+                    " LEFT JOIN bas_pessoa pes ON pes.id = con.id_pessoa " +
+                    " LEFT JOIN bas_pessoa_fisica pf ON pf.id_pessoa = pes.id " +
+                    " LEFT JOIN bas_pessoa_juridica pj ON pj.id_pessoa = pes.id " +
+                    " LEFT JOIN bas_pessoa rpes ON rpes.id = con.id_responsavel " +
+                    " LEFT JOIN bas_pessoa_fisica rf ON rf.id_pessoa = rpes.id " +
+                    " LEFT JOIN bas_pessoa_juridica rpj ON rpj.id_pessoa = rpes.id " +
+                    " WHERE m.id_oferecimento_componente_curricular = ?1 " +
+                    " AND m.data_cancelamento IS NULL " +
+                    " ORDER BY lower(COALESCE(pf.nome, pj.nome_fantasia, ''))";
 
     private static final String SQL_TURMA_COM_GRAU =
             "SELECT off.id, " +
@@ -183,6 +232,19 @@ public class GestaoProfessorService {
                 new RegistroDto(toLong(r[0]), toLong(r[1]), formatData(r[2]), toStr(r[3]))).toList());
     }
 
+    public Uni<InformacoesDto> buscarInformacoes(Long turmaId) {
+        return nativeQuery(SQL_INFO_TURMA, turmaId).chain(rows -> {
+            if (rows.isEmpty()) {
+                return Uni.createFrom().failure(new NotFoundException("Turma não encontrada"));
+            }
+            Object[] r = rows.get(0);
+            Uni<List<Object[]>> diasAula = nativeQuery(SQL_INFO_DIAS_AULA, turmaId);
+            Uni<List<Object[]>> alunos = nativeQuery(SQL_INFO_ALUNOS, turmaId);
+            return Uni.combine().all().unis(diasAula, alunos).asTuple()
+                    .map(t -> buildInformacoes(r, t.getItem1(), t.getItem2()));
+        });
+    }
+
     public Uni<List<PendenciaDto>> listarPendencias(Long pessoaId) {
         return nativeQuery(SQL_PENDENCIAS, pessoaId).map(rows -> rows.stream().map(r ->
                 new PendenciaDto(toStr(r[0]), toStr(r[1]), toLong(r[2]))).toList());
@@ -193,23 +255,14 @@ public class GestaoProfessorService {
             SELECT p.id
             FROM edc_professor p
             INNER JOIN bas_usuario u ON u.id_pessoa = p.id_pessoa
-            WHERE lower(u.login) = lower(?1) AND p.fl_ativo = true
+            WHERE lower(u.login) = lower(?1)
             LIMIT 1
             """;
-        return Uni.createFrom().completionStage(() -> java.util.concurrent.CompletableFuture.supplyAsync(() -> {
-            try (var conn = aulaDataSource.getConnection();
-                 var stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, username);
-                try (var rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        return new IdentidadeDto(true, rs.getLong(1));
-                    }
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            return new IdentidadeDto(false, null);
-        }));
+        return Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql)
+                        .setParameter(1, username)
+                        .getSingleResultOrNull())
+                .map(result -> result != null ? new IdentidadeDto(true, ((Number) result).longValue()) : new IdentidadeDto(false, null));
     }
 
     public Uni<Void> salvarChamada(SalvarChamadaRequest request) {
@@ -372,6 +425,41 @@ public class GestaoProfessorService {
         return new NotasDto(turma, toStr(r[6]), toInt(r[7]), toDouble(r[8]), toDouble(r[9]), toDouble(r[10]),
                 toBool(r[11]), toBool(r[12]), toBool(r[13]), toBool(r[14]), toDouble(r[15]),
                 grauNotas, grauConceitos, new ArrayList<>(mapa.values()));
+    }
+
+    private InformacoesDto buildInformacoes(Object[] r, List<Object[]> diasRows, List<Object[]> alunosRows) {
+        List<InformacoesDto.DiaAulaDto> dias = diasRows.stream()
+                .map(x -> new InformacoesDto.DiaAulaDto(formatData(x[0]), toStr(x[1]),
+                        formatTurno(x[2], x[3]))).toList();
+        String salas = diasRows.stream()
+                .map(x -> toLong(x[4]))
+                .filter(n -> n != null && n != 0)
+                .distinct()
+                .map(String::valueOf)
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
+        List<InformacoesDto.AlunoInfoDto> alunos = alunosRows.stream()
+                .map(x -> new InformacoesDto.AlunoInfoDto(toLong(x[0]), toStr(x[1]), toStr(x[2]),
+                        toStr(x[3]), toStr(x[4]), toStr(x[5]), toStr(x[6]), toStr(x[7]), toStr(x[8]))).toList();
+        return new InformacoesDto(toLong(r[0]), toStr(r[1]), toStr(r[2]), toStr(r[3]), toStr(r[4]),
+                toStr(r[5]), salas, toStr(r[6]), toStr(r[7]), toStr(r[8]), toStr(r[9]), dias, alunos);
+    }
+
+    private String formatTurno(Object inicio, Object fim) {
+        String ini = formatHora(inicio);
+        String end = formatHora(fim);
+        if (ini.isEmpty() && end.isEmpty()) {
+            return "";
+        }
+        return ini + " até " + end;
+    }
+
+    private String formatHora(Object value) {
+        if (value == null) {
+            return "";
+        }
+        String s = String.valueOf(value);
+        return s.length() >= 5 ? s.substring(0, 5) : s;
     }
 
     private TurmaDto mapTurma(Object[] r) {

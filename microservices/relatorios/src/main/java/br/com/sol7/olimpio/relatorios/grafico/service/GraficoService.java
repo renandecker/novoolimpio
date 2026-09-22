@@ -120,8 +120,15 @@ public class GraficoService {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Grafico not found"))
                 .chain(grafico -> {
-                    int limite = grafico.limite != null && !grafico.limite.isBlank()
-                            ? Math.min(Integer.parseInt(grafico.limite), LIMITE_MAXIMO) : LIMITE_MAXIMO;
+                    int limite = LIMITE_MAXIMO;
+                    if (grafico.limite != null && !grafico.limite.isBlank()) {
+                        try {
+                            int l = Integer.parseInt(grafico.limite.trim());
+                            if (l > 0) limite = Math.min(l, LIMITE_MAXIMO);
+                        } catch (NumberFormatException ignored) {
+                            // limite invalido -> usa o padrao (MAXIMO)
+                        }
+                    }
                     return montarResposta(grafico, limite);
                 });
     }
@@ -196,7 +203,9 @@ public class GraficoService {
             sql.append(" ").append(ordem);
         }
 
-        sql.append(" LIMIT ").append(limite);
+        if (limite > 0) {
+            sql.append(" LIMIT ").append(limite);
+        }
 
         return sql.toString();
     }

@@ -11,18 +11,27 @@ import java.util.Date;
 @Table(name = "rel_indicador_gauge")
 public class IndicadorGauge extends PanacheEntity {
 
-    @Column(name = "nome")
+    @Column(name = "nome", nullable = false, length = 255)
     public String nome;
 
-    @Column(name = "sql_query", columnDefinition = "TEXT")
+    @Column(name = "sql", nullable = false, columnDefinition = "TEXT")
     public String sql;
 
-    @Column(name = "configuracao", columnDefinition = "JSONB")
+    @Column(name = "configuracao", columnDefinition = "JSONB", nullable = false)
     public String configuracao;
 
-    @Column(name = "data_criacao")
+    @Column(name = "fl_ativo")
+    public Boolean flAtivo = true;
+
+    @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     public Date createdAt;
 
-    @Column(name = "data_atualizacao")
+    @Column(name = "updated_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     public Date updatedAt;
+
+    @Column(name = "created_by")
+    public Long createdBy;
+
+    @Column(name = "updated_by")
+    public Long updatedBy;
 }

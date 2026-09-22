@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
-import {useParams, useSearchParams} from 'react-router-dom';
-import {useQuery} from '@tanstack/react-query';
-import {PermissionGate} from '../../../shared/services/permissions';
+import {useParams, useSearchParams, useNavigate} from 'react-router-dom';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
+import {PermissionGate, usePermissions} from '../../../shared/services/permissions';
 import {ReportFilters} from '../../../shared/components/ReportFilters';
 import HelpOverlay from '../../../shared/components/HelpOverlay';
 import type {FiltroRelatorioWrapper} from '../../../shared/types/types';
@@ -11,6 +11,9 @@ import '../ReportView.css';
 
 export default function ViewRelatoriosViewTabelaListScreen() {
     const {id} = useParams<{ id: string }>();
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+    const {can} = usePermissions();
     const [searchParams] = useSearchParams();
     const tabelaId = Number(id);
     const [filtros, setFiltros] = useState<FiltroRelatorioWrapper[]>([]);
@@ -18,6 +21,27 @@ export default function ViewRelatoriosViewTabelaListScreen() {
     const [page, setPage] = useState(0);
     const [fetchLimit, setFetchLimit] = useState(10);
     const [dataPage, setDataPage] = useState<{ colunas: string[]; linhas: Record<string, unknown>[]; totalElements: number; totalPages: number } | null>(null);
+    const [confirmingDelete, setConfirmingDelete] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+
+    const managementOutcome = 'view/relatorios/formTabela';
+    const canEdit = can('UPDATE', managementOutcome);
+    const canDelete = can('DELETE', managementOutcome);
+
+    const handleDelete = async () => {
+        setDeleting(true);
+        try {
+            await api.delete(`/api/relatorios/tabela/${tabelaId}`);
+            queryClient.invalidateQueries({queryKey: ['relatorios', 'disponiveis']});
+            navigate('/view/relatorios/listTabela');
+        } catch (error) {
+            console.error('Erro ao excluir tabela:', error);
+            alert('Erro ao excluir tabela');
+        } finally {
+            setDeleting(false);
+            setConfirmingDelete(false);
+        }
+    };
 
     useEffect(() => {
         const fetchFiltros = async () => {
@@ -89,9 +113,44 @@ export default function ViewRelatoriosViewTabelaListScreen() {
                     <h1>{nomeRelatorio}</h1>
                 </div>
                 <div className="report-view-actions">
+                    {canEdit && (
+                        <button
+                            type="button"
+                            className="btngreen"
+                            onClick={() => navigate(`/view/relatorios/formTabela?id=${tabelaId}`)}
+                        >
+                            Editar
+                        </button>
+                    )}
+                    {canDelete && (
+                        <button
+                            type="button"
+                            className="btn-danger"
+                            style={{backgroundColor: '#e53935', borderColor: '#e53935', color: '#fff'}}
+                            onClick={() => setConfirmingDelete(true)}
+                        >
+                            Excluir
+                        </button>
+                    )}
                     <HelpOverlay/>
                 </div>
             </div>
+            {confirmingDelete && (
+                <div className="modal-overlay" onClick={() => setConfirmingDelete(false)}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <h3>Excluir registro</h3>
+                        <p>Deseja realmente excluir o relatório de tabela #{tabelaId}?</p>
+                        <div className="modal-actions">
+                            <button type="button" className="btnyellow" onClick={() => setConfirmingDelete(false)} disabled={deleting}>
+                                Cancelar
+                            </button>
+                            <button type="button" className="btn-danger" style={{backgroundColor: '#e53935', borderColor: '#e53935', color: '#fff'}} onClick={() => void handleDelete()} disabled={deleting}>
+                                {deleting ? 'Excluindo...' : 'Excluir'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="report-view-content">
                 <ReportFilters filtros={filtros} onFiltersChange={handleFiltersChange} onApplyFilters={handleApplyFilters} />
                 {dataPage && (

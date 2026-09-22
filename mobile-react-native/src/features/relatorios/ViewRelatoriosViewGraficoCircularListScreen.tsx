@@ -1,6 +1,6 @@
 import React from 'react';
-import {ModuleList} from '../ModuleListScreen';
+import GraficoRelatorioView from './GraficoRelatorioView';
 
 export default function ViewRelatoriosViewGraficoCircularListScreen() {
-    return <ModuleList path="/api/relatorios/grafico"/>;
+    return <GraficoRelatorioView tipo="CIRCULAR"/>;
 }

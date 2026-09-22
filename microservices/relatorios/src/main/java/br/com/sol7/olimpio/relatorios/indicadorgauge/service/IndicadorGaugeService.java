@@ -15,6 +15,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -32,21 +34,40 @@ public class IndicadorGaugeService {
     @Inject
     Pool pool;
 
+    @Context
+    ContainerRequestContext requestContext;
+
     private static final Pattern COMANDOS_BLOQUEADOS = Pattern.compile(
             "(?i)\\b(insert|update|delete|drop|alter|truncate|grant|revoke|create|exec|execute|call|copy|merge|vacuum|do|comment)\\b");
     private static final Pattern INICIA_COM_SELECT = Pattern.compile("(?is)^\\s*(with|select)\\b");
+
+    private Long getCurrentUserId() {
+        if (requestContext != null) {
+            String userId = requestContext.getHeaderString("X-Authenticated-User-Id");
+            if (userId != null) {
+                try {
+                    return Long.parseLong(userId);
+                } catch (NumberFormatException ignored) {}
+            }
+            String username = requestContext.getHeaderString("X-Authenticated-Username");
+            if (username != null && !username.isBlank()) {
+                return 1L; // fallback to system user
+            }
+        }
+        return 1L; // system user fallback
+    }
 
     public Uni<PagedResponse<IndicadorGaugeResponse>> listarDisponiveis(int page, int size, String busca) {
         int p = Math.max(0, page);
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
 
-        var query = repository.findAll(io.quarkus.panache.common.Sort.by("id").descending());
+        var query = repository.find("flAtivo = true order by id desc");
         if (busca != null && !busca.isBlank()) {
-            query = repository.find("lower(nome) like ?1", "%" + busca.toLowerCase() + "%");
+            query = repository.find("flAtivo = true and lower(nome) like ?1 order by id desc", "%" + busca.toLowerCase() + "%");
         }
 
         return query.page(io.quarkus.panache.common.Page.of(p, s)).list()
-                .onItem().transformToUni(items -> repository.count()
+                .onItem().transformToUni(items -> repository.count("flAtivo = true")
                         .map(count -> new PagedResponse<>(
                                 items.stream().map(this::toResponse).toList(),
                                 count, p, s)));
@@ -61,17 +82,23 @@ public class IndicadorGaugeService {
     public Uni<IndicadorGaugeResponse> create(IndicadorGaugeRequest r) {
         var e = new IndicadorGauge();
         apply(e, r);
+        e.flAtivo = true;
         e.createdAt = new Date();
         e.updatedAt = new Date();
+        Long userId = getCurrentUserId();
+        e.createdBy = userId;
+        e.updatedBy = userId;
         return repository.persist(e).replaceWith(() -> toResponse(e));
     }
 
     public Uni<IndicadorGaugeResponse> update(Long id, IndicadorGaugeRequest r) {
+        Long userId = getCurrentUserId();
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("IndicadorGauge not found"))
                 .invoke(e -> {
                     apply(e, r);
                     e.updatedAt = new Date();
+                    e.updatedBy = userId;
                 })
                 .map(this::toResponse);
     }
@@ -90,7 +117,7 @@ public class IndicadorGaugeService {
 
     private IndicadorGaugeResponse toResponse(IndicadorGauge e) {
         return new IndicadorGaugeResponse(
-                e.id, e.nome, e.sql, e.configuracao, e.createdAt, e.updatedAt);
+                e.id, e.nome, e.sql, e.configuracao, e.createdAt, e.updatedAt, e.createdBy, e.updatedBy);
     }
 
     public Uni<IndicadorGaugeExecucaoResponse> executar(String sql) {

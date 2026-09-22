@@ -12,6 +12,7 @@ import {
     View,
 } from 'react-native';
 import {Alert} from './SweetAlert';
+import {useNavigation} from '@react-navigation/native';
 import {useQuery} from '@tanstack/react-query';
 import {PAGE_SIZES, useModulePaged} from '../hooks/useModulePaged';
 import {executeAction} from '../services/actions';
@@ -99,23 +100,29 @@ export function ModuleList({
                                 params,
                                 extraActions,
                                 actionGroups,
+                                rowActionGroups,
                                 outcome: customOutcome,
                                 hideCreate = false,
                                 hideUpdate = false,
                                 hideDelete = false,
                                 hideView = false,
+                                createNavigateTo,
                             }: {
     path: string;
     title?: string;
     params?: Record<string, string | number | boolean | undefined>;
     extraActions?: ModuleListExtraAction[];
     actionGroups?: ModuleListActionGroup[];
+    /** Menus por linha com acesso ao registro (ex.: listTurma com status-dependente). */
+    rowActionGroups?: (item: ApiItem) => ModuleListActionGroup[];
     outcome?: string;
     hideCreate?: boolean;
     hideUpdate?: boolean;
     hideDelete?: boolean;
     hideView?: boolean;
+    createNavigateTo?: string;
 }) {
+    const navigation = useNavigation();
     const [sortField, setSortField] = useState<string>('id');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -256,7 +263,13 @@ export function ModuleList({
             <View style={styles.header}>
                 <Text style={styles.title}>{screenTitle}</Text>
                 {canCreate && (
-                    <Pressable style={styles.primaryButton} onPress={() => setModal({mode: 'create'})}>
+                    <Pressable
+                        style={styles.primaryButton}
+                        onPress={() => {
+                            if (createNavigateTo) navigation.navigate(createNavigateTo as never);
+                            else setModal({mode: 'create'});
+                        }}
+                    >
                         <Text style={styles.primaryButtonText}>Novo</Text>
                     </Pressable>
                 )}
@@ -334,7 +347,7 @@ export function ModuleList({
                                             </Pressable>
                                         );
                                     })}
-                                    {actionGroups?.map((group) => {
+                                    {(rowActionGroups ? rowActionGroups(item) : actionGroups)?.map((group) => {
                                         if (group.permission && !can(session, group.permission, outcome)) return null;
                                         return (
                                             <RowMenu

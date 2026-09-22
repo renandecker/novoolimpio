@@ -1,6 +1,6 @@
 import React from 'react';
-import {ModuleList} from '../ModuleListScreen';
+import ViewRelatoriosViewMapaScreen from './ViewRelatoriosViewMapaScreen';
 
 export default function ViewRelatoriosViewMapaListScreen() {
-    return <ModuleList path="/api/view/relatorios/viewMapa"/>;
+    return <ViewRelatoriosViewMapaScreen/>;
 }

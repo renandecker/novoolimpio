@@ -361,14 +361,14 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                         />
                     </View>
                     <TouchableOpacity style={styles.actionBtn} onPress={() => abrirPessoaFisica()}>
-                        <Text style={styles.actionBtnText}>Novo</Text>
+                        <Text style={styles.actionBtnIcon}>+</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[styles.actionBtn, !contrato.pessoa && styles.actionBtnDisabled]}
                         disabled={!contrato.pessoa}
                         onPress={() => contrato.pessoa && abrirPessoaFisica(contrato.pessoa.id)}
                     >
-                        <Text style={styles.actionBtnText}>Editar</Text>
+                        <Text style={styles.actionBtnIcon}>✎</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.panelsRow}>
@@ -417,27 +417,27 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                     {contrato.tipoContratante === 'juridica' ? (
                         <>
                             <TouchableOpacity style={styles.actionBtn} onPress={() => abrirPessoaJuridica()}>
-                                <Text style={styles.actionBtnText}>Novo</Text>
+                                <Text style={styles.actionBtnIcon}>+</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[styles.actionBtn, !contrato.responsavel && styles.actionBtnDisabled]}
                                 disabled={!contrato.responsavel}
                                 onPress={() => contrato.responsavel && abrirPessoaJuridica(contrato.responsavel.id)}
                             >
-                                <Text style={styles.actionBtnText}>Editar</Text>
+                                <Text style={styles.actionBtnIcon}>✎</Text>
                             </TouchableOpacity>
                         </>
                     ) : (
                         <>
                             <TouchableOpacity style={styles.actionBtn} onPress={() => abrirPessoaFisica()}>
-                                <Text style={styles.actionBtnText}>Novo</Text>
+                                <Text style={styles.actionBtnIcon}>+</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[styles.actionBtn, !contrato.responsavel && styles.actionBtnDisabled]}
                                 disabled={!contrato.responsavel}
                                 onPress={() => contrato.responsavel && abrirPessoaFisica(contrato.responsavel.id)}
                             >
-                                <Text style={styles.actionBtnText}>Editar</Text>
+                                <Text style={styles.actionBtnIcon}>✎</Text>
                             </TouchableOpacity>
                         </>
                     )}
@@ -619,7 +619,7 @@ const styles = StyleSheet.create({
     section: {marginBottom: 20},
     sectionTitle: {fontSize: 18, fontWeight: 'bold', marginBottom: 12, color: '#333'},
     row: {flexDirection: 'row', gap: 12},
-    fieldRow: {flexDirection: 'row', gap: 8, alignItems: 'flex-start'},
+    fieldRow: {flexDirection: 'row', gap: 8, alignItems: 'flex-end'},
     field: {flex: 1},
     label: {fontSize: 14, color: '#666', marginBottom: 4},
     radioGroup: {flexDirection: 'row', gap: 16, marginVertical: 8},
@@ -627,9 +627,9 @@ const styles = StyleSheet.create({
     radioOuter: {width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: '#999', alignItems: 'center', justifyContent: 'center'},
     radioOuterChecked: {borderColor: '#007AFF'},
     radioInner: {width: 9, height: 9, borderRadius: 5, backgroundColor: '#007AFF'},
-    actionBtn: {backgroundColor: '#007AFF', paddingVertical: 10, paddingHorizontal: 12, borderRadius: 4, marginBottom: 12},
+    actionBtn: {backgroundColor: '#007AFF', paddingVertical: 10, paddingHorizontal: 16, borderRadius: 4},
     actionBtnDisabled: {backgroundColor: '#b0c4de'},
-    actionBtnText: {color: '#fff', fontWeight: 'bold', fontSize: 13},
+    actionBtnIcon: {color: '#fff', fontWeight: 'bold', fontSize: 16, lineHeight: 18},
     panelsRow: {flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12},
     panelBadge: {borderWidth: 1, borderRadius: 6, paddingVertical: 6, paddingHorizontal: 10, minWidth: 110, backgroundColor: '#fff'},
     panelBadgeLabel: {fontSize: 11, color: '#666'},

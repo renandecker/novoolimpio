@@ -1,11 +1,23 @@
 import React, {useState, useEffect} from 'react';
-import {ModuleList} from '../ModuleListScreen';
-import {ReportFilters} from '../shared/components/ReportFilters';
-import type {FiltroRelatorioWrapper} from '../shared/types/types';
-import {api} from '../shared/services/api';
+import {ModuleList, type ModuleListExtraAction} from '../ModuleListScreen';
+import {ReportFilters} from '../../shared/components/ReportFilters';
+import type {FiltroRelatorioWrapper, ApiItem} from '../../shared/types/types';
+import {api} from '../../shared/services/api';
+import {useNavigation} from '@react-navigation/native';
 import {View, Text, StyleSheet, ActivityIndicator} from 'react-native';
 
+const TIPO_ROTA: Record<string, string> = {
+    GRAFICO: 'view/relatorios/viewGraficoBarrasVertical',
+    PIZZA: 'view/relatorios/viewGraficoPizza',
+    LINHA: 'view/relatorios/viewGraficoLinhas',
+    COMBINADO: 'view/relatorios/viewGraficoCombinado',
+    CIRCULAR: 'view/relatorios/viewGraficoCircular',
+    BARRA_VERTICAL: 'view/relatorios/viewGraficoBarrasVertical',
+    BARRA_HORIZONTAL: 'view/relatorios/viewGraficoBarrasHorizontal',
+};
+
 export default function ViewRelatoriosListGraficoListScreen() {
+    const navigation = useNavigation<any>();
     const [filtros, setFiltros] = useState<FiltroRelatorioWrapper[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -32,6 +44,30 @@ export default function ViewRelatoriosListGraficoListScreen() {
         console.log('Aplicar filtros do gráfico');
     };
 
+    const extraActions: ModuleListExtraAction[] = [
+        {
+            key: 'editar',
+            title: 'Editar',
+            icon: '✏️',
+            permission: 'UPDATE',
+            onPress: (item: ApiItem) => {
+                navigation.navigate('view/relatorios/formGrafico' as never, {id: String(item.id)} as never);
+            },
+        },
+        {
+            key: 'acessar',
+            title: 'Acessar Relatório',
+            icon: '📈',
+            permission: 'EXECUTE',
+            onPress: (item: ApiItem) => {
+                const record = item as unknown as Record<string, unknown>;
+                const tipo = String(record.tipo ?? 'GRAFICO').toUpperCase();
+                const rota = TIPO_ROTA[tipo] ?? 'view/relatorios/viewGraficoBarrasVertical';
+                navigation.navigate(rota as never, {id: String(item.id)} as never);
+            },
+        },
+    ];
+
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
@@ -51,7 +87,7 @@ export default function ViewRelatoriosListGraficoListScreen() {
                 onFiltersChange={handleFiltersChange}
                 onApplyFilters={handleApplyFilters}
             />
-            <ModuleList path="/api/view/relatorios/listGrafico"/>
+            <ModuleList path="/api/relatorios/grafico" extraActions={extraActions}/>
         </View>
     );
 }

@@ -13,18 +13,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Publica a notificacao no Kafka em um topico por canal de entrega:
+ * Publica a notificacao no RabbitMQ em um exchange por canal de entrega:
  * <ul>
  * <li>olimpio.notificacao.email  -> consumido para envio via SMTP (CanalEmailService)</li>
  * <li>olimpio.notificacao.mobile -> consumido para push em tempo real no react native</li>
  * <li>olimpio.notificacao.web    -> consumido para push em tempo real no react web</li>
  * </ul>
- * A mensagem vai apenas para os topicos dos canais habilitados na notificacao.
+ * A mensagem vai apenas para os exchanges dos canais habilitados na notificacao.
  */
 @ApplicationScoped
-public class NotificacaoKafkaProducer {
+public class NotificacaoRabbitMQProducer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotificacaoKafkaProducer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotificacaoRabbitMQProducer.class);
 
     @Inject
     @Channel("notificacao-email-out")
@@ -54,7 +54,7 @@ public class NotificacaoKafkaProducer {
         }
         return emitter.send(json)
                 .onFailure().invoke(err ->
-                        LOGGER.warn("Falha ao publicar notificação no Kafka (canal {}): {}", canal, err.getMessage()))
+                        LOGGER.warn("Falha ao publicar notificação no RabbitMQ (canal {}): {}", canal, err.getMessage()))
                 .onFailure().recoverWithNull();
     }
 
@@ -64,7 +64,7 @@ public class NotificacaoKafkaProducer {
                     e.id, e.username, e.titulo, e.mensagem, e.tipo, e.link,
                     e.canalSistema, e.canalMobile, e.canalEmail, null));
         } catch (JsonProcessingException ex) {
-            throw new IllegalStateException("Erro ao serializar a notificação para o Kafka", ex);
+            throw new IllegalStateException("Erro ao serializar a notificação para o RabbitMQ", ex);
         }
     }
 }

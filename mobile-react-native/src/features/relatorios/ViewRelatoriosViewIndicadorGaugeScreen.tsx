@@ -1,25 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, SafeAreaView } from 'react-native';
-import { useApi } from '../../shared/services/api';
-import Svg, { Path, Circle, Text as SvgText, Defs, Style, G } from 'react-native-svg';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+    View,
+    Text,
+    StyleSheet,
+    ScrollView,
+    ActivityIndicator,
+    TouchableOpacity,
+    SafeAreaView,
+    RefreshControl,
+} from 'react-native';
+import { api } from '../../shared/services/api';
+import { GaugeChart, type GaugeConfig } from './GaugeChart';
 
-const GAUGE_COLORS = [
-    '#22c55e', '#16a34a', '#15803d', '#166534',
-    '#84cc16', '#65a30d', '#4d7c0f', '#3f6212',
-    '#eab308', '#ca8a04', '#a16207', '#854d0e',
-    '#f59e0b', '#d97706', '#b45309', '#92400e',
-    '#ef4444', '#dc2626', '#b91c1c', '#991b1b',
-    '#f43f5e', '#e11d48', '#be123c', '#9f1239',
-    '#ec4899', '#db2777', '#be185d', '#9d174d',
-    '#a855f7', '#9333ea', '#7e22ce', '#6b21a8',
-    '#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6',
-    '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af',
-    '#06b6d4', '#0891b2', '#0e7490', '#155e75',
-    '#14b8a6', '#0d9488', '#0f766e', '#115e59',
-    '#f97316', '#ea580c', '#c2410c', '#9a3412',
-];
-
-const DEFAULT_CONFIG = {
+const DEFAULT_CONFIG: GaugeConfig = {
     nrOfLevels: 3,
     colors: ['#22c55e', '#eab308', '#ef4444'],
     arcWidth: 0.3,
@@ -28,222 +21,136 @@ const DEFAULT_CONFIG = {
     needleColor: '#475569',
     needleBaseColor: '#475569',
     animate: true,
+    tipoExibicao: 'valor',
 };
 
-function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number) {
-    const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
-    return {
-        x: centerX + radius * Math.cos(angleInRadians),
-        y: centerY + radius * Math.sin(angleInRadians)
-    };
+function parseConfiguracao(raw: unknown): GaugeConfig {
+    if (!raw) return { ...DEFAULT_CONFIG };
+    try {
+        const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        return { ...DEFAULT_CONFIG, ...parsed };
+    } catch {
+        return { ...DEFAULT_CONFIG };
+    }
 }
 
-function describeArc(x: number, y: number, radius: number, startAngle: number, endAngle: number) {
-    const start = polarToCartesian(x, y, radius, endAngle);
-    const end = polarToCartesian(x, y, radius, startAngle);
-    const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
-    return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`;
+interface Indicador {
+    id: number;
+    nome: string;
+    sql: string;
+    configuracao: unknown;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
-function getLevelConfig(config: any, totalAngle: number) {
-    const levels = config.nrOfLevels;
-    const anglePerLevel = totalAngle / levels;
-    return config.colors.map((color: string, i: number) => ({
-        color,
-        startAngle: -90 + (i * anglePerLevel),
-        endAngle: -90 + ((i + 1) * anglePerLevel),
-    }));
+interface GaugeData {
+    valorAtual: number;
+    valorMinimo: number;
+    valorMaximo: number;
 }
 
-function getNeedleAngle(config: any, percent: number, totalAngle: number) {
-    const clampedPercent = Math.max(0, Math.min(1, percent));
-    return -90 + (clampedPercent * totalAngle);
-}
-
-function getNeedlePath(config: any, percent: number, totalAngle: number, centerX: number, centerY: number, radius: number) {
-    const needleAngle = getNeedleAngle(config, percent, totalAngle);
-    const needleLength = radius * 0.9;
-    const needleBaseRadius = radius * 0.15;
-    
-    const needleTip = polarToCartesian(centerX, centerY, needleLength, needleAngle);
-    const needleBase1 = polarToCartesian(centerX, centerY, needleBaseRadius, needleAngle - 90);
-    const needleBase2 = polarToCartesian(centerX, centerY, needleBaseRadius, needleAngle + 90);
-    
-    return `M ${needleBase1.x} ${needleBase1.y} L ${needleTip.x} ${needleTip.y} L ${needleBase2.x} ${needleBase2.y} Z`;
-}
-
-interface Props {
-    route: {
-        params?: {
-            id?: number;
-        };
-    };
-}
-
-export default function ViewRelatoriosViewIndicadorGaugeScreen({ route }: Props) {
-    const { id } = route.params || {};
-    const { get: loadIndicador } = useApi('/api/relatorios/indicador-gauge');
-
-    const [indicador, setIndicador] = useState<any>(null);
-    const [gaugeData, setGaugeData] = useState<{ valorAtual: number; valorMinimo: number; valorMaximo: number } | null>(null);
+export default function ViewRelatoriosViewIndicadorGaugeScreen({
+    route,
+    navigation,
+}: {
+    route: { params?: { id?: number | string } };
+    navigation: any;
+}) {
+    const { id } = route.params ?? {};
+    const [indicador, setIndicador] = useState<Indicador | null>(null);
+    const [config, setConfig] = useState<GaugeConfig>({ ...DEFAULT_CONFIG });
+    const [gaugeData, setGaugeData] = useState<GaugeData | null>(null);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const fetchData = async () => {
-        if (!id) return;
-        setLoading(true);
-        try {
-            const resp = await loadIndicador(id);
-            setIndicador(resp.data);
-        } catch (error) {
-            console.error('Erro ao carregar indicador:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchGaugeData = async () => {
-        if (!indicador?.sql) return;
+    const fetchGaugeData = useCallback(async (sql: string) => {
         setRefreshing(true);
         try {
-            const resp = await fetch('/api/relatorios/indicador-gauge/executar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sql: indicador.sql }),
-            });
-            if (resp.ok) {
-                const result = await resp.json();
-                setGaugeData(result);
-            }
-        } catch (error) {
-            console.error('Erro ao buscar dados do gauge:', error);
+            const resp = await api.post<GaugeData>('/api/relatorios/indicador-gauge/executar', { sql });
+            setGaugeData(resp.data);
+        } catch (err) {
+            console.error('Erro ao buscar dados do gauge:', err);
         } finally {
             setRefreshing(false);
         }
+    }, []);
+
+    useEffect(() => {
+        if (id == null) {
+            setLoading(false);
+            setError('Indicador não encontrado.');
+            return;
+        }
+        api.get<Indicador>(`/api/relatorios/indicador-gauge/${id}`)
+            .then((resp) => {
+                const data = resp.data;
+                setIndicador(data);
+                setConfig(parseConfiguracao(data.configuracao));
+                if (data.sql) {
+                    fetchGaugeData(data.sql);
+                }
+            })
+            .catch((err) => {
+                console.error('Erro ao carregar indicador:', err);
+                setError('Erro ao carregar o indicador.');
+            })
+            .finally(() => setLoading(false));
+    }, [id, fetchGaugeData]);
+
+    const handleRefresh = () => {
+        if (indicador?.sql) fetchGaugeData(indicador.sql);
     };
 
-    useEffect(() => {
-        fetchData();
-    }, [id, loadIndicador]);
+    if (loading) {
+        return (
+            <SafeAreaView style={styles.center}>
+                <ActivityIndicator size="large" color="#3a85bd" />
+                <Text style={styles.centerText}>Carregando...</Text>
+            </SafeAreaView>
+        );
+    }
 
-    useEffect(() => {
-        if (indicador) {
-            fetchGaugeData();
-        }
-    }, [indicador]);
+    if (error || !indicador) {
+        return (
+            <SafeAreaView style={styles.center}>
+                <Text style={styles.errorText}>{error ?? 'Indicador não encontrado'}</Text>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                    <Text style={styles.backButtonText}>Voltar</Text>
+                </TouchableOpacity>
+            </SafeAreaView>
+        );
+    }
 
-    const config = indicador ? { ...DEFAULT_CONFIG, ...indicador.configuracao } : DEFAULT_CONFIG;
     const percent = gaugeData
         ? (gaugeData.valorAtual - gaugeData.valorMinimo) / (gaugeData.valorMaximo - gaugeData.valorMinimo)
         : config.percent;
 
-    const centerX = 150;
-    const centerY = 150;
-    const radius = 130;
-    const arcRadius = radius;
-    const innerRadius = radius * (1 - config.arcWidth);
-    const totalAngle = 180;
-
-    const levels = getLevelConfig(config, totalAngle);
-    const needlePath = getNeedlePath(config, percent, totalAngle, centerX, centerY, radius);
-    const displayValue = gaugeData
-        ? gaugeData.valorMinimo + (gaugeData.valorMaximo - gaugeData.valorMinimo) * percent
-        : 70;
-
-    if (loading) {
-        return (
-            <SafeAreaView style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#3a85bd" />
-                <Text style={styles.loadingText}>Carregando...</Text>
-            </SafeAreaView>
-        );
-    }
-
-    if (!indicador) {
-        return (
-            <SafeAreaView style={styles.errorContainer}>
-                <Text style={styles.errorText}>Indicador não encontrado</Text>
-            </SafeAreaView>
-        );
-    }
-
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView style={styles.scrollView} refreshControl={
-                <ActivityIndicator
-                    size="small"
-                    color="#3a85bd"
-                    animating={refreshing}
-                    style={styles.refreshIndicator}
-                />
-            } onRefresh={fetchGaugeData}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => {}} style={styles.backButton}>
-                        <Text style={styles.backButtonText}>← Voltar</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>{indicador.nome}</Text>
-                </View>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBack}>
+                    <Text style={styles.headerBackText}>← Voltar</Text>
+                </TouchableOpacity>
+                <Text style={styles.headerTitle} numberOfLines={1}>{indicador.nome}</Text>
+            </View>
 
-                <View style={styles.gaugeContainer}>
-                    <Svg width={300} height={300} viewBox="0 0 300 300">
-                        <Defs>
-                            {config.animate && (
-                                <Style>
-                                    {`
-                                        .gauge-arc { animation: drawArc 1s ease-out forwards; }
-                                        .gauge-needle { animation: rotateNeedle 1s ease-out forwards; transform-origin: ${centerX}px ${centerY}px; }
-                                        @keyframes drawArc { from { stroke-dashoffset: 1000; } to { stroke-dashoffset: 0; } }
-                                        @keyframes rotateNeedle { from { transform: rotate(-90deg); } to { transform: rotate(${getNeedleAngle(config, percent, totalAngle)}deg); } }
-                                    `}
-                                </Style>
-                            )}
-                        </Defs>
-                        {levels.map((level: any, i: number) => (
-                            <Path
-                                key={i}
-                                d={describeArc(centerX, centerY, arcRadius, level.startAngle, level.endAngle)}
-                                stroke={level.color}
-                                strokeWidth={config.arcWidth * radius * 2}
-                                fill="none"
-                                strokeLinecap="round"
-                                className={config.animate ? 'gauge-arc' : ''}
-                                strokeDasharray={`${(level.endAngle - level.startAngle) / totalAngle * 2 * Math.PI * arcRadius} ${2 * Math.PI * arcRadius}`}
-                                strokeDashoffset={config.animate ? `${2 * Math.PI * arcRadius}` : '0'}
-                            />
-                        ))}
-                        <Circle
-                            cx={centerX}
-                            cy={centerY}
-                            r={radius * 0.15}
-                            fill={config.needleBaseColor}
-                        />
-                        <Path
-                            d={needlePath}
-                            fill={config.needleColor}
-                            className={config.animate ? 'gauge-needle' : ''}
-                        />
-                        <SvgText
-                            x={centerX}
-                            y={centerY + 10}
-                            textAnchor="middle"
-                            fill={config.textColor}
-                            fontSize={32}
-                            fontWeight="bold"
-                            fontFamily="system-ui"
-                        >
-                            {displayValue.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
-                        </SvgText>
-                        <SvgText
-                            x={centerX}
-                            y={centerY + 50}
-                            textAnchor="middle"
-                            fill={config.textColor}
-                            fontSize={14}
-                            fontFamily="system-ui"
-                        >
-                            {indicador.nome}
-                        </SvgText>
-                    </Svg>
+            <ScrollView
+                style={styles.scrollView}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#3a85bd" />
+                }
+                contentContainerStyle={styles.content}
+            >
+                <View style={styles.gaugeBox}>
+                    <GaugeChart
+                        config={config}
+                        value={gaugeData?.valorAtual ?? config.percent}
+                        minValue={gaugeData?.valorMinimo ?? 0}
+                        maxValue={gaugeData?.valorMaximo ?? 100}
+                        label={indicador.nome}
+                        size={280}
+                    />
                 </View>
 
                 <View style={styles.section}>
@@ -269,7 +176,7 @@ export default function ViewRelatoriosViewIndicadorGaugeScreen({ route }: Props)
                         </View>
                         <View style={styles.valueItem}>
                             <Text style={styles.valueLabel}>Percentual</Text>
-                            <Text style={[styles.valueNumber, { color: '#3b82f6', fontSize: 24 }]}>
+                            <Text style={[styles.valueNumber, { color: '#2563eb' }]}>
                                 {(percent * 100).toFixed(1)}%
                             </Text>
                         </View>
@@ -286,6 +193,12 @@ export default function ViewRelatoriosViewIndicadorGaugeScreen({ route }: Props)
                         <View style={styles.configItem}>
                             <Text style={styles.configLabel}>Largura do Arco</Text>
                             <Text style={styles.configValue}>{config.arcWidth}</Text>
+                        </View>
+                        <View style={styles.configItem}>
+                            <Text style={styles.configLabel}>Tipo de Exibição</Text>
+                            <Text style={styles.configValue}>
+                                {config.tipoExibicao === 'percentual' ? 'Percentual' : config.tipoExibicao === 'ambos' ? 'Valor + %' : 'Valor'}
+                            </Text>
                         </View>
                         <View style={styles.configItem}>
                             <Text style={styles.configLabel}>Animado</Text>
@@ -305,19 +218,26 @@ export default function ViewRelatoriosViewIndicadorGaugeScreen({ route }: Props)
                                 <Text style={styles.configValue}>{config.needleColor}</Text>
                             </View>
                         </View>
+                        <View style={styles.configItem}>
+                            <Text style={styles.configLabel}>Base do Ponteiro</Text>
+                            <View style={styles.configColorRow}>
+                                <View style={[styles.colorSwatch, { backgroundColor: config.needleBaseColor }]} />
+                                <Text style={styles.configValue}>{config.needleBaseColor}</Text>
+                            </View>
+                        </View>
                     </View>
                 </View>
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Cores dos Níveis</Text>
                     <View style={styles.colorsRow}>
-                        {config.colors.map((color: string, i: number) => (
+                        {config.colors.map((color, i) => (
                             <View key={i} style={styles.colorItem}>
                                 <View style={[styles.colorSwatchLarge, { backgroundColor: color }]} />
-                                <Text style={styles.colorInfo}>
+                                <View style={styles.colorInfo}>
                                     <Text style={styles.colorHex}>{color}</Text>
                                     <Text style={styles.colorLevel}>Nível {i + 1}</Text>
-                                </Text>
+                                </View>
                             </View>
                         ))}
                     </View>
@@ -335,53 +255,52 @@ export default function ViewRelatoriosViewIndicadorGaugeScreen({ route }: Props)
 }
 
 const styles = StyleSheet.create({
-    loadingContainer: {
+    container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
         backgroundColor: '#fff',
     },
-    loadingText: {
-        color: '#666',
-        fontSize: 14,
-        marginTop: 8,
-    },
-    errorContainer: {
+    center: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#fff',
         padding: 20,
     },
-    errorText: {
+    centerText: {
         color: '#666',
+        fontSize: 14,
+        marginTop: 8,
+    },
+    errorText: {
+        color: '#dc2626',
         fontSize: 16,
+        textAlign: 'center',
     },
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
-    scrollView: {
-        flex: 1,
-    },
-    refreshIndicator: {
+    backButton: {
+        marginTop: 16,
+        backgroundColor: '#3a85bd',
+        paddingHorizontal: 20,
         paddingVertical: 10,
+        borderRadius: 8,
+    },
+    backButtonText: {
+        color: '#fff',
+        fontWeight: '600',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
         paddingHorizontal: 16,
         paddingVertical: 12,
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
     },
-    backButton: {
-        padding: 8,
+    headerBack: {
+        paddingRight: 12,
     },
-    backButtonText: {
+    headerBackText: {
         color: '#3a85bd',
-        fontSize: 14,
+        fontSize: 15,
         fontWeight: '600',
     },
     headerTitle: {
@@ -389,18 +308,22 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#333',
         flex: 1,
-        textAlign: 'center',
-        marginRight: 60,
     },
-    gaugeContainer: {
+    scrollView: {
+        flex: 1,
+    },
+    content: {
+        paddingBottom: 24,
+    },
+    gaugeBox: {
         alignItems: 'center',
         paddingVertical: 20,
     },
     section: {
         paddingHorizontal: 16,
         paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
+        borderTopWidth: 1,
+        borderTopColor: '#f0f0f0',
     },
     sectionTitle: {
         fontSize: 16,
@@ -509,7 +432,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#0f172a',
         borderRadius: 12,
         padding: 12,
-        maxHeight: 200,
     },
     sqlText: {
         fontSize: 12,

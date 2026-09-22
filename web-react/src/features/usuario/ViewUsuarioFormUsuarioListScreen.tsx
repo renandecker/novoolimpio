@@ -5,7 +5,6 @@ import {PermissionGate} from '../../shared/services/permissions';
 import {Tabs} from '../../shared/components/Tabs';
 import {MasterDetail} from '../../shared/components/MasterDetail';
 import {BooleanField} from '../../shared/components/BooleanField';
-import {FileUploadBase} from '../../shared/components/FileUploadBase';
 import {AutoComplete, AutoCompleteOption} from '../../shared/components/AutoComplete';
 import type {ApiItem} from '../../shared/types/index';
 
@@ -29,31 +28,50 @@ const requiredMark = <span style={{color:'#C90000',marginLeft:4}}>*</span>;
 
 
 // ── Documento upload card ────────────────────────────────────────────
-function DocCard({label, required, value, onChange}:{label:string; required?:boolean; value:string; onChange:(v:string)=>void}){
-    const [files, setFiles] = useState<File[]>([]);
+function formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 bytes';
+    const k = 1024;
+    const sizes = ['bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
 
-    const handleFilesChange = async (newFiles: File[]) => {
-        setFiles(newFiles);
-        if (newFiles.length > 0) {
+function DocCard({label, required, value, onChange}:{label:string; required?:boolean; value:string; onChange:(v:string)=>void}){
+    const [file, setFile] = useState<File | null>(null);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const selected = e.target.files[0];
+            setFile(selected);
             const reader = new FileReader();
             reader.onload = () => onChange(String(reader.result));
-            reader.readAsDataURL(newFiles[0]);
-        } else {
-            onChange('');
+            reader.readAsDataURL(selected);
         }
     };
 
     return (
-        <div style={{display:'flex', flexDirection:'column', gap:6, border:'1px solid #e0e0e0',borderRadius:6,padding:12,background:'#fafafa'}}>
-            <span className="form-label" style={{fontWeight:700,fontSize:12}}>{label} {required && requiredMark}</span>
-            <FileUploadBase
-                files={files}
-                onFilesChange={handleFilesChange}
-                accept="image/*,application/pdf"
-                allowsMultiple={false}
-                maxSizeMb={5}
-                showPreview={true}
-            />
+        <div style={{display:'flex', flexDirection:'column', gap:8, border:'1px solid #e0e0e0', borderRadius:6, padding:12, background:'#ffffff'}}>
+            <span className="form-label" style={{fontWeight:700, fontSize:12}}>{label} {required && requiredMark}</span>
+            <div style={{display:'flex', flexDirection:'column', alignItems:'flex-start', width:'100%'}}>
+                <input
+                    type="file"
+                    accept="image/*,application/pdf"
+                    onChange={handleFileChange}
+                    style={{width:'100%', fontSize:12}}
+                />
+            </div>
+            {file ? (
+                <section style={{border:'1px dashed #d0d5dd', borderRadius:6, padding:'8px 12px', background:'#fafafa'}}>
+                    <div style={{fontSize:12, fontWeight:600, marginBottom:4, color:'#2f333b'}}>Dados do arquivo:</div>
+                    <ul style={{margin:0, paddingLeft:18, fontSize:12, color:'#444'}}>
+                        <li>Nome: {file.name}</li>
+                        <li>Tipo: {file.type || 'n/a'}</li>
+                        <li>Tamanho: {formatFileSize(file.size)}</li>
+                    </ul>
+                </section>
+            ) : (
+                <div style={{fontSize:11, color:'#999'}}>Nenhum arquivo selecionado</div>
+            )}
         </div>
     );
 }

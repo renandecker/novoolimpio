@@ -21,30 +21,42 @@ export function ReportFilters({filtros, onFiltersChange, onApplyFilters}: Report
     const [open, setOpen] = useState(false);
     const [activeFiltro, setActiveFiltro] = useState<FiltroRelatorioWrapper | null>(null);
     const [filterStates, setFilterStates] = useState<Record<number, FilterState>>({});
+    const [availableInformacoes, setAvailableInformacoes] = useState<Record<number, string[]>>({});
 
     useEffect(() => {
         const initialStates: Record<number, FilterState> = {};
-        filtros.forEach((filtro) => {
-            const fr = filtro.filtroRelatorio;
-            if (fr.dimensao.tipoInfo === 'TEMPO') {
-                initialStates[fr.id] = {
-                    tipo: 0,
-                    dataInicio: '',
-                    dataFim: '',
-                    campoDinamico: '',
-                    queryOperation: 'EQUALS',
-                };
-            } else if (fr.dimensao.tipoInfo === 'DESCRITIVO') {
-                initialStates[fr.id] = {
-                    listaTodosSelected: [],
-                };
-            } else if (fr.tipo === 'FIXO') {
-                initialStates[fr.id] = {
-                    selected: filtro.selected,
-                };
+        const fetchRelacoes = async () => {
+            const infosMap: Record<number, string[]> = {};
+            for (const filtro of filtros) {
+                const fr = filtro.filtroRelatorio;
+                if (fr.dimensao.tipoInfo === 'TEMPO') {
+                    initialStates[fr.id] = {
+                        tipo: 0,
+                        dataInicio: '',
+                        dataFim: '',
+                        campoDinamico: '',
+                        queryOperation: 'EQUALS',
+                    };
+                } else if (fr.dimensao.tipoInfo === 'DESCRITIVO') {
+                    initialStates[fr.id] = {
+                        listaTodosSelected: [],
+                    };
+                    try {
+                        const res = await api.get<{ informacoes?: string[] }>(`/api/relatorios/filtros/${fr.id}/relacoes`);
+                        infosMap[fr.id] = Array.isArray(res.data?.informacoes) ? res.data.informacoes : [];
+                    } catch {
+                        infosMap[fr.id] = [];
+                    }
+                } else if (fr.tipo === 'FIXO') {
+                    initialStates[fr.id] = {
+                        selected: filtro.selected,
+                    };
+                }
             }
-        });
-        setFilterStates(initialStates);
+            setAvailableInformacoes(infosMap);
+            setFilterStates(initialStates);
+        };
+        fetchRelacoes();
     }, [filtros]);
 
     const handleFiltroClick = (filtro: FiltroRelatorioWrapper) => {
@@ -243,13 +255,8 @@ export function ReportFilters({filtros, onFiltersChange, onApplyFilters}: Report
     };
 
     const renderDescritivoFilter = (fr: FiltroRelatorio, state: DescritivoFilterState) => {
-        const availableItems = [
-            {informacao: 'Item 1'},
-            {informacao: 'Item 2'},
-            {informacao: 'Item 3'},
-            {informacao: 'Item 4'},
-            {informacao: 'Item 5'},
-        ];
+        const rawList = availableInformacoes[fr.id] || [];
+        const availableItems = rawList.map(info => ({informacao: info}));
 
         const addItem = (item: {informacao: string}) => {
             if (!state.listaTodosSelected.find(s => s.informacao === item.informacao)) {

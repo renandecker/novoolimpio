@@ -17,7 +17,7 @@ import br.com.sol7.olimpio.basico.feriado.dto.FeriadoResponse;
 import br.com.sol7.olimpio.basico.feriado.dto.TurmaFeriadoResponse;
 import br.com.sol7.olimpio.basico.feriado.entity.Feriado;
 import br.com.sol7.olimpio.basico.feriado.entity.FeriadoAjuste;
-import br.com.sol7.olimpio.basico.feriado.producer.FeriadoKafkaProducer;
+import br.com.sol7.olimpio.basico.feriado.producer.FeriadoRabbitMQProducer;
 import br.com.sol7.olimpio.basico.feriado.repository.FeriadoAjusteRepository;
 import br.com.sol7.olimpio.basico.feriado.repository.FeriadoRepository;
 import br.com.sol7.olimpio.basico.feriado.dto.CalendarioEventoResponse;
@@ -32,7 +32,7 @@ public class FeriadoService {
     @Inject
     FeriadoAjusteRepository feriadoAjusteRepository;
     @Inject
-    FeriadoKafkaProducer kafkaProducer;
+    FeriadoRabbitMQProducer rabbitMQProducer;
 
     public Uni<List<FeriadoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -111,24 +111,24 @@ public class FeriadoService {
     }
 
 
-    // Migrado de FeriadoController.atualizarOferecimento - agora envia trigger via Kafka
+    // Migrado de FeriadoController.atualizarOferecimento - agora envia trigger via RabbitMQ
     // para o schedule executar a regra (FeriadoAjusteMaintenanceService)
     public Uni<String> atualizarOferecimento() {
-        return kafkaProducer.enviarTrigger("verificaFeriadosParaajustar")
+        return rabbitMQProducer.enviarTrigger("verificaFeriadosParaajustar")
                 .replaceWith("Trigger de ajuste geral enviado para o schedule");
     }
 
 
-    // Migrado de FeriadoController.atualizarOferecimentoNaoAjustado - agora envia trigger via Kafka
+    // Migrado de FeriadoController.atualizarOferecimentoNaoAjustado - agora envia trigger via RabbitMQ
     public Uni<String> atualizarOferecimentoNaoAjustado() {
-        return kafkaProducer.enviarTrigger("executarAjusteNaoSelecionados")
+        return rabbitMQProducer.enviarTrigger("executarAjusteNaoSelecionados")
                 .replaceWith("Trigger de ajuste nao selecionados enviado para o schedule");
     }
 
 
-    // Migrado de FeriadoController.atualizarOferecimentoAjustados - agora envia trigger via Kafka
+    // Migrado de FeriadoController.atualizarOferecimentoAjustados - agora envia trigger via RabbitMQ
     public Uni<String> atualizarOferecimentoAjustados() {
-        return kafkaProducer.enviarTrigger("executarAjusteSelecionados")
+        return rabbitMQProducer.enviarTrigger("executarAjusteSelecionados")
                 .replaceWith("Trigger de ajuste selecionados enviado para o schedule");
     }
 

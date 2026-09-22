@@ -38,20 +38,21 @@ const toMovimentacao = (raw: Record<string, unknown>): Movimentacao => {
     const valor = Number(raw.valor) || 0;
     const desconto = Number(raw.desconto) || 0;
     const multaJuros = Number(raw.multaJuros) || 0;
+    const valorTroco = Number(raw.valorTroco) || 0;
     return {
         id: Number(raw.id) || 0,
         parcelaId: raw.parcelaId != null ? Number(raw.parcelaId) : 0,
-        contratoId: raw.caixaId != null ? Number(raw.caixaId) : 0,
-        aluno: String(raw.historico ?? ''),
-        parcelaSequencia: raw.parcelaId != null ? Number(raw.parcelaId) : 0,
+        contratoId: raw.contratoId != null ? Number(raw.contratoId) : (raw.caixaId != null ? Number(raw.caixaId) : 0),
+        aluno: String(raw.aluno ?? raw.historico ?? ''),
+        parcelaSequencia: raw.parcelaSequencia != null ? Number(raw.parcelaSequencia) : (raw.parcelaId != null ? Number(raw.parcelaId) : 0),
         dataMovimento: String(raw.dataMovimento ?? ''),
         vencimento: raw.vencimento != null ? String(raw.vencimento) : '',
         formaPagamento: raw.tipoPagamento != null ? String(raw.tipoPagamento) : '',
         valor,
         desconto,
         multaJuros,
-        troco: Number(raw.valorTroco) || 0,
-        total: valor - desconto + multaJuros,
+        troco: valorTroco,
+        total: valor - valorTroco,
         tipoMovimento,
     };
 };
@@ -325,7 +326,7 @@ const openFluxoCaixa = async (row: CaixaRow) => {
             else if (forma.includes('CHEQUE')) totals.totalCheque += total;
             else if (forma.includes('CARTÃO') || forma.includes('CARTAO')) totals.totalCartao += total;
             else if (forma.includes('BOLETO')) totals.totalBoleto += total;
-            else if (forma.includes('TRANSFER') || forma.includes('PIX')) totals.totalTransferencia += total;
+            else if (forma.includes('TRANSFER') || forma.includes('TRANFER') || forma.includes('PIX')) totals.totalTransferencia += total;
             else if (forma.includes('DEPÓSITO') || forma.includes('DEPOSITO')) totals.totalDeposito += total;
             if (mov.tipoMovimento === 'SANGRIA' || mov.tipoMovimento === '3') totals.totalSangria += total;
         });
@@ -466,10 +467,11 @@ const openFluxoCaixa = async (row: CaixaRow) => {
                                                     <div className="master-detail-content">
                                                         {loading ? (
                                                             <p>Carregando movimentações...</p>
-                                                        ) : movs.length === 0 ? (
-                                                            <p className="master-detail-empty">Nenhuma movimentação encontrada.</p>
                                                         ) : (
                                                             <>
+                                                                {movs.length === 0 ? (
+                                                                    <p className="master-detail-empty">Nenhuma movimentação encontrada.</p>
+                                                                ) : (
                                                                 <table className="master-detail-table">
                                                                     <thead>
                                                                     <tr>
@@ -543,6 +545,7 @@ const openFluxoCaixa = async (row: CaixaRow) => {
                                                                     ))}
                                                                     </tbody>
                                                                 </table>
+                                                                )}
                                                                 <div className="caixa-totals-actions">
                                                                     <div className="caixa-totals">
 {(() => {

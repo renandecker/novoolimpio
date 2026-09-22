@@ -8,6 +8,7 @@ export interface FormTabConfig {
     label: string;
     fields?: FormFieldConfig[];
     content?: ReactNode;
+    customContent?: ReactNode;
 }
 
 export interface FormFieldConfig {
@@ -32,11 +33,13 @@ export interface FormLayoutProps {
     initialValues?: Record<string, unknown>;
     onSubmit: (values: Record<string, unknown>) => void;
     onCancel: () => void;
+    onChange?: (values: Record<string, unknown>) => void;
     submitLabel?: string;
     cancelLabel?: string;
     saving?: boolean;
     error?: string;
     className?: string;
+    footer?: boolean;
     children?: ReactNode;
 }
 
@@ -46,11 +49,13 @@ export function FormLayout({
     initialValues = {},
     onSubmit,
     onCancel,
+    onChange,
     submitLabel = 'Salvar',
     cancelLabel = 'Voltar',
     saving = false,
     error,
     className = '',
+    footer = true,
     children,
 }: FormLayoutProps) {
     const [values, setValues] = useState<Record<string, unknown>>(initialValues);
@@ -62,7 +67,11 @@ export function FormLayout({
     }, [initialValues]);
 
     const handleChange = (name: string, value: unknown) => {
-        setValues((prev) => ({...prev, [name]: value}));
+        setValues((prev) => {
+            const next = {...prev, [name]: value};
+            onChange?.(next);
+            return next;
+        });
     };
 
     const handleSubmit = () => {
@@ -73,16 +82,21 @@ export function FormLayout({
         key: tab.key,
         label: tab.label,
         content: tab.content ?? (
-            <div className="form-grid">
-                {(tab.fields ?? []).map((field) => (
-                    <label key={field.name} className="form-field">
-                        <span className="form-label">
-                            {field.label} {field.required && <span style={{color: '#C90000', marginLeft: '2px'}}>*</span>}
-                        </span>
-                        {renderField(field, handleChange, values[field.name])}
-                    </label>
-                ))}
-            </div>
+            <>
+                {(tab.fields ?? []).length > 0 && (
+                    <div className="form-grid">
+                        {(tab.fields ?? []).map((field) => (
+                            <label key={field.name} className="form-field">
+                                <span className="form-label">
+                                    {field.label} {field.required && <span style={{color: '#C90000', marginLeft: '2px'}}>*</span>}
+                                </span>
+                                {renderField(field, handleChange, values[field.name])}
+                            </label>
+                        ))}
+                    </div>
+                )}
+                {tab.customContent}
+            </>
         ),
     }));
 
@@ -102,14 +116,16 @@ export function FormLayout({
 
             <Tabs tabs={tabItems} initial={tabs[0]?.key} className="form-tabs"/>
 
-            <div className="form-footer">
-                <button type="button" className="btn-form-back btnyellow" onClick={onCancel} disabled={saving}>
-                    {cancelLabel}
-                </button>
-                <button type="button" className="btn-form-save btnstop" onClick={handleSubmit} disabled={saving}>
-                    {saving ? 'Salvando...' : submitLabel}
-                </button>
-            </div>
+            {footer && (
+                <div className="form-footer">
+                    <button type="button" className="btn-form-back btnyellow" onClick={onCancel} disabled={saving}>
+                        {cancelLabel}
+                    </button>
+                    <button type="button" className="btn-form-save btnstop" onClick={handleSubmit} disabled={saving}>
+                        {saving ? 'Salvando...' : submitLabel}
+                    </button>
+                </div>
+            )}
 
             {children}
         </div>

@@ -4,7 +4,7 @@ import br.com.sol7.olimpio.educacao.lote.dto.LoteNapEmailRequest;
 import br.com.sol7.olimpio.educacao.lote.dto.LoteNapLigacaoRequest;
 import br.com.sol7.olimpio.educacao.lote.dto.LoteNapResponse;
 import br.com.sol7.olimpio.educacao.lote.service.LoteNapService;
-import br.com.sol7.olimpio.educacao.shared.kafka.EducacaoKafkaProducer;
+import br.com.sol7.olimpio.educacao.shared.rabbitmq.EducacaoRabbitMQProducer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
@@ -29,7 +29,7 @@ public class LoteNapController {
     LoteNapService service;
 
     @Inject
-    EducacaoKafkaProducer kafkaProducer;
+    EducacaoRabbitMQProducer rabbitMQProducer;
 
     @Inject
     ObjectMapper objectMapper;
@@ -53,7 +53,7 @@ public class LoteNapController {
     @Path("/email")
     public Uni<String> enviarEmail(@Valid LoteNapEmailRequest request) throws Exception {
         String json = objectMapper.writeValueAsString(request);
-        return kafkaProducer.enviarTriggerEmailNap(json)
+        return rabbitMQProducer.enviarTriggerEmailNap(json)
                 .replaceWith("Trigger de email NAP enviado para o notificacoes");
     }
 

@@ -14,6 +14,7 @@ import br.com.sol7.olimpio.relatorios.filtros.repository.FiltrosRepository;
 import br.com.sol7.olimpio.relatorios.grafico.entity.Grafico;
 import br.com.sol7.olimpio.relatorios.mapa.entity.Mapa;
 import br.com.sol7.olimpio.relatorios.organograma.entity.Organograma;
+import br.com.sol7.olimpio.relatorios.basico.entity.BasUsuario;
 import br.com.sol7.olimpio.relatorios.tabela.entity.Tabela;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,6 +25,8 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Context;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +37,9 @@ public class FiltrosService {
 
     @Inject
     FiltrosRepository repository;
+
+    @Context
+    ContainerRequestContext requestContext;
 
     public Uni<List<FiltrosResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -375,9 +381,29 @@ public class FiltrosService {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    private Uni<Long> getCurrentUserId() {
+        if (requestContext != null) {
+            String userId = requestContext.getHeaderString("X-Authenticated-User-Id");
+            if (userId != null) {
+                try {
+                    return Uni.createFrom().item(Long.parseLong(userId));
+                } catch (NumberFormatException ignored) {}
+            }
+            String username = requestContext.getHeaderString("X-Authenticated-Username");
+            if (username != null && !username.isBlank()) {
+                return BasUsuario.findIdByLogin(username)
+                        .onItem().ifNull().continueWith(1L);
+            }
+        }
+        return Uni.createFrom().item(1L);
+    }
+
     public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewTabela(Long tabelaId) {
-        return repository.findByTabela(tabelaId)
-                .map(this::toWrapperDTOs);
+        return getCurrentUserId()
+                .flatMap(usuarioId -> Tabela.<Tabela>findById(tabelaId)
+                        .onItem().ifNull().failWith(() -> new NotFoundException("Tabela not found"))
+                        .flatMap(tabela -> repository.findByTabelaWithPermissions(tabelaId, usuarioId, tabela.estruturaId))
+                        .map(filtros -> toWrapperDTOs(filtros)));
     }
 
     public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForListTabela() {
@@ -416,7 +442,7 @@ public class FiltrosService {
         boolean exibirFiltro = f.flExibir != null ? f.flExibir : true;
         String tipo = f.tipoFiltro != null ? f.tipoFiltro : "DINAMICO";
         String informacao = null;
-        String tipoInfo = "DESCRITIVO";
+        String tipoInfo = f.dadosJson != null ? f.dadosJson : "DESCRITIVO";
         return new FiltroRelatorioWrapperDTO.FiltroRelatorioDTO(
                 f.id, f.nome, fixo, exibirFiltro, tipo, informacao,
                 new FiltroRelatorioWrapperDTO.DimensaoDTO(tipoInfo)

@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.financeiro.shared.kafka;
+package br.com.sol7.olimpio.financeiro.shared.rabbitmq;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -12,7 +12,7 @@ import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class KafkaResponse {
+public class RabbitMQResponse {
 
     private String correlationId;
     private String service;
@@ -21,7 +21,7 @@ public class KafkaResponse {
     private String error;
     private ObjectNode data;
 
-    public KafkaResponse() {
+    public RabbitMQResponse() {
     }
 
     public String getCorrelationId() {
@@ -93,8 +93,8 @@ public class KafkaResponse {
         return mapper.convertValue(idsNode, mapper.getTypeFactory().constructCollectionType(List.class, Long.class));
     }
 
-    public static KafkaResponse success(String correlationId, String service, String action, ObjectNode data) {
-        KafkaResponse response = new KafkaResponse();
+    public static RabbitMQResponse success(String correlationId, String service, String action, ObjectNode data) {
+        RabbitMQResponse response = new RabbitMQResponse();
         response.setCorrelationId(correlationId);
         response.setService(service);
         response.setAction(action);
@@ -103,8 +103,8 @@ public class KafkaResponse {
         return response;
     }
 
-    public static KafkaResponse error(String correlationId, String service, String action, String error) {
-        KafkaResponse response = new KafkaResponse();
+    public static RabbitMQResponse error(String correlationId, String service, String action, String error) {
+        RabbitMQResponse response = new RabbitMQResponse();
         response.setCorrelationId(correlationId);
         response.setService(service);
         response.setAction(action);

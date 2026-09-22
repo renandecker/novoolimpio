@@ -1,4 +1,4 @@
-import {useRef, useState, useEffect} from 'react';
+﻿import {useRef, useState, useEffect} from 'react';
 
 
 import {
@@ -11,6 +11,7 @@ import {
   ChevronDown,
   ChevronRight,
   FileText,
+  Pencil,
 } from 'lucide-react';
 import {api} from '../../../shared/services/api';
 import {swalConfirm} from '../../../shared/components/swal';
@@ -30,6 +31,8 @@ import {ScheduleWeekView, mondayOf, toIsoDate, type ScheduleEventData} from '../
 import {legacyClassName} from '../../../shared/components/DataTable';
 
 import {BooleanField} from '../../../shared/components/BooleanField';
+
+import {InformacoesModal} from '../../professor/GestaoProfessorModais';
 
 import '../../professor/GestaoProfessor.css';
 
@@ -68,7 +71,6 @@ type Aluno = { matriculaId: number; nome: string; ativo: boolean; presencas: Pre
 
 
 type Caderno = { turma: Turma; ocorrencias: Ocorrencia[]; alunos: Aluno[] };
-
 
 
 type GrauNota = {
@@ -193,7 +195,7 @@ const PRESENCAS: Record<string, { titulo: string; cor: string }> = {
 
     p: {titulo: 'Presente', cor: '#32CD32'},
 
-    m: {titulo: 'Meia Presença', cor: '#FFD700'},
+    m: {titulo: 'Meia PresenÃ§a', cor: '#FFD700'},
 
     a: {titulo: 'Ausente', cor: '#FF0000'},
 
@@ -375,7 +377,7 @@ export default function ViewGestaoProfessorGestaoProfessorListScreen() {
 
     const tabs = [
 
-        {key: 'gestao', label: 'Gestão', content: <GestaoTab/>},
+        {key: 'gestao', label: 'GestÃ£o', content: <GestaoTab/>},
 
         ...(souProfessor && professorId !== null
 
@@ -391,7 +393,7 @@ export default function ViewGestaoProfessorGestaoProfessorListScreen() {
 
         <main className="gestao-professor">
 
-            <h1>Gestão do Professor</h1>
+            <h1>GestÃ£o do Professor</h1>
 
             <Tabs tabs={tabs}/>
 
@@ -427,7 +429,39 @@ function GestaoTab() {
 
     const [painel, setPainel] = useState<'caderno' | 'notas' | 'registro' | 'aula' | null>(null);
 
+    // Abas ocultas: só aparecem depois que o botão da turma é clicado.
+    // Ex.: clicar em "Caderno chamada" abre a aba "Presenças" com os alunos e presenças.
+    const [abasAbertas, setAbasAbertas] = useState<Array<'caderno' | 'notas' | 'registro' | 'aula'>>([]);
+
+    const ABAS_TITULOS: Record<'caderno' | 'notas' | 'registro' | 'aula', string> = {
+        caderno: 'Presenças',
+        notas: 'Notas',
+        registro: 'Registro de aula',
+        aula: 'Aulas',
+    };
+
+    function abrirAba(aba: 'caderno' | 'notas' | 'registro' | 'aula') {
+        setPainel(aba);
+        setAbasAbertas((prev) => (prev.includes(aba) ? prev : [...prev, aba]));
+        setCarregandoDetalhe(true);
+        setTimeout(() => abasRef.current?.scrollIntoView({behavior: 'smooth', block: 'nearest'}), 100);
+    }
+
+    function fecharAba(aba: 'caderno' | 'notas' | 'registro' | 'aula') {
+        const restantes = abasAbertas.filter((a) => a !== aba);
+        setAbasAbertas(restantes);
+        if (painel === aba) {
+            setPainel(restantes.length > 0 ? restantes[restantes.length - 1] : null);
+        }
+    }
+
     const [turmaSelecionada, setTurmaSelecionada] = useState<Turma | null>(null);
+
+    const [infoTurma, setInfoTurma] = useState<Turma | null>(null);
+
+    const [carregandoDetalhe, setCarregandoDetalhe] = useState(false);
+
+    const abasRef = useRef<HTMLDivElement | null>(null);
 
 
 
@@ -465,7 +499,7 @@ function GestaoTab() {
 
 
 
-    const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
+const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
     const [qtdDias, setQtdDias] = useState(0);
 
@@ -508,6 +542,8 @@ function GestaoTab() {
 
         setPainel(null);
 
+        setAbasAbertas([]);
+
         try {
 
             const {data} = await api.get<Turma[]>(professorId === null ? '/api/professor/gestao-professor/turmas' : '/api/professor/gestao-professor/turmas', {params: professorId !== null ? {professorId} : undefined});
@@ -528,7 +564,7 @@ function GestaoTab() {
 
             setErro('Erro ao carregar as turmas.');
 
-        } finally {
+} finally {
 
             setCarregandoTurmas(false);
 
@@ -537,10 +573,9 @@ function GestaoTab() {
     }
 
 
-
     async function abrirCaderno(turma: Turma) {
 
-        setPainel('caderno');
+        abrirAba('caderno');
 
         setTurmaSelecionada(turma);
 
@@ -572,7 +607,7 @@ function GestaoTab() {
 
     async function abrirNotas(turma: Turma) {
 
-        setPainel('notas');
+        abrirAba('notas');
 
         setTurmaSelecionada(turma);
 
@@ -596,7 +631,7 @@ function GestaoTab() {
 
     async function abrirRegistro(turma: Turma) {
 
-        setPainel('registro');
+        abrirAba('registro');
 
         setTurmaSelecionada(turma);
 
@@ -622,7 +657,7 @@ function GestaoTab() {
 
     async function abrirAula(turma: Turma) {
 
-        setPainel('aula');
+        abrirAba('aula');
 
         setTurmaSelecionada(turma);
 
@@ -642,11 +677,11 @@ function GestaoTab() {
 
             setOcorrenciasAula(data);
 
-            if (data.length === 0) notificar('erro', 'Nenhuma ocorrência encontrada para esta turma.');
+            if (data.length === 0) notificar('erro', 'Nenhuma ocorrÃªncia encontrada para esta turma.');
 
         } catch (e) {
 
-            notificar('erro', 'Erro ao carregar as ocorrências da turma.');
+            notificar('erro', 'Erro ao carregar as ocorrÃªncias da turma.');
 
         }
 
@@ -670,7 +705,7 @@ function GestaoTab() {
 
         } catch (e) {
 
-            notificar('erro', 'Erro ao carregar as aulas da ocorrência.');
+            notificar('erro', 'Erro ao carregar as aulas da ocorrÃªncia.');
 
         }
 
@@ -718,7 +753,7 @@ function GestaoTab() {
 
             if (aulaForm.id === aula.id) setAulaForm({id: null, nome: '', descricao: '', anexos: []});
 
-            notificar('sucesso', 'Aula excluída com sucesso.');
+            notificar('sucesso', 'Aula excluÃ­da com sucesso.');
 
         } catch (e) {
 
@@ -812,7 +847,7 @@ function GestaoTab() {
 
         } catch (e) {
 
-            // silencioso: apenas anexos são recarregados
+            // silencioso: apenas anexos sÃ£o recarregados
 
         }
 
@@ -918,7 +953,7 @@ function GestaoTab() {
 
         if (alteradas.length === 0) {
 
-            notificar('erro', 'Nenhuma presença foi alterada.');
+            notificar('erro', 'Nenhuma presenÃ§a foi alterada.');
 
             return;
 
@@ -1064,6 +1099,11 @@ function GestaoTab() {
 
 
 
+    // Libera o "Carregando..." da aba assim que chegam dados ou avisos (sucesso/erro).
+    useEffect(() => {
+        setCarregandoDetalhe(false);
+    }, [caderno, notas, registrosEdit, aulasDaOcorrencia, ocorrenciasAula, aviso]);
+
     const hoje = new Date();
 
     hoje.setHours(0, 0, 0, 0);
@@ -1142,7 +1182,7 @@ function GestaoTab() {
 
                     <table className="gp-table">
 
-                        <thead>
+<thead>
 
                         <tr>
 
@@ -1206,7 +1246,7 @@ function GestaoTab() {
 
                                                 onClick={() => abrirNotas(t)}>
 
-                                            âœï¸
+                                            <Pencil className="icon" />
 
                                         </button>
 
@@ -1232,7 +1272,7 @@ function GestaoTab() {
 
                                 <button className="gp-btn gp-btn-acoes btnyellow" title="Informações"
 
-                                        onClick={() => window.open(`/api/educacao/professor/${t.id}/informacoes`, '_blank')}>
+                                        onClick={() => setInfoTurma(t)}>
 
                                     <Info className="icon" />
 
@@ -1266,6 +1306,62 @@ function GestaoTab() {
 
             </Painel>
 
+
+            {abasAbertas.length > 0 && (
+
+                <div className="tabs-container gp-abas-detalhe" ref={abasRef}>
+
+                    <nav className="tabs">
+
+                        {abasAbertas.map((aba) => (
+
+                            <button
+                                key={aba}
+                                type="button"
+                                className={painel === aba ? 'tab tab-active' : 'tab'}
+                                onClick={() => setPainel(aba)}
+                                title={turmaSelecionada ? `${ABAS_TITULOS[aba]} - Turma ${turmaSelecionada.id}` : ABAS_TITULOS[aba]}
+                            >
+                                {ABAS_TITULOS[aba]}
+                                <span
+                                    role="button"
+                                    aria-label={`Fechar ${ABAS_TITULOS[aba]}`}
+                                    tabIndex={0}
+                                    className="gp-aba-fechar"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        fecharAba(aba);
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            fecharAba(aba);
+                                        }
+                                    }}
+                                >
+                                    <X className="icon" />
+                                </span>
+                            </button>
+
+                        ))}
+
+                    </nav>
+
+                </div>
+
+            )}
+
+
+            {painel && carregandoDetalhe && (
+
+                <Painel titulo={ABAS_TITULOS[painel]} colapsado={false} onToggle={() => undefined}>
+
+                    <div className="gp-vazio">Carregando...</div>
+
+                </Painel>
+
+            )}
 
 
             {painel === 'caderno' && caderno && (
@@ -1356,7 +1452,7 @@ function GestaoTab() {
 
                                     }}
 
-                                    title={`Máximo de aulas ${caderno.ocorrencias.length}`}
+                                    title={`MÃ¡ximo de aulas ${caderno.ocorrencias.length}`}
 
                                 />
 
@@ -1518,7 +1614,7 @@ function GestaoTab() {
 
                             <div>
 
-                                <b>Média aprovação sem exame: </b>
+                                <b>MÃ©dia aprovaÃ§Ã£o sem exame: </b>
 
                                 <span>{notas.mediaSemExame ?? '-'}</span>
 
@@ -1528,7 +1624,7 @@ function GestaoTab() {
 
                                 <div>
 
-                                    <b>Média aprovação com exame: </b>
+                                    <b>MÃ©dia aprovaÃ§Ã£o com exame: </b>
 
                                     <span>{notas.mediaFinal ?? '-'}</span>
 
@@ -1538,7 +1634,7 @@ function GestaoTab() {
 
                             <div>
 
-                                <b>Nota máxima: </b>
+                                <b>Nota mÃ¡xima: </b>
 
                                 <span>{notas.notaMaxima ?? '-'}</span>
 
@@ -1836,7 +1932,7 @@ function GestaoTab() {
 
                         <div className="gp-control-group gp-control-group-stretch">
 
-                            <span className="gp-control-label">Ocorrência:</span>
+                            <span className="gp-control-label">OcorrÃªncia:</span>
 
                             <select
 
@@ -1846,7 +1942,7 @@ function GestaoTab() {
 
                             >
 
-                                <option value="">Selecione a ocorrência...</option>
+                                <option value="">Selecione a ocorrÃªncia...</option>
 
                                 {ocorrenciasAula.map((o) => (
 
@@ -1896,7 +1992,7 @@ function GestaoTab() {
 
                                 <label className="gp-aula-label">
 
-                                    <span className="gp-aula-label-text">Descrição</span>
+                                    <span className="gp-aula-label-text">DescriÃ§Ã£o</span>
 
                                     <textarea
 
@@ -1906,7 +2002,7 @@ function GestaoTab() {
 
                                         onChange={(e) => setAulaForm((f) => ({...f, descricao: e.target.value}))}
 
-                                        placeholder="Descrição / conteúdo da aula"
+                                        placeholder="DescriÃ§Ã£o / conteÃºdo da aula"
 
                                     />
 
@@ -2000,7 +2096,7 @@ function GestaoTab() {
 
                                             >
 
-                                                <option value="VIDEO">Vídeo</option>
+                                                <option value="VIDEO">VÃ­deo</option>
 
                                                 <option value="PDF">Documento (PDF)</option>
 
@@ -2107,11 +2203,11 @@ function GestaoTab() {
 
                                         <th>Nome</th>
 
-                                        <th>Descrição</th>
+                                        <th>DescriÃ§Ã£o</th>
 
                                         <th>Anexos</th>
 
-                                        <th>Ações</th>
+                                        <th>AÃ§Ãµes</th>
 
                                     </tr>
 
@@ -2141,7 +2237,7 @@ function GestaoTab() {
 
                                                 {(anexosDaAula[aula.id] ?? []).length === 0 &&
 
-                                                <span className="gp-vazio">—</span>}
+                                                <span className="gp-vazio">â€”</span>}
 
                                             </td>
 
@@ -2151,7 +2247,7 @@ function GestaoTab() {
 
                                                         onClick={() => editarAula(aula)}>
 
-                                                    âœï¸
+                                                    Ã¢Å“ÂÃ¯Â¸Â
 
                                                 </button>
 
@@ -2175,7 +2271,7 @@ function GestaoTab() {
 
                                             <td colSpan={4} className="gp-vazio">
 
-                                                Nenhuma aula registrada nesta ocorrência.
+                                                Nenhuma aula registrada nesta ocorrÃªncia.
 
                                             </td>
 
@@ -2193,9 +2289,15 @@ function GestaoTab() {
 
                     )}
 
-                    {ocorrenciasAula.length === 0 && <div className="gp-vazio">Nenhuma ocorrência encontrada.</div>}
+                    {ocorrenciasAula.length === 0 && <div className="gp-vazio">Nenhuma ocorrÃªncia encontrada.</div>}
 
                 </Painel>
+
+            )}
+
+            {infoTurma && (
+
+                <InformacoesModal turmaId={infoTurma.id} onClose={() => setInfoTurma(null)} />
 
             )}
 
@@ -2269,7 +2371,7 @@ function DisponibilidadeTab({professorId}: { professorId: number }) {
 
     const LEGENDA = [
 
-        {className: 'evento-green', label: 'Disponível'},
+        {className: 'evento-green', label: 'DisponÃ­vel'},
 
         {className: 'evento-black', label: 'Aula (ocupado)'},
 
@@ -2308,4 +2410,6 @@ function DisponibilidadeTab({professorId}: { professorId: number }) {
     );
 
 }
+
+
 

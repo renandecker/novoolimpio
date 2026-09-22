@@ -19,7 +19,9 @@ interface WizardProps {
     completeLabel?: string;
     onComplete?: (data: any) => void;
     initialData?: any;
+    data?: any;
     onDataChange?: (data: any) => void;
+    hideNavButtons?: boolean;
 }
 
 export function Wizard({
@@ -29,18 +31,23 @@ export function Wizard({
                            completeLabel = 'Finalizar',
                            onComplete,
                            initialData = {},
+                           data,
                            onDataChange,
+                           hideNavButtons = false,
                        }: WizardProps) {
     const [index, setIndex] = useState(initial);
-    const [data, setData] = useState(initialData);
+    const [internalData, setInternalData] = useState(initialData);
     const [isValidating, setIsValidating] = useState(false);
 
+    const currentData = data ?? internalData;
     const current = steps[Math.min(index, steps.length - 1)];
     const last = index >= steps.length - 1;
 
     useEffect(() => {
-        setData(initialData);
-    }, [initialData]);
+        if (data === undefined) {
+            setInternalData(initialData);
+        }
+    }, [initialData, data]);
 
     useEffect(() => {
         if (stepIndex === undefined) return;
@@ -48,10 +55,12 @@ export function Wizard({
     }, [stepIndex, steps.length]);
 
     const updateData = useCallback((newData: any) => {
-        const merged = {...data, ...newData};
-        setData(merged);
+        const merged = {...currentData, ...newData};
+        if (data === undefined) {
+            setInternalData(merged);
+        }
         onDataChange?.(merged);
-    }, [data, onDataChange]);
+    }, [currentData, data, onDataChange]);
 
     const validateStep = async (stepIndex: number, direction: 'next' | 'back'): Promise<boolean> => {
         if (direction === 'back') return true;
@@ -61,7 +70,7 @@ export function Wizard({
 
         setIsValidating(true);
         try {
-            const result = await step.validate(data);
+            const result = await step.validate(currentData);
             setIsValidating(false);
             if (result === true || result === '') return true;
             if (typeof result === 'string') {
@@ -79,7 +88,7 @@ export function Wizard({
         const step = steps[stepIndex];
         if (step.onEnter) {
             try {
-                await step.onEnter(data);
+                await step.onEnter(currentData);
             } catch (error) {
                 console.error('Step preparation error:', error);
             }
@@ -89,7 +98,7 @@ export function Wizard({
     const goNext = async () => {
         if (last) {
             if (await validateStep(index, 'next')) {
-                onComplete?.(data);
+                onComplete?.(currentData);
             }
             return;
         }
@@ -153,6 +162,7 @@ export function Wizard({
 
             <View style={styles.content}>{current?.content}</View>
 
+            {!hideNavButtons && (
             <View style={styles.actions}>
                 <Pressable
                     style={[styles.backButton, index === 0 && styles.buttonDisabled]}
@@ -171,6 +181,7 @@ export function Wizard({
                     </Text>
                 </Pressable>
             </View>
+            )}
         </View>
     );
 }

@@ -83,7 +83,7 @@ export default function ViewProspectoListProspectoListScreen() {
         },
         {
             key: 'quantidadeLigacao',
-            title: 'Quantidade Ligação por Resultado',
+            title: 'Qtde Ligação por Resultado',
             className: 'btnstop',
             icon: <i className="fa fa-phone"/>,
             onClick: (item) => carregarQuantidadeLigacao(item),

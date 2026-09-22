@@ -1,5 +1,6 @@
 package br.com.sol7.olimpio.financeiro.cobranca;
 
+import br.com.sol7.olimpio.financeiro.shared.rabbitmq.FinanceiroRabbitMQProducer;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
@@ -17,7 +18,7 @@ public class CobrancaController {
     CobrancaService service;
 
     @Inject
-    br.com.sol7.olimpio.financeiro.shared.kafka.FinanceiroKafkaProducer kafkaProducer;
+    FinanceiroRabbitMQProducer rabbitMQProducer;
 
     @GET
     public Uni<List<CobrancaResponse>> list() {
@@ -84,7 +85,7 @@ public class CobrancaController {
     @POST
     @Path("/atualizar-cobrancas-automatico")
     public Uni<Response> atualizarCobrancasAutomatico() {
-        return kafkaProducer.enviarTriggerAtualizarCobrancas("atualizarCobrancasAutomatico")
+        return rabbitMQProducer.enviarTriggerAtualizarCobrancas("atualizarCobrancasAutomatico")
                 .map(v -> Response.accepted().entity(java.util.Map.of("status", "trigger enviado", "action", "atualizarCobrancasAutomatico")).build());
     }
 

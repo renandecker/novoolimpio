@@ -224,7 +224,7 @@ export const ESTRUTURA_COLUNA_COLUMNS: MasterDetailColumn[] = [
 ];
 export const ESTRUTURA_COLUNA_SEARCH = ['coluna'];
 
-export const FILTRO_SOURCE = '/api/relatorios/filtro';
+export const FILTRO_SOURCE = '/api/relatorios/filtros';
 export const FILTRO_COLUMNS: MasterDetailColumn[] = [
     {key: 'id', label: 'ID do Filtro'},
     {key: 'nome', label: 'Nome'},

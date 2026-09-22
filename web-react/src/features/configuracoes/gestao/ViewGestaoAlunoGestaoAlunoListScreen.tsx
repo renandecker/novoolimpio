@@ -810,7 +810,7 @@ function MatriculasTable({contratoId, acessoTudo, acessoRelatorios, acessoNovo, 
 
                         <div className="modal-actions form-footer">
 
-                            <button type="button" className="btn-form-back" onClick={() => setPlaceholder(null)}>
+                            <button type="button" className="btn-form-back btnyellow" onClick={() => setPlaceholder(null)}>
 
                                 Fechar
 
@@ -1636,7 +1636,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
                         <div className="modal-actions form-footer">
 
-                            <button type="button" className="btn-form-back" onClick={() => setPlaceholder(null)}>
+                            <button type="button" className="btn-form-back btnyellow" onClick={() => setPlaceholder(null)}>
 
                                 Fechar
 

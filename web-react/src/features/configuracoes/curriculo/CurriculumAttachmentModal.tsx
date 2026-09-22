@@ -33,11 +33,7 @@ export function CurriculumAttachmentModal({
         }
     }, [visible, currentFileBase64, currentFileName]);
 
-    useEffect(() => {
-        if (visible && fileInputRef.current) {
-            fileInputRef.current.click();
-        }
-    }, [visible, sourceType]);
+    
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];

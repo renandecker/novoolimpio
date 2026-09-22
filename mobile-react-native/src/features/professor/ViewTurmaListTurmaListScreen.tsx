@@ -1,12 +1,12 @@
-import React, {useState, useCallback} from 'react';
-import {Modal, Pressable, StyleSheet, Text, View} from 'react-native';
+import React, {useState} from 'react';
+import {Modal, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import {Alert} from '../../shared/components/SweetAlert';
-import {ModuleList, type ModuleListExtraAction} from '../../shared/components/ModuleListScreen';
+import {ModuleList, type ModuleListActionGroup, type ModuleListExtraAction} from '../../shared/components/ModuleListScreen';
 import {MasterDetail} from '../../MasterDetail';
 import {Tabs} from '../../Tabs';
 import {Wizard} from '../../Wizard';
 import type {ApiItem} from '../../types';
-import {useAuth} from '../../shared/services/auth';
 import {
     UNIDADE_SOURCE,
     UNIDADE_COLUMNS,
@@ -16,299 +16,473 @@ import {
     COMPONENTE_SEARCH,
 } from '../../masterDetailSources';
 import {can} from '../../shared/services/permissions';
+import {useAuth} from '../auth/auth';
 
-function EmptyText({children}: { children: string }) {
-    return <Text style={styles.empty}>{children}</Text>;
-}
+const asRecord = (item: ApiItem) => (item ?? {}) as Record<string, unknown>;
 
-/** <p:dialog id="dialogo" header="Finalizando Turma"><p:tabView> — plain tabs, not a wizard. */
-function FinalizarTurmaModal({visible, onClose}: { visible: boolean; onClose: () => void }) {
+const statusOf = (item: ApiItem | null) => String(asRecord(item).status ?? '');
+
+function ModalShell({title, onClose, children}: { title: string; onClose: () => void; children: React.ReactNode }) {
     return (
-        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+        <Modal visible transparent animationType="fade" onRequestClose={onClose}>
             <Pressable style={styles.overlay} onPress={onClose}>
                 <Pressable style={styles.modal} onPress={(e) => e.stopPropagation()}>
                     <View style={styles.header}>
-                        <Text style={styles.title}>Finalizando Turma</Text>
+                        <Text style={styles.title}>{title}</Text>
                         <Pressable style={styles.closeBtn} onPress={onClose} accessibilityLabel="Fechar">
                             <Text style={styles.closeBtnText}>✕</Text>
                         </Pressable>
                     </View>
-                    <Tabs
-                        tabs={[
-                            {
-                                key: 'matriculas',
-                                label: 'Matrículas',
-                                content: <ModuleList path="/api/educacao/matricula"/>
-                            },
-                            {key: 'notas', label: 'Notas', content: <EmptyText>Notas da turma.</EmptyText>},
-                            {key: 'presencas', label: 'Presenças', content: <EmptyText>Presenças da turma.</EmptyText>},
-                        ]}
-                    />
+                    <ScrollView style={styles.modalScroll} contentContainerStyle={styles.modalContent}>
+                        {children}
+                    </ScrollView>
                 </Pressable>
             </Pressable>
         </Modal>
     );
 }
 
-/** <p:dialog id="dialogProrrogando" widgetVar="prorrogando"><p:wizard> — Dias Aula / Comparativo Aula / Professor. */
-function ProrrogarTurmaModal({visible, onClose}: { visible: boolean; onClose: () => void }) {
+/** <p:dialog id="professores" header="Alterando professor para turma"> */
+function ProfessorModal({visible, turma, onClose}: { visible: boolean; turma: ApiItem | null; onClose: () => void }) {
+    if (!turma) return null;
     return (
-        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-            <Pressable style={styles.overlay} onPress={onClose}>
-                <Pressable style={styles.modal} onPress={(e) => e.stopPropagation()}>
-                    <View style={styles.header}>
-                        <Text style={styles.title}>Prorrogando Turma</Text>
-                        <Pressable style={styles.closeBtn} onPress={onClose} accessibilityLabel="Fechar">
-                            <Text style={styles.closeBtnText}>✕</Text>
-                        </Pressable>
-                    </View>
-                    <Wizard
-                        completeLabel="Concluir"
-                        onComplete={onClose}
-                        steps={[
-                            {
-                                key: 'diaAula',
-                                label: 'Dias Aula',
-                                content: <ModuleList path="/api/educacao/ocorrencia-componente-curricular"/>
-                            },
-                            {
-                                key: 'comparativoAula',
-                                label: 'Comparativo Aula',
-                                content: <EmptyText>Comparativo de aulas.</EmptyText>
-                            },
-                            {
-                                key: 'selecioneProfessor',
-                                label: 'Professor',
-                                nextLabel: 'Salvar',
-                                content: <ModuleList path="/api/view/professor/listProfessor"/>
-                            },
-                        ]}
-                    />
+        <ModalShell title={`Alterando professor da turma #${turma.id}`} onClose={onClose}>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>Turma:</Text>
+                <Text style={styles.infoValue}>#{turma.id} - {turma.nome}</Text>
+            </View>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>Status:</Text>
+                <Text style={styles.infoValue}>{statusOf(turma)}</Text>
+            </View>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>Professor atual:</Text>
+                <Text style={styles.infoValue}>{String(asRecord(turma).professor_descricao ?? '-')}</Text>
+            </View>
+
+            <Text style={styles.section}>Aulas Futuras</Text>
+            <View style={styles.modalButtons}>
+                <Pressable style={styles.btnBlue} onPress={() => Alert.alert('Sucesso', 'Professor das aulas futuras alterado!')}>
+                    <Text style={styles.btnText}>Salvar aula(s) futuras</Text>
                 </Pressable>
-            </Pressable>
-        </Modal>
+                <Pressable style={styles.btnBlue} onPress={() => Alert.alert('Sucesso', 'Professor de todas as aulas alterado!')}>
+                    <Text style={styles.btnText}>Salvar todas aula(s)</Text>
+                </Pressable>
+                <Pressable style={styles.btnRed} onPress={onClose}>
+                    <Text style={styles.btnText}>Cancelar</Text>
+                </Pressable>
+            </View>
+
+            <Text style={styles.section}>Por Aula</Text>
+            <ModuleList
+                path="/api/educacao/ocorrencia-componente-curricular"
+                params={{turmaId: turma.id}}
+                hideCreate
+                hideUpdate
+                hideDelete
+                hideView
+            />
+        </ModalShell>
     );
 }
 
-/** <p:dialog header="Trocar aluno da turma"><p:wizard id="wizardtroca" showNavBar="false"> — Selecionando Aluno / Nova Turma. */
-function TrocarTurmaModal({visible, onClose}: { visible: boolean; onClose: () => void }) {
+/** <p:dialog id="salas" header="Alterando sala da turma"> */
+function SalaModal({visible, turma, onClose}: { visible: boolean; turma: ApiItem | null; onClose: () => void }) {
+    if (!turma) return null;
+    const salaActions: ModuleListExtraAction[] = [
+        {
+            key: 'alterarSala',
+            title: 'Alterar Sala',
+            permission: 'UPDATE',
+            onPress: (sala) => {
+                Alert.alert('Sucesso', `Sala #${sala.id} atribuída à turma #${turma.id}!`);
+                onClose();
+            },
+        },
+    ];
     return (
-        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-            <Pressable style={styles.overlay} onPress={onClose}>
-                <Pressable style={styles.modal} onPress={(e) => e.stopPropagation()}>
-                    <View style={styles.header}>
-                        <Text style={styles.title}>Trocar aluno da turma</Text>
-                        <Pressable style={styles.closeBtn} onPress={onClose} accessibilityLabel="Fechar">
-                            <Text style={styles.closeBtnText}>✕</Text>
-                        </Pressable>
-                    </View>
-                    <Wizard
-                        completeLabel="Concluir"
-                        onComplete={onClose}
-                        steps={[
-                            {
-                                key: 'selecionarAluno',
-                                label: 'Selecionando Aluno',
-                                content: <EmptyText>Seleção de aluno.</EmptyText>
-                            },
-                            {
-                                key: 'novaTurma',
-                                label: 'Selecionando nova Turma',
-                                nextLabel: 'Finalizar',
-                                content: <EmptyText>Seleção de nova turma.</EmptyText>
-                            },
-                        ]}
-                    />
+        <ModalShell title={`Alterando sala da turma #${turma.id}`} onClose={onClose}>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>Turma:</Text>
+                <Text style={styles.infoValue}>#{turma.id} - {turma.nome}</Text>
+            </View>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>Sala atual:</Text>
+                <Text style={styles.infoValue}>{String(asRecord(turma).sala_descricao ?? '-')}</Text>
+            </View>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>Vagas:</Text>
+                <Text style={styles.infoValue}>{String(asRecord(turma).vagas ?? '-')}</Text>
+            </View>
+
+            <Text style={styles.section}>Vagas</Text>
+            <View style={styles.modalButtons}>
+                <Pressable style={styles.btnBlue} onPress={() => Alert.alert('Sucesso', 'Vagas atualizadas!')}>
+                    <Text style={styles.btnText}>Atualizar vagas</Text>
                 </Pressable>
-            </Pressable>
-        </Modal>
+            </View>
+
+            <Text style={styles.section}>Salas</Text>
+            <ModuleList
+                path="/api/educacao/sala"
+                extraActions={salaActions}
+                hideCreate
+                hideUpdate
+                hideDelete
+                hideView
+            />
+        </ModalShell>
     );
 }
 
-function InformacoesModal({visible, onClose, turmaId}: { visible: boolean; onClose: () => void; turmaId: number | null }) {
+/** <p:dialog id="dialogInformacoes" header="Informações sobre a turma"> */
+function InformacoesModal({visible, turma, onClose}: { visible: boolean; turma: ApiItem | null; onClose: () => void }) {
+    if (!turma) return null;
     return (
-        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-            <Pressable style={styles.overlay} onPress={onClose}>
-                <Pressable style={styles.modal} onPress={(e) => e.stopPropagation()}>
-                    <View style={styles.header}>
-                        <Text style={styles.title}>Informações da Turma</Text>
-                        <Pressable style={styles.closeBtn} onPress={onClose} accessibilityLabel="Fechar">
-                            <Text style={styles.closeBtnText}>✕</Text>
-                        </Pressable>
-                    </View>
-                    <View style={styles.modalContent}>
-                        <EmptyText>Detalhes da turma #{turmaId}</EmptyText>
-                    </View>
+        <ModalShell title={`Informações sobre a turma #${turma.id}`} onClose={onClose}>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>Turma:</Text>
+                <Text style={styles.infoValue}>#{turma.id} - {turma.nome}</Text>
+            </View>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>Unidade:</Text>
+                <Text style={styles.infoValue}>{String(asRecord(turma).unidade_descricao ?? '-')}</Text>
+            </View>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>Grupo:</Text>
+                <Text style={styles.infoValue}>{String(asRecord(turma).grupo_descricao ?? '-')}</Text>
+            </View>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>Curso:</Text>
+                <Text style={styles.infoValue}>{String(asRecord(turma).curriculo_descricao ?? '-')}</Text>
+            </View>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>Componente Curricular:</Text>
+                <Text style={styles.infoValue}>{String(asRecord(turma).componente_curricular_descricao ?? '-')}</Text>
+            </View>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>Professor:</Text>
+                <Text style={styles.infoValue}>{String(asRecord(turma).professor_descricao ?? '-')}</Text>
+            </View>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>Sala:</Text>
+                <Text style={styles.infoValue}>{String(asRecord(turma).sala_descricao ?? '-')}</Text>
+            </View>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>Status:</Text>
+                <Text style={styles.infoValue}>{statusOf(turma)}</Text>
+            </View>
+
+            <Tabs
+                tabs={[
+                    {
+                        key: 'professores',
+                        label: 'Professores',
+                        content: <ModuleList path="/api/professor/professor" hideCreate hideUpdate hideDelete hideView />,
+                    },
+                    {
+                        key: 'alteracoes',
+                        label: 'Alterações',
+                        content: <ModuleList path="/api/educacao/ocorrencia-componente-curricular" params={{turmaId: turma.id}} hideCreate hideUpdate hideDelete hideView />,
+                    },
+                    {
+                        key: 'matriculas',
+                        label: 'Matrículas',
+                        content: <ModuleList path="/api/educacao/matricula" params={{turmaId: turma.id}} hideCreate hideUpdate hideDelete hideView />,
+                    },
+                ]}
+            />
+        </ModalShell>
+    );
+}
+
+/** <p:dialog id="cancelarTurma" header="Cancelamento de Turma"> */
+function CancelarProrrogarModal({visible, turma, onClose, onProrrogar}: { visible: boolean; turma: ApiItem | null; onClose: () => void; onProrrogar: () => void }) {
+    if (!turma) return null;
+    return (
+        <ModalShell title={`Cancelamento de Turma #${turma.id}`} onClose={onClose}>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>Sala:</Text>
+                <Text style={styles.infoValue}>{String(asRecord(turma).sala_descricao ?? '-')}</Text>
+            </View>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>Vagas:</Text>
+                <Text style={styles.infoValue}>{String(asRecord(turma).vagas ?? '-')}</Text>
+            </View>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoKey}>Data Início:</Text>
+                <Text style={styles.infoValue}>{String(asRecord(turma).dataInicio ?? '-')}</Text>
+            </View>
+
+            <Tabs
+                tabs={[
+                    {
+                        key: 'professores',
+                        label: 'Professores',
+                        content: <ModuleList path="/api/professor/professor" hideCreate hideUpdate hideDelete hideView />,
+                    },
+                    {
+                        key: 'alunos',
+                        label: 'Alunos',
+                        content: <ModuleList path="/api/educacao/matricula" params={{turmaId: turma.id}} hideCreate hideUpdate hideDelete hideView />,
+                    },
+                ]}
+            />
+
+            <View style={styles.modalButtons}>
+                <Pressable style={styles.btnBlue} onPress={onProrrogar}>
+                    <Text style={styles.btnText}>Prorrogar Turma</Text>
                 </Pressable>
-            </Pressable>
-        </Modal>
+                <Pressable
+                    style={styles.btnRed}
+                    onPress={() =>
+                        Alert.alert('Cancelar Turma', `Confirma o cancelamento da turma #${turma.id}?`, [
+                            {text: 'Não', style: 'cancel'},
+                            {text: 'Sim', style: 'destructive', onPress: () => { Alert.alert('Sucesso', 'Turma cancelada!'); onClose(); }},
+                        ])
+                    }
+                >
+                    <Text style={styles.btnText}>Cancelar Turma</Text>
+                </Pressable>
+            </View>
+        </ModalShell>
+    );
+}
+
+/** <p:dialog id="dialogProrrogando" widgetVar="prorrogando"><p:wizard> */
+function ProrrogarTurmaModal({visible, turma, onClose}: { visible: boolean; turma: ApiItem | null; onClose: () => void }) {
+    if (!turma) return null;
+    return (
+        <ModalShell title={`Prorrogando a turma #${turma.id}`} onClose={onClose}>
+            <Wizard
+                completeLabel="Prorrogar"
+                onComplete={() => { Alert.alert('Sucesso', 'Turma prorrogada!'); onClose(); }}
+                steps={[
+                    {
+                        key: 'diaAula',
+                        label: 'Dias Aula',
+                        content: <ModuleList path="/api/educacao/ocorrencia-componente-curricular" params={{turmaId: turma.id}} hideCreate hideUpdate hideDelete hideView />,
+                    },
+                    {
+                        key: 'comparativoAula',
+                        label: 'Comparativo Aula',
+                        content: <Text style={styles.empty}>Comparativo de aulas (original x nova).</Text>,
+                    },
+                    {
+                        key: 'selecioneProfessor',
+                        label: 'Professor',
+                        nextLabel: 'Prorrogar',
+                        content: <ModuleList path="/api/professor/professor" hideCreate hideUpdate hideDelete hideView />,
+                    },
+                ]}
+            />
+        </ModalShell>
+    );
+}
+
+/** <p:dialog id="formTrocarTurma" header="Trocar aluno da turma"><p:wizard id="wizardtroca"> */
+function TrocarTurmaModal({visible, turma, onClose}: { visible: boolean; turma: ApiItem | null; onClose: () => void }) {
+    if (!turma) return null;
+    return (
+        <ModalShell title={`Trocar aluno da turma #${turma.id}`} onClose={onClose}>
+            <Wizard
+                completeLabel="Finalizar e gerar documento"
+                onComplete={() => { Alert.alert('Sucesso', 'Troca de turma finalizada e documento gerado!'); onClose(); }}
+                steps={[
+                    {
+                        key: 'selecionarAluno',
+                        label: 'Selecionando Aluno',
+                        content: <ModuleList path="/api/educacao/matricula" params={{turmaId: turma.id}} hideCreate hideUpdate hideDelete hideView />,
+                    },
+                    {
+                        key: 'novaTurma',
+                        label: 'Selecionando nova Turma',
+                        nextLabel: 'Finalizar',
+                        content: (
+                            <>
+                                <ModuleList path="/api/educacao/turma" hideCreate hideUpdate hideDelete hideView />
+                                <Text style={styles.section}>Dias da Semana</Text>
+                                <Text style={styles.empty}>{['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'].join(' · ')}</Text>
+                            </>
+                        ),
+                    },
+                ]}
+            />
+        </ModalShell>
+    );
+}
+
+/** <p:dialog id="diarioDialog" header="Diário de Classe"> */
+function DiarioModal({visible, turma, onClose}: { visible: boolean; turma: ApiItem | null; onClose: () => void }) {
+    if (!turma) return null;
+    return (
+        <ModalShell title={`Diário de Classe - Turma #${turma.id}`} onClose={onClose}>
+            <Text style={styles.empty}>Gere o diário de classe em PDF.</Text>
+            <View style={styles.modalButtons}>
+                <Pressable style={styles.btnBlue} onPress={() => Alert.alert('Exportar', `Gerando diário de classe da turma #${turma.id}...`)}>
+                    <Text style={styles.btnText}>Gerar Diário de Classe</Text>
+                </Pressable>
+            </View>
+        </ModalShell>
     );
 }
 
 export default function ViewTurmaListTurmaListScreen() {
+    const navigation = useNavigation<any>();
+    const {session} = useAuth();
     const [unidades, setUnidades] = useState<ApiItem[]>([]);
     const [componentes, setComponentes] = useState<ApiItem[]>([]);
-    const [finalizarAberto, setFinalizarAberto] = useState(false);
+    const [turmaSelecionada, setTurmaSelecionada] = useState<ApiItem | null>(null);
+    const [professorAberto, setProfessorAberto] = useState(false);
+    const [salaAberto, setSalaAberto] = useState(false);
+    const [infoAberto, setInfoAberto] = useState(false);
+    const [cancelarProrrogarAberto, setCancelarProrrogarAberto] = useState(false);
     const [prorrogarAberto, setProrrogarAberto] = useState(false);
     const [trocarAberto, setTrocarAberto] = useState(false);
-    const [infoAberto, setInfoAberto] = useState(false);
-    const [turmaSelecionadaId, setTurmaSelecionadaId] = useState<number | null>(null);
+    const [diarioAberto, setDiarioAberto] = useState(false);
     const outcome = '/view/turma/listTurma';
 
-    const buildExtraActions = useCallback((): ModuleListExtraAction[] => {
-        const actions: ModuleListExtraAction[] = [];
+    const fechar = (setter: (v: boolean) => void) => () => {
+        setter(false);
+        setTurmaSelecionada(null);
+    };
 
-        // CREATE permission actions (acessoNovo)
-        if (can('CREATE', outcome)) {
-            actions.push({
-                key: 'trocarComponente',
-                title: 'Trocar Componente',
-                icon: '⇄',
+    /**
+     * Réplica dos 4 <p:menuButton> do listTurma.xhtml (acessoNovo/acessoEditar/
+     * acessoRelatorios/acessoRemover) com os itens e cores do XHTML, por linha.
+     */
+    const buildRowActionGroups = (item: ApiItem): ModuleListActionGroup[] => {
+        const status = statusOf(item);
+        const groups: ModuleListActionGroup[] = [];
+
+        if (can(session, 'CREATE', outcome)) {
+            groups.push({
+                icon: <Text style={styles.menuIcon}>＋</Text>,
+                className: 'btnstop',
+                title: 'Novo',
                 permission: 'CREATE',
-                onPress: async (item) => {
-                    setTurmaSelecionadaId(item.id);
-                    // Would call API to load students for component swap
-                    setTrocarAberto(true);
-                },
-            });
-            actions.push({
-                key: 'alterarProfessor',
-                title: 'Alterar Professor',
-                icon: '👤',
-                permission: 'CREATE',
-                onPress: async (item) => {
-                    setTurmaSelecionadaId(item.id);
-                    // Would call API to get professors
-                    Alert.alert('Alterar Professor', `Abrir seleção de professor para turma #${item.id}`);
-                },
+                items: [
+                    {
+                        key: 'trocarComponente',
+                        label: 'Trocar Componente',
+                        className: 'btngreen',
+                        onSelect: () => { setTurmaSelecionada(item); setTrocarAberto(true); },
+                    },
+                    {
+                        key: 'alterarProfessor',
+                        label: 'Alterar professor',
+                        className: 'btnblack',
+                        onSelect: () => { setTurmaSelecionada(item); setProfessorAberto(true); },
+                    },
+                ],
             });
         }
 
-        // UPDATE permission actions (acessoEditar)
-        if (can('UPDATE', outcome)) {
-            actions.push({
-                key: 'criarAulaCoringa',
-                title: 'Criar Aula Coringa',
-                icon: '📅',
+        if (can(session, 'UPDATE', outcome)) {
+            groups.push({
+                icon: <Text style={styles.menuIcon}>✎</Text>,
+                className: 'btngreen',
+                title: 'Editar',
                 permission: 'UPDATE',
-                onPress: async (item) => {
-                    const record = item as unknown as Record<string, unknown>;
-                    const status = String(record.status ?? '');
-                    if (status === 'PENDENTE' || status === 'CANCELADA') {
-                        Alert.alert('Aviso', 'Não é possível criar aula coringa para turma com status ' + status);
-                        return;
-                    }
-                    // Would call API to recreate calendar
-                    Alert.alert('Sucesso', 'Aula coringa criada com sucesso!');
-                },
-            });
-            actions.push({
-                key: 'trocarTurma',
-                title: 'Trocar Turma',
-                icon: '⇄',
-                permission: 'UPDATE',
-                onPress: async (item) => {
-                    setTurmaSelecionadaId(item.id);
-                    // Would call API to load students
-                    setTrocarAberto(true);
-                },
-            });
-            actions.push({
-                key: 'alterarSala',
-                title: 'Alterar Sala',
-                icon: '🏫',
-                permission: 'UPDATE',
-                onPress: async (item) => {
-                    setTurmaSelecionadaId(item.id);
-                    // Would call API to get salas
-                    Alert.alert('Alterar Sala', `Abrir seleção de sala para turma #${item.id}`);
-                },
+                items: [
+                    {
+                        key: 'criarAulaCoringa',
+                        label: 'Criar Aula coringa',
+                        className: 'btnpurple',
+                        onSelect: () => {
+                            if (status === 'PENDENTE' || status === 'CANCELADA') {
+                                Alert.alert('Aviso', 'Não é possível criar aula coringa para turma com status ' + status);
+                                return;
+                            }
+                            Alert.alert('Sucesso', 'Aula coringa criada com sucesso!');
+                        },
+                    },
+                    {
+                        key: 'trocarTurma',
+                        label: 'Trocar Turma',
+                        className: 'btnblue',
+                        onSelect: () => { setTurmaSelecionada(item); setTrocarAberto(true); },
+                    },
+                    {
+                        key: 'alterarSala',
+                        label: 'Alterar sala',
+                        className: 'btnorange',
+                        onSelect: () => { setTurmaSelecionada(item); setSalaAberto(true); },
+                    },
+                ],
             });
         }
 
-        // EXECUTE/REPORTS permission actions (acessoRelatorios)
-        if (can('EXECUTE', outcome)) {
-            actions.push({
-                key: 'maisInformacoes',
-                title: 'Mais Informações',
-                icon: 'ℹ️',
+        if (can(session, 'EXECUTE', outcome)) {
+            groups.push({
+                icon: <Text style={styles.menuIcon}>📄</Text>,
+                className: 'btnyellow',
+                title: 'Relatórios',
                 permission: 'EXECUTE',
-                onPress: async (item) => {
-                    setTurmaSelecionadaId(item.id);
-                    // Would call API to load info
-                    setInfoAberto(true);
-                },
-            });
-            actions.push({
-                key: 'segundaViaTroca',
-                title: '2ª Via Troca Turma',
-                icon: '📄',
-                permission: 'EXECUTE',
-                onPress: (item) => {
-                    // Would open PDF in browser
-                    Alert.alert('Exportar', `Gerar 2ª via de troca para turma #${item.id}`);
-                },
-            });
-            actions.push({
-                key: 'diarioClasse',
-                title: 'Diário de Classe',
-                icon: '📋',
-                permission: 'EXECUTE',
-                onPress: async (item) => {
-                    setTurmaSelecionadaId(item.id);
-                    // Would open diario de classe modal
-                    Alert.alert('Diário de Classe', `Abrir diário de classe para turma #${item.id}`);
-                },
+                items: [
+                    {
+                        key: 'maisInformacoes',
+                        label: 'Mais informações',
+                        className: 'btnyellow',
+                        onSelect: () => { setTurmaSelecionada(item); setInfoAberto(true); },
+                    },
+                    {
+                        key: 'trocaTurmaSegundaVia',
+                        label: 'Troca Turma',
+                        className: 'btnblue',
+                        onSelect: () => Alert.alert('Exportar', `Gerar 2ª via de troca para turma #${item.id}`),
+                    },
+                    {
+                        key: 'diarioClasse',
+                        label: 'Diário de Classe',
+                        className: 'btnblack',
+                        onSelect: () => { setTurmaSelecionada(item); setDiarioAberto(true); },
+                    },
+                ],
             });
         }
 
-        // DELETE/REMOVE permission actions (acessoRemover)
-        if (can('DELETE', outcome)) {
-            actions.push({
-                key: 'finalizar',
-                title: 'Finalizar',
-                icon: '✓',
+        if (can(session, 'DELETE', outcome)) {
+            groups.push({
+                icon: <Text style={styles.menuIcon}>🗑</Text>,
+                className: 'btnred',
+                title: 'Remover',
                 permission: 'DELETE',
-                onPress: async (item) => {
-                    const record = item as unknown as Record<string, unknown>;
-                    const status = String(record.status ?? '');
-                    if (status !== 'EM_ANDAMENTO' && status !== 'CANCELADA') {
-                        Alert.alert('Aviso', 'Só é possível finalizar turmas com status EM_ANDAMENTO ou CANCELADA');
-                        return;
-                    }
-                    setTurmaSelecionadaId(item.id);
-                    // Would call API to list matriculas
-                    setFinalizarAberto(true);
-                },
-            });
-            actions.push({
-                key: 'cancelarProrrogar',
-                title: 'Cancelar ou Prorrogar',
-                icon: '✕',
-                permission: 'DELETE',
-                onPress: async (item) => {
-                    const record = item as unknown as Record<string, unknown>;
-                    const status = String(record.status ?? '');
-                    if (status === 'CANCELADA') {
-                        Alert.alert('Aviso', 'Turma já está cancelada');
-                        return;
-                    }
-                    setTurmaSelecionadaId(item.id);
-                    // Would call API to load students
-                    setProrrogarAberto(true);
-                },
+                items: [
+                    {
+                        key: 'finalizar',
+                        label: 'Finalizar',
+                        className: 'btngrey',
+                        onSelect: () => {
+                            if (status !== 'EM_ANDAMENTO' && status !== 'CANCELADA') {
+                                Alert.alert('Aviso', 'Só é possível finalizar turmas com status EM_ANDAMENTO ou CANCELADA');
+                                return;
+                            }
+                            navigation.navigate('view/turma/listTurmaFinalizando', {turmaId: item.id});
+                        },
+                    },
+                    {
+                        key: 'cancelarProrrogar',
+                        label: 'Cancelar ou Prorrogar',
+                        className: 'btnred',
+                        onSelect: () => {
+                            if (status === 'CANCELADA') {
+                                Alert.alert('Aviso', 'Turma já está cancelada');
+                                return;
+                            }
+                            setTurmaSelecionada(item);
+                            setCancelarProrrogarAberto(true);
+                        },
+                    },
+                ],
             });
         }
 
-        return actions;
-    }, [outcome]);
-
-    const extraActions = buildExtraActions();
+        return groups;
+    };
 
     return (
         <View style={styles.container}>
-            {/* Cada botão abaixo corresponde a um <p:menuitem>/<p:dialog> independente em
-          listTurma.xhtml — não são etapas de um único wizard de página. */}
             <View style={styles.filters}>
                 <MasterDetail
                     label="Unidade"
@@ -333,14 +507,22 @@ export default function ViewTurmaListTurmaListScreen() {
             <ModuleList
                 path="/api/educacao/turma"
                 title="Turma"
-                extraActions={extraActions}
+                rowActionGroups={buildRowActionGroups}
                 outcome={outcome}
             />
 
-            <FinalizarTurmaModal visible={finalizarAberto} onClose={() => { setFinalizarAberto(false); setTurmaSelecionadaId(null); }}/>
-            <ProrrogarTurmaModal visible={prorrogarAberto} onClose={() => { setProrrogarAberto(false); setTurmaSelecionadaId(null); }}/>
-            <TrocarTurmaModal visible={trocarAberto} onClose={() => { setTrocarAberto(false); setTurmaSelecionadaId(null); }}/>
-            <InformacoesModal visible={infoAberto} onClose={() => { setInfoAberto(false); setTurmaSelecionadaId(null); }} turmaId={turmaSelecionadaId}/>
+            <ProfessorModal visible={professorAberto} turma={turmaSelecionada} onClose={fechar(setProfessorAberto)} />
+            <SalaModal visible={salaAberto} turma={turmaSelecionada} onClose={fechar(setSalaAberto)} />
+            <InformacoesModal visible={infoAberto} turma={turmaSelecionada} onClose={fechar(setInfoAberto)} />
+            <CancelarProrrogarModal
+                visible={cancelarProrrogarAberto}
+                turma={turmaSelecionada}
+                onClose={fechar(setCancelarProrrogarAberto)}
+                onProrrogar={() => { setCancelarProrrogarAberto(false); setProrrogarAberto(true); }}
+            />
+            <ProrrogarTurmaModal visible={prorrogarAberto} turma={turmaSelecionada} onClose={fechar(setProrrogarAberto)} />
+            <TrocarTurmaModal visible={trocarAberto} turma={turmaSelecionada} onClose={fechar(setTrocarAberto)} />
+            <DiarioModal visible={diarioAberto} turma={turmaSelecionada} onClose={fechar(setDiarioAberto)} />
         </View>
     );
 }
@@ -348,11 +530,12 @@ export default function ViewTurmaListTurmaListScreen() {
 const styles = StyleSheet.create({
     container: {flex: 1},
     filters: {padding: 8},
+    menuIcon: {fontSize: 18, color: '#fff', fontWeight: '700'},
     overlay: {flex: 1, backgroundColor: 'rgba(29, 32, 37, 0.55)', justifyContent: 'center', padding: 16},
     modal: {
         backgroundColor: '#ffffff',
         borderRadius: 16,
-        maxHeight: '90%',
+        maxHeight: '92%',
         shadowColor: '#1d2025',
         shadowOffset: {width: 0, height: 12},
         shadowOpacity: 0.25,
@@ -362,9 +545,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'rgba(194, 170, 60, 0.15)',
     },
-    modalContent: {
-        padding: 20,
-    },
+    modalScroll: {maxHeight: '82%'},
+    modalContent: {padding: 20, gap: 10},
     header: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -380,8 +562,29 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#ffffff',
         letterSpacing: 0.3,
+        flexShrink: 1,
     },
-    empty: {color: '#888', fontStyle: 'italic', fontSize: 14},
+    section: {fontSize: 14, fontWeight: '700', color: '#333', marginTop: 6},
+    infoRow: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap'},
+    infoKey: {fontSize: 13, color: '#666', fontWeight: '600'},
+    infoValue: {fontSize: 14, color: '#1d2025', flexShrink: 1, textAlign: 'right'},
+    modalButtons: {flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4},
+    btnText: {color: '#fff', fontWeight: '700', fontSize: 14, textAlign: 'center'},
+    btnBlue: {
+        backgroundColor: '#337ab7',
+        borderRadius: 8,
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        minWidth: 130,
+    },
+    btnRed: {
+        backgroundColor: '#dc3545',
+        borderRadius: 8,
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        minWidth: 130,
+    },
+    empty: {color: '#888', fontStyle: 'italic', fontSize: 14, textAlign: 'center', paddingVertical: 20},
     closeBtn: {
         width: 36,
         height: 36,

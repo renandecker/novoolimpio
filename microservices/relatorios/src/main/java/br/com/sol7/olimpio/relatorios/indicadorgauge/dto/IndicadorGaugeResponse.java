@@ -8,5 +8,7 @@ public record IndicadorGaugeResponse(
     String sql,
     String configuracao,
     Date createdAt,
-    Date updatedAt
+    Date updatedAt,
+    Long createdBy,
+    Long updatedBy
 ) {}

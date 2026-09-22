@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.financeiro.lote.kafka;
+package br.com.sol7.olimpio.financeiro.lote.rabbitmq;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.logging.Log;
@@ -9,7 +9,7 @@ import jakarta.inject.Inject;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 
 /**
- * Publica as cobranças de lote nos tópicos do notificacoes-service
+ * Publica as cobranças de lote nos exchanges do notificacoes-service
  * ({@code olimpio.notificacao.email}, {@code olimpio.notificacao.mobile} e
  * {@code olimpio.notificacao.web}), conforme os canais solicitados: e-mail entrega
  * no endereço do contrato, push mobile/web no username (quando houver login).
@@ -51,7 +51,7 @@ public class NotificacaoEventProducer {
         }
         return emitter.send(json)
                 .onFailure().invoke(err ->
-                        Log.warnf("NotificacaoEventProducer - falha ao publicar lote no topico %s: %s", canal, err.getMessage()))
+                        Log.warnf("NotificacaoEventProducer - falha ao publicar lote no exchange %s: %s", canal, err.getMessage()))
                 .onFailure().recoverWithNull();
     }
 }

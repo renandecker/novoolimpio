@@ -187,8 +187,8 @@ public class MatriculaRepository implements PanacheRepository<Matricula> {
     // Dados da pessoa física: cpf, data de nascimento e data de alteração do cadastro.
     public static final String SQL_INFO_PESSOA_FISICA =
             "SELECT pf.cpf AS cpf, to_char(pf.data_nascimento, 'YYYY-MM-DD') AS data_nascimento, " +
-            "to_char(p.data_alteracao, 'YYYY-MM-DD') AS data_alteracao " +
-            "FROM bas_pessoa_fisica pf LEFT JOIN bas_pessoa p ON p.id = pf.id_pessoa " +
+            "NULL AS data_alteracao " +
+            "FROM bas_pessoa_fisica pf " +
             "WHERE pf.id_pessoa = ?1 LIMIT 1";
 
     public Uni<java.util.List<Tuple>> buscarInfoPessoaFisica(Long pessoaId) {

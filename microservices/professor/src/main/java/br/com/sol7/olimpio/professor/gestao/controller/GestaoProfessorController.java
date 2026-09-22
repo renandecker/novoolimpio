@@ -49,6 +49,12 @@ public class GestaoProfessorController {
     }
 
     @GET
+    @Path("/turmas/{id}/informacoes")
+    public Uni<InformacoesDto> buscarInformacoes(@PathParam("id") Long id) {
+        return service.buscarInformacoes(id);
+    }
+
+    @GET
     @Path("/pendencias")
     public Uni<List<PendenciaDto>> listarPendencias(@QueryParam("pessoaId") Long pessoaId) {
         return service.listarPendencias(pessoaId);

@@ -175,7 +175,7 @@ export const GEOREFERENCIA_COLUMNS: MasterDetailColumn[] = [
 ];
 export const GEOREFERENCIA_SEARCH = ['nomeVisualizacao', 'nome'];
 
-export const FILTRO_SOURCE = '/api/relatorios/filtro';
+export const FILTRO_SOURCE = '/api/relatorios/filtros';
 export const FILTRO_COLUMNS: MasterDetailColumn[] = [
     {key: 'id', label: 'Id'},
     {key: 'nome', label: 'Nome'},

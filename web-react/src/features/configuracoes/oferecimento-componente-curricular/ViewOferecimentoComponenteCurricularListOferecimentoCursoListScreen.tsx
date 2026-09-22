@@ -14,9 +14,6 @@ import {PAGE_SIZES} from '../../../shared/components/DataTable';
 
 import {RowMenu, type RowMenuItem} from '../../../shared/components/RowMenu';
 
-import {ExportDropdown} from '../../../shared/components/ExportDropdown';
-
-
 
 import type {SearchFilterRequest} from '../../../shared/types/types';
 
@@ -25,10 +22,7 @@ import {ModuleFilter} from '../../../shared/components/ModuleFilter';
 
 
 
-
-
 const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
-
 
 
 interface OferecimentoRow {
@@ -52,7 +46,6 @@ interface OferecimentoRow {
     professor_descricao?: string;
 
 }
-
 
 
 const COLUMNS = [
@@ -91,17 +84,14 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
     const [filterParams, setFilterParams] = useState<SearchFilterRequest>({filters: {}});
 
 
-
     const {can} = usePermissions();
 
     const outcome = useCurrentOutcome();
 
 
-
     const [perfilModuloPermissions, setPerfilModuloPermissions] = useState<any>(null);
 
     const [perfilModuloLoading, setPerfilModuloLoading] = useState(false);
-
 
 
     useEffect(() => {
@@ -146,13 +136,11 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);
 
 
-
     const handleInfo = (entity: any) => {
 
         setInfoDialog({open: true, entity});
 
     };
-
 
 
     const handleSelecao = async (entity: any) => {
@@ -184,7 +172,6 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
     };
 
 
-
     const handleDelete = (entity: any) => {
 
         setDeleteDialog({open: true, entity});
@@ -192,11 +179,9 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
     };
 
 
-
     const confirmDelete = async () => {
 
         if (!deleteDialog.entity) return;
-
         try {
 
             await api.delete(`/api/educacao/oferecimento-curso/${deleteDialog.entity.id}`);
@@ -214,13 +199,11 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
     };
 
 
-
     const toggleSelect = (id: number) => {
 
         setSelecionados(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
 
     };
-
 
 
     const selectAll = (checked: boolean) => {
@@ -238,31 +221,6 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
     };
 
 
-
-    const exportarPDF = (_record: Record<string, unknown>) => {
-
-        alert('Exportação PDF não implementada');
-
-    };
-
-
-
-    const exportarDOCX = (_record: Record<string, unknown>) => {
-
-        alert('Exportação DOCX não implementada');
-
-    };
-
-
-
-    const exportarExcel = (_record: Record<string, unknown>) => {
-
-        alert('Exportação Excel não implementada');
-
-    };
-
-
-
     const irParaEdicao = (ids: number[]) => {
 
         const grupoId = selecaoDialog.entity?.id;
@@ -278,9 +236,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
     };
 
 
-
     const fmtData = (valor: unknown) => valor ? String(valor).slice(0, 10) : '';
-
 
 
     const ordenarPorInicioOferecimento = () => {
@@ -304,7 +260,6 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
     };
 
 
-
     const ordenarPorListagemTabela = () => {
 
         if (oferecimentos.length === 0) {
@@ -318,7 +273,6 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
         irParaEdicao(oferecimentos.map(o => Number(o.id)));
 
     };
-
 
 
     const ordenarPorSelecionado = () => {
@@ -336,7 +290,6 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
     };
 
 
-
     const fecharSelecao = () => {
 
         setSelecaoDialog({open: false, entity: null});
@@ -344,7 +297,6 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
         setSelecionados([]);
 
     };
-
 
 
     return (
@@ -356,71 +308,6 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                 <h1>Oferecimento Curso</h1>
 
                 <div className="data-table-toolbar" style={{marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px'}}>
-
-                    {acessoRelatorios && (
-
-                        <ExportDropdown
-
-                            options={[
-
-                                {
-
-                                    key: 'pdf',
-
-                                    label: 'PDF',
-
-                                    icon: <i className="fa fa-file-pdf-o"/>,
-
-                                    onClick: () => {
-
-                                        if (all.length > 0) exportarPDF(asRecord(all[0]));
-
-                                    }
-
-                                },
-
-                                {
-
-                                    key: 'docx',
-
-                                    label: 'DOCX',
-
-                                    icon: <i className="fa fa-file-word-o"/>,
-
-                                    onClick: () => {
-
-                                        if (all.length > 0) exportarDOCX(asRecord(all[0]));
-
-                                    }
-
-                                },
-
-                                {
-
-                                    key: 'excel',
-
-                                    label: 'Excel',
-
-                                    icon: <i className="fa fa-file-excel-o"/>,
-
-                                    onClick: () => {
-
-                                        if (all.length > 0) exportarExcel(asRecord(all[0]));
-
-                                    }
-
-                                }
-
-                            ]}
-
-                            triggerLabel="Exportar"
-
-                            triggerIcon={<i className="fa fa-download"/>}
-
-                        />
-
-                    )}
-
                 </div>
 
                 <div className="data-table">
@@ -478,7 +365,6 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                                     const id = Number(record.id);
 
 
-
                                     const relatoriosItems: RowMenuItem[] = [
 
                                         {
@@ -496,111 +382,99 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                                     ];
 
 
+                                     const editarItems: RowMenuItem[] = [
 
-                                    const selecionarItems: RowMenuItem[] = [
+                                         {
 
-                                        {
+                                             key: 'selecionar',
 
-                                            key: 'selecionar',
+                                             label: 'Selecionar Oferecimentos para Editar',
 
-                                            label: 'Selecionar Oferecimentos para Editar',
+                                             className: 'btnblue',
 
-                                            className: 'btnblue',
+                                             onSelect: () => handleSelecao(record),
 
-                                            onSelect: () => handleSelecao(record),
+                                         },
 
-                                        },
+                                         {
 
-                                    ];
+                                             key: 'editarTodos',
 
-                                    const editarTodosItems: RowMenuItem[] = [
+                                             label: 'Editar Todos',
 
-                                        {
+                                             className: 'btngreen',
 
-                                            key: 'editarTodos',
+                                             onSelect: () => window.location.href = `/view/oferecimentoComponenteCurricular/formOferecimentoCurso?id=${id}`,
 
-                                            label: 'Editar Todos',
+                                         },
 
-                                            className: 'btngreen',
-
-                                            onSelect: () => window.location.href = `/view/oferecimentoComponenteCurricular/formOferecimentoCurso?id=${id}`,
-
-                                        },
-
-                                    ];
+                                     ];
 
 
+                                     const removerItems: RowMenuItem[] = [
 
-                                    const removerItems: RowMenuItem[] = [
+                                         {
 
-                                        {
+                                             key: 'excluir',
 
-                                            key: 'excluir',
+                                             label: 'Excluir',
 
-                                            label: 'Excluir',
+                                             className: 'btnred',
 
-                                            className: 'btnred',
+                                             onSelect: () => handleDelete(record),
 
-                                            onSelect: () => handleDelete(record),
+                                         },
 
-                                        },
-
-                                    ];
-
+                                     ];
 
 
-                                    return (
+                                     return (
 
-                                        <tr key={id}>
+                                         <tr key={id}>
 
-                                            {COLUMNS.map((column) => (
+                                             {COLUMNS.map((column) => (
 
-                                                <td key={column.key}>
+                                                 <td key={column.key}>
 
-                                                    {column.render ? column.render(item) : String(record[column.key] ?? '')}
+                                                     {column.render ? column.render(item) : String(record[column.key] ?? '')}
 
-                                                </td>
+                                                 </td>
 
-                                            ))}
+                                             ))}
 
-                                             <td className="col-actions">
-                                                 <div className="row-actions-menu">
-                                                     {acessoRelatorios && (
-                                                         <RowMenu icon={<i className="fa fa-info-circle"/>}
-                                                                  className="btnyellow" title="Relatórios"
-                                                                  items={relatoriosItems}/>
-                                                     )}
-                                                 </div>
-                                             </td>
-                                             <td className="col-actions">
-                                                 <div className="row-actions-menu">
-                                                     {acessoEditar && (
-                                                         <>
-                                                             <RowMenu icon={<i className="fa fa-edit"/>}
-                                                                      className="btnblue" title="Selecionar Oferecimentos para Editar"
-                                                                      items={selecionarItems}/>
-                                                             <RowMenu icon={<i className="fa fa-pencil"/>}
-                                                                      className="btngreen" title="Editar Todos"
-                                                                      items={editarTodosItems}/>
-                                                         </>
-                                                     )}
-                                                 </div>
-                                             </td>
-                                             <td className="col-actions">
-                                                 <div className="row-actions-menu">
-                                                     {acessoRemover && (
-                                                         <RowMenu icon={<i className="fa fa-trash"/>}
-                                                                  className="btnred" title="Remover"
-                                                                  items={removerItems}/>
-                                                     )}
-                                                 </div>
-                                             </td>
+                                              <td className="col-actions">
+                                                  <div className="row-actions-menu">
+                                                      {acessoRelatorios && (
+                                                          <RowMenu icon={<i className="fa fa-info-circle"/>}
+                                                                   className="btnyellow" title="Relatórios"
+                                                                   items={relatoriosItems}/>
+                                                      )}
+                                                  </div>
+                                              </td>
+                                               <td className="col-actions">
+                                                   <div className="row-actions-menu">
+                                                       {acessoEditar && (
+                                                           <RowMenu icon={<i className="fa fa-pencil"/>}
+                                                                    className="btngreen" title="Editar"
+                                                                    items={editarItems}/>
+                                                       )}
+                                                   </div>
+                                               </td>
+                                              <td className="col-actions">
+                                                  <div className="row-actions-menu">
+                                                      {acessoRemover && (
+                                                          <RowMenu icon={<i className="fa fa-trash"/>}
+                                                                   className="btnred" title="Remover"
+                                                                   items={removerItems}/>
+                                                      )}
+                                                  </div>
+                                              </td>
 
-                                        </tr>
+                                         </tr>
 
-                                    );
+                                     );
 
-                                })
+                                 })
 
                             )}
 
@@ -649,7 +523,6 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                         </table>
 
                     )}
-
 
 
                     {/* Info Dialog */}
@@ -727,7 +600,6 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                         </div>
 
                     )}
-
 
 
                     {/* Seleção Dialog */}
@@ -875,7 +747,6 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                     )}
 
 
-
                     {/* Delete Dialog */}
 
                     {deleteDialog.open && deleteDialog.entity && (
@@ -919,4 +790,3 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
     );
 
 }
-

@@ -575,7 +575,7 @@ export default function ViewPagamentoFechamentoCaixaListScreen() {
             <Text style={styles.title}>Fechamento Caixa</Text>
             {!!erro && <Text style={styles.error}>{erro}</Text>}
             {!!mensagem && <Text style={styles.success}>{mensagem}</Text>}
-            <Wizard steps={steps} stepIndex={stepIndex} completeLabel="Concluir" onComplete={carregarTotais}/>
+            <Wizard steps={steps} stepIndex={stepIndex} completeLabel="Concluir" onComplete={carregarTotais} hideNavButtons/>
         </View>
     );
 }

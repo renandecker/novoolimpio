@@ -3,6 +3,8 @@ package br.com.sol7.olimpio.relatorios.painel.controller;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.relatorios.painel.service.PainelService;
 import br.com.sol7.olimpio.relatorios.painel.dto.PainelRequest;
+import br.com.sol7.olimpio.relatorios.painel.dto.PainelPermissaoRequest;
+import br.com.sol7.olimpio.relatorios.painel.dto.PainelFiltrosRequest;
 import br.com.sol7.olimpio.relatorios.painel.dto.PainelResponse;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
@@ -51,6 +53,24 @@ public class PainelController {
     @Path("/{id}")
     public Uni<Void> delete(@PathParam("id") Long id) {
         return service.delete(id);
+    }
+
+    @PUT
+    @Path("/{id}/permissoes")
+    public Uni<PainelResponse> updatePermissoes(@PathParam("id") Long id, PainelPermissaoRequest r) {
+        return service.updatePermissoes(id, r);
+    }
+
+    @GET
+    @Path("/{id}/filtros")
+    public Uni<List<Long>> listarFiltros(@PathParam("id") Long id) {
+        return service.listarFiltros(id);
+    }
+
+    @PUT
+    @Path("/{id}/filtros")
+    public Uni<PainelResponse> updateFiltros(@PathParam("id") Long id, PainelFiltrosRequest r) {
+        return service.updateFiltros(id, r);
     }
 
     @GET

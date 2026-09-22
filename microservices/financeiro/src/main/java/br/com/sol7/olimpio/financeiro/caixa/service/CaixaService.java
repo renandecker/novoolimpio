@@ -154,14 +154,11 @@ public class CaixaService {
         // nome/CPF sao resolvidos no DTO de pessoa (cross-service basico).
         final String sql = "SELECT DISTINCT p.id FROM edc_contrato c " +
                 "INNER JOIN bas_pessoa p ON p.id = c.id_pessoa " +
-                "INNER JOIN bas_pessoa_unidade p_u_jt ON p_u_jt.id_pessoa = p.id " +
-                "INNER JOIN bas_unidade u ON u.id = p_u_jt.id_unidade " +
                 "LEFT JOIN bas_unidade j_c_unidade ON j_c_unidade.id = c.id_unidade " +
                 "LEFT JOIN bas_unidade j_c_unidadeResponsavel ON j_c_unidadeResponsavel.id = c.id_unidade_resposavel " +
                 "LEFT JOIN bas_pessoa_fisica j_p_pessoaFisica ON j_p_pessoaFisica.id_pessoa = p.id " +
-                "WHERE j_c_unidade.fl_ativo = true and j_c_unidadeResponsavel.fl_ativo = true " +
-                "and (lower(j_p_pessoaFisica.nome) like '%' || ?1 || '%' OR (j_p_pessoaFisica.cpf) like '%' || ?1 || '%') " +
-                "and exists(select par from fin_parcela par where par.data_pagamento is null and par.data_cancelamento is null and par.id_contrato = c.id) " +
+                "WHERE (lower(j_p_pessoaFisica.nome) like '%' || ?1 || '%' OR (j_p_pessoaFisica.cpf) like '%' || ?1 || '%') " +
+                "and exists(select par.id from fin_parcela par where par.data_pagamento is null and par.data_cancelamento is null and par.id_contrato = c.id) " +
                 "LIMIT 10";
         return Panache.getSession()
                 .chain(session -> session.createNativeQuery(sql)
@@ -354,9 +351,9 @@ public class CaixaService {
                                                                                                     BigDecimal totalDesconto = tp != null && tp.length >= 2 ? toBigDecimalSafe(tp[1]) : BigDecimal.ZERO;
                                                                                                     BigDecimal totalMultaJuros = tp != null && tp.length >= 3 ? toBigDecimalSafe(tp[2]) : BigDecimal.ZERO;
 
-                                                                                                    td = nvl(td).subtract(nvl(trc));
-                                                                                                    BigDecimal fundoCaixa = cx.fundoCaixa() != null ? cx.fundoCaixa() : BigDecimal.ZERO;
-                                                                                                    BigDecimal totalDinheiroCaixa = nvl(td).add(nvl(fundoCaixa)).subtract(nvl(trc)).subtract(nvl(totalSangria));
+                                                                                                     td = nvl(td).subtract(nvl(trc));
+                                                                                                     BigDecimal fundoCaixa = cx.fundoCaixa() != null ? cx.fundoCaixa() : BigDecimal.ZERO;
+                                                                                                     BigDecimal totalDinheiroCaixa = nvl(td).add(nvl(fundoCaixa)).subtract(nvl(totalSangria));
 
                                                                                                     return new CaixaTotais(
                                                                                                             nvl(td), nvl(tc), nvl(tca), nvl(tb),

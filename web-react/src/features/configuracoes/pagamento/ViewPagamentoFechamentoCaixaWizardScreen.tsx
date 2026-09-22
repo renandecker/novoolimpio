@@ -356,9 +356,9 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
     const fetchMovimento = fetchAutoComplete('/api/view/movimento/listMovimento', 'id', 'descricaocompleta');
 
     const fetchCategoriaFinanceira = fetchAutoComplete('/api/view/tipoMovimento/listTipoMovimento', 'id', 'descricao');
+const fetchBandeira = fetchAutoComplete('/api/view/bandeira/listBandeira', 'id', 'descricao');
 
-    const fetchBandeira = fetchAutoComplete('/api/view/bandeira/listBandeira', 'id', 'descricao');
-
+    const fetchImpressora = fetchAutoComplete('/api/view/impressora/listImpressora', 'id', 'descricao');
 
 
     // AutoComplete fetchById functions (for loading label when value has ID but no label)
@@ -1039,11 +1039,14 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
 
                 <Wizard
 
+                    data={data}
                     initialData={data}
 
                     onDataChange={updateFields}
 
                     stepIndex={stepIndex}
+
+                    hideNavButtons
 
                     steps={[
 
@@ -1309,10 +1312,10 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                                              id="aluno"
                                                              label="Buscar Aluno"
                                                              placeholder="Nome ou CPF do aluno..."
-                                                             value={data.alunoId ? {
-                                                                 id: Number(data.alunoId),
-                                                                 label: `Aluno #${data.alunoId}`
-                                                             } : null}
+                                                              value={data.alunoId ? {
+                                                                  id: Number(data.alunoId),
+                                                                  label: ''
+                                                              } : null}
                                                              onChange={(opt) => updateField('alunoId', opt ? String(opt.id) : '')}
                                                              fetchOptions={fetchAlunoPagamento}
                                                              fetchById={fetchAlunoPagamentoById}

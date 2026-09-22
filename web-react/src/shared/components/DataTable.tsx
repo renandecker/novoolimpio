@@ -12,6 +12,7 @@ import {useAuth} from '../../features/auth/auth';
 import {BooleanField} from './BooleanField';
 import {PerfilModuloPermissions} from '../hooks/useModulePaged';
 import {IconPickerButton} from './IconPickerModal';
+import {RowMenu} from './RowMenu';
 import './IconPicker.css';
 
 export const PAGE_SIZES = [10, 20, 50, 100];
@@ -58,6 +59,17 @@ export interface DataTableToolbarButton {
     title?: string;
 }
 
+/** Equivalente ao <p:menuButton> do PrimeFaces: botão colorido que abre um
+ * dropdown de itens coloridos (<p:menuitem>). */
+export interface DataTableRowMenu {
+    key: string;
+    icon: ReactNode;
+    className: string;
+    title?: string;
+    permission?: 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'EXECUTE';
+    items: DataTableRowAction[];
+}
+
 interface DataTableProps {
     path?: string;
     columns?: DataTableColumn[];
@@ -80,6 +92,8 @@ interface DataTableProps {
     extraToolbarButtons?: DataTableToolbarButton[];
     /** Ações extras por linha (ex.: Atualizar/Troca do listLogradouro.xhtml). */
     extraRowActions?: DataTableRowAction[];
+    /** Menus por linha (ex.: <p:menuButton> do listTurma.xhtml). */
+    extraRowMenus?: DataTableRowMenu[];
     /** Dados locais para modo sem API (ignora path). */
     data?: ApiItem[];
 }
@@ -249,7 +263,7 @@ interface FilterModalState {
     filters: SearchFilterRequest;
 }
 
-export function DataTable({path = '', columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, hideUpdate = false, hideDelete = false, hideView = false, editNavigateTo, createNavigateTo, extraToolbarButtons, extraRowActions, data}: DataTableProps) {
+export function DataTable({path = '', columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, hideUpdate = false, hideDelete = false, hideView = false, editNavigateTo, createNavigateTo, extraToolbarButtons, extraRowActions, extraRowMenus, data}: DataTableProps) {
     const navigate = useNavigate();
     const [sortField, setSortField] = useState<string>('id');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -397,6 +411,36 @@ const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem)
                         {extra.icon ?? '⚙'}
                     </button>
                 ),
+        });
+    }
+    for (const group of extraRowMenus ?? []) {
+        if (group.permission && !can(group.permission, screenOutcome)) continue;
+        actionColumns.push({
+            key: group.key,
+            label: group.title ?? '',
+            render: (item) => {
+                const menuItems = group.items
+                    .filter((action) => !action.permission || can(action.permission, screenOutcome))
+                    .map((action) => ({
+                        key: action.key,
+                        label: action.title,
+                        className: action.className,
+                        disabled: action.visible ? !action.visible(item) : false,
+                        onSelect: async () => {
+                            await action.onClick(item);
+                            q.refetch();
+                        },
+                    }));
+                if (menuItems.length === 0) return null as ReactNode;
+                return (
+                    <RowMenu
+                        icon={group.icon}
+                        className={group.className}
+                        title={group.title}
+                        items={menuItems}
+                    />
+                );
+            },
         });
     }
     if (canDelete) {

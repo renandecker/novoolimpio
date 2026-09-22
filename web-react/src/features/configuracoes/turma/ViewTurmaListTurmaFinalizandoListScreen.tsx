@@ -1,3 +1,5 @@
+import {useNavigate, useSearchParams} from 'react-router-dom';
+
 import {PermissionGate} from '../../../shared/services/permissions';
 
 import {ModuleTabs} from '../../../shared/components/ModuleTabs';
@@ -80,13 +82,21 @@ const TURMA_FINALIZANDO_COLUMNS: DataTableColumn[] = [
 
 export default function ViewTurmaListTurmaFinalizandoListScreen() {
 
+    const navigate = useNavigate();
+
+    const [searchParams] = useSearchParams();
+
+    const turmaId = searchParams.get('id');
+
+
+
     return (
 
         <PermissionGate permission="READ">
 
             <main>
 
-                <h1>Turma Finalizando</h1>
+                <h1>Turma Finalizando{turmaId ? ` - #${turmaId}` : ''}</h1>
 
                 <ModuleTabs
 
@@ -99,6 +109,8 @@ export default function ViewTurmaListTurmaFinalizandoListScreen() {
                             label: 'Matrículas',
 
                             path: '/api/view/turma/listTurmaFinalizando',
+
+                            params: turmaId ? {turmaId: Number(turmaId)} : undefined,
 
                             columns: TURMA_FINALIZANDO_COLUMNS,
 
@@ -177,6 +189,16 @@ export default function ViewTurmaListTurmaFinalizandoListScreen() {
                     ]}
 
                 />
+
+                <div className="modal-actions form-footer" style={{marginTop: '16px'}}>
+                    <button
+                        type="button"
+                        className="btn-form-back btnyellow"
+                        onClick={() => navigate('/view/turma/listTurma')}
+                    >
+                        Voltar
+                    </button>
+                </div>
 
             </main>
 

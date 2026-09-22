@@ -28,6 +28,15 @@ export default function ViewRelatoriosListTabelaListScreen() {
 
     const extraActions: ModuleListExtraAction[] = [
         {
+            key: 'editar',
+            title: 'Editar',
+            icon: '✏️',
+            permission: 'UPDATE',
+            onPress: (item) => {
+                navigation.navigate('view/relatorios/formTabela' as never, {id: String(item.id)} as never);
+            },
+        },
+        {
             key: 'acessar',
             title: 'Acessar',
             icon: '▶',

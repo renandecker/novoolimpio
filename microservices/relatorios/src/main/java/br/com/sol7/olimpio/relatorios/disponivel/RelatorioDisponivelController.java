@@ -10,6 +10,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.MediaType;
 import br.com.sol7.olimpio.relatorios.tabela.service.TabelaService;
 import br.com.sol7.olimpio.relatorios.grafico.service.GraficoService;
@@ -52,26 +53,31 @@ public class RelatorioDisponivelController {
             @PathParam("id") Long id,
             @HeaderParam("X-Authenticated-Username") String username) {
         String tipoNormalizado = tipo == null ? "" : tipo.toUpperCase();
-        return service.podeAcessar(username, tipoNormalizado, id)
-                .onItem().transformToUni(permitido -> {
-                    if (!permitido)
-                        return Uni.createFrom().failure(new ForbiddenException("Relatório não disponível para este usuário"));
-                    return switch (tipoNormalizado) {
-                        case "TABELA" ->tabelaService.find(id)
-                                .chain(r -> tabelaService.executar(id)
-                                        .map(dados -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, dados)));
-                        case "GRAFICO", "PIZZA", "LINHA", "COMBINADO", "CIRCULAR", "BARRA_VERTICAL", "BARRA_HORIZONTAL" ->graficoService.find(id)
-                                .chain(r -> graficoService.dados(id)
-                                        .map(dados -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, dados)));
-                        case "MAPA" ->mapaService.find(id)
-                                .chain(mapa -> mapaService.buscarPontos(id)
-                                        .map(dados -> new RelatorioAbertoResponse(mapa.id(), mapa.nome(), tipoNormalizado, mapa, dados)));
-                        case "ORGANOGRAMA" ->organogramaService.find(id)
-                                .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, null));
-                        case "DASHBOARD" ->painelService.find(id)
-                                .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, null));
-                        default ->Uni.createFrom().failure(new ForbiddenException("Tipo de relatório inválido"));
-                    } ;
+        return service.existeRelatorio(tipoNormalizado, id)
+                .onItem().transformToUni(existe -> {
+                    if (!existe)
+                        return Uni.createFrom().failure(new NotFoundException("Relatório não encontrado"));
+                    return service.podeAcessar(username, tipoNormalizado, id)
+                            .onItem().transformToUni(permitido -> {
+                                if (!permitido)
+                                    return Uni.createFrom().failure(new ForbiddenException("Relatório não disponível para este usuário"));
+                                return switch (tipoNormalizado) {
+                                    case "TABELA" ->tabelaService.find(id)
+                                            .chain(r -> tabelaService.executar(id)
+                                                    .map(dados -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, dados)));
+                                    case "GRAFICO", "PIZZA", "LINHA", "COMBINADO", "CIRCULAR", "BARRA_VERTICAL", "BARRA_HORIZONTAL" ->graficoService.find(id)
+                                            .chain(r -> graficoService.dados(id)
+                                                    .map(dados -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, dados)));
+                                    case "MAPA" ->mapaService.find(id)
+                                            .chain(mapa -> mapaService.buscarPontos(id)
+                                                    .map(dados -> new RelatorioAbertoResponse(mapa.id(), mapa.nome(), tipoNormalizado, mapa, dados)));
+                                    case "ORGANOGRAMA" ->organogramaService.find(id)
+                                            .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, null));
+                                    case "DASHBOARD" ->painelService.find(id)
+                                            .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, null));
+                                    default ->Uni.createFrom().failure(new ForbiddenException("Tipo de relatório inválido"));
+                                } ;
+                            });
                 });
     }
 }

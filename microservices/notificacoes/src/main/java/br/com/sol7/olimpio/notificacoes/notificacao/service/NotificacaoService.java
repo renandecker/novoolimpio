@@ -30,7 +30,7 @@ public class NotificacaoService {
     @Inject
     ConfigCanalService configCanalService;
     @Inject
-    NotificacaoKafkaProducer kafkaProducer;
+    NotificacaoRabbitMQProducer rabbitMQProducer;
 
     @WithSession
     public Uni<List<NotificacaoResponse>> list() {
@@ -83,9 +83,9 @@ public class NotificacaoService {
                     e.canalEmail = r.canalEmail() != null ? r.canalEmail() : canais.email();
                 })
                 .chain(canais -> repository.persist(e))
-                .chain(saved -> kafkaProducer.dispatch(saved)
+                .chain(saved -> rabbitMQProducer.dispatch(saved)
                         .onFailure().invoke(err ->
-                                LOGGER.warn("Falha ao publicar a notificação {} no Kafka: {}", e.id, err.getMessage()))
+                                LOGGER.warn("Falha ao publicar a notificação {} no RabbitMQ: {}", e.id, err.getMessage()))
                         .onFailure().recoverWithNull())
                 .replaceWith(() -> toResponse(e));
     }

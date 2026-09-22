@@ -242,7 +242,7 @@ function ModalFrame({titulo, onClose, children}: { titulo: string; onClose: () =
                 <h2>{titulo}</h2>
                 {children}
                 <div className="modal-actions form-footer">
-                    <button type="button" className="btn-form-back" onClick={onClose}>
+                    <button type="button" className="btn-form-back btnyellow" onClick={onClose}>
                         Fechar
                     </button>
                 </div>
@@ -1040,61 +1040,71 @@ export function PresencasModal({pessoaId, onClose}: GestaoModalProps) {
         <ModalFrame titulo="Presenças" onClose={onClose}>
             <Accordion
                 panels={[
-                    ...frequencias.map((frequencia) => ({
-                        key: String(frequencia.matricula.id),
-                        title: `${frequencia.matricula.curso} - ${frequencia.matricula.componente} - Turma ${frequencia.matricula.turma ?? '—'} (${frequencia.frequenciaPerc == null ? '—' : `${frequencia.frequenciaPerc}%`})`,
-                        content: (
-                            <>
-                                <div className="form-grid">
-                                    <label className="form-field">
-                                        <span className="form-label">Curso</span>
-                                        <input className="form-input" value={frequencia.matricula.curso} readOnly/>
-                                    </label>
-                                    <label className="form-field">
-                                        <span className="form-label">Componente</span>
-                                        <input className="form-input" value={frequencia.matricula.componente}
-                                               readOnly/>
-                                    </label>
-                                    <label className="form-field">
-                                        <span className="form-label">Turma</span>
-                                        <input className="form-input" value={frequencia.matricula.turma ?? '—'}
-                                               readOnly/>
-                                    </label>
-                                    <label className="form-field">
-                                        <span className="form-label">Frequência</span>
-                                        <input className="form-input"
-                                               value={frequencia.frequenciaPerc == null ? '—' : `${frequencia.frequenciaPerc}%`}
-                                               readOnly/>
-                                    </label>
-                                    <label className="form-field">
-                                        <span className="form-label">Presentes</span>
-                                        <input className="form-input" value={frequencia.presentes} readOnly/>
-                                    </label>
-                                    <label className="form-field">
-                                        <span className="form-label">Ausentes</span>
-                                        <input className="form-input" value={frequencia.ausentes} readOnly/>
-                                    </label>
-                                </div>
-                                <TabelaDadosPaginada
-                                    vazio="Nenhuma ocorrência de presença."
-                                    colunas={[
-                                        {
-                                            key: 'data',
-                                            label: 'Data',
-                                            render: (linha) => fmtData(linha.data as string | null)
-                                        },
-                                        {
-                                            key: 'presenca',
-                                            label: 'Presença',
-                                            render: (linha) => PRESENCA_COR[String(linha.presenca ?? '')] ?? String(linha.presenca ?? '')
-                                        },
-                                        {key: 'componente', label: 'Componente'},
-                                    ]}
-                                    linhas={frequencia.ocorrencias as unknown as Record<string, unknown>[]}
-                                />
-                            </>
+                    {
+                        key: 'matriculas-turmas',
+                        title: 'Matrícula / Turmas (Chamadas)',
+                        content: frequencias.length === 0 ? (
+                            <p className="master-detail-empty">Nenhuma matrícula encontrada.</p>
+                        ) : (
+                            <Accordion
+                                panels={frequencias.map((frequencia) => ({
+                                    key: String(frequencia.matricula.id),
+                                    title: `${frequencia.matricula.curso} - ${frequencia.matricula.componente} - Turma ${frequencia.matricula.turma ?? '—'} (${frequencia.frequenciaPerc == null ? '—' : `${frequencia.frequenciaPerc}%`})`,
+                                    content: (
+                                        <>
+                                            <div className="form-grid">
+                                                <label className="form-field">
+                                                    <span className="form-label">Curso</span>
+                                                    <input className="form-input" value={frequencia.matricula.curso} readOnly/>
+                                                </label>
+                                                <label className="form-field">
+                                                    <span className="form-label">Componente</span>
+                                                    <input className="form-input" value={frequencia.matricula.componente}
+                                                           readOnly/>
+                                                </label>
+                                                <label className="form-field">
+                                                    <span className="form-label">Turma</span>
+                                                    <input className="form-input" value={frequencia.matricula.turma ?? '—'}
+                                                           readOnly/>
+                                                </label>
+                                                <label className="form-field">
+                                                    <span className="form-label">Frequência</span>
+                                                    <input className="form-input"
+                                                           value={frequencia.frequenciaPerc == null ? '—' : `${frequencia.frequenciaPerc}%`}
+                                                           readOnly/>
+                                                </label>
+                                                <label className="form-field">
+                                                    <span className="form-label">Presentes</span>
+                                                    <input className="form-input" value={frequencia.presentes} readOnly/>
+                                                </label>
+                                                <label className="form-field">
+                                                    <span className="form-label">Ausentes</span>
+                                                    <input className="form-input" value={frequencia.ausentes} readOnly/>
+                                                </label>
+                                            </div>
+                                            <TabelaDadosPaginada
+                                                vazio="Nenhuma ocorrência de presença."
+                                                colunas={[
+                                                    {
+                                                        key: 'data',
+                                                        label: 'Data',
+                                                        render: (linha) => fmtData(linha.data as string | null)
+                                                    },
+                                                    {
+                                                        key: 'presenca',
+                                                        label: 'Presença',
+                                                        render: (linha) => PRESENCA_COR[String(linha.presenca ?? '')] ?? String(linha.presenca ?? '')
+                                                    },
+                                                    {key: 'componente', label: 'Componente'},
+                                                ]}
+                                                linhas={frequencia.ocorrencias as unknown as Record<string, unknown>[]}
+                                            />
+                                        </>
+                                    ),
+                                }))}
+                            />
                         ),
-                    })),
+                    },
                     {
                         key: 'trocaTurma',
                         title: 'Troca Turma',
@@ -1400,7 +1410,7 @@ function PixQrCodeModal({isOpen, onClose, parcela}: PixQrCodeModalProps) {
                                 />
                                 <button
                                     type="button"
-                                    className="btn-form-save"
+                                    className="btn-form-save btngreen"
                                     style={{marginTop: '0.5rem'}}
                                     onClick={() => {
                                         navigator.clipboard.writeText(pixData.chave || '');
@@ -1465,7 +1475,7 @@ function PixQrCodeModal({isOpen, onClose, parcela}: PixQrCodeModalProps) {
                     )}
                 </div>
                 <div className="modal-actions form-footer">
-                    <button type="button" className="btn-form-back" onClick={onClose}>
+                    <button type="button" className="btn-form-back btnyellow" onClick={onClose}>
                         Fechar
                     </button>
                 </div>

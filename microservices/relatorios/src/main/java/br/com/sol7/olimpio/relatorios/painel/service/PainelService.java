@@ -1,11 +1,12 @@
 package br.com.sol7.olimpio.relatorios.painel.service;
-import br.com.sol7.olimpio.relatorios.estrutura.entity.Estrutura;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.relatorios.painel.repository.PainelRepository;
 import br.com.sol7.olimpio.relatorios.painel.entity.Painel;
 import br.com.sol7.olimpio.relatorios.painel.dto.PainelRequest;
+import br.com.sol7.olimpio.relatorios.painel.dto.PainelPermissaoRequest;
+import br.com.sol7.olimpio.relatorios.painel.dto.PainelFiltrosRequest;
 import br.com.sol7.olimpio.relatorios.painel.dto.PainelResponse;
 
 import io.smallrye.mutiny.Uni;
@@ -21,6 +22,9 @@ public class PainelService {
 
     @Inject
     PainelRepository repository;
+
+    @Inject
+    PainelTopicoService painelTopicoService;
 
     public Uni<List<PainelResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -38,7 +42,13 @@ public class PainelService {
     public Uni<PainelResponse> find(Long id) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Painel not found"))
-                .map(this::toResponse);
+                .flatMap(e -> painelTopicoService.findByPainelId(id)
+                        .flatMap(topicos -> Uni.combine().all()
+                                .unis(repository.listUsuarios(id), repository.listUnidades(id),
+                                        repository.listPerfis(id), repository.listFiltrosIds(id))
+                                .asTuple()
+                                .map(tuple -> new PainelResponse(e.id, e.nome, topicos,
+                                        tuple.getItem1(), tuple.getItem2(), tuple.getItem3(), tuple.getItem4()))));
     }
 
     public Uni<PainelResponse> create(PainelRequest r) {
@@ -54,10 +64,32 @@ public class PainelService {
                 .map(this::toResponse);
     }
 
+    public Uni<PainelResponse> updatePermissoes(Long id, PainelPermissaoRequest r) {
+        return repository.findById(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Painel not found"))
+                .flatMap(e -> repository.replacePermissoes(id, r.usuariosIds(), r.unidadesIds(), r.perfisIds())
+                        .replaceWith(find(id)));
+    }
+
+    public Uni<List<Long>> listarFiltros(Long id) {
+        return repository.findById(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Painel not found"))
+                .flatMap(e -> repository.listFiltrosIds(id));
+    }
+
+    public Uni<PainelResponse> updateFiltros(Long id, PainelFiltrosRequest r) {
+        return repository.findById(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Painel not found"))
+                .flatMap(e -> repository.replaceFiltros(id, r.filtrosIds())
+                        .replaceWith(find(id)));
+    }
+
     public Uni<Void> delete(Long id) {
-        return repository.deleteById(id).onItem()
-                .transformToUni(deleted -> deleted ? Uni.createFrom().voidItem()
-                        : Uni.createFrom().failure(new NotFoundException("Painel not found")));
+        return repository.findById(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Painel not found"))
+                .flatMap(e -> repository.deleteJoinByPainelId(id)
+                        .flatMap(v -> repository.deleteById(id))
+                        .replaceWithVoid());
     }
 
     private void apply(Painel e, PainelRequest r) {
@@ -65,7 +97,7 @@ public class PainelService {
     }
 
     private PainelResponse toResponse(Painel e) {
-        return new PainelResponse(e.id, e.nome);
+        return new PainelResponse(e.id, e.nome, List.of(), List.of(), List.of(), List.of(), List.of());
     }
 
 
@@ -76,8 +108,9 @@ public class PainelService {
     //         return getConexaoRepository().buscarUnidades(id);
     //     }
     public Uni<List<Long>> buscarUnidades(Long id) {
-        // Obs: depende do microservico basico (Unidade) - repository.buscarUnidades
-        return Uni.createFrom().item(java.util.List.of());
+        return repository.findById(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Painel not found"))
+                .flatMap(e -> repository.listUnidades(id));
     }
 
 
@@ -88,8 +121,9 @@ public class PainelService {
     //         return getConexaoRepository().buscarPerfils(id);
     //     }
     public Uni<List<Long>> buscarPerfils(Long id) {
-        // Obs: depende do microservico basico (Perfil) - repository.buscarPerfils
-        return Uni.createFrom().item(java.util.List.of());
+        return repository.findById(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Painel not found"))
+                .flatMap(e -> repository.listPerfis(id));
     }
 
 
@@ -100,8 +134,9 @@ public class PainelService {
     //         return getConexaoRepository().buscarUsuarios(id);
     //     }
     public Uni<List<Long>> buscarUsuarios(Long id) {
-        // Obs: depende do microservico basico (Usuario) - repository.buscarUsuarios
-        return Uni.createFrom().item(java.util.List.of());
+        return repository.findById(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Painel not found"))
+                .flatMap(e -> repository.listUsuarios(id));
     }
 
 

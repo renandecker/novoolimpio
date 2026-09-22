@@ -2,19 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Save, ArrowLeft, RotateCcw, Database, Code, BarChart2, Palette, SlidersHorizontal } from 'lucide-react';
 import { FormLayout } from '../../shared/components/FormLayout';
-import { AutoComplete } from '../../shared/components/AutoComplete';
-import { GAUGE_COLORS, type GaugeConfiguracao } from './GaugeChart';
-import { salvarIndicadorGauge, atualizarIndicadorGauge, executarSqlIndicador, type IndicadorGauge, DEFAULT_GAUGE_CONFIG } from './indicadorGauge';
-import { useApi } from '../../shared/services/api';
-import { API_PATHS } from '../../shared/services/apiPaths';
+import { GaugeChart, GAUGE_COLORS, type GaugeConfig } from './GaugeChart';
+import {
+  salvarIndicadorGauge,
+  atualizarIndicadorGauge,
+  carregarIndicadorGauge,
+  executarSqlIndicador,
+  type IndicadorGauge,
+  type GaugeConfiguracao,
+  DEFAULT_GAUGE_CONFIG,
+} from './indicadorGauge';
 
-const NR_OF_LEVELS_OPTIONS = [
-  { value: 2, label: '2 Níveis' },
-  { value: 3, label: '3 Níveis' },
-  { value: 4, label: '4 Níveis' },
-  { value: 5, label: '5 Níveis' },
-];
-
+const NR_OF_LEVELS_OPTIONS = [2, 3, 4, 5];
 const ARC_WIDTH_OPTIONS = [
   { value: 0.1, label: 'Fino (0.1)' },
   { value: 0.2, label: 'Médio-fino (0.2)' },
@@ -22,18 +21,13 @@ const ARC_WIDTH_OPTIONS = [
   { value: 0.4, label: 'Médio-grosso (0.4)' },
   { value: 0.5, label: 'Grosso (0.5)' },
 ];
+const TIPO_EXIBICAO_OPTIONS: { value: GaugeConfiguracao['tipoExibicao']; label: string }[] = [
+  { value: 'valor', label: 'Valor' },
+  { value: 'percentual', label: 'Percentual' },
+  { value: 'ambos', label: 'Valor e Percentual' },
+];
 
-interface ColorOption {
-  value: string;
-  label: string;
-}
-
-const COLOR_OPTIONS: ColorOption[] = GAUGE_COLORS.map(color => ({
-  value: color,
-  label: color,
-}));
-
-const GAUGE_PREVIEW_SQL = `SELECT 
+const GAUGE_PREVIEW_SQL = `SELECT
     COALESCE(SUM(valor_total), 0) AS valor_atual,
     0 AS valor_minimo,
     50000 AS valor_maximo -- Meta predefinida
@@ -44,10 +38,6 @@ export default function IndicadorGaugeFormScreen() {
   const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
   const isEditing = Boolean(id);
-  
-  const { post: saveIndicador } = useApi('/api/relatorios/indicador-gauge');
-  const { put: updateIndicador } = useApi('/api/relatorios/indicador-gauge');
-  const { get: loadIndicador } = useApi('/api/relatorios/indicador-gauge');
 
   const [entity, setEntity] = useState<Partial<IndicadorGauge>>({
     nome: '',
@@ -60,26 +50,29 @@ export default function IndicadorGaugeFormScreen() {
 
   useEffect(() => {
     if (isEditing && id) {
-      loadIndicador(parseInt(id)).then(resp => {
-        setEntity({
-          ...resp.data,
-          configuracao: { ...DEFAULT_GAUGE_CONFIG, ...resp.data.configuracao },
+      carregarIndicadorGauge(parseInt(id))
+        .then((resp) => {
+          setEntity({
+            nome: resp.nome,
+            sql: resp.sql,
+            configuracao: { ...DEFAULT_GAUGE_CONFIG, ...resp.configuracao },
+          });
+        })
+        .catch(() => {
+          alert('Erro ao carregar indicador');
+          navigate('/view/indicador/listIndicadorGauge');
         });
-      }).catch(() => {
-        alert('Erro ao carregar indicador');
-        navigate('/view/relatorios/listIndicadorGauge');
-      });
     }
-  }, [id, isEditing, loadIndicador, navigate]);
+  }, [id, isEditing, navigate]);
 
   const handleConfigChange = <K extends keyof GaugeConfiguracao>(key: K, value: GaugeConfiguracao[K]) => {
-    setEntity(prev => ({
+    setEntity((prev) => ({
       ...prev,
-      configuracao: { ...prev.configuracao!, [key]: value },
+      configuracao: { ...(prev.configuracao ?? DEFAULT_GAUGE_CONFIG), [key]: value },
     }));
   };
 
-  const handleColorChange = (index: 0 | 1 | 2, color: string) => {
+  const handleColorChange = (index: number, color: string) => {
     const colors = [...(entity.configuracao?.colors ?? DEFAULT_GAUGE_CONFIG.colors)];
     colors[index] = color;
     handleConfigChange('colors', colors);
@@ -102,35 +95,33 @@ export default function IndicadorGaugeFormScreen() {
     }
   };
 
-  const handleSubmit = async () => {
-    if (!entity.nome?.trim()) {
+  const handleSubmit = async (vals: Record<string, unknown>) => {
+    const nome = String(vals.nome ?? entity.nome ?? '').trim();
+    const sql = String(vals.sql ?? entity.sql ?? '').trim();
+    const configuracao = entity.configuracao ?? DEFAULT_GAUGE_CONFIG;
+
+    if (!nome) {
       alert('Informe o nome do indicador');
       return;
     }
-    if (!entity.sql?.trim()) {
+    if (!sql) {
       alert('Informe a consulta SQL');
       return;
     }
-    if (!entity.configuracao?.colors?.length || entity.configuracao.colors.length < 2) {
+    if (!configuracao.colors?.length || configuracao.colors.length < 2) {
       alert('Configure pelo menos 2 cores');
       return;
     }
 
     setSalvando(true);
     try {
-      const payload = {
-        nome: entity.nome,
-        sql: entity.sql,
-        configuracao: entity.configuracao,
-      };
-
       if (isEditing && id) {
-        await updateIndicador(parseInt(id), payload);
+        await atualizarIndicadorGauge(parseInt(id), { nome, sql, configuracao });
       } else {
-        await saveIndicador(payload);
+        await salvarIndicadorGauge({ nome, sql, configuracao });
       }
       alert(isEditing ? 'Indicador atualizado com sucesso!' : 'Indicador criado com sucesso!');
-      navigate('/view/relatorios/listIndicadorGauge');
+      navigate('/view/indicador/listIndicadorGauge');
     } catch (error) {
       console.error('Erro ao salvar:', error);
       alert('Erro ao salvar indicador');
@@ -139,12 +130,75 @@ export default function IndicadorGaugeFormScreen() {
     }
   };
 
-  const config = entity.configuracao ?? DEFAULT_GAUGE_CONFIG;
-  const previewValue = testResult 
-    ? ((testResult.valorAtual - testResult.valorMinimo) / (testResult.valorMaximo - testResult.valorMinimo))
+  const config: GaugeConfig = entity.configuracao ?? DEFAULT_GAUGE_CONFIG;
+  const previewValue = testResult
+    ? (testResult.valorAtual - testResult.valorMinimo) / (testResult.valorMaximo - testResult.valorMinimo)
     : config.percent;
   const previewMin = testResult?.valorMinimo ?? 0;
   const previewMax = testResult?.valorMaximo ?? 100;
+
+  const SegmentButton = ({
+    label,
+    active,
+    onClick,
+    style = {},
+  }: {
+    label: string;
+    active: boolean;
+    onClick: () => void;
+    style?: React.CSSProperties;
+  }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        padding: '8px 16px',
+        borderRadius: '8px',
+        border: '1px solid #cbd5e1',
+        backgroundColor: active ? '#2563eb' : '#fff',
+        color: active ? '#fff' : '#475569',
+        fontSize: '13px',
+        fontWeight: 600,
+        cursor: 'pointer',
+        transition: 'all 0.15s ease',
+        ...style,
+      }}
+      onMouseOver={(e) => {
+        if (!active) e.currentTarget.style.backgroundColor = '#f1f5f9';
+      }}
+      onMouseOut={(e) => {
+        if (!active) e.currentTarget.style.backgroundColor = '#fff';
+      }}
+    >
+      {label}
+    </button>
+  );
+
+  const ColorOptionButton = ({
+    color,
+    active,
+    onClick,
+  }: {
+    color: string;
+    active: boolean;
+    onClick: () => void;
+  }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        width: '28px',
+        height: '28px',
+        borderRadius: '6px',
+        border: active ? '2px solid #1e293b' : '2px solid transparent',
+        backgroundColor: color,
+        cursor: 'pointer',
+        transition: 'all 0.15s ease',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+      }}
+      title={color}
+    />
+  );
 
   return (
     <FormLayout
@@ -180,13 +234,13 @@ export default function IndicadorGaugeFormScreen() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setEntity(prev => ({ ...prev, sql: GAUGE_PREVIEW_SQL }))}
+                  onClick={() => setEntity((prev) => ({ ...prev, sql: GAUGE_PREVIEW_SQL }))}
                   className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
                 >
                   <Code size={16} /> Usar Exemplo
                 </button>
               </div>
-              
+
               {testResult && (
                 <div className="bg-green-50 border border-green-200 rounded-xl p-4">
                   <h4 className="font-medium text-green-800 mb-2 flex items-center gap-2">
@@ -208,7 +262,7 @@ export default function IndicadorGaugeFormScreen() {
                     <div>
                       <div className="text-xs text-green-600 font-medium">Percentual</div>
                       <div className="text-lg font-bold text-green-900 font-mono">
-                        {((testResult.valorAtual - testResult.valorMinimo) / (testResult.valorMaximo - testResult.valorMinimo) * 100).toFixed(1)}%
+                        {(((testResult.valorAtual - testResult.valorMinimo) / (testResult.valorMaximo - testResult.valorMinimo)) * 100).toFixed(1)}%
                       </div>
                     </div>
                   </div>
@@ -221,69 +275,102 @@ export default function IndicadorGaugeFormScreen() {
           key: 'aparencia',
           label: 'Aparência',
           icon: Palette,
-          fields: [
-            {
-              name: 'nrOfLevels',
-              label: 'Níveis de Cor *',
-              type: 'select',
-              options: NR_OF_LEVELS_OPTIONS,
-              required: true,
-            },
-            {
-              name: 'arcWidth',
-              label: 'Largura do Arco *',
-              type: 'select',
-              options: ARC_WIDTH_OPTIONS,
-              required: true,
-            },
-            {
-              name: 'animate',
-              label: 'Animar',
-              type: 'boolean',
-              booleanLabels: { on: 'Sim', off: 'Não' },
-            },
-          ],
           customContent: (
-            <div style={{ marginTop: '20px' }}>
-              <h4 className="font-medium text-gray-800 mb-4">Cores dos Níveis</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
-                {Array.from({ length: config.nrOfLevels }, (_, i) => i).map((levelIndex) => (
-                  <div key={levelIndex} className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                    <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
-                      Cor do Nível {levelIndex + 1}
-                    </label>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '4px' }}>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Tipo de Exibição *</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {TIPO_EXIBICAO_OPTIONS.map((opt) => (
+                    <SegmentButton
+                      key={opt.value}
+                      label={opt.label}
+                      active={config.tipoExibicao === opt.value}
+                      onClick={() => handleConfigChange('tipoExibicao', opt.value)}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Níveis de Cor *</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {NR_OF_LEVELS_OPTIONS.map((n) => (
+                    <SegmentButton
+                      key={n}
+                      label={`${n} níveis`}
+                      active={config.nrOfLevels === n}
+                      onClick={() => handleConfigChange('nrOfLevels', n)}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Largura do Arco *</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {ARC_WIDTH_OPTIONS.map((opt) => (
+                    <SegmentButton
+                      key={opt.value}
+                      label={opt.label}
+                      active={config.arcWidth === opt.value}
+                      onClick={() => handleConfigChange('arcWidth', opt.value)}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Animar</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  <SegmentButton
+                    label="Sim"
+                    active={config.animate}
+                    onClick={() => handleConfigChange('animate', true)}
+                  />
+                  <SegmentButton
+                    label="Não"
+                    active={!config.animate}
+                    onClick={() => handleConfigChange('animate', false)}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-4">Cores dos Níveis</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {Array.from({ length: config.nrOfLevels }, (_, i) => i).map((levelIndex) => (
+                    <div key={levelIndex} style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', padding: '12px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                       <div
                         style={{
-                          width: '40px',
-                          height: '40px',
+                          width: '36px',
+                          height: '36px',
                           borderRadius: '8px',
                           backgroundColor: config.colors[levelIndex] ?? DEFAULT_GAUGE_CONFIG.colors[levelIndex],
                           border: '2px solid #e2e8f0',
                           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                         }}
                       />
-                      <select
-                        value={config.colors[levelIndex] ?? DEFAULT_GAUGE_CONFIG.colors[levelIndex]}
-                        onChange={(e) => handleColorChange(levelIndex as 0 | 1 | 2, e.target.value)}
-                        className="flex-1 min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                      >
-                        {COLOR_OPTIONS.map(opt => (
-                          <option key={opt.value} value={opt.value} style={{ backgroundColor: opt.value, color: '#fff' }}>
-                            {opt.value}
-                          </option>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', minWidth: '70px' }}>Nível {levelIndex + 1}</span>
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        {GAUGE_COLORS.map((color) => (
+                          <ColorOptionButton
+                            key={color}
+                            color={color}
+                            active={(config.colors[levelIndex] ?? DEFAULT_GAUGE_CONFIG.colors[levelIndex]) === color}
+                            onClick={() => handleColorChange(levelIndex, color)}
+                          />
                         ))}
-                      </select>
+                      </div>
+                      <input
+                        type="color"
+                        value={config.colors[levelIndex] ?? DEFAULT_GAUGE_CONFIG.colors[levelIndex]}
+                        onChange={(e) => handleColorChange(levelIndex, e.target.value)}
+                        style={{ width: '32px', height: '32px', borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', padding: 0 }}
+                        title="Escolher cor personalizada"
+                      />
                     </div>
-                    <input
-                      type="color"
-                      value={config.colors[levelIndex] ?? DEFAULT_GAUGE_CONFIG.colors[levelIndex]}
-                      onChange={(e) => handleColorChange(levelIndex as 0 | 1 | 2, e.target.value)}
-                      className="mt-2 w-20 h-8 rounded-lg border border-gray-200 cursor-pointer"
-                      title="Escolher cor personalizada"
-                    />
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           ),
@@ -292,132 +379,60 @@ export default function IndicadorGaugeFormScreen() {
           key: 'cores-avancadas',
           label: 'Cores Avançadas',
           icon: SlidersHorizontal,
-          fields: [
-            {
-              name: 'textColor',
-              label: 'Cor do Texto',
-              type: 'color',
-            },
-            {
-              name: 'needleColor',
-              label: 'Cor do Ponteiro',
-              type: 'color',
-            },
-            {
-              name: 'needleBaseColor',
-              label: 'Cor da Base do Ponteiro',
-              type: 'color',
-            },
-          ],
+          customContent: (
+            <div className="form-grid">
+              {([
+                ['textColor', 'Cor do Texto'],
+                ['needleColor', 'Cor do Ponteiro'],
+                ['needleBaseColor', 'Cor da Base do Ponteiro'],
+              ] as [keyof GaugeConfiguracao, string][]).map(([key, label]) => (
+                <label key={key} className="form-field">
+                  <span className="form-label">{label}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <input
+                      type="color"
+                      value={config[key] as string}
+                      onChange={(e) => handleConfigChange(key, e.target.value)}
+                      style={{ width: '48px', height: '36px', borderRadius: '8px', border: '1px solid #cbd5e1', cursor: 'pointer', padding: 0 }}
+                    />
+                    <input
+                      type="text"
+                      value={config[key] as string}
+                      onChange={(e) => handleConfigChange(key, e.target.value)}
+                      className="form-input"
+                    />
+                  </div>
+                </label>
+              ))}
+            </div>
+          ),
         },
         {
           key: 'preview',
           label: 'Pré-visualização',
           icon: BarChart2,
-          fields: [],
           customContent: (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px', padding: '20px' }}>
               <div style={{ textAlign: 'center' }}>
                 <h4 className="font-medium text-gray-800 mb-4">{entity.nome || 'Indicador Gauge'}</h4>
-                <div style={{ width: '300px', height: '200px', margin: '0 auto' }}>
-                  <svg width="300" height="200" viewBox="0 0 300 200">
-                    <defs>
-                      {config.animate && (
-                        <style>{`
-                          .gauge-arc { animation: drawArc 1s ease-out forwards; }
-                          .gauge-needle { animation: rotateNeedle 1s ease-out forwards; transform-origin: 150px 100px; }
-                          @keyframes drawArc { from { stroke-dashoffset: 1000; } to { stroke-dashoffset: 0; } }
-                          @keyframes rotateNeedle { from { transform: rotate(-90deg); } to { transform: rotate(${getNeedleAngle(config, previewValue, 180)}deg); } }
-                        `}</style>
-                      )}
-                    </defs>
-                    {getLevelConfig(config, 180).map((level, i) => (
-                      <path
-                        key={i}
-                        d={describeArc(150, 100, 120, level.startAngle, level.endAngle)}
-                        stroke={level.color}
-                        strokeWidth={config.arcWidth * 240}
-                        fill="none"
-                        strokeLinecap="round"
-                        className={config.animate ? 'gauge-arc' : ''}
-                        style={{
-                          strokeDasharray: `${(level.endAngle - level.startAngle) / 180 * 2 * Math.PI * 120} ${2 * Math.PI * 120}`,
-                          strokeDashoffset: config.animate ? `${2 * Math.PI * 120}` : '0',
-                        }}
-                      />
-                    ))}
-                    <circle cx="150" cy="100" r={120 * 0.15} fill={config.needleBaseColor} />
-                    <path
-                      d={getNeedlePath(config, previewValue, 180)}
-                      fill={config.needleColor}
-                      className={config.animate ? 'gauge-needle' : ''}
-                      style={{ transformOrigin: '150px 100px' }}
-                    />
-                    <text x="150" y="110" textAnchor="middle" fill={config.textColor} fontSize="28" fontWeight="bold" fontFamily="system-ui, sans-serif">
-                      {previewMin + (previewMax - previewMin) * previewValue}.toLocaleString('pt-BR')
-                    </text>
-                  </svg>
-                </div>
-                <p className="text-sm text-gray-500 mt-4">
-                  Valor: {(previewMin + (previewMax - previewMin) * previewValue).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} / {previewMax.toLocaleString('pt-BR')} ({(previewValue * 100).toFixed(1)}%)
-                </p>
+                <GaugeChart
+                  config={config}
+                  value={testResult?.valorAtual ?? previewValue}
+                  minValue={previewMin}
+                  maxValue={previewMax}
+                />
               </div>
             </div>
           ),
         },
       ]}
       initialValues={entity}
-      onSubmit={(vals) => setEntity({ ...entity, ...vals })}
-      onCancel={() => navigate('/view/relatorios/listIndicadorGauge')}
+      onSubmit={handleSubmit}
+      onCancel={() => navigate('/view/indicador/listIndicadorGauge')}
       submitLabel="Salvar"
       cancelLabel="Voltar"
-      submitDisabled={salvando}
-      submitIcon={salvando ? <RotateCcw className="animate-spin" size={18} /> : <Save size={18} />}
+      saving={salvando}
+      error=""
     />
   );
-}
-
-function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number) {
-  const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
-  return {
-    x: centerX + radius * Math.cos(angleInRadians),
-    y: centerY + radius * Math.sin(angleInRadians)
-  };
-}
-
-function describeArc(x: number, y: number, radius: number, startAngle: number, endAngle: number) {
-  const start = polarToCartesian(x, y, radius, endAngle);
-  const end = polarToCartesian(x, y, radius, startAngle);
-  const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
-  return ['M', start.x, start.y, 'A', radius, radius, 0, largeArcFlag, 0, end.x, end.y].join(' ');
-}
-
-function getLevelConfig(config: GaugeConfiguracao, totalAngle: number) {
-  const levels = config.nrOfLevels;
-  const anglePerLevel = totalAngle / levels;
-  return config.colors.map((color, i) => ({
-    color,
-    startAngle: -90 + (i * anglePerLevel),
-    endAngle: -90 + ((i + 1) * anglePerLevel),
-  }));
-}
-
-function getNeedleAngle(config: GaugeConfiguracao, percent: number, totalAngle: number) {
-  const clampedPercent = Math.max(0, Math.min(1, percent));
-  return -90 + (clampedPercent * totalAngle);
-}
-
-function getNeedlePath(config: GaugeConfiguracao, percent: number, totalAngle: number) {
-  const centerX = 150;
-  const centerY = 100;
-  const radius = 120;
-  const needleAngle = getNeedleAngle(config, percent, totalAngle);
-  const needleLength = radius * 0.9;
-  const needleBaseRadius = radius * 0.15;
-  
-  const needleTip = polarToCartesian(centerX, centerY, needleLength, needleAngle);
-  const needleBase1 = polarToCartesian(centerX, centerY, needleBaseRadius, needleAngle - 90);
-  const needleBase2 = polarToCartesian(centerX, centerY, needleBaseRadius, needleAngle + 90);
-  
-  return `M ${needleBase1.x} ${needleBase1.y} L ${needleTip.x} ${needleTip.y} L ${needleBase2.x} ${needleBase2.y} Z`;
 }

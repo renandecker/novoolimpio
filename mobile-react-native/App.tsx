@@ -192,8 +192,8 @@ import ViewHorarioPeriodoListHorarioPeriodoListScreen
     from './src/screens/ViewHorarioPeriodoListHorarioPeriodoListScreen';
 import ViewImpressoraFormImpressoraListScreen from './src/screens/ViewImpressoraFormImpressoraListScreen';
 import ViewImpressoraListImpressoraListScreen from './src/screens/ViewImpressoraListImpressoraListScreen';
-import ViewIndicadorFormIndicadorListScreen from './src/screens/ViewIndicadorFormIndicadorListScreen';
-import ViewIndicadorListIndicadorListScreen from './src/screens/ViewIndicadorListIndicadorListScreen';
+import ViewIndicadorFormIndicadorListScreen from './src/features/configuracoes/indicador/ViewIndicadorFormIndicadorListScreen';
+import ViewIndicadorListIndicadorListScreen from './src/features/configuracoes/indicador/ViewIndicadorListIndicadorListScreen';
 import ViewLigacaoLigacaoListScreen from './src/screens/ViewLigacaoLigacaoListScreen';
 import ViewLoginLoginListScreen from './src/screens/ViewLoginLoginListScreen';
 import ViewLogradouroFormLogradouroListScreen from './src/screens/ViewLogradouroFormLogradouroListScreen';
@@ -291,32 +291,33 @@ import ViewReferenciaBibliograficaListReferenciaBibliograficaListScreen
 import ViewRegiaoFormRegiaoListScreen from './src/screens/ViewRegiaoFormRegiaoListScreen';
 import ViewRegiaoListRegiaoListScreen from './src/screens/ViewRegiaoListRegiaoListScreen';
 
-import ViewRelatoriosExtratorListScreen from './src/screens/ViewRelatoriosExtratorListScreen';
-import ViewRelatoriosFormDashboardListScreen from './src/screens/ViewRelatoriosFormDashboardListScreen';
-import ViewRelatoriosFormGraficoListScreen from './src/screens/ViewRelatoriosFormGraficoListScreen';
-import ViewRelatoriosFormMapaListScreen from './src/screens/ViewRelatoriosFormMapaListScreen';
-import ViewRelatoriosFormOrganogramaListScreen from './src/screens/ViewRelatoriosFormOrganogramaListScreen';
-import ViewRelatoriosFormTabelaListScreen from './src/screens/ViewRelatoriosFormTabelaListScreen';
+import ViewRelatoriosExtratorListScreen from './src/features/relatorios/ViewRelatoriosExtratorListScreen';
+import ViewRelatoriosFormDashboardListScreen from './src/features/relatorios/ViewRelatoriosFormDashboardListScreen';
+import DashboardMontagemScreen from './src/features/relatorios/DashboardMontagemScreen';
+import ViewRelatoriosFormGraficoListScreen from './src/features/relatorios/ViewRelatoriosFormGraficoListScreen';
+import ViewRelatoriosFormMapaListScreen from './src/features/relatorios/ViewRelatoriosFormMapaListScreen';
+import ViewRelatoriosFormOrganogramaListScreen from './src/features/relatorios/ViewRelatoriosFormOrganogramaListScreen';
+import ViewRelatoriosFormTabelaListScreen from './src/features/relatorios/ViewRelatoriosFormTabelaListScreen';
 import ViewRelatoriosFormIndicadorGaugeListScreen from './src/features/relatorios/ViewRelatoriosFormIndicadorGaugeListScreen';
-import ViewRelatoriosListDashboardListScreen from './src/screens/ViewRelatoriosListDashboardListScreen';
-import ViewRelatoriosListGraficoListScreen from './src/screens/ViewRelatoriosListGraficoListScreen';
-import ViewRelatoriosListMapaListScreen from './src/screens/ViewRelatoriosListMapaListScreen';
-import ViewRelatoriosListOrganogramaListScreen from './src/screens/ViewRelatoriosListOrganogramaListScreen';
-import ViewRelatoriosListTabelaListScreen from './src/screens/ViewRelatoriosListTabelaListScreen';
+import ViewRelatoriosListDashboardListScreen from './src/features/relatorios/ViewRelatoriosListDashboardListScreen';
+import ViewRelatoriosListGraficoListScreen from './src/features/relatorios/ViewRelatoriosListGraficoListScreen';
+import ViewRelatoriosListMapaListScreen from './src/features/relatorios/ViewRelatoriosListMapaListScreen';
+import ViewRelatoriosListOrganogramaListScreen from './src/features/relatorios/ViewRelatoriosListOrganogramaListScreen';
+import ViewRelatoriosListTabelaListScreen from './src/features/relatorios/ViewRelatoriosListTabelaListScreen';
 import ViewRelatoriosListIndicadorGaugeListScreen from './src/features/relatorios/ViewRelatoriosListIndicadorGaugeListScreen';
-import ViewRelatoriosViewDashboardListScreen from './src/screens/ViewRelatoriosViewDashboardListScreen';
+import ViewRelatoriosViewDashboardListScreen from './src/features/relatorios/ViewRelatoriosViewDashboardListScreen';
 import ViewRelatoriosViewGraficoBarrasHorizontalListScreen
-    from './src/screens/ViewRelatoriosViewGraficoBarrasHorizontalListScreen';
+    from './src/features/relatorios/ViewRelatoriosViewGraficoBarrasHorizontalListScreen';
 import ViewRelatoriosViewGraficoBarrasVerticalListScreen
-    from './src/screens/ViewRelatoriosViewGraficoBarrasVerticalListScreen';
-import ViewRelatoriosViewGraficoCircularListScreen from './src/screens/ViewRelatoriosViewGraficoCircularListScreen';
-import ViewRelatoriosViewGraficoCombinadoListScreen from './src/screens/ViewRelatoriosViewGraficoCombinadoListScreen';
-import ViewRelatoriosViewGraficoLinhasListScreen from './src/screens/ViewRelatoriosViewGraficoLinhasListScreen';
-import ViewRelatoriosViewGraficoPizzaListScreen from './src/screens/ViewRelatoriosViewGraficoPizzaListScreen';
-import ViewRelatoriosViewMapaListScreen from './src/screens/ViewRelatoriosViewMapaListScreen';
+    from './src/features/relatorios/ViewRelatoriosViewGraficoBarrasVerticalListScreen';
+import ViewRelatoriosViewGraficoCircularListScreen from './src/features/relatorios/ViewRelatoriosViewGraficoCircularListScreen';
+import ViewRelatoriosViewGraficoCombinadoListScreen from './src/features/relatorios/ViewRelatoriosViewGraficoCombinadoListScreen';
+import ViewRelatoriosViewGraficoLinhasListScreen from './src/features/relatorios/ViewRelatoriosViewGraficoLinhasListScreen';
+import ViewRelatoriosViewGraficoPizzaListScreen from './src/features/relatorios/ViewRelatoriosViewGraficoPizzaListScreen';
+import ViewRelatoriosViewMapaListScreen from './src/features/relatorios/ViewRelatoriosViewMapaListScreen';
 import ViewRelatoriosViewMapaScreen from './src/features/relatorios/ViewRelatoriosViewMapaScreen';
-import ViewRelatoriosViewOrganogramaListScreen from './src/screens/ViewRelatoriosViewOrganogramaListScreen';
-import ViewRelatoriosViewTabelaListScreen from './src/screens/ViewRelatoriosViewTabelaListScreen';
+import ViewRelatoriosViewOrganogramaListScreen from './src/features/relatorios/ViewRelatoriosViewOrganogramaListScreen';
+import ViewRelatoriosViewTabelaListScreen from './src/features/relatorios/ViewRelatoriosViewTabelaListScreen';
 import ViewRelatoriosViewIndicadorGaugeScreen from './src/features/relatorios/ViewRelatoriosViewIndicadorGaugeScreen';
 
 import ViewResultadoFormResultadoListScreen from './src/screens/ViewResultadoFormResultadoListScreen';
@@ -652,6 +653,10 @@ function AppRoutes() {
         <Stack.Screen name='view/impressora/listImpressora' component={ViewImpressoraListImpressoraListScreen}/>
         <Stack.Screen name='view/indicador/formIndicador' component={ViewIndicadorFormIndicadorListScreen}/>
         <Stack.Screen name='view/indicador/listIndicador' component={ViewIndicadorListIndicadorListScreen}/>
+        <Stack.Screen name='view/indicador/formIndicadorGauge' component={ViewRelatoriosFormIndicadorGaugeListScreen}/>
+        <Stack.Screen name='view/indicador/formIndicadorGauge/:id' component={ViewRelatoriosFormIndicadorGaugeListScreen}/>
+        <Stack.Screen name='view/indicador/listIndicadorGauge' component={ViewRelatoriosListIndicadorGaugeListScreen}/>
+        <Stack.Screen name='view/indicador/viewIndicadorGauge/:id' component={ViewRelatoriosViewIndicadorGaugeScreen}/>
         <Stack.Screen name='view/ligacao/ligacao' component={ViewLigacaoLigacaoListScreen}/>
         <Stack.Screen name='view/login/login' component={ViewLoginLoginListScreen}/>
         <Stack.Screen name='view/logradouro/formLogradouro' component={ViewLogradouroFormLogradouroListScreen}/>
@@ -755,6 +760,7 @@ function AppRoutes() {
 
         <Stack.Screen name='view/relatorios/extrator' component={ViewRelatoriosExtratorListScreen}/>
         <Stack.Screen name='view/relatorios/formDashboard' component={ViewRelatoriosFormDashboardListScreen}/>
+        <Stack.Screen name='view/relatorios/dashboardMontagem' component={DashboardMontagemScreen}/>
         <Stack.Screen name='view/relatorios/formGrafico' component={ViewRelatoriosFormGraficoListScreen}/>
         <Stack.Screen name='view/relatorios/formMapa' component={ViewRelatoriosFormMapaListScreen}/>
         <Stack.Screen name='view/relatorios/formOrganograma' component={ViewRelatoriosFormOrganogramaListScreen}/>
@@ -767,16 +773,12 @@ function AppRoutes() {
         <Stack.Screen name='view/relatorios/listTabela' component={ViewRelatoriosListTabelaListScreen}/>
         <Stack.Screen name='view/relatorios/listIndicadorGauge' component={ViewRelatoriosListIndicadorGaugeListScreen}/>
         <Stack.Screen name='view/relatorios/viewDashboard' component={ViewRelatoriosViewDashboardListScreen}/>
-        <Stack.Screen name='view/relatorios/viewGraficoBarrasHorizontal'
-                      component={ViewRelatoriosViewGraficoBarrasHorizontalListScreen}/>
-        <Stack.Screen name='view/relatorios/viewGraficoBarrasVertical'
-                      component={ViewRelatoriosViewGraficoBarrasVerticalListScreen}/>
-        <Stack.Screen name='view/relatorios/viewGraficoCircular'
-                      component={ViewRelatoriosViewGraficoCircularListScreen}/>
-        <Stack.Screen name='view/relatorios/viewGraficoCombinado'
-                      component={ViewRelatoriosViewGraficoCombinadoListScreen}/>
-        <Stack.Screen name='view/relatorios/viewGraficoLinhas' component={ViewRelatoriosViewGraficoLinhasListScreen}/>
-        <Stack.Screen name='view/relatorios/viewGraficoPizza' component={ViewRelatoriosViewGraficoPizzaListScreen}/>
+        <Stack.Screen name='view/relatorios/viewGraficoBarrasHorizontal/:id' component={ViewRelatoriosViewGraficoBarrasHorizontalListScreen}/>
+        <Stack.Screen name='view/relatorios/viewGraficoBarrasVertical/:id' component={ViewRelatoriosViewGraficoBarrasVerticalListScreen}/>
+        <Stack.Screen name='view/relatorios/viewGraficoCircular/:id' component={ViewRelatoriosViewGraficoCircularListScreen}/>
+        <Stack.Screen name='view/relatorios/viewGraficoCombinado/:id' component={ViewRelatoriosViewGraficoCombinadoListScreen}/>
+        <Stack.Screen name='view/relatorios/viewGraficoLinhas/:id' component={ViewRelatoriosViewGraficoLinhasListScreen}/>
+        <Stack.Screen name='view/relatorios/viewGraficoPizza/:id' component={ViewRelatoriosViewGraficoPizzaListScreen}/>
         <Stack.Screen name='view/relatorios/viewMapa' component={ViewRelatoriosViewMapaScreen}/>
         <Stack.Screen name='view/relatorios/viewOrganograma' component={ViewRelatoriosViewOrganogramaListScreen}/>
         <Stack.Screen name='view/relatorios/viewTabela' component={ViewRelatoriosViewTabelaListScreen}/>

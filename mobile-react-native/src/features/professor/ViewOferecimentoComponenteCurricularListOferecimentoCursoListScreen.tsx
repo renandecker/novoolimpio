@@ -156,24 +156,17 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
                                 <Text style={styles.cardSub}>
                                     {String(record.unidade_sucinto ?? '')} • {String(record.curso_nome ?? '')}
                                 </Text>
-                                 <View style={styles.cardActions}>
-                                     <RowMenu
-                                         icon={<Text style={{fontSize: 20}}>✏️</Text>}
-                                         className="btnblue"
-                                         title="Selecionar Oferecimentos para Editar"
-                                         items={[
-                                             {key: 'selecionar', label: 'Selecionar Oferecimentos para Editar', className: 'btnblue', onSelect: () => abrirSelecao(id)},
-                                         ]}
-                                     />
-                                     <RowMenu
-                                         icon={<Text style={{fontSize: 20}}>📝</Text>}
-                                         className="btngreen"
-                                         title="Editar Todos"
-                                         items={[
-                                             {key: 'editarTodos', label: 'Editar Todos', className: 'btngreen', onSelect: () => navigation.navigate('view/oferecimentoComponenteCurricular/formOferecimentoCurso', {id})},
-                                         ]}
-                                     />
-                                 </View>
+                                  <View style={styles.cardActions}>
+                                      <RowMenu
+                                          icon={<Text style={{fontSize: 20}}>✏️</Text>}
+                                          className="btngreen"
+                                          title="Editar"
+                                          items={[
+                                              {key: 'selecionar', label: 'Selecionar Oferecimentos para Editar', className: 'btnblue', onSelect: () => abrirSelecao(id)},
+                                              {key: 'editarTodos', label: 'Editar Todos', className: 'btngreen', onSelect: () => navigation.navigate('view/oferecimentoComponenteCurricular/formOferecimentoCurso', {id})},
+                                          ]}
+                                      />
+                                  </View>
                             </View>
                         );
                     }}

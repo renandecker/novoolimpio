@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, Database, Download, Expand } from 'lucide-react';
-import { GaugeChart, type GaugeConfiguracao } from './GaugeChart';
-import { executarSqlIndicador, type IndicadorGauge, DEFAULT_GAUGE_CONFIG } from './indicadorGauge';
-import { useApi } from '../../shared/services/api';
+import { GaugeChart } from './GaugeChart';
+import { executarSqlIndicador, carregarIndicadorGauge, type IndicadorGauge, DEFAULT_GAUGE_CONFIG } from './indicadorGauge';
 
 export default function IndicadorGaugeViewScreen() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { get: loadIndicador } = useApi('/api/relatorios/indicador-gauge');
 
   const [indicador, setIndicador] = useState<IndicadorGauge | null>(null);
   const [loading, setLoading] = useState(true);
@@ -21,8 +19,8 @@ export default function IndicadorGaugeViewScreen() {
     setLoading(true);
     setError(null);
     try {
-      const resp = await loadIndicador(parseInt(id));
-      setIndicador(resp.data);
+      const resp = await carregarIndicadorGauge(parseInt(id));
+      setIndicador(resp);
     } catch (err) {
       setError('Erro ao carregar indicador');
       console.error(err);
@@ -92,7 +90,7 @@ export default function IndicadorGaugeViewScreen() {
         <Database className="mx-auto text-gray-300" size={48} />
         <p className="mt-4 text-gray-500">{error || 'Indicador não encontrado'}</p>
 <button
-              onClick={() => navigate('/view/relatorios/listIndicadorGauge')}
+              onClick={() => navigate('/view/indicador/listIndicadorGauge')}
               className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
           Voltar à Lista
@@ -112,7 +110,7 @@ export default function IndicadorGaugeViewScreen() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate('/view/relatorios/listIndicadorGauge')}
+              onClick={() => navigate('/view/indicador/listIndicadorGauge')}
               className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               aria-label="Voltar"
             >
@@ -140,7 +138,7 @@ export default function IndicadorGaugeViewScreen() {
               <Download size={20} />
             </button>
             <button
-              onClick={() => window.open(`/view/relatorios/formIndicadorGauge/${id}`, '_blank')}
+              onClick={() => window.open(`/view/indicador/formIndicadorGauge/${id}`, '_blank')}
               className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               aria-label="Editar"
             >

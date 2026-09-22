@@ -1,20 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
-import { ModuleList } from '../ModuleListScreen';
-import { useApi } from '../../shared/services/api';
+import React, {useState, useEffect} from 'react';
+import {useNavigation} from '@react-navigation/native';
+import {ModuleList} from '../ModuleListScreen';
+import type {ModuleListExtraAction} from '../ModuleListScreen';
+import {ReportFilters} from '../shared/components/ReportFilters';
+import type {FiltroRelatorioWrapper} from '../shared/types/types';
+import {api} from '../shared/services/api';
 
 export default function ViewRelatoriosListIndicadorGaugeListScreen() {
-    const { get: listIndicadores } = useApi('/api/relatorios/indicador-gauge/disponiveis');
+    const navigation = useNavigation();
+    const [filtros, setFiltros] = useState<FiltroRelatorioWrapper[]>([]);
     const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
 
-    const onRefresh = async () => {
-        setRefreshing(true);
-        try {
-            await listIndicadores({ page: 0, size: 50 });
-        } finally {
-            setRefreshing(false);
-        }
+    useEffect(() => {
+        const fetchFiltros = async () => {
+            try {
+                setLoading(true);
+                const response = await api.get<FiltroRelatorioWrapper[]>(`/api/relatorios/filtros/listTabela`);
+                setFiltros(response.data);
+            } catch (error) {
+                console.error('Erro ao carregar filtros:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchFiltros();
+    }, []);
+
+    const extraActions: ModuleListExtraAction[] = [
+        {
+            key: 'ver',
+            title: 'Ver',
+            icon: '👁',
+            permission: 'EXECUTE',
+            onPress: (item) => {
+                navigation.navigate('view/indicador/viewIndicadorGauge' as never, {id: String(item.id)} as never);
+            },
+        },
+    ];
+
+    const handleFiltersChange = (newFiltros: FiltroRelatorioWrapper[]) => {
+        setFiltros(newFiltros);
+    };
+
+    const handleApplyFilters = () => {
+        console.log('Aplicar filtros do indicador gauge');
     };
 
     if (loading) {
@@ -27,103 +56,51 @@ export default function ViewRelatoriosListIndicadorGaugeListScreen() {
     }
 
     return (
-        <ModuleList
-            path="/api/relatorios/indicador-gauge/disponiveis"
-            refreshControl={
-                <View style={styles.refreshControl}>
-                    <ActivityIndicator size="small" color="#3a85bd" animating={refreshing} />
-                </View>
-            }
-            onRefresh={onRefresh}
-            renderItem={({ item }) => (
-                <TouchableOpacity
-                    style={styles.item}
-                    onPress={() => {
-                        // Navigate to view screen
-                    }}
-                >
-                    <View style={styles.itemContent}>
-                        <Text style={styles.itemTitle}>{item.nome}</Text>
-                        <View style={styles.itemMeta}>
-                            <Text style={styles.itemMetaText}>
-                                {item.configuracao?.nrOfLevels ?? 3} níveis
-                            </Text>
-                            <Text style={styles.itemMetaText}>
-                                Arco: {item.configuracao?.arcWidth ?? 0.3}
-                            </Text>
-                        </View>
-                    </View>
-                    <View style={styles.itemColors}>
-                        {item.configuracao?.colors?.map((color: string, idx: number) => (
-                            <View
-                                key={idx}
-                                style={[
-                                    styles.colorDot,
-                                    { backgroundColor: color }
-                                ]}
-                            />
-                        ))}
-                    </View>
-                </TouchableOpacity>
-            )}
-            columns={[
-                { key: 'nome', label: 'Nome', width: '60%' },
-                { key: 'configuracao.nrOfLevels', label: 'Níveis', width: '20%' },
-            ]}
-        />
+        <View style={styles.container}>
+            <View style={styles.header}>
+                <Text style={styles.headerTitle}>Indicadores Gauge</Text>
+            </View>
+            <ReportFilters
+                filtros={filtros}
+                onFiltersChange={handleFiltersChange}
+                onApplyFilters={handleApplyFilters}
+            />
+            <ModuleList
+                path="/api/relatorios/indicador-gauge/disponiveis"
+                extraActions={extraActions}
+                outcome="view/relatorios/indicador-gauge"
+            />
+        </View>
     );
 }
 
+import {View, Text, StyleSheet, ActivityIndicator} from 'react-native';
+
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+    },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
     },
+    header: {
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        backgroundColor: '#f8f9fa',
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    headerTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#333',
+    },
     loadingText: {
         color: '#666',
         fontSize: 14,
         marginTop: 8,
-    },
-    refreshControl: {
-        paddingVertical: 10,
-    },
-    item: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
-    },
-    itemContent: {
-        flex: 1,
-    },
-    itemTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#333',
-        marginBottom: 4,
-    },
-    itemMeta: {
-        flexDirection: 'row',
-        gap: 12,
-    },
-    itemMetaText: {
-        fontSize: 12,
-        color: '#888',
-    },
-    itemColors: {
-        flexDirection: 'row',
-        gap: 4,
-        marginLeft: 12,
-    },
-    colorDot: {
-        width: 16,
-        height: 16,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#e0e0e0',
     },
 });

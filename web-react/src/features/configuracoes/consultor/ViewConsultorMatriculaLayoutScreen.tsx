@@ -1450,23 +1450,25 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                                     placeholder="Digite 3+ caracteres..."
                                 />
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <div style={{ display: 'flex', gap: '6px' }}>
                                 <button
                                     type="button"
                                     className="btnblue"
-                                    style={{ padding: '8px 12px', fontSize: '12px' }}
+                                    title="Criar Pessoa"
+                                    style={{ padding: '8px 12px', fontSize: '14px', lineHeight: 1 }}
                                     onClick={() => {
                                         setPessoaFisicaModalMode('create');
                                         setPessoaFisicaEditId(null);
                                         setShowPessoaFisicaModal(true);
                                     }}
                                 >
-                                    Criar Pessoa
+                                    +
                                 </button>
                                 <button
                                     type="button"
                                     className="btngreen"
-                                    style={{ padding: '8px 12px', fontSize: '12px' }}
+                                    title="Editar Pessoa"
+                                    style={{ padding: '8px 12px', fontSize: '14px', lineHeight: 1 }}
                                     disabled={!contrato.pessoa}
                                     onClick={() => {
                                         const pessoa = contrato.pessoa as AutoCompleteOption;
@@ -1477,7 +1479,7 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                                         }
                                     }}
                                 >
-                                    Editar Pessoa
+                                    ✎
                                 </button>
                             </div>
                         </div>
@@ -1516,23 +1518,25 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                                         placeholder="Digite 3+ caracteres..."
                                     />
                                 </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <div style={{ display: 'flex', gap: '6px' }}>
                                     <button
                                         type="button"
                                         className="btnblue"
-                                        style={{ padding: '8px 12px', fontSize: '12px' }}
+                                        title="Criar Pessoa"
+                                        style={{ padding: '8px 12px', fontSize: '14px', lineHeight: 1 }}
                                         onClick={() => {
                                             setPessoaFisicaModalMode('create');
                                             setPessoaFisicaEditId(null);
                                             setShowPessoaFisicaModal(true);
                                         }}
                                     >
-                                        Criar Pessoa
+                                        +
                                     </button>
                                     <button
                                         type="button"
                                         className="btngreen"
-                                        style={{ padding: '8px 12px', fontSize: '12px' }}
+                                        title="Editar Pessoa"
+                                        style={{ padding: '8px 12px', fontSize: '14px', lineHeight: 1 }}
                                         disabled={!contrato.responsavel}
                                         onClick={() => {
                                             const responsavel = contrato.responsavel as AutoCompleteOption;
@@ -1543,7 +1547,7 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                                             }
                                         }}
                                     >
-                                        Editar Pessoa
+                                        ✎
                                     </button>
                                 </div>
                             </div>
@@ -1558,23 +1562,25 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                                         placeholder="Digite 3+ caracteres..."
                                     />
                                 </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <div style={{ display: 'flex', gap: '6px' }}>
                                     <button
                                         type="button"
                                         className="btnblue"
-                                        style={{ padding: '8px 12px', fontSize: '12px' }}
+                                        title="Criar Pessoa"
+                                        style={{ padding: '8px 12px', fontSize: '14px', lineHeight: 1 }}
                                         onClick={() => {
                                             setPessoaJuridicaModalMode('create');
                                             setPessoaJuridicaEditId(null);
                                             setShowPessoaJuridicaModal(true);
                                         }}
                                     >
-                                        Criar Pessoa
+                                        +
                                     </button>
                                     <button
                                         type="button"
                                         className="btngreen"
-                                        style={{ padding: '8px 12px', fontSize: '12px' }}
+                                        title="Editar Pessoa"
+                                        style={{ padding: '8px 12px', fontSize: '14px', lineHeight: 1 }}
                                         disabled={!contrato.responsavel}
                                         onClick={() => {
                                             const responsavel = contrato.responsavel as AutoCompleteOption;
@@ -1585,7 +1591,7 @@ export default function ViewConsultorMatriculaLayoutScreen() {
                                             }
                                         }}
                                     >
-                                        Editar Pessoa
+                                        ✎
                                     </button>
                                 </div>
                             </div>

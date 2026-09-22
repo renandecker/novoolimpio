@@ -65,7 +65,9 @@ public class ViewService {
             Map.entry("resultadoCobranca/listResultadoCobranca", "fin_resultado_ligacao_cobranca"),
             Map.entry("resultadoCobranca/formResultadoCobranca", "fin_resultado_ligacao_cobranca"),
             Map.entry("filtros/listFiltros", "rel_filtro"),
-            Map.entry("filtros/formFiltros", "rel_filtro"));
+            Map.entry("filtros/formFiltros", "rel_filtro"),
+            Map.entry("relatorios/listDashboard", "rel_painel"),
+            Map.entry("relatorios/listPainel", "rel_painel"));
 
     // Consultas com JOIN para telas que exibem colunas de relacionamentos aninhados
     // (ex.: logradouro -> bairro -> cidade -> estado), como no listLogradouro.xhtml legado.
@@ -966,10 +968,20 @@ private Uni<PagedResponse<Map<String, Object>>> doPagedCuratedWithFilters(Mutiny
     private Uni<Void> delete(String table, Long id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> {
-                    // limpa join antes para cen_turno_trabalho (FK sem cascade)
-                    Uni<Integer> pre = "cen_turno_trabalho".equals(table)
-                            ? session.createNativeQuery("DELETE FROM cen_turno_trabalho_unidade WHERE id_turno_trabalho = :id").setParameter("id", id).executeUpdate()
-                            : Uni.createFrom().item(0);
+                    // limpa join antes para cen_turno_trabalho e rel_painel (FK sem cascade)
+                    Uni<Integer> pre;
+                    if ("cen_turno_trabalho".equals(table)) {
+                        pre = session.createNativeQuery("DELETE FROM cen_turno_trabalho_unidade WHERE id_turno_trabalho = :id").setParameter("id", id).executeUpdate();
+                    } else if ("rel_painel".equals(table)) {
+                        Uni<Integer> top = session.createNativeQuery("DELETE FROM rel_painel_topico WHERE id_painel = :id").setParameter("id", id).executeUpdate();
+                        Uni<Integer> usu = session.createNativeQuery("DELETE FROM rel_painel_usuario WHERE id_painel = :id").setParameter("id", id).executeUpdate();
+                        Uni<Integer> uni = session.createNativeQuery("DELETE FROM rel_painel_unidade WHERE id_painel = :id").setParameter("id", id).executeUpdate();
+                        Uni<Integer> per = session.createNativeQuery("DELETE FROM rel_painel_perfil WHERE id_painel = :id").setParameter("id", id).executeUpdate();
+                        Uni<Integer> fil = session.createNativeQuery("DELETE FROM rel_filtro_painel WHERE id_painel = :id").setParameter("id", id).executeUpdate();
+                        pre = Uni.combine().all().unis(top, usu, uni, per, fil).asTuple().replaceWith(0);
+                    } else {
+                        pre = Uni.createFrom().item(0);
+                    }
                     return pre.flatMap(v -> {
                         String sql = "DELETE FROM " + quote(table) + " WHERE id = :id";
                         return session.createNativeQuery(sql).setParameter("id", id).executeUpdate()

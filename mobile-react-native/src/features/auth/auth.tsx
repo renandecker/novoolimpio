@@ -23,7 +23,7 @@ type Auth = {
 };
 
 const KEY = 'olimpio.session';
-const MENU_KEY = 'olimpio.menu';
+const MENU_KEY = 'olimpio.menu.v2';
 const MENU_TTL = 24 * 60 * 60 * 1000;
 type MenuCache = { at: number; modules: Modulo[] };
 const Context = createContext<Auth | undefined>(undefined);

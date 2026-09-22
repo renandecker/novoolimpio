@@ -1,5 +1,7 @@
 import React from 'react';
 
+export type TipoExibicaoGauge = 'valor' | 'percentual' | 'ambos';
+
 export interface GaugeConfig {
   nrOfLevels: number;
   colors: string[];
@@ -9,6 +11,7 @@ export interface GaugeConfig {
   needleColor: string;
   needleBaseColor: string;
   animate: boolean;
+  tipoExibicao?: TipoExibicaoGauge;
 }
 
 export interface GaugeChartProps {
@@ -78,7 +81,10 @@ export function GaugeChart({ config, value, minValue, maxValue, label, width = 3
   const innerRadius = radius * (1 - config.arcWidth);
   const totalAngle = 180;
   
-  const percent = config.percent ?? ((value - minValue) / (maxValue - minValue));
+  const computedPercent = minValue < maxValue ? (value - minValue) / (maxValue - minValue) : null;
+  const percent = computedPercent !== null
+    ? Math.max(0, Math.min(1, computedPercent))
+    : (config.percent ?? 0);
   const needleAngle = getNeedleAngle(config, percent, totalAngle);
   const needleLength = radius * 0.9;
   const needleBaseRadius = radius * 0.15;
@@ -91,6 +97,10 @@ export function GaugeChart({ config, value, minValue, maxValue, label, width = 3
   
   const displayValue = minValue + (maxValue - minValue) * percent;
   const formattedValue = displayValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const formattedPercent = `${(percent * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+  const tipo = config.tipoExibicao ?? 'valor';
+  const valorCentral = tipo === 'percentual' ? formattedPercent : formattedValue;
+  const valorInferior = tipo === 'ambos' ? formattedPercent : tipo === 'valor' ? label : undefined;
 
   return (
     <div style={{ width, height, position: 'relative' }}>
@@ -146,10 +156,10 @@ export function GaugeChart({ config, value, minValue, maxValue, label, width = 3
           fontWeight="bold"
           fontFamily="system-ui, sans-serif"
         >
-          {formattedValue}
+          {valorCentral}
         </text>
         
-        {label && (
+        {valorInferior && (
           <text
             x={centerX}
             y={centerY + radius * 0.5}
@@ -158,7 +168,7 @@ export function GaugeChart({ config, value, minValue, maxValue, label, width = 3
             fontSize={Math.max(10, radius * 0.12)}
             fontFamily="system-ui, sans-serif"
           >
-            {label}
+            {valorInferior}
           </text>
         )}
       </svg>

@@ -41,7 +41,7 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-messaging-kafka</artifactId>
+            <artifactId>quarkus-messaging-rabbitmq</artifactId>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>

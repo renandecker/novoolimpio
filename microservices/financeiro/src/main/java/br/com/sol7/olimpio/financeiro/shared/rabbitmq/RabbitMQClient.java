@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.financeiro.shared.kafka;
+package br.com.sol7.olimpio.financeiro.shared.rabbitmq;
 
 import io.quarkus.logging.Log;
 import io.smallrye.mutiny.Uni;
@@ -14,24 +14,24 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 @ApplicationScoped
-public class KafkaClient {
+public class RabbitMQClient {
 
     @Inject
-    @Channel("kafka-requests-out")
-    MutinyEmitter<KafkaRequest> requestEmitter;
+    @Channel("requests-out")
+    MutinyEmitter<RabbitMQRequest> requestEmitter;
 
     @Inject
-    @Channel("kafka-responses-out")
-    MutinyEmitter<KafkaResponse> responseEmitter;
+    @Channel("responses-out")
+    MutinyEmitter<RabbitMQResponse> responseEmitter;
 
-    private final Map<String, CompletableFuture<KafkaResponse>> pendingRequests = new ConcurrentHashMap<>();
-    private final Map<String, Consumer<KafkaResponse>> responseHandlers = new ConcurrentHashMap<>();
+    private final Map<String, CompletableFuture<RabbitMQResponse>> pendingRequests = new ConcurrentHashMap<>();
+    private final Map<String, Consumer<RabbitMQResponse>> responseHandlers = new ConcurrentHashMap<>();
 
-    public Uni<KafkaResponse> request(String service, String action, Map<String, Object> params) {
-        KafkaRequest request = KafkaRequest.of(service, action, params);
+    public Uni<RabbitMQResponse> request(String service, String action, Map<String, Object> params) {
+        RabbitMQRequest request = RabbitMQRequest.of(service, action, params);
         String correlationId = request.getCorrelationId();
 
-        CompletableFuture<KafkaResponse> future = new CompletableFuture<>();
+        CompletableFuture<RabbitMQResponse> future = new CompletableFuture<>();
         pendingRequests.put(correlationId, future);
 
         return requestEmitter.send(request)
@@ -42,18 +42,18 @@ public class KafkaClient {
                 .replaceWith(Uni.createFrom().completionStage(future));
     }
 
-    public void handleResponse(KafkaResponse response) {
+    public void handleResponse(RabbitMQResponse response) {
         String correlationId = response.getCorrelationId();
         if (correlationId == null) {
-            Log.warn("Received KafkaResponse without correlationId");
+            Log.warn("Received RabbitMQResponse without correlationId");
             return;
         }
 
-        CompletableFuture<KafkaResponse> future = pendingRequests.remove(correlationId);
+        CompletableFuture<RabbitMQResponse> future = pendingRequests.remove(correlationId);
         if (future != null) {
             future.complete(response);
         } else {
-            Consumer<KafkaResponse> handler = responseHandlers.get(correlationId);
+            Consumer<RabbitMQResponse> handler = responseHandlers.get(correlationId);
             if (handler != null) {
                 handler.accept(response);
             } else {
@@ -62,7 +62,7 @@ public class KafkaClient {
         }
     }
 
-    public void registerResponseHandler(String correlationId, Consumer<KafkaResponse> handler) {
+    public void registerResponseHandler(String correlationId, Consumer<RabbitMQResponse> handler) {
         responseHandlers.put(correlationId, handler);
     }
 
@@ -70,8 +70,8 @@ public class KafkaClient {
         responseHandlers.remove(correlationId);
     }
 
-    public Uni<Void> sendResponse(KafkaResponse response) {
+    public Uni<Void> sendResponse(RabbitMQResponse response) {
         return responseEmitter.send(response)
-                .onFailure().invoke(err -> Log.errorf("Failed to send Kafka response: %s", err.getMessage()));
+                .onFailure().invoke(err -> Log.errorf("Failed to send RabbitMQ response: %s", err.getMessage()));
     }
 }

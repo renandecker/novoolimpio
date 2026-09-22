@@ -303,6 +303,7 @@ ViewComunicacaoListComunicacaoListScreen,
     ViewRelatoriosDocumentosListScreen,
     ViewRelatoriosExtratorListScreen,
     ViewRelatoriosFormDashboardListScreen,
+    DashboardMontagemScreen,
     ViewRelatoriosFormGraficoListScreen,
     ViewRelatoriosFormMapaListScreen,
     ViewRelatoriosFormOrganogramaListScreen,
@@ -737,6 +738,8 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/relatorios/documentos" element={<ViewRelatoriosDocumentosListScreen/>}/>
     <Route path="/view/relatorios/extrator" element={<ViewRelatoriosExtratorListScreen/>}/>
     <Route path="/view/relatorios/formDashboard" element={<ViewRelatoriosFormDashboardListScreen/>}/>
+    <Route path="/view/relatorios/dashboardMontagem" element={<DashboardMontagemScreen/>}/>
+    <Route path="/view/relatorios/dashboardMontagem/:id" element={<DashboardMontagemScreen/>}/>
     <Route path="/view/relatorios/formGrafico" element={<ViewRelatoriosFormGraficoListScreen/>}/>
     <Route path="/view/relatorios/formMapa" element={<ViewRelatoriosFormMapaListScreen/>}/>
     <Route path="/view/relatorios/formOrganograma" element={<ViewRelatoriosFormOrganogramaListScreen/>}/>
@@ -750,15 +753,13 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/relatorios/listTabela" element={<ListTabelaScreen/>}/>
     <Route path="/view/relatorios/listIndicadorGauge" element={<ViewRelatoriosListIndicadorGaugeListScreen/>}/>
     <Route path="/view/relatorios/viewDashboard" element={<ReportViewScreen/>}/>
-    <Route path="/view/relatorios/viewGraficoBarrasHorizontal"
-           element={<ReportViewScreen/>}/>
-    <Route path="/view/relatorios/viewGraficoBarrasVertical"
-           element={<ReportViewScreen/>}/>
-    <Route path="/view/relatorios/viewGraficoCircular" element={<ReportViewScreen/>}/>
-    <Route path="/view/relatorios/viewGraficoCombinado" element={<ReportViewScreen/>}/>
-    <Route path="/view/relatorios/viewGraficoLinhas" element={<ReportViewScreen/>}/>
-    <Route path="/view/relatorios/viewGraficoPizza" element={<ReportViewScreen/>}/>
-    <Route path="/view/relatorios/viewMapa" element={<ReportViewScreen/>}/>
+    <Route path="/view/relatorios/viewGraficoBarrasHorizontal/:id" element={<ViewRelatoriosViewGraficoBarrasHorizontalListScreen/>}/>
+    <Route path="/view/relatorios/viewGraficoBarrasVertical/:id" element={<ViewRelatoriosViewGraficoBarrasVerticalListScreen/>}/>
+    <Route path="/view/relatorios/viewGraficoCircular/:id" element={<ViewRelatoriosViewGraficoCircularListScreen/>}/>
+    <Route path="/view/relatorios/viewGraficoCombinado/:id" element={<ViewRelatoriosViewGraficoCombinadoListScreen/>}/>
+    <Route path="/view/relatorios/viewGraficoLinhas/:id" element={<ViewRelatoriosViewGraficoLinhasListScreen/>}/>
+    <Route path="/view/relatorios/viewGraficoPizza/:id" element={<ViewRelatoriosViewGraficoPizzaListScreen/>}/>
+    <Route path="/view/relatorios/viewMapa" element={<ViewRelatoriosViewMapaListScreen/>}/>
     <Route path="/view/relatorios/viewOrganograma" element={<ReportViewScreen/>}/>
     <Route path="/view/relatorios/viewTabela/:id" element={<ViewRelatoriosViewTabelaListScreen/>}/>
     <Route path="/view/relatorios/viewIndicadorGauge/:id" element={<ViewRelatoriosViewIndicadorGaugeScreen/>}/>

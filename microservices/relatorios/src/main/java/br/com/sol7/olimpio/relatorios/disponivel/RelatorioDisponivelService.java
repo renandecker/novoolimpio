@@ -204,4 +204,40 @@ public class RelatorioDisponivelService {
                                 tipo))
                         .toList());
     }
+
+    public Uni<Boolean> existeRelatorio(String tipo, Long relatorioId) {
+        if (relatorioId == null) return Uni.createFrom().item(false);
+        String tipoUpper = tipo == null ? "" : tipo.toUpperCase();
+        String sql;
+        switch (tipoUpper) {
+            case "TABELA":
+                sql = "SELECT 1 FROM rel_tabela WHERE id = ?1";
+                break;
+            case "GRAFICO":
+            case "PIZZA":
+            case "LINHA":
+            case "COMBINADO":
+            case "CIRCULAR":
+            case "BARRA_VERTICAL":
+            case "BARRA_HORIZONTAL":
+                sql = "SELECT 1 FROM rel_grafico WHERE id = ?1";
+                break;
+            case "MAPA":
+                sql = "SELECT 1 FROM rel_mapa WHERE id = ?1";
+                break;
+            case "ORGANOGRAMA":
+                sql = "SELECT 1 FROM rel_organograma WHERE id = ?1";
+                break;
+            case "DASHBOARD":
+                sql = "SELECT 1 FROM rel_painel WHERE id = ?1";
+                break;
+            default:
+                return Uni.createFrom().item(false);
+        }
+        return Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql)
+                        .setParameter(1, relatorioId)
+                        .getSingleResultOrNull())
+                .map(result -> result != null);
+    }
 }
