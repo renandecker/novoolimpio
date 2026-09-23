@@ -71,19 +71,25 @@ function EtapaList({etapaId}: {etapaId: number}) {
                             <View style={s.rowActions}>
                                 <Pressable
                                     style={s.rowButton}
-                                    onPress={() => executeAction('ligacao-nap', 'carregarDetalhes', 'view/nap/listLigacaoNap/actions', JSON.stringify({contrato: r.contratoId ?? (r as Record<string, unknown>).contrato}))}
+                                    onPress={async () => {
+                                        await api.post('/api/educacao/ligacao-nap/carregar-detalhes', {contrato: r.contratoId ?? (r as Record<string, unknown>).contrato});
+                                    }}
                                 >
                                     <Text style={s.rowButtonText}>ℹ️ Detalhes</Text>
                                 </Pressable>
                                 <Pressable
                                     style={s.rowButton}
-                                    onPress={() => executeAction('ligacao-nap', 'iniciarLigacao', 'view/nap/listLigacaoNap/actions', JSON.stringify({nap: item.id, contrato: r.contratoId}))}
+                                    onPress={async () => {
+                                        await api.post('/api/educacao/nap/lote/ligacao', {nap: item.id, contrato: r.contratoId});
+                                    }}
                                 >
                                     <Text style={s.rowButtonText}>📞 Ligação</Text>
                                 </Pressable>
                                 <Pressable
                                     style={s.rowButton}
-                                    onPress={() => executeAction('ligacao-nap', 'prepararEnvioEmail', 'view/nap/listLigacaoNap/actions', JSON.stringify({id: item.id}))}
+                                    onPress={async () => {
+                                        await api.post('/api/educacao/nap/lote/email', {id: item.id});
+                                    }}
                                 >
                                     <Text style={s.rowButtonText}>✉️ E-mail</Text>
                                 </Pressable>

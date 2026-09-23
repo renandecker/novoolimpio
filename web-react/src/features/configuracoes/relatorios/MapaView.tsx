@@ -2,7 +2,9 @@ import {useEffect, useRef, useState} from 'react';
 import * as maplibregl from 'maplibre-gl';
 import {Map, Marker, Popup} from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import '../../MapaView.css';
+import '../MapaView.css';
+
+maplibregl.config.WORKER_URL = `${import.meta.env.BASE_URL}maplibre-gl-worker.mjs`;
 
 type MapaPontosResponse = {
     coordenadaCentro: string;
@@ -62,9 +64,10 @@ export default function MapaView({data}: MapaViewProps) {
                 sources: {
                     'osm': {
                         type: 'raster',
-                        tiles: ['https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                        tiles: ['https://{a|b|c}.tile.openstreetmap.org/{z}/{x}/{y}.png'],
                         tileSize: 256,
-                        attribution: '&copy; OpenStreetMap contributors'
+                        attribution: '&copy; OpenStreetMap contributors',
+                        subdomains: ['a', 'b', 'c']
                     }
                 },
                 layers: [{

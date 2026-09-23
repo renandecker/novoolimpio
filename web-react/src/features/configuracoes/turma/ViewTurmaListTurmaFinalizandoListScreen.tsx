@@ -194,7 +194,7 @@ export default function ViewTurmaListTurmaFinalizandoListScreen() {
                     <button
                         type="button"
                         className="btn-form-back btnyellow"
-                        onClick={() => navigate('/view/turma/listTurma')}
+                        onClick={() => navigate(-1)}
                     >
                         Voltar
                     </button>

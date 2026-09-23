@@ -6,6 +6,8 @@ import {Wizard} from './Wizard';
 interface CancelamentoModalProps {
     visible: boolean;
     onClose: () => void;
+    titulo?: string;
+    pathMatriculas?: string;
 }
 
 /**
@@ -13,13 +15,13 @@ interface CancelamentoModalProps {
  * found in olimpio.zip (gestaoAluno.xhtml and listDesistente.xhtml). It is opened by an action
  * button ("Cancelamento de Contrato") — it is not a step embedded in a page-level wizard/tabs.
  */
-export function CancelamentoModal({visible, onClose}: CancelamentoModalProps) {
+export function CancelamentoModal({visible, onClose, titulo = 'Cancelamento', pathMatriculas = '/api/educacao/matricula'}: CancelamentoModalProps) {
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
             <Pressable style={styles.overlay} onPress={onClose}>
                 <Pressable style={styles.modal} onPress={(e) => e.stopPropagation()}>
                     <View style={styles.header}>
-                        <Text style={styles.title}>Cancelamento</Text>
+                        <Text style={styles.title}>{titulo}</Text>
                         <Pressable style={styles.closeBtn} onPress={onClose} accessibilityLabel="Fechar">
                             <Text style={styles.closeBtnText}>✕</Text>
                         </Pressable>
@@ -38,7 +40,7 @@ export function CancelamentoModal({visible, onClose}: CancelamentoModalProps) {
                                 key: 'cancelamento',
                                 label: 'Cancelamento',
                                 nextLabel: 'Finalizar',
-                                content: <ModuleList path="/api/educacao/matricula"/>,
+                                content: <ModuleList path={pathMatriculas}/>,
                             },
                         ]}
                     />

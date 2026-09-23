@@ -379,8 +379,8 @@ import ViewTipoUnidadeFormTipoUnidadeListScreen from './src/screens/ViewTipoUnid
 import ViewTipoUnidadeListTipoUnidadeListScreen from './src/screens/ViewTipoUnidadeListTipoUnidadeListScreen';
 
 import ViewTurmaFormAjusteCalendarioListScreen from './src/screens/ViewTurmaFormAjusteCalendarioListScreen';
-import ViewTurmaListTurmaListScreen from './src/screens/ViewTurmaListTurmaListScreen';
 import ViewTurmaListTurmaFinalizandoListScreen from './src/screens/ViewTurmaListTurmaFinalizandoListScreen';
+import ViewTurmaRecriarCalendarioAcademicoListScreen from './src/features/professor/ViewTurmaRecriarCalendarioAcademicoListScreen';
 
 import ViewTurnoFormTurnoListScreen from './src/screens/ViewTurnoFormTurnoListScreen';
 import ViewTurnoListTurnoListScreen from './src/screens/ViewTurnoListTurnoListScreen';
@@ -773,12 +773,12 @@ function AppRoutes() {
         <Stack.Screen name='view/relatorios/listTabela' component={ViewRelatoriosListTabelaListScreen}/>
         <Stack.Screen name='view/relatorios/listIndicadorGauge' component={ViewRelatoriosListIndicadorGaugeListScreen}/>
         <Stack.Screen name='view/relatorios/viewDashboard' component={ViewRelatoriosViewDashboardListScreen}/>
-        <Stack.Screen name='view/relatorios/viewGraficoBarrasHorizontal/:id' component={ViewRelatoriosViewGraficoBarrasHorizontalListScreen}/>
-        <Stack.Screen name='view/relatorios/viewGraficoBarrasVertical/:id' component={ViewRelatoriosViewGraficoBarrasVerticalListScreen}/>
-        <Stack.Screen name='view/relatorios/viewGraficoCircular/:id' component={ViewRelatoriosViewGraficoCircularListScreen}/>
-        <Stack.Screen name='view/relatorios/viewGraficoCombinado/:id' component={ViewRelatoriosViewGraficoCombinadoListScreen}/>
-        <Stack.Screen name='view/relatorios/viewGraficoLinhas/:id' component={ViewRelatoriosViewGraficoLinhasListScreen}/>
-        <Stack.Screen name='view/relatorios/viewGraficoPizza/:id' component={ViewRelatoriosViewGraficoPizzaListScreen}/>
+        <Stack.Screen name='view/relatorios/viewGraficoBarrasHorizontal' component={ViewRelatoriosViewGraficoBarrasHorizontalListScreen}/>
+        <Stack.Screen name='view/relatorios/viewGraficoBarrasVertical' component={ViewRelatoriosViewGraficoBarrasVerticalListScreen}/>
+        <Stack.Screen name='view/relatorios/viewGraficoCircular' component={ViewRelatoriosViewGraficoCircularListScreen}/>
+        <Stack.Screen name='view/relatorios/viewGraficoCombinado' component={ViewRelatoriosViewGraficoCombinadoListScreen}/>
+        <Stack.Screen name='view/relatorios/viewGraficoLinhas' component={ViewRelatoriosViewGraficoLinhasListScreen}/>
+        <Stack.Screen name='view/relatorios/viewGraficoPizza' component={ViewRelatoriosViewGraficoPizzaListScreen}/>
         <Stack.Screen name='view/relatorios/viewMapa' component={ViewRelatoriosViewMapaScreen}/>
         <Stack.Screen name='view/relatorios/viewOrganograma' component={ViewRelatoriosViewOrganogramaListScreen}/>
         <Stack.Screen name='view/relatorios/viewTabela' component={ViewRelatoriosViewTabelaListScreen}/>
@@ -846,8 +846,8 @@ function AppRoutes() {
         <Stack.Screen name='view/tipoUnidade/listTipoUnidade' component={ViewTipoUnidadeListTipoUnidadeListScreen}/>
 
         <Stack.Screen name='view/turma/formAjusteCalendario' component={ViewTurmaFormAjusteCalendarioListScreen}/>
-        <Stack.Screen name='view/turma/listTurma' component={ViewTurmaListTurmaListScreen}/>
         <Stack.Screen name='view/turma/listTurmaFinalizando' component={ViewTurmaListTurmaFinalizandoListScreen}/>
+        <Stack.Screen name='view/turma/recriarCalendarioAcademico' component={ViewTurmaRecriarCalendarioAcademicoListScreen}/>
         <Stack.Screen name='view/turno/formTurno' component={ViewTurnoFormTurnoListScreen}/>
         <Stack.Screen name='view/turno/listTurno' component={ViewTurnoListTurnoListScreen}/>
 

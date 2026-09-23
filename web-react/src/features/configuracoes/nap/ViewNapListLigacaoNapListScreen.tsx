@@ -50,7 +50,7 @@ const extraRowActions: DataTableRowAction[] = [
         permission: 'READ',
         onClick: async (item) => {
             const r = asRecord(item);
-            await executeAction('ligacao-nap', 'carregarDetalhes', JSON.stringify({contrato: r.contratoId ?? r.contrato}), 'educacao');
+            await api.post('/api/educacao/ligacao-nap/carregar-detalhes', {contrato: r.contratoId ?? r.contrato});
         },
     },
     {
@@ -60,7 +60,7 @@ const extraRowActions: DataTableRowAction[] = [
         permission: 'EXECUTE',
         onClick: async (item) => {
             const r = asRecord(item);
-            await executeAction('ligacao-nap', 'iniciarLigacao', JSON.stringify({nap: r.id ?? r.nap, contrato: r.contratoId ?? r.contrato}), 'educacao');
+            await api.post('/api/educacao/nap/lote/ligacao', {nap: r.id ?? r.nap, contrato: r.contratoId ?? r.contrato});
         },
     },
     {
@@ -69,7 +69,8 @@ const extraRowActions: DataTableRowAction[] = [
         icon: <i className="fa fa-envelope"/>,
         permission: 'EXECUTE',
         onClick: async (item) => {
-            await executeAction('ligacao-nap', 'prepararEnvioEmail', JSON.stringify({id: asRecord(item).id}), 'educacao');
+            const r = asRecord(item);
+            await api.post('/api/educacao/nap/lote/email', {id: r.id});
         },
     },
 ];

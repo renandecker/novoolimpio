@@ -10,6 +10,8 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.InternalServerErrorException;
+import org.jboss.logging.Logger;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -35,6 +37,8 @@ import io.quarkus.hibernate.reactive.panache.Panache;
 @ApplicationScoped
 @WithTransaction
 public class TabelaService {
+
+    private static final Logger LOG = Logger.getLogger(TabelaService.class);
 
     @Inject
     TabelaRepository repository;
@@ -104,7 +108,18 @@ public class TabelaService {
         return Panache.getSession().chain(session -> session.createNativeQuery(SQL_ESTRUTURA).setParameter(1, tabelaId).getSingleResultOrNull())
                 .onItem().ifNull().failWith(() -> new NotFoundException("Estrutura da tabela não encontrada"))
                 .onItem().transformToUni(estrutura -> Panache.getSession().chain(session -> session.createNativeQuery(SQL_COLUNAS).setParameter(1, tabelaId).getResultList())
-                        .onItem().transformToUni(colunas -> executarSql((Object[]) estrutura, colunas, p, s)));
+                        .onItem().transformToUni(colunas -> executarSql((Object[]) estrutura, colunas, p, s)))
+                .onFailure().recoverWithUni(throwable -> {
+                    LOG.errorf(throwable, "Erro ao executar tabela ID %d: %s", tabelaId, throwable.getMessage());
+                    if (throwable instanceof IllegalArgumentException) {
+                        return Uni.createFrom().failure(new InternalServerErrorException("Configuração SQL inválida na tabela: " + throwable.getMessage()));
+                    }
+                    if (throwable instanceof jakarta.persistence.PersistenceException) {
+                        String msg = throwable.getCause() != null ? throwable.getCause().getMessage() : throwable.getMessage();
+                        return Uni.createFrom().failure(new InternalServerErrorException("Erro ao executar consulta SQL da tabela: " + msg));
+                    }
+                    return Uni.createFrom().failure(throwable);
+                });
     }
 
     public Uni<TabelaExecutadaResponse> executar(Long tabelaId) {

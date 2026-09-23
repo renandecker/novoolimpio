@@ -42,8 +42,10 @@ export function ReportFilters({filtros, onFiltersChange, onApplyFilters}: Report
                         listaTodosSelected: [],
                     };
                     try {
-                        const res = await api.get<{ informacoes?: string[] }>(`/api/relatorios/filtros/${fr.id}/relacoes`);
-                        infosMap[fr.id] = Array.isArray(res.data?.informacoes) ? res.data.informacoes : [];
+                        const res = await api.get<any>(`/api/relatorios/filtros/${fr.id}/relacoes`);
+                        const data = res.data ?? {};
+                        const list = Array.isArray(data.informacoes) ? data.informacoes : (Array.isArray(data) ? data : []);
+                        infosMap[fr.id] = list;
                     } catch {
                         infosMap[fr.id] = [];
                     }
@@ -285,19 +287,23 @@ export function ReportFilters({filtros, onFiltersChange, onApplyFilters}: Report
                 <div>
                     <h4 style={{marginBottom: '8px'}}>Filtros Disponíveis</h4>
                     <div style={{maxHeight: '300px', overflowY: 'auto', border: '1px solid #ddd', borderRadius: '4px'}}>
-                        {availableItems.map((item, idx) => (
-                            <div key={idx} style={{display: 'flex', justifyContent: 'space-between', padding: '8px', borderBottom: '1px solid #eee'}}>
-                                <span>{item.informacao}</span>
-                                <button
-                                    type="button"
-                                    className="btnblue"
-                                    style={{padding: '2px 8px', fontSize: '12px'}}
-                                    onClick={() => addItem(item)}
-                                >
-                                    +
-                                </button>
-                            </div>
-                        ))}
+                        {availableItems.length === 0 ? (
+                            <div style={{padding: '16px', textAlign: 'center', color: '#666'}}>Nenhum item disponível</div>
+                        ) : (
+                            availableItems.map((item, idx) => (
+                                <div key={idx} style={{display: 'flex', justifyContent: 'space-between', padding: '8px', borderBottom: '1px solid #eee', alignItems: 'center'}}>
+                                    <span>{item.informacao}</span>
+                                    <button
+                                        type="button"
+                                        className="btnblue"
+                                        style={{padding: '2px 8px', fontSize: '12px'}}
+                                        onClick={() => addItem(item)}
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
                 <div>
@@ -307,7 +313,7 @@ export function ReportFilters({filtros, onFiltersChange, onApplyFilters}: Report
                             <div style={{padding: '16px', textAlign: 'center', color: '#666'}}>Nenhum filtro aplicado</div>
                         ) : (
                             state.listaTodosSelected.map((item, idx) => (
-                                <div key={idx} style={{display: 'flex', justifyContent: 'space-between', padding: '8px', borderBottom: '1px solid #eee'}}>
+                                <div key={idx} style={{display: 'flex', justifyContent: 'space-between', padding: '8px', borderBottom: '1px solid #eee', alignItems: 'center'}}>
                                     <span>{item.informacao}</span>
                                     <button
                                         type="button"

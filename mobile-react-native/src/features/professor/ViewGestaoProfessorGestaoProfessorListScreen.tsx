@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {
     ActivityIndicator,
     Alert,
+    Modal,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -171,7 +172,33 @@ function InfoTurma({turma}: { turma: Turma }) {
                 </View>
             ))}
         </View>
-    );
+        {modalInformacoes && turmaModal && (
+            <Modal
+                visible={modalInformacoes}
+                onRequestClose={() => { setModalInformacoes(false); setTurmaModal(null); }}
+                animationType="slide"
+                transparent={false}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Informações da Turma {turmaModal.id}</Text>
+                        <Text style={styles.modalText}>Professor: {turmaModal.professor}</Text>
+                        <Text style={styles.modalText}>Grupo: {turmaModal.grupo}</Text>
+                        <Text style={styles.modalText}>Curso: {turmaModal.curso}</Text>
+                        <Text style={styles.modalText}>Componente: {turmaModal.componenteCurricular}</Text>
+                        <Text style={styles.modalText}>Status: {turmaModal.status}</Text>
+                        <Pressable
+                            style={styles.modalCloseBtn}
+                            onPress={() => { setModalInformacoes(false); setTurmaModal(null); }}
+                        >
+                            <Text style={styles.modalCloseBtnText}>Fechar</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </Modal>
+        )}
+    </ScrollView>
+);
 }
 
 function AbasOcultas({abas, ativa, turmaId, onSelect, onClose}: {
@@ -552,6 +579,10 @@ function GestaoTurmas({professorId, souProfessor}: { professorId: number | null;
     const [turmaSelecionada, setTurmaSelecionada] = useState<Turma | null>(null);
     const [infoTurma, setInfoTurma] = useState<Turma | null>(null);
     const [carregandoDetalhe, setCarregandoDetalhe] = useState(false);
+    const [modalInformacoes, setModalInformacoes] = useState(false);
+    const [turmaModal, setTurmaModal] = useState<Turma | null>(null);
+    const [infoTurma, setInfoTurma] = useState<Turma | null>(null);
+    const [carregandoDetalhe, setCarregandoDetalhe] = useState(false);
 
     const [caderno, setCaderno] = useState<Caderno | null>(null);
     const [notas, setNotas] = useState<Notas | null>(null);
@@ -590,6 +621,11 @@ function GestaoTurmas({professorId, souProfessor}: { professorId: number | null;
         if (abaAtiva === aba) {
             setAbaAtiva(restantes.length > 0 ? restantes[restantes.length - 1] : null);
         }
+    }
+
+    function abrirInformacoes(turma: Turma) {
+        setTurmaModal(turma);
+        setModalInformacoes(true);
     }
 
     async function buscarTurmas(pid: number | null) {
@@ -868,8 +904,9 @@ function GestaoTurmas({professorId, souProfessor}: { professorId: number | null;
     }
 
     return (
-        <View style={styles.page}>
-            <View style={styles.headerRow}>
+        <ScrollView contentContainerStyle={styles.scroll}>
+            <View style={styles.page}>
+                <View style={styles.headerRow}>
                 <Text style={styles.title}>Turmas</Text>
                 <Pressable
                     style={[styles.recarregarBtn, carregandoTurmas && styles.btnDesabilitado]}
@@ -1072,6 +1109,7 @@ const styles = StyleSheet.create({
     avisoErroTexto: {color: Colors.error, fontSize: Typography.sizes.base},
     avisoSucessoTexto: {color: Colors.success, fontSize: Typography.sizes.base},
     vazio: {color: Colors.textLight, fontStyle: 'italic', textAlign: 'center', marginVertical: Spacing.lg, fontSize: Typography.sizes.base},
+    scroll: {paddingHorizontal: Spacing.md, paddingBottom: Spacing.xl},
     turmaCard: {backgroundColor: Colors.bgSecondary, borderRadius: BorderRadius.xl, borderWidth: 1, borderColor: Colors.borderLight, padding: Spacing.md, marginBottom: Spacing.md},
     turmaHeader: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.xs},
     turmaTitulo: {fontSize: Typography.sizes.lg, fontWeight: Typography.weights.bold, color: Colors.textPrimary},
@@ -1136,4 +1174,10 @@ const styles = StyleSheet.create({
     secBtnTexto: {color: Colors.primary, fontSize: Typography.sizes.base, fontWeight: Typography.weights.semibold},
     dangerBtn: {borderColor: Colors.error},
     dangerBtnTexto: {color: Colors.error},
+    modalOverlay: {flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: Spacing.lg},
+    modalContent: {backgroundColor: Colors.bgPrimary, borderRadius: BorderRadius.xl, padding: Spacing.lg, width: '100%', maxWidth: 400, maxHeight: '80%'},
+    modalTitle: {fontSize: Typography.sizes.xl, fontWeight: Typography.weights.bold, color: Colors.textPrimary, marginBottom: Spacing.md, textAlign: 'center'},
+    modalText: {fontSize: Typography.sizes.base, color: Colors.textSecondary, marginBottom: Spacing.xs},
+    modalCloseBtn: {backgroundColor: Colors.primary, borderRadius: BorderRadius.lg, paddingVertical: Spacing.md, alignItems: 'center', marginTop: Spacing.md},
+    modalCloseBtnText: {color: Colors.textWhite, fontSize: Typography.sizes.base, fontWeight: Typography.weights.semibold},
 });

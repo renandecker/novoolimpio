@@ -11,7 +11,7 @@ export default function ViewTurmaListTurmaFinalizandoListScreen() {
 
     const voltar = () => {
         if (navigation.canGoBack()) navigation.goBack();
-        else navigation.navigate('view/turma/listTurma');
+        else navigation.navigate('home');
     };
 
     return (

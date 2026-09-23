@@ -158,6 +158,8 @@ services:
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0069__move_meta_dinamica_indicador_to_recursos.sql
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0081__move_indicador_meta_dinamica_to_recursos.sql
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0082__dashboard_em_paineis_relatorios.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0083__remover_portal_aluno_de_paineis.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0084__remove_recriar_calendario_academico_menu.sql
         echo "[restore] Restore concluido."
 
   # Broker RabbitMQ. Substitui o Kafka para mensageria entre microsservicos.

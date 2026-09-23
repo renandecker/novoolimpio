@@ -8,6 +8,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Path("/api/educacao/ligacao-nap")
 @Produces(MediaType.APPLICATION_JSON)
@@ -64,6 +65,12 @@ public class LigacaoNapController {
     @Path("/paged-sem-etapa")
     public Uni<PagedResponse<LigacaoNapResponse>> pagedSemEtapa(@QueryParam("page") Integer page, @QueryParam("size") Integer size) {
         return service.pagedSemEtapa(page == null ? 0 : page, size == null ? 10 : size);
+    }
+
+    @POST
+    @Path("/carregar-detalhes")
+    public Uni<Response> carregarDetalhes(Map<String, Object> req) {
+        return Uni.createFrom().item(Response.ok(req).build());
     }
 
 }

@@ -344,7 +344,7 @@ export { default as ViewTipoUnidadeListTipoUnidadeListScreen } from '../features
 
 
 export { default as ViewTurmaListTurmaFinalizandoListScreen } from '../features/configuracoes/turma/ViewTurmaListTurmaFinalizandoListScreen.tsx';
-export { default as ViewTurmaListTurmaListScreen } from '../features/configuracoes/turma/ViewTurmaListTurmaListScreen.tsx';
+export { default as ViewTurmaRecriarCalendarioAcademicoScreen } from '../features/configuracoes/turma/ViewTurmaRecriarCalendarioAcademicoScreen.tsx';
 
 export { default as ViewTurnoEducacaoFormTurnoEducacaoListScreen } from '../features/configuracoes/turno/ViewTurnoEducacaoFormTurnoEducacaoListScreen.tsx';
 export { default as ViewTurnoEducacaoListTurnoEducacaoListScreen } from '../features/configuracoes/turno/ViewTurnoEducacaoListTurnoEducacaoListScreen.tsx';

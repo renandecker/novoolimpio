@@ -19,18 +19,20 @@ const CANCELAMENTO_COLUMNS: DataTableColumn[] = [
 
 interface CancelamentoModalProps {
     onClose: () => void;
+    titulo?: string;
+    pathMatriculas?: string;
 }
 
 /**
  * Modal equivalent of <p:dialog widgetVar="cancelamento">…<p:wizard widgetVar="wizardCancelamento">
  * found in olimpio.zip (gestaoAluno.xhtml and listDesistente.xhtml). It is opened by an action
- * button ("Cancelamento de Contrato") — it is not a step embedded in a page-level wizard/tabs.
+ * button ("Cancelamento de Contrato" or "Cancelamento de matricula") — it is not a step embedded in a page-level wizard/tabs.
  */
-export function CancelamentoModal({onClose}: CancelamentoModalProps) {
+export function CancelamentoModal({onClose, titulo = 'Cancelamento', pathMatriculas = '/api/educacao/matricula'}: CancelamentoModalProps) {
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal form-modal" onClick={(event) => event.stopPropagation()}>
-                <h2>Cancelamento</h2>
+                <h2>{titulo}</h2>
                 <Wizard
                     completeLabel="Concluir"
                     onComplete={onClose}
@@ -44,7 +46,7 @@ export function CancelamentoModal({onClose}: CancelamentoModalProps) {
                             key: 'cancelamento',
                             label: 'Cancelamento',
                             nextLabel: 'Finalizar',
-                            content: <DataTable path="/api/educacao/matricula" columns={CANCELAMENTO_COLUMNS}/>,
+                            content: <DataTable path={pathMatriculas} columns={CANCELAMENTO_COLUMNS}/>,
                         },
                     ]}
                 />
