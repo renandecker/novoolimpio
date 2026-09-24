@@ -246,7 +246,7 @@ const renderValue = (item: ApiItem, key: string) => {
 
         } else {
 
-            return boolVal ? 'SIM' : 'N�fO';
+            return boolVal ? 'SIM' : 'NÃO';
 
         }
 
@@ -916,7 +916,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
 
 
-    // Documento em geração (chave do item do menu) �?" desabilita o item enquanto o PDF é gerado.
+    // Documento em geração (chave do item do menu) — desabilita o item enquanto o PDF é gerado.
 
     const [gerandoDoc, setGerandoDoc] = useState<string | null>(null);
 

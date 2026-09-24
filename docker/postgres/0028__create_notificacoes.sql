@@ -12,8 +12,14 @@ CREATE TABLE IF NOT EXISTS not_notificacao (
     canal_sistema BOOLEAN NOT NULL DEFAULT TRUE,
     canal_mobile BOOLEAN NOT NULL DEFAULT FALSE,
     canal_email BOOLEAN NOT NULL DEFAULT FALSE,
+    canal_telegram BOOLEAN NOT NULL DEFAULT FALSE,
+    canal_sms BOOLEAN NOT NULL DEFAULT FALSE,
+    canal_whatsapp BOOLEAN NOT NULL DEFAULT FALSE,
     email_enviado BOOLEAN NOT NULL DEFAULT FALSE,
     mobile_enviado BOOLEAN NOT NULL DEFAULT FALSE,
+    telegram_enviado BOOLEAN NOT NULL DEFAULT FALSE,
+    sms_enviado BOOLEAN NOT NULL DEFAULT FALSE,
+    whatsapp_enviado BOOLEAN NOT NULL DEFAULT FALSE,
     data_leitura TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -37,5 +43,8 @@ CREATE TABLE IF NOT EXISTS not_config_canal (
 INSERT INTO not_config_canal (canal, ativo, destinatario, descricao) VALUES
     ('SISTEMA', TRUE,  NULL,     'Notificacao exibida dentro do sistema (web)'),
     ('MOBILE',  TRUE,  NULL,     'Notificacao exibida no aplicativo mobile'),
-    ('EMAIL',   TRUE,  NULL,     'Notificacao enviada por e-mail (SMTP via bas_email)')
+    ('EMAIL',   TRUE,  NULL,     'Notificacao enviada por e-mail (SMTP via bas_email)'),
+    ('TELEGRAM', FALSE, NULL,     'Notificacao enviada via bot do Telegram'),
+    ('SMS',     FALSE, NULL,     'Notificacao enviada via SMS (Gateway Android: Textbee / SMS Gateway Me)'),
+    ('WHATSAPP', FALSE, NULL,     'Notificacao enviada via WhatsApp (microservico Baileys)')
 ON CONFLICT (canal) DO NOTHING;

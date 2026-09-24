@@ -24,8 +24,11 @@ public class ConfigCanalService {
     public static final String CANAL_SISTEMA = "SISTEMA";
     public static final String CANAL_MOBILE = "MOBILE";
     public static final String CANAL_EMAIL = "EMAIL";
+    public static final String CANAL_TELEGRAM = "TELEGRAM";
+    public static final String CANAL_SMS = "SMS";
+    public static final String CANAL_WHATSAPP = "WHATSAPP";
 
-    public record CanaisAtivos(boolean sistema, boolean mobile, boolean email) {
+    public record CanaisAtivos(boolean sistema, boolean mobile, boolean email, boolean telegram, boolean sms, boolean whatsapp) {
     }
 
     @Inject
@@ -39,6 +42,15 @@ public class ConfigCanalService {
 
     @ConfigProperty(name = "olimpio.notificacoes.canal.email", defaultValue = "true")
     boolean canalEmailDefault;
+
+    @ConfigProperty(name = "olimpio.notificacoes.canal.telegram", defaultValue = "false")
+    boolean canalTelegramDefault;
+
+    @ConfigProperty(name = "olimpio.notificacoes.canal.sms", defaultValue = "false")
+    boolean canalSmsDefault;
+
+    @ConfigProperty(name = "olimpio.notificacoes.canal.whatsapp", defaultValue = "false")
+    boolean canalWhatsappDefault;
 
     public Uni<List<ConfigCanalResponse>> list() {
         return repository.findAll(Sort.by("canal").ascending()).list()
@@ -84,19 +96,22 @@ public class ConfigCanalService {
             boolean sistema = canalSistemaDefault;
             boolean mobile = canalMobileDefault;
             boolean email = canalEmailDefault;
+            boolean telegram = canalTelegramDefault;
+            boolean sms = canalSmsDefault;
+            boolean whatsapp = canalWhatsappDefault;
             for (ConfigCanal c : configs) {
                 switch (c.canal.toUpperCase().trim()) {
-                    case CANAL_SISTEMA -> sistema = c.ativo
-                        ;
-                    case CANAL_MOBILE -> mobile = c.ativo
-                        ;
-                    case CANAL_EMAIL -> email = c.ativo
-                        ;
-                    default ->{
+                    case CANAL_SISTEMA -> sistema = c.ativo;
+                    case CANAL_MOBILE -> mobile = c.ativo;
+                    case CANAL_EMAIL -> email = c.ativo;
+                    case CANAL_TELEGRAM -> telegram = c.ativo;
+                    case CANAL_SMS -> sms = c.ativo;
+                    case CANAL_WHATSAPP -> whatsapp = c.ativo;
+                    default -> {
                     }
                 }
             }
-            return new CanaisAtivos(sistema, mobile, email);
+            return new CanaisAtivos(sistema, mobile, email, telegram, sms, whatsapp);
         });
     }
 

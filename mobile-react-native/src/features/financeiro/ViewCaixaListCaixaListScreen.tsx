@@ -226,7 +226,7 @@ export default function ViewCaixaListCaixaListScreen() {
 
     const COLUMN_FIELDS = ['id_caixa_unidade', 'usuario_login', 'unidade_sucinto', 'data', 'fundo_caixa'] as const;
 
-    const q = useModulePaged('/api/view/caixa/listCaixa', page, size, undefined, filterParams);
+    const q = useModulePaged('/api/financeiro/caixa', page, size, undefined, filterParams);
     const items = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);

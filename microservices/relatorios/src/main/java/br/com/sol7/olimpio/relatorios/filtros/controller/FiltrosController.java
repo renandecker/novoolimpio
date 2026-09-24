@@ -156,12 +156,21 @@ public class FiltrosController {
     }
 
     @GET
+    @Path("/viewGrafico")
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewGrafico(@QueryParam("graficoId") Long graficoId) {
+        if (graficoId == null) {
+            return Uni.createFrom().item(List.of());
+        }
+        return service.getFiltersForViewGrafico(graficoId);
+    }
+
+    @GET
     @Path("/viewGraficoBarrasHorizontal")
     public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewGraficoBarrasHorizontal(@QueryParam("graficoId") Long graficoId) {
         if (graficoId == null) {
             return Uni.createFrom().item(List.of());
         }
-        return service.getFiltersForViewGraficoBarrasHorizontal(graficoId);
+        return service.getFiltersForViewGrafico(graficoId);
     }
 
     @GET

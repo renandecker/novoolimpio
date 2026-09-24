@@ -10,4 +10,7 @@ public record NotificacaoRequest(
         String tipo,
         String link,
         Boolean canalMobile,
-        Boolean canalEmail){}
+        Boolean canalEmail,
+        Boolean canalTelegram,
+        Boolean canalSms,
+        Boolean canalWhatsapp){}

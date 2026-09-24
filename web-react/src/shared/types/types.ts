@@ -4,6 +4,37 @@ export type PagedResponse<T> = { content: T[]; totalElements: number; page: numb
 export type SortRequest = { field?: string; direction?: 'asc' | 'desc' };
 export type ModulePermissions = Record<string, string[]>;
 
+export interface PreferenciaNotificacaoCanal {
+  canal: string;
+  canalLabel: string;
+  ativo: boolean;
+}
+
+export interface PreferenciaNotificacaoTipo {
+  tipo: string;
+  tipoLabel: string;
+  descricao: string;
+  canais: PreferenciaNotificacaoCanal[];
+}
+
+export interface PreferenciaNotificacaoCategoria {
+  categoria: string;
+  categoriaLabel: string;
+  descricao: string;
+  tipos: PreferenciaNotificacaoTipo[];
+}
+
+export interface PreferenciaNotificacaoUsuarioResponse {
+  id: number;
+  username: string;
+  categoria: string;
+  tipo: string;
+  canal: string;
+  ativo: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type QueryOperation =
     | 'CONTAINS' | 'EQUALS' | 'NOT_EQUALS' | 'STARTS_WITH' | 'ENDS_WITH'
     | 'GREATER_THAN' | 'GREATER_THAN_OR_EQUAL' | 'LESS_THAN' | 'LESS_THAN_OR_EQUAL'
@@ -14,6 +45,15 @@ export interface FilterCondition {
     value: string;
     value2?: string;
 }
+
+export interface ReportFilterSqlValue {
+    operation?: string;
+    value?: string;
+    value2?: string;
+    selected?: boolean;
+}
+
+export type ReportFilterSqlValues = Record<string, ReportFilterSqlValue>;
 
 export interface SearchFilterRequest {
     filters: Record<string, FilterCondition>;

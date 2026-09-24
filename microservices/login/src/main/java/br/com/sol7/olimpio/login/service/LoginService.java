@@ -153,7 +153,8 @@ public class LoginService {
                                             .map(perfil -> new LoginResponse(token.token(), token.expiresAt(), login.username, permissions, tokenModulePermissions,
                                                     perfil == null ? null : str(perfil[2]), perfil == null ? null : str(perfil[1]),
                                                     perfil == null ? null : str(perfil[3]), perfil == null ? null : str(perfil[0]),
-                                                    defaultOutcome, perfil == null ? null : str(perfil[4]))));
+                                                    defaultOutcome, perfil == null ? null : str(perfil[4]),
+                                                    login.idUsuario))));
                         }));
     }
 

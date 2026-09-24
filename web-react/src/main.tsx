@@ -371,6 +371,7 @@ ViewComunicacaoListComunicacaoListScreen,
     ViewTipoUnidadeFormTipoUnidadeListScreen,
     ViewTipoUnidadeListTipoUnidadeListScreen,
 
+    ViewTurmaListTurmaListScreen,
     ViewTurmaListTurmaFinalizandoListScreen,
     ViewTurmaRecriarCalendarioAcademicoScreen,
     ViewTurnoFormTurnoListScreen,
@@ -544,6 +545,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/configuracao/listConfiguracaoParcela"
            element={<ViewConfiguracaoListConfiguracaoParcelaListScreen/>}/>
     <Route path="/view/configuracao/listLayout" element={<ViewConfiguracaoListLayoutListScreen/>}/>
+    <Route path="/view/configuracao/notificacoes" element={<ConfiguracaoNotificacoesScreen/>}/>
     <Route path="/view/configuracao/listDocumentos" element={<ViewConfiguracaoDocumentosListScreen/>}/>
     <Route path="/view/consultor/consultor" element={<ViewConsultorConsultorListScreen/>}/>
     <Route path="/view/consultor/formConsultor" element={<ViewConsultorFormConsultorListScreen/>}/>
@@ -820,6 +822,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/tipoUnidade/listTipoUnidade" element={<ViewTipoUnidadeListTipoUnidadeListScreen/>}/>
 
     
+    <Route path="/view/turma/listTurma" element={<ViewTurmaListTurmaListScreen/>}/>
     <Route path="/view/turma/listTurmaFinalizando" element={<ViewTurmaListTurmaFinalizandoListScreen/>}/>
     <Route path="/view/turma/recriarCalendarioAcademico" element={<ViewTurmaRecriarCalendarioAcademicoScreen/>}/>
     <Route path="/view/turno/formTurno" element={<ViewTurnoFormTurnoListScreen/>}/>

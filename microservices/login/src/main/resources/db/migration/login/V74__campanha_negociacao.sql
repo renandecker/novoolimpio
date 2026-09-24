@@ -1,4 +1,4 @@
--- V54__campanha_negociacao_flyway.sql
+-- V74__campanha_negociacao.sql
 -- Flyway migration for Negotiation Campaigns
 -- Apply changes to fin_campanha_negociacao table
 -- Idempotente: utiliza IF NOT EXISTS e valida existencia previo

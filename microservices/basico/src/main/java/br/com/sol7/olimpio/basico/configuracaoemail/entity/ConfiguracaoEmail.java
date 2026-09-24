@@ -25,7 +25,7 @@ public class ConfiguracaoEmail extends PanacheEntity {
     @Column(name = "fl_principal")
     public Boolean principal;
     @Column(name = "periodicidade")
-    public String periodicidade;  // era Periodicidade (enum/embeddable) no legado
+    public String periodicidade;
     @Column(name = "google_maps_api")
     public String googleMapsApi;
     @Column(name = "google_maps_cota_total")
@@ -37,7 +37,7 @@ public class ConfiguracaoEmail extends PanacheEntity {
     @Column(name = "fl_api_email")
     public boolean habilitarApi;
     @Column(name = "tipo_api")
-    public String tipoApiEmail;  // era TipoApiEmail (enum/embeddable) no legado
+    public String tipoApiEmail;
     @Column(name = "data_atualizacao")
     public Date dateCota;
     @Column(name = "cota")
@@ -68,4 +68,10 @@ public class ConfiguracaoEmail extends PanacheEntity {
     public Integer autenticated;
     @Column(name = "fallback")
     public Integer fallback;
+    @Column(name = "tls")
+    public Boolean tls;
+    @Column(name = "ssl")
+    public Boolean ssl;
+    @Column(name = "auto")
+    public Boolean auto;
 }

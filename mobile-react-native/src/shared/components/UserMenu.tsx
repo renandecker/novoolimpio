@@ -13,6 +13,7 @@ import {
 import {useAuth} from '../../features/auth/auth';
 import {PhotoUploadModal} from './PhotoUploadModal';
 import {useNavigation} from '@react-navigation/native';
+import {removerPushToken} from '../../features/notificacoes/PushNotificationService';
 
 interface UserMenuProps {
     style?: any;
@@ -33,8 +34,11 @@ export function UserMenu({style}: UserMenuProps) {
         });
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         setOpen(false);
+        if (session?.idUsuario) {
+            await removerPushToken(session.idUsuario);
+        }
         signOut();
         navigation.reset({
             index: 0,

@@ -13,7 +13,13 @@ public record NotificacaoResponse(
         boolean canalSistema,
         boolean canalMobile,
         boolean canalEmail,
+        boolean canalTelegram,
+        boolean canalSms,
+        boolean canalWhatsapp,
         boolean emailEnviado,
         boolean mobileEnviado,
+        boolean telegramEnviado,
+        boolean smsEnviado,
+        boolean whatsappEnviado,
         OffsetDateTime dataLeitura,
         OffsetDateTime createdAt){}

@@ -13,6 +13,7 @@ package br.com.sol7.olimpio.notificacoes.notificacao.dto;
 public record NotificacaoMessage(
         Long id,
         String username,
+        Integer idUsuario,
         String titulo,
         String mensagem,
         String tipo,
@@ -20,4 +21,7 @@ public record NotificacaoMessage(
         boolean canalSistema,
         boolean canalMobile,
         boolean canalEmail,
+        boolean canalTelegram,
+        boolean canalSms,
+        boolean canalWhatsapp,
         String destinatario){}

@@ -2,7 +2,11 @@ package br.com.sol7.olimpio.notificacoes.notificacao.consumer;
 
 import br.com.sol7.olimpio.notificacoes.notificacao.dto.NotificacaoMessage;
 import br.com.sol7.olimpio.notificacoes.notificacao.service.CanalEmailService;
+import br.com.sol7.olimpio.notificacoes.notificacao.service.CanalTelegramService;
+import br.com.sol7.olimpio.notificacoes.notificacao.service.CanalSmsService;
+import br.com.sol7.olimpio.notificacoes.notificacao.service.CanalWhatsappService;
 import br.com.sol7.olimpio.notificacoes.notificacao.service.NotificacaoSseHub;
+import br.com.sol7.olimpio.notificacoes.notificacao.service.PushNotificationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.hibernate.reactive.panache.Panache;
@@ -18,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * de cada canal:
  * <ul>
  * <li>olimpio.notificacao.email  -> envia o e-mail (SMTP) e marca email_enviado</li>
- * <li>olimpio.notificacao.mobile -> push em tempo real (SSE) ao react native e marca mobile_enviado</li>
+ * <li>olimpio.notificacao.mobile -> push notification (FCM/APNs) + SSE ao react native e marca mobile_enviado</li>
  * <li>olimpio.notificacao.web    -> push em tempo real (SSE) ao react web</li>
  * </ul>
  */
@@ -34,7 +38,19 @@ public class NotificacaoDispatchConsumer {
     CanalEmailService canalEmailService;
 
     @Inject
+    CanalTelegramService canalTelegramService;
+
+    @Inject
+    CanalSmsService canalSmsService;
+
+    @Inject
+    CanalWhatsappService canalWhatsappService;
+
+    @Inject
     NotificacaoSseHub sseHub;
+
+    @Inject
+    PushNotificationService pushNotificationService;
 
     @Incoming("notificacao-email-in")
     public Uni<Void> onEmail(String payload) {
@@ -42,6 +58,30 @@ public class NotificacaoDispatchConsumer {
                 .chain(msg -> canalEmailService.enviar(msg, msg.destinatario()))
                 .onFailure().invoke(err ->
                         LOGGER.warn("Falha ao processar notificação no canal EMAIL: {}", err.getMessage()));
+    }
+
+    @Incoming("notificacao-telegram-in")
+    public Uni<Void> onTelegram(String payload) {
+        return parse(payload)
+                .chain(msg -> canalTelegramService.enviar(msg))
+                .onFailure().invoke(err ->
+                        LOGGER.warn("Falha ao processar notificação no canal TELEGRAM: {}", err.getMessage()));
+    }
+
+    @Incoming("notificacao-sms-in")
+    public Uni<Void> onSms(String payload) {
+        return parse(payload)
+                .chain(msg -> canalSmsService.enviar(msg))
+                .onFailure().invoke(err ->
+                        LOGGER.warn("Falha ao processar notificação no canal SMS: {}", err.getMessage()));
+    }
+
+    @Incoming("notificacao-whatsapp-in")
+    public Uni<Void> onWhatsapp(String payload) {
+        return parse(payload)
+                .chain(msg -> canalWhatsappService.enviar(msg))
+                .onFailure().invoke(err ->
+                        LOGGER.warn("Falha ao processar notificação no canal WHATSAPP: {}", err.getMessage()));
     }
 
     @Incoming("notificacao-mobile-in")
@@ -52,9 +92,16 @@ public class NotificacaoDispatchConsumer {
                         LOGGER.info("Notificação sem username (fluxo de lote por e-mail direto) - push MOBILE ignorado.");
                         return Uni.createFrom().voidItem();
                     }
-                    return Uni.createFrom().voidItem()
-                            .invoke(() -> sseHub.publish(NotificacaoSseHub.CANAL_MOBILE, msg.username(), payload))
-                            .chain(() -> marcaEnviado("mobile_enviado", msg.id()));
+                    Integer idUsuario = msg.idUsuario();
+                    if (idUsuario == null || idUsuario == 0) {
+                        LOGGER.warn("Notificação sem idUsuario - push MOBILE ignorado para username: {}", msg.username());
+                        return Uni.createFrom().voidItem();
+                    }
+                    // Envia push notification via FCM/APNs para todos os tokens do usuário
+                    return pushNotificationService.enviarParaUsuario(idUsuario, msg)
+                            .chain(() -> Uni.createFrom().voidItem()
+                                    .invoke(() -> sseHub.publish(NotificacaoSseHub.CANAL_MOBILE, msg.username(), payload))
+                                    .chain(() -> marcaEnviado("mobile_enviado", msg.id())));
                 })
                 .onFailure().invoke(err ->
                         LOGGER.warn("Falha ao processar notificação no canal MOBILE: {}", err.getMessage()));

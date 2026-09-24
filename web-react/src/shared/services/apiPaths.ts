@@ -108,6 +108,7 @@ export const API_PATHS = {
   notificacoes: {
     regras: '/api/notificacoes/regras',
     notificacao: '/api/notificacoes/notificacao',
+    preferencias: '/api/notificacoes/preferencias',
   },
   asaas: {
     pixEnviarEmail: '/api/asaas/pix/enviar-email',

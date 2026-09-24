@@ -1,5 +1,5 @@
 ﻿import {api} from '../../shared/services/api';
-import type {PagedResponse} from '../../shared/types/types';
+import type {PagedResponse, ReportFilterSqlValues} from '../../shared/types/types';
 
 export type RelatorioDisponivel = {
     id: number;
@@ -66,5 +66,7 @@ export const listarRelatoriosDisponiveis = async (page = 0, size = 10, busca?: s
         }
     })).data;
 
-export const abrirRelatorio = async (tipo: string, id: number): Promise<RelatorioAberto> =>
-    (await api.get<RelatorioAberto>(`/api/relatorios/relatorio/disponiveis/${tipo}/${id}`)).data;
+export const abrirRelatorio = async (tipo: string, id: number, filtros?: ReportFilterSqlValues): Promise<RelatorioAberto> =>
+    (await api.get<RelatorioAberto>(`/api/relatorios/relatorio/disponiveis/${tipo}/${id}`, {
+        params: filtros && Object.keys(filtros).length > 0 ? {filtros: JSON.stringify(filtros)} : {}
+    })).data;

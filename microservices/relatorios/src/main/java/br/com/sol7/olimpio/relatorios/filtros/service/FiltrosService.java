@@ -416,7 +416,7 @@ public class FiltrosService {
                 .map(this::toWrapperDTOs);
     }
 
-    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewGraficoBarrasHorizontal(Long graficoId) {
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewGrafico(Long graficoId) {
         return repository.findByGrafico(graficoId)
                 .map(this::toWrapperDTOs);
     }

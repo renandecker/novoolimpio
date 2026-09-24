@@ -121,8 +121,8 @@ type CaixaRow = {
 
 const COLUMNS = [
     {key: 'id_caixa_unidade', label: 'Nº Caixa'},
-    {key: 'usuario_login', label: 'Usuário'},
-    {key: 'unidade_sucinto', label: 'Unidade'},
+    {key: 'usuario_login', label: 'Usuário', render: (item: ApiItem) => String(asRecord(item).usuario_login ?? asRecord(item).usuario_descricao ?? asRecord(item).usuario ?? '')},
+    {key: 'unidade_sucinto', label: 'Unidade', render: (item: ApiItem) => String(asRecord(item).unidade_sucinto ?? asRecord(item).unidade_nome ?? asRecord(item).unidade ?? '')},
     {key: 'data', label: 'Data', render: (item: ApiItem) => formatDateTime(asRecord(item).data)},
     {key: 'data_fechamento', label: 'Data Fechamento', render: (item: ApiItem) => asRecord(item).data_fechamento ? formatDateTime(asRecord(item).data_fechamento) : ''},
     {key: 'fundo_caixa', label: 'Fundo de Caixa', render: (item: ApiItem) => formatCurrency(asRecord(item).fundo_caixa)},
@@ -136,7 +136,7 @@ export default function ViewCaixaListCaixaListScreen() {
 
     const [filterParams, setFilterParams] = useState<SearchFilterRequest>({filters: {}});
 
-    const q = useModulePaged('/api/view/caixa/listCaixa', 0, 10, undefined, filterParams);
+    const q = useModulePaged('/api/financeiro/caixa', 0, 10, undefined, filterParams);
     const all = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);

@@ -37,7 +37,7 @@ export default function HelpOverlay() {
                 aria-expanded={open}
                 onClick={() => setOpen((current) => !current)}
             >
-                ?
+                <i className="fa fa-question" aria-hidden="true" />
             </button>
             {open && (
                 <div className="help-overlay-panel" role="dialog" aria-label="Ajuda">

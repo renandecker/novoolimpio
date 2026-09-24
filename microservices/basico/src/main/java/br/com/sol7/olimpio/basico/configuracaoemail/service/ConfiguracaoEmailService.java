@@ -89,10 +89,13 @@ public class ConfiguracaoEmailService {
         e.debug = r.debug();
         e.autenticated = r.autenticated();
         e.fallback = r.fallback();
+        e.tls = r.tls();
+        e.ssl = r.ssl();
+        e.auto = r.auto();
     }
 
     private ConfiguracaoEmailResponse toResponse(ConfiguracaoEmail e) {
-        return new ConfiguracaoEmailResponse(e.id, e.host, e.port, e.protocol, e.username, e.password, e.principal, e.periodicidade, e.googleMapsApi, e.googleMapsCota, e.googleMapsUsar, e.googleMapsUsado, e.habilitarApi, e.tipoApiEmail, e.dateCota, e.cota, e.usado, e.tokenCorreio, e.tokenSendgrip, e.clientId, e.clientSecret, e.accessToken, e.refreshToken, e.quitwait, e.starttls, e.auth, e.debug, e.autenticated, e.fallback);
+        return new ConfiguracaoEmailResponse(e.id, e.host, e.port, e.protocol, e.username, e.password, e.principal, e.periodicidade, e.googleMapsApi, e.googleMapsCota, e.googleMapsUsar, e.googleMapsUsado, e.habilitarApi, e.tipoApiEmail, e.dateCota, e.cota, e.usado, e.tokenCorreio, e.tokenSendgrip, e.clientId, e.clientSecret, e.accessToken, e.refreshToken, e.quitwait, e.starttls, e.auth, e.debug, e.autenticated, e.fallback, e.tls, e.ssl, e.auto);
     }
 
 

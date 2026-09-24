@@ -117,6 +117,10 @@ public class GraficoService {
 
 
     public Uni<GraficoDadosResponse> dados(Long id) {
+        return dados(id, null);
+    }
+
+    public Uni<GraficoDadosResponse> dados(Long id, Map<String, Object> filtros) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Grafico not found"))
                 .chain(grafico -> {
@@ -129,20 +133,39 @@ public class GraficoService {
                             // limite invalido -> usa o padrao (MAXIMO)
                         }
                     }
-                    return montarResposta(grafico, limite);
+                    return montarResposta(grafico, limite, filtros);
                 });
     }
 
-    private Uni<GraficoDadosResponse> montarResposta(Grafico grafico, int limite) {
+    // Migrado de FiltrosController/QueryBuilder (extracted_aceso): filtra as colunas
+    // da dimensao de cada rel_filtro vinculado ao grafico, para montar o WHERE no SQL do grafico.
+    private static final String SQL_FILTROS_GRAFICO = "SELECT f.nome, dc.coluna, f.tipo_filtro, f.operacao, f.data_inicio, f.data_fim, f.periodo_dinamico, f.valor_fixo " +
+            "FROM rel_filtro f " +
+            "JOIN rel_filtro_grafico fg ON fg.id_filtro = f.id " +
+            "LEFT JOIN rel_dimensao d ON d.id = f.id_dimensao " +
+            "LEFT JOIN rel_coluna dc ON dc.id = d.id_coluna " +
+            "WHERE fg.id_grafico = ?1";
+
+    private Uni<String> montarFiltroFragmento(Long graficoId, Map<String, Object> filtros) {
+        if (filtros == null || filtros.isEmpty()) {
+            return Uni.createFrom().item("");
+        }
+        return Panache.getSession().chain(session ->
+                session.createNativeQuery(SQL_FILTROS_GRAFICO).setParameter(1, graficoId).getResultList())
+                .map(configFiltros -> br.com.sol7.olimpio.relatorios.shared.FiltroSqlBuilder.montarFiltroSql(configFiltros, filtros));
+    }
+
+    private Uni<GraficoDadosResponse> montarResposta(Grafico grafico, int limite, Map<String, Object> filtros) {
         return buscarEstruturaTabela(grafico.estruturaId).chain(tabela ->
                 buscarEstruturaCondicao(grafico.estruturaId).chain(condicao ->
                         buscarDimensaoColuna(grafico.dimensaoReferenciaId).chain(dimColuna ->
                                 buscarMedidaColuna(grafico.medidaInformacaoId).chain(medColuna ->
                                         buscarMedidaTipoInfo(grafico.medidaInformacaoId).chain(medTipoInfo ->
-                                                montarRespostaComDados(grafico, limite, tabela, condicao, dimColuna, medColuna, medTipoInfo))))));
+                                                montarFiltroFragmento(grafico.id, filtros).chain(fragmento ->
+                                                        montarRespostaComDados(grafico, limite, tabela, condicao, dimColuna, medColuna, medTipoInfo, fragmento)))))));
     }
 
-    private Uni<GraficoDadosResponse> montarRespostaComDados(Grafico grafico, int limite, String tabela, String condicao, String dimColuna, String medColuna, String medTipoInfo) {
+    private Uni<GraficoDadosResponse> montarRespostaComDados(Grafico grafico, int limite, String tabela, String condicao, String dimColuna, String medColuna, String medTipoInfo, String fragmentoFiltro) {
         if (tabela == null || tabela.isBlank())
             return Uni.createFrom().failure(new BadRequestException("Estrutura do grafico sem tabela definida"));
         if (dimColuna == null || dimColuna.isBlank())
@@ -150,17 +173,17 @@ public class GraficoService {
         if (medColuna == null || medColuna.isBlank())
             return Uni.createFrom().failure(new BadRequestException("Medida de informacao sem coluna definida"));
 
-        String sqlPrincipal = montarSql(grafico.tipo, grafico.ordemGrafico, limite, tabela, condicao, dimColuna, medColuna, medTipoInfo);
-        return executarSql(sqlPrincipal).chain(dadosL -> montarCombinado(grafico, limite, tabela, condicao, dadosL));
+        String sqlPrincipal = montarSql(grafico.tipo, grafico.ordemGrafico, limite, tabela, condicao, dimColuna, medColuna, medTipoInfo, fragmentoFiltro);
+        return executarSql(sqlPrincipal).chain(dadosL -> montarCombinado(grafico, limite, tabela, condicao, fragmentoFiltro, dadosL));
     }
 
-    private Uni<GraficoDadosResponse> montarCombinado(Grafico grafico, int limite, String tabela, String condicao, List<Map<String, Object>> dadosL) {
+    private Uni<GraficoDadosResponse> montarCombinado(Grafico grafico, int limite, String tabela, String condicao, String fragmentoFiltro, List<Map<String, Object>> dadosL) {
         Uni<List<Map<String, Object>>> combinado;
         if ("COMBINADO".equalsIgnoreCase(grafico.tipo) && grafico.dimensaoCombinadoId != null && grafico.medidaCombinadoId != null) {
             combinado = buscarDimensaoColuna(grafico.dimensaoCombinadoId).chain(dimComb ->
                             buscarMedidaColuna(grafico.medidaCombinadoId).chain(medComb ->
                                     buscarMedidaTipoInfo(grafico.medidaCombinadoId).map(medCombTipo ->
-                                            montarSql(grafico.tipo, grafico.ordemGrafico, limite, tabela, condicao, dimComb, medComb, medCombTipo))))
+                                            montarSql(grafico.tipo, grafico.ordemGrafico, limite, tabela, condicao, dimComb, medComb, medCombTipo, fragmentoFiltro))))
                     .chain(sqlComb -> executarSql(sqlComb));
         } else {
             combinado = Uni.createFrom().item(List.of());
@@ -171,7 +194,7 @@ public class GraficoService {
                 limite, grafico.posicao, dadosL, combL));
     }
 
-    private String montarSql(String tipo, String ordemGrafico, int limite, String tabela, String condicao, String dimensaoColuna, String medidaColuna, String medidaTipoInfo) {
+    private String montarSql(String tipo, String ordemGrafico, int limite, String tabela, String condicao, String dimensaoColuna, String medidaColuna, String medidaTipoInfo, String fragmentoFiltro) {
         String dimensaoSql = semAlias(dimensaoColuna);
         String medidaBase = semAlias(medidaColuna);
         String medidaSql;
@@ -194,6 +217,11 @@ public class GraficoService {
 
         if (condicao != null && !condicao.isBlank()) {
             sql.append(" ").append(condicao);
+        }
+
+        if (fragmentoFiltro != null && !fragmentoFiltro.isBlank()) {
+            boolean jaTemCondicao = condicao != null && !condicao.isBlank();
+            sql.append(jaTemCondicao ? " AND (" : " WHERE (").append(fragmentoFiltro).append(")");
         }
 
         sql.append(" GROUP BY 1 ORDER BY 2");

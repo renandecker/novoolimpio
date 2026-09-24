@@ -49,11 +49,29 @@ public class Notificacao extends PanacheEntityBase {
     @Column(name = "canal_email", nullable = false)
     public boolean canalEmail = false;
 
+    @Column(name = "canal_telegram", nullable = false)
+    public boolean canalTelegram = false;
+
+    @Column(name = "canal_sms", nullable = false)
+    public boolean canalSms = false;
+
+    @Column(name = "canal_whatsapp", nullable = false)
+    public boolean canalWhatsapp = false;
+
     @Column(name = "email_enviado", nullable = false)
     public boolean emailEnviado = false;
 
     @Column(name = "mobile_enviado", nullable = false)
     public boolean mobileEnviado = false;
+
+    @Column(name = "telegram_enviado", nullable = false)
+    public boolean telegramEnviado = false;
+
+    @Column(name = "sms_enviado", nullable = false)
+    public boolean smsEnviado = false;
+
+    @Column(name = "whatsapp_enviado", nullable = false)
+    public boolean whatsappEnviado = false;
 
     @Column(name = "data_leitura")
     public OffsetDateTime dataLeitura;

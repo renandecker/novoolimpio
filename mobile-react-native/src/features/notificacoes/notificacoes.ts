@@ -13,6 +13,56 @@ export type Notificacao = {
     createdAt: string;
 };
 
+export type UsuarioMobileToken = {
+    id: number;
+    idUsuario: number;
+    token: string;
+    plataforma: string;
+    ativo: boolean;
+    ultimoUso: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type PreferenciaNotificacaoCanal = {
+    canal: string;
+    canalLabel: string;
+    ativo: boolean;
+};
+
+export type PreferenciaNotificacaoTipo = {
+    tipo: string;
+    tipoLabel: string;
+    descricao: string;
+    canais: PreferenciaNotificacaoCanal[];
+};
+
+export type PreferenciaNotificacaoCategoria = {
+    categoria: string;
+    categoriaLabel: string;
+    descricao: string;
+    tipos: PreferenciaNotificacaoTipo[];
+};
+
+export type PreferenciaNotificacaoUsuarioRequest = {
+    username: string;
+    categoria: string;
+    tipo: string;
+    canal: string;
+    ativo: boolean;
+};
+
+export type PreferenciaNotificacaoUsuarioResponse = {
+    id: number;
+    username: string;
+    categoria: string;
+    tipo: string;
+    canal: string;
+    ativo: boolean;
+    createdAt: string;
+    updatedAt: string;
+};
+
 export const listMinhasNotificacoes = async (page = 0, size = 20): Promise<PagedResponse<Notificacao>> =>
     (await api.get('/api/notificacoes/notificacao/minhas', {params: {page, size}})).data;
 
@@ -21,6 +71,17 @@ export const countNaoLidas = async (): Promise<number> =>
 
 export const marcarNotificacaoLida = async (id: number): Promise<Notificacao> =>
     (await api.post(`/api/notificacoes/notificacao/${id}/ler`)).data;
+
+export const registrarMobileToken = async (idUsuario: number, token: string, plataforma: 'ANDROID' | 'IOS' = 'ANDROID'): Promise<UsuarioMobileToken> =>
+    (await api.post(`/api/notificacoes/mobile/tokens/usuario/${idUsuario}`, {token, plataforma})).data;
+
+export const listarMobileTokens = async (idUsuario: number): Promise<UsuarioMobileToken[]> =>
+    (await api.get(`/api/notificacoes/mobile/tokens/usuario/${idUsuario}`)).data;
+
+export const desativarMobileToken = async (idUsuario: number, token: string): Promise<void> => {
+    await api.delete(`/api/notificacoes/mobile/tokens/usuario/${idUsuario}/${token}`);
+    return;
+};
 
 /**
  * Assina o stream SSE (Server-Sent Events) de notificações do React Native
@@ -81,3 +142,12 @@ export const subscribeNotificacoesStream = (onMessage: (notification: Notificaca
         }
     };
 };
+
+export const listPreferenciasNotificacaoAgrupadas = async (username: string): Promise<PreferenciaNotificacaoCategoria[]> =>
+    (await api.get('/api/notificacoes/preferencias/minhas/agrupadas', {params: {username}})).data;
+
+export const salvarPreferenciaNotificacao = async (request: PreferenciaNotificacaoUsuarioRequest): Promise<PreferenciaNotificacaoUsuarioResponse> =>
+    (await api.post('/api/notificacoes/preferencias', request)).data;
+
+export const inicializarPreferenciasNotificacao = async (username: string): Promise<void> =>
+    (await api.post(`/api/notificacoes/preferencias/inicializar/${username}`)).data;

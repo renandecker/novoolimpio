@@ -26,7 +26,7 @@ public class ViewResource {
     PermissionGuard permissions;
 
     @GET
-    @Path("/{feature}/{resource}/paged")
+    @Path("/{feature}/{resource:.*}/paged")
     public Uni<PagedResponse<Map<String, Object>>> paged(@PathParam("feature") String feature,
                                                          @PathParam("resource") String resource,
                                                          @QueryParam("page") Integer page,
@@ -35,21 +35,21 @@ public class ViewResource {
     }
 
     @GET
-    @Path("/{feature}/{resource}")
+    @Path("/{feature}/{resource:.*}")
     public Uni<List<Map<String, Object>>> list(@PathParam("feature") String feature,
                                                @PathParam("resource") String resource) {
         return service.list(feature, resource);
     }
 
     @GET
-    @Path("/{feature}/{resource}/refs")
+    @Path("/{feature}/{resource:.*}/refs")
     public Uni<Map<String, List<Map<String, Object>>>> refs(@PathParam("feature") String feature,
                                                             @PathParam("resource") String resource) {
         return service.refs(feature, resource);
     }
 
     @POST
-    @Path("/{feature}/{resource}")
+    @Path("/{feature}/{resource:.*}")
     public Uni<Response> create(@Context ContainerRequestContext context,
                                 @HeaderParam("X-Authenticated-Permissions") String granted,
                                 @PathParam("feature") String feature,
@@ -64,7 +64,7 @@ public class ViewResource {
     }
 
     @PUT
-    @Path("/{feature}/{resource}/{id}")
+    @Path("/{feature}/{resource:.*}/{id}")
     public Uni<Response> update(@Context ContainerRequestContext context,
                                 @HeaderParam("X-Authenticated-Permissions") String granted,
                                 @PathParam("feature") String feature,
@@ -80,7 +80,7 @@ public class ViewResource {
     }
 
     @DELETE
-    @Path("/{feature}/{resource}/{id}")
+    @Path("/{feature}/{resource:.*}/{id}")
     public Uni<Response> delete(@Context ContainerRequestContext context,
                                 @HeaderParam("X-Authenticated-Permissions") String granted,
                                 @PathParam("feature") String feature,
@@ -95,7 +95,7 @@ public class ViewResource {
     }
 
     @GET
-    @Path("/{feature}/{resource}/{id}")
+    @Path("/{feature}/{resource:.*}/{id}")
     public Uni<Map<String, Object>> findById(@PathParam("feature") String feature,
                                               @PathParam("resource") String resource,
                                               @PathParam("id") Long id) {
@@ -108,7 +108,7 @@ public class ViewResource {
 
     @SuppressWarnings("unchecked")
     @POST
-    @Path("/{feature}/{resource}/search")
+    @Path("/{feature}/{resource:.*}/search")
     public Uni<PagedResponse<Map<String, Object>>> search(@PathParam("feature") String feature,
                                                            @PathParam("resource") String resource,
                                                            @QueryParam("page") Integer page,

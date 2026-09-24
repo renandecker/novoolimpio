@@ -817,18 +817,6 @@ export default function ViewEstruturaFormEstruturaListScreen() {
     /* ── Passo Campos ───────────────────────────────────────────────────────────── */
     const camposContent = (
         <div>
-            <div className="tabs-container">
-                <nav className="tabs">
-                    {[
-                        {key: 'dimensao', label: 'Descrição'},
-                        {key: 'tempo', label: 'Tempo'},
-                        {key: 'medida', label: 'Medida'},
-                        {key: 'geo', label: 'Georeferencia'},
-                    ].map((t) => (
-                        <button key={t.key} type="button" className="tab">{t.label}</button>
-                    ))}
-                </nav>
-            </div>
             <Tabs
                 tabs={[
                     {

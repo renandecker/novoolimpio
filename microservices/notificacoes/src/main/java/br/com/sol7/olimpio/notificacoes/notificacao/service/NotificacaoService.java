@@ -81,6 +81,9 @@ public class NotificacaoService {
                     e.canalSistema = true;
                     e.canalMobile = r.canalMobile() != null ? r.canalMobile() : canais.mobile();
                     e.canalEmail = r.canalEmail() != null ? r.canalEmail() : canais.email();
+                    e.canalTelegram = r.canalTelegram() != null ? r.canalTelegram() : canais.telegram();
+                    e.canalSms = r.canalSms() != null ? r.canalSms() : canais.sms();
+                    e.canalWhatsapp = r.canalWhatsapp() != null ? r.canalWhatsapp() : canais.whatsapp();
                 })
                 .chain(canais -> repository.persist(e))
                 .chain(saved -> rabbitMQProducer.dispatch(saved)
@@ -102,6 +105,9 @@ public class NotificacaoService {
                     e.link = r.link();
                     if (r.canalMobile() != null) e.canalMobile = r.canalMobile();
                     if (r.canalEmail() != null) e.canalEmail = r.canalEmail();
+                    if (r.canalTelegram() != null) e.canalTelegram = r.canalTelegram();
+                    if (r.canalSms() != null) e.canalSms = r.canalSms();
+                    if (r.canalWhatsapp() != null) e.canalWhatsapp = r.canalWhatsapp();
                 })
                 .map(this::toResponse);
     }
@@ -128,6 +134,6 @@ public class NotificacaoService {
 
     private NotificacaoResponse toResponse(Notificacao e) {
         return new NotificacaoResponse(e.id, e.username, e.titulo, e.mensagem, e.tipo, e.link, e.lida,
-                e.canalSistema, e.canalMobile, e.canalEmail, e.emailEnviado, e.mobileEnviado, e.dataLeitura, e.createdAt);
+                e.canalSistema, e.canalMobile, e.canalEmail, e.canalTelegram, e.canalSms, e.canalWhatsapp, e.emailEnviado, e.mobileEnviado, e.telegramEnviado, e.smsEnviado, e.whatsappEnviado, e.dataLeitura, e.createdAt);
     }
 }

@@ -22,17 +22,15 @@ import {useAuth} from '../../auth/auth';
 
 import {useQuery} from '@tanstack/react-query';
 
-import {Tabs} from '../../../shared/components/Tabs';
-
 import {AutoComplete, type AutoCompleteOption} from '../../../shared/components/AutoComplete';
 
 import {ScheduleWeekView, mondayOf, toIsoDate, type ScheduleEventData} from '../../../shared/components/WeeklyGrid';
 
-import {legacyClassName} from '../../../shared/components/DataTable';
+import {legacyClassName, PAGE_SIZES} from '../../../shared/components/DataTable';
 
 import {BooleanField} from '../../../shared/components/BooleanField';
 
-import {InformacoesModal} from '../../professor/GestaoProfessorModais';
+import {InformacoesConteudo, type TurmaInformacoes} from '../../professor/GestaoProfessorModais';
 
 import '../../professor/GestaoProfessor.css';
 
@@ -55,6 +53,42 @@ type Turma = {
     oferecimentoId?: number;
 
 };
+
+
+
+// Uma aba de detalhe para cada botão da tabela de turmas (espelha os
+
+// commandButton Caderno/Notas/Registro aulas/Informações de gestaoProfessor.xhtml).
+
+type AcaoDetalhe = 'caderno' | 'notas' | 'registro' | 'aula' | 'info';
+
+
+
+const TITULO_ACAO: Record<AcaoDetalhe, string> = {
+
+    caderno: 'Presenças',
+
+    notas: 'Notas',
+
+    registro: 'Registro de aula',
+
+    aula: 'Aulas',
+
+    info: 'Informações',
+
+};
+
+
+
+interface DetalheAba {
+
+    key: string;
+
+    acao: AcaoDetalhe;
+
+    turma: Turma;
+
+}
 
 
 
@@ -195,7 +229,7 @@ const PRESENCAS: Record<string, { titulo: string; cor: string }> = {
 
     p: {titulo: 'Presente', cor: '#32CD32'},
 
-    m: {titulo: 'Meia PresenÃ§a', cor: '#FFD700'},
+    m: {titulo: 'Meia Presença', cor: '#FFD700'},
 
     a: {titulo: 'Ausente', cor: '#FF0000'},
 
@@ -375,17 +409,37 @@ export default function ViewGestaoProfessorGestaoProfessorListScreen() {
 
 
 
-    const tabs = [
+    // Abas de detalhe: cada botão da tabela abre sua aba ao lado de "Gestão".
 
-        {key: 'gestao', label: 'GestÃ£o', content: <GestaoTab/>},
+    const [detalheAbas, setDetalheAbas] = useState<DetalheAba[]>([]);
 
-        ...(souProfessor && professorId !== null
+    const [abaAtiva, setAbaAtiva] = useState<string>('gestao');
 
-            ? [{key: 'disponibilidade', label: 'Disponibilidade do Professor', content: <DisponibilidadeTab professorId={professorId}/>}]
 
-            : []),
 
-    ];
+    function abrirDetalhe(acao: AcaoDetalhe, turma: Turma) {
+
+        const key = `${acao}-${turma.id}`;
+
+        setDetalheAbas((prev) => (prev.some((a) => a.key === key) ? prev : [...prev, {key, acao, turma}]));
+
+        setAbaAtiva(key);
+
+    }
+
+
+
+    function fecharDetalhe(key: string) {
+
+        setDetalheAbas((prev) => prev.filter((a) => a.key !== key));
+
+        setAbaAtiva((atual) => (atual === key ? 'gestao' : atual));
+
+    }
+
+
+
+    const mostraDisponibilidade = souProfessor && professorId !== null;
 
 
 
@@ -393,9 +447,97 @@ export default function ViewGestaoProfessorGestaoProfessorListScreen() {
 
         <main className="gestao-professor">
 
-            <h1>GestÃ£o do Professor</h1>
+            <h1>Gestão do Professor</h1>
 
-            <Tabs tabs={tabs}/>
+            <div className="tabs-container">
+
+                <nav className="tabs">
+
+                    <button
+                        key="gestao"
+                        type="button"
+                        className={abaAtiva === 'gestao' ? 'tab tab-active' : 'tab'}
+                        onClick={() => setAbaAtiva('gestao')}
+                    >
+                        Gestão
+                    </button>
+
+                    {detalheAbas.map((aba) => (
+
+                        <button
+                            key={aba.key}
+                            type="button"
+                            className={abaAtiva === aba.key ? 'tab tab-active' : 'tab'}
+                            onClick={() => setAbaAtiva(aba.key)}
+                            title={`${TITULO_ACAO[aba.acao]} - Turma ${aba.turma.id}`}
+                        >
+                            {TITULO_ACAO[aba.acao]} - T{aba.turma.id}
+                            <span
+                                role="button"
+                                aria-label={`Fechar ${TITULO_ACAO[aba.acao]} - Turma ${aba.turma.id}`}
+                                tabIndex={0}
+                                className="gp-aba-fechar"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    fecharDetalhe(aba.key);
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        fecharDetalhe(aba.key);
+                                    }
+                                }}
+                            >
+                                <X className="icon" />
+                            </span>
+                        </button>
+
+                    ))}
+
+                    {mostraDisponibilidade && (
+
+                        <button
+                            key="disponibilidade"
+                            type="button"
+                            className={abaAtiva === 'disponibilidade' ? 'tab tab-active' : 'tab'}
+                            onClick={() => setAbaAtiva('disponibilidade')}
+                        >
+                            Disponibilidade do Professor
+                        </button>
+
+                    )}
+
+                </nav>
+
+            </div>
+
+            <div className="tab-content">
+
+                <div hidden={abaAtiva !== 'gestao'}>
+                    <GestaoTab onAbrirDetalhe={abrirDetalhe}/>
+                </div>
+
+                {detalheAbas.map((aba) => (
+
+                    <div key={aba.key} hidden={abaAtiva !== aba.key}>
+                        <GestaoTab
+                            onAbrirDetalhe={abrirDetalhe}
+                            detalheFixo={{acao: aba.acao, turma: aba.turma}}
+                        />
+                    </div>
+
+                ))}
+
+                {mostraDisponibilidade && professorId !== null && (
+
+                    <div hidden={abaAtiva !== 'disponibilidade'}>
+                        <DisponibilidadeTab professorId={professorId}/>
+                    </div>
+
+                )}
+
+            </div>
 
         </main>
 
@@ -405,7 +547,13 @@ export default function ViewGestaoProfessorGestaoProfessorListScreen() {
 
 
 
-function GestaoTab() {
+function GestaoTab({onAbrirDetalhe, detalheFixo}: {
+
+    onAbrirDetalhe: (acao: AcaoDetalhe, turma: Turma) => void;
+
+    detalheFixo?: { acao: AcaoDetalhe; turma: Turma };
+
+}) {
 
     const {session} = useAuth();
 
@@ -429,39 +577,31 @@ function GestaoTab() {
 
     const [painel, setPainel] = useState<'caderno' | 'notas' | 'registro' | 'aula' | null>(null);
 
-    // Abas ocultas: só aparecem depois que o botão da turma é clicado.
-    // Ex.: clicar em "Caderno chamada" abre a aba "Presenças" com os alunos e presenças.
-    const [abasAbertas, setAbasAbertas] = useState<Array<'caderno' | 'notas' | 'registro' | 'aula'>>([]);
-
-    const ABAS_TITULOS: Record<'caderno' | 'notas' | 'registro' | 'aula', string> = {
-        caderno: 'Presenças',
-        notas: 'Notas',
-        registro: 'Registro de aula',
-        aula: 'Aulas',
-    };
+    // Aba de detalhe exibida por esta instância: no modo tabela é null e o
+    // detalhe abre em aba própria ao lado de "Gestão"; no modo detalhe é fixa.
+    const acaoAtiva: AcaoDetalhe | null = detalheFixo?.acao ?? painel;
 
     function abrirAba(aba: 'caderno' | 'notas' | 'registro' | 'aula') {
         setPainel(aba);
-        setAbasAbertas((prev) => (prev.includes(aba) ? prev : [...prev, aba]));
         setCarregandoDetalhe(true);
-        setTimeout(() => abasRef.current?.scrollIntoView({behavior: 'smooth', block: 'nearest'}), 100);
-    }
-
-    function fecharAba(aba: 'caderno' | 'notas' | 'registro' | 'aula') {
-        const restantes = abasAbertas.filter((a) => a !== aba);
-        setAbasAbertas(restantes);
-        if (painel === aba) {
-            setPainel(restantes.length > 0 ? restantes[restantes.length - 1] : null);
-        }
     }
 
     const [turmaSelecionada, setTurmaSelecionada] = useState<Turma | null>(null);
 
-    const [infoTurma, setInfoTurma] = useState<Turma | null>(null);
-
     const [carregandoDetalhe, setCarregandoDetalhe] = useState(false);
 
-    const abasRef = useRef<HTMLDivElement | null>(null);
+    // Paginação da tabela de turmas (client-side, mesmo paginador de gestaoAluno).
+    const [page, setPage] = useState(0);
+
+    const [size, setSize] = useState(PAGE_SIZES[0]);
+
+    // Expandir por linha (espelha o <p:rowExpansion> de gestaoAluno.xhtml):
+    // mostra unidade/sala, dias de aula e alunos da turma.
+    const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+    const [infoCache, setInfoCache] = useState<Record<number, TurmaInformacoes>>({});
+
+    const [infoLoading, setInfoLoading] = useState<Record<number, boolean>>({});
 
 
 
@@ -540,9 +680,9 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
         setCarregandoTurmas(true);
 
-        setPainel(null);
+        setPage(0);
 
-        setAbasAbertas([]);
+        setExpanded({});
 
         try {
 
@@ -677,11 +817,11 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
             setOcorrenciasAula(data);
 
-            if (data.length === 0) notificar('erro', 'Nenhuma ocorrÃªncia encontrada para esta turma.');
+            if (data.length === 0) notificar('erro', 'Nenhuma ocorrência encontrada para esta turma.');
 
         } catch (e) {
 
-            notificar('erro', 'Erro ao carregar as ocorrÃªncias da turma.');
+            notificar('erro', 'Erro ao carregar as ocorrências da turma.');
 
         }
 
@@ -705,7 +845,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
         } catch (e) {
 
-            notificar('erro', 'Erro ao carregar as aulas da ocorrÃªncia.');
+            notificar('erro', 'Erro ao carregar as aulas da ocorrência.');
 
         }
 
@@ -753,7 +893,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
             if (aulaForm.id === aula.id) setAulaForm({id: null, nome: '', descricao: '', anexos: []});
 
-            notificar('sucesso', 'Aula excluÃ­da com sucesso.');
+            notificar('sucesso', 'Aula excluída com sucesso.');
 
         } catch (e) {
 
@@ -847,7 +987,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
         } catch (e) {
 
-            // silencioso: apenas anexos sÃ£o recarregados
+            // silencioso: apenas anexos são recarregados
 
         }
 
@@ -953,7 +1093,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
         if (alteradas.length === 0) {
 
-            notificar('erro', 'Nenhuma presenÃ§a foi alterada.');
+            notificar('erro', 'Nenhuma presença foi alterada.');
 
             return;
 
@@ -1104,6 +1244,42 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
         setCarregandoDetalhe(false);
     }, [caderno, notas, registrosEdit, aulasDaOcorrencia, ocorrenciasAula, aviso]);
 
+    // Modo detalhe: abre o painel da aba fixa ao montar a instância.
+    const detalheFixoRef = useRef(false);
+    useEffect(() => {
+        if (!detalheFixo || detalheFixoRef.current) return;
+        detalheFixoRef.current = true;
+        const t = detalheFixo.turma;
+        if (detalheFixo.acao === 'caderno') void abrirCaderno(t);
+        else if (detalheFixo.acao === 'notas') void abrirNotas(t);
+        else if (detalheFixo.acao === 'registro') void abrirRegistro(t);
+        else if (detalheFixo.acao === 'aula') void abrirAula(t);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [detalheFixo]);
+
+    const totalTurmas = turmas.length;
+    const totalPages = Math.max(1, Math.ceil(totalTurmas / size));
+    const paginaSegura = Math.min(page, totalPages - 1);
+    const turmasPagina = turmas.slice(paginaSegura * size, paginaSegura * size + size);
+    const colSpanTurmas = 8;
+
+    async function alternarExpand(t: Turma) {
+        const key = String(t.id);
+        const abrindo = !expanded[key];
+        setExpanded((prev) => ({...prev, [key]: !prev[key]}));
+        if (abrindo && !infoCache[t.id] && !infoLoading[t.id]) {
+            setInfoLoading((prev) => ({...prev, [t.id]: true}));
+            try {
+                const {data} = await api.get<TurmaInformacoes>(`/api/professor/gestao-professor/turmas/${t.id}/informacoes`);
+                setInfoCache((prev) => ({...prev, [t.id]: data}));
+            } catch {
+                // silencioso: a linha expandida mostra a falha abaixo
+            } finally {
+                setInfoLoading((prev) => ({...prev, [t.id]: false}));
+            }
+        }
+    }
+
     const hoje = new Date();
 
     hoje.setHours(0, 0, 0, 0);
@@ -1114,7 +1290,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
         <div>
 
-            <div className="gp-procurar">
+            {!detalheFixo && (<div className="gp-procurar">
 
 <AutoComplete
 
@@ -1163,12 +1339,13 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
     </button>
 
             </div>
+            )}
 
             <Aviso tipo={erro ? 'erro' : aviso.tipo} texto={erro || aviso.texto}/>
 
 
 
-            <Painel
+            {!detalheFixo && (<Painel
 
                 titulo="Menu Turmas"
 
@@ -1185,6 +1362,8 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 <thead>
 
                         <tr>
+
+                            <th className="col-toggle"></th>
 
                             <th>Turma</th>
 
@@ -1206,9 +1385,32 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                         <tbody>
 
-                        {turmas.map((t) => (
+                        {turmasPagina.flatMap((t) => {
 
-                            <tr key={t.id}>
+                            const rowKey = String(t.id);
+
+                            const isOpen = Boolean(expanded[rowKey]);
+
+                            const info = infoCache[t.id];
+
+                            const row = (
+
+                            <tr key={`${rowKey}-row`}>
+
+                                <td className="col-toggle">
+
+                                    <button
+                                        type="button"
+                                        className="btn-row-toggle"
+                                        title={isOpen ? 'Recolher' : 'Expandir'}
+                                        onClick={() => alternarExpand(t)}
+                                    >
+
+                                        {isOpen ? '▼' : '▶'}
+
+                                    </button>
+
+                                </td>
 
                                 <td>{t.id}</td>
 
@@ -1236,7 +1438,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                                         <button className="gp-btn gp-btn-acoes btnstop" title="Caderno chamada"
 
-                                                onClick={() => abrirCaderno(t)}>
+                                                onClick={() => onAbrirDetalhe('caderno', t)}>
 
                                             <BookOpen className="icon" />
 
@@ -1244,7 +1446,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                                         <button className="gp-btn gp-btn-acoes btngreen" title="Notas"
 
-                                                onClick={() => abrirNotas(t)}>
+                                                onClick={() => onAbrirDetalhe('notas', t)}>
 
                                             <Pencil className="icon" />
 
@@ -1252,7 +1454,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                                         <button className="gp-btn gp-btn-acoes btnblack" title="Registros de aula"
 
-                                                onClick={() => abrirRegistro(t)}>
+                                                onClick={() => onAbrirDetalhe('registro', t)}>
 
                                             <FileText className="icon" />
 
@@ -1260,7 +1462,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                                         <button className="gp-btn gp-btn-acoes" title="Aulas"
 
-                                                onClick={() => abrirAula(t)}>
+                                                onClick={() => onAbrirDetalhe('aula', t)}>
 
                                             <Clapperboard className="icon" />
 
@@ -1272,7 +1474,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                                 <button className="gp-btn gp-btn-acoes btnyellow" title="Informações"
 
-                                        onClick={() => setInfoTurma(t)}>
+                                        onClick={() => onAbrirDetalhe('info', t)}>
 
                                     <Info className="icon" />
 
@@ -1282,13 +1484,99 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                             </tr>
 
-                        ))}
+                            );
 
-                        {turmas.length === 0 && (
+                            if (!isOpen) return [row];
+
+                            return [
+
+                                row,
+
+                                <tr key={`${rowKey}-detail`} className="row-detail">
+
+                                    <td colSpan={colSpanTurmas}>
+
+                                        {info ? (
+
+                                            <div className="gp-expandido">
+
+                                                <div className="gp-expandido-linha">
+                                                    <b>Unidade:</b> {info.unidade || '—'}{' '}
+                                                    <b>Sala:</b> {info.sala || '—'}
+                                                </div>
+
+                                                <h4>Dias de aula ({info.diasAula.length})</h4>
+
+                                                {info.diasAula.length === 0 ? (
+                                                    <div className="gp-vazio">Nenhum dia de aula.</div>
+                                                ) : (
+                                                    <table className="gp-table">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>Dia</th>
+                                                            <th>Dia da semana</th>
+                                                            <th>Turno</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        {info.diasAula.map((d, i) => (
+                                                            <tr key={i}>
+                                                                <td>{d.data}</td>
+                                                                <td>{d.diaSemana}</td>
+                                                                <td>{d.turno}</td>
+                                                            </tr>
+                                                        ))}
+                                                        </tbody>
+                                                    </table>
+                                                )}
+
+                                                <h4>Alunos ({info.alunos.length})</h4>
+
+                                                {info.alunos.length === 0 ? (
+                                                    <div className="gp-vazio">Nenhum aluno matriculado.</div>
+                                                ) : (
+                                                    <table className="gp-table">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>Aluno</th>
+                                                            <th>Telefone</th>
+                                                            <th>Celular</th>
+                                                            <th>Contratante</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        {info.alunos.map((a) => (
+                                                            <tr key={a.matriculaId}>
+                                                                <td>{a.aluno}</td>
+                                                                <td>{a.telefone}</td>
+                                                                <td>{a.celular}</td>
+                                                                <td>{a.contratante}</td>
+                                                            </tr>
+                                                        ))}
+                                                        </tbody>
+                                                    </table>
+                                                )}
+
+                                            </div>
+                                        ) : infoLoading[t.id] ? (
+                                            <div className="gp-vazio">Carregando...</div>
+                                        ) : (
+                                            <div className="gp-vazio">Não foi possível carregar os detalhes da turma.</div>
+                                        )}
+
+                                    </td>
+
+                                </tr>,
+
+                            ];
+
+                        })}
+
+                        {turmasPagina.length === 0 && (
 
                             <tr>
 
-                                <td colSpan={7} className="gp-vazio">
+                                <td colSpan={colSpanTurmas} className="gp-vazio">
 
                                     Nenhum registro.
 
@@ -1300,62 +1588,89 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                         </tbody>
 
+                        <tfoot>
+
+                            <tr>
+
+                                <td colSpan={colSpanTurmas} className="data-table-paginator">
+
+                                    <button onClick={() => setPage((current) => Math.max(0, current - 1))}
+
+                                            disabled={paginaSegura === 0 || carregandoTurmas}>
+
+                                        Anterior
+
+                                    </button>
+
+                                    <span>
+
+                                        Página {paginaSegura + 1} de {totalPages}
+
+                                    </span>
+
+                                    <button
+
+                                        onClick={() => setPage((current) => Math.min(totalPages - 1, current + 1))}
+
+                                        disabled={paginaSegura >= totalPages - 1 || carregandoTurmas}
+
+                                    >
+
+                                        Próxima
+
+                                    </button>
+
+                                    <label>
+
+                                        Registros por página
+
+                                        <select
+
+                                            value={size}
+
+                                            onChange={(event) => {
+
+                                                setSize(Number(event.target.value));
+
+                                                setPage(0);
+
+                                            }}
+
+                                        >
+
+                                            {PAGE_SIZES.map((option) => (
+
+                                                <option key={option} value={option}>
+
+                                                    {option}
+
+                                                </option>
+
+                                            ))}
+
+                                        </select>
+
+                                    </label>
+
+                                    <span>Total: {totalTurmas}</span>
+
+                                </td>
+
+                            </tr>
+
+                        </tfoot>
+
                     </table>
 
                 </div>
 
             </Painel>
-
-
-            {abasAbertas.length > 0 && (
-
-                <div className="tabs-container gp-abas-detalhe" ref={abasRef}>
-
-                    <nav className="tabs">
-
-                        {abasAbertas.map((aba) => (
-
-                            <button
-                                key={aba}
-                                type="button"
-                                className={painel === aba ? 'tab tab-active' : 'tab'}
-                                onClick={() => setPainel(aba)}
-                                title={turmaSelecionada ? `${ABAS_TITULOS[aba]} - Turma ${turmaSelecionada.id}` : ABAS_TITULOS[aba]}
-                            >
-                                {ABAS_TITULOS[aba]}
-                                <span
-                                    role="button"
-                                    aria-label={`Fechar ${ABAS_TITULOS[aba]}`}
-                                    tabIndex={0}
-                                    className="gp-aba-fechar"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        fecharAba(aba);
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' || e.key === ' ') {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            fecharAba(aba);
-                                        }
-                                    }}
-                                >
-                                    <X className="icon" />
-                                </span>
-                            </button>
-
-                        ))}
-
-                    </nav>
-
-                </div>
-
             )}
 
 
-            {painel && carregandoDetalhe && (
+            {acaoAtiva && carregandoDetalhe && (
 
-                <Painel titulo={ABAS_TITULOS[painel]} colapsado={false} onToggle={() => undefined}>
+                <Painel titulo={TITULO_ACAO[acaoAtiva]} colapsado={false} onToggle={() => undefined}>
 
                     <div className="gp-vazio">Carregando...</div>
 
@@ -1364,7 +1679,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
             )}
 
 
-            {painel === 'caderno' && caderno && (
+            {acaoAtiva === 'caderno' && caderno && (
 
                 <Painel titulo="Caderno de Chamada" colapsado={false} onToggle={() => undefined}>
 
@@ -1380,7 +1695,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                                     <span key={k} className="gp-legenda-item">
 
-                                        <span className="gp-dot-legenda" style={{background: v.cor}}/>
+                                        <span className="gp-dot-legenda" style={{background: v.cor}} title={v.titulo}/>
 
                                         {v.titulo}
 
@@ -1452,7 +1767,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                                     }}
 
-                                    title={`MÃ¡ximo de aulas ${caderno.ocorrencias.length}`}
+                                    title={`Máximo de aulas ${caderno.ocorrencias.length}`}
 
                                 />
 
@@ -1602,7 +1917,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
 
 
-            {painel === 'notas' && notas && (
+            {acaoAtiva === 'notas' && notas && (
 
                 <Painel titulo="Notas" colapsado={false} onToggle={() => undefined}>
 
@@ -1614,7 +1929,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                             <div>
 
-                                <b>MÃ©dia aprovaÃ§Ã£o sem exame: </b>
+                                <b>Média aprovação sem exame: </b>
 
                                 <span>{notas.mediaSemExame ?? '-'}</span>
 
@@ -1624,7 +1939,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                                 <div>
 
-                                    <b>MÃ©dia aprovaÃ§Ã£o com exame: </b>
+                                    <b>Média aprovação com exame: </b>
 
                                     <span>{notas.mediaFinal ?? '-'}</span>
 
@@ -1634,7 +1949,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                             <div>
 
-                                <b>Nota mÃ¡xima: </b>
+                                <b>Nota máxima: </b>
 
                                 <span>{notas.notaMaxima ?? '-'}</span>
 
@@ -1860,7 +2175,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
 
 
-            {painel === 'registro' && turmaSelecionada && (
+            {acaoAtiva === 'registro' && turmaSelecionada && (
 
                 <Painel titulo="Registrar de aula" colapsado={false} onToggle={() => undefined}>
 
@@ -1922,7 +2237,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
 
 
-            {painel === 'aula' && turmaSelecionada && (
+            {acaoAtiva === 'aula' && turmaSelecionada && (
 
                 <Painel titulo="Aulas" colapsado={false} onToggle={() => undefined}>
 
@@ -1932,7 +2247,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                         <div className="gp-control-group gp-control-group-stretch">
 
-                            <span className="gp-control-label">OcorrÃªncia:</span>
+                            <span className="gp-control-label">Ocorrência:</span>
 
                             <select
 
@@ -1942,7 +2257,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                             >
 
-                                <option value="">Selecione a ocorrÃªncia...</option>
+                                <option value="">Selecione a ocorrência...</option>
 
                                 {ocorrenciasAula.map((o) => (
 
@@ -1992,7 +2307,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                                 <label className="gp-aula-label">
 
-                                    <span className="gp-aula-label-text">DescriÃ§Ã£o</span>
+                                    <span className="gp-aula-label-text">Descrição</span>
 
                                     <textarea
 
@@ -2002,7 +2317,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                                         onChange={(e) => setAulaForm((f) => ({...f, descricao: e.target.value}))}
 
-                                        placeholder="DescriÃ§Ã£o / conteÃºdo da aula"
+                                        placeholder="Descrição / conteúdo da aula"
 
                                     />
 
@@ -2096,7 +2411,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                                             >
 
-                                                <option value="VIDEO">VÃ­deo</option>
+                                                <option value="VIDEO">Vídeo</option>
 
                                                 <option value="PDF">Documento (PDF)</option>
 
@@ -2203,11 +2518,11 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                                         <th>Nome</th>
 
-                                        <th>DescriÃ§Ã£o</th>
+                                        <th>Descrição</th>
 
                                         <th>Anexos</th>
 
-                                        <th>AÃ§Ãµes</th>
+                                        <th>Ações</th>
 
                                     </tr>
 
@@ -2237,7 +2552,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                                                 {(anexosDaAula[aula.id] ?? []).length === 0 &&
 
-                                                <span className="gp-vazio">â€”</span>}
+                                                <span className="gp-vazio">—</span>}
 
                                             </td>
 
@@ -2247,7 +2562,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                                                         onClick={() => editarAula(aula)}>
 
-                                                    Ã¢Å“ÂÃ¯Â¸Â
+                                                    <Pencil className="icon" />
 
                                                 </button>
 
@@ -2271,7 +2586,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                                             <td colSpan={4} className="gp-vazio">
 
-                                                Nenhuma aula registrada nesta ocorrÃªncia.
+                                                Nenhuma aula registrada nesta ocorrência.
 
                                             </td>
 
@@ -2289,15 +2604,21 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
                     )}
 
-                    {ocorrenciasAula.length === 0 && <div className="gp-vazio">Nenhuma ocorrÃªncia encontrada.</div>}
+                    {ocorrenciasAula.length === 0 && <div className="gp-vazio">Nenhuma ocorrência encontrada.</div>}
 
                 </Painel>
 
             )}
 
-            {infoTurma && (
+            {detalheFixo?.acao === 'info' && (
 
-                <InformacoesModal turmaId={infoTurma.id} onClose={() => setInfoTurma(null)} />
+                <Painel titulo={`Informações da Turma ${detalheFixo.turma.id}`} colapsado={false} onToggle={() => undefined}>
+
+                    <InfoTurma turma={detalheFixo.turma}/>
+
+                    <InformacoesConteudo turmaId={detalheFixo.turma.id}/>
+
+                </Painel>
 
             )}
 
@@ -2371,7 +2692,7 @@ function DisponibilidadeTab({professorId}: { professorId: number }) {
 
     const LEGENDA = [
 
-        {className: 'evento-green', label: 'DisponÃ­vel'},
+        {className: 'evento-green', label: 'Disponível'},
 
         {className: 'evento-black', label: 'Aula (ocupado)'},
 

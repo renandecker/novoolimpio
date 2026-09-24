@@ -1,0 +1,1 @@
+ALTER TABLE public.rel_filtro ADD COLUMN IF NOT EXISTS dados_json text;

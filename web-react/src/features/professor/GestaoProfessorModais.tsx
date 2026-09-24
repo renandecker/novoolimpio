@@ -115,19 +115,19 @@ function Campo({rotulo, valor}: { rotulo: string; valor: ReactNode }) {
     );
 }
 
-export function InformacoesModal({turmaId, onClose}: { turmaId: number; onClose: () => void }) {
+export function InformacoesConteudo({turmaId}: { turmaId: number }) {
     const q = useQuery({
         queryKey: ['gestao-professor', 'informacoes', turmaId],
         queryFn: async () => (await api.get<TurmaInformacoes>(`/api/professor/gestao-professor/turmas/${turmaId}/informacoes`)).data,
     });
 
-    if (q.isLoading) return <ModalFrame titulo="Informações da Turma" onClose={onClose}><Carregando /></ModalFrame>;
-    if (q.isError || !q.data) return <ModalFrame titulo="Informações da Turma" onClose={onClose}><Erro mensagem={apiError(q.error)} /></ModalFrame>;
+    if (q.isLoading) return <Carregando />;
+    if (q.isError || !q.data) return <Erro mensagem={apiError(q.error)} />;
 
     const info = q.data;
 
     return (
-        <ModalFrame titulo={`Informações da Turma ${info.turmaId} - ${info.componenteCurricular}`}>
+        <>
             <div className="form-grid">
                 <Campo rotulo="Unidade" valor={info.unidade || '—'} />
                 <Campo rotulo="Sala" valor={info.sala || '—'} />
@@ -174,6 +174,24 @@ export function InformacoesModal({turmaId, onClose}: { turmaId: number; onClose:
                 ]}
                 linhas={(info.alunos ?? []) as unknown as Record<string, unknown>[]}
             />
+        </>
+    );
+}
+
+export function InformacoesModal({turmaId, onClose}: { turmaId: number; onClose: () => void }) {
+    const q = useQuery({
+        queryKey: ['gestao-professor', 'informacoes', turmaId],
+        queryFn: async () => (await api.get<TurmaInformacoes>(`/api/professor/gestao-professor/turmas/${turmaId}/informacoes`)).data,
+    });
+
+    if (q.isLoading) return <ModalFrame titulo="Informações da Turma" onClose={onClose}><Carregando /></ModalFrame>;
+    if (q.isError || !q.data) return <ModalFrame titulo="Informações da Turma" onClose={onClose}><Erro mensagem={apiError(q.error)} /></ModalFrame>;
+
+    const info = q.data;
+
+    return (
+        <ModalFrame titulo={`Informações da Turma ${info.turmaId} - ${info.componenteCurricular}`} onClose={onClose}>
+            <InformacoesConteudo turmaId={turmaId} />
         </ModalFrame>
     );
 }

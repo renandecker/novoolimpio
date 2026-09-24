@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import type {FiltroRelatorioWrapper, FilterDimensionType, TempoFilterState, DescritivoFilterState, FixoFilterState, FilterState, QueryOperation, FiltroRelatorio} from '../types/types';
+import type {FiltroRelatorioWrapper, FilterDimensionType, TempoFilterState, DescritivoFilterState, FixoFilterState, FilterState, QueryOperation, FiltroRelatorio, ReportFilterSqlValues} from '../types/types';
 import {STRING_OPERATIONS} from '../types/types';
 import {Modal} from './Modal';
 import {BooleanField} from './BooleanField';
@@ -7,7 +7,7 @@ import {BooleanField} from './BooleanField';
 interface ReportFiltersProps {
     filtros: FiltroRelatorioWrapper[];
     onFiltersChange: (filtros: FiltroRelatorioWrapper[]) => void;
-    onApplyFilters: () => void;
+    onApplyFilters: (filtros?: ReportFilterSqlValues) => void;
 }
 
 const TEMPO_TYPES = [
@@ -61,10 +61,21 @@ export function ReportFilters({filtros, onFiltersChange, onApplyFilters}: Report
         fetchRelacoes();
     }, [filtros]);
 
-    const handleFiltroClick = (filtro: FiltroRelatorioWrapper) => {
+    const handleFiltroClick = async (filtro: FiltroRelatorioWrapper) => {
         if (!filtro.filtroRelatorio.exibirFiltro) return;
+        const fr = filtro.filtroRelatorio;
         setActiveFiltro(filtro);
         setOpen(true);
+        if (fr.dimensao.tipoInfo === 'DESCRITIVO' && (!availableInformacoes[fr.id] || availableInformacoes[fr.id].length === 0)) {
+            try {
+                const res = await api.get<any>(`/api/relatorios/filtros/${fr.id}/relacoes`);
+                const data = res.data ?? {};
+                const list = Array.isArray(data.informacoes) ? data.informacoes : (Array.isArray(data) ? data : []);
+                setAvailableInformacoes(prev => ({...prev, [fr.id]: list}));
+            } catch {
+                setAvailableInformacoes(prev => ({...prev, [fr.id]: []}));
+            }
+        }
     };
 
     const handleClose = () => {
@@ -84,8 +95,34 @@ export function ReportFilters({filtros, onFiltersChange, onApplyFilters}: Report
             });
             onFiltersChange(updatedFiltros);
         }
-        onApplyFilters();
+        onApplyFilters(buildSqlValues());
         handleClose();
+    };
+
+    const buildSqlValues = (): ReportFilterSqlValues => {
+        const values: ReportFilterSqlValues = {};
+        for (const filtro of filtros) {
+            const fr = filtro.filtroRelatorio;
+            const state = filterStates[fr.id];
+            if (!state || !isFilterActive(fr, state)) continue;
+            if (fr.dimensao.tipoInfo === 'TEMPO') {
+                const tempoState = state as TempoFilterState;
+                if (tempoState.tipo === 1) {
+                    values[fr.nome] = {operation: tempoState.queryOperation || 'EQUALS', value: tempoState.dataInicio || ''};
+                } else if (tempoState.tipo === 2) {
+                    values[fr.nome] = {operation: '=', value: tempoState.campoDinamico || ''};
+                } else if (tempoState.tipo === 3) {
+                    values[fr.nome] = {operation: 'BETWEEN', value: tempoState.dataInicio || '', value2: tempoState.dataFim || ''};
+                }
+            } else if (fr.dimensao.tipoInfo === 'DESCRITIVO') {
+                const descState = state as DescritivoFilterState;
+                values[fr.nome] = {operation: 'IN', value: descState.listaTodosSelected.map(s => s.informacao).join(',')};
+            } else if (fr.tipo === 'FIXO') {
+                const fixoState = state as FixoFilterState;
+                values[fr.nome] = {selected: fixoState.selected};
+            }
+        }
+        return values;
     };
 
     const isFilterActive = (fr: FiltroRelatorio, state: FilterState | undefined): boolean => {

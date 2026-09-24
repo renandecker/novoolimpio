@@ -383,6 +383,16 @@
     border: 1px solid rgba(0, 0, 0, 0.25);
 }
 
+/* Bolinhas da legenda de presenças (espelham ponto_*.png de extracted_aceso) */
+.gp-dot-legenda {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    flex: none;
+}
+
 .gp-dot-btn {
     width: 18px;
     height: 18px;
@@ -712,4 +722,27 @@
 .gp-aba-fechar .icon {
     width: 12px;
     height: 12px;
+}
+
+/* ---- Linha expansível da tabela de turmas (espelha gestaoAluno) ---- */
+.gp-table .col-toggle {
+    width: 30px;
+    text-align: center;
+}
+
+.gp-table tr.row-detail td {
+    background-color: #f4f7fa;
+    border-top: none;
+}
+
+.gp-expandido {
+    padding: 6px 2px;
+}
+
+.gp-expandido-linha {
+    margin-bottom: 8px;
+}
+
+.gp-expandido h4 {
+    margin: 10px 0 6px;
 }

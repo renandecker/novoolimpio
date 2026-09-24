@@ -34,6 +34,15 @@ public class TipoCanalController {
     }
 
     @POST
+    @Path("/search")
+    public Uni<PagedResponse<TipoCanalResponse>> search(
+            @QueryParam("page") Integer page,
+            @QueryParam("size") Integer size,
+            Object filters) {
+        return service.paged(page == null ? 0 : page, size == null ? 10 : size);
+    }
+
+    @POST
     public Uni<Response> create(@Valid TipoCanalRequest r) {
         return service.create(r).map(item -> Response.status(Response.Status.CREATED).entity(item).build());
     }

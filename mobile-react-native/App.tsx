@@ -96,6 +96,7 @@ import ViewConfiguracaoListConfiguracaoMarketingListScreen
 import ViewConfiguracaoListConfiguracaoParcelaListScreen
     from './src/screens/ViewConfiguracaoListConfiguracaoParcelaListScreen';
 import ViewConfiguracaoListLayoutListScreen from './src/screens/ViewConfiguracaoListLayoutListScreen';
+import ConfiguracaoNotificacoesScreen from './src/features/notificacoes/ConfiguracaoNotificacoesScreen';
 import ViewConsultorConsultorListScreen from './src/screens/ViewConsultorConsultorListScreen';
 import ViewConsultorFormConsultorListScreen from './src/screens/ViewConsultorFormConsultorListScreen';
 
@@ -378,8 +379,9 @@ import ViewTipoTelefoneListTipoTelefoneListScreen from './src/screens/ViewTipoTe
 import ViewTipoUnidadeFormTipoUnidadeListScreen from './src/screens/ViewTipoUnidadeFormTipoUnidadeListScreen';
 import ViewTipoUnidadeListTipoUnidadeListScreen from './src/screens/ViewTipoUnidadeListTipoUnidadeListScreen';
 
-import ViewTurmaFormAjusteCalendarioListScreen from './src/screens/ViewTurmaFormAjusteCalendarioListScreen';
-import ViewTurmaListTurmaFinalizandoListScreen from './src/screens/ViewTurmaListTurmaFinalizandoListScreen';
+import ViewTurmaFormAjusteCalendarioListScreen from './src/features/professor/ViewTurmaFormAjusteCalendarioListScreen';
+import ViewTurmaListTurmaListScreen from './src/features/professor/ViewTurmaListTurmaListScreen';
+import ViewTurmaListTurmaFinalizandoListScreen from './src/features/professor/ViewTurmaListTurmaFinalizandoListScreen';
 import ViewTurmaRecriarCalendarioAcademicoListScreen from './src/features/professor/ViewTurmaRecriarCalendarioAcademicoListScreen';
 
 import ViewTurnoFormTurnoListScreen from './src/screens/ViewTurnoFormTurnoListScreen';
@@ -551,6 +553,7 @@ function AppRoutes() {
         <Stack.Screen name='view/configuracao/listConfiguracaoParcela'
                       component={ViewConfiguracaoListConfiguracaoParcelaListScreen}/>
         <Stack.Screen name='view/configuracao/listLayout' component={ViewConfiguracaoListLayoutListScreen}/>
+        <Stack.Screen name='config/notificacoes' component={ConfiguracaoNotificacoesScreen} options={{title: 'Configuração de Notificações'}}/>
         <Stack.Screen name='view/consultor/consultor' component={ViewConsultorConsultorListScreen}/>
         <Stack.Screen name='view/consultor/formConsultor' component={ViewConsultorFormConsultorListScreen}/>
 
@@ -846,6 +849,7 @@ function AppRoutes() {
         <Stack.Screen name='view/tipoUnidade/listTipoUnidade' component={ViewTipoUnidadeListTipoUnidadeListScreen}/>
 
         <Stack.Screen name='view/turma/formAjusteCalendario' component={ViewTurmaFormAjusteCalendarioListScreen}/>
+        <Stack.Screen name='view/turma/listTurma' component={ViewTurmaListTurmaListScreen}/>
         <Stack.Screen name='view/turma/listTurmaFinalizando' component={ViewTurmaListTurmaFinalizandoListScreen}/>
         <Stack.Screen name='view/turma/recriarCalendarioAcademico' component={ViewTurmaRecriarCalendarioAcademicoListScreen}/>
         <Stack.Screen name='view/turno/formTurno' component={ViewTurnoFormTurnoListScreen}/>

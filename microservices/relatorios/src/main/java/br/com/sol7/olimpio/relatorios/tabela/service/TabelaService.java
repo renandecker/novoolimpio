@@ -139,20 +139,32 @@ public class TabelaService {
         boolean possuiAgregacao = false;
         for (Object configuracao : configuracoes) {
             Object[] coluna = (Object[]) configuracao;
-            boolean dimensao = coluna[1] != null;
-            String nome = texto(dimensao ? coluna[1] : coluna[4]);
-            String tipoInfo = texto(dimensao ? coluna[2] : coluna[5]);
-            String base = semAlias(texto(dimensao ? coluna[3] : coluna[6]));
+            String dimNome = texto(coluna[1]);
+            String dimTipo = texto(coluna[2]);
+            String dimExpr = semAlias(texto(coluna[3]));
+            String medNome = texto(coluna[4]);
+            String medTipo = texto(coluna[5]);
+            String medExpr = semAlias(texto(coluna[6]));
+            
+            boolean dimensao = !dimExpr.isBlank();
+            String nome = dimensao ? dimNome : medNome;
+            String tipoInfo = dimensao ? dimTipo : medTipo;
+            String base = dimensao ? dimExpr : medExpr;
+            
             validarFragmento(base);
+            if (base.isBlank()) continue;
+            
             String expressao = dimensao ? base : expressaoMedida(base, tipoInfo);
             possuiAgregacao |= !dimensao && ("CONTAGEM".equalsIgnoreCase(tipoInfo) || "CONTAGEM-DISTINTA".equalsIgnoreCase(tipoInfo));
             if (dimensao) grupos.add(base);
-            expressoes.add(expressao);
+            expressoes.add(expressao + " AS " + "\"" + (nome.isBlank() ? "Coluna " + (cabecalhos.size() + 1) : nome.replace("\"", "")) + "\"");
             cabecalhos.add(nome.isBlank() ? "Coluna " + (cabecalhos.size() + 1) : nome);
         }
+        if (expressoes.isEmpty()) expressoes.add("1 AS col");
         StringBuilder sql = new StringBuilder("SELECT ").append(String.join(", ", expressoes)).append(' ').append(origem);
         if (!condicao.isBlank()) sql.append(' ').append(condicao);
         if (possuiAgregacao && !grupos.isEmpty()) sql.append(" GROUP BY ").append(String.join(", ", grupos));
+        LOG.infof("SQL Montado: %s", sql.toString());
         return new SqlMontado(sql.toString(), cabecalhos);
     }
 
@@ -199,7 +211,23 @@ public class TabelaService {
     }
 
     private String semAlias(String coluna) {
-        return coluna.replaceFirst("(?i)\\s+as\\s+.*$", "").trim();
+        if (coluna == null) return "";
+        String limpa = Arrays.stream(coluna.split("\n"))
+                .filter(linha -> !linha.trim().startsWith("--"))
+                .collect(Collectors.joining(" "));
+        // Remove trailing AS alias (handles both "as alias" and "as \"alias with spaces\"")
+        int lastAs = limpa.toLowerCase().lastIndexOf(" as ");
+        if (lastAs > 0) {
+            String afterAs = limpa.substring(lastAs + 4).trim();
+            // Check if it's a simple alias (no spaces unless quoted, no parentheses)
+            if (!afterAs.isEmpty() && !afterAs.contains("(") && !afterAs.contains(")")) {
+                // Also check if it's a quoted alias like "Nome Aluno"
+                if (!afterAs.contains(" ") || (afterAs.startsWith("\"") && afterAs.endsWith("\""))) {
+                    return limpa.substring(0, lastAs).trim();
+                }
+            }
+        }
+        return limpa.trim();
     }
 
     private String texto(Object valor) {

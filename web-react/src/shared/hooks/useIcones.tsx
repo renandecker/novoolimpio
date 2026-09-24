@@ -201,11 +201,15 @@ export function useMenuIcon() {
             return stored;
         }
         
-        if (stored && stored.startsWith('fa ')) {
-            const icone = getIconeByClasse(stored);
+        const isFaClass = stored.startsWith('fa ') || stored.startsWith('fas ') || stored.startsWith('far ') || stored.startsWith('fab ') || stored.includes('fa-');
+        
+        if (stored && isFaClass) {
+            const cleanStored = (stored.startsWith('fa ') || stored.startsWith('fas ') || stored.startsWith('far ') || stored.startsWith('fab ')) ? stored : `fa ${stored}`;
+            const icone = getIconeByClasse(cleanStored) || getIconeByClasse(stored);
             if (icone) {
                 return renderFaIcon(icone.classe, icone.versao);
             }
+            return <i className={cleanStored} aria-hidden="true" />;
         }
         
         if (loaded && icones.length > 0) {

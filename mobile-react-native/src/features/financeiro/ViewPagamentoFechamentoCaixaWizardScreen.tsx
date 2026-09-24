@@ -110,6 +110,11 @@ interface FechamentoCaixaData {
     valorExtra: string;
     movimentoId: string;
     tipoPagamentoExtra: TipoPagamento;
+    categoriaFinanceiraId: string;
+    tipoHistoricoId: string;
+    documentoExtra: string;
+    quantidadeExtra: string;
+    especieExtra: string;
 
     // Sangria
     valorSangria: string;
@@ -140,6 +145,11 @@ const initialData: FechamentoCaixaData = {
     valorExtra: '',
     movimentoId: '',
     tipoPagamentoExtra: 'DINHEIRO',
+    categoriaFinanceiraId: '',
+    tipoHistoricoId: '',
+    documentoExtra: '',
+    quantidadeExtra: '',
+    especieExtra: '',
     valorSangria: '',
     totais: null,
 };
@@ -428,10 +438,18 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                 tipoPagamento: state.tipoPagamentoExtra,
                 caixaId: caixa.id,
                 usuarioId: Number(state.usuarioId),
+                tipoMovimentoId: state.categoriaFinanceiraId ? Number(state.categoriaFinanceiraId) : null,
+                tipoHistoricoId: state.tipoHistoricoId ? Number(state.tipoHistoricoId) : null,
+                documento: state.documentoExtra || null,
+                quantidade: state.quantidadeExtra ? Number(state.quantidadeExtra) : null,
+                especie: state.especieExtra || null,
                 valorTroco: 0,
             });
             setMensagem('Movimentação registrada com sucesso!');
-            setFields({historico: '', valorExtra: '', movimentoId: ''});
+            setFields({
+                historico: '', valorExtra: '', movimentoId: '', categoriaFinanceiraId: '',
+                tipoHistoricoId: '', documentoExtra: '', quantidadeExtra: '', especieExtra: ''
+            });
         } catch (e: any) {
             setErro(e?.response?.data?.message ?? 'Erro ao registrar movimentação!');
         } finally {
@@ -927,10 +945,10 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
             {state.movSubTab === 'extra' && (
                 <View>
                     <View style={styles.fieldFull}>
-                        <Text style={styles.fieldLabel}>Descrição / Histórico *</Text>
+                        <Text style={styles.fieldLabel}>Histórico *</Text>
                         <TextInput style={styles.input} value={state.historico}
                                    onChangeText={(v) => setField('historico', v)}
-                                   placeholder="Descrição da movimentação"/>
+                                   placeholder="Histórico"/>
                     </View>
                     <View style={styles.formRow}>
                         <View style={styles.fieldHalf}>
@@ -938,20 +956,6 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                             <TextInput style={styles.input} value={state.valorExtra}
                                        onChangeText={(v) => setField('valorExtra', v)} keyboardType="numeric"/>
                         </View>
-                        <AutoComplete
-                            label="Tipo de Movimento *"
-                            placeholder="Buscar movimento..."
-                            value={state.movimentoId ? {id: Number(state.movimentoId), label: ''} : null}
-                            onChange={(opt) => {
-                                setField('movimentoId', opt ? String(opt.id) : '');
-                                setMovimentoSearch(opt?.label || '');
-                            }}
-                            fetchOptions={fetchMovimento}
-                            minChars={2}
-                            style={styles.fieldHalf}
-                        />
-                    </View>
-                    <View style={styles.formRow}>
                         <View style={styles.fieldHalf}>
                             <Text style={styles.fieldLabel}>Forma de Pagamento</Text>
                             <AutoComplete
@@ -969,6 +973,58 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                                 minChars={0}
                                 style={styles.autoCompleteSmall}
                             />
+                        </View>
+                    </View>
+                    <View style={styles.formRow}>
+                        <AutoComplete
+                            label="Tipo Movimento *"
+                            placeholder="Selecione..."
+                            value={state.categoriaFinanceiraId ? {id: Number(state.categoriaFinanceiraId), label: ''} : null}
+                            onChange={(opt) => setField('categoriaFinanceiraId', opt ? String(opt.id) : '')}
+                            fetchOptions={fetchAutoComplete('/api/view/tipoMovimento/listTipoMovimento', 'id', 'descricao')}
+                            minChars={0}
+                            style={styles.fieldHalf}
+                        />
+                        <AutoComplete
+                            label="Movimento *"
+                            placeholder="Buscar movimento..."
+                            value={state.movimentoId ? {id: Number(state.movimentoId), label: ''} : null}
+                            onChange={(opt) => setField('movimentoId', opt ? String(opt.id) : '')}
+                            fetchOptions={fetchMovimento}
+                            minChars={2}
+                            style={styles.fieldHalf}
+                        />
+                    </View>
+                    <View style={styles.formRow}>
+                        <AutoComplete
+                            label="Tipo Histórico"
+                            placeholder="Selecione..."
+                            value={state.tipoHistoricoId ? {id: Number(state.tipoHistoricoId), label: ''} : null}
+                            onChange={(opt) => setField('tipoHistoricoId', opt ? String(opt.id) : '')}
+                            fetchOptions={fetchAutoComplete('/api/view/tipoHistorico/listTipoHistorico', 'id', 'descricao')}
+                            minChars={0}
+                            style={styles.fieldHalf}
+                        />
+                        <View style={styles.fieldHalf}>
+                            <Text style={styles.fieldLabel}>Documento</Text>
+                            <TextInput style={styles.input} value={state.documentoExtra}
+                                       onChangeText={(v) => setField('documentoExtra', v)}
+                                       placeholder="Documento"/>
+                        </View>
+                    </View>
+                    <View style={styles.formRow}>
+                        <View style={styles.fieldHalf}>
+                            <Text style={styles.fieldLabel}>Quantidade</Text>
+                            <TextInput style={styles.input} value={state.quantidadeExtra}
+                                       onChangeText={(v) => setField('quantidadeExtra', v)}
+                                       keyboardType="numeric"
+                                       placeholder="Quantidade"/>
+                        </View>
+                        <View style={styles.fieldHalf}>
+                            <Text style={styles.fieldLabel}>Espécie</Text>
+                            <TextInput style={styles.input} value={state.especieExtra}
+                                       onChangeText={(v) => setField('especieExtra', v)}
+                                       placeholder="Espécie"/>
                         </View>
                     </View>
                     <Pressable style={styles.primaryButton} onPress={registrarMovimentacaoExtra} disabled={loading}>

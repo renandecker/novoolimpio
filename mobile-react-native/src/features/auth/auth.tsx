@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {createContext, useContext, useEffect, useMemo, useState, type ReactNode} from 'react';
 import {api} from './api';
 import type {ModulePermissions, Modulo} from './types';
+import {inicializarPushNotifications, removerPushToken} from '../notificacoes/PushNotificationService';
 
 export type Session = {
     accessToken: string;
@@ -11,6 +12,7 @@ export type Session = {
     modulePermissions?: ModulePermissions;
     modules?: Modulo[];
     hierarquia?: string;
+    idUsuario?: number;
 };
 
 type Auth = {
@@ -61,17 +63,33 @@ const fetchModules = async (accessToken: string): Promise<Modulo[]> => {
 export function AuthProvider({children}: { children: ReactNode }) {
     const [session, setSession] = useState<Session | null>(null);
     const [ready, setReady] = useState(false);
+    const [pushCleanup, setPushCleanup] = useState<(() => void) | null>(null);
 
     useEffect(() => {
         AsyncStorage.getItem(KEY)
             .then((raw) => {
                 if (raw) {
                     const value = JSON.parse(raw) as Session;
-                    if (value.expiresAt * 1000 > Date.now()) setSession(value);
+                    if (value.expiresAt * 1000 > Date.now()) {
+                        setSession(value);
+                        // Inicializa push notifications ao restaurar sessão
+                        if (value.idUsuario) {
+                            inicializarPushNotifications(value.idUsuario)
+                                .then(({cleanup}) => setPushCleanup(cleanup))
+                                .catch(err => console.warn('Falha ao inicializar push notifications:', err));
+                        }
+                    }
                 }
             })
             .finally(() => setReady(true));
     }, []);
+
+    // Cleanup push listener on unmount
+    useEffect(() => {
+        return () => {
+            if (pushCleanup) pushCleanup();
+        };
+    }, [pushCleanup]);
 
     const value = useMemo<Auth>(
         () => ({
@@ -85,8 +103,21 @@ export function AuthProvider({children}: { children: ReactNode }) {
                 data.modules = await fetchModules(data.accessToken);
                 await AsyncStorage.setItem(KEY, JSON.stringify(data));
                 setSession(data);
+                // Inicializa push notifications após login
+                if (data.idUsuario) {
+                    inicializarPushNotifications(data.idUsuario)
+                        .then(({cleanup}) => setPushCleanup(cleanup))
+                        .catch(err => console.warn('Falha ao inicializar push notifications:', err));
+                }
             },
             async signOut() {
+                if (session?.idUsuario) {
+                    await removerPushToken(session.idUsuario);
+                }
+                if (pushCleanup) {
+                    pushCleanup();
+                    setPushCleanup(null);
+                }
                 await AsyncStorage.removeItem(KEY);
                 setSession(null);
             },

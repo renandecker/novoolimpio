@@ -1,6 +1,8 @@
 package br.com.sol7.olimpio.relatorios.disponivel;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -19,6 +21,7 @@ import br.com.sol7.olimpio.relatorios.organograma.service.OrganogramaService;
 import br.com.sol7.olimpio.relatorios.painel.service.PainelService;
 
 import java.util.List;
+import java.util.Map;
 
 @Path("/api/relatorios/relatorio/disponiveis")
 @Produces(MediaType.APPLICATION_JSON)
@@ -51,8 +54,10 @@ public class RelatorioDisponivelController {
     public Uni<RelatorioAbertoResponse> abrir(
             @PathParam("tipo") String tipo,
             @PathParam("id") Long id,
-            @HeaderParam("X-Authenticated-Username") String username) {
+            @HeaderParam("X-Authenticated-Username") String username,
+            @QueryParam("filtros") String filtrosJson) {
         String tipoNormalizado = tipo == null ? "" : tipo.toUpperCase();
+        Map<String, Object> filtros = parseFiltros(filtrosJson);
         return service.existeRelatorio(tipoNormalizado, id)
                 .onItem().transformToUni(existe -> {
                     if (!existe)
@@ -66,7 +71,7 @@ public class RelatorioDisponivelController {
                                             .chain(r -> tabelaService.executar(id)
                                                     .map(dados -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, dados)));
                                     case "GRAFICO", "PIZZA", "LINHA", "COMBINADO", "CIRCULAR", "BARRA_VERTICAL", "BARRA_HORIZONTAL" ->graficoService.find(id)
-                                            .chain(r -> graficoService.dados(id)
+                                            .chain(r -> graficoService.dados(id, filtros)
                                                     .map(dados -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, dados)));
                                     case "MAPA" ->mapaService.find(id)
                                             .chain(mapa -> mapaService.buscarPontos(id)
@@ -79,5 +84,17 @@ public class RelatorioDisponivelController {
                                 } ;
                             });
                 });
+    }
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    private Map<String, Object> parseFiltros(String filtrosJson) {
+        if (filtrosJson == null || filtrosJson.isBlank()) return null;
+        try {
+            return OBJECT_MAPPER.readValue(filtrosJson, new TypeReference<Map<String, Object>>() {
+            });
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

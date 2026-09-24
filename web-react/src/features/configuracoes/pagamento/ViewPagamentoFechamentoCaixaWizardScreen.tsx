@@ -206,6 +206,11 @@ interface FechamentoCaixaData {
     valorExtra: string;
     movimentoId: string;
     tipoPagamentoExtra: TipoPagamento;
+    categoriaFinanceiraId: string;
+    tipoHistoricoId: string;
+    documentoExtra: string;
+    quantidadeExtra: string;
+    especieExtra: string;
 
     // Sangria
     valorSangria: string;
@@ -239,6 +244,11 @@ const initialData: FechamentoCaixaData = {
     valorExtra: '',
     movimentoId: '',
     tipoPagamentoExtra: 'DINHEIRO',
+    categoriaFinanceiraId: '',
+    tipoHistoricoId: '',
+    documentoExtra: '',
+    quantidadeExtra: '',
+    especieExtra: '',
     valorSangria: '',
     totais: null,
 };
@@ -879,13 +889,26 @@ const fetchBandeira = fetchAutoComplete('/api/view/bandeira/listBandeira', 'id',
 
                 usuarioId: Number(data.usuarioId),
 
+                tipoMovimentoId: data.categoriaFinanceiraId ? Number(data.categoriaFinanceiraId) : null,
+
+                tipoHistoricoId: data.tipoHistoricoId ? Number(data.tipoHistoricoId) : null,
+
+                documento: data.documentoExtra || null,
+
+                quantidade: data.quantidadeExtra ? Number(data.quantidadeExtra) : null,
+
+                especie: data.especieExtra || null,
+
                 valorTroco: 0,
 
             });
 
             setMensagem('Movimentação registrada com sucesso!');
 
-            updateFields({historico: '', valorExtra: '', movimentoId: ''});
+            updateFields({
+                historico: '', valorExtra: '', movimentoId: '', categoriaFinanceiraId: '',
+                tipoHistoricoId: '', documentoExtra: '', quantidadeExtra: '', especiesExtra: ''
+            });
 
         } catch (e: any) {
 
@@ -1943,7 +1966,7 @@ const fetchBandeira = fetchAutoComplete('/api/view/bandeira/listBandeira', 'id',
 
                                                 <div className="field-group full">
 
-                                                    <label>Descrição / Histórico *</label>
+                                                    <label>Histórico *</label>
 
                                                     <input
 
@@ -1951,37 +1974,11 @@ const fetchBandeira = fetchAutoComplete('/api/view/bandeira/listBandeira', 'id',
 
                                                         onChange={(e) => updateField('historico', e.target.value)}
 
-                                                        placeholder="Descrição da movimentação"
+                                                        placeholder="Histórico"
 
                                                     />
 
                                                 </div>
-
-                                                <AutoComplete
-
-                                                    id="movimento"
-
-                                                    label="Tipo de Movimento *"
-
-                                                    placeholder="Buscar movimento..."
-
-                                                    value={data.movimentoId ? {
-
-                                                        id: Number(data.movimentoId),
-
-                                                        label: ''
-
-                                                    } : null}
-
-                                                    onChange={(opt) => updateField('movimentoId', opt ? String(opt.id) : '')}
-
-                                                    fetchOptions={fetchMovimento}
-
-                                                    fetchById={fetchMovimentoById}
-
-                                                    minChars={2}
-
-                                                />
 
                                                 <div className="field-group">
 
@@ -2022,6 +2019,146 @@ const fetchBandeira = fetchAutoComplete('/api/view/bandeira/listBandeira', 'id',
                                                         ))}
 
                                                     </select>
+
+                                                </div>
+
+                                                <div className="field-group">
+
+                                                    <label>Tipo Movimento *</label>
+
+                                                    <AutoComplete
+
+                                                        id="categoriaFinanceira"
+
+                                                        label=""
+
+                                                        placeholder="Selecione..."
+
+                                                        value={data.categoriaFinanceiraId ? {
+
+                                                            id: Number(data.categoriaFinanceiraId),
+
+                                                            label: ''
+
+                                                        } : null}
+
+                                                        onChange={(opt) => updateField('categoriaFinanceiraId', opt ? String(opt.id) : '')}
+
+                                                        fetchOptions={fetchCategoriaFinanceira}
+
+                                                        fetchById={fetchCategoriaFinanceiraById}
+
+                                                        minChars={0}
+
+                                                    />
+
+                                                </div>
+
+                                                <AutoComplete
+
+                                                    id="movimento"
+
+                                                    label="Movimento *"
+
+                                                    placeholder="Buscar movimento..."
+
+                                                    value={data.movimentoId ? {
+
+                                                        id: Number(data.movimentoId),
+
+                                                        label: ''
+
+                                                    } : null}
+
+                                                    onChange={(opt) => updateField('movimentoId', opt ? String(opt.id) : '')}
+
+                                                    fetchOptions={fetchMovimento}
+
+                                                    fetchById={fetchMovimentoById}
+
+                                                    minChars={2}
+
+                                                />
+
+                                                <div className="field-group">
+
+                                                    <label>Tipo Histórico</label>
+
+                                                    <AutoComplete
+
+                                                        id="tipoHistorico"
+
+                                                        label=""
+
+                                                        placeholder="Selecione..."
+
+                                                        value={data.tipoHistoricoId ? {
+
+                                                            id: Number(data.tipoHistoricoId),
+
+                                                            label: ''
+
+                                                        } : null}
+
+                                                        onChange={(opt) => updateField('tipoHistoricoId', opt ? String(opt.id) : '')}
+
+                                                        fetchOptions={fetchAutoComplete('/api/view/tipoHistorico/listTipoHistorico', 'id', 'descricao')}
+
+                                                        minChars={0}
+
+                                                    />
+
+                                                </div>
+
+                                                <div className="field-group">
+
+                                                    <label>Documento</label>
+
+                                                    <input
+
+                                                        value={data.documentoExtra || ''}
+
+                                                        onChange={(e) => updateField('documentoExtra', e.target.value)}
+
+                                                        placeholder="Documento"
+
+                                                    />
+
+                                                </div>
+
+                                                <div className="field-group">
+
+                                                    <label>Quantidade</label>
+
+                                                    <input
+
+                                                        type="number"
+
+                                                        step="1"
+
+                                                        value={data.quantidadeExtra || ''}
+
+                                                        onChange={(e) => updateField('quantidadeExtra', e.target.value)}
+
+                                                        placeholder="Quantidade"
+
+                                                    />
+
+                                                </div>
+
+                                                <div className="field-group">
+
+                                                    <label>Espécie</label>
+
+                                                    <input
+
+                                                        value={data.especieExtra || ''}
+
+                                                        onChange={(e) => updateField('especieExtra', e.target.value)}
+
+                                                        placeholder="Espécie"
+
+                                                    />
 
                                                 </div>
 

@@ -100,6 +100,7 @@ export { default as ViewConfiguracaoListConfiguracaoListScreen } from '../featur
 export { default as ViewConfiguracaoListConfiguracaoMarketingListScreen } from '../features/configuracoes/configuracao/ViewConfiguracaoListConfiguracaoMarketingListScreen.tsx';
 export { default as ViewConfiguracaoListConfiguracaoParcelaListScreen } from '../features/configuracoes/configuracao/ViewConfiguracaoListConfiguracaoParcelaListScreen.tsx';
 export { default as ViewConfiguracaoListLayoutListScreen } from '../features/configuracoes/configuracao/ViewConfiguracaoListLayoutListScreen.tsx';
+export { default as ConfiguracaoNotificacoesScreen } from '../features/configuracoes/notificacoes/ConfiguracaoNotificacoesScreen.tsx';
 export { default as ViewConsultorConsultorListScreen } from '../features/configuracoes/consultor/ViewConsultorConsultorListScreen.tsx';
 export { default as ViewConsultorFormConsultorListScreen } from '../features/configuracoes/consultor/ViewConsultorFormConsultorListScreen.tsx';
 
@@ -344,6 +345,7 @@ export { default as ViewTipoUnidadeListTipoUnidadeListScreen } from '../features
 
 
 export { default as ViewTurmaListTurmaFinalizandoListScreen } from '../features/configuracoes/turma/ViewTurmaListTurmaFinalizandoListScreen.tsx';
+export { default as ViewTurmaListTurmaListScreen } from '../features/configuracoes/turma/ViewTurmaListTurmaListScreen.tsx';
 export { default as ViewTurmaRecriarCalendarioAcademicoScreen } from '../features/configuracoes/turma/ViewTurmaRecriarCalendarioAcademicoScreen.tsx';
 
 export { default as ViewTurnoEducacaoFormTurnoEducacaoListScreen } from '../features/configuracoes/turno/ViewTurnoEducacaoFormTurnoEducacaoListScreen.tsx';

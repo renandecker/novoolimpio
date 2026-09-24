@@ -14,10 +14,13 @@ import {ExportButton} from '../../../shared/components/ExportButton';
 import {ExportDropdown} from '../../../shared/components/ExportDropdown';
 import {BooleanField} from '../../../shared/components/BooleanField';
 import HelpOverlay from '../../../shared/components/HelpOverlay';
+import {ReportFilters} from '../../../shared/components/ReportFilters';
 import {FileText, Download} from 'lucide-react';
 
 import GraficoChart from './GraficoChart';
 import MapaView from './MapaView';
+
+import type {FiltroRelatorioWrapper, ReportFilterSqlValues} from '../../../shared/types/types';
 
 import '../ReportView.css';
 
@@ -223,13 +226,46 @@ export default function ReportViewScreen() {
 
     const [fetchLimit, setFetchLimit] = useState(10);
 
+    const [filtros, setFiltros] = useState<FiltroRelatorioWrapper[]>([]);
 
+    const [loadingFiltros, setLoadingFiltros] = useState(false);
+
+    const [filtrosAplicados, setFiltrosAplicados] = useState<ReportFilterSqlValues | undefined>(undefined);
+
+    const isGraph = reportType ? graphTypes.has(reportType) : false;
+
+    useEffect(() => {
+        if (!isGraph) {
+            setFiltros([]);
+            setLoadingFiltros(false);
+            setFiltrosAplicados(undefined);
+            return;
+        }
+        let cancelled = false;
+        setLoadingFiltros(true);
+        const fetchFiltros = async () => {
+            try {
+                const response = await api.get<FiltroRelatorioWrapper[]>('/api/relatorios/filtros/viewGrafico', {
+                    params: { graficoId: reportId }
+                });
+                if (!cancelled) setFiltros(response.data);
+            } catch (error) {
+                console.error('Erro ao carregar filtros do grafico:', error);
+            } finally {
+                if (!cancelled) setLoadingFiltros(false);
+            }
+        };
+        void fetchFiltros();
+        return () => {
+            cancelled = true;
+        };
+    }, [isGraph, reportId]);
 
     const report = useQuery({
 
-        queryKey: ['relatorio-aberto', reportType, reportId],
+        queryKey: ['relatorio-aberto', reportType, reportId, filtrosAplicados],
 
-        queryFn: () => abrirRelatorio(reportType!, reportId),
+        queryFn: () => abrirRelatorio(reportType!, reportId, filtrosAplicados),
 
         enabled: Boolean(reportType && Number.isInteger(reportId) && reportId > 0),
 
@@ -244,6 +280,8 @@ export default function ReportViewScreen() {
         setDataPage(null);
 
         setFetchLimit(10);
+
+        setFiltrosAplicados(undefined);
 
     }, [reportType, reportId]);
 
@@ -303,7 +341,7 @@ export default function ReportViewScreen() {
 
     }
 
-    if (report.isLoading) return <main><p>Carregando relatório...</p></main>;
+    if (report.isLoading || (isGraph && loadingFiltros)) return <main><p>Carregando relatório...</p></main>;
 
     if (report.isError || !report.data) return <main><h1>Relatório indisponível</h1><p>Você não possui acesso a este
 
@@ -361,7 +399,9 @@ export default function ReportViewScreen() {
 
                 <div className="report-view-actions">
 
-                    {canEdit && <button className="btngreen" onClick={() => setEditing(true)}>Editar</button>}
+                    {canEdit && (isGraph
+                        ? <button className="btngreen" onClick={() => navigate(`/view/relatorios/formGrafico?id=${reportId}`)}>Editar</button>
+                        : <button className="btngreen" onClick={() => setEditing(true)}>Editar</button>)}
 
                     {canDelete &&
 
@@ -426,6 +466,14 @@ export default function ReportViewScreen() {
                 <section className="report-view-content">
 
                     <h2>Relatório</h2>
+
+                    {isGraph && (
+                        <ReportFilters
+                            filtros={filtros}
+                            onFiltersChange={setFiltros}
+                            onApplyFilters={(valores) => setFiltrosAplicados(valores || undefined)}
+                        />
+                    )}
 
                     {data.tipo === 'TABELA' && dataPage && (
 
