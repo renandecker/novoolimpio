@@ -1,9 +1,11 @@
 package br.com.sol7.olimpio.financeiro.movimentacaofinanceira.repository;
 
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.Tuple;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -55,21 +57,17 @@ public class MovimentacaoFinanceiraRepository implements PanacheRepository<Movim
     // Migrado de CaixaController.totalRelatorio (legado) - totais vinculados a pagamento de
     // parcela (id_parcela not null): valor bruto, desconto e multa/juros aplicados.
     private static final String SQL_TOTAIS_PARCELA =
-            "SELECT COALESCE(SUM(m.valor), 0), COALESCE(SUM(m.desconto), 0), COALESCE(SUM(m.multa_juros), 0) " +
+            "SELECT COALESCE(SUM(m.valor), 0) AS valor, COALESCE(SUM(m.desconto), 0) AS desconto, COALESCE(SUM(m.multa_juros), 0) AS multa_juros " +
                     "FROM fin_movimentacao m WHERE m.id_caixa = ?1 AND m.id_parcela IS NOT NULL";
 
-    public Uni<Object[]> totaisParcela(Long caixaId) {
+    public Uni<Tuple> totaisParcela(Long caixaId) {
         return Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_TOTAIS_PARCELA).setParameter(1, caixaId).getResultList())
+                .chain(session -> session.createNativeQuery(SQL_TOTAIS_PARCELA, Tuple.class).setParameter(1, caixaId).getResultList())
                 .map(list -> {
                     if (list == null || list.isEmpty()) {
-                        return new Object[] { BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO };
+                        return null;
                     }
-                    Object item = list.get(0);
-                    if (item instanceof Object[] arr) {
-                        return arr;
-                    }
-                    return new Object[] { item, BigDecimal.ZERO, BigDecimal.ZERO };
+                    return (Tuple) list.get(0);
                 });
     }
 

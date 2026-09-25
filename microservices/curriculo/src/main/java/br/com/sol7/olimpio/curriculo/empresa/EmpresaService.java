@@ -3,12 +3,14 @@ package br.com.sol7.olimpio.curriculo.empresa;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.RefOption;
 import br.com.sol7.olimpio.shared.RefService;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.unchecked.Unchecked;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.NotFoundException;
 
 import java.util.ArrayList;
@@ -62,23 +64,23 @@ public class EmpresaService {
                 WHERE p.id IN (%s)
                 """.formatted(pessoaIds.stream().map(String::valueOf).reduce((a, b) -> a + "," + b).orElse("0"));
         return Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql).getResultList())
+                .chain(session -> session.createNativeQuery(sql, Tuple.class).getResultList())
                 .map(rows -> {
-                    Map<Long, Object[]> pessoaMap = new java.util.HashMap<>();
+                    Map<Long, Tuple> pessoaMap = new java.util.HashMap<>();
                     for (Object rowObj : rows) {
-                        Object[] row = (Object[]) rowObj;
-                        Long id = ((Number) row[0]).longValue();
+                        Tuple row = (Tuple) rowObj;
+                        Long id = TupleHelper.getLong(row, "id");
                         pessoaMap.put(id, row);
                     }
                     for (Empresa e : empresas) {
-                        Object[] data = pessoaMap.get(e.pessoaId);
+                        Tuple data = pessoaMap.get(e.pessoaId);
                         if (data != null) {
-                            e.pessoaNome = data[1] != null ? data[1].toString() : null;
-                            e.pessoaNomeFantasia = data[2] != null ? data[2].toString() : null;
-                            e.pessoaRazaoSocial = data[3] != null ? data[3].toString() : null;
-                            e.pessoaCnpj = data[4] != null ? data[4].toString() : null;
-                            e.pessoaTelefone = data[5] != null ? data[5].toString() : null;
-                            e.pessoaEmail = data[6] != null ? data[6].toString() : null;
+                            e.pessoaNome = TupleHelper.getString(data, "nome");
+                            e.pessoaNomeFantasia = TupleHelper.getString(data, "nome_fantasia");
+                            e.pessoaRazaoSocial = TupleHelper.getString(data, "razao_social");
+                            e.pessoaCnpj = TupleHelper.getString(data, "cnpj");
+                            e.pessoaTelefone = TupleHelper.getString(data, "telefone");
+                            e.pessoaEmail = TupleHelper.getString(data, "email");
                         }
                     }
                     return empresas;

@@ -3,7 +3,7 @@ import {api} from '../../shared/services/api';
 import type {ModulePermissions} from '../../shared/types/types.ts';
 
 type Module = { id: number; antecessorId: number | null; rotulo: string; descricao: string; icone: string; ajuda: string; outcome: string; ordem: number };
-type Session = { accessToken: string; expiresAt: number; username: string; permissions: string[]; modules: Module[]; modulePermissions?: ModulePermissions; nome?: string; email?: string; cpf?: string; foto?: string; defaultOutcome?: string; hierarquia?: string };
+type Session = { accessToken: string; expiresAt: number; username: string; permissions: string[]; modules: Module[]; modulePermissions?: ModulePermissions; nome?: string; email?: string; cpf?: string; foto?: string; defaultOutcome?: string; hierarquia?: string; idUsuario?: number };
 type SessionCore =
     Pick<Session, 'accessToken' | 'expiresAt' | 'username' | 'permissions'>
     & { modulePermissions?: ModulePermissions; nome?: string; email?: string; cpf?: string; foto?: string; defaultOutcome?: string; hierarquia?: string };

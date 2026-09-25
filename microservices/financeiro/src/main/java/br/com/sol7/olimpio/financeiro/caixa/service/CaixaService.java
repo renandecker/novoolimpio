@@ -21,9 +21,11 @@ import br.com.sol7.olimpio.financeiro.sangria.dto.SangriaResponse;
 import br.com.sol7.olimpio.financeiro.sangria.dto.SangriaRequest;
 import br.com.sol7.olimpio.financeiro.impressora.ImpressoraService;
 import br.com.sol7.olimpio.financeiro.controleimpressao.service.ControleImpressaoService;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.NotFoundException;
 
 import java.math.BigDecimal;
@@ -212,15 +214,14 @@ public class CaixaService {
                 "ORDER BY p.data_vencimento " +
                 "LIMIT ?2";
         return Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql)
+                .chain(session -> session.createNativeQuery(sql, Tuple.class)
                         .setParameter(1, query)
                         .setParameter(2, limit)
                         .getResultList())
-                .map(list -> list.stream().map(row -> {
-                    Object[] o = (Object[]) row;
+                .map(list -> list.stream().map(t -> (Tuple) t).map(t -> {
                     return new ParcelaSearchResponse(
-                            ((Number) o[0]).longValue(),
-                            (String) o[1]
+                            TupleHelper.getLong(t, "id"),
+                            TupleHelper.getString(t, "pessoa_nome")
                     );
                 }).toList());
     }
@@ -324,32 +325,32 @@ public class CaixaService {
                                                                 .onFailure().recoverWithItem(BigDecimal.ZERO)
                                                                 .chain(totalDeposito -> movimentacaoRepository.totalTroco(caixaId)
                                                                         .onFailure().recoverWithItem(BigDecimal.ZERO)
-                                                                        .chain(troco -> movimentacaoRepository.totaisParcela(caixaId)
-                                                                                .onFailure().recoverWithItem(new Object[] { BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO })
-                                                                                .chain(totaisParcela -> sangriaService.buscarPorCaixa(caixaId)
-                                                                                        .onFailure().recoverWithItem(java.util.List.of())
-                                                                                        .chain(sangrias -> find(caixaId)
-                                                                                                .onFailure().recoverWithUni(e -> Uni.createFrom().failure(new IllegalArgumentException("Caixa não encontrado: " + caixaId)))
-                                                                                                .map(caixa -> {
-                                                                                                    BigDecimal td = nvl(totalDinheiro);
-                                                                                                    BigDecimal tc = nvl(totalCheque);
-                                                                                                    BigDecimal tca = nvl(totalCartao);
-                                                                                                    BigDecimal tb = nvl(totalBoleto);
-                                                                                                    BigDecimal tr = nvl(transferencia).add(nvl(pix));
-                                                                                                    BigDecimal tdep = nvl(totalDeposito);
-                                                                                                    BigDecimal trc = nvl(troco);
-                                                                                                    Object[] tp = totaisParcela;
-                                                                                                    @SuppressWarnings("unchecked")
-                                                                                                    List<SangriaResponse> sng = sangrias != null ? sangrias : java.util.List.of();
-                                                                                                    CaixaResponse cx = caixa;
+.chain(troco -> movimentacaoRepository.totaisParcela(caixaId)
+                                                                         .onFailure().recoverWithItem(() -> null)
+                                                                        .chain(totaisParcela -> sangriaService.buscarPorCaixa(caixaId)
+                                                                                .onFailure().recoverWithItem(java.util.List.of())
+                                                                                .chain(sangrias -> find(caixaId)
+                                                                                        .onFailure().recoverWithUni(e -> Uni.createFrom().failure(new IllegalArgumentException("Caixa não encontrado: " + caixaId)))
+                                                                                        .map(caixa -> {
+                                                                                            BigDecimal td = nvl(totalDinheiro);
+                                                                                            BigDecimal tc = nvl(totalCheque);
+                                                                                            BigDecimal tca = nvl(totalCartao);
+                                                                                            BigDecimal tb = nvl(totalBoleto);
+                                                                                            BigDecimal tr = nvl(transferencia).add(nvl(pix));
+                                                                                            BigDecimal tdep = nvl(totalDeposito);
+                                                                                            BigDecimal trc = nvl(troco);
+                                                                                            Tuple tp = totaisParcela;
+                                                                                            @SuppressWarnings("unchecked")
+                                                                                            List<SangriaResponse> sng = sangrias != null ? sangrias : java.util.List.of();
+                                                                                            CaixaResponse cx = caixa;
 
-                                                                                                    BigDecimal totalSangria = sng.stream()
-                                                                                                            .map(s -> s.valor() != null ? s.valor() : BigDecimal.ZERO)
-                                                                                                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                                                                                            BigDecimal totalSangria = sng.stream()
+                                                                                                    .map(s -> s.valor() != null ? s.valor() : BigDecimal.ZERO)
+                                                                                                    .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-                                                                                                    BigDecimal valorTotalParcela = tp != null && tp.length >= 1 ? toBigDecimalSafe(tp[0]) : BigDecimal.ZERO;
-                                                                                                    BigDecimal totalDesconto = tp != null && tp.length >= 2 ? toBigDecimalSafe(tp[1]) : BigDecimal.ZERO;
-                                                                                                    BigDecimal totalMultaJuros = tp != null && tp.length >= 3 ? toBigDecimalSafe(tp[2]) : BigDecimal.ZERO;
+                                                                                            BigDecimal valorTotalParcela = tp != null ? TupleHelper.getBigDecimal(tp, "valor") : BigDecimal.ZERO;
+                                                                                            BigDecimal totalDesconto = tp != null ? TupleHelper.getBigDecimal(tp, "desconto") : BigDecimal.ZERO;
+                                                                                            BigDecimal totalMultaJuros = tp != null ? TupleHelper.getBigDecimal(tp, "multa_juros") : BigDecimal.ZERO;
 
                                                                                                      td = nvl(td).subtract(nvl(trc));
                                                                                                      BigDecimal fundoCaixa = cx.fundoCaixa() != null ? cx.fundoCaixa() : BigDecimal.ZERO;
@@ -533,11 +534,11 @@ public class CaixaService {
                 "LEFT JOIN bas_unidade u ON u.id = c.id_unidade " +
                 "WHERE p.id = ?1 AND c.id_unidade_resposavel = ?2 AND p.data_cancelamento IS NULL AND u.fl_ativo = true";
         return Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql)
+                .chain(session -> session.createNativeQuery(sql, Tuple.class)
                         .setParameter(1, parcelaId)
                         .setParameter(2, unidadeId)
                         .getSingleResult())
-                .map(this::rowToParcelaResponse);
+                .map(t -> rowToParcelaResponse((Tuple) t));
     }
 
     private Uni<ParcelaResponse> buscarParcelaPorId(Long parcelaId) {
@@ -548,38 +549,28 @@ public class CaixaService {
                 "FROM fin_parcela p LEFT JOIN edc_contrato c ON c.id = p.id_contrato " +
                 "WHERE p.id = ?1";
         return Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql)
+                .chain(session -> session.createNativeQuery(sql, Tuple.class)
                         .setParameter(1, parcelaId)
                         .getSingleResult())
-                .map(this::rowToParcelaResponse);
+                .map(t -> rowToParcelaResponse((Tuple) t));
     }
 
-    @SuppressWarnings("unchecked")
-    private ParcelaResponse rowToParcelaResponse(Object row) {
-        if (row == null) {
+    private ParcelaResponse rowToParcelaResponse(Tuple t) {
+        if (t == null) {
             return null;
         }
-        Object[] o = (Object[]) row;
         return new ParcelaResponse(
-                toLong(o[0]),
-                toLong(o[1]),
-                toLong(o[2]),
-                o[3] != null ? ((Number) o[3]).intValue() : null,
-                toDate(o[4]),
-                toBigDecimal(o[5]),
-                toBigDecimal(o[6]),
-                toBigDecimal(o[7]),
-                toBigDecimal(o[8]),
-                toDate(o[9])
+                TupleHelper.getLong(t, "id"),
+                TupleHelper.getLong(t, "contrato_id"),
+                TupleHelper.getLong(t, "pessoa_id"),
+                TupleHelper.getInteger(t, "parcela"),
+                TupleHelper.getDate(t, "data_vencimento"),
+                TupleHelper.getBigDecimal(t, "valor"),
+                TupleHelper.getBigDecimal(t, "valor_pago"),
+                TupleHelper.getBigDecimal(t, "valor_desconto"),
+                TupleHelper.getBigDecimal(t, "valor_multa_juros"),
+                TupleHelper.getDate(t, "data_pagamento")
         );
-    }
-
-    private Long toLong(Object v) {
-        return v == null ? null : ((Number) v).longValue();
-    }
-
-    private java.math.BigDecimal toBigDecimal(Object v) {
-        return v == null ? null : new java.math.BigDecimal(v.toString());
     }
 
     private Date toDate(Object v) {
@@ -605,14 +596,13 @@ public class CaixaService {
 
     // Migrado de CaixaService.buscarAberturaCaixa (original service)
     public Uni<List<Long>> buscarAberturaCaixa(Long usuarioId) {
-        return repository.buscarAberturaCaixa(usuarioId)
-                .map(list -> list.stream().map(x -> x.id).toList());
+        return repository.buscarAberturaCaixa(usuarioId);
     }
 
     // Migrado de CaixaService.buscarAberturaCaixaComUsuarioUnidade (original service)
     public Uni<Long> buscarAberturaCaixaComUsuarioUnidade(Long usuarioId, Long unidadeId) {
         return repository.buscarAberturaCaixaComUsuarioUnidade(usuarioId, unidadeId)
-                .map(list -> list.isEmpty() ? null : list.get(0).id);
+                .map(list -> list.isEmpty() ? null : list.get(0));
     }
 
     // Busca o fundo de caixa sugerido baseado na configuração do usuário e unidade

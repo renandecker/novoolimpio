@@ -20,5 +20,9 @@
     "@types/qrcode-terminal": "^0.12.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.3.3"
+  },
+  "allowScripts": {
+    "@whiskeysockets/baileys@6.7.24": true,
+    "protobufjs@7.6.6": true
   }
 }

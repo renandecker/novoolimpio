@@ -71,6 +71,7 @@ echo " Verificando compilacao dos microsservicos..."
 echo "============================================"
 
 MICROSERVICES="aluno asaas basico central comercial curriculo educacao estoque financeiro fiserv login notificacoes professor relatorios schedule"
+NPM_MICROSERVICES="notificacoes-whatsapp"
 COMPILE_ERRORS=0
 > "$LOGFILE"
 
@@ -98,6 +99,37 @@ if [ "$COMPILE_ERRORS" -ne 0 ]; then
 fi
 
 echo "Todos os microsservicos compilaram com sucesso."
+
+echo "============================================"
+echo " Compilando microsservicos npm (TypeScript)..."
+echo "============================================"
+
+for svc in $NPM_MICROSERVICES; do
+    if [ -d "microservices/$svc" ] && [ -f "microservices/$svc/package.json" ]; then
+        echo "  Compilando $svc..."
+        cd "microservices/$svc"
+        if ! npm ci >> "$LOGFILE" 2>&1; then
+            echo "  [ERRO] $svc - npm ci falhou. Detalhes em error.log"
+            COMPILE_ERRORS=1
+        elif ! npm run build >> "$LOGFILE" 2>&1; then
+            echo "  [ERRO] $svc - build falhou. Detalhes em error.log"
+            COMPILE_ERRORS=1
+        else
+            echo "  [OK] $svc"
+        fi
+        cd - > /dev/null
+    fi
+done
+
+if [ "$COMPILE_ERRORS" -ne 0 ]; then
+    echo ""
+    echo "[ERRO] Nem todos os microsservicos npm compilaram com sucesso."
+    echo "  Corrija os erros de compilacao antes de subir os containers."
+    echo "  Detalhes em error.log"
+    exit 1
+fi
+
+echo "Todos os microsservicos npm compilaram com sucesso."
 
 echo "============================================"
 echo " Subindo Postgres, Kafka, 16 microsservicos, gateway e app React..."
@@ -128,11 +160,12 @@ if [ "$1" == "-d" ]; then
     echo "  estoque:    http://localhost:8086"
     echo "  financeiro: http://localhost:8087"
     echo "  login:      http://localhost:8090"
-    echo "  notificacoes: http://localhost:8082"
-    echo "  fiserv:     http://localhost:8097"
-    echo "  professor:  http://localhost:8091"
-    echo "  relatorios: http://localhost:8088"
-    echo "  schedule:   http://localhost:8089"
+echo "  notificacoes: http://localhost:8082"
+echo "  notificacoes-whatsapp: http://localhost:8093 (interno: 3030)"
+echo "  fiserv:     http://localhost:8097"
+echo "  professor:  http://localhost:8091"
+echo "  relatorios: http://localhost:8088"
+echo "  schedule:   http://localhost:8089"
     echo ""
     echo "Use '$DC logs -f <servico>' para acompanhar logs de um servico."
     echo "Use './stop-all.sh' para parar todos os containers."
@@ -148,6 +181,7 @@ else
     echo "  App React: http://localhost:3000"
     echo "  Gateway:   http://localhost:8080"
     echo "  Login:     http://localhost:8090"
+    echo "  Notificacoes WhatsApp: http://localhost:8093 (interno: 3030)"
     echo "  Pagamento: http://localhost:8097"
     echo ""
     echo "Pressione Ctrl+C para parar todos os containers."

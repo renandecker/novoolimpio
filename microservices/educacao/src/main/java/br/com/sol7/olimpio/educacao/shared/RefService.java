@@ -1,8 +1,10 @@
 package br.com.sol7.olimpio.educacao.shared;
 
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.Tuple;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,11 +33,10 @@ public class RefService {
 
     private Uni<List<RefOption>> query(String sql) {
         return Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql).setMaxResults(200).getResultList())
-                .map(rows -> rows.stream().map(row -> {
-                    Object[] values = (Object[]) row;
-                    Long id = ((Number) values[0]).longValue();
-                    String label = values.length > 1 && values[1] != null ? String.valueOf(values[1]) : null;
+                .chain(session -> session.createNativeQuery(sql, Tuple.class).setMaxResults(200).getResultList())
+                .map(rows -> rows.stream().map(t -> (Tuple) t).map(t -> {
+                    Long id = TupleHelper.getLong(t, "id");
+                    String label = TupleHelper.getString(t, "label");
                     return new RefOption(id, label);
                 }).toList());
     }

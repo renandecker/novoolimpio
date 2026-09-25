@@ -1,10 +1,12 @@
 package br.com.sol7.olimpio.notificacoes.notificacao.service;
 
 import br.com.sol7.olimpio.notificacoes.notificacao.dto.NotificacaoMessage;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import java.util.Optional;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -73,15 +75,15 @@ public class CanalTelegramService {
     private Uni<TelegramConfig> resolveConfigTelegram() {
         return Panache.getSession()
                 .chain(session -> session.createNativeQuery(
-                        "SELECT destinatario, descricao FROM not_config_canal WHERE canal = 'TELEGRAM' LIMIT 1")
+                        "SELECT destinatario, descricao FROM not_config_canal WHERE canal = 'TELEGRAM' LIMIT 1", Tuple.class)
                         .getResultList())
                 .map(list -> {
                     String token = botTokenConfig.orElse("");
                     String chatId = chatIdConfig.orElse("");
                     if (!list.isEmpty() && list.get(0) != null) {
-                        Object[] row = (Object[]) list.get(0);
-                        String dest = row[0] == null ? null : row[0].toString().trim();
-                        String desc = row[1] == null ? null : row[1].toString().trim();
+                        Tuple row = (Tuple) list.get(0);
+                        String dest = TupleHelper.getString(row, "destinatario");
+                        String desc = TupleHelper.getString(row, "descricao");
                         if (dest != null && !dest.isBlank()) {
                             chatId = dest;
                         }

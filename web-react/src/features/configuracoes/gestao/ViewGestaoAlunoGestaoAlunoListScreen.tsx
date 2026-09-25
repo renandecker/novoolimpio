@@ -6,6 +6,8 @@ import {api} from '../../../shared/services/api';
 
 import {PermissionGate, usePermissions, useCurrentOutcome} from '../../../shared/services/permissions';
 
+import {useAuth} from '../../auth/auth';
+
 import {PAGE_SIZES} from '../../../shared/components/DataTable';
 
 import {useModulePaged} from '../../../shared/hooks/useModulePaged';
@@ -817,11 +819,13 @@ function MatriculasTable({contratoId, acessoTudo, acessoRelatorios, acessoNovo, 
 
 
 
-function ContractsTable({searchedIds, onBuscarContratos}: {
+function ContractsTable({searchedIds, onBuscarContratos, usuarioId}: {
 
     searchedIds: number[] | null;
 
     onBuscarContratos: (pessoaId: number, pessoaNome: string) => void;
+
+    usuarioId?: number;
 
 }) {
 
@@ -926,7 +930,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
     // e baixa o PDF retornado (string base64 ou {fileName, contentType, base64Data}).
 
-    const gerarDocumento = async (key: DocumentoKey | string, contratoId: number) => {
+    const gerarDocumento = async (key: DocumentoKey | string, contratoId: number, usuarioId: number | undefined) => {
 
         const doc = DOCUMENTOS[key as DocumentoKey];
 
@@ -946,7 +950,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
             }>(doc.url, {}, {
 
-                params: key === 'certificado' ? {contratos: contratoId} : {ccId: contratoId},
+                params: key === 'certificado' ? {contratos: contratoId, usuarioId} : {ccId: contratoId, usuarioId},
 
             });
 
@@ -1149,7 +1153,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
                                     disabled: gerandoDoc === 'contrato',
 
-                                    onSelect: () => gerarDocumento('contrato', contratoId),
+                                    onSelect: () => gerarDocumento('contrato', contratoId, usuarioId),
 
                                 },
 
@@ -1163,7 +1167,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
                                     disabled: gerandoDoc === 'promissoria',
 
-                                    onSelect: () => gerarDocumento('promissoria', contratoId),
+                                    onSelect: () => gerarDocumento('promissoria', contratoId, usuarioId),
 
                                 },
 
@@ -1219,7 +1223,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
                                     disabled: gerandoDoc === 'cancelamentoContratual',
 
-                                    onSelect: () => gerarDocumento('cancelamentoContratual', contratoId),
+                                    onSelect: () => gerarDocumento('cancelamentoContratual', contratoId, usuarioId),
 
                                 }]),
 
@@ -1233,7 +1237,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
                                     disabled: !temConclusao || gerandoDoc === 'historicoEscolar',
 
-                                    onSelect: () => gerarDocumento('historicoEscolar', contratoId),
+                                    onSelect: () => gerarDocumento('historicoEscolar', contratoId, usuarioId),
 
                                 },
 
@@ -1247,7 +1251,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
                                     disabled: gerandoDoc === 'certificado',
 
-                                    onSelect: () => gerarDocumento('certificado', contratoId),
+                                    onSelect: () => gerarDocumento('certificado', contratoId, usuarioId),
 
                                 }] : []),
 
@@ -1261,7 +1265,7 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
                                     disabled: gerandoDoc === 'boletim',
 
-                                    onSelect: () => gerarDocumento('boletim', contratoId),
+                                    onSelect: () => gerarDocumento('boletim', contratoId, usuarioId),
 
                                 },
 
@@ -1645,6 +1649,10 @@ function ContractsTable({searchedIds, onBuscarContratos}: {
 
 export default function ViewGestaoAlunoGestaoAlunoListScreen() {
 
+    const {session} = useAuth();
+
+    const usuarioId = session?.idUsuario;
+
     const [aluno, setAluno] = useState<AutoCompleteOption | null>(null);
 
     const [searchedIds, setSearchedIds] = useState<number[] | null>(null);
@@ -1825,7 +1833,7 @@ export default function ViewGestaoAlunoGestaoAlunoListScreen() {
 
                 </section>
 
-                <ContractsTable searchedIds={searchedIds} onBuscarContratos={buscarContratosDoAluno}/>
+                <ContractsTable searchedIds={searchedIds} onBuscarContratos={buscarContratosDoAluno} usuarioId={usuarioId}/>
 
 
 

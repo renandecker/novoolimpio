@@ -12,10 +12,12 @@ import br.com.sol7.olimpio.login.permissao.service.ModulePermissionService;
 import br.com.sol7.olimpio.login.repository.LoginRepository;
 import br.com.sol7.olimpio.login.repository.LoginSessionRepository;
 import br.com.sol7.olimpio.shared.security.JwtTokenService;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotAuthorizedException;
 import org.slf4j.Logger;
@@ -149,24 +151,22 @@ public class LoginService {
                             session.active = true;
                             return sessions.persist(session)
                                     .onItem().transformToUni(ignored -> modulePermissions.resolveDefaultOutcome(login.idUsuario))
-                                    .onItem().transformToUni(defaultOutcome -> repository.perfilPorUsername(login.username)
-                                            .map(perfil -> new LoginResponse(token.token(), token.expiresAt(), login.username, permissions, tokenModulePermissions,
-                                                    perfil == null ? null : str(perfil[2]), perfil == null ? null : str(perfil[1]),
-                                                    perfil == null ? null : str(perfil[3]), perfil == null ? null : str(perfil[0]),
-                                                    defaultOutcome, perfil == null ? null : str(perfil[4]),
-                                                    login.idUsuario))));
-                        }));
-    }
+                                    .onItem().transformToUni(defaultOutcome -> {
+return repository.perfilPorUsername(login.username)
+                                        .map(perfil -> new LoginResponse(token.token(), token.expiresAt(), login.username, permissions, tokenModulePermissions,
+                                                perfil == null ? null : TupleHelper.getString(perfil, "nome"), perfil == null ? null : TupleHelper.getString(perfil, "email"),
+                                                perfil == null ? null : TupleHelper.getString(perfil, "cpf"), perfil == null ? null : TupleHelper.getString(perfil, "foto_base64"),
+                                                defaultOutcome, perfil == null ? null : TupleHelper.getString(perfil, "hierarquia"),
+login.idUsuario));
+                                     });
+                         }));
+     }
 
-    private String normalise(String username) {
-        return username.trim().toLowerCase();
-    }
+     private String normalise(String username) {
+         return username.trim().toLowerCase();
+     }
 
-    private String str(Object value) {
-        return value == null ? null : value.toString();
-    }
-
-    private Set<String> parsePermissions(String value) {
+     private Set<String> parsePermissions(String value) {
         var result = new LinkedHashSet<String>();
         Arrays.stream(value.split(",")).map(String::trim).map(String::toUpperCase).filter(ALL_PERMISSIONS::contains).forEach(result::add);
         return result;

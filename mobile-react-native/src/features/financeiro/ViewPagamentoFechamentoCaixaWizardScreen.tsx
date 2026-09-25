@@ -177,6 +177,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
     const [loading, setLoading] = useState(false);
     const [erro, setErro] = useState<string | null>(null);
     const [mensagem, setMensagem] = useState<string | null>(null);
+    const [stepIndex, setStepIndex] = useState(0);
 
     // For AutoComplete - using local state for search text
     const [usuarioSearch, setUsuarioSearch] = useState('');
@@ -263,9 +264,14 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                             caixaId: caixaData.id,
                             fundoCaixa: String(caixaData.fundoCaixa)
                         }));
+                        setStepIndex(caixaData.dataFechamento ? 0 : 1);
+                        if (caixaData.dataFechamento) {
+                            setMensagem('O caixa do dia já foi fechado e não pode ser aberto novamente hoje.');
+                        }
                     }
                 }
                 if (!cancelled && !caixaId) {
+                    setStepIndex(0);
                     const {data: sugerido} = await api.get<number | null>('/api/financeiro/caixa/fundo-caixa-sugerido', {
                         params: {usuarioId: Number(state.usuarioId), unidadeId: Number(state.unidadeId)},
                     });
@@ -337,6 +343,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
             });
             setCaixa(newCaixa);
             setFields({caixaAberto: true, caixaId: newCaixa.id});
+            setStepIndex(1);
             setMensagem('Caixa aberto com sucesso!');
         } catch (e: any) {
             setErro(e?.response?.data?.message ?? 'Erro ao abrir o caixa!');
@@ -353,6 +360,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
             const {data: reopened} = await api.post<Caixa>(`/api/financeiro/caixa/${caixa.id}/abrir`);
             setCaixa(reopened);
             setFields({caixaAberto: true, caixaId: reopened.id});
+            setStepIndex(1);
             setMensagem('Caixa reaberto com sucesso!');
         } catch {
             setErro('Erro ao reabrir o caixa!');
@@ -1136,6 +1144,7 @@ export default function ViewPagamentoFechamentoCaixaWizardScreen() {
                 initialData={state}
                 onDataChange={setFields}
                 steps={steps}
+                stepIndex={stepIndex}
                 onComplete={fecharCaixa}
                 hideNavButtons
             />

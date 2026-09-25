@@ -58,8 +58,13 @@ export default function ViewProfessorListProfessorListScreen() {
 
                 <h1>Professor</h1>
 
-                <DataTable path="/api/view/professor/listProfessor" columns={COLUMNS} maxMainColumns={COLUMNS.length}/>
-
+                <DataTable
+                    path="/api/view/professor/listProfessor"
+                    columns={COLUMNS}
+                    maxMainColumns={COLUMNS.length}
+                    createNavigateTo="/view/professor/formProfessor"
+                    editNavigateTo="/view/professor/formProfessor"
+                />
             </main>
 
         </PermissionGate>

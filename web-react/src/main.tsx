@@ -3,56 +3,6 @@ import {createRoot} from 'react-dom/client';
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 
-if (typeof window !== 'undefined') {
-    const handleCorruption = async () => {
-        console.warn('Database corruption detected (block checksum mismatch), clearing all IndexedDB databases...');
-        try {
-            const dbs = await indexedDB.databases?.();
-            if (dbs) {
-                await Promise.all(dbs.map(db => db.name ? new Promise<void>((resolve) => {
-                    const req = indexedDB.deleteDatabase(db.name!);
-                    req.onsuccess = req.onerror = () => resolve();
-                }) : Promise.resolve()));
-            }
-            localStorage.clear();
-            sessionStorage.clear();
-            if ('caches' in window) {
-                const cacheNames = await caches.keys();
-                await Promise.all(cacheNames.map(name => caches.delete(name)));
-            }
-        } catch (e) {
-            console.error('Failed to clear storage:', e);
-        }
-        setTimeout(() => window.location.reload(true as any), 100);
-    };
-
-    window.addEventListener('error', (event) => {
-        const msg = event.error?.message || String(event.error || '');
-        if (msg.includes('Corruption: block checksum mismatch') || msg.includes('block checksum mismatch')) {
-            handleCorruption();
-            event.preventDefault();
-        }
-    });
-
-    window.addEventListener('unhandledrejection', (event) => {
-        const msg = event.reason?.message || String(event.reason || '');
-        if (msg.includes('Corruption: block checksum mismatch') || msg.includes('block checksum mismatch')) {
-            handleCorruption();
-            event.preventDefault();
-        }
-    });
-
-    (async () => {
-        try {
-            const dbs = await indexedDB.databases?.();
-            if (dbs?.length) {
-                console.debug('IndexedDB databases found:', dbs.map(d => d.name).filter(Boolean).join(', '));
-            }
-        } catch {
-        }
-    })();
-}
-
 import {
     AuthProvider,
     ThemeProvider,
@@ -130,6 +80,7 @@ ViewComunicacaoListComunicacaoListScreen,
     ViewConfiguracaoListConfiguracaoMarketingListScreen,
     ViewConfiguracaoListConfiguracaoParcelaListScreen,
     ViewConfiguracaoListLayoutListScreen,
+    ConfiguracaoNotificacoesScreen,
     ViewConfiguracaoDocumentosListScreen,
     ViewConsultorConsultorListScreen,
     ViewConsultorFormConsultorListScreen,

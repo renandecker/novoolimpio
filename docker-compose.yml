@@ -162,6 +162,7 @@ services:
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0084__remove_recriar_calendario_academico_menu.sql
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0085__ajuste_icones_menu_descricao.sql
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0086__create_preferencia_notificacao_usuario.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0087__add_configuracao_notificacoes_menu.sql
         echo "[restore] Restore concluido."
 
   # Broker RabbitMQ. Substitui o Kafka para mensageria entre microsservicos.
@@ -216,6 +217,12 @@ services:
     environment:
       <<: *service-env
       DATABASE_URL: postgresql://postgres:5432/olimpio
+      FCM_SERVER_KEY: ${FCM_SERVER_KEY:-}
+      APNS_KEY_ID: ${APNS_KEY_ID:-}
+      APNS_TEAM_ID: ${APNS_TEAM_ID:-}
+      APNS_BUNDLE_ID: ${APNS_BUNDLE_ID:-}
+      APNS_PRIVATE_KEY: ${APNS_PRIVATE_KEY:-}
+      APNS_USE_SANDBOX: ${APNS_USE_SANDBOX:-true}
     ports:
     - "8082:8082"
     healthcheck:
@@ -561,6 +568,29 @@ services:
 
   # O modulo Fiserv (cartao) vive em fiserv (porta 8097); o fluxo PIX (Asaas) vive em asaas-service (porta 8094).
 
+  notificacoes-whatsapp:
+    build: ./microservices/notificacoes-whatsapp
+    container_name: olimpio-notificacoes-whatsapp
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      PORT: "3030"
+    ports:
+    - "8093:3030"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3030/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+      login:
+        condition: service_healthy
+
   gateway:
     build: ./docker/gateway
     container_name: olimpio-gateway
@@ -589,6 +619,8 @@ services:
       login:
         condition: service_healthy
       notificacoes:
+        condition: service_healthy
+      notificacoes-whatsapp:
         condition: service_healthy
       fiserv:
         condition: service_healthy

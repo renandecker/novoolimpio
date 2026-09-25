@@ -1,6 +1,7 @@
 package br.com.sol7.olimpio.notificacoes.notificacao.service;
 
 import br.com.sol7.olimpio.notificacoes.notificacao.dto.NotificacaoMessage;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.Vertx;
@@ -10,6 +11,7 @@ import io.vertx.ext.mail.MailMessage;
 import io.vertx.ext.mail.StartTLSOptions;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,21 +87,21 @@ public class CanalEmailService {
                     if (!list.isEmpty()) return Uni.createFrom().item(toConfigSmtp(list.get(0)));
                     return Panache.getSession()
                             .chain(session -> session.createNativeQuery(
-                                    "SELECT host, port, username, password, tls, ssl FROM bas_email ORDER BY id ASC LIMIT 1")
+                                    "SELECT host, port, username, password, tls, ssl FROM bas_email ORDER BY id ASC LIMIT 1", Tuple.class)
                                     .getResultList())
                             .map(rows -> rows.isEmpty() ? null : toConfigSmtp(rows.get(0)));
                 });
     }
 
     private ConfigSmtp toConfigSmtp(Object row) {
-        Object[] cols = (Object[]) row;
+        Tuple t = (Tuple) row;
         return new ConfigSmtp(
-                cols[0] == null ? null : cols[0].toString(),
-                cols[1] == null ? null : ((Number) cols[1]).intValue(),
-                cols[2] == null ? null : cols[2].toString(),
-                cols[3] == null ? null : cols[3].toString(),
-                cols[4] == null ? null : (Boolean) cols[4],
-                cols[5] == null ? null : (Boolean) cols[5]);
+                TupleHelper.getString(t, "host"),
+                TupleHelper.getInteger(t, "port"),
+                TupleHelper.getString(t, "username"),
+                TupleHelper.getString(t, "password"),
+                TupleHelper.getBoolean(t, "tls"),
+                TupleHelper.getBoolean(t, "ssl"));
     }
 
     private Uni<String> resolveDestinatario(String username, String destinatarioOverride) {
@@ -114,10 +116,10 @@ public class CanalEmailService {
                         LEFT JOIN bas_pessoa p ON p.id = u.id_pessoa
                         WHERE lower(l.username) = lower(?1)
                         LIMIT 1
-                        """)
+                        """, Tuple.class)
                                 .setParameter(1, username)
                                 .getResultList())
-                .map(list -> list.isEmpty() || list.get(0) == null ? null : list.get(0).toString().trim());
+                .map(list -> list.isEmpty() || list.get(0) == null ? null : TupleHelper.getString(list.get(0), "email"));
     }
 
     private Uni<Void> marcaEmailEnviado(Long id) {

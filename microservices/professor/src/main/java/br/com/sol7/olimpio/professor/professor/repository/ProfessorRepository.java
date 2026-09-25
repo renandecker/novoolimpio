@@ -2,6 +2,7 @@ package br.com.sol7.olimpio.professor.professor.repository;
 
 import br.com.sol7.olimpio.professor.professor.entity.Professor;
 import br.com.sol7.olimpio.professor.professor.dto.ProfessorResponse;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.Tuple;
@@ -180,18 +181,18 @@ public class ProfessorRepository implements PanacheRepository<Professor> {
 
     public Uni<List<ProfessorResponse>> listAllWithNome() {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_LIST_ALL_WITH_NOME)
+                .chain(session -> session.createNativeQuery(SQL_LIST_ALL_WITH_NOME, Tuple.class)
                         .getResultList())
                 .onItem().transform(list -> list.stream()
-                        .map(tuple -> (Object[]) tuple)
-                        .map(arr -> new ProfessorResponse(
-                                ((Number) arr[0]).longValue(),
-                                arr[1] != null ? ((Number) arr[1]).longValue() : null,
-                                (Boolean) arr[2],
-                                (Boolean) arr[3],
-                                (java.sql.Date) arr[4],
-                                (java.sql.Date) arr[5],
-                                (String) arr[6]
+                        .map(t -> (Tuple) t)
+                        .map(t -> new ProfessorResponse(
+                                TupleHelper.getLong(t, "id"),
+                                TupleHelper.getLong(t, "id_pessoa"),
+                                TupleHelper.getBoolean(t, "fl_ativo"),
+                                TupleHelper.getBoolean(t, "caderno_bola"),
+                                TupleHelper.getDate(t, "dt_inicio"),
+                                TupleHelper.getDate(t, "dt_fim"),
+                                TupleHelper.getString(t, "nome")
                         ))
                         .toList());
     }
@@ -207,20 +208,20 @@ public class ProfessorRepository implements PanacheRepository<Professor> {
 
     public Uni<ProfessorResponse> findByIdWithNome(Long id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_FIND_BY_ID_WITH_NOME)
+                .chain(session -> session.createNativeQuery(SQL_FIND_BY_ID_WITH_NOME, Tuple.class)
                         .setParameter(1, id)
                         .getSingleResultOrNull())
-                .onItem().transform(tuple -> {
-                    if (tuple == null) return null;
-                    Object[] arr = (Object[]) tuple;
+                .onItem().transform(t -> {
+                    if (t == null) return null;
+                    Tuple tuple = (Tuple) t;
                     return new ProfessorResponse(
-                            ((Number) arr[0]).longValue(),
-                            arr[1] != null ? ((Number) arr[1]).longValue() : null,
-                            (Boolean) arr[2],
-                            (Boolean) arr[3],
-                            (java.sql.Date) arr[4],
-                            (java.sql.Date) arr[5],
-                            (String) arr[6]
+                            TupleHelper.getLong(tuple, "id"),
+                            TupleHelper.getLong(tuple, "id_pessoa"),
+                            TupleHelper.getBoolean(tuple, "fl_ativo"),
+                            TupleHelper.getBoolean(tuple, "caderno_bola"),
+                            TupleHelper.getDate(tuple, "dt_inicio"),
+                            TupleHelper.getDate(tuple, "dt_fim"),
+                            TupleHelper.getString(tuple, "nome")
                     );
                 });
     }

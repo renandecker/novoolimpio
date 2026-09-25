@@ -3,6 +3,7 @@ package br.com.sol7.olimpio.curriculo.vaga;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.RefOption;
 import br.com.sol7.olimpio.shared.RefService;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.quarkus.mailer.Mail;
@@ -11,6 +12,7 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.unchecked.Unchecked;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.NotFoundException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
@@ -224,19 +226,19 @@ public class VagaService {
         LIMIT 100
         """;
         return Panache.getSession()
-                .chain(session -> session.createNativeQuery(SELECT_SQL).getResultList())
+                .chain(session -> session.createNativeQuery(SELECT_SQL, Tuple.class).getResultList())
                 .chain(Unchecked.function(rows -> {
                     if (rows.isEmpty()) {
                         LOG.infof("enviarVagasAlunos: finalizado apos %d lote(s), %d candidato(s)", round, total);
                         return Uni.createFrom().item(Map.<String, Object>of("candidatos", total, "lotes", round));
                     }
-                    List<Object[]> lista = rows.stream().map(r -> (Object[]) r).toList();
-                    long lastId = lista.stream().map(r -> ((Number) r[0]).longValue()).max(Long::compare).orElse(0L);
-                    for (Object[] row : lista) {
-                        String vagaNome = (String) row[3];
-                        String login = (String) row[1];
-                        String email = (String) row[2];
-                        String tituloEmail = (String) row[4];
+                    List<Tuple> lista = rows;
+                    long lastId = lista.stream().map(r -> TupleHelper.getLong(r, "id")).max(Long::compare).orElse(0L);
+                    for (Tuple row : lista) {
+                        String vagaNome = TupleHelper.getString(row, "nome");
+                        String login = TupleHelper.getString(row, "login");
+                        String email = TupleHelper.getString(row, "email");
+                        String tituloEmail = TupleHelper.getString(row, "titulo_email");
 
                         if (emailEnabled && email != null && !email.isBlank()) {
                             String assunto = tituloEmail != null ? tituloEmail : "Nova vaga disponível: " + vagaNome;

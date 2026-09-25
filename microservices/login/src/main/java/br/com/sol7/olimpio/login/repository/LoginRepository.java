@@ -5,6 +5,7 @@ import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.Tuple;
 
 @ApplicationScoped
 public class LoginRepository implements PanacheRepository<Login> {
@@ -21,29 +22,29 @@ public class LoginRepository implements PanacheRepository<Login> {
                         LEFT JOIN bas_pessoa p ON p.id = u.id_pessoa
                         WHERE lower(l.username) = lower(?1)
                         LIMIT 1
-                        """)
-                                .setParameter(1, username)
-                                .getResultList())
-                .map(list -> list.isEmpty() || list.get(0) == null ? null : list.get(0).toString().trim());
+                        """, Tuple.class)
+                        .setParameter(1, username)
+                        .getResultList())
+                .map(list -> list.isEmpty() || list.get(0) == null ? null : ((Tuple) list.get(0)).get("email", String.class));
     }
 
-    public Uni<Object[]> perfilPorUsername(String username) {
+    public Uni<Tuple> perfilPorUsername(String username) {
         return Panache.getSession()
                 .chain(session -> session.createNativeQuery("""
-                        SELECT COALESCE(u.foto_base64, ''),
-                        COALESCE(p.email, ''),
-                        COALESCE(f.nome, ''),
-                        COALESCE(f.cpf, ''),
-                        COALESCE(u.hierarquia, '')
+                        SELECT COALESCE(u.foto_base64, '') AS foto_base64,
+                        COALESCE(p.email, '') AS email,
+                        COALESCE(f.nome, '') AS nome,
+                        COALESCE(f.cpf, '') AS cpf,
+                        COALESCE(u.hierarquia, '') AS hierarquia
                         FROM bas_login l
                         LEFT JOIN bas_usuario u ON u.id = l.id_usuario
                         LEFT JOIN bas_pessoa p ON p.id = u.id_pessoa
                         LEFT JOIN bas_pessoa_fisica f ON f.id_pessoa = p.id
                         WHERE lower(l.username) = lower(?1)
                         LIMIT 1
-                        """)
-                                .setParameter(1, username)
-                                .getResultList())
-                .map(list -> list.isEmpty() ? null : (Object[]) list.get(0));
+                        """, Tuple.class)
+                        .setParameter(1, username)
+                        .getResultList())
+                .map(list -> list.isEmpty() ? null : (Tuple) list.get(0));
     }
 }

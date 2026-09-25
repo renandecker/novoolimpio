@@ -76,7 +76,8 @@ public class NotificacaoRabbitMQProducer {
                         .setParameter(1, username)
                         .getSingleResult())
                 .onItem().transform(Optional::ofNullable)
-                .onItem().ifNull().continueWith(0);
+                .onItem().ifNull().continueWith(() -> Optional.of(0))
+                .onItem().transform(opt -> opt.orElse(0));
     }
 
     private Uni<Void> publish(boolean habilitado, MutinyEmitter<String> emitter, String canal, String json) {

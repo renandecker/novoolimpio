@@ -2,6 +2,8 @@ package br.com.sol7.olimpio.educacao.nap;
 
 import java.util.List;
 
+import jakarta.persistence.Tuple;
+
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
@@ -24,11 +26,11 @@ public class NAPRepository implements PanacheRepository<NAP> {
     }
 
     private NAP mapToNAP(Object row) {
-        Object[] columns = (Object[]) row;
+        Tuple tuple = (Tuple) row;
         NAP nap = new NAP();
-        nap.id = ((Number) columns[0]).longValue();
-        nap.nome = (String) columns[1];
-        nap.dadosJson = (String) columns[2];
+        nap.id = tuple.get("id", Long.class);
+        nap.nome = tuple.get("nome", String.class);
+        nap.dadosJson = tuple.get("dados_json", String.class);
         return nap;
     }
 
@@ -40,7 +42,7 @@ public class NAPRepository implements PanacheRepository<NAP> {
 
     public Uni<java.util.List<NAP>> listaNapComEtapa(Long etapasNAPId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_LISTA_NAP_COM_ETAPA)
+                .chain(session -> session.createNativeQuery(SQL_LISTA_NAP_COM_ETAPA, Tuple.class)
                         .setParameter(1, etapasNAPId)
                         .getResultList())
                 .map(rows -> rows.stream().map(this::mapToNAP).toList());
@@ -54,7 +56,7 @@ public class NAPRepository implements PanacheRepository<NAP> {
 
     public Uni<java.util.List<NAP>> listaNapSemEtapa() {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_LISTA_NAP_SEM_ETAPA)
+                .chain(session -> session.createNativeQuery(SQL_LISTA_NAP_SEM_ETAPA, Tuple.class)
                         .getResultList())
                 .map(rows -> rows.stream().map(this::mapToNAP).toList());
     }

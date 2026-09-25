@@ -1,8 +1,10 @@
 package br.com.sol7.olimpio.aluno.repository;
 
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.Tuple;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,7 +15,7 @@ public class AlunoRepository {
     @SuppressWarnings("unchecked")
     private <T> Uni<List<T>> nativeList(String sql, Object... params) {
         return Panache.getSession().onItem().transformToUni(session -> {
-            var query = session.createNativeQuery(sql);
+            var query = session.createNativeQuery(sql, Tuple.class);
             for (int i = 0; i < params.length; i++) query.setParameter(i + 1, params[i]);
             return query.getResultList();
         }).map(list -> (List<T>) list);
@@ -36,10 +38,10 @@ public class AlunoRepository {
         LIMIT 1
         """;
         return nativeList(sql, username)
-                .map(rows -> rows.isEmpty() ? null : asLong(rows.get(0)));
+                .map(rows -> rows.isEmpty() ? null : TupleHelper.getLong((Tuple) rows.get(0), "id_pessoa"));
     }
 
-    public Uni<Object[]> perfilPorUsername(String username) {
+    public Uni<Tuple> perfilPorUsername(String username) {
         String sql = """
         SELECT l.username,
                 COALESCE(f.nome, '') AS nome,
@@ -74,10 +76,10 @@ public class AlunoRepository {
         LIMIT 1
         """;
         return nativeList(sql, username)
-                .map(rows -> rows.isEmpty() ? null : (Object[]) rows.get(0));
+                .map(rows -> rows.isEmpty() ? null : (Tuple) rows.get(0));
     }
 
-    public Uni<List<Object[]>> matriculasPorPessoa(Long pessoaId) {
+    public Uni<List<Tuple>> matriculasPorPessoa(Long pessoaId) {
         String sql = """
         SELECT m.id,
                 COALESCE(c.nome, '') AS curso,
@@ -115,7 +117,7 @@ public class AlunoRepository {
     // Matriculas de um contrato com as colunas descritivas da subtabela "detalhesAluno"
     // (gestaoAluno.xhtml p:rowExpansion): turma, datas, grupo, componente, carga horaria,
     // unidade, professor, status da turma e status da matricula.
-    public Uni<List<Object[]>> matriculasPorContrato(Long contratoId) {
+    public Uni<List<Tuple>> matriculasPorContrato(Long contratoId) {
         String sql = """
         SELECT m.id,
                of.id AS turma,
@@ -143,7 +145,7 @@ public class AlunoRepository {
         return nativeList(sql, contratoId);
     }
 
-    public Uni<List<Object[]>> notasGrauPorMatricula(Long matriculaId) {
+    public Uni<List<Tuple>> notasGrauPorMatricula(Long matriculaId) {
         String sql = """
         SELECT COALESCE (g.id, 0)AS grau_id,
         COALESCE(g.descricao, '') AS grau_descricao,
@@ -166,7 +168,7 @@ public class AlunoRepository {
         return nativeList(sql, matriculaId);
     }
 
-    public Uni<List<Object[]>> avaliacoesPorMatricula(Long matriculaId) {
+    public Uni<List<Tuple>> avaliacoesPorMatricula(Long matriculaId) {
         String sql = """
         SELECT ncm.id AS ncm_id,
                 n.ordem,
@@ -181,7 +183,7 @@ public class AlunoRepository {
         return nativeList(sql, matriculaId);
     }
 
-    public Uni<List<Object[]>> presencasPorMatricula(Long matriculaId) {
+    public Uni<List<Tuple>> presencasPorMatricula(Long matriculaId) {
         String sql = """
         SELECT occ.id AS ocorrencia_id,
                 occ.data,
@@ -197,7 +199,7 @@ public class AlunoRepository {
         return nativeList(sql, matriculaId);
     }
 
-    public Uni<Object[]> resumoFinanceiroPorPessoa(Long pessoaId) {
+    public Uni<Tuple> resumoFinanceiroPorPessoa(Long pessoaId) {
         String sql = """
         SELECT COALESCE ((SELECT current_date - p.data_vencimento
         FROM fin_parcela p
@@ -210,10 +212,10 @@ public class AlunoRepository {
         COALESCE((SELECT SUM(c.valor_parcelas) FROM edc_contrato c WHERE c.id_pessoa = ?1),0) AS valor_pendente
         """;
         return nativeList(sql, pessoaId)
-                .map(rows -> rows.isEmpty() ? null : (Object[]) rows.get(0));
+                .map(rows -> rows.isEmpty() ? null : (Tuple) rows.get(0));
     }
 
-    public Uni<List<Object[]>> contratosPorPessoa(Long pessoaId) {
+    public Uni<List<Tuple>> contratosPorPessoa(Long pessoaId) {
         String sql = """
         SELECT ct.id,
                 COALESCE(c.nome, '') AS curso,
@@ -242,25 +244,25 @@ public class AlunoRepository {
         return nativeList(sql, pessoaId);
     }
 
-    public Uni<List<Object[]>> parcelasMesPorPessoa(Long pessoaId, LocalDate inicioMes, LocalDate fimMes, LocalDate hoje) {
+    public Uni<List<Tuple>> parcelasMesPorPessoa(Long pessoaId, LocalDate inicioMes, LocalDate fimMes, LocalDate hoje) {
         return parcelasPorPessoa(
                 "p.data_cancelamento IS NULL AND (p.data_vencimento BETWEEN ?2 AND ?3 OR (p.data_pagamento IS NULL AND p.data_vencimento <= ?4))",
                 pessoaId, inicioMes, fimMes, hoje);
     }
 
-    public Uni<List<Object[]>> parcelasMatriculaPorPessoa(Long pessoaId) {
+    public Uni<List<Tuple>> parcelasMatriculaPorPessoa(Long pessoaId) {
         return parcelasPorPessoa("p.data_cancelamento IS NULL AND p.id_contrato IS NOT NULL", pessoaId);
     }
 
-    public Uni<List<Object[]>> parcelasProdutosPorPessoa(Long pessoaId) {
+    public Uni<List<Tuple>> parcelasProdutosPorPessoa(Long pessoaId) {
         return parcelasPorPessoa("p.data_cancelamento IS NOT NULL AND p.id_venda IS NOT NULL", pessoaId);
     }
 
-    public Uni<List<Object[]>> parcelasCanceladasPorPessoa(Long pessoaId) {
+    public Uni<List<Tuple>> parcelasCanceladasPorPessoa(Long pessoaId) {
         return parcelasPorPessoa("p.data_cancelamento IS NOT NULL", pessoaId);
     }
 
-private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params) {
+    private Uni<List<Tuple>> parcelasPorPessoa(String condicao, Object... params) {
         String sql = "SELECT p.id," +
             "p.id_contrato," +
             "p.parcela," +
@@ -286,7 +288,7 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
         return nativeList(sql, params);
     }
 
-    public Uni<Object[]> pessoaDadosPorPessoa(Long pessoaId) {
+    public Uni<Tuple> pessoaDadosPorPessoa(Long pessoaId) {
         String sql = """
         SELECT p.id,
                 COALESCE(f.nome, '') AS nome,
@@ -302,10 +304,10 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
         LIMIT 1
         """;
         return nativeList(sql, pessoaId)
-                .map(rows -> rows.isEmpty() ? null : (Object[]) rows.get(0));
+                .map(rows -> rows.isEmpty() ? null : (Tuple) rows.get(0));
     }
 
-    public Uni<List<Object[]>> responsaveisPorPessoa(Long pessoaId) {
+    public Uni<List<Tuple>> responsaveisPorPessoa(Long pessoaId) {
         String sql = """
         SELECT DISTINCT p.id,
                 COALESCE(f.nome, '') AS nome,
@@ -324,7 +326,7 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
         return nativeList(sql, pessoaId);
     }
 
-    public Uni<List<Object[]>> historicoNapLigacaoPorPessoa(Long pessoaId) {
+    public Uni<List<Tuple>> historicoNapLigacaoPorPessoa(Long pessoaId) {
         String sql = """
         SELECT ln.id,
                 ln.data_inicial,
@@ -340,7 +342,7 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
         return nativeList(sql, pessoaId);
     }
 
-    public Uni<List<Object[]>> historicoNapEmailPorPessoa(Long pessoaId) {
+    public Uni<List<Tuple>> historicoNapEmailPorPessoa(Long pessoaId) {
         String sql = """
         SELECT en.id,
                 en.data,
@@ -354,7 +356,7 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
         return nativeList(sql, pessoaId);
     }
 
-    public Uni<List<Object[]>> historicoCobrancaLigacaoPorPessoa(Long pessoaId) {
+    public Uni<List<Tuple>> historicoCobrancaLigacaoPorPessoa(Long pessoaId) {
         String sql = """
         SELECT lc.id,
                 lc.data_inicial,
@@ -371,7 +373,7 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
         return nativeList(sql, pessoaId);
     }
 
-    public Uni<List<Object[]>> historicoCobrancaEmailPorPessoa(Long pessoaId) {
+    public Uni<List<Tuple>> historicoCobrancaEmailPorPessoa(Long pessoaId) {
         String sql = """
         SELECT ec.id,
                 ec.data,
@@ -387,7 +389,7 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
         return nativeList(sql, pessoaId);
     }
 
-    public Uni<List<Object[]>> historicoAlunoPorPessoa(Long pessoaId) {
+    public Uni<List<Tuple>> historicoAlunoPorPessoa(Long pessoaId) {
         String sql = """
         SELECT ha.id,
                 ha.data_registro,
@@ -403,7 +405,7 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
         return nativeList(sql, pessoaId);
     }
 
-    public Uni<List<Object[]>> trocasTurmaPorPessoa(Long pessoaId) {
+    public Uni<List<Tuple>> trocasTurmaPorPessoa(Long pessoaId) {
         String sql = """
         SELECT tt.id,
                 tt.data,
@@ -433,7 +435,7 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
     // Registro de aulas (edc_aula/edc_aula_aluno - legado V1_4_584__aulas.sql):
     // aulas das turmas (oferecimentos) em que o aluno possui matricula ativa.
 
-    public Uni<List<Object[]>> chamadasPorPessoa(Long pessoaId) {
+    public Uni<List<Tuple>> chamadasPorPessoa(Long pessoaId) {
         String sql = """
         SELECT a.id,
                 COALESCE(a.nome, '') AS nome,
@@ -463,7 +465,7 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
     // Avaliacoes (edc_avaliacao/edc_avaliacao_pergunta/edc_avaliacao_resposta/
     // edc_avaliacao_aluno): questionarios vinculados as matriculas do aluno.
 
-    public Uni<List<Object[]>> avaliacoesPorPessoa(Long pessoaId) {
+    public Uni<List<Tuple>> avaliacoesPorPessoa(Long pessoaId) {
         String sql = """
         SELECT av.id,
                 COALESCE(av.nome, '') AS nome,
@@ -505,7 +507,7 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
         return nativeList(sql, avaliacaoId, pessoaId).map(rows -> !rows.isEmpty());
     }
 
-    public Uni<Object[]> avaliacaoPorId(Long avaliacaoId) {
+    public Uni<Tuple> avaliacaoPorId(Long avaliacaoId) {
         String sql = """
         SELECT av.id,
                 COALESCE(av.nome, '') AS nome,
@@ -515,10 +517,10 @@ private Uni<List<Object[]>> parcelasPorPessoa(String condicao, Object... params)
         WHERE av.id = ?1
         LIMIT 1
         """;
-        return nativeList(sql, avaliacaoId).map(rows -> rows.isEmpty() ? null : (Object[]) rows.get(0));
+        return nativeList(sql, avaliacaoId).map(rows -> rows.isEmpty() ? null : (Tuple) rows.get(0));
     }
 
-    public Uni<List<Object[]>> perguntasDaAvaliacao(Long avaliacaoId, Long pessoaId) {
+    public Uni<List<Tuple>> perguntasDaAvaliacao(Long avaliacaoId, Long pessoaId) {
         String sql = """
         SELECT p.id AS pergunta_id,
                 COALESCE(p.pergunta, '') AS pergunta,

@@ -31,10 +31,12 @@ import br.com.sol7.olimpio.aluno.dto.AlunoDtos.ParcelaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.PessoaDadosResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.ResumoFinanceiroResponse;
 import br.com.sol7.olimpio.aluno.repository.AlunoRepository;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.NotFoundException;
 
 import java.math.BigDecimal;
@@ -134,10 +136,10 @@ public class AlunoService {
         return repository.presencasPorMatricula(matricula.id()).map(rows -> {
             List<OcorrenciaPresencaResponse> ocorrencias = new ArrayList<>();
             int presentes = 0, meias = 0, ausentes = 0, atestados = 0, atrasos = 0, semMarcacao = 0, canceladas = 0, prorrogadas = 0;
-            for (Object[] row : rows) {
-                String presenca = asString(row[2]).trim().toLowerCase();
+            for (Tuple row : rows) {
+                String presenca = TupleHelper.getString(row, "presenca").trim().toLowerCase();
                 String descricao = PRESENCA_DESCRICAO.getOrDefault(presenca, presenca.isEmpty() ? "Sem marcação" : presenca);
-                ocorrencias.add(new OcorrenciaPresencaResponse(asLocalDate(row[1]), presenca, descricao, asString(row[3])));
+                ocorrencias.add(new OcorrenciaPresencaResponse(TupleHelper.getLocalDate(row, "data"), presenca, descricao, TupleHelper.getString(row, "componente")));
                 switch (presenca) {
                     case "p" ->presentes++;
                     case "m" ->meias++;
@@ -177,11 +179,11 @@ public class AlunoService {
                 repository.parcelasCanceladasPorPessoa(pessoaId))
                 .asTuple().map(t -> new FinanceiroResponse(
                         toResumo(t.getItem1()),
-                        ((List<?>) t.getItem2()).stream().map(row -> toContratoFinanceiro((Object[]) row)).toList(),
-                        ((List<?>) t.getItem3()).stream().map(row -> toParcela((Object[]) row)).toList(),
-                        ((List<?>) t.getItem4()).stream().map(row -> toParcela((Object[]) row)).toList(),
-                        ((List<?>) t.getItem5()).stream().map(row -> toParcela((Object[]) row)).toList(),
-                        ((List<?>) t.getItem6()).stream().map(row -> toParcela((Object[]) row)).toList()));
+                        ((List<?>) t.getItem2()).stream().map(row -> toContratoFinanceiro((Tuple) row)).toList(),
+                        ((List<?>) t.getItem3()).stream().map(row -> toParcela((Tuple) row)).toList(),
+                        ((List<?>) t.getItem4()).stream().map(row -> toParcela((Tuple) row)).toList(),
+                        ((List<?>) t.getItem5()).stream().map(row -> toParcela((Tuple) row)).toList(),
+                        ((List<?>) t.getItem6()).stream().map(row -> toParcela((Tuple) row)).toList()));
     }
 
     public Uni<PessoaDadosResponse> pessoaDados(Long pessoaId) {
@@ -200,8 +202,8 @@ public class AlunoService {
                 repository.historicoNapLigacaoPorPessoa(pessoaId),
                 repository.historicoNapEmailPorPessoa(pessoaId))
                 .asTuple().map(t -> new HistoricoNapResponse(
-                        ((List<?>) t.getItem1()).stream().map(row -> toLigacaoNap((Object[]) row)).toList(),
-                        ((List<?>) t.getItem2()).stream().map(row -> toEmailNap((Object[]) row)).toList()));
+                        ((List<?>) t.getItem1()).stream().map(row -> toLigacaoNap((Tuple) row)).toList(),
+                        ((List<?>) t.getItem2()).stream().map(row -> toEmailNap((Tuple) row)).toList()));
     }
 
     public Uni<HistoricoCobrancaResponse> historicoCobranca(Long pessoaId) {
@@ -209,8 +211,8 @@ public class AlunoService {
                 repository.historicoCobrancaLigacaoPorPessoa(pessoaId),
                 repository.historicoCobrancaEmailPorPessoa(pessoaId))
                 .asTuple().map(t -> new HistoricoCobrancaResponse(
-                        ((List<?>) t.getItem1()).stream().map(row -> toLigacaoCobranca((Object[]) row)).toList(),
-                        ((List<?>) t.getItem2()).stream().map(row -> toEmailCobranca((Object[]) row)).toList()));
+                        ((List<?>) t.getItem1()).stream().map(row -> toLigacaoCobranca((Tuple) row)).toList(),
+                        ((List<?>) t.getItem2()).stream().map(row -> toEmailCobranca((Tuple) row)).toList()));
     }
 
     public Uni<List<HistoricoAlunoResponse>> historicoAluno(Long pessoaId) {
@@ -289,84 +291,74 @@ public class AlunoService {
                         }));
     }
 
-    private ChamadaAulaResponse toChamadaAula(Object[] row) {
-        LocalDateTime assistida = asLocalDateTimeOrNull(row[6]);
-        return new ChamadaAulaResponse(asLong(row[0]), asString(row[1]), asString(row[2]),
-                asString(row[3]), asInt(row[4]), asLocalDate(row[5]), assistida);
+    private ChamadaAulaResponse toChamadaAula(Tuple row) {
+        LocalDateTime assistida = TupleHelper.getLocalDateTime(row, "data_assitida");
+        return new ChamadaAulaResponse(TupleHelper.getLong(row, "id"), TupleHelper.getString(row, "nome"), TupleHelper.getString(row, "descricao"),
+                TupleHelper.getString(row, "componente"), TupleHelper.getInteger(row, "turma"), TupleHelper.getLocalDate(row, "data_aula"), assistida);
     }
 
-    private AvaliacaoAlunoItemResponse toAvaliacaoItem(Object[] row) {
-        return new AvaliacaoAlunoItemResponse(asLong(row[0]), asString(row[1]), asString(row[2]),
-                asString(row[3]), asInt(row[4]), asLocalDate(row[5]), asLocalDate(row[6]),
-                asBoolean(row[7]), asBoolean(row[8]));
+    private AvaliacaoAlunoItemResponse toAvaliacaoItem(Tuple row) {
+        return new AvaliacaoAlunoItemResponse(TupleHelper.getLong(row, "id"), TupleHelper.getString(row, "nome"), TupleHelper.getString(row, "descricao"),
+                TupleHelper.getString(row, "componente"), TupleHelper.getInteger(row, "turma"), TupleHelper.getLocalDate(row, "data_inicial"), TupleHelper.getLocalDate(row, "data_final"),
+                TupleHelper.getBoolean(row, "ativa"), TupleHelper.getBoolean(row, "respondida"));
     }
 
-    private AvaliacaoDetalheResponse toAvaliacaoDetalhe(Object[] avaliacao, List<Object[]> rows) {
-        Map<Long, List<Object[]>> porPergunta = new LinkedHashMap<>();
-        for (Object[] row : rows) {
-            porPergunta.computeIfAbsent(asLong(row[0]), id -> new ArrayList<>()).add(row);
+    private AvaliacaoDetalheResponse toAvaliacaoDetalhe(Tuple avaliacao, List<Tuple> rows) {
+        Map<Long, List<Tuple>> porPergunta = new LinkedHashMap<>();
+        for (Tuple row : rows) {
+            porPergunta.computeIfAbsent(TupleHelper.getLong(row, "pergunta_id"), id -> new ArrayList<>()).add(row);
         }
         List<AvaliacaoPerguntaResponse> perguntas = new ArrayList<>();
-        for (Map.Entry<Long, List<Object[]>> entry : porPergunta.entrySet()) {
-            Object[] primeira = entry.getValue().get(0);
-            Long escolhida = asLong(primeira[5]);
-            String texto = primeira[6] == null ? null : asString(primeira[6]);
+        for (Map.Entry<Long, List<Tuple>> entry : porPergunta.entrySet()) {
+            Tuple primeira = entry.getValue().get(0);
+            Long escolhida = TupleHelper.getLong(primeira, "escolhida_id");
+            String texto = TupleHelper.getString(primeira, "resposta_aluno");
             List<AvaliacaoOpcaoResponse> opcoes = entry.getValue().stream()
-                    .filter(r -> r[3] != null)
-                    .map(r -> new AvaliacaoOpcaoResponse(asLong(r[3]), asString(r[4])))
+                    .filter(r -> TupleHelper.getLong(r, "resposta_id") != null)
+                    .map(r -> new AvaliacaoOpcaoResponse(TupleHelper.getLong(r, "resposta_id"), TupleHelper.getString(r, "resposta_opcao")))
                     .toList();
-            perguntas.add(new AvaliacaoPerguntaResponse(entry.getKey(), asString(primeira[1]),
-                    asString(primeira[2]), opcoes, escolhida, texto));
+            perguntas.add(new AvaliacaoPerguntaResponse(entry.getKey(), TupleHelper.getString(primeira, "pergunta"),
+                    TupleHelper.getString(primeira, "tipo"), opcoes, escolhida, texto));
         }
-        return new AvaliacaoDetalheResponse(asLong(avaliacao[0]), asString(avaliacao[1]),
-                asString(avaliacao[2]), asBoolean(avaliacao[3]), perguntas);
+        return new AvaliacaoDetalheResponse(TupleHelper.getLong(avaliacao, "id"), TupleHelper.getString(avaliacao, "nome"),
+                TupleHelper.getString(avaliacao, "descricao"), TupleHelper.getBoolean(avaliacao, "ativa"), perguntas);
     }
 
-    private LocalDateTime asLocalDateTimeOrNull(Object o) {
-        if (o == null) return null;
-        try {
-            return asLocalDateTime(o);
-        } catch (RuntimeException ignored) {
-            return null;
-        }
-    }
-
-    private ResumoFinanceiroResponse toResumo(Object row) {
+    private ResumoFinanceiroResponse toResumo(Tuple row) {
         if (row == null) return new ResumoFinanceiroResponse("Em dia", 0, 0, 0, BigDecimal.ZERO);
-        Object[] r = (Object[]) row;
-        Integer diasAtraso = asInt(r[0]);
-        Integer atrasadas = asInt(r[1]);
-        Integer restantes = asInt(r[2]);
-        BigDecimal pendente = asBigDecimal(r[3]) == null ? BigDecimal.ZERO : asBigDecimal(r[3]);
+        Integer diasAtraso = TupleHelper.getInteger(row, "dias_atraso");
+        Integer atrasadas = TupleHelper.getInteger(row, "qtd_atrasadas");
+        Integer restantes = TupleHelper.getInteger(row, "qtd_restantes");
+        BigDecimal pendente = TupleHelper.getBigDecimal(row, "valor_pendente") == null ? BigDecimal.ZERO : TupleHelper.getBigDecimal(row, "valor_pendente");
         String situacao = diasAtraso != null && diasAtraso > 0 ? "Atraso" : "Em dia";
         return new ResumoFinanceiroResponse(situacao, diasAtraso, atrasadas, restantes, pendente);
     }
 
-    private ContratoFinanceiroResponse toContratoFinanceiro(Object[] r) {
-        LocalDate dataCancelamento = asLocalDate(r[4]);
+    private ContratoFinanceiroResponse toContratoFinanceiro(Tuple r) {
+        LocalDate dataCancelamento = TupleHelper.getLocalDate(r, "data_cancelamento");
         String status;
-        if (dataCancelamento != null && !asBoolean(r[5])) {
+        if (dataCancelamento != null && !TupleHelper.getBoolean(r, "desistente")) {
             status = "Cancelado " + dataCancelamento;
-        } else if (dataCancelamento == null && !asBoolean(r[6])) {
+        } else if (dataCancelamento == null && !TupleHelper.getBoolean(r, "inscricao")) {
             status = "Ativo sem inscrição";
-        } else if (dataCancelamento != null && asBoolean(r[5])) {
+        } else if (dataCancelamento != null && TupleHelper.getBoolean(r, "desistente")) {
             status = "Desistente " + dataCancelamento;
         } else {
             status = "Ativo";
         }
         return new ContratoFinanceiroResponse(
-                asLong(r[0]), asString(r[1]), asString(r[2]), asString(r[3]), status,
-                asInt(r[7]), asInt(r[8]), asLocalDate(r[9]), asBigDecimal(r[10]),
-                asInt(r[11]), asLocalDate(r[12]), asBigDecimal(r[13]));
+                TupleHelper.getLong(r, "id"), TupleHelper.getString(r, "curso"), TupleHelper.getString(r, "unidade"), TupleHelper.getString(r, "unidade_responsavel"), status,
+                TupleHelper.getInteger(r, "qtde_reparcelamento"), TupleHelper.getInteger(r, "prox_parcela_seq"), TupleHelper.getLocalDate(r, "prox_parcela_data"), TupleHelper.getBigDecimal(r, "prox_parcela_valor"),
+                TupleHelper.getInteger(r, "ult_parcela_seq"), TupleHelper.getLocalDate(r, "ult_parcela_data"), TupleHelper.getBigDecimal(r, "ult_parcela_valor"));
     }
 
-    private ParcelaResponse toParcela(Object[] r) {
-        boolean vendaProduto = asBoolean(r[16]);
-        boolean multaLivro = asBoolean(r[17]);
-        boolean reparcela = asBoolean(r[13]);
-        boolean cancelamento = asBoolean(r[14]);
-        boolean original = asBoolean(r[15]);
-        Integer parcela = asInt(r[2]);
+    private ParcelaResponse toParcela(Tuple r) {
+        boolean vendaProduto = TupleHelper.getBoolean(r, "venda_produto");
+        boolean multaLivro = TupleHelper.getBoolean(r, "multa_livro");
+        boolean reparcela = TupleHelper.getBoolean(r, "fl_reparcela");
+        boolean cancelamento = TupleHelper.getBoolean(r, "fl_cancelamento");
+        boolean original = TupleHelper.getBoolean(r, "fl_original");
+        Integer parcela = TupleHelper.getInteger(r, "parcela");
         String descricao;
         String descricaoCor;
         if (!vendaProduto && !multaLivro && (parcela == null || parcela == 0)) {
@@ -396,13 +388,13 @@ public class AlunoService {
         }
         String situacao;
         String situacaoCor;
-        if (asLocalDate(r[9]) != null) {
+        if (TupleHelper.getLocalDate(r, "data_cancelamento") != null) {
             situacao = "Cancelado";
             situacaoCor = "#FFA500";
-        } else if (asLocalDate(r[8]) != null) {
+        } else if (TupleHelper.getLocalDate(r, "data_pagamento") != null) {
             situacao = "Pago";
             situacaoCor = "#0000FF";
-        } else if (asLocalDate(r[7]) != null && asLocalDate(r[7]).isBefore(LocalDate.now())) {
+        } else if (TupleHelper.getLocalDate(r, "data_vencimento") != null && TupleHelper.getLocalDate(r, "data_vencimento").isBefore(LocalDate.now())) {
             situacao = "Atraso";
             situacaoCor = "#FF0000";
         } else {
@@ -410,13 +402,13 @@ public class AlunoService {
             situacaoCor = "#32CD32";
         }
         return new ParcelaResponse(
-                asLong(r[0]), asLong(r[1]), parcela, asInt(r[3]),
-                asBigDecimal(r[4]), asBigDecimal(r[5]), asBigDecimal(r[6]),
-                asLocalDate(r[7]), asLocalDate(r[8]), asLocalDate(r[9]),
-                asBigDecimal(r[10]), asBigDecimal(r[11]), asString(r[12]),
+                TupleHelper.getLong(r, "id"), TupleHelper.getLong(r, "id_contrato"), parcela, TupleHelper.getInteger(r, "parcela_sequencia"),
+                TupleHelper.getBigDecimal(r, "multa"), TupleHelper.getBigDecimal(r, "juros"), TupleHelper.getBigDecimal(r, "desconto"),
+                TupleHelper.getLocalDate(r, "data_vencimento"), TupleHelper.getLocalDate(r, "data_pagamento"), TupleHelper.getLocalDate(r, "data_cancelamento"),
+                TupleHelper.getBigDecimal(r, "valor"), TupleHelper.getBigDecimal(r, "valor_pago"), TupleHelper.getString(r, "forma_pagamento"),
                 reparcela, cancelamento, original,
                 vendaProduto, multaLivro, descricao, descricaoCor, situacao, situacaoCor,
-                asLong(r[18]));
+                TupleHelper.getLong(r, "id_parcela_pix"));
     }
 
     private boolean asBoolean(Object o) {
@@ -435,23 +427,23 @@ public class AlunoService {
                                 .orElseThrow(() -> new NotFoundException("Matrícula não encontrada"))));
     }
 
-    private List<GrauData> toGraus(List<Object[]> rows) {
+    private List<GrauData> toGraus(List<Tuple> rows) {
         Map<Long, GrauData> graus = new LinkedHashMap<>();
-        for (Object[] row : rows) {
-            Long grauId = asLong(row[0]);
-            GrauData grau = graus.computeIfAbsent(grauId, id -> new GrauData(id, asString(row[1]),
-                    asBigDecimal(row[8]), asBigDecimal(row[9]), asBigDecimal(row[10]), asBigDecimal(row[11]), new ArrayList<>()));
-            grau.notas().add(new GrauNotaData(asLong(row[2]), asLong(row[3]), asString(row[4]), asInt(row[5]),
-                    asBigDecimal(row[6]), asBigDecimal(row[7]), new ArrayList<>()));
+        for (Tuple row : rows) {
+            Long grauId = TupleHelper.getLong(row, "grau_id");
+            GrauData grau = graus.computeIfAbsent(grauId, id -> new GrauData(id, TupleHelper.getString(row, "grau_descricao"),
+                    TupleHelper.getBigDecimal(row, "nota_maxima"), TupleHelper.getBigDecimal(row, "media_sem_exame"), TupleHelper.getBigDecimal(row, "media_final"), TupleHelper.getBigDecimal(row, "frequencia_minima"), new ArrayList<>()));
+            grau.notas().add(new GrauNotaData(TupleHelper.getLong(row, "ncm_id"), TupleHelper.getLong(row, "id_grau_nota"), TupleHelper.getString(row, "grau_nota_nome"), TupleHelper.getInteger(row, "numero_nota"),
+                    TupleHelper.getBigDecimal(row, "peso"), TupleHelper.getBigDecimal(row, "nota_grau"), new ArrayList<>()));
         }
         return new ArrayList<>(graus.values());
     }
 
-    private void vincularAvaliacoes(List<GrauData> graus, List<Object[]> avaliacoes) {
+    private void vincularAvaliacoes(List<GrauData> graus, List<Tuple> avaliacoes) {
         Map<Long, List<AvaliacaoResponse>> porNcm = new LinkedHashMap<>();
-        for (Object[] row : avaliacoes) {
-            porNcm.computeIfAbsent(asLong(row[0]), id -> new ArrayList<>())
-                    .add(new AvaliacaoResponse(asInt(row[1]), asBigDecimal(row[2]), asString(row[3])));
+        for (Tuple row : avaliacoes) {
+            porNcm.computeIfAbsent(TupleHelper.getLong(row, "ncm_id"), id -> new ArrayList<>())
+                    .add(new AvaliacaoResponse(TupleHelper.getInteger(row, "ordem"), TupleHelper.getBigDecimal(row, "nota"), TupleHelper.getString(row, "conceito")));
         }
         for (GrauData grau : graus)
             for (GrauNotaData nota : grau.notas()) {
@@ -491,77 +483,68 @@ public class AlunoService {
         return "APROVADO";
     }
 
-    private AlunoPerfilResponse toPerfil(Object[] row) {
-        return new AlunoPerfilResponse(asString(row[0]), asString(row[1]), asString(row[2]), asString(row[3]),
-                asString(row[4]), asLocalDate(row[5]), asString(row[6]), asString(row[7]), asString(row[8]), asString(row[9]),
-                asString(row[10]), asString(row[11]), asString(row[12]), asString(row[13]),
-                asString(row[14]), asString(row[15]), asString(row[16]),
-                asString(row[17]), asString(row[18]), asString(row[19]), asString(row[20]));
+    private AlunoPerfilResponse toPerfil(Tuple row) {
+        return new AlunoPerfilResponse(TupleHelper.getString(row, "username"), TupleHelper.getString(row, "nome"), TupleHelper.getString(row, "nome_social"), TupleHelper.getString(row, "cpf"),
+                TupleHelper.getString(row, "rg"), TupleHelper.getLocalDate(row, "data_nascimento"), TupleHelper.getString(row, "email"), TupleHelper.getString(row, "telefone"), TupleHelper.getString(row, "celular"), TupleHelper.getString(row, "foto"),
+                TupleHelper.getString(row, "nome_pai"), TupleHelper.getString(row, "nome_mae"), TupleHelper.getString(row, "nome_referencia"), TupleHelper.getString(row, "telefone_referencia"),
+                TupleHelper.getString(row, "facebook"), TupleHelper.getString(row, "twitter"), TupleHelper.getString(row, "telefone_comercial"),
+                TupleHelper.getString(row, "genero"), TupleHelper.getString(row, "etnia"), TupleHelper.getString(row, "escolaridade"), TupleHelper.getString(row, "estado_civil"));
     }
 
-    private PessoaDadosResponse toPessoaDados(Object[] r) {
-        return new PessoaDadosResponse(asLong(r[0]), asString(r[1]), asString(r[2]), asString(r[3]),
-                asLocalDate(r[4]), asString(r[5]), asString(r[6]), asString(r[7]));
+    private PessoaDadosResponse toPessoaDados(Tuple r) {
+        return new PessoaDadosResponse(TupleHelper.getLong(r, "id"), TupleHelper.getString(r, "nome"), TupleHelper.getString(r, "cpf"), TupleHelper.getString(r, "rg"),
+                TupleHelper.getLocalDate(r, "data_nascimento"), TupleHelper.getString(r, "email"), TupleHelper.getString(r, "telefone"), TupleHelper.getString(r, "celular"));
     }
 
-    private LigacaoNapResponse toLigacaoNap(Object[] r) {
-        return new LigacaoNapResponse(asLong(r[0]), asLocalDateTime(r[1]), asString(r[2]),
-                asString(r[3]), asString(r[4]), asLocalDate(r[5]));
+    private LigacaoNapResponse toLigacaoNap(Tuple r) {
+        return new LigacaoNapResponse(TupleHelper.getLong(r, "id"), TupleHelper.getLocalDateTime(r, "data_inicial"), TupleHelper.getString(r, "telefone"),
+                TupleHelper.getString(r, "observacao"), TupleHelper.getString(r, "resultado"), TupleHelper.getLocalDate(r, "retorno_aula"));
     }
 
-    private EmailNapResponse toEmailNap(Object[] r) {
-        return new EmailNapResponse(asLong(r[0]), asLocalDateTime(r[1]), asString(r[2]),
-                asString(r[3]), asString(r[4]));
+    private EmailNapResponse toEmailNap(Tuple r) {
+        return new EmailNapResponse(TupleHelper.getLong(r, "id"), TupleHelper.getLocalDateTime(r, "data"), TupleHelper.getString(r, "email"),
+                TupleHelper.getString(r, "assunto"), TupleHelper.getString(r, "mensagem"));
     }
 
-    private LigacaoCobrancaResponse toLigacaoCobranca(Object[] r) {
-        return new LigacaoCobrancaResponse(asLong(r[0]), asLocalDateTime(r[1]), asString(r[2]),
-                asString(r[3]), asString(r[4]), asInt(r[5]), asBigDecimal(r[6]));
+    private LigacaoCobrancaResponse toLigacaoCobranca(Tuple r) {
+        return new LigacaoCobrancaResponse(TupleHelper.getLong(r, "id"), TupleHelper.getLocalDateTime(r, "data_inicial"), TupleHelper.getString(r, "telefone"),
+                TupleHelper.getString(r, "observacao"), TupleHelper.getString(r, "resultado"), TupleHelper.getInteger(r, "qtde_parcela"), TupleHelper.getBigDecimal(r, "valor"));
     }
 
-    private EmailCobrancaResponse toEmailCobranca(Object[] r) {
-        return new EmailCobrancaResponse(asLong(r[0]), asLocalDateTime(r[1]), asString(r[2]),
-                asString(r[3]), asString(r[4]), asInt(r[5]), asBigDecimal(r[6]));
+    private EmailCobrancaResponse toEmailCobranca(Tuple r) {
+        return new EmailCobrancaResponse(TupleHelper.getLong(r, "id"), TupleHelper.getLocalDateTime(r, "data"), TupleHelper.getString(r, "email"),
+                TupleHelper.getString(r, "assunto"), TupleHelper.getString(r, "mensagem"), TupleHelper.getInteger(r, "qtde_parcela"), TupleHelper.getBigDecimal(r, "valor"));
     }
 
-    private HistoricoAlunoResponse toHistoricoAluno(Object[] r) {
-        return new HistoricoAlunoResponse(asLong(r[0]), asLocalDateTime(r[1]), asString(r[2]),
-                asLong(r[3]), asString(r[4]));
+    private HistoricoAlunoResponse toHistoricoAluno(Tuple r) {
+        return new HistoricoAlunoResponse(TupleHelper.getLong(r, "id"), TupleHelper.getLocalDateTime(r, "data_registro"), TupleHelper.getString(r, "descricao"),
+                TupleHelper.getLong(r, "id_usuario"), TupleHelper.getString(r, "usuario_nome"));
     }
 
-    private TrocaTurmaResponse toTrocaTurma(Object[] r) {
+    private TrocaTurmaResponse toTrocaTurma(Tuple r) {
         return new TrocaTurmaResponse(
-                asLong(r[0]),
-                asLocalDateTime(r[1]),
-                asString(r[2]),
-                asString(r[3]),
-                asString(r[4]),
-                asString(r[5]),
-                asInt(r[6]),
-                asInt(r[7]));
+                TupleHelper.getLong(r, "id"),
+                TupleHelper.getLocalDateTime(r, "data"),
+                TupleHelper.getString(r, "usuario_nome"),
+                TupleHelper.getString(r, "curso"),
+                TupleHelper.getString(r, "componente"),
+                TupleHelper.getString(r, "unidade"),
+                TupleHelper.getInteger(r, "turma_antes"),
+                TupleHelper.getInteger(r, "turma_depois"));
     }
 
-    private MatriculaResponse toMatricula(Object[] row) {
-        return new MatriculaResponse(asLong(row[0]), asString(row[1]), asString(row[2]), asString(row[3]),
-                asInt(row[4]), asString(row[5]), asInt(row[6]), asString(row[7]), asLocalDate(row[8]),
-                asBigDecimal(row[9]), asBigDecimal(row[10]), asInt(row[11]), asInt(row[12]), asInt(row[13]),
-                asInt(row[14]), asInt(row[15]), asInt(row[16]), asString(row[17]));
+    private MatriculaResponse toMatricula(Tuple row) {
+        return new MatriculaResponse(TupleHelper.getLong(row, "id"), TupleHelper.getString(row, "curso"), TupleHelper.getString(row, "componente"), TupleHelper.getString(row, "unidade"),
+                TupleHelper.getInteger(row, "turma"), TupleHelper.getString(row, "periodo"), TupleHelper.getInteger(row, "ano"), TupleHelper.getString(row, "status"), TupleHelper.getLocalDate(row, "data"),
+                TupleHelper.getBigDecimal(row, "media_final"), TupleHelper.getBigDecimal(row, "percentual_presenca"), TupleHelper.getInteger(row, "qtde_aula"), TupleHelper.getInteger(row, "qtde_aula_feita"), TupleHelper.getInteger(row, "qtde_aula_presente"),
+                TupleHelper.getInteger(row, "qtde_aula_meia_presente"), TupleHelper.getInteger(row, "qtde_falta"), TupleHelper.getInteger(row, "qtde_aula_atrasado"), TupleHelper.getString(row, "professor"));
     }
 
-    private MatriculaContratoResponse toMatriculaContrato(Object[] r) {
+    private MatriculaContratoResponse toMatriculaContrato(Tuple r) {
         return new MatriculaContratoResponse(
-                asLong(r[0]), asLong(r[1]), asLocalDateOrNull(r[2]), asLocalDateOrNull(r[3]),
-                asString(r[4]), asString(r[5]), asInt(r[6]), asString(r[7]), asString(r[8]),
-                asString(r[9]), asString(r[10]), asLocalDateOrNull(r[11]), asBoolean(r[12]));
-    }
-
-    private LocalDate asLocalDateOrNull(Object o) {
-        if (o == null) return null;
-        try {
-            return asLocalDate(o);
-        } catch (RuntimeException ignored) {
-            return null;
-        }
+                TupleHelper.getLong(r, "id"), TupleHelper.getLong(r, "turma"), TupleHelper.getLocalDate(r, "data_inicio"), TupleHelper.getLocalDate(r, "data_fim"),
+                TupleHelper.getString(r, "grupo"), TupleHelper.getString(r, "componente"), TupleHelper.getInteger(r, "carga_horaria"), TupleHelper.getString(r, "unidade"), TupleHelper.getString(r, "professor"),
+                TupleHelper.getString(r, "status_turma"), TupleHelper.getString(r, "status_matricula"), TupleHelper.getLocalDate(r, "data_cancelamento"), TupleHelper.getBoolean(r, "troca_turma"));
     }
 
     private GrauResponse toGrau(GrauData grau) {
@@ -581,64 +564,5 @@ public class AlunoService {
             acumulado.add(item);
             return sequencial(unis, i + 1, acumulado);
         });
-    }
-
-    private String asString(Object o) {
-        return o == null ? "" : o.toString();
-    }
-
-    private Long asLong(Object o) {
-        if (o == null) return null;
-        if (o instanceof Number n)return n.longValue();
-        return Long.valueOf(o.toString());
-    }
-
-    private Integer asInt(Object o) {
-        if (o == null) return null;
-        if (o instanceof Number n)return n.intValue();
-        return Integer.valueOf(o.toString());
-    }
-
-    private BigDecimal asBigDecimal(Object o) {
-        if (o == null) return null;
-        if (o instanceof BigDecimal b)return b;
-        if (o instanceof Number n)return BigDecimal.valueOf(n.doubleValue());
-        return new BigDecimal(o.toString());
-    }
-
-    private LocalDate asLocalDate(Object o) {
-        if (o == null) return null;
-        if (o instanceof LocalDate d)return d;
-        if (o instanceof LocalDateTime d)return d.toLocalDate();
-        if (o instanceof java.sql.Date d)return d.toLocalDate();
-        if (o instanceof java.sql.Timestamp d)return d.toLocalDateTime().toLocalDate();
-        if (o instanceof java.util.Date d)return d.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-        String s = o.toString();
-        if (s.length() >= 10) {
-            try {
-                return LocalDate.parse(s.substring(0, 10));
-            } catch (RuntimeException ignored) {
-                // fall through
-            }
-        }
-        return LocalDate.parse(s);
-    }
-
-    private LocalDateTime asLocalDateTime(Object o) {
-        if (o == null) return null;
-        if (o instanceof LocalDateTime d)return d;
-        if (o instanceof LocalDate d)return d.atStartOfDay();
-        if (o instanceof java.sql.Timestamp d)return d.toLocalDateTime();
-        if (o instanceof java.util.Date d)
-        return d.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime();
-        String s = o.toString();
-        if (s.length() >= 16) {
-            try {
-                return LocalDateTime.parse(s.substring(0, 16).replace(' ', 'T'));
-            } catch (RuntimeException ignored) {
-                // fall through
-            }
-        }
-        return LocalDateTime.parse(s);
     }
 }

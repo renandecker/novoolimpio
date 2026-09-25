@@ -3,6 +3,7 @@ import { DataTable } from '../../shared/components/DataTable';
 import { PermissionGate } from '../../shared/services/permissions';
 import type { DataTableRowAction } from '../../shared/components/DataTable';
 import { useNavigate } from 'react-router-dom';
+import { useIndicadorGaugePaged } from './hooks/useIndicadorGaugePaged';
 
 export default function IndicadorGaugeListScreen() {
   const navigate = useNavigate();
@@ -29,13 +30,13 @@ export default function IndicadorGaugeListScreen() {
         </div>
       </div>
       <DataTable
-        path="/api/relatorios/indicador-gauge/disponiveis"
         module="relatorios"
         outcome="indicador-gauge"
         createNavigateTo="/view/indicador/formIndicadorGauge"
         editNavigateTo="/view/indicador/formIndicadorGauge"
         extraRowActions={extraRowActions}
         hideView={false}
+        useCustomPaged={useIndicadorGaugePaged}
       />
     </main>
   </PermissionGate>;

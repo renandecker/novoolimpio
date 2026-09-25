@@ -42,7 +42,7 @@ const pino_1 = __importDefault(require("pino"));
 const qrcode_terminal_1 = __importDefault(require("qrcode-terminal"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3030;
 let sock = null;
 let qrCodeValue = null;
 let isConnected = false;

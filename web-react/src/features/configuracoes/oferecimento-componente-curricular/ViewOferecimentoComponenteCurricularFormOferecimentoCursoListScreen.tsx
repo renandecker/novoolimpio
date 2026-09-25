@@ -19,6 +19,7 @@ import {ScheduleWeekView, mondayOf, toIsoDate, monthRangeForWeek} from '../../..
 import type {ScheduleEventData} from '../../../shared/components/WeeklyGrid';
 
 import {Modal} from '../../../shared/components/Modal';
+import {ProfessorAvailabilityModal} from '../../../shared/components/ProfessorAvailabilityModal';
 
 import {BooleanField} from '../../../shared/components/BooleanField';
 
@@ -505,6 +506,10 @@ export default function ViewOferecimentoComponenteCurricularFormOferecimentoCurs
     const [bloquearProximo, setBloquearProximo] = useState(false);
 
     const [disponibilidadeModalOpen, setDisponibilidadeModalOpen] = useState(false);
+
+    const [professorAvailabilityOpen, setProfessorAvailabilityOpen] = useState(false);
+    const [selectedProfessorId, setSelectedProfessorId] = useState<number | null>(null);
+    const [selectedProfessorNome, setSelectedProfessorNome] = useState<string | null>(null);
 
     const [disponibilidadeSalaId, setDisponibilidadeSalaId] = useState<number | null>(null);
 
@@ -2764,7 +2769,7 @@ useEffect(() => {
 
             <section className="tab-content">
 
-                <div className="field-row" style={{marginBottom: '16px', justifyContent: 'flex-end'}}>
+                <div className="field-row" style={{marginBottom: '16px', justifyContent: 'flex-end', gap: '8px', flexWrap: 'wrap'}}>
 
                     <button
 
@@ -2772,9 +2777,26 @@ useEffect(() => {
 
                         className="btn-secondary ofc-btn-yellow"
 
-                        title="Disponibilidade dos Professores"
+                        title="Disponibilidade do Professor selecionado"
 
-                        onClick={() => data.unidadeId ? window.open(`/api/educacao/disponibilidade-professor/schedule-events?unidadeId=${data.unidadeId}`, '_blank') : alert('Selecione uma unidade primeiro')}
+                        disabled={!data.unidadeId || !Object.values(data.professores).find(p => p)}
+
+                        onClick={() => {
+                            const firstProfessorId = Object.values(data.professores).find(p => p);
+                            if (!data.unidadeId) {
+                                alert('Selecione uma unidade primeiro');
+                                return;
+                            }
+                            if (!firstProfessorId) {
+                                alert('Selecione um professor na tabela primeiro');
+                                return;
+                            }
+                            const professorNome = Object.entries(data.professores)
+                                .find(([, pid]) => pid === firstProfessorId)?.[0];
+                            setSelectedProfessorId(firstProfessorId);
+                            setSelectedProfessorNome(professorNome ?? 'Professor');
+                            setProfessorAvailabilityOpen(true);
+                        }}
 
                     >
 
@@ -2788,7 +2810,7 @@ useEffect(() => {
 
                         className="btn-primary"
 
-                        onClick={() => alert('Novo Professor - implementar cadastro de professor')}
+                        onClick={() => alert('Cadastro de professor - implementar modal de cadastro')}
 
                     >
 
@@ -2815,6 +2837,8 @@ useEffect(() => {
                             <th>Componente Curricular</th>
 
                             <th style={{width: '45%'}}>Professor</th>
+
+                            <th style={{width: '120px', textAlign: 'center'}}>Ações</th>
 
                         </tr>
 
@@ -2863,6 +2887,40 @@ useEffect(() => {
                                         </span>
 
                                     )}
+
+                                </td>
+
+                                <td style={{textAlign: 'center', whiteSpace: 'nowrap'}}>
+
+                                    <button
+
+                                        type="button"
+
+                                        className="btn-secondary ofc-btn-yellow"
+
+                                        style={{padding: '4px 8px', fontSize: '12px'}}
+
+                                        disabled={!data.professores[String(turma.componenteCurricularId)]}
+
+                                        onClick={() => {
+
+                                            const professorId = data.professores[String(turma.componenteCurricularId)];
+
+                                            if (!professorId) return;
+
+                                            setSelectedProfessorId(professorId);
+
+                                            setSelectedProfessorNome(turma.descricao);
+
+                                            setProfessorAvailabilityOpen(true);
+
+                                        }}
+
+                                    >
+
+                                        Disponibilidade
+
+                                    </button>
 
                                 </td>
 
@@ -3198,7 +3256,18 @@ useEffect(() => {
                             legend={disponibilidadeSalaId ? LEGENDA_SALA : LEGENDA_TODAS}
                         />
                     </div>
-                </Modal>
+</Modal>
+
+                <ProfessorAvailabilityModal
+                    professorId={selectedProfessorId}
+                    professorNome={selectedProfessorNome}
+                    open={professorAvailabilityOpen}
+                    onClose={() => {
+                        setProfessorAvailabilityOpen(false);
+                        setSelectedProfessorId(null);
+                        setSelectedProfessorNome(null);
+                    }}
+                />
 
             </main>
 
@@ -3215,4 +3284,5 @@ function opcaoFilterGuard(_id: number): number {
     return _id;
 
 }
+
 

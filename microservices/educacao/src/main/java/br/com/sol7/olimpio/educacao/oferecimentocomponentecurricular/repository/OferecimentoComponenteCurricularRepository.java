@@ -3,6 +3,8 @@ package br.com.sol7.olimpio.educacao.oferecimentocomponentecurricular;
 import java.util.Date;
 import java.util.List;
 
+import jakarta.persistence.Tuple;
+
 import br.com.sol7.olimpio.educacao.diaaula.DiaAula;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -513,15 +515,16 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
 
     public Uni<java.util.List<DiaAulaGrupoDTO>> buscarDiasAulaPorGrupo(Long grupoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_DIAS_AULA_POR_GRUPO, Object[].class)
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_DIAS_AULA_POR_GRUPO, Tuple.class)
                         .setParameter(1, grupoId)
                         .getResultList())
                 .map(list -> list.stream()
-                        .map(arr -> new DiaAulaGrupoDTO(
-                                ((Number) arr[0]).longValue(),
-                                arr[1] != null ? ((Number) arr[1]).longValue() : null,
-                                arr[2] != null ? ((Number) arr[2]).longValue() : null,
-                                arr[3] != null ? ((Number) arr[3]).longValue() : null
+                        .map(t -> (Tuple) t)
+                        .map(t -> new DiaAulaGrupoDTO(
+                                t.get("id", Long.class),
+                                t.get("id_dia_semana", Long.class),
+                                t.get("id_turno", Long.class),
+                                t.get("id_tempo_aula", Long.class)
                         ))
                         .toList());
     }
@@ -552,20 +555,21 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
 
     public Uni<java.util.List<DiaAulaCompletoDTO>> buscarDiasAulaPorOferecimento(Long oferecimentoComponenteCurricularId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_DIAS_AULA_POR_OFERECIMENTO, Object[].class)
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_DIAS_AULA_POR_OFERECIMENTO, Tuple.class)
                         .setParameter(1, oferecimentoComponenteCurricularId)
                         .getResultList())
                 .map(list -> list.stream()
-                        .map(arr -> new DiaAulaCompletoDTO(
-                                ((Number) arr[0]).longValue(),
-                                arr[1] != null ? ((Number) arr[1]).longValue() : null,
-                                arr[2] != null ? ((Number) arr[2]).longValue() : null,
-                                arr[3] != null ? ((Number) arr[3]).longValue() : null,
-                                (String) arr[4],
-                                toTime(arr[5]),
-                                toTime(arr[6]),
-                                (String) arr[7],
-                                arr[8] != null ? ((Number) arr[8]).intValue() : null
+                        .map(t -> (Tuple) t)
+                        .map(t -> new DiaAulaCompletoDTO(
+                                t.get("id", Long.class),
+                                t.get("id_dia_semana", Long.class),
+                                t.get("id_turno", Long.class),
+                                t.get("id_tempo_aula", Long.class),
+                                t.get("turno_descricao", String.class),
+                                t.get("turno_inicio", java.time.LocalTime.class),
+                                t.get("turno_fim", java.time.LocalTime.class),
+                                t.get("tempo_descricao", String.class),
+                                t.get("tempo_minutos", Integer.class)
                         ))
                         .toList());
     }

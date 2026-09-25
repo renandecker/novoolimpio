@@ -14,35 +14,53 @@ if /i not "%OLIMPIO_FROM_TEMP%"=="1" (
     > "%MARKER%" echo(%~dp0
     copy /y "%~f0" "%TEMP%\olimpio-start-all.bat" >nul 2>&1
     if exist "%TEMP%\olimpio-start-all.bat" (
-        endlocal & set "OLIMPIO_FROM_TEMP=1"
+        endlocal & set "OLIMPIO_FROM_TEMP=1" & setlocal enabledelayedexpansion
         cmd /c "%TEMP%\olimpio-start-all.bat" %*
-        set RC=%errorlevel%
-        exit /b %RC%
+        set "RC=!errorlevel!"
+        echo.
+        if not "!RC!"=="0" (
+            echo [ERRO] O script terminou com erro ^(codigo !RC!^).
+            echo   Detalhes em: compile-errors.log
+            echo   Detalhes em: docker-compose.log
+        ) else (
+            echo [SUCESSO] Script finalizado.
+        )
+        echo.
+        pause
+        exit /b !RC!
     )
     echo [AVISO] Nao foi possivel copiar para TEMP. Executando da pasta original...
 )
 
+set "EXIT_CODE=0"
 set "OLIMPIO_WORKDIR="
 if exist "%MARKER%" set /p OLIMPIO_WORKDIR=<"%MARKER%"
 if not defined OLIMPIO_WORKDIR set "OLIMPIO_WORKDIR=%~dp0"
+set COMPILE_LOG=%OLIMPIO_WORKDIR%compile-errors.log
+set DOCKER_LOG=%OLIMPIO_WORKDIR%docker-compose.log
+
 cd /d "%OLIMPIO_WORKDIR%"
 if %errorlevel% neq 0 (
     echo [ERRO] Nao foi possivel entrar na pasta do projeto: %OLIMPIO_WORKDIR%
-    exit /b 1
+    call :log_error "%DOCKER_LOG%" "Nao foi possivel entrar na pasta do projeto."
+    set "EXIT_CODE=1"
+    goto :finish
 )
-set COMPILE_LOG=%OLIMPIO_WORKDIR%compile-errors.log
-set DOCKER_LOG=%OLIMPIO_WORKDIR%docker-compose.log
 
 where docker >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ERRO] Docker nao encontrado.
-    exit /b 1
+    call :log_error "%DOCKER_LOG%" "Docker nao encontrado no PATH."
+    set "EXIT_CODE=1"
+    goto :finish
 )
 
 where mvn >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ERRO] Maven ^(mvn^) nao encontrado no PATH.
-    exit /b 1
+    call :log_error "%COMPILE_LOG%" "Maven nao encontrado no PATH."
+    set "EXIT_CODE=1"
+    goto :finish
 )
 
 echo Verificando se o Docker Desktop esta pronto...
@@ -64,10 +82,12 @@ set /a ATTEMPT+=1
 if !ATTEMPT! geq 90 (
     echo.
     echo [ERRO] Docker Desktop nao respondeu apos 180 segundos.
-    exit /b 1
+    call :log_error "%DOCKER_LOG%" "Docker Desktop nao respondeu apos 180 segundos."
+    set "EXIT_CODE=1"
+    goto :finish
 )
 echo   Aguardando Docker Desktop iniciar... (!ATTEMPT!/90)
-timeout /t 2 /nobreak >nul
+ping -n 3 127.0.0.1 >nul
 goto check_docker
 
 :docker_ok
@@ -82,7 +102,9 @@ if !errorlevel! equ 0 (
         set DC=docker-compose
     ) else (
         echo [ERRO] docker compose nao encontrado.
-        exit /b 1
+        call :log_error "%DOCKER_LOG%" "docker compose nao encontrado."
+        set "EXIT_CODE=1"
+        goto :finish
     )
 )
 
@@ -96,10 +118,12 @@ if %errorlevel% equ 0 (
     for /f %%i in ('%DC% ps -q') do set HAS_CONTAINERS=1
     if defined HAS_CONTAINERS (
         echo  Encontrados containers. Derrubando antes de subir novamente...
-        %DC% down --remove-orphans 2> "%DOCKER_LOG%"
+        %DC% down --remove-orphans 2>> "%DOCKER_LOG%"
         if !errorlevel! neq 0 (
             echo [ERRO] Falha ao derrubar containers. Detalhes em docker-compose.log
-            exit /b 1
+            call :log_error "%DOCKER_LOG%" "Falha ao derrubar containers."
+            set "EXIT_CODE=1"
+            goto :finish
         )
         docker network rm olimpio_default >nul 2>&1
         echo  Containers derrubados.
@@ -149,7 +173,9 @@ for %%s in (%SVC_LIST%) do (
 if !EXPECTED! equ 0 (
     echo [ERRO] Nenhum pom.xml encontrado em microservices\.
     echo   Pasta do projeto: %OLIMPIO_WORKDIR%
-    exit /b 1
+    call :log_error "%COMPILE_LOG%" "Nenhum pom.xml encontrado em microservices."
+    set "EXIT_CODE=1"
+    goto :finish
 )
 
 set COMPILE_ERRORS=0
@@ -163,6 +189,7 @@ for %%s in (%SVC_LIST%) do (
             set /a OK_COUNT+=1
         ) else (
             echo   [ERRO] %%s ^(Detalhes no arquivo unico: %COMPILE_LOG%^)
+            call :log_error "%COMPILE_LOG%" "Falha na compilacao do microsservico %%s."
             set COMPILE_ERRORS=1
         )
     )
@@ -174,30 +201,38 @@ if "!COMPILE_ERRORS!" neq "0" (
     echo.
     echo [ERRO] Nem todos os microsservicos compilaram ^(!OK_COUNT!/!EXPECTED! ok^).
     echo   Detalhes em: %COMPILE_LOG%
-    exit /b 1
+    set "EXIT_CODE=1"
+    goto :finish
 )
 
 echo Todos os !EXPECTED! microsservicos compilaram com sucesso.
 
 echo ============================================
-echo  Subindo containers com acompanhamento em tempo real...
+echo  Subindo containers...
 echo ============================================
 
-if "%1"=="-d" goto start_bg_with_progress
-goto start_fg_with_progress
+set COMPOSE_SVC=postgres rabbitmq restore basico notificacoes central comercial educacao estoque financeiro relatorios schedule professor login aluno curriculo asaas fiserv
 
-:start_bg_with_progress
-echo.
-echo Iniciando containers em background com monitoramento de saude...
-echo.
-
-%DC% up --build -d 2> "%DOCKER_LOG%"
-if %errorlevel% neq 0 (
-    echo [ERRO] Falha ao subir containers. Detalhes em: %DOCKER_LOG%
+%DC% up --build -d %COMPOSE_SVC% 2>> "%DOCKER_LOG%"
+if !errorlevel! neq 0 (
     echo.
-    echo Ultimas linhas do log:
-    powershell -NoProfile -Command "Get-Content -LiteralPath \"%DOCKER_LOG%\" -Tail 20" 2>nul
-    exit /b 1
+    echo [ERRO] Falha ao subir containers.
+    echo   Detalhes em: %DOCKER_LOG%
+    powershell -NoProfile -Command "Get-Content -LiteralPath '%DOCKER_LOG%' -Tail 20" 2>nul
+    call :log_error "%DOCKER_LOG%" "Falha ao subir containers."
+    set "EXIT_CODE=1"
+    goto :finish
+)
+
+%DC% up -d --build --no-deps gateway web-react 2>> "%DOCKER_LOG%"
+if !errorlevel! neq 0 (
+    echo.
+    echo [ERRO] Falha ao subir gateway e web-react.
+    echo   Detalhes em: %DOCKER_LOG%
+    powershell -NoProfile -Command "Get-Content -LiteralPath '%DOCKER_LOG%' -Tail 20" 2>nul
+    call :log_error "%DOCKER_LOG%" "Falha ao subir gateway e web-react."
+    set "EXIT_CODE=1"
+    goto :finish
 )
 
 echo.
@@ -221,23 +256,16 @@ for %%s in (%SERVICES%) do (
     )
 )
 
-if !HEALTHY! equ !TOTAL! goto bg_all_healthy
-if !WAITED! geq !MAX_WAIT! goto bg_timeout
+if !HEALTHY! equ !TOTAL! goto all_healthy
+if !WAITED! geq !MAX_WAIT! goto wait_timeout
 
 set /a WAITED+=5
 echo [AGUARDANDO] !HEALTHY!/!TOTAL! servicos saudaveis... !WAITED!s/!MAX_WAIT!s
 if defined FAIL_LIST echo   Aguardando: !FAIL_LIST!
-timeout /t 5 /nobreak >nul
+ping -n 6 127.0.0.1 >nul
 goto wait_loop
 
-:bg_all_healthy
-echo.
-echo ============================================
-echo  [SUCESSO] Todos os %TOTAL% servicos estao saudaveis!
-echo ============================================
-goto show_endpoints
-
-:bg_timeout
+:wait_timeout
 echo.
 echo ============================================
 echo  [AVISO] Tempo maximo atingido %MAX_WAIT% seg.
@@ -245,6 +273,14 @@ echo  Servicos operacionais: !HEALTHY!/%TOTAL%
 echo  Servicos com problema: !FAIL_LIST!
 echo.
 echo  Verifique os logs com: docker compose logs -f [servico]
+echo ============================================
+call :log_error "%DOCKER_LOG%" "Timeout ao aguardar servicos saudaveis: !HEALTHY!/!TOTAL! - !FAIL_LIST!"
+goto show_endpoints
+
+:all_healthy
+echo.
+echo ============================================
+echo  [SUCESSO] Todos os %TOTAL% servicos estao saudaveis!
 echo ============================================
 goto show_endpoints
 
@@ -272,7 +308,6 @@ echo.
 echo Enderecos disponiveis:
 echo   App React:    http://localhost:3000
 echo   Gateway:      http://localhost:8080
-echo   Kafka:        http://localhost:9092
 echo   Postgres:     http://localhost:5454
 echo   aluno:        http://localhost:8092
 echo   asaas:        http://localhost:8094
@@ -295,34 +330,51 @@ echo   Docker:       %DOCKER_LOG%
 echo.
 echo Use "%DC% logs -f [servico]" para acompanhar logs.
 echo Use "stop-all.bat" para parar.
+
+curl -sL -f "http://localhost:3000/" >nul 2>&1
+if !errorlevel! equ 0 (
+    echo.
+    echo Abrindo o app no navegador...
+    start "" "http://localhost:3000"
+) else (
+    echo.
+    echo [AVISO] App React nao respondeu em http://localhost:3000
+    call :log_error "%DOCKER_LOG%" "App React nao respondeu em http://localhost:3000."
+)
+goto :keep_alive
+
+:keep_alive
+echo.
+echo ============================================
+echo  Os containers continuam rodando no Docker.
+echo  Esta janela pode ser fechada com segurar CTRL+C.
+echo ============================================
+
+:keep_loop
+set HEALTHY=0
+set FAIL_LIST=
+for %%s in (%SERVICES%) do (
+    for /f "tokens=1,2 delims=:" %%a in ("%%s") do (
+        call :check_health %%a %%b
+    )
+)
+echo [%TIME%] Servicos saudaveis: !HEALTHY!/!TOTAL!
+if defined FAIL_LIST echo   Com problema: !FAIL_LIST!
+ping -n 31 127.0.0.1 >nul
+goto keep_loop
+
+:log_error
+>> "%~1" echo [%DATE% %TIME%] [ERRO] %~2
 goto :eof
 
-:start_fg_with_progress
+:finish
 echo.
-echo Iniciando servicos com logs em tempo real...
-echo Pressione Ctrl+C para parar.
-echo.
-
-echo Iniciando monitoramento de saude em janela separada...
-copy /y "%OLIMPIO_WORKDIR%\health-monitor.bat" "%TEMP%\olimpio-health-monitor.bat" >nul 2>&1
-if exist "%TEMP%\olimpio-health-monitor.bat" (
-    start "Health Monitor" cmd /k ""%TEMP%\olimpio-health-monitor.bat""
-) else (
-    start "Health Monitor" cmd /k ""%OLIMPIO_WORKDIR%\health-monitor.bat""
-)
-
-%DC% up --build 2> "%DOCKER_LOG%"
-if %errorlevel% neq 0 (
-    echo.
-    echo [ERRO] Falha ao subir containers.
-    echo   Detalhes em: %DOCKER_LOG%
-    exit /b 1
-)
-
-echo.
-echo [SUCESSO] Todos os containers estao rodando.
-echo   App React: http://localhost:3000
-echo   Gateway:   http://localhost:8080
-echo   Login:     http://localhost:8090
-
-endlocal
+echo ============================================
+echo  Os containers continuam rodando no Docker.
+echo  Para verificar: docker compose ps
+echo  Para parar: stop-all.bat
+echo  Logs: %COMPILE_LOG%
+echo        %DOCKER_LOG%
+echo ============================================
+if not defined OLIMPIO_FROM_TEMP pause
+endlocal & exit /b %EXIT_CODE%

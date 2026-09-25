@@ -7,7 +7,7 @@ import qrcode from 'qrcode-terminal';
 const app = express();
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3030;
 let sock: any = null;
 let qrCodeValue: string | null = null;
 let isConnected = false;

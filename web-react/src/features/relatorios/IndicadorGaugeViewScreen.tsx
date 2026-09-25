@@ -44,7 +44,7 @@ export default function IndicadorGaugeViewScreen() {
 
   useEffect(() => {
     fetchData();
-  }, [id, loadIndicador]);
+  }, [id]);
 
   useEffect(() => {
     if (indicador) {

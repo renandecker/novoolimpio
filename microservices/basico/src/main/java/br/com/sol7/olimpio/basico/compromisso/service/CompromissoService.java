@@ -2,12 +2,14 @@ package br.com.sol7.olimpio.basico.compromisso.service;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
@@ -418,8 +420,8 @@ public class CompromissoService {
     public Uni<List<br.com.sol7.olimpio.basico.compromisso.dto.ResultadoResponse>> listarResultados(Long id) {
         return repository.buscarResultadosDoCompromisso(id)
                 .map(list -> list.stream().map(row -> new br.com.sol7.olimpio.basico.compromisso.dto.ResultadoResponse(
-                        row[0] != null ? ((Number) row[0]).longValue() : null,
-                        row[1] != null ? row[1].toString() : null
+                        TupleHelper.getLong(row, "id"),
+                        TupleHelper.getString(row, "descricao")
                 )).toList());
     }
 

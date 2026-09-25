@@ -7,6 +7,7 @@ import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
 import br.com.sol7.olimpio.basico.compromisso.entity.Compromisso;
+import jakarta.persistence.Tuple;
 
 @ApplicationScoped
 public class CompromissoRepository implements PanacheRepository<Compromisso> {
@@ -192,12 +193,12 @@ public class CompromissoRepository implements PanacheRepository<Compromisso> {
     public static final String SQL_BUSCAR_RESULTADOS_DO_COMPROMISSO =
             "SELECT r.id, r.descricao FROM bas_compromisso_resultado cr JOIN bas_resultado r ON r.id = cr.id_resultado WHERE cr.id_compromisso = ?1 ORDER BY r.descricao";
 
-    public Uni<List<Object[]>> buscarResultadosDoCompromisso(Long compromissoId) {
+    public Uni<List<Tuple>> buscarResultadosDoCompromisso(Long compromissoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_RESULTADOS_DO_COMPROMISSO)
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_RESULTADOS_DO_COMPROMISSO, Tuple.class)
                         .setParameter(1, compromissoId)
                         .getResultList())
-                .map(list -> list.stream().map(row -> (Object[]) row).toList());
+                .map(list -> list.stream().map(row -> (Tuple) row).toList());
     }
 
 

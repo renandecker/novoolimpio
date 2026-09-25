@@ -68,40 +68,36 @@ public class CaixaRepository implements PanacheRepository<Caixa> {
     // Migrado de CaixaRepository.buscarAberturaCaixa (legado) - HQL original:
     // select c from Caixa c where c.usuario = ?1 AND date(c.data) = current_date  order by c.id
     public static final String SQL_BUSCAR_ABERTURA_CAIXA =
-            "SELECT c.* FROM fin_caixa c WHERE c.id_usuario = ?1 AND date(c.data) = current_date ORDER BY c.id";
+            "SELECT c.id FROM fin_caixa c WHERE c.id_usuario = ?1 AND date(c.data) = current_date ORDER BY c.id";
 
-    public Uni<java.util.List<Caixa>> buscarAberturaCaixa(Long usuarioId) {
+    public Uni<java.util.List<Long>> buscarAberturaCaixa(Long usuarioId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_ABERTURA_CAIXA, Caixa.class)
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_ABERTURA_CAIXA)
                         .setParameter(1, usuarioId)
-                        .getResultList());
+                        .getResultList())
+                .map(list -> list.stream().map(v -> ((Number) v).longValue()).toList());
     }
 
 
     // Migrado de CaixaRepository.buscarAberturaCaixaComUsuarioUnidade (legado) - HQL original:
     // select c from Caixa c where c.usuario = ?1 and c.unidade = ?2  AND date(c.data) = current_date
     public static final String SQL_BUSCAR_ABERTURA_CAIXA_COM_USUARIO_UNIDADE =
-            "SELECT c.* FROM fin_caixa c WHERE c.id_usuario = ?1 and c.id_unidade = ?2 AND date(c.data) = current_date";
+            "SELECT c.id FROM fin_caixa c WHERE c.id_usuario = ?1 and c.id_unidade = ?2 AND date(c.data) = current_date";
 
-    public Uni<java.util.List<Caixa>> buscarAberturaCaixaComUsuarioUnidade(Long usuarioId, Long unidadeId) {
+    public Uni<java.util.List<Long>> buscarAberturaCaixaComUsuarioUnidade(Long usuarioId, Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_ABERTURA_CAIXA_COM_USUARIO_UNIDADE, Caixa.class)
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_ABERTURA_CAIXA_COM_USUARIO_UNIDADE)
                         .setParameter(1, usuarioId)
                         .setParameter(2, unidadeId)
-                        .getResultList());
+                        .getResultList())
+                .map(list -> list.stream().map(v -> ((Number) v).longValue()).toList());
     }
 
 
     // Migrado de CaixaRepository.buscarCaixasAbertos (legado) - HQL original:
     // select c from Caixa c where c.dataFechamento is null order by c.id
-    public static final String SQL_BUSCAR_CAIXAS_ABERTOS =
-            "SELECT c.* FROM fin_caixa c WHERE c.data_fechamento is null ORDER BY c.id";
-
     public Uni<java.util.List<Caixa>> buscarCaixasAbertos() {
-        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_CAIXAS_ABERTOS, Caixa.class)
-
-                        .getResultList());
+        return find("dataFechamento is null order by id").list();
     }
 
 

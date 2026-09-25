@@ -277,8 +277,8 @@ import ViewProdutoFormProdutoListScreen from './src/screens/ViewProdutoFormProdu
 import ViewProdutoListConfiguracaoProdutoListScreen from './src/screens/ViewProdutoListConfiguracaoProdutoListScreen';
 import ViewProdutoListProdutoListScreen from './src/screens/ViewProdutoListProdutoListScreen';
 
-import ViewProfessorFormProfessorListScreen from './src/screens/ViewProfessorFormProfessorListScreen';
-import ViewProfessorListProfessorListScreen from './src/screens/ViewProfessorListProfessorListScreen';
+import ViewProfessorFormProfessorListScreen from './src/features/professor/ViewProfessorFormProfessorListScreen';
+import ViewProfessorListProfessorListScreen from './src/features/professor/ViewProfessorListProfessorListScreen';
 import ViewProspectoCadastroProspectoListScreen from './src/screens/ViewProspectoCadastroProspectoListScreen';
 import ViewProspectoControleProspectoListScreen from './src/screens/ViewProspectoControleProspectoListScreen';
 import ViewProspectoEditProspectoListScreen from './src/screens/ViewProspectoEditProspectoListScreen';

@@ -8,6 +8,7 @@ import {
     Pressable,
     KeyboardAvoidingView,
     Platform,
+    Switch,
 } from 'react-native';
 import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from './theme';
 
@@ -20,7 +21,7 @@ export interface FormFieldAction {
 export interface FormFieldConfig {
     name: string;
     label: string;
-    type?: 'text' | 'email' | 'number' | 'date' | 'select' | 'textarea' | 'mask' | 'autoComplete';
+    type?: 'text' | 'email' | 'number' | 'date' | 'select' | 'textarea' | 'mask' | 'autoComplete' | 'boolean';
     required?: boolean;
     placeholder?: string;
     mask?: string;
@@ -37,6 +38,8 @@ export interface FormTabConfig {
     key: string;
     label: string;
     fields: FormFieldConfig[];
+    /** Conteúdo customizado renderizado no lugar dos campos da aba (ex.: tabela de disponibilidade). */
+    customContent?: React.ReactNode;
 }
 
 export interface FormLayoutProps {
@@ -120,7 +123,16 @@ export function FormLayout({
 
         const renderControl = () => (
             <View style={styles.fieldControl}>
-                {field.type === 'select' ? (
+                {field.type === 'boolean' ? (
+                    <View style={[styles.fieldInput, styles.booleanContainer]}>
+                        <Switch
+                            value={Boolean(currentValue)}
+                            onValueChange={(value: boolean) => handleChange(field.name, value)}
+                            disabled={field.readOnly}
+                            trackColor={{false: Colors.borderMedium, true: Colors.primary}}
+                        />
+                    </View>
+                ) : field.type === 'select' ? (
                     <View style={styles.selectContainer}>
                         <TextInput
                             {...getInputProps()}
@@ -215,7 +227,7 @@ export function FormLayout({
                     .filter((tab) => tab.key === activeTab)
                     .map((tab) => (
                         <View key={tab.key} style={styles.tabContent}>
-                            {tab.fields.map(renderField)}
+                            {tab.customContent ? tab.customContent : tab.fields.map(renderField)}
                         </View>
                     ))}
             </ScrollView>
@@ -351,6 +363,10 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: Colors.textLight,
         pointerEvents: 'none',
+    },
+    booleanContainer: {
+        justifyContent: 'center',
+        minHeight: 44,
     },
     fieldError: {
         fontSize: Typography.sizes.xs,

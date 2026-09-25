@@ -17,6 +17,7 @@ import {legacyClassName} from '../../../shared/components/DataTable';
 import {format} from 'date-fns';
 
 import {Modal} from '../../../shared/components/Modal';
+import {ProfessorAvailabilityModal} from '../../../shared/components/ProfessorAvailabilityModal';
 
 import {BooleanField} from '../../../shared/components/BooleanField';
 
@@ -284,7 +285,7 @@ const [carregando, setCarregando] = useState(true);
     const [criterio, setCriterio] = useState<any>(null);
 
 
-    const [modalOfertaOpen, setModalOfertaOpen] = useState(false);
+const [modalOfertaOpen, setModalOfertaOpen] = useState(false);
     const [modalSalaOpen, setModalSalaOpen] = useState(false);
     const [modalOfertaWeekStart, setModalOfertaWeekStart] = useState(() => toIsoDate(mondayOf(new Date())));
     const [modalSalaWeekStart, setModalSalaWeekStart] = useState(() => toIsoDate(mondayOf(new Date())));
@@ -292,6 +293,10 @@ const [carregando, setCarregando] = useState(true);
     const [modalSalaEvents, setModalSalaEvents] = useState<ScheduleEventData[]>([]);
     const [modalOfertaLoading, setModalOfertaLoading] = useState(false);
     const [modalSalaLoading, setModalSalaLoading] = useState(false);
+
+    const [professorAvailabilityOpen, setProfessorAvailabilityOpen] = useState(false);
+    const [selectedProfessorId, setSelectedProfessorId] = useState<number | null>(null);
+    const [selectedProfessorNome, setSelectedProfessorNome] = useState<string | null>(null);
 
 
     // Master-detail state for diaSemana entries
@@ -1598,9 +1603,63 @@ const fetchProfessor = async (query: string, diaSemanaId?: number, turnoId?: num
 
                                     </div>
 
-                                    <div role="tabpanel" id="panel-tabProfessor" aria-labelledby="tab-tabProfessor" hidden={activeTab !== 'tabProfessor'}>
+<div role="tabpanel" id="panel-tabProfessor" aria-labelledby="tab-tabProfessor" hidden={activeTab !== 'tabProfessor'}>
 
                                         <section className="tab-content">
+
+                                            <div className="field-row" style={{marginBottom: '16px', justifyContent: 'flex-end', gap: '8px', flexWrap: 'wrap'}}>
+
+                                                <button
+
+                                                    type="button"
+
+                                                    className="btn-secondary ofc-btn-yellow"
+
+                                                    title="Disponibilidade do Professor"
+
+                                                    disabled={!data.professorId}
+
+                                                    onClick={() => {
+
+                                                        if (!data.professorId) {
+
+                                                            alert('Selecione um professor primeiro');
+
+                                                            return;
+
+                                                        }
+
+                                                        const professorNome = professores.find(p => p.id === data.professorId)?.nome ?? 'Professor';
+
+                                                        setSelectedProfessorId(data.professorId);
+
+                                                        setSelectedProfessorNome(professorNome);
+
+                                                        setProfessorAvailabilityOpen(true);
+
+                                                    }}
+
+                                                >
+
+                                                    Disponibilidade
+
+                                                </button>
+
+                                                <button
+
+                                                    type="button"
+
+                                                    className="btn-primary"
+
+                                                    onClick={() => alert('Cadastro de professor - implementar modal de cadastro')}
+
+                                                >
+
+                                                    Professor
+
+                                                </button>
+
+                                            </div>
 
                                             <fieldset className="form-fieldset">
 
@@ -1677,7 +1736,18 @@ const fetchProfessor = async (query: string, diaSemanaId?: number, turnoId?: num
                     loading={modalSalaLoading}
                     legend={LEGENDA_OFERECIMENTO}
                 />
-            </Modal>
+</Modal>
+
+            <ProfessorAvailabilityModal
+                professorId={selectedProfessorId}
+                professorNome={selectedProfessorNome}
+                open={professorAvailabilityOpen}
+                onClose={() => {
+                    setProfessorAvailabilityOpen(false);
+                    setSelectedProfessorId(null);
+                    setSelectedProfessorNome(null);
+                }}
+            />
 
             </main>
 

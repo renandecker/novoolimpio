@@ -265,6 +265,24 @@
     white-space: nowrap;
 }
 
+/* Bolinha de presença da matriz (espelha ponto_*.png de extracted_aceso):
+   o botão carrega a cor via style e alterna a presença ao clicar. */
+.gp-presenca-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    display: inline-block;
+    padding: 0;
+    vertical-align: middle;
+}
+
+.gp-presenca-btn:disabled {
+    cursor: default;
+    opacity: 0.65;
+}
+
 .gp-status {
     display: inline-block;
     padding: 2px 8px;

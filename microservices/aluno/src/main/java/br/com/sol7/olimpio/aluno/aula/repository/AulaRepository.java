@@ -1,10 +1,12 @@
 package br.com.sol7.olimpio.aluno.aula.repository;
 
 import br.com.sol7.olimpio.aluno.aula.entity.Aula;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.Tuple;
 
 import java.util.Date;
 import java.util.List;
@@ -15,7 +17,7 @@ public class AulaRepository implements PanacheRepository<Aula> {
     @SuppressWarnings("unchecked")
     private <T> Uni<List<T>> nativeList(String sql, Object... params) {
         return Panache.getSession().onItem().transformToUni(session -> {
-            var query = session.createNativeQuery(sql);
+            var query = session.createNativeQuery(sql, Tuple.class);
             for (int i = 0; i < params.length; i++) query.setParameter(i + 1, params[i]);
             return query.getResultList();
         }).map(list -> (List<T>) list);
@@ -24,7 +26,7 @@ public class AulaRepository implements PanacheRepository<Aula> {
     @SuppressWarnings("unchecked")
     private <T> Uni<T> nativeOne(String sql, Object... params) {
         return Panache.getSession().onItem().transformToUni(session -> {
-            var query = session.createNativeQuery(sql);
+            var query = session.createNativeQuery(sql, Tuple.class);
             for (int i = 0; i < params.length; i++) query.setParameter(i + 1, params[i]);
             return query.getResultList();
         }).map(list -> list.isEmpty() ? null : (T) list.get(0));
@@ -39,10 +41,10 @@ public class AulaRepository implements PanacheRepository<Aula> {
         LIMIT 1
         """;
         return nativeList(sql, username)
-                .map(rows -> rows.isEmpty() ? null : asLong(firstColumn(rows.get(0))));
+                .map(rows -> rows.isEmpty() ? null : TupleHelper.getLong((Tuple) rows.get(0), "id_pessoa"));
     }
 
-    public Uni<List<Object[]>> contratosDoAluno(Long pessoaId) {
+    public Uni<List<Tuple>> contratosDoAluno(Long pessoaId) {
         String sql = """
         SELECT DISTINCT c.id, COALESCE(cur.nome, '') AS curso
         FROM edc_contrato c
@@ -55,7 +57,7 @@ public class AulaRepository implements PanacheRepository<Aula> {
         return nativeList(sql, pessoaId);
     }
 
-    public Uni<List<Object[]>> oferecimentosDoContrato(Long contratoId) {
+    public Uni<List<Tuple>> oferecimentosDoContrato(Long contratoId) {
         String sql = """
         SELECT DISTINCT of.id, COALESCE(cc.sucinto, cc.descricao, '') AS modulo
         FROM edc_matricula m
@@ -67,7 +69,7 @@ public class AulaRepository implements PanacheRepository<Aula> {
         return nativeList(sql, contratoId);
     }
 
-    public Uni<List<Object[]>> ocorrenciasDoOferecimento(Long oferecimentoId) {
+    public Uni<List<Tuple>> ocorrenciasDoOferecimento(Long oferecimentoId) {
         String sql = """
         SELECT occ.id, occ.data, COALESCE(occ.aula_coringa, false) AS aula_coringa,
         COALESCE(occ.aula_presencial, false) AS aula_presencial
@@ -82,7 +84,7 @@ public class AulaRepository implements PanacheRepository<Aula> {
         return list("ocorrenciaComponenteCurricularId", ocorrenciaId);
     }
 
-    public Uni<List<Object[]>> turmasDoAluno(Long pessoaId) {
+    public Uni<List<Tuple>> turmasDoAluno(Long pessoaId) {
         String sql = """
         SELECT DISTINCT of.id,
                 COALESCE(c.nome, '') AS curso,
@@ -104,7 +106,7 @@ public class AulaRepository implements PanacheRepository<Aula> {
         return nativeList(sql, pessoaId);
     }
 
-    public Uni<List<Object[]>> aulasDaTurma(Long oferecimentoId, Long pessoaId) {
+    public Uni<List<Tuple>> aulasDaTurma(Long oferecimentoId, Long pessoaId) {
         String sql = """
         SELECT a.id,
                COALESCE(a.nome, '') AS nome,
@@ -140,7 +142,8 @@ public class AulaRepository implements PanacheRepository<Aula> {
         """;
         return nativeOne(sql, aulaId, pessoaId).map(row -> {
             if (row == null) return new Date();
-            Object o = firstColumn(row);
+            Tuple t = (Tuple) row;
+            Object o = t.get(0);
             if (o instanceof java.sql.Timestamp ts)return new Date(ts.getTime());
             if (o instanceof Date d)return d;
             return new Date();
@@ -150,12 +153,7 @@ public class AulaRepository implements PanacheRepository<Aula> {
     public Uni<Boolean> jaAssistida(Long aulaId, Long pessoaId) {
         String sql = "SELECT count(*) FROM edc_aula_aluno WHERE id_aula = ?1 AND id_pessoa = ?2";
         return nativeList(sql, aulaId, pessoaId)
-                .map(rows -> !rows.isEmpty() && asLong(firstColumn(rows.get(0))) > 0);
-    }
-
-    private Object firstColumn(Object row) {
-        if (row instanceof Object[] arr)return arr[0];
-        return row;
+                .map(rows -> !rows.isEmpty() && TupleHelper.toLong(((Tuple) rows.get(0)).get(0)) > 0);
     }
 
     private Long asLong(Object o) {

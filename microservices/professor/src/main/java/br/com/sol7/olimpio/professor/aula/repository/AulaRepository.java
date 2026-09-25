@@ -5,6 +5,7 @@ import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.Tuple;
 
 import java.util.List;
 
@@ -14,13 +15,13 @@ public class AulaRepository implements PanacheRepository<Aula> {
     @SuppressWarnings("unchecked")
     private <T> Uni<List<T>> nativeList(String sql, Object... params) {
         return Panache.getSession().onItem().transformToUni(session -> {
-            var query = session.createNativeQuery(sql);
+            var query = session.createNativeQuery(sql, Tuple.class);
             for (int i = 0; i < params.length; i++) query.setParameter(i + 1, params[i]);
             return query.getResultList();
         }).map(list -> (List<T>) list);
     }
 
-    public Uni<List<Object[]>> ocorrenciasDoOferecimento(Long oferecimentoId) {
+    public Uni<List<Tuple>> ocorrenciasDoOferecimento(Long oferecimentoId) {
         String sql = """
         SELECT occ.id, occ.data, COALESCE(occ.aula_coringa, false) AS aula_coringa,
         COALESCE(occ.aula_presencial, false) AS aula_presencial

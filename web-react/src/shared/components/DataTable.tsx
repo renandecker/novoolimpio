@@ -70,6 +70,19 @@ export interface DataTableRowMenu {
     items: DataTableRowAction[];
 }
 
+interface UsePagedHookResult {
+    data?: { content: ApiItem[]; totalElements: number; totalPages: number };
+    isLoading: boolean;
+    isError: boolean;
+    isFetching: boolean;
+    refetch: () => void;
+    create: { mutate: (body: unknown, options?: { onSuccess?: () => void; onError?: (error: unknown) => void }) => void };
+    update: { mutate: (args: { id: number; body: unknown }, options?: { onSuccess?: () => void; onError?: (error: unknown) => void }) => void };
+    remove: { mutate: (id: number, options?: { onSuccess?: () => void; onError?: (error: unknown) => void }) => void };
+}
+
+type UsePagedHook = (page: number, size: number, params?: Record<string, unknown>, filters?: SearchFilterRequest, sort?: SortRequest) => UsePagedHookResult;
+
 interface DataTableProps {
     path?: string;
     columns?: DataTableColumn[];
@@ -96,6 +109,8 @@ interface DataTableProps {
     extraRowMenus?: DataTableRowMenu[];
     /** Dados locais para modo sem API (ignora path). */
     data?: ApiItem[];
+    /** Hook personalizado para paginação (ex.: useIndicadorGaugePaged) */
+    useCustomPaged?: UsePagedHook;
 }
 
 const toTitle = (value: string) =>
@@ -263,7 +278,7 @@ interface FilterModalState {
     filters: SearchFilterRequest;
 }
 
-export function DataTable({path = '', columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, hideUpdate = false, hideDelete = false, hideView = false, editNavigateTo, createNavigateTo, extraToolbarButtons, extraRowActions, extraRowMenus, data}: DataTableProps) {
+export function DataTable({path = '', columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, hideUpdate = false, hideDelete = false, hideView = false, editNavigateTo, createNavigateTo, extraToolbarButtons, extraRowActions, extraRowMenus, data, useCustomPaged}: DataTableProps) {
     const navigate = useNavigate();
     const [sortField, setSortField] = useState<string>('id');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -294,7 +309,11 @@ export function DataTable({path = '', columns, params, module = 'basico', outcom
     const screenOutcome = outcome ?? routeOutcome;
 
     const hasPath = Boolean(path);
-    const q = hasPath ? useModulePaged(path, page, size, params, filterParams, sortRequest) : {data: {content: data ?? [], totalElements: (data ?? []).length, totalPages: 1}, refetch: () => {}, isLoading: false, isError: false};
+    const q = hasPath
+        ? (useCustomPaged
+            ? useCustomPaged(page, size, params, filterParams, sortRequest)
+            : useModulePaged(path, page, size, params, filterParams, sortRequest))
+        : {data: {content: data ?? [], totalElements: (data ?? []).length, totalPages: 1}, refetch: () => {}, isLoading: false, isError: false};
     const items = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);
