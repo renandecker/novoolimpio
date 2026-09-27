@@ -13,9 +13,12 @@ UPDATE public.bas_modulo
 SET outcome = '/default'
 WHERE outcome IS NULL OR outcome = '' OR outcome = '/';
 
--- 2) Remove o modulo Biblioteca (features descontinuadas) e as permissoes dele.
-DELETE FROM public.bas_perfil_modulo WHERE id_modulo IN (187,188,189,193,194,195,196,207,218,223);
-DELETE FROM public.bas_modulo WHERE id IN (187,188,189,193,194,195,196,207,218,223);
+-- 2) A remocao dos modulos de Biblioteca/Livros e tratada na migracao V31
+--    (remove_biblioteca_livros.sql), que resolve os ids por rotulo/outcome com
+--    CTE recursivo e limpa todas as referencias (bas_perfil_modulo,
+--    bas_favorito_perfil/usuario, bas_status_modulo e bas_perfil.id_modulo).
+--    Remover aqui por lista de ids fixos causava FK violations em backups com
+--    ids diferentes e bloqueava todas as migracoes seguintes.
 
 -- 3) Garante o perfil Administrador (hierarquia ADMIN).
 INSERT INTO public.bas_perfil (id, descricao, hierarquia, id_modulo, exibir_favoritos, ajustar_favoritos, exibir_foto, exibir_senha, exibir_menu, comunicar)

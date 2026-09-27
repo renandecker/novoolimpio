@@ -3,7 +3,7 @@
 --    filha de "Acesso do Aluno", o que fazia o portal inteiro sumir do menu,
 --    pois nenhum no da subarvore ficava acessivel a partir da raiz).
 -- 2) Garante "Acesso do Aluno" como filho da raiz "Aluno".
--- 3) Remove telas duplicadas do portal (ex.: legadas 252/253/254 x novas),
+-- 3) Remove telas duplicadas do portal (ex.: telas antigas x novas),
 --    mantendo uma unica tela por outcome dentro de "Acesso do Aluno".
 -- 4) Reposiciona as telas do portal apenas se forem folhas (nunca grupos).
 -- 5) Regaranta permissoes: perfil Aluno (leitura) e hierarquia ADMIN (integral).
@@ -61,9 +61,9 @@ WHERE lower(raiz.rotulo) = 'aluno'
   AND raiz.id_modulo IS NULL
   AND (raiz.outcome IS NULL OR raiz.outcome = '' OR raiz.outcome = '/default');
 
--- Avanca a sequencia para nao colidir com ids criados manualmente.
+-- Garante que a sequencia nunca gere um id ja usado.
 SELECT setval('public.bas_modulo_id_seq',
-              GREATEST((SELECT COALESCE(MAX(id), 0) FROM public.bas_modulo), 254), true);
+              GREATEST((SELECT COALESCE(MAX(id), 0) FROM public.bas_modulo), 1), true);
 
 -- 6) Perfil "Aluno": garante existencia e vinculo ao grupo raiz.
 INSERT INTO public.bas_perfil (id, descricao, hierarquia, id_modulo, exibir_favoritos, ajustar_favoritos, exibir_foto, exibir_senha, exibir_menu, comunicar)

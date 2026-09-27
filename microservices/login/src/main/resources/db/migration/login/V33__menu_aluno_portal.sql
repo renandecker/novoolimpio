@@ -82,9 +82,9 @@ WHERE lower(rotulo) = 'aluno'
   AND id_modulo IS NULL
   AND (outcome IS NULL OR outcome = '' OR outcome = '/default');
 
--- Avanca a sequencia de ids para nao colidir com os modulos criados acima.
+-- Garante que a sequencia nunca gere um id ja usado.
 SELECT setval('public.bas_modulo_id_seq',
-              GREATEST((SELECT COALESCE(MAX(id), 0) FROM public.bas_modulo), 254), true);
+              GREATEST((SELECT COALESCE(MAX(id), 0) FROM public.bas_modulo), 1), true);
 
 -- 6) Perfil "Aluno": garante existencia e vinculo ao grupo raiz.
 INSERT INTO public.bas_perfil (id, descricao, hierarquia, id_modulo, exibir_favoritos, ajustar_favoritos, exibir_foto, exibir_senha, exibir_menu, comunicar)

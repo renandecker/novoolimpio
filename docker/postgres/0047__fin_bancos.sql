@@ -23,6 +23,7 @@ COMMENT ON COLUMN public.fin_bancos.chave           IS 'Nome da chave: base-url,
 COMMENT ON COLUMN public.fin_bancos.valor           IS 'Valor da configuracao (texto livre)';
 
 -- Menu: Configuracao Financeira (dentro do modulo basico > Configuracoes)
+-- O pai e resolvido por rotulo com LIMIT 1, sem depender do id do modulo.
 -- Adiciona coluna fl_ativo se nao existir no bas_modulo
 DO $$
 BEGIN
@@ -33,7 +34,11 @@ END $$;
 
 INSERT INTO bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem, fl_ativo)
 SELECT nextval('bas_modulo_id_seq'),
-       (SELECT id FROM bas_modulo WHERE lower(rotulo) = 'configurações' AND id_modulo = 25 LIMIT 1),
+       (SELECT c.id
+          FROM bas_modulo c
+         WHERE lower(c.rotulo) = 'configurações'
+           AND c.id_modulo = (SELECT p.id FROM bas_modulo p WHERE lower(p.rotulo) = 'administração' AND p.id_modulo IS NULL LIMIT 1)
+         LIMIT 1),
        'Configuração Financeira',
        'Credenciais Fiserv e Asaas por unidade',
        '💰',

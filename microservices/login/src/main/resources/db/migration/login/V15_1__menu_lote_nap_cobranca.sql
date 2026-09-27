@@ -1,19 +1,29 @@
 -- V15: Adiciona ao menu os modulos "NAP em lote" e "Cobrança em lote"
 -- (telas React /view/nap/listLote e /view/cobranca/listLote) dentro dos
--- submenus "NAP" (137, sob Acadêmico) e "Gestão de Cobrança" (131).
--- Concede acesso ao perfil Administrador. Idempotente.
+-- submenus "NAP" (sob "Acadêmico") e "Gestão de Cobrança" (sob "Financeiro").
+-- Os pais sao resolvidos por rotulo com LIMIT 1, sem depender de ids fixos,
+-- para funcionar em backups diferentes. Concede acesso ao perfil
+-- Administrador. Idempotente.
 
 -- 1) Modulo "NAP em lote" dentro do submenu NAP.
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
 SELECT nextval('public.bas_modulo_id_seq'),
-       (SELECT m.id FROM public.bas_modulo m WHERE m.rotulo = 'NAP' AND m.id_modulo = 49 LIMIT 1),
+       (SELECT n.id
+          FROM public.bas_modulo n
+         WHERE n.rotulo = 'NAP'
+           AND n.id_modulo = (SELECT a.id FROM public.bas_modulo a WHERE a.rotulo = 'Acadêmico' AND a.id_modulo IS NULL LIMIT 1)
+         LIMIT 1),
        'NAP em lote', 'Envio de e-mails e ligações em lote da NAP', '📨', '/view/nap/listLote', NULL, 100
 WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE outcome = '/view/nap/listLote');
 
 -- 2) Modulo "Cobrança em lote" dentro do submenu Gestão de Cobrança.
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
 SELECT nextval('public.bas_modulo_id_seq'),
-       (SELECT m.id FROM public.bas_modulo m WHERE m.rotulo = 'Gestão de Cobrança' LIMIT 1),
+       (SELECT g.id
+          FROM public.bas_modulo g
+         WHERE g.rotulo = 'Gestão de Cobrança'
+           AND g.id_modulo = (SELECT f.id FROM public.bas_modulo f WHERE f.rotulo = 'Financeiro' AND f.id_modulo IS NULL LIMIT 1)
+         LIMIT 1),
        'Cobrança em lote', 'Envio de e-mails e ligações em lote da Cobrança', '📨', '/view/cobranca/listLote', NULL, 100
 WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE outcome = '/view/cobranca/listLote');
 

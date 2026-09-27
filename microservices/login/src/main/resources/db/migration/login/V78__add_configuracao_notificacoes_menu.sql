@@ -1,10 +1,15 @@
 -- V78: Adiciona menu "Configuração Notificações" em Administração > Configurações
 -- Tela para o usuário configurar quais canais (Push, Telegram, WhatsApp, Email, SMS)
 -- deseja receber para cada tipo de notificação (Notas, Presenças, Aulas, Registro aula, Alteração contrato).
+-- O pai é resolvido por rotulo com LIMIT 1, sem depender do id do módulo.
 
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem, fl_ativo)
 SELECT nextval('public.bas_modulo_id_seq'),
-       (SELECT m.id FROM public.bas_modulo m WHERE m.rotulo = 'Configurações' AND m.id_modulo = 25 LIMIT 1),
+       (SELECT c.id
+          FROM public.bas_modulo c
+         WHERE c.rotulo = 'Configurações'
+           AND c.id_modulo = (SELECT p.id FROM public.bas_modulo p WHERE p.rotulo = 'Administração' AND p.id_modulo IS NULL LIMIT 1)
+         LIMIT 1),
        'Configuração Notificações',
        'Configuração de canais de notificação por categoria e tipo (Notas, Presenças, Aulas, Registro aula, Alteração contrato)',
        'fa fa-bell',

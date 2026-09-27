@@ -1,29 +1,38 @@
 -- V9: Cria o menu "Acesso do Aluno" em bas_modulo, o perfil "Aluno" em bas_perfil
 -- e vincula o acesso ao usuario admin (bas_usuario_perfil). Idempotente.
+-- Nada aqui depende de id fixo: os ids sao gerados pela sequencia e o vinculo
+-- com o modulo pai e feito por rotulo (LIMIT 1), para funcionar em backups
+-- diferentes (mesmos rotulos, ids distintos).
 
 -- 1) Modulo raiz "Acesso do Aluno" (grupo do menu).
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
-SELECT 251, NULL, 'Acesso do Aluno', 'Portal de acesso do aluno', '🎓', '/aluno/portalAluno', 'Tela de acesso do aluno: portal, boletim e frequência.', 5
+SELECT nextval('public.bas_modulo_id_seq'), NULL, 'Acesso do Aluno', 'Portal de acesso do aluno', '🎓', '/aluno/portalAluno', 'Tela de acesso do aluno: portal, boletim e frequência.', 5
 WHERE NOT EXISTS (
     SELECT 1 FROM public.bas_modulo
-    WHERE id = 251 OR lower(rotulo) = 'acesso do aluno'
+    WHERE lower(rotulo) = 'acesso do aluno'
 );
 
 -- 2) Telas do acesso do aluno, vinculadas ao modulo raiz.
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
-SELECT 252, (SELECT id FROM public.bas_modulo WHERE lower(rotulo) = 'acesso do aluno' LIMIT 1), 'Portal do aluno', 'Visão geral do aluno', '📊', '/aluno/portalAluno', NULL, 1
-WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE id = 252);
+SELECT nextval('public.bas_modulo_id_seq'),
+       (SELECT id FROM public.bas_modulo WHERE lower(rotulo) = 'acesso do aluno' LIMIT 1),
+       'Portal do aluno', 'Visão geral do aluno', '📊', '/aluno/portalAluno', NULL, 1
+WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE lower(rotulo) = 'portal do aluno');
 
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
-SELECT 253, (SELECT id FROM public.bas_modulo WHERE lower(rotulo) = 'acesso do aluno' LIMIT 1), 'Boletim', 'Boletim e notas do aluno', '📄', '/aluno/boletim', NULL, 2
-WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE id = 253);
+SELECT nextval('public.bas_modulo_id_seq'),
+       (SELECT id FROM public.bas_modulo WHERE lower(rotulo) = 'acesso do aluno' LIMIT 1),
+       'Boletim', 'Boletim e notas do aluno', '📄', '/aluno/boletim', NULL, 2
+WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE lower(rotulo) = 'boletim');
 
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
-SELECT 254, (SELECT id FROM public.bas_modulo WHERE lower(rotulo) = 'acesso do aluno' LIMIT 1), 'Frequência', 'Frequência do aluno', '📅', '/aluno/frequencia', NULL, 3
-WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE id = 254);
+SELECT nextval('public.bas_modulo_id_seq'),
+       (SELECT id FROM public.bas_modulo WHERE lower(rotulo) = 'acesso do aluno' LIMIT 1),
+       'Frequência', 'Frequência do aluno', '📅', '/aluno/frequencia', NULL, 3
+WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE lower(rotulo) = 'frequência');
 
--- Avanca a sequencia de ids para nao colidir com os modulos criados acima.
-SELECT setval('public.bas_modulo_id_seq', GREATEST((SELECT COALESCE(MAX(id), 0) FROM public.bas_modulo), 254), true);
+-- Garante que a sequencia nunca gere um id ja usado.
+SELECT setval('public.bas_modulo_id_seq', GREATEST((SELECT COALESCE(MAX(id), 0) FROM public.bas_modulo), 1), true);
 
 -- 3) Perfil "Aluno" em bas_perfil.
 INSERT INTO public.bas_perfil (id, descricao, hierarquia, id_modulo, exibir_favoritos, ajustar_favoritos, exibir_foto, exibir_senha, exibir_menu, comunicar)

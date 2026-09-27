@@ -44,8 +44,8 @@ WHERE outcome IN ('/aluno/aulas', '/aluno/avaliacoes')
   AND (id_modulo IS NULL
        OR id_modulo <> (SELECT m.id FROM public.bas_modulo m WHERE lower(m.rotulo) = 'acesso do aluno' LIMIT 1));
 
--- Avanca a sequencia de ids para nao colidir com os modulos criados acima.
-SELECT setval('public.bas_modulo_id_seq', GREATEST((SELECT COALESCE(MAX(id), 0) FROM public.bas_modulo), 254), true);
+-- Garante que a sequencia nunca gere um id ja usado.
+SELECT setval('public.bas_modulo_id_seq', GREATEST((SELECT COALESCE(MAX(id), 0) FROM public.bas_modulo), 1), true);
 
 -- 5) Perfil Aluno: acesso (somente leitura) as telas e aos grupos do portal.
 INSERT INTO public.bas_perfil_modulo (id_perfil, id_modulo, novo, editar, remover, relatorio, id)

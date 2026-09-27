@@ -2,10 +2,16 @@
 -- 1) Notificacoes do usuario (USUARIO+AGENDA): alteracoes da agenda e do cadastro.
 -- 2) Notificacoes do aluno (ALUNO+CONTRATO+TURMA): criacao/cancelamento contrato, aula, nota, presenca, registro.
 -- 3) Notificacoes do professor (PROFESSOR): perguntas respondidas, turma vinculada, registro do professor.
+-- O pai ("Configurações", sob "Administração") e resolvido por rotulo com LIMIT 1,
+-- sem depender de ids fixos, para funcionar em backups diferentes.
 
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem, fl_ativo)
 SELECT nextval('public.bas_modulo_id_seq'),
-       (SELECT m.id FROM public.bas_modulo m WHERE m.rotulo = 'Configurações' AND m.id_modulo = 25 LIMIT 1),
+       (SELECT c.id
+          FROM public.bas_modulo c
+         WHERE c.rotulo = 'Configurações'
+           AND c.id_modulo = (SELECT p.id FROM public.bas_modulo p WHERE p.rotulo = 'Administração' AND p.id_modulo IS NULL LIMIT 1)
+         LIMIT 1),
        'Notificações do Usuário',
        'Alterações da sua agenda e do seu cadastro (categorias USUARIO e AGENDA)',
        'fa fa-user-bell',
@@ -17,7 +23,11 @@ WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE outcome = '/view/configu
 
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem, fl_ativo)
 SELECT nextval('public.bas_modulo_id_seq'),
-       (SELECT m.id FROM public.bas_modulo m WHERE m.rotulo = 'Configurações' AND m.id_modulo = 25 LIMIT 1),
+       (SELECT c.id
+          FROM public.bas_modulo c
+         WHERE c.rotulo = 'Configurações'
+           AND c.id_modulo = (SELECT p.id FROM public.bas_modulo p WHERE p.rotulo = 'Administração' AND p.id_modulo IS NULL LIMIT 1)
+         LIMIT 1),
        'Notificações do Aluno',
        'Contrato (criação/cancelamento), aula, nota, presença e registro de aula (categorias ALUNO, CONTRATO, TURMA)',
        'fa fa-graduation-cap',
@@ -29,7 +39,11 @@ WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE outcome = '/view/configu
 
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem, fl_ativo)
 SELECT nextval('public.bas_modulo_id_seq'),
-       (SELECT m.id FROM public.bas_modulo m WHERE m.rotulo = 'Configurações' AND m.id_modulo = 25 LIMIT 1),
+       (SELECT c.id
+          FROM public.bas_modulo c
+         WHERE c.rotulo = 'Configurações'
+           AND c.id_modulo = (SELECT p.id FROM public.bas_modulo p WHERE p.rotulo = 'Administração' AND p.id_modulo IS NULL LIMIT 1)
+         LIMIT 1),
        'Notificações do Professor',
        'Perguntas respondidas, turma vinculada e registro do professor (categoria PROFESSOR)',
        'fa fa-chalkboard-teacher',

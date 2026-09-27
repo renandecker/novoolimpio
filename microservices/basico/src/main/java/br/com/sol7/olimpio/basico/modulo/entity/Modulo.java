@@ -23,4 +23,6 @@ public class Modulo extends PanacheEntity {
     public String outcome;
     @Column(name = "ordem")
     public Integer ordem;
+    @Column(name = "fl_ativo")
+    public Boolean flAtivo;
 }

@@ -47,16 +47,25 @@ VALUES
 ON CONFLICT (tema) DO NOTHING;
 
 -- 4) Modulo "Ícones Disponíveis" dentro de Administração > Configurações.
+-- O pai é resolvido por rotulo (Administração > Configurações) para não depender do id.
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
 SELECT nextval('public.bas_modulo_id_seq'),
-       (SELECT m.id FROM public.bas_modulo m WHERE m.rotulo = 'Configurações' AND m.id_modulo = 25 LIMIT 1),
+       (SELECT c.id
+          FROM public.bas_modulo c
+         WHERE c.rotulo = 'Configurações'
+           AND c.id_modulo = (SELECT p.id FROM public.bas_modulo p WHERE p.rotulo = 'Administração' AND p.id_modulo IS NULL LIMIT 1)
+         LIMIT 1),
        'Ícones Disponíveis', 'Lista de ícones disponíveis no sistema', '✨', '/view/icones/listIcones', 'Exibe a lista de ícones disponíveis para uso nas telas e componentes do sistema.', 100
 WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE rotulo = 'Ícones Disponíveis');
 
 -- 5) Modulo "Temas" dentro de Administração > Configurações.
 INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
 SELECT nextval('public.bas_modulo_id_seq'),
-       (SELECT m.id FROM public.bas_modulo m WHERE m.rotulo = 'Configurações' AND m.id_modulo = 25 LIMIT 1),
+       (SELECT c.id
+          FROM public.bas_modulo c
+         WHERE c.rotulo = 'Configurações'
+           AND c.id_modulo = (SELECT p.id FROM public.bas_modulo p WHERE p.rotulo = 'Administração' AND p.id_modulo IS NULL LIMIT 1)
+         LIMIT 1),
        'Temas', 'Cadastro de temas (cores e layout) do sistema', '🎨', '/view/tema/listTemas', 'Cadastro e gerenciamento de temas (cores e layout) do sistema.', 100
 WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE rotulo = 'Temas');
 
