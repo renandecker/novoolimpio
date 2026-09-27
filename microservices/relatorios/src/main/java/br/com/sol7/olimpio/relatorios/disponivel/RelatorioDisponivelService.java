@@ -2,10 +2,12 @@ package br.com.sol7.olimpio.relatorios.disponivel;
 import br.com.sol7.olimpio.relatorios.relatorio.controller.RelatorioController;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.Tuple;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,7 +23,7 @@ public class RelatorioDisponivelService {
     // Regras de visibilidade migradas de RelatorioController.carregarRelatorio
     // (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/RelatorioController.java:34)
     static final String SQL_TABELA =
-            "SELECT DISTINCT rel.id, rel.nome FROM rel_tabela rel " +
+            "SELECT DISTINCT rel.id AS id, rel.nome AS nome FROM rel_tabela rel " +
                     "INNER JOIN bas_usuario usu ON (usu.id = ?1) " +
                     "LEFT JOIN bas_usuario_perfil per ON (per.id_usuario = usu.id) " +
                     "LEFT JOIN bas_usuario_unidade uni ON (uni.id_usuario = usu.id) " +
@@ -32,7 +34,7 @@ public class RelatorioDisponivelService {
                     "ORDER BY rel.nome";
 
     static final String SQL_GRAFICO =
-            "SELECT DISTINCT rel.id, rel.nome FROM rel_grafico rel " +
+            "SELECT DISTINCT rel.id AS id, rel.nome AS nome FROM rel_grafico rel " +
                     "INNER JOIN bas_usuario usu ON (usu.id = ?1) " +
                     "LEFT JOIN bas_usuario_perfil per ON (per.id_usuario = usu.id) " +
                     "LEFT JOIN bas_usuario_unidade uni ON (uni.id_usuario = usu.id) " +
@@ -43,7 +45,7 @@ public class RelatorioDisponivelService {
                     "ORDER BY rel.nome";
 
     static final String SQL_MAPA =
-            "SELECT DISTINCT rel.id, rel.nome FROM rel_mapa rel " +
+            "SELECT DISTINCT rel.id AS id, rel.nome AS nome FROM rel_mapa rel " +
                     "INNER JOIN bas_usuario usu ON (usu.id = ?1) " +
                     "LEFT JOIN bas_usuario_perfil per ON (per.id_usuario = usu.id) " +
                     "LEFT JOIN bas_usuario_unidade uni ON (uni.id_usuario = usu.id) " +
@@ -54,7 +56,7 @@ public class RelatorioDisponivelService {
                     "ORDER BY rel.nome";
 
     static final String SQL_ORGANOGRAMA =
-            "SELECT DISTINCT rel.id, rel.nome FROM rel_organograma rel " +
+            "SELECT DISTINCT rel.id AS id, rel.nome AS nome FROM rel_organograma rel " +
                     "INNER JOIN bas_usuario usu ON (usu.id = ?1) " +
                     "LEFT JOIN bas_usuario_perfil per ON (per.id_usuario = usu.id) " +
                     "LEFT JOIN bas_usuario_unidade uni ON (uni.id_usuario = usu.id) " +
@@ -65,7 +67,7 @@ public class RelatorioDisponivelService {
                     "ORDER BY rel.nome";
 
     static final String SQL_DASHBOARD =
-            "SELECT DISTINCT rel.id, rel.nome FROM rel_painel rel " +
+            "SELECT DISTINCT rel.id AS id, rel.nome AS nome FROM rel_painel rel " +
                     "INNER JOIN bas_usuario usu ON (usu.id = ?1) " +
                     "LEFT JOIN bas_usuario_perfil per ON (per.id_usuario = usu.id) " +
                     "LEFT JOIN bas_usuario_unidade uni ON (uni.id_usuario = usu.id) " +
@@ -193,14 +195,14 @@ public class RelatorioDisponivelService {
 
     private Uni<List<RelatorioDisponivelResponse>> consultar(String sql, Long usuarioId, String tipo) {
         return Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql)
+                .chain(session -> session.createNativeQuery(sql, Tuple.class)
                         .setParameter(1, usuarioId)
                         .getResultList())
                 .map(linhas -> linhas.stream()
-                        .map(linha -> (Object[]) linha)
+                        .map(linha -> (Tuple) linha)
                         .map(linha -> new RelatorioDisponivelResponse(
-                                ((Number) linha[0]).longValue(),
-                                linha[1] == null ? "" : linha[1].toString(),
+                                TupleHelper.getLong(linha, "id"),
+                                TupleHelper.getString(linha, "nome") == null ? "" : TupleHelper.getString(linha, "nome"),
                                 tipo))
                         .toList());
     }

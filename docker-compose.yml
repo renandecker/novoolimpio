@@ -163,6 +163,12 @@ services:
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0085__ajuste_icones_menu_descricao.sql
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0086__create_preferencia_notificacao_usuario.sql
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0087__add_configuracao_notificacoes_menu.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0093__notificacoes_por_perfil_menu.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0090__create_biblioteca_tables.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0091__create_biblioteca_virtual_tables.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0092__create_biblioteca_menu.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0093__create_biblioteca_virtual_provedor.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0094__add_provedor_to_livro_digital.sql
         echo "[restore] Restore concluido."
 
   # Broker RabbitMQ. Substitui o Kafka para mensageria entre microsservicos.
@@ -566,6 +572,58 @@ services:
       login:
         condition: service_healthy
 
+  biblioteca:
+    build: ./microservices/biblioteca
+    container_name: olimpio-biblioteca
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+      BIBLIOTECA_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
+      QUARKUS_DATASOURCE_BIBLIOTECA_MAX_SIZE: "12"
+      QUARKUS_DATASOURCE_BIBLIOTECA_MIN_SIZE: "2"
+    ports:
+    - "8098:8098"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8098/q/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+      login:
+        condition: service_healthy
+
+  biblioteca-virtual:
+    build: ./microservices/biblioteca-virtual
+    container_name: olimpio-biblioteca-virtual
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DATABASE_URL: postgresql://postgres:5432/olimpio
+      BIBLIOTECA_VIRTUAL_JDBC_URL: jdbc:postgresql://postgres:5432/olimpio
+      QUARKUS_DATASOURCE_BIBLIOTECA_VIRTUAL_MAX_SIZE: "12"
+      QUARKUS_DATASOURCE_BIBLIOTECA_VIRTUAL_MIN_SIZE: "2"
+    ports:
+    - "8099:8099"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8099/q/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+    depends_on:
+      restore:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+      login:
+        condition: service_healthy
+
   # O modulo Fiserv (cartao) vive em fiserv (porta 8097); o fluxo PIX (Asaas) vive em asaas-service (porta 8094).
 
   notificacoes-whatsapp:
@@ -603,6 +661,10 @@ services:
       asaas:
         condition: service_healthy
       basico:
+        condition: service_healthy
+      biblioteca:
+        condition: service_healthy
+      biblioteca-virtual:
         condition: service_healthy
       central:
         condition: service_healthy

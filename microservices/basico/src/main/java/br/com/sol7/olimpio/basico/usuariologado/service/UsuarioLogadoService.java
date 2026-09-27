@@ -15,6 +15,8 @@ import br.com.sol7.olimpio.basico.usuariologado.dto.UsuarioLogadoRequest;
 import br.com.sol7.olimpio.basico.usuariologado.dto.UsuarioLogadoResponse;
 import br.com.sol7.olimpio.basico.usuariologado.entity.UsuarioLogado;
 import br.com.sol7.olimpio.basico.usuariologado.repository.UsuarioLogadoRepository;
+import br.com.sol7.olimpio.shared.TupleHelper;
+import jakarta.persistence.Tuple;
 
 @ApplicationScoped
 @WithTransaction
@@ -82,15 +84,15 @@ public class UsuarioLogadoService {
     public Uni<List<FavoritoDisponivelResponse>> listarFavoritos(String username) {
         if (username == null || username.isBlank()) return Uni.createFrom().item(List.of());
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_FAVORITOS_DO_USUARIO)
+                .chain(session -> session.createNativeQuery(SQL_FAVORITOS_DO_USUARIO, Tuple.class)
                         .setParameter(1, username)
                         .getResultList())
                 .map(linhas -> linhas.stream()
-                        .map(linha -> (Object[]) linha)
+                        .map(linha -> (Tuple) linha)
                         .map(linha -> new FavoritoDisponivelResponse(
-                                linha[0] == null ? "" : linha[0].toString(),
-                                linha[1] == null ? "" : linha[1].toString(),
-                                linha[2] == null ? "" : linha[2].toString()))
+                                TupleHelper.getString(linha, "nome") == null ? "" : TupleHelper.getString(linha, "nome"),
+                                TupleHelper.getString(linha, "icon") == null ? "" : TupleHelper.getString(linha, "icon"),
+                                TupleHelper.getString(linha, "outcome") == null ? "" : TupleHelper.getString(linha, "outcome")))
                         .toList());
     }
 
@@ -101,16 +103,16 @@ public class UsuarioLogadoService {
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
         String filtro = (busca == null || busca.isBlank()) ? null : busca.trim().toLowerCase();
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_FAVORITOS_DO_USUARIO)
+                .chain(session -> session.createNativeQuery(SQL_FAVORITOS_DO_USUARIO, Tuple.class)
                         .setParameter(1, username)
                         .getResultList())
                 .map(linhas -> {
                     List<FavoritoDisponivelResponse> todos = linhas.stream()
-                            .map(linha -> (Object[]) linha)
+                            .map(linha -> (Tuple) linha)
                             .map(linha -> new FavoritoDisponivelResponse(
-                                    linha[0] == null ? "" : linha[0].toString(),
-                                    linha[1] == null ? "" : linha[1].toString(),
-                                    linha[2] == null ? "" : linha[2].toString()))
+                                    TupleHelper.getString(linha, "nome") == null ? "" : TupleHelper.getString(linha, "nome"),
+                                    TupleHelper.getString(linha, "icon") == null ? "" : TupleHelper.getString(linha, "icon"),
+                                    TupleHelper.getString(linha, "outcome") == null ? "" : TupleHelper.getString(linha, "outcome")))
                             .toList();
                     List<FavoritoDisponivelResponse> filtrados = filtro == null
                             ? todos

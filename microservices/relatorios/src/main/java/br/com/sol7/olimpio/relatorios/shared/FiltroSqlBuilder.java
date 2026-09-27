@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import br.com.sol7.olimpio.shared.TupleHelper;
+import jakarta.persistence.Tuple;
+
 /**
  * Constrói o fragmento WHERE a partir dos filtros vindos do frontend.
  * Cada entrada do mapa tem o NOME do rel_filtro como chave e
@@ -20,10 +23,10 @@ public final class FiltroSqlBuilder {
 
     public static String montarFiltroSql(List<?> configFiltros, Map<String, Object> filtros) {
         if (filtros == null || filtros.isEmpty()) return "";
-        Map<String, Object[]> porNome = new HashMap<>();
+        Map<String, Tuple> porNome = new HashMap<>();
         for (Object item : configFiltros) {
-            Object[] cfg = (Object[]) item;
-            String nome = texto(cfg[0]);
+            Tuple cfg = (Tuple) item;
+            String nome = texto(TupleHelper.getString(cfg, "nome"));
             if (!nome.isEmpty()) porNome.put(nome.trim().toLowerCase(), cfg);
         }
         List<String> condicoes = new ArrayList<>();
@@ -31,9 +34,9 @@ public final class FiltroSqlBuilder {
             Object condicaoObj = entrada.getValue();
             if (!(condicaoObj instanceof Map<?, ?>)) continue;
             Map<?, ?> cond = (Map<?, ?>) condicaoObj;
-            Object[] cfg = porNome.get(entrada.getKey().trim().toLowerCase());
+            Tuple cfg = porNome.get(entrada.getKey().trim().toLowerCase());
             if (cfg == null) continue;
-            String coluna = semAlias(texto(cfg[1]));
+            String coluna = semAlias(texto(TupleHelper.getString(cfg, "coluna")));
             if (coluna.isEmpty()) continue;
             if (Boolean.TRUE.equals(cond.get("selected"))) {
                 String trechoFixo = montarCondicaoFixa(coluna, cfg);
@@ -43,17 +46,17 @@ public final class FiltroSqlBuilder {
             String operador = operador(cond);
             String valor = texto(cond.get("value"));
             String valor2 = texto(cond.get("value2"));
-            String tipoFiltro = texto(cfg[2]);
+            String tipoFiltro = texto(TupleHelper.getString(cfg, "tipo_filtro"));
             String trecho = montarCondicao(coluna, operador, valor, valor2, tipoFiltro);
             if (trecho != null) condicoes.add(trecho);
         }
         return String.join(" AND ", condicoes);
     }
 
-    private static String montarCondicaoFixa(String coluna, Object[] cfg) {
-        String operacao = texto(cfg[3]);
+    private static String montarCondicaoFixa(String coluna, Tuple cfg) {
+        String operacao = texto(TupleHelper.getString(cfg, "operacao"));
         if (operacao.isBlank()) operacao = "=";
-        String valorFixo = texto(cfg[7]);
+        String valorFixo = texto(TupleHelper.getString(cfg, "valor_fixo"));
         if (valorFixo.isEmpty()) return null;
         return coluna + " " + operacao + " '" + esc(valorFixo) + "'";
     }

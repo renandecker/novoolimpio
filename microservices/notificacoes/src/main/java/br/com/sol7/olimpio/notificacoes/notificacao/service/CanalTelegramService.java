@@ -101,20 +101,20 @@ public class CanalTelegramService {
         }
         return Panache.getSession()
                 .chain(session -> session.createNativeQuery("""
-                        SELECT p.telefone
+                        SELECT p.telefone AS telefone
                         FROM bas_login l
                         LEFT JOIN bas_usuario u ON u.id = l.id_usuario
                         LEFT JOIN bas_pessoa p ON p.id = u.id_pessoa
                         WHERE lower(l.username) = lower(?1)
                         LIMIT 1
-                        """)
+                        """, Tuple.class)
                         .setParameter(1, username)
                         .getResultList())
                 .map(list -> {
                     if (!list.isEmpty() && list.get(0) != null) {
-                        String tel = list.get(0).toString().trim();
-                        if (!tel.isBlank()) {
-                            return tel;
+                        String tel = TupleHelper.getString(list.get(0), "telefone");
+                        if (tel != null && !tel.isBlank()) {
+                            return tel.trim();
                         }
                     }
                     return defaultChatId;

@@ -9,12 +9,14 @@ import br.com.sol7.olimpio.asaas.pagamento_pix.event.PagamentoConfirmadoProducer
 import br.com.sol7.olimpio.asaas.pagamento_pix.provider.PixProviderClient;
 import br.com.sol7.olimpio.asaas.pagamento_pix.repository.ParcelaPixRepository;
 import br.com.sol7.olimpio.asaas.pagamento_pix.repository.ParcelaRepository;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.NotFoundException;
 import io.vertx.core.Vertx;
 import io.vertx.ext.mail.MailClient;
@@ -150,17 +152,17 @@ public class PixService {
     public Uni<Void> enviarEmailPix(Long idParcela, Long idPessoa, String qrcode, String chave) {
         return Panache.getSession()
                 .chain(session -> session.createNativeQuery("""
-                        SELECT p.email
+                        SELECT p.email AS email
                         FROM bas_pessoa p
                         WHERE p.id = ?1
-                        """)
+                        """, Tuple.class)
                         .setParameter(1, idPessoa)
                         .getResultList())
                 .onItem().transformToUni(emails -> {
-                    if (emails.isEmpty() || emails.get(0) == null) {
+                    if (emails.isEmpty() || TupleHelper.getString(emails.get(0), "email") == null) {
                         return Uni.createFrom().failure(new IllegalStateException("E-mail do aluno não encontrado"));
                     }
-                    String destinatario = emails.get(0).toString().trim();
+                    String destinatario = TupleHelper.getString(emails.get(0), "email").trim();
                     return enviarEmail(destinatario, idParcela, qrcode, chave);
                 });
     }
@@ -184,27 +186,26 @@ public class PixService {
     private Uni<ConfigSmtp> configSmtp() {
         return Panache.getSession()
                 .chain(session -> session.createNativeQuery(
-                        "SELECT host, port, username, password, tls, ssl FROM bas_email WHERE fl_principal = true LIMIT 1")
+                        "SELECT host AS host, port AS port, username AS username, password AS password, tls AS tls, ssl AS ssl FROM bas_email WHERE fl_principal = true LIMIT 1", Tuple.class)
                         .getResultList())
                 .chain(list -> {
                     if (!list.isEmpty()) return Uni.createFrom().item(toConfigSmtp(list.get(0)));
                     return Panache.getSession()
                             .chain(session -> session.createNativeQuery(
-                                    "SELECT host, port, username, password, tls, ssl FROM bas_email ORDER BY id ASC LIMIT 1")
+                                    "SELECT host AS host, port AS port, username AS username, password AS password, tls AS tls, ssl AS ssl FROM bas_email ORDER BY id ASC LIMIT 1", Tuple.class)
                                     .getResultList())
                             .map(rows -> rows.isEmpty() ? null : toConfigSmtp(rows.get(0)));
                 });
     }
 
-    private ConfigSmtp toConfigSmtp(Object row) {
-        Object[] cols = (Object[]) row;
+    private ConfigSmtp toConfigSmtp(Tuple row) {
         return new ConfigSmtp(
-                cols[0] == null ? null : cols[0].toString(),
-                cols[1] == null ? null : ((Number) cols[1]).intValue(),
-                cols[2] == null ? null : cols[2].toString(),
-                cols[3] == null ? null : cols[3].toString(),
-                cols[4] == null ? null : (Boolean) cols[4],
-                cols[5] == null ? null : (Boolean) cols[5]);
+                TupleHelper.getString(row, "host"),
+                TupleHelper.getInteger(row, "port"),
+                TupleHelper.getString(row, "username"),
+                TupleHelper.getString(row, "password"),
+                TupleHelper.getBoolean(row, "tls"),
+                TupleHelper.getBoolean(row, "ssl"));
     }
 
     private String buildEmailBody(Long idParcela, String qrcode, String chave) {

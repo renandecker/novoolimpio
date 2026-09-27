@@ -18,12 +18,16 @@ import jakarta.ws.rs.NotFoundException;
 import java.util.List;
 import java.util.Date;
 
+import br.com.sol7.olimpio.professor.shared.notificacao.NotificacaoEventProducer;
+
 @ApplicationScoped
 @WithTransaction
 public class ProfessorService {
 
     @Inject
     ProfessorRepository repository;
+    @Inject
+    NotificacaoEventProducer notificacaoEventProducer;
 
     public Uni<List<ProfessorResponse>> list() {
         return repository.listAllWithNome();
@@ -69,14 +73,24 @@ public class ProfessorService {
         var e = new Professor();
         apply(e, r);
         return repository.persist(e)
-                .chain(saved -> repository.findByIdWithNome(saved.id));
+                .chain(saved -> repository.findByIdWithNome(saved.id))
+                .chain(resp -> notificacaoEventProducer.enviar(null, "PROFESSOR", "ALTERACAO_PROFESSOR",
+                        "Registro de professor criado: " + resp.nome(),
+                        "O registro do professor '" + resp.nome() + "' foi criado.",
+                        "/view/configuracao/notificacoes-professor")
+                        .replaceWith(() -> resp));
     }
 
     public Uni<ProfessorResponse> update(Long id, ProfessorRequest r) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Professor not found"))
                 .invoke(e -> apply(e, r))
-                .chain(saved -> repository.findByIdWithNome(saved.id));
+                .chain(saved -> repository.findByIdWithNome(saved.id))
+                .chain(resp -> notificacaoEventProducer.enviar(null, "PROFESSOR", "ALTERACAO_PROFESSOR",
+                        "Registro de professor alterado: " + resp.nome(),
+                        "O seu registro de professor foi alterado.",
+                        "/view/configuracao/notificacoes-professor")
+                        .replaceWith(() -> resp));
     }
 
     public Uni<Void> delete(Long id) {

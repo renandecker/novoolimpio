@@ -2,10 +2,12 @@ package br.com.sol7.olimpio.comercial.prospectoradar;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import br.com.sol7.olimpio.comercial.acao.AcaoRepository;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.NotFoundException;
 
 import java.util.ArrayList;
@@ -61,17 +63,13 @@ public class ProspectoRadarService {
         return new ProspectoRadarResponse(e.id, e.nome, e.dadosJson);
     }
 
-    private List<Map<String, Object>> toMapList(List<?> rows, List<String> cols) {
+    private List<Map<String, Object>> toMapList(List<Tuple> rows, List<String> cols) {
         List<Map<String, Object>> out = new ArrayList<>();
         if (rows == null) return out;
-        for (Object row : rows) {
+        for (Tuple row : rows) {
             Map<String, Object> m = new HashMap<>();
-            if (row instanceof Object[] arr) {
-                for (int i = 0; i < cols.size() && i < arr.length; i++) {
-                    m.put(cols.get(i), arr[i]);
-                }
-            } else if (row != null && !cols.isEmpty()) {
-                m.put(cols.get(0), row);
+            for (String col : cols) {
+                m.put(col, TupleHelper.get(row, col));
             }
             out.add(m);
         }
@@ -88,7 +86,7 @@ public class ProspectoRadarService {
     // Implementacao: carrega prospecto para visualizacao (requer modulo Prospecto)
     public Uni<List<Map<String, Object>>> carregarProspectoParaVisualizacao(Long entityId) {
         String sql = """
-            SELECT c.id AS campo_id, c.rotulo, c.tipo, cat.descricao AS categoria, pc.valor
+            SELECT c.id AS campo_id, c.rotulo AS rotulo, c.tipo AS tipo, cat.descricao AS categoria, pc.valor AS valor
             FROM com_prospecto p
             INNER JOIN com_prospecto_campo pc ON pc.id_prospecto = p.id
             INNER JOIN com_campo c ON c.id = pc.id_campo
@@ -97,7 +95,7 @@ public class ProspectoRadarService {
             ORDER BY cat.id, c.rotulo
         """;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql)
+                .chain(session -> session.createNativeQuery(sql, Tuple.class)
                         .setParameter("id", entityId)
                         .getResultList())
                 .map(rows -> toMapList(rows, List.of("campo_id", "rotulo", "tipo", "categoria", "valor")));

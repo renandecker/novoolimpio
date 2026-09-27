@@ -13,11 +13,15 @@ import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
 
+import br.com.sol7.olimpio.professor.shared.notificacao.NotificacaoEventProducer;
+
 @ApplicationScoped
 @WithTransaction
 public class NotaService {
     @Inject
     NotaRepository repository;
+    @Inject
+    NotificacaoEventProducer notificacaoEventProducer;
 
     public Uni<List<NotaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -38,11 +42,21 @@ public class NotaService {
     public Uni<NotaResponse> create(NotaRequest r) {
         var e = new Nota();
         apply(e, r);
-        return repository.persist(e).replaceWith(() -> toResponse(e));
+        return repository.persist(e)
+                .chain(persisted -> notificacaoEventProducer.enviar(null, "ALUNO", "ALTERACAO_NOTA",
+                        "Nota lançada: " + persisted.nota,
+                        "Houve alteração de nota.",
+                        "/view/configuracao/notificacoes-aluno")
+                        .replaceWith(() -> toResponse(persisted)));
     }
 
     public Uni<NotaResponse> update(Long id, NotaRequest r) {
-        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Nota not found")).invoke(e -> apply(e, r)).map(this::toResponse);
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Nota not found")).invoke(e -> apply(e, r))
+                .chain(e -> notificacaoEventProducer.enviar(null, "ALUNO", "ALTERACAO_NOTA",
+                        "Nota alterada: " + id,
+                        "A nota #" + id + " foi alterada.",
+                        "/view/configuracao/notificacoes-aluno")
+                        .replaceWith(() -> toResponse(e)));
     }
 
     public Uni<Void> delete(Long id) {

@@ -4,6 +4,7 @@ import br.com.sol7.olimpio.notificacoes.notificacao.dto.NotificacaoRequest;
 import br.com.sol7.olimpio.notificacoes.notificacao.dto.NotificacaoResponse;
 import br.com.sol7.olimpio.notificacoes.notificacao.entity.Notificacao;
 import br.com.sol7.olimpio.notificacoes.notificacao.repository.NotificacaoRepository;
+import br.com.sol7.olimpio.notificacoes.notificacao.repository.PreferenciaNotificacaoUsuarioRepository;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -31,6 +32,10 @@ public class NotificacaoService {
     ConfigCanalService configCanalService;
     @Inject
     NotificacaoRabbitMQProducer rabbitMQProducer;
+    @Inject
+    PreferenciaNotificacaoUsuarioService preferenciaService;
+    @Inject
+    PreferenciaNotificacaoUsuarioRepository preferenciaRepository;
 
     @WithSession
     public Uni<List<NotificacaoResponse>> list() {
@@ -76,21 +81,85 @@ public class NotificacaoService {
         e.tipo = r.tipo();
         e.link = r.link();
         e.lida = false;
+        String categoria = r.categoria() == null || r.categoria().isBlank() ? inferirCategoria(r.tipo()) : r.categoria().toUpperCase().trim();
+        String tipo = r.tipo() == null ? null : r.tipo().toUpperCase().trim();
         return configCanalService.canaisAtivos()
-                .invoke(canais -> {
-                    e.canalSistema = true;
-                    e.canalMobile = r.canalMobile() != null ? r.canalMobile() : canais.mobile();
-                    e.canalEmail = r.canalEmail() != null ? r.canalEmail() : canais.email();
-                    e.canalTelegram = r.canalTelegram() != null ? r.canalTelegram() : canais.telegram();
-                    e.canalSms = r.canalSms() != null ? r.canalSms() : canais.sms();
-                    e.canalWhatsapp = r.canalWhatsapp() != null ? r.canalWhatsapp() : canais.whatsapp();
+                .chain(canais -> aplicarPreferenciasUsuario(e.username, categoria, tipo, canais)
+                        .map(filtrados -> new CanaisResolvidos(canais.sistema(), filtrados.mobile(), filtrados.email(),
+                                filtrados.telegram(), filtrados.sms(), filtrados.whatsapp())))
+                .invoke(resolvidos -> {
+                    e.canalSistema = resolvidos.sistema();
+                    // Override explicito no request tem prioridade sobre sistema+usuario.
+                    e.canalMobile = r.canalMobile() != null ? r.canalMobile() : resolvidos.mobile();
+                    e.canalEmail = r.canalEmail() != null ? r.canalEmail() : resolvidos.email();
+                    e.canalTelegram = r.canalTelegram() != null ? r.canalTelegram() : resolvidos.telegram();
+                    e.canalSms = r.canalSms() != null ? r.canalSms() : resolvidos.sms();
+                    e.canalWhatsapp = r.canalWhatsapp() != null ? r.canalWhatsapp() : resolvidos.whatsapp();
                 })
-                .chain(canais -> repository.persist(e))
-                .chain(saved -> rabbitMQProducer.dispatch(saved)
-                        .onFailure().invoke(err ->
-                                LOGGER.warn("Falha ao publicar a notificação {} no RabbitMQ: {}", e.id, err.getMessage()))
-                        .onFailure().recoverWithNull())
+                .chain(() -> repository.persist(e))
+                .chain(saved -> {
+                    if (!e.canalSistema && !e.canalMobile && !e.canalEmail
+                            && !e.canalTelegram && !e.canalSms && !e.canalWhatsapp) {
+                        LOGGER.info("Notificacao {} sem nenhum canal habilitado (sistema/usuario) - persistida sem dispatch.", e.id);
+                        return Uni.createFrom().voidItem();
+                    }
+                    return rabbitMQProducer.dispatch(saved)
+                            .onFailure().invoke(err ->
+                                    LOGGER.warn("Falha ao publicar a notificação {} no RabbitMQ: {}", e.id, err.getMessage()))
+                            .onFailure().recoverWithNull();
+                })
                 .replaceWith(() -> toResponse(e));
+    }
+
+    private record CanaisResolvidos(boolean sistema, boolean mobile, boolean email, boolean telegram, boolean sms, boolean whatsapp) {
+    }
+
+    /**
+     * Aplica as preferencias do usuario sobre os canais ativos do sistema.
+     * Regra: canal final = canalSistema && preferenciaUsuario (default true quando sem registro).
+     * Se categoria/tipo ausentes, mantem os canais do sistema.
+     */
+    private Uni<ConfigCanalService.CanaisAtivos> aplicarPreferenciasUsuario(String username, String categoria, String tipo,
+                                                                            ConfigCanalService.CanaisAtivos canais) {
+        if (categoria == null || categoria.isBlank() || tipo == null || tipo.isBlank()
+                || username == null || username.isBlank()) {
+            return Uni.createFrom().item(canais);
+        }
+        return preferenciaRepository.findByUsername(username).map(prefs -> {
+            var idx = new java.util.HashMap<String, Boolean>();
+            for (var p : prefs) {
+                idx.put(p.categoria + "|" + p.tipo + "|" + p.canal, p.ativo);
+            }
+            // PUSH mapeia para MOBILE; SISTEMA segue config global.
+            boolean mobile = canais.mobile() && prefOuDefault(idx, categoria, tipo, "PUSH", true);
+            boolean email = canais.email() && prefOuDefault(idx, categoria, tipo, "EMAIL", true);
+            boolean telegram = canais.telegram() && prefOuDefault(idx, categoria, tipo, "TELEGRAM", true);
+            boolean sms = canais.sms() && prefOuDefault(idx, categoria, tipo, "SMS", true);
+            boolean whatsapp = canais.whatsapp() && prefOuDefault(idx, categoria, tipo, "WHATSAPP", true);
+            return new ConfigCanalService.CanaisAtivos(canais.sistema(), mobile, email, telegram, sms, whatsapp);
+        });
+    }
+
+    private boolean prefOuDefault(java.util.Map<String, Boolean> idx, String categoria, String tipo, String canal, boolean def) {
+        Boolean v = idx.get(categoria + "|" + tipo + "|" + canal);
+        return v == null ? def : v;
+    }
+
+    /**
+     * Infere a categoria a partir do tipo para chamadas antigas que nao enviam categoria.
+     */
+    static String inferirCategoria(String tipo) {
+        if (tipo == null) return null;
+        String t = tipo.toUpperCase().trim();
+        return switch (t) {
+            case "NOTAS", "PRESENCAS", "AULAS", "REGISTRO_AULA" -> "TURMA";
+            case "ALTERACAO_CONTRATO", "CONTRATO_CRIACAO", "CONTRATO_CANCELAMENTO" -> "CONTRATO";
+            case "ALTERACAO_AGENDA" -> "AGENDA";
+            case "ALTERACAO_CADASTRO" -> "USUARIO";
+            case "ALTERACAO_AULA", "ALTERACAO_NOTA", "ALTERACAO_PRESENCA", "ALTERACAO_REGISTRO_AULA" -> "ALUNO";
+            case "PERGUNTA_RESPONDIDA", "ALTERACAO_TURMA", "ALTERACAO_PROFESSOR" -> "PROFESSOR";
+            default -> null;
+        };
     }
 
     @WithTransaction

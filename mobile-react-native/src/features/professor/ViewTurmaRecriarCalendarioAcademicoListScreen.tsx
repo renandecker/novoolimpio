@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, Text, View, Pressable, Alert} from 'react-native';
+import {StyleSheet, Text, View, Pressable} from 'react-native';
+import {Alert} from '../../shared/components/SweetAlert';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {ModuleList} from '../../shared/components/ModuleListScreen';
 import {MasterDetail} from '../../MasterDetail';

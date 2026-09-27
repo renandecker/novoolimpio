@@ -2,9 +2,11 @@ package br.com.sol7.olimpio.comercial.prospectolist;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.NotFoundException;
 import org.hibernate.reactive.mutiny.Mutiny;
 
@@ -70,14 +72,14 @@ public class ProspectoListService {
      */
     public Uni<List<Map<String, Object>>> carregarQuantidadeLigacao(Long prospectoId) {
         String sql = """
-            SELECT rc.descricao AS resultado, lp.quantidade
+            SELECT rc.descricao AS resultado, lp.quantidade AS quantidade
             FROM cen_ligacao_prospecto lp
             JOIN cen_resultado_contato rc ON rc.id = lp.id_resultado_contato
             WHERE lp.id_prospecto = :pid
             ORDER BY lp.quantidade DESC
         """;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql)
+                .chain(session -> session.createNativeQuery(sql, Tuple.class)
                         .setParameter("pid", prospectoId)
                         .getResultList())
                 .map(rows -> toMapList(rows, List.of("resultado", "quantidade")));
@@ -91,12 +93,12 @@ public class ProspectoListService {
     public Uni<List<Map<String, Object>>> carregarHistoricoLigacao(Long prospectoId) {
         String sql = """
             SELECT
-                l.id,
+                l.id AS id,
                 u.login AS operador,
                 l.data_inicial AS dataInicial,
                 l.data_final AS dataFinal,
                 rc.descricao AS resultado,
-                l.relato
+                l.relato AS relato
             FROM cen_ligacao l
             JOIN cen_ordem_ligacao ol ON ol.id = l.id_ordem_ligacao
             LEFT JOIN bas_usuario u ON u.id = l.id_usuario
@@ -105,7 +107,7 @@ public class ProspectoListService {
             ORDER BY l.data_inicial DESC
         """;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql)
+                .chain(session -> session.createNativeQuery(sql, Tuple.class)
                         .setParameter("pid", prospectoId)
                         .getResultList())
                 .map(rows -> toMapList(rows, List.of("id", "operador", "dataInicial", "dataFinal", "resultado", "relato")));
@@ -119,13 +121,13 @@ public class ProspectoListService {
     public Uni<List<Map<String, Object>>> carregarProspectosLink() {
         String sql = """
             SELECT
-                pl.id,
+                pl.id AS id,
                 a.descricao AS acao,
                 un.nome_fantasia AS unidade,
                 u.login AS usuario,
                 pl.fl_ativo AS ativo,
-                pl.link,
-                pl.token
+                pl.link AS link,
+                pl.token AS token
             FROM com_prospecto_link pl
             JOIN bas_usuario u ON u.id = pl.id_usuario
             JOIN com_acao a ON a.id = pl.id_acao
@@ -133,7 +135,7 @@ public class ProspectoListService {
             ORDER BY pl.id DESC
         """;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql)
+                .chain(session -> session.createNativeQuery(sql, Tuple.class)
                         .getResultList())
                 .map(rows -> toMapList(rows, List.of("id", "acao", "unidade", "usuario", "ativo", "link", "token")));
     }
@@ -162,11 +164,11 @@ public class ProspectoListService {
 
                     // Check: same user cannot have different action (verificaLinkProspecto)
                     String checkSql = """
-                        SELECT id_acao FROM com_prospecto_link
+                        SELECT id_acao AS id_acao FROM com_prospecto_link
                         WHERE id_usuario = :uid AND id_acao <> :aid
                         LIMIT 1
                     """;
-                    return session.createNativeQuery(checkSql)
+                    return session.createNativeQuery(checkSql, Tuple.class)
                             .setParameter("uid", usuarioId)
                             .setParameter("aid", acaoId)
                             .getSingleResultOrNull()
@@ -183,9 +185,9 @@ public class ProspectoListService {
                                 String insertSql = """
                                     INSERT INTO com_prospecto_link (id_usuario, id_acao, id_unidade, token, link, fl_ativo)
                                     VALUES (:uid, :aid, :unid, :token, :link, true)
-                                    RETURNING id, id_usuario, id_acao, id_unidade, token, link, fl_ativo
+                                    RETURNING id AS id, id_usuario AS id_usuario, id_acao AS id_acao, id_unidade AS id_unidade, token AS token, link AS link, fl_ativo AS fl_ativo
                                 """;
-                                return session.createNativeQuery(insertSql)
+                                return session.createNativeQuery(insertSql, Tuple.class)
                                         .setParameter("uid", usuarioId)
                                         .setParameter("aid", acaoId)
                                         .setParameter("unid", unidadeId)
@@ -205,10 +207,10 @@ public class ProspectoListService {
             UPDATE com_prospecto_link
             SET fl_ativo = NOT fl_ativo
             WHERE id = :id
-            RETURNING id, id_usuario, id_acao, id_unidade, token, link, fl_ativo
+            RETURNING id AS id, id_usuario AS id_usuario, id_acao AS id_acao, id_unidade AS id_unidade, token AS token, link AS link, fl_ativo AS fl_ativo
         """;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql)
+                .chain(session -> session.createNativeQuery(sql, Tuple.class)
                         .setParameter("id", id)
                         .getSingleResultOrNull()
                         .map(row -> row != null ? toSingleMap(row, List.of("id", "id_usuario", "id_acao", "id_unidade", "token", "link", "fl_ativo")) : Map.of()));
@@ -277,7 +279,7 @@ public class ProspectoListService {
      */
     public Uni<List<Map<String, Object>>> carregarProspectoParaVisualizacao(Long id) {
         String sql = """
-            SELECT c.id AS campo_id, c.rotulo, c.tipo, cat.descricao AS categoria, pc.valor
+            SELECT c.id AS campo_id, c.rotulo AS rotulo, c.tipo AS tipo, cat.descricao AS categoria, pc.valor AS valor
             FROM com_prospecto p
             INNER JOIN com_prospecto_campo pc ON pc.id_prospecto = p.id
             INNER JOIN com_campo c ON c.id = pc.id_campo
@@ -286,7 +288,7 @@ public class ProspectoListService {
             ORDER BY cat.id, c.rotulo
         """;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql)
+                .chain(session -> session.createNativeQuery(sql, Tuple.class)
                         .setParameter("id", id)
                         .getResultList())
                 .map(rows -> toMapList(rows, List.of("campo_id", "rotulo", "tipo", "categoria", "valor")));
@@ -294,31 +296,24 @@ public class ProspectoListService {
 
     // ===== Helper methods =====
 
-    private List<Map<String, Object>> toMapList(List<?> rows, List<String> cols) {
+    private List<Map<String, Object>> toMapList(List<Tuple> rows, List<String> cols) {
         List<Map<String, Object>> out = new ArrayList<>();
         if (rows == null) return out;
-        for (Object row : rows) {
+        for (Tuple row : rows) {
             Map<String, Object> m = new HashMap<>();
-            if (row instanceof Object[] arr) {
-                for (int i = 0; i < cols.size() && i < arr.length; i++) {
-                    m.put(cols.get(i), arr[i]);
-                }
-            } else if (row != null && !cols.isEmpty()) {
-                m.put(cols.get(0), row);
+            for (String col : cols) {
+                m.put(col, TupleHelper.get(row, col));
             }
             out.add(m);
         }
         return out;
     }
 
-    private Map<String, Object> toSingleMap(Object row, List<String> cols) {
+    private Map<String, Object> toSingleMap(Tuple row, List<String> cols) {
         Map<String, Object> m = new HashMap<>();
-        if (row instanceof Object[] arr) {
-            for (int i = 0; i < cols.size() && i < arr.length; i++) {
-                m.put(cols.get(i), arr[i]);
-            }
-        } else if (row != null && !cols.isEmpty()) {
-            m.put(cols.get(0), row);
+        if (row == null) return m;
+        for (String col : cols) {
+            m.put(col, TupleHelper.get(row, col));
         }
         return m;
     }

@@ -103,6 +103,8 @@ export default function Sidebar({onPhotoAction}: SidebarProps) {
             {label: 'Início', parent: null, path: defaultPath, icon: menuIcon('paginainicial'), keywords: 'inicio paginainicial'},
             {label: 'Configuração Documentos', parent: null, path: CONFIGURACAO_DOCUMENTOS_OUTCOME, icon: menuIcon('configuracao documentos'), keywords: 'configuracao documentos relatorios'},
             {label: 'Fiserv', parent: null, path: '/view/fiserv/cartao-pessoa', icon: menuIcon('fiserv'), keywords: 'fiserv cartao pagamento'},
+            {label: 'Biblioteca', parent: null, path: '/view/biblioteca', icon: menuIcon('biblioteca'), keywords: 'biblioteca acervo livro emprestimo'},
+            {label: 'Biblioteca Virtual', parent: null, path: '/view/biblioteca-virtual', icon: menuIcon('biblioteca virtual'), keywords: 'biblioteca virtual digital livro licenca'},
         ];
         const walk = (modulo: Modulo, parent: string | null) => {
             items.push({

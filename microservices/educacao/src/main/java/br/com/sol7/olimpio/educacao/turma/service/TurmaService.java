@@ -12,11 +12,15 @@ import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
 
+import br.com.sol7.olimpio.educacao.shared.notificacao.NotificacaoEventProducer;
+
 @ApplicationScoped
 @WithTransaction
 public class TurmaService {
     @Inject
     TurmaRepository repository;
+    @Inject
+    NotificacaoEventProducer notificacaoEventProducer;
 
     public Uni<List<TurmaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -37,11 +41,21 @@ public class TurmaService {
     public Uni<TurmaResponse> create(TurmaRequest r) {
         var e = new Turma();
         apply(e, r);
-        return repository.persist(e).replaceWith(() -> toResponse(e));
+        return repository.persist(e)
+                .chain(persisted -> notificacaoEventProducer.enviar(null, "PROFESSOR", "ALTERACAO_TURMA",
+                        "Turma criada: " + persisted.nome,
+                        "A turma '" + persisted.nome + "' foi criada.",
+                        "/view/configuracao/notificacoes-professor")
+                        .replaceWith(() -> toResponse(persisted)));
     }
 
     public Uni<TurmaResponse> update(Long id, TurmaRequest r) {
-        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Turma not found")).invoke(e -> apply(e, r)).map(this::toResponse);
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Turma not found")).invoke(e -> apply(e, r))
+                .chain(e -> notificacaoEventProducer.enviar(null, "PROFESSOR", "ALTERACAO_TURMA",
+                        "Turma alterada: " + e.nome,
+                        "A turma '" + e.nome + "' teve status ou dia de aula alterado.",
+                        "/view/configuracao/notificacoes-professor")
+                        .replaceWith(() -> toResponse(e)));
     }
 
     public Uni<Void> delete(Long id) {

@@ -89,7 +89,7 @@ public class CoordenadorService {
             for (var e : params.entrySet()) countQuery.setParameter(e.getKey(), e.getValue());
             Uni<Long> total = countQuery.getSingleResult().map(r -> ((Number) r).longValue());
 
-            Mutiny.Query selectQuery = session.createNativeQuery(selectSql);
+            Mutiny.Query selectQuery = (Mutiny.Query) session.createNativeQuery(selectSql, Tuple.class);
             for (var e : params.entrySet()) selectQuery.setParameter(e.getKey(), e.getValue());
             selectQuery.setParameter("limit", s);
             selectQuery.setParameter("offset", (long) p * s);
@@ -211,11 +211,11 @@ public class CoordenadorService {
             session.createNativeQuery("SELECT id FROM cen_pausa WHERE id_operador = :uid AND data_final IS NULL LIMIT 1")
                 .setParameter("uid", operadorId.intValue()).getResultList().flatMap(pausas -> {
                     if (!pausas.isEmpty()) return Uni.createFrom().item("Pausa");
-                    return session.createNativeQuery("SELECT tipo FROM cen_ponto WHERE id_usuario = :uid AND data = CURRENT_DATE ORDER BY id DESC LIMIT 1")
+                    return session.createNativeQuery("SELECT tipo AS tipo FROM cen_ponto WHERE id_usuario = :uid AND data = CURRENT_DATE ORDER BY id DESC LIMIT 1", Tuple.class)
                         .setParameter("uid", operadorId.intValue()).getResultList().map(pontos -> {
                             if (pontos.isEmpty()) return "Ausente";
                             Object tp = pontos.get(0);
-                            String tipo = tp instanceof Object[] ? String.valueOf(((Object[]) tp)[0]) : String.valueOf(tp);
+                            String tipo = tp instanceof Tuple ? TupleHelper.getString((Tuple) tp, "tipo") : String.valueOf(tp);
                             if ("S".equalsIgnoreCase(tipo)) return "Saiu";
                             return "Acessando";
                         });
@@ -437,8 +437,8 @@ public class CoordenadorService {
 
     public Uni<List<String>> telefonesProspecto(Long prospectoId){
         return Panache.getSession().chain(session ->
-            session.createNativeQuery("SELECT valor FROM com_prospecto_campo pc JOIN com_campo c ON c.id = pc.id_campo WHERE pc.id_prospecto = :pid AND lower(c.descricao) LIKE '%telefone%'")
-                .setParameter("pid", prospectoId.intValue()).getResultList().map(list -> list.stream().map(o -> o instanceof Object[] ? String.valueOf(((Object[])o)[0]) : String.valueOf(o)).toList())
+            session.createNativeQuery("SELECT valor AS valor FROM com_prospecto_campo pc JOIN com_campo c ON c.id = pc.id_campo WHERE pc.id_prospecto = :pid AND lower(c.descricao) LIKE '%telefone%'", Tuple.class)
+                .setParameter("pid", prospectoId.intValue()).getResultList().map(list -> list.stream().map(o -> o instanceof Tuple ? String.valueOf(TupleHelper.get(o, "valor")) : String.valueOf(o)).toList())
         );
     }
 }

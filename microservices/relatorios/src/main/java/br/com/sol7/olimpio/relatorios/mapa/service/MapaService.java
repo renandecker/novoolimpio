@@ -24,6 +24,8 @@ import br.com.sol7.olimpio.relatorios.mapa.dto.MapaPontosResponse;
 import br.com.sol7.olimpio.relatorios.mapa.dto.Marcador;
 import br.com.sol7.olimpio.relatorios.mapa.dto.RegraPontos;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.TupleHelper;
+import jakarta.persistence.Tuple;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -365,10 +367,10 @@ public class MapaService {
                         String groupBy;
 
                         if (dimColuna == null || dimColuna.isBlank()) {
-                            colunasSelect = "sum(" + mColuna + ")";
+                            colunasSelect = "sum(" + mColuna + ") AS valor";
                             groupBy = "group by 1";
                         } else {
-                            colunasSelect = dimColuna + ", sum(" + mColuna + ")";
+                            colunasSelect = dimColuna + " AS dimensao, sum(" + mColuna + ") AS valor";
                             groupBy = "group by 1,2";
                         }
 
@@ -379,19 +381,20 @@ public class MapaService {
                             whereClause = " where " + medidaCondicao;
                         }
 
-                        String sql = "select distinct " + geoColuna + ", " + colunasSelect +
+                        String sql = "select distinct " + geoColuna + " AS coordenada, " + colunasSelect +
                                 " " + estTabela + whereClause + " " + groupBy + " limit 1000";
+                        boolean temDimensao = dimColuna != null && !dimColuna.isBlank();
 
                         return Panache.getSession().chain(session ->
-                                session.createNativeQuery(sql)
+                                session.createNativeQuery(sql, Tuple.class)
                                         .setMaxResults(1000)
                                         .getResultList()
                                         .onItem().transformToUni(list -> {
                                             List<Marcador> marcadores = new ArrayList<>();
                                             for (Object row : list) {
-                                                Object[] rowData = (Object[]) row;
-                                                String coordenada = rowData.length > 0 ? rowData[0].toString() : null;
-                                                String dimensaoValor = rowData.length > 1 ? rowData[1].toString() : null;
+                                                Tuple t = (Tuple) row;
+                                                String coordenada = TupleHelper.getString(t, "coordenada");
+                                                String dimensaoValor = temDimensao ? TupleHelper.getString(t, "dimensao") : TupleHelper.getString(t, "valor");
 
                                                 if (coordenada != null && COORDENADA_PATTERN.matcher(coordenada).matches()) {
                                                     String[] coords = coordenada.split(",");

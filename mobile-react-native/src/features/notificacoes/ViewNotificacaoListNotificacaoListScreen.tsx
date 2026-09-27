@@ -8,8 +8,8 @@ import {
     subscribeNotificacoesStream,
     type
     Notificacao
-} from '../notificacoes';
-import type {ParamList} from '../HomeScreen';
+} from './notificacoes';
+import type {ParamList} from '../../HomeScreen';
 
 const PAGE_SIZES = [10, 20, 50];
 

@@ -4,11 +4,13 @@ import br.com.sol7.olimpio.educacao.disponibilidadeprofessor.dto.Disponibilidade
 import br.com.sol7.olimpio.educacao.disponibilidadeprofessor.dto.DisponibilidadeProfessorResponse;
 import br.com.sol7.olimpio.educacao.shared.DisponibilidadeScheduleEventResponse;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.NotFoundException;
 import org.hibernate.reactive.mutiny.Mutiny;
 
@@ -31,13 +33,13 @@ public class DisponibilidadeProfessorService {
     private static final DateTimeFormatter ISO = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     private static final String SQL_FERIADOS_UNIDADE =
-            "SELECT DISTINCT f.nome, f.dt_feriado FROM bas_feriado f " +
+            "SELECT DISTINCT f.nome AS nome, f.dt_feriado AS dt_feriado FROM bas_feriado f " +
                     " LEFT JOIN bas_feriado_unidade fu ON fu.id_feriado = f.id " +
                     " WHERE (f.fl_nacional = true OR fu.id_unidade = ?1) AND f.dt_feriado >= ?2 AND f.dt_feriado < ?3 " +
                     " ORDER BY f.dt_feriado";
 
     private static final String SQL_OCORRENCIAS_PROFESSOR =
-            "SELECT o.id, o.data, t.inicio, t.fim, COALESCE(cc.descricao, ''), COALESCE(s.numero, 0) " +
+            "SELECT o.id AS id, o.data AS data, t.inicio AS inicio, t.fim AS fim, COALESCE(cc.descricao, '') AS descricao, COALESCE(s.numero, 0) AS numero " +
                     " FROM edc_ocorrencia_componente_curricular o " +
                     " INNER JOIN edc_oferecimento_componente_curricular off ON off.id = o.id_oferecimento_componente_curricular " +
                     " INNER JOIN edc_componente_curricular cc ON cc.id = off.id_componente_curricular " +
@@ -101,50 +103,49 @@ public class DisponibilidadeProfessorService {
         LocalDate first = inicio == null ? LocalDate.now().minusDays(6) : inicio.minusDays(6);
         LocalDate last = fim == null ? LocalDate.now().plusDays(6) : fim.plusDays(6);
         
-        Uni<List<Object[]>> feriados = nativeQuery(SQL_FERIADOS_UNIDADE, unidadeId, toDate(first), toDate(last.plusDays(1)));
-        Uni<List<Object[]>> ocorrencias = nativeQuery(SQL_OCORRENCIAS_PROFESSOR, unidadeId, professorId, toDate(first), toDate(last.plusDays(1)));
+        Uni<List<Tuple>> feriados = nativeQuery(SQL_FERIADOS_UNIDADE, unidadeId, toDate(first), toDate(last.plusDays(1)));
+        Uni<List<Tuple>> ocorrencias = nativeQuery(SQL_OCORRENCIAS_PROFESSOR, unidadeId, professorId, toDate(first), toDate(last.plusDays(1)));
         
         return Uni.combine().all().unis(feriados, ocorrencias).asTuple()
                 .map(t -> buildSchedule(t.getItem1(), t.getItem2(), first, last));
     }
 
-    private List<DisponibilidadeScheduleEventResponse> buildSchedule(List<Object[]> feriados, List<Object[]> ocorrencias,
+    private List<DisponibilidadeScheduleEventResponse> buildSchedule(List<Tuple> feriados, List<Tuple> ocorrencias,
                                                                       LocalDate first, LocalDate last) {
         List<DisponibilidadeScheduleEventResponse> events = new ArrayList<>();
-        for (Object[] f : feriados) {
-            LocalDate data = toLocalDate(f[1]);
+        for (Tuple f : feriados) {
+            LocalDate data = TupleHelper.getLocalDate(f, "dt_feriado");
             if (data == null) {
                 continue;
             }
             String iso = data.atStartOfDay().format(ISO);
-            events.add(new DisponibilidadeScheduleEventResponse(toStr(f[0]), iso, iso, true, "evento-blue", null));
+            events.add(new DisponibilidadeScheduleEventResponse(TupleHelper.getString(f, "nome"), iso, iso, true, "evento-blue", null));
         }
-        for (Object[] o : ocorrencias) {
-            LocalDate data = toLocalDate(o[1]);
+        for (Tuple o : ocorrencias) {
+            LocalDate data = TupleHelper.getLocalDate(o, "data");
             if (data == null) {
                 continue;
             }
-            LocalTime inicio = toTime(o[2]);
-            LocalTime fim = toTime(o[3]);
-            String descricao = toStr(o[4]);
+            LocalTime inicio = toTime(TupleHelper.get(o, "inicio"));
+            LocalTime fim = toTime(TupleHelper.get(o, "fim"));
+            String descricao = TupleHelper.getString(o, "descricao");
             String horario = (inicio != null && fim != null) ? hora(inicio) + "-" + hora(fim) + " " : "";
-            Integer numero = o.length > 5 ? toInt(o[5]) : null;
+            Integer numero = TupleHelper.getInteger(o, "numero");
             String title = "Sala " + (numero == null ? "" : numero) + " " + horario + descricao;
             String start = iso(data, inicio);
             String end = iso(data, fim == null ? inicio : fim);
-            events.add(new DisponibilidadeScheduleEventResponse(title, start, end, false, "evento-green", toLong(o[0])));
+            events.add(new DisponibilidadeScheduleEventResponse(title, start, end, false, "evento-green", TupleHelper.getLong(o, "id")));
         }
         return events;
     }
 
-    private Uni<List<Object[]>> nativeQuery(String sql, Object... params) {
+    private Uni<List<Tuple>> nativeQuery(String sql, Object... params) {
         return Panache.getSession().chain(session -> {
-            Mutiny.Query<Object> q = session.createNativeQuery(sql);
+            Mutiny.SelectionQuery<Tuple> q = session.createNativeQuery(sql, Tuple.class);
             for (int i = 0; i < params.length; i++) {
                 q.setParameter(i + 1, params[i]);
             }
-            return q.getResultList()
-                    .map(list -> list.stream().map(row -> (Object[]) row).toList());
+            return q.getResultList();
         });
     }
 
@@ -156,32 +157,11 @@ public class DisponibilidadeProfessorService {
         return t.format(DateTimeFormatter.ofPattern("HH:mm"));
     }
 
-    private LocalDate toLocalDate(Object value) {
-        if (value == null) return null;
-        if (value instanceof LocalDate d)return d;
-        if (value instanceof java.sql.Date d)return d.toLocalDate();
-        if (value instanceof java.sql.Timestamp t)return t.toLocalDateTime().toLocalDate();
-        if (value instanceof Date d)return d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        return null;
-    }
-
     private LocalTime toTime(Object value) {
         if (value == null) return null;
         if (value instanceof LocalTime t)return t;
         if (value instanceof java.sql.Time t)return t.toLocalTime();
         return null;
-    }
-
-    private Integer toInt(Object value) {
-        return value == null ? null : ((Number) value).intValue();
-    }
-
-    private Long toLong(Object value) {
-        return value == null ? null : ((Number) value).longValue();
-    }
-
-    private String toStr(Object value) {
-        return value == null ? null : String.valueOf(value);
     }
 
     private Date toDate(LocalDate d) {

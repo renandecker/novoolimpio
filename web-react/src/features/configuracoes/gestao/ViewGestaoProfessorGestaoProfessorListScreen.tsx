@@ -1105,7 +1105,7 @@ const [tipoLista, setTipoLista] = useState<'0' | '1' | '2'>('1');
 
             await api.post(`/api/professor/gestao-professor/turmas/${turmaSelecionada.id}/caderno/salvar`, {
 
-                usuarioId: null,
+                usuarioId: session?.idUsuario ?? null,
 
                 presencas: alteradas,
 

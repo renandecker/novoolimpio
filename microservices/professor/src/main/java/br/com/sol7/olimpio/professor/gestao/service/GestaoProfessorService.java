@@ -1,11 +1,13 @@
 package br.com.sol7.olimpio.professor.gestao.service;
 
 import br.com.sol7.olimpio.professor.gestao.dto.*;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.NotFoundException;
 import org.hibernate.reactive.mutiny.Mutiny;
 
@@ -20,12 +22,12 @@ public class GestaoProfessorService {
     private static final SimpleDateFormat DIA = new SimpleDateFormat("dd/MM/yyyy");
 
     private static final String SQL_TURMA =
-            "SELECT off.id, " +
-                    " COALESCE(pf.nome, pj.nome_fantasia, ''), " +
-                    " COALESCE(grp.nome, ''), " +
-                    " COALESCE(c.nome, ''), " +
-                    " COALESCE(cc.descricao, ''), " +
-                    " COALESCE(off.status, '') " +
+            "SELECT off.id AS id, " +
+                    " COALESCE(pf.nome, pj.nome_fantasia, '') AS professor_nome, " +
+                    " COALESCE(grp.nome, '') AS grupo_nome, " +
+                    " COALESCE(c.nome, '') AS curso_nome, " +
+                    " COALESCE(cc.descricao, '') AS componente_descricao, " +
+                    " COALESCE(off.status, '') AS status " +
                     " FROM edc_oferecimento_componente_curricular off " +
                     " INNER JOIN edc_professor p ON p.id = off.id_professor " +
                     " LEFT JOIN bas_pessoa pes ON pes.id = p.id_pessoa " +
@@ -39,7 +41,7 @@ public class GestaoProfessorService {
     private static final String SQL_TURMAS = SQL_TURMA + " WHERE off.id_professor = ?1 ORDER BY off.id DESC";
 
     private static final String SQL_OCORRENCIAS =
-            "SELECT DISTINCT o.id, o.data, o.fl_ativo " +
+            "SELECT DISTINCT o.id AS id, o.data AS data, o.fl_ativo AS ativo " +
                     " FROM edc_caderno_componente_curricular c " +
                     " INNER JOIN edc_ocorrencia_componente_curricular o ON o.id = c.id_ocorrencia_componente_curricular " +
                     " WHERE o.id_oferecimento_componente_curricular = ?1 " +
@@ -48,10 +50,10 @@ public class GestaoProfessorService {
                     " ORDER BY o.data, o.id";
 
     private static final String SQL_ALUNOS =
-            "SELECT m.id, " +
-                    " COALESCE(pf.nome, pj.nome_fantasia, ''), " +
-                    " (m.status = 'CURSANDO' AND con.ativo = true) AS ativo, " +
-                    " ccc.id, o.id, o.data, ccc.presenca " +
+            "SELECT m.id AS matricula_id, " +
+                    " COALESCE(pf.nome, pj.nome_fantasia, '') AS aluno_nome, " +
+                    " (m.status = 'CURSANDO' AND con.ativo = true) AS aluno_ativo, " +
+                    " ccc.id AS caderno_id, o.id AS ocorrencia_id, o.data AS ocorrencia_data, ccc.presenca AS presenca " +
                     " FROM edc_matricula m " +
                     " INNER JOIN edc_contrato con ON con.id = m.id_contrato " +
                     " LEFT JOIN bas_pessoa pes ON pes.id = con.id_pessoa " +
@@ -65,16 +67,16 @@ public class GestaoProfessorService {
                     " ORDER BY lower(COALESCE(pf.nome, pj.nome_fantasia, '')), o.data, o.id";
 
     private static final String SQL_INFO_TURMA =
-            "SELECT off.id, " +
-                    " COALESCE(pf.nome, pj.nome_fantasia, ''), " +
-                    " COALESCE(pes.telefone, ''), " +
-                    " COALESCE(pes.celular, ''), " +
-                    " COALESCE(pes.email, ''), " +
-                    " COALESCE(un.sucinto, ''), " +
-                    " COALESCE(grp.nome, ''), " +
-                    " COALESCE(c.nome, ''), " +
-                    " COALESCE(cc.descricao, ''), " +
-                    " COALESCE(off.status, '') " +
+            "SELECT off.id AS id, " +
+                    " COALESCE(pf.nome, pj.nome_fantasia, '') AS professor_nome, " +
+                    " COALESCE(pes.telefone, '') AS telefone, " +
+                    " COALESCE(pes.celular, '') AS celular, " +
+                    " COALESCE(pes.email, '') AS email, " +
+                    " COALESCE(un.sucinto, '') AS unidade_sucinto, " +
+                    " COALESCE(grp.nome, '') AS grupo_nome, " +
+                    " COALESCE(c.nome, '') AS curso_nome, " +
+                    " COALESCE(cc.descricao, '') AS componente_descricao, " +
+                    " COALESCE(off.status, '') AS status " +
                     " FROM edc_oferecimento_componente_curricular off " +
                     " INNER JOIN edc_professor p ON p.id = off.id_professor " +
                     " LEFT JOIN bas_pessoa pes ON pes.id = p.id_pessoa " +
@@ -88,7 +90,7 @@ public class GestaoProfessorService {
                     " WHERE off.id = ?1";
 
     private static final String SQL_INFO_DIAS_AULA =
-            "SELECT DISTINCT o.data, COALESCE(ds.nome, ''), t.inicio, t.fim, COALESCE(s.numero, 0) " +
+            "SELECT DISTINCT o.data AS data, COALESCE(ds.nome, '') AS dia_semana, t.inicio AS inicio, t.fim AS fim, COALESCE(s.numero, 0) AS sala_numero " +
                     " FROM edc_ocorrencia_componente_curricular o " +
                     " LEFT JOIN edc_dia_aula da ON da.id = o.id_dia_aula " +
                     " LEFT JOIN bas_dia_semana ds ON ds.id = da.id_dia_semana " +
@@ -98,15 +100,15 @@ public class GestaoProfessorService {
                     " ORDER BY o.data";
 
     private static final String SQL_INFO_ALUNOS =
-            "SELECT m.id, " +
-                    " COALESCE(pf.nome, pj.nome_fantasia, ''), " +
-                    " COALESCE(pf.cpf, ''), " +
-                    " COALESCE(pes.telefone, ''), " +
-                    " COALESCE(pes.celular, ''), " +
-                    " COALESCE(rf.nome, rpj.nome_fantasia, ''), " +
-                    " COALESCE(rf.cpf, ''), " +
-                    " COALESCE(rpes.telefone, ''), " +
-                    " COALESCE(rpes.celular, '') " +
+            "SELECT m.id AS matricula_id, " +
+                    " COALESCE(pf.nome, pj.nome_fantasia, '') AS aluno_nome, " +
+                    " COALESCE(pf.cpf, '') AS aluno_cpf, " +
+                    " COALESCE(pes.telefone, '') AS telefone, " +
+                    " COALESCE(pes.celular, '') AS celular, " +
+                    " COALESCE(rf.nome, rpj.nome_fantasia, '') AS responsavel_nome, " +
+                    " COALESCE(rf.cpf, '') AS responsavel_cpf, " +
+                    " COALESCE(rpes.telefone, '') AS responsavel_telefone, " +
+                    " COALESCE(rpes.celular, '') AS responsavel_celular " +
                     " FROM edc_matricula m " +
                     " INNER JOIN edc_contrato con ON con.id = m.id_contrato " +
                     " LEFT JOIN bas_pessoa pes ON pes.id = con.id_pessoa " +
@@ -120,14 +122,14 @@ public class GestaoProfessorService {
                     " ORDER BY lower(COALESCE(pf.nome, pj.nome_fantasia, ''))";
 
     private static final String SQL_TURMA_COM_GRAU =
-            "SELECT off.id, " +
-                    " COALESCE(pf.nome, pj.nome_fantasia, ''), " +
-                    " COALESCE(grp.nome, ''), " +
-                    " COALESCE(c.nome, ''), " +
-                    " COALESCE(cc.descricao, ''), " +
-                    " COALESCE(off.status, ''), " +
-                    " gra.tipo_grau, gra.notas_parciais, gra.media_sem_exame, gra.media_final, gra.nota_maxima, " +
-                    " gra.recuperacao, gra.manual, gra.manual_aluno, gra.peso_distinto, gra.frequencia_minima, gra.id " +
+            "SELECT off.id AS id, " +
+                    " COALESCE(pf.nome, pj.nome_fantasia, '') AS professor_nome, " +
+                    " COALESCE(grp.nome, '') AS grupo_nome, " +
+                    " COALESCE(c.nome, '') AS curso_nome, " +
+                    " COALESCE(cc.descricao, '') AS componente_descricao, " +
+                    " COALESCE(off.status, '') AS status, " +
+                    " gra.tipo_grau AS tipo_grau, gra.notas_parciais AS notas_parciais, gra.media_sem_exame AS media_sem_exame, gra.media_final AS media_final, gra.nota_maxima AS nota_maxima, " +
+                    " gra.recuperacao AS recuperacao, gra.manual AS manual, gra.manual_aluno AS manual_aluno, gra.peso_distinto AS peso_distinto, gra.frequencia_minima AS frequencia_minima, gra.id AS grau_id " +
                     " FROM edc_oferecimento_componente_curricular off " +
                     " INNER JOIN edc_professor p ON p.id = off.id_professor " +
                     " LEFT JOIN bas_pessoa pes ON pes.id = p.id_pessoa " +
@@ -141,17 +143,17 @@ public class GestaoProfessorService {
                     " WHERE off.id = ?1";
 
     private static final String SQL_GRAU_NOTAS =
-            "SELECT gn.id, gn.nome, gn.descricao, gn.numero_nota, gn.qtde_nota, gn.peso " +
+            "SELECT gn.id AS id, gn.nome AS nome, gn.descricao AS descricao, gn.numero_nota AS numero_nota, gn.qtde_nota AS qtde_nota, gn.peso AS peso " +
                     " FROM edc_grau_nota gn WHERE gn.id_grau = ?1 ORDER BY gn.numero_nota";
 
     private static final String SQL_GRAU_CONCEITOS =
-            "SELECT gc.id, gc.nome, gc.descricao, gc.conceito, gc.ordem, gc.qtde_nota " +
+            "SELECT gc.id AS id, gc.nome AS nome, gc.descricao AS descricao, gc.conceito AS conceito, gc.ordem AS ordem, gc.qtde_nota AS qtde_nota " +
                     " FROM edc_grau_conceito gc WHERE gc.id_grau = ?1 ORDER BY gc.ordem";
 
     private static final String SQL_AVALIACOES =
-            "SELECT ncm.id, m.id, COALESCE(pf.nome, pj.nome_fantasia, ''), ncm.id_grau_nota, ncm.id_grau_conceito, " +
-                    " ncm.nota, ncm.id_conceito_notas, " +
-                    " n.id, n.nota, COALESCE(ng.nome, nm.nome, '') " +
+            "SELECT ncm.id AS avaliacao_id, m.id AS matricula_id, COALESCE(pf.nome, pj.nome_fantasia, '') AS aluno_nome, ncm.id_grau_nota AS grau_nota_id, ncm.id_grau_conceito AS grau_conceito_id, " +
+                    " ncm.nota AS nota_valor, ncm.id_conceito_notas AS conceito_notas_id, " +
+                    " n.id AS nota_id, n.nota AS nota_detalhe_valor, COALESCE(ng.nome, nm.nome, '') AS nota_nome " +
                     " FROM edc_nota_componente_curricular_matricula ncm " +
                     " INNER JOIN edc_matricula m ON m.id = ncm.id_matricula " +
                     " INNER JOIN edc_contrato con ON con.id = m.id_contrato " +
@@ -165,14 +167,14 @@ public class GestaoProfessorService {
                     " ORDER BY lower(COALESCE(pf.nome, pj.nome_fantasia, '')), m.id, ncm.id_grau_nota, n.id";
 
     private static final String SQL_REGISTROS =
-            "SELECT r.id, o.id, o.data, COALESCE(r.descricao, '') " +
+            "SELECT r.id AS registro_id, o.id AS ocorrencia_id, o.data AS data, COALESCE(r.descricao, '') AS descricao " +
                     " FROM edc_ocorrencia_componente_curricular o " +
                     " LEFT JOIN edc_registro_aula r ON r.id_ocorrencia_componente_curricular = o.id " +
                     " WHERE o.id_oferecimento_componente_curricular = ?1 AND o.fl_ativo = true AND o.data < current_date " +
                     " ORDER BY o.data DESC";
 
     private static final String SQL_PENDENCIAS =
-            "SELECT comp.sucinto, off.id, count(ccc.presenca) " +
+            "SELECT comp.sucinto AS componente_sucinto, off.id AS oferecimento_id, count(ccc.presenca) AS total " +
                     " FROM edc_caderno_componente_curricular ccc " +
                     " INNER JOIN edc_ocorrencia_componente_curricular o ON o.id = ccc.id_ocorrencia_componente_curricular " +
                     " INNER JOIN edc_oferecimento_componente_curricular off ON off.id = o.id_oferecimento_componente_curricular " +
@@ -181,14 +183,13 @@ public class GestaoProfessorService {
                     " WHERE ccc.presenca = 'n' AND o.data < current_date AND p.id_pessoa = ?1 " +
                     " GROUP BY comp.sucinto, off.id ORDER BY count(ccc.presenca) DESC";
 
-    private Uni<List<Object[]>> nativeQuery(String sql, Object... params) {
+    private Uni<List<Tuple>> nativeQuery(String sql, Object... params) {
         return Panache.getSession().chain(session -> {
-            Mutiny.Query<Object> q = session.createNativeQuery(sql);
+            Mutiny.SelectionQuery<Tuple> q = session.createNativeQuery(sql, Tuple.class);
             for (int i = 0; i < params.length; i++) {
                 q.setParameter(i + 1, params[i]);
             }
-            return q.getResultList()
-                    .map(list -> list.stream().map(row -> (Object[]) row).toList());
+            return q.getResultList();
         });
     }
 
@@ -205,8 +206,8 @@ public class GestaoProfessorService {
                 return Uni.createFrom().failure(new NotFoundException("Turma não encontrada"));
             }
             TurmaDto turma = mapTurma(rows.get(0));
-            Uni<List<Object[]>> ocorrencias = nativeQuery(SQL_OCORRENCIAS, turmaId);
-            Uni<List<Object[]>> alunos = nativeQuery(SQL_ALUNOS, turmaId);
+            Uni<List<Tuple>> ocorrencias = nativeQuery(SQL_OCORRENCIAS, turmaId);
+            Uni<List<Tuple>> alunos = nativeQuery(SQL_ALUNOS, turmaId);
             return Uni.combine().all().unis(ocorrencias, alunos).asTuple()
                     .map(t -> buildCaderno(turma, t.getItem1(), t.getItem2()));
         });
@@ -217,11 +218,11 @@ public class GestaoProfessorService {
             if (rows.isEmpty()) {
                 return Uni.createFrom().failure(new NotFoundException("Turma não encontrada"));
             }
-            Object[] r = rows.get(0);
-            Long grauId = toLong(r[16]);
-            Uni<List<Object[]>> grauNotas = nativeQuery(SQL_GRAU_NOTAS, grauId);
-            Uni<List<Object[]>> grauConceitos = nativeQuery(SQL_GRAU_CONCEITOS, grauId);
-            Uni<List<Object[]>> avaliacoes = nativeQuery(SQL_AVALIACOES, turmaId);
+            Tuple r = rows.get(0);
+            Long grauId = TupleHelper.getLong(r, "grau_id");
+            Uni<List<Tuple>> grauNotas = nativeQuery(SQL_GRAU_NOTAS, grauId);
+            Uni<List<Tuple>> grauConceitos = nativeQuery(SQL_GRAU_CONCEITOS, grauId);
+            Uni<List<Tuple>> avaliacoes = nativeQuery(SQL_AVALIACOES, turmaId);
             return Uni.combine().all().unis(grauNotas, grauConceitos, avaliacoes).asTuple()
                     .map(t -> buildNotas(r, t.getItem1(), t.getItem2(), t.getItem3()));
         });
@@ -229,7 +230,7 @@ public class GestaoProfessorService {
 
     public Uni<List<RegistroDto>> buscarRegistros(Long turmaId) {
         return nativeQuery(SQL_REGISTROS, turmaId).map(rows -> rows.stream().map(r ->
-                new RegistroDto(toLong(r[0]), toLong(r[1]), formatData(r[2]), toStr(r[3]))).toList());
+                new RegistroDto(TupleHelper.getLong(r, "registro_id"), TupleHelper.getLong(r, "ocorrencia_id"), formatData(TupleHelper.get(r, "data")), TupleHelper.getString(r, "descricao"))).toList());
     }
 
     public Uni<InformacoesDto> buscarInformacoes(Long turmaId) {
@@ -237,9 +238,9 @@ public class GestaoProfessorService {
             if (rows.isEmpty()) {
                 return Uni.createFrom().failure(new NotFoundException("Turma não encontrada"));
             }
-            Object[] r = rows.get(0);
-            Uni<List<Object[]>> diasAula = nativeQuery(SQL_INFO_DIAS_AULA, turmaId);
-            Uni<List<Object[]>> alunos = nativeQuery(SQL_INFO_ALUNOS, turmaId);
+            Tuple r = rows.get(0);
+            Uni<List<Tuple>> diasAula = nativeQuery(SQL_INFO_DIAS_AULA, turmaId);
+            Uni<List<Tuple>> alunos = nativeQuery(SQL_INFO_ALUNOS, turmaId);
             return Uni.combine().all().unis(diasAula, alunos).asTuple()
                     .map(t -> buildInformacoes(r, t.getItem1(), t.getItem2()));
         });
@@ -247,7 +248,7 @@ public class GestaoProfessorService {
 
     public Uni<List<PendenciaDto>> listarPendencias(Long pessoaId) {
         return nativeQuery(SQL_PENDENCIAS, pessoaId).map(rows -> rows.stream().map(r ->
-                new PendenciaDto(toStr(r[0]), toStr(r[1]), toLong(r[2]))).toList());
+                new PendenciaDto(TupleHelper.getString(r, "componente_sucinto"), TupleHelper.getString(r, "oferecimento_id"), TupleHelper.getLong(r, "total"))).toList());
     }
 
     public Uni<IdentidadeDto> identidade(String username) {
@@ -308,25 +309,53 @@ public class GestaoProfessorService {
         if (p.id() == null) {
             return Uni.createFrom().voidItem();
         }
-        return session.createNativeQuery("SELECT presenca FROM edc_caderno_componente_curricular WHERE id = ?1")
+        // A matricula e a ocorrencia sao lidas da propria linha do caderno em
+        // vez de vir do payload: assim o historico nunca registra a matricula
+        // errada e nunca chega null no INSERT (ver inserirHistoricoChamada).
+        return session.createNativeQuery(
+                        "SELECT presenca AS presenca, id_matricula AS matricula_id, id_ocorrencia_componente_curricular AS ocorrencia_id "
+                                + "FROM edc_caderno_componente_curricular WHERE id = ?1", Tuple.class)
                 .setParameter(1, p.id()).getResultList()
                 .chain(list -> {
-                    String anterior = (list == null || list.isEmpty() || list.get(0) == null)
-                            ? null : String.valueOf(list.get(0));
-                    String nova = p.presenca();
+                    if (list == null || list.isEmpty() || list.get(0) == null) {
+                        return Uni.createFrom().voidItem();
+                    }
+                    Tuple linha = (Tuple) list.get(0);
+                    String anterior = TupleHelper.getString(linha, "presenca") == null ? null : TupleHelper.getString(linha, "presenca").trim();
+                    String nova = p.presenca() == null ? "" : p.presenca().trim();
                     Uni<Integer> update = session.createNativeQuery(
-                            "UPDATE edc_caderno_componente_curricular SET presenca = ?1, data_alteracao = now() WHERE id = ?2")
+                            "UPDATE edc_caderno_componente_curricular SET presenca = ?1, data_alteracao = current_date WHERE id = ?2")
                             .setParameter(1, nova).setParameter(2, p.id()).executeUpdate();
                     if (anterior != null && !anterior.equals(nova)) {
-                        return update.chain(v -> session.createNativeQuery(
-                                "INSERT INTO edc_historico_caderno_chamada (id_usuario, data, id_matricula, id_ocorrencia_componente_curricular, presenca_anterior, presenca_posterior) VALUES (?1, now(), ?2, ?3, ?4, ?5)")
-                                .setParameter(1, usuarioId).setParameter(2, p.matriculaId())
-                                .setParameter(3, p.ocorrenciaId())
-                                .setParameter(4, anterior).setParameter(5, nova)
-                                .executeUpdate()).replaceWithVoid();
+                        return update.chain(v -> inserirHistoricoChamada(session, usuarioId,
+                                        TupleHelper.getLong(linha, "matricula_id"), TupleHelper.getLong(linha, "ocorrencia_id"), anterior, nova))
+                                .replaceWithVoid();
                     }
                     return update.replaceWithVoid();
                 });
+    }
+
+    // O Hibernate Reactive nao consegue bindar parametro null: o
+    // PreparedStatementAdaptor dele nao implementa getParameterMetaData, que e
+    // justamente o que o Hibernate usa para descobrir o tipo JDBC de um null
+    // (UnsupportedOperationException -> HTTP 500). Por isso id_usuario so entra
+    // no INSERT quando veio preenchido; sem usuario a coluna fica NULL.
+    private Uni<Integer> inserirHistoricoChamada(Mutiny.Session session, Long usuarioId, Long matriculaId,
+                                                  Long ocorrenciaId, String anterior, String nova) {
+        if (usuarioId == null) {
+            return session.createNativeQuery(
+                            "INSERT INTO edc_historico_caderno_chamada (data, id_matricula, id_ocorrencia_componente_curricular, presenca_anterior, presenca_posterior) "
+                                    + "VALUES (now(), ?1, ?2, ?3, ?4)")
+                    .setParameter(1, matriculaId).setParameter(2, ocorrenciaId)
+                    .setParameter(3, anterior).setParameter(4, nova)
+                    .executeUpdate();
+        }
+        return session.createNativeQuery(
+                        "INSERT INTO edc_historico_caderno_chamada (id_usuario, data, id_matricula, id_ocorrencia_componente_curricular, presenca_anterior, presenca_posterior) "
+                                + "VALUES (?1, now(), ?2, ?3, ?4, ?5)")
+                .setParameter(1, usuarioId).setParameter(2, matriculaId)
+                .setParameter(3, ocorrenciaId).setParameter(4, anterior).setParameter(5, nova)
+                .executeUpdate();
     }
 
     private Uni<Void> salvarAvaliacao(Mutiny.Session session, SalvarNotasRequest.NotaSalvarDto a) {
@@ -380,69 +409,73 @@ public class GestaoProfessorService {
     }
 
     private Uni<Void> salvarRegistroItem(Mutiny.Session session, SalvarRegistroRequest.RegistroSalvarDto r) {
+        // Mesma limitacao do Hibernate Reactive com parametro null (ver
+        // inserirHistoricoChamada): null no bind estoura com HTTP 500, entao
+        // quem nao tiver texto vira string vazia.
+        String descricao = r.descricao() == null ? "" : r.descricao();
         if (r.id() != null) {
             return session.createNativeQuery("UPDATE edc_registro_aula SET descricao = ?1 WHERE id = ?2")
-                    .setParameter(1, r.descricao()).setParameter(2, r.id()).executeUpdate().replaceWithVoid();
+                    .setParameter(1, descricao).setParameter(2, r.id()).executeUpdate().replaceWithVoid();
         }
         if (r.ocorrenciaId() != null) {
             return session.createNativeQuery("INSERT INTO edc_registro_aula (id_ocorrencia_componente_curricular, descricao) VALUES (?1, ?2)")
-                    .setParameter(1, r.ocorrenciaId()).setParameter(2, r.descricao()).executeUpdate().replaceWithVoid();
+                    .setParameter(1, r.ocorrenciaId()).setParameter(2, descricao).executeUpdate().replaceWithVoid();
         }
         return Uni.createFrom().voidItem();
     }
 
-    private CadernoDto buildCaderno(TurmaDto turma, List<Object[]> ocorrenciasRows, List<Object[]> alunosRows) {
+    private CadernoDto buildCaderno(TurmaDto turma, List<Tuple> ocorrenciasRows, List<Tuple> alunosRows) {
         List<OcorrenciaDto> ocorrencias = ocorrenciasRows.stream()
-                .map(r -> new OcorrenciaDto(toLong(r[0]), formatData(r[1]), toBool(r[2]))).toList();
+                .map(r -> new OcorrenciaDto(TupleHelper.getLong(r, "id"), formatData(TupleHelper.get(r, "data")), toBool(TupleHelper.get(r, "ativo")))).toList();
         Map<Long, AlunoDto> mapa = new LinkedHashMap<>();
-        for (Object[] r : alunosRows) {
-            Long matriculaId = toLong(r[0]);
+        for (Tuple r : alunosRows) {
+            Long matriculaId = TupleHelper.getLong(r, "matricula_id");
             AlunoDto aluno = mapa.computeIfAbsent(matriculaId,
-                    id -> new AlunoDto(id, toStr(r[1]), toBool(r[2]), new ArrayList<>()));
-            aluno.presencas().add(new PresencaDto(toLong(r[3]), toLong(r[4]), formatData(r[5]), toStr(r[6])));
+                    id -> new AlunoDto(id, TupleHelper.getString(r, "aluno_nome"), toBool(TupleHelper.get(r, "aluno_ativo")), new ArrayList<>()));
+            aluno.presencas().add(new PresencaDto(TupleHelper.getLong(r, "caderno_id"), TupleHelper.getLong(r, "ocorrencia_id"), formatData(TupleHelper.get(r, "ocorrencia_data")), TupleHelper.getString(r, "presenca")));
         }
         return new CadernoDto(turma, ocorrencias, new ArrayList<>(mapa.values()));
     }
 
-    private NotasDto buildNotas(Object[] r, List<Object[]> grauNotasRows, List<Object[]> grauConceitosRows,
-                                List<Object[]> avaliacoesRows) {
+    private NotasDto buildNotas(Tuple r, List<Tuple> grauNotasRows, List<Tuple> grauConceitosRows,
+                                List<Tuple> avaliacoesRows) {
         TurmaDto turma = mapTurma(r);
         List<GrauNotaDto> grauNotas = grauNotasRows.stream()
-                .map(x -> new GrauNotaDto(toLong(x[0]), toStr(x[1]), toStr(x[2]), toInt(x[3]), toInt(x[4]), toDouble(x[5])))
+                .map(x -> new GrauNotaDto(TupleHelper.getLong(x, "id"), TupleHelper.getString(x, "nome"), TupleHelper.getString(x, "descricao"), TupleHelper.getInteger(x, "numero_nota"), TupleHelper.getInteger(x, "qtde_nota"), toDouble(TupleHelper.get(x, "peso"))))
                 .toList();
         List<GrauConceitoDto> grauConceitos = grauConceitosRows.stream()
-                .map(x -> new GrauConceitoDto(toLong(x[0]), toStr(x[1]), toStr(x[2]), toStr(x[3]), toInt(x[4]), toInt(x[5])))
+                .map(x -> new GrauConceitoDto(TupleHelper.getLong(x, "id"), TupleHelper.getString(x, "nome"), TupleHelper.getString(x, "descricao"), TupleHelper.getString(x, "conceito"), TupleHelper.getInteger(x, "ordem"), TupleHelper.getInteger(x, "qtde_nota")))
                 .toList();
         Map<Long, NotaAlunoDto> mapa = new LinkedHashMap<>();
-        for (Object[] x : avaliacoesRows) {
-            Long id = toLong(x[0]);
-            NotaAlunoDto ava = mapa.computeIfAbsent(id, k -> new NotaAlunoDto(id, toLong(x[1]), toStr(x[2]),
-                    toLong(x[3]), toLong(x[4]), toDouble(x[5]), toLong(x[6]), new ArrayList<>()));
-            if (x[7] != null) {
-                ava.notas().add(new NotaDto(toLong(x[7]), toStr(x[9]), toDouble(x[8])));
+        for (Tuple x : avaliacoesRows) {
+            Long id = TupleHelper.getLong(x, "avaliacao_id");
+            NotaAlunoDto ava = mapa.computeIfAbsent(id, k -> new NotaAlunoDto(id, TupleHelper.getLong(x, "matricula_id"), TupleHelper.getString(x, "aluno_nome"),
+                    TupleHelper.getLong(x, "grau_nota_id"), TupleHelper.getLong(x, "grau_conceito_id"), toDouble(TupleHelper.get(x, "nota_valor")), TupleHelper.getLong(x, "conceito_notas_id"), new ArrayList<>()));
+            if (TupleHelper.get(x, "nota_id") != null) {
+                ava.notas().add(new NotaDto(TupleHelper.getLong(x, "nota_id"), TupleHelper.getString(x, "nota_nome"), toDouble(TupleHelper.get(x, "nota_detalhe_valor"))));
             }
         }
-        return new NotasDto(turma, toStr(r[6]), toInt(r[7]), toDouble(r[8]), toDouble(r[9]), toDouble(r[10]),
-                toBool(r[11]), toBool(r[12]), toBool(r[13]), toBool(r[14]), toDouble(r[15]),
+        return new NotasDto(turma, TupleHelper.getString(r, "status"), TupleHelper.getInteger(r, "notas_parciais"), toDouble(TupleHelper.get(r, "media_sem_exame")), toDouble(TupleHelper.get(r, "media_final")), toDouble(TupleHelper.get(r, "nota_maxima")),
+                toBool(TupleHelper.get(r, "recuperacao")), toBool(TupleHelper.get(r, "manual")), toBool(TupleHelper.get(r, "manual_aluno")), toBool(TupleHelper.get(r, "peso_distinto")), toDouble(TupleHelper.get(r, "frequencia_minima")),
                 grauNotas, grauConceitos, new ArrayList<>(mapa.values()));
     }
 
-    private InformacoesDto buildInformacoes(Object[] r, List<Object[]> diasRows, List<Object[]> alunosRows) {
+    private InformacoesDto buildInformacoes(Tuple r, List<Tuple> diasRows, List<Tuple> alunosRows) {
         List<InformacoesDto.DiaAulaDto> dias = diasRows.stream()
-                .map(x -> new InformacoesDto.DiaAulaDto(formatData(x[0]), toStr(x[1]),
-                        formatTurno(x[2], x[3]))).toList();
+                .map(x -> new InformacoesDto.DiaAulaDto(formatData(TupleHelper.get(x, "data")), TupleHelper.getString(x, "dia_semana"),
+                        formatTurno(TupleHelper.get(x, "inicio"), TupleHelper.get(x, "fim")))).toList();
         String salas = diasRows.stream()
-                .map(x -> toLong(x[4]))
+                .map(x -> TupleHelper.getLong(x, "sala_numero"))
                 .filter(n -> n != null && n != 0)
                 .distinct()
                 .map(String::valueOf)
                 .reduce((a, b) -> a + ", " + b)
                 .orElse("");
         List<InformacoesDto.AlunoInfoDto> alunos = alunosRows.stream()
-                .map(x -> new InformacoesDto.AlunoInfoDto(toLong(x[0]), toStr(x[1]), toStr(x[2]),
-                        toStr(x[3]), toStr(x[4]), toStr(x[5]), toStr(x[6]), toStr(x[7]), toStr(x[8]))).toList();
-        return new InformacoesDto(toLong(r[0]), toStr(r[1]), toStr(r[2]), toStr(r[3]), toStr(r[4]),
-                toStr(r[5]), salas, toStr(r[6]), toStr(r[7]), toStr(r[8]), toStr(r[9]), dias, alunos);
+                .map(x -> new InformacoesDto.AlunoInfoDto(TupleHelper.getLong(x, "matricula_id"), TupleHelper.getString(x, "aluno_nome"), TupleHelper.getString(x, "aluno_cpf"),
+                        TupleHelper.getString(x, "telefone"), TupleHelper.getString(x, "celular"), TupleHelper.getString(x, "responsavel_nome"), TupleHelper.getString(x, "responsavel_cpf"), TupleHelper.getString(x, "responsavel_telefone"), TupleHelper.getString(x, "responsavel_celular"))).toList();
+        return new InformacoesDto(TupleHelper.getLong(r, "id"), TupleHelper.getString(r, "professor_nome"), TupleHelper.getString(r, "telefone"), TupleHelper.getString(r, "celular"), TupleHelper.getString(r, "email"),
+                TupleHelper.getString(r, "unidade_sucinto"), salas, TupleHelper.getString(r, "grupo_nome"), TupleHelper.getString(r, "curso_nome"), TupleHelper.getString(r, "componente_descricao"), TupleHelper.getString(r, "status"), dias, alunos);
     }
 
     private String formatTurno(Object inicio, Object fim) {
@@ -462,8 +495,8 @@ public class GestaoProfessorService {
         return s.length() >= 5 ? s.substring(0, 5) : s;
     }
 
-    private TurmaDto mapTurma(Object[] r) {
-        return new TurmaDto(toLong(r[0]), toStr(r[1]), toStr(r[2]), toStr(r[3]), toStr(r[4]), toStr(r[5]));
+    private TurmaDto mapTurma(Tuple r) {
+        return new TurmaDto(TupleHelper.getLong(r, "id"), TupleHelper.getString(r, "professor_nome"), TupleHelper.getString(r, "grupo_nome"), TupleHelper.getString(r, "curso_nome"), TupleHelper.getString(r, "componente_descricao"), TupleHelper.getString(r, "status"));
     }
 
     private String formatData(Object value) {

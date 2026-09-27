@@ -31,6 +31,7 @@ import br.com.sol7.olimpio.aluno.dto.AlunoDtos.ParcelaResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.PessoaDadosResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.ResumoFinanceiroResponse;
 import br.com.sol7.olimpio.aluno.repository.AlunoRepository;
+import br.com.sol7.olimpio.aluno.shared.notificacao.NotificacaoEventProducer;
 import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
@@ -57,6 +58,8 @@ public class AlunoService {
 
     @Inject
     AlunoRepository repository;
+    @Inject
+    NotificacaoEventProducer notificacaoEventProducer;
 
     private static final Map<String, String> PRESENCA_DESCRICAO = Map.of(
             "p", "Presente", "m", "Meia presença", "a", "Ausente", "t", "Atestado",
@@ -287,6 +290,10 @@ public class AlunoService {
                                             .map(r -> repository.inserirResposta(pessoaId, avaliacaoId,
                                                     r.perguntaId(), r.respostaId(), r.respostaTexto()))
                                             .toList()))
+                                    .chain(() -> notificacaoEventProducer.enviar(username, "PROFESSOR", "PERGUNTA_RESPONDIDA",
+                                            "Perguntas respondidas (avaliação " + avaliacaoId + ")",
+                                            "O aluno '" + username + "' respondeu a avaliação #" + avaliacaoId + ".",
+                                            "/view/configuracao/notificacoes-professor"))
                                     .replaceWithVoid();
                         }));
     }

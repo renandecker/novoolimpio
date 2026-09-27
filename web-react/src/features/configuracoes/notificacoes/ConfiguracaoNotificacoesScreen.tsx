@@ -7,9 +7,12 @@ import './ConfiguracaoNotificacoesScreen.css';
 
 interface ConfiguracaoNotificacoesScreenProps {
   username?: string;
+  categoriasFiltro?: string[];
+  titulo?: string;
+  subtitulo?: string;
 }
 
-export default function ConfiguracaoNotificacoesScreen({ username: propUsername }: ConfiguracaoNotificacoesScreenProps) {
+export default function ConfiguracaoNotificacoesScreen({ username: propUsername, categoriasFiltro, titulo, subtitulo }: ConfiguracaoNotificacoesScreenProps) {
   const [categorias, setCategorias] = useState<PreferenciaNotificacaoCategoria[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -22,7 +25,10 @@ export default function ConfiguracaoNotificacoesScreen({ username: propUsername 
         `${API_PATHS.notificacoes.preferencias}/minhas/agrupadas`,
         { params: { username } }
       );
-      setCategorias(response.data);
+      const filtradas = categoriasFiltro && categoriasFiltro.length > 0
+        ? response.data.filter((c) => categoriasFiltro.includes(c.categoria))
+        : response.data;
+      setCategorias(filtradas);
     } catch (error) {
       console.error('Erro ao carregar preferências:', error);
       setMessage({ type: 'error', text: 'Erro ao carregar configurações de notificação' });
@@ -116,9 +122,9 @@ export default function ConfiguracaoNotificacoesScreen({ username: propUsername 
   return (
     <div className="config-notificacoes-container">
       <div className="config-notificacoes-header">
-        <h1 className="config-notificacoes-title">Configuração de Notificações</h1>
+        <h1 className="config-notificacoes-title">{titulo || 'Configuração de Notificações'}</h1>
         <p className="config-notificacoes-subtitle">
-          Gerencie como deseja receber notificações para cada tipo de evento.
+          {subtitulo || 'Gerencie como deseja receber notificações para cada tipo de evento.'}
         </p>
       </div>
 

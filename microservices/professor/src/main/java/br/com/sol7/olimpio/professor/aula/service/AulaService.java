@@ -18,6 +18,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import br.com.sol7.olimpio.professor.shared.notificacao.NotificacaoEventProducer;
+
 @ApplicationScoped
 @WithTransaction
 public class AulaService {
@@ -26,6 +28,8 @@ public class AulaService {
 
     @Inject
     AulaRepository repository;
+    @Inject
+    NotificacaoEventProducer notificacaoEventProducer;
 
     public Uni<List<AulaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -48,14 +52,23 @@ public class AulaService {
     public Uni<AulaResponse> create(AulaRequest r) {
         var e = new Aula();
         apply(e, r);
-        return repository.persistAndFlush(e).replaceWith(() -> toResponse(e));
+        return repository.persistAndFlush(e)
+                .chain(persisted -> notificacaoEventProducer.enviar(null, "ALUNO", "ALTERACAO_AULA",
+                        "Aula alterada/criada: " + persisted.id,
+                        "Houve alteração de aula (id " + persisted.id + ").",
+                        "/view/configuracao/notificacoes-aluno")
+                        .replaceWith(() -> toResponse(persisted)));
     }
 
     public Uni<AulaResponse> update(Long id, AulaRequest r) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Aula not found"))
                 .invoke(e -> apply(e, r))
-                .map(this::toResponse);
+                .chain(e -> notificacaoEventProducer.enviar(null, "ALUNO", "ALTERACAO_AULA",
+                        "Aula alterada: " + id,
+                        "A aula #" + id + " foi alterada.",
+                        "/view/configuracao/notificacoes-aluno")
+                        .replaceWith(() -> toResponse(e)));
     }
 
     public Uni<Void> delete(Long id) {

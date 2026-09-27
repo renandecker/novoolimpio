@@ -9,15 +9,15 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Colors, Spacing, BorderRadius, Typography, Layout, Shadows } from '../../theme';
+import { Colors, Spacing, BorderRadius, Typography, Layout, Shadows } from '../../shared/styles/theme';
 import {
     listPreferenciasNotificacaoAgrupadas,
     salvarPreferenciaNotificacao,
     type PreferenciaNotificacaoCategoria,
     type PreferenciaNotificacaoCanal,
     type PreferenciaNotificacaoTipo,
-} from '../notificacoes';
-import type {ParamList} from '../HomeScreen';
+} from './notificacoes';
+import type {ParamList} from '../../HomeScreen';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 
 const CANAL_CORES: Record<string, string> = {
@@ -26,6 +26,14 @@ const CANAL_CORES: Record<string, string> = {
     WHATSAPP: '#25D366',
     EMAIL: '#ea4335',
     SMS: '#34a853',
+};
+
+export type ConfigNotificacoesParams = {
+    username?: string;
+    /** Filtra as categorias exibidas (ex. ['USUARIO', 'AGENDA']). Ausente = todas. */
+    categoriasFiltro?: string[];
+    titulo?: string;
+    subtitulo?: string;
 };
 
 interface ToggleProps {
@@ -78,7 +86,10 @@ function CanalItem({canal, onChange}: {canal: PreferenciaNotificacaoCanal; onCha
     );
 }
 
-function TipoCard({tipo}: {tipo: PreferenciaNotificacaoTipo}) {
+function TipoCard({tipo, onCanalChange}: {
+    tipo: PreferenciaNotificacaoTipo;
+    onCanalChange: (canal: string, ativo: boolean) => void;
+}) {
     return (
         <View style={styles.tipoCard}>
             <View style={styles.tipoHeader}>
@@ -90,7 +101,7 @@ function TipoCard({tipo}: {tipo: PreferenciaNotificacaoTipo}) {
                     <CanalItem
                         key={canal.canal}
                         canal={canal}
-                        onChange={(ativo) => canal.ativo = ativo}
+                        onChange={(ativo) => onCanalChange(canal.canal, ativo)}
                     />
                 ))}
             </View>
@@ -98,13 +109,10 @@ function TipoCard({tipo}: {tipo: PreferenciaNotificacaoTipo}) {
     );
 }
 
-function CategoriaSection({categoria, onSave}: {categoria: PreferenciaNotificacaoCategoria; onSave: () => void}) {
-    const handleCanalChange = (tipo: PreferenciaNotificacaoTipo, canal: PreferenciaNotificacaoCanal, ativo: boolean) => {
-        const updatedTipo = {...tipo, canais: tipo.canais.map(c => c.canal === canal.canal ? {...c, ativo} : c)};
-        const updatedCategoria = {...categoria, tipos: categoria.tipos.map(t => t.tipo === tipo.tipo ? updatedTipo : t)};
-        return updatedCategoria;
-    };
-
+function CategoriaSection({categoria, onCanalChange}: {
+    categoria: PreferenciaNotificacaoCategoria;
+    onCanalChange: (tipo: string, canal: string, ativo: boolean) => void;
+}) {
     return (
         <View style={styles.categoriaSection}>
             <View style={styles.categoriaHeader}>
@@ -115,7 +123,11 @@ function CategoriaSection({categoria, onSave}: {categoria: PreferenciaNotificaca
             </View>
             <View style={styles.tiposContainer}>
                 {categoria.tipos.map((tipo) => (
-                    <TipoCard key={tipo.tipo} tipo={tipo} />
+                    <TipoCard
+                        key={tipo.tipo}
+                        tipo={tipo}
+                        onCanalChange={(canal, ativo) => onCanalChange(tipo.tipo, canal, ativo)}
+                    />
                 ))}
             </View>
         </View>
@@ -126,7 +138,12 @@ export default function ConfiguracaoNotificacoesScreen({
     route,
 }: NativeStackScreenProps<ParamList, 'config/notificacoes'>) {
     const queryClient = useQueryClient();
-    const [username] = useState(() => route.params?.username || 'admin');
+    const params = (route.params ?? {}) as ConfigNotificacoesParams;
+    const [username] = useState(() => params.username || 'admin');
+    const categoriasFiltro = params.categoriasFiltro;
+    const titulo = params.titulo || 'Configuração de Notificações';
+    const subtitulo = params.subtitulo || 'Gerencie como deseja receber notificações para cada tipo de evento.';
+    const [categorias, setCategorias] = useState<PreferenciaNotificacaoCategoria[]>([]);
     const [saving, setSaving] = useState(false);
     const [saveMessage, setSaveMessage] = useState<{type: 'success' | 'error'; text: string} | null>(null);
 
@@ -136,9 +153,40 @@ export default function ConfiguracaoNotificacoesScreen({
         staleTime: 5 * 60 * 1000,
     });
 
+    useEffect(() => {
+        if (query.data) {
+            const filtradas = categoriasFiltro && categoriasFiltro.length > 0
+                ? query.data.filter((c) => categoriasFiltro.includes(c.categoria))
+                : query.data;
+            setCategorias(filtradas);
+        }
+    }, [query.data]);
+
+    const handleCanalChange = (categoria: string, tipo: string, canal: string, ativo: boolean) => {
+        setCategorias((prev) =>
+            prev.map((cat) =>
+                cat.categoria === categoria
+                    ? {
+                        ...cat,
+                        tipos: cat.tipos.map((t) =>
+                            t.tipo === tipo
+                                ? {
+                                    ...t,
+                                    canais: t.canais.map((c) =>
+                                        c.canal === canal ? {...c, ativo} : c
+                                    ),
+                                }
+                                : t
+                        ),
+                    }
+                    : cat
+            )
+        );
+    };
+
     const saveMutation = useMutation({
-        mutationFn: async (categorias: PreferenciaNotificacaoCategoria[]) => {
-            const requests = categorias.flatMap(cat =>
+        mutationFn: async (cats: PreferenciaNotificacaoCategoria[]) => {
+            const requests = cats.flatMap(cat =>
                 cat.tipos.flatMap(tipo =>
                     tipo.canais.map(canal => ({
                         username,
@@ -163,9 +211,10 @@ export default function ConfiguracaoNotificacoesScreen({
     });
 
     const handleSave = () => {
-        if (query.data) {
+        if (categorias.length > 0) {
             setSaving(true);
-            saveMutation.mutate(query.data);
+            setSaveMessage(null);
+            saveMutation.mutate(categorias);
         }
     };
 
@@ -173,7 +222,7 @@ export default function ConfiguracaoNotificacoesScreen({
         queryClient.invalidateQueries({queryKey: ['preferencias-notificacao', username]});
     };
 
-    if (query.isLoading) {
+    if (query.isLoading && categorias.length === 0) {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={Colors.primary} />
@@ -195,9 +244,9 @@ export default function ConfiguracaoNotificacoesScreen({
             contentContainerStyle={styles.contentContainer}
         >
             <View style={styles.header}>
-                <Text style={styles.title}>Configuração de Notificações</Text>
+                <Text style={styles.title}>{titulo}</Text>
                 <Text style={styles.subtitle}>
-                    Gerencie como deseja receber notificações para cada tipo de evento.
+                    {subtitulo}
                 </Text>
             </View>
 
@@ -215,11 +264,11 @@ export default function ConfiguracaoNotificacoesScreen({
                 </View>
             )}
 
-            {query.data?.map((categoria) => (
+            {categorias.map((categoria) => (
                 <CategoriaSection
                     key={categoria.categoria}
                     categoria={categoria}
-                    onSave={handleSave}
+                    onCanalChange={(tipo, canal, ativo) => handleCanalChange(categoria.categoria, tipo, canal, ativo)}
                 />
             ))}
 

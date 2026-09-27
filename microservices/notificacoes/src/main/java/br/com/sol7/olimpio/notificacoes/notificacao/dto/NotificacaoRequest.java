@@ -8,6 +8,7 @@ public record NotificacaoRequest(
 @NotBlank @Size(max = 255) String titulo,
         String mensagem,
         String tipo,
+        String categoria,
         String link,
         Boolean canalMobile,
         Boolean canalEmail,

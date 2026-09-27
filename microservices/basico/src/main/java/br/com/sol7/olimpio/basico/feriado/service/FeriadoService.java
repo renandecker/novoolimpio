@@ -2,6 +2,8 @@ package br.com.sol7.olimpio.basico.feriado.service;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.TupleHelper;
+import jakarta.persistence.Tuple;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -322,41 +324,41 @@ public class FeriadoService {
 
     public Uni<List<CalendarioEventoResponse>> calendarioEventos() {
         String sql = """
-            SELECT f.id, f.nome, f.dt_feriado,
-                   CASE WHEN f.fl_feriado_fixo = true THEN '#27ae60' ELSE '#3498db' END,
-                   f.fl_feriado_fixo, f.fl_nacional, f.descricao
+            SELECT f.id AS id, f.nome AS nome, f.dt_feriado AS data_feriado,
+                   CASE WHEN f.fl_feriado_fixo = true THEN '#27ae60' ELSE '#3498db' END AS cor,
+                   f.fl_feriado_fixo AS fixo, f.fl_nacional AS nacional, f.descricao AS descricao
             FROM bas_feriado f
             ORDER BY f.dt_feriado
         """;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql).getResultList()
+                .chain(session -> session.createNativeQuery(sql, Tuple.class).getResultList()
                         .map(list -> list.stream().map(row -> {
-                            Object[] arr = (Object[]) row;
+                            Tuple t = (Tuple) row;
                             return new CalendarioEventoResponse(
-                                    ((Number) arr[0]).longValue(),
-                                    (String) arr[1],
-                                    (Date) arr[2],
-                                    (String) arr[3],
-                                    (Boolean) arr[4],
-                                    (Boolean) arr[5],
-                                    (String) arr[6]
+                                    TupleHelper.getLong(t, "id"),
+                                    TupleHelper.getString(t, "nome"),
+                                    TupleHelper.getDate(t, "data_feriado"),
+                                    TupleHelper.getString(t, "cor"),
+                                    TupleHelper.getBoolean(t, "fixo"),
+                                    TupleHelper.getBoolean(t, "nacional"),
+                                    TupleHelper.getString(t, "descricao")
                             );
                         }).toList()));
     }
 
     public Uni<List<OcorrenciaFeriadoResponse>> ocorrenciasAjustar(Long feriadoAjusteId) {
         String sql = """
-            SELECT o.id, o.data, o.id_oferecimento_componente_curricular,
-                   ofe.id, ofe.id_grupo, g.nome,
-                   ofe.id_unidade, u.sucinto,
-                   ofe.id_curso, c.nome,
-                   ofe.id_componente_curricular, cc.descricao,
-                   cc.carga_horaria,
-                   ofe.status,
-                   ofe.inscritos, ofe.vagas,
-                   o.id_dia_aula, da.nome,
-                   tu.descricao,
-                   ta.descricao
+            SELECT o.id AS ocorrencia_id, o.data AS data, o.id_oferecimento_componente_curricular AS oferecimento_ref,
+                   ofe.id AS oferecimento_id, ofe.id_grupo AS grupo_id, g.nome AS grupo_nome,
+                   ofe.id_unidade AS unidade_id, u.sucinto AS unidade_sucinto,
+                   ofe.id_curso AS curso_id, c.nome AS curso_nome,
+                   ofe.id_componente_curricular AS componente_id, cc.descricao AS componente_descricao,
+                   cc.carga_horaria AS carga_horaria,
+                   ofe.status AS status,
+                   ofe.inscritos AS inscritos, ofe.vagas AS vagas,
+                   o.id_dia_aula AS dia_aula_id, da.nome AS dia_aula_nome,
+                   tu.descricao AS turno_descricao,
+                   ta.descricao AS tempo_descricao
             FROM bas_feriado_ocorrencia_ajustar foa
             JOIN edc_ocorrencia_componente_curricular o ON o.id = foa.id_ocorrencia_componente_curricular
             JOIN edc_oferecimento_componente_curricular ofe ON ofe.id = o.id_oferecimento_componente_curricular
@@ -371,49 +373,49 @@ public class FeriadoService {
             ORDER BY ofe.id, o.data
         """;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql)
+                .chain(session -> session.createNativeQuery(sql, Tuple.class)
                         .setParameter(1, feriadoAjusteId)
                         .getResultList()
                         .map(list -> list.stream().map(row -> {
-                            Object[] arr = (Object[]) row;
+                            Tuple t = (Tuple) row;
                             return new OcorrenciaFeriadoResponse(
-                                    ((Number) arr[0]).longValue(),
-                                    (Date) arr[1],
-                                    ((Number) arr[2]).longValue(),
-                                    (String) arr[3],
-                                    arr[4] != null ? ((Number) arr[4]).longValue() : null,
-                                    (String) arr[5],
-                                    arr[6] != null ? ((Number) arr[6]).longValue() : null,
-                                    (String) arr[7],
-                                    arr[8] != null ? ((Number) arr[8]).longValue() : null,
-                                    (String) arr[9],
-                                    arr[10] != null ? ((Number) arr[10]).longValue() : null,
-                                    (String) arr[11],
-                                    arr[12] != null ? ((Number) arr[12]).intValue() : null,
-                                    (String) arr[13],
-                                    arr[14] != null ? ((Number) arr[14]).intValue() : null,
-                                    arr[15] != null ? ((Number) arr[15]).intValue() : null,
-                                    arr[16] != null ? ((Number) arr[16]).longValue() : null,
-                                    (String) arr[17],
-                                    (String) arr[18],
-                                    (String) arr[19]
+                                    TupleHelper.getLong(t, "ocorrencia_id"),
+                                    TupleHelper.getDate(t, "data"),
+                                    TupleHelper.getLong(t, "oferecimento_ref"),
+                                    TupleHelper.getString(t, "oferecimento_id"),
+                                    TupleHelper.getLong(t, "grupo_id"),
+                                    TupleHelper.getString(t, "grupo_nome"),
+                                    TupleHelper.getLong(t, "unidade_id"),
+                                    TupleHelper.getString(t, "unidade_sucinto"),
+                                    TupleHelper.getLong(t, "curso_id"),
+                                    TupleHelper.getString(t, "curso_nome"),
+                                    TupleHelper.getLong(t, "componente_id"),
+                                    TupleHelper.getString(t, "componente_descricao"),
+                                    TupleHelper.getInteger(t, "carga_horaria"),
+                                    TupleHelper.getString(t, "status"),
+                                    TupleHelper.getInteger(t, "inscritos"),
+                                    TupleHelper.getInteger(t, "vagas"),
+                                    TupleHelper.getLong(t, "dia_aula_id"),
+                                    TupleHelper.getString(t, "dia_aula_nome"),
+                                    TupleHelper.getString(t, "turno_descricao"),
+                                    TupleHelper.getString(t, "tempo_descricao")
                             );
                         }).toList()));
     }
 
     public Uni<List<OcorrenciaFeriadoResponse>> ocorrenciasNaoAjustar(Long feriadoAjusteId) {
         String sql = """
-            SELECT o.id, o.data, o.id_oferecimento_componente_curricular,
-                   ofe.id, ofe.id_grupo, g.nome,
-                   ofe.id_unidade, u.sucinto,
-                   ofe.id_curso, c.nome,
-                   ofe.id_componente_curricular, cc.descricao,
-                   cc.carga_horaria,
-                   ofe.status,
-                   ofe.inscritos, ofe.vagas,
-                   o.id_dia_aula, da.nome,
-                   tu.descricao,
-                   ta.descricao
+            SELECT o.id AS ocorrencia_id, o.data AS data, o.id_oferecimento_componente_curricular AS oferecimento_ref,
+                   ofe.id AS oferecimento_id, ofe.id_grupo AS grupo_id, g.nome AS grupo_nome,
+                   ofe.id_unidade AS unidade_id, u.sucinto AS unidade_sucinto,
+                   ofe.id_curso AS curso_id, c.nome AS curso_nome,
+                   ofe.id_componente_curricular AS componente_id, cc.descricao AS componente_descricao,
+                   cc.carga_horaria AS carga_horaria,
+                   ofe.status AS status,
+                   ofe.inscritos AS inscritos, ofe.vagas AS vagas,
+                   o.id_dia_aula AS dia_aula_id, da.nome AS dia_aula_nome,
+                   tu.descricao AS turno_descricao,
+                   ta.descricao AS tempo_descricao
             FROM bas_feriado_ocorrencia_nao_ajustar fona
             JOIN edc_ocorrencia_componente_curricular o ON o.id = fona.id_ocorrencia_componente_curricular
             JOIN edc_oferecimento_componente_curricular ofe ON ofe.id = o.id_oferecimento_componente_curricular
@@ -428,53 +430,53 @@ public class FeriadoService {
             ORDER BY ofe.id, o.data
         """;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql)
+                .chain(session -> session.createNativeQuery(sql, Tuple.class)
                         .setParameter(1, feriadoAjusteId)
                         .getResultList()
                         .map(list -> list.stream().map(row -> {
-                            Object[] arr = (Object[]) row;
+                            Tuple t = (Tuple) row;
                             return new OcorrenciaFeriadoResponse(
-                                    ((Number) arr[0]).longValue(),
-                                    (Date) arr[1],
-                                    ((Number) arr[2]).longValue(),
-                                    (String) arr[3],
-                                    arr[4] != null ? ((Number) arr[4]).longValue() : null,
-                                    (String) arr[5],
-                                    arr[6] != null ? ((Number) arr[6]).longValue() : null,
-                                    (String) arr[7],
-                                    arr[8] != null ? ((Number) arr[8]).longValue() : null,
-                                    (String) arr[9],
-                                    arr[10] != null ? ((Number) arr[10]).longValue() : null,
-                                    (String) arr[11],
-                                    arr[12] != null ? ((Number) arr[12]).intValue() : null,
-                                    (String) arr[13],
-                                    arr[14] != null ? ((Number) arr[14]).intValue() : null,
-                                    arr[15] != null ? ((Number) arr[15]).intValue() : null,
-                                    arr[16] != null ? ((Number) arr[16]).longValue() : null,
-                                    (String) arr[17],
-                                    (String) arr[18],
-                                    (String) arr[19]
+                                    TupleHelper.getLong(t, "ocorrencia_id"),
+                                    TupleHelper.getDate(t, "data"),
+                                    TupleHelper.getLong(t, "oferecimento_ref"),
+                                    TupleHelper.getString(t, "oferecimento_id"),
+                                    TupleHelper.getLong(t, "grupo_id"),
+                                    TupleHelper.getString(t, "grupo_nome"),
+                                    TupleHelper.getLong(t, "unidade_id"),
+                                    TupleHelper.getString(t, "unidade_sucinto"),
+                                    TupleHelper.getLong(t, "curso_id"),
+                                    TupleHelper.getString(t, "curso_nome"),
+                                    TupleHelper.getLong(t, "componente_id"),
+                                    TupleHelper.getString(t, "componente_descricao"),
+                                    TupleHelper.getInteger(t, "carga_horaria"),
+                                    TupleHelper.getString(t, "status"),
+                                    TupleHelper.getInteger(t, "inscritos"),
+                                    TupleHelper.getInteger(t, "vagas"),
+                                    TupleHelper.getLong(t, "dia_aula_id"),
+                                    TupleHelper.getString(t, "dia_aula_nome"),
+                                    TupleHelper.getString(t, "turno_descricao"),
+                                    TupleHelper.getString(t, "tempo_descricao")
                             );
                         }).toList()));
     }
 
     public Uni<List<TurmaFeriadoResponse>> turmasPorData(Date data) {
         String sql = """
-            SELECT 
-                o.id,
-                o.data,
-                ofe.id,
-                g.nome,
-                u.sucinto,
-                c.nome,
-                cc.descricao,
-                ofe.carga_horaria,
-                ofe.status,
-                ofe.inscritos,
-                ofe.vagas,
-                da.nome,
-                tu.descricao,
-                ta.descricao
+            SELECT
+                o.id AS ocorrencia_id,
+                o.data AS data,
+                ofe.id AS oferecimento_id,
+                g.nome AS grupo_nome,
+                u.sucinto AS unidade_sucinto,
+                c.nome AS curso_nome,
+                cc.descricao AS componente_descricao,
+                ofe.carga_horaria AS carga_horaria,
+                ofe.status AS status,
+                ofe.inscritos AS inscritos,
+                ofe.vagas AS vagas,
+                da.nome AS dia_aula_nome,
+                tu.descricao AS turno_descricao,
+                ta.descricao AS tempo_descricao
             FROM edc_ocorrencia_componente_curricular o
             JOIN edc_oferecimento_componente_curricular ofe ON ofe.id = o.id_oferecimento_componente_curricular
             LEFT JOIN edc_grupo g ON g.id = ofe.id_grupo
@@ -488,26 +490,26 @@ public class FeriadoService {
             ORDER BY ofe.id, o.data
         """;
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(sql)
+                .chain(session -> session.createNativeQuery(sql, Tuple.class)
                         .setParameter(1, data)
                         .getResultList()
                         .map(list -> list.stream().map(row -> {
-                            Object[] arr = (Object[]) row;
+                            Tuple t = (Tuple) row;
                             return new TurmaFeriadoResponse(
-                                    ((Number) arr[0]).longValue(),
-                                    (Date) arr[1],
-                                    ((Number) arr[2]).longValue(),
-                                    (String) arr[3],
-                                    (String) arr[4],
-                                    (String) arr[5],
-                                    (String) arr[6],
-                                    arr[7] != null ? ((Number) arr[7]).intValue() : null,
-                                    (String) arr[8],
-                                    arr[9] != null ? ((Number) arr[9]).intValue() : null,
-                                    arr[10] != null ? ((Number) arr[10]).intValue() : null,
-                                    (String) arr[11],
-                                    (String) arr[12],
-                                    (String) arr[13]
+                                    TupleHelper.getLong(t, "ocorrencia_id"),
+                                    TupleHelper.getDate(t, "data"),
+                                    TupleHelper.getLong(t, "oferecimento_id"),
+                                    TupleHelper.getString(t, "grupo_nome"),
+                                    TupleHelper.getString(t, "unidade_sucinto"),
+                                    TupleHelper.getString(t, "curso_nome"),
+                                    TupleHelper.getString(t, "componente_descricao"),
+                                    TupleHelper.getInteger(t, "carga_horaria"),
+                                    TupleHelper.getString(t, "status"),
+                                    TupleHelper.getInteger(t, "inscritos"),
+                                    TupleHelper.getInteger(t, "vagas"),
+                                    TupleHelper.getString(t, "dia_aula_nome"),
+                                    TupleHelper.getString(t, "turno_descricao"),
+                                    TupleHelper.getString(t, "tempo_descricao")
                             );
                         }).toList()));
     }

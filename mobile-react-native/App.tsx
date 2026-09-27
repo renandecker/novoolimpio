@@ -97,6 +97,9 @@ import ViewConfiguracaoListConfiguracaoParcelaListScreen
     from './src/screens/ViewConfiguracaoListConfiguracaoParcelaListScreen';
 import ViewConfiguracaoListLayoutListScreen from './src/screens/ViewConfiguracaoListLayoutListScreen';
 import ConfiguracaoNotificacoesScreen from './src/features/notificacoes/ConfiguracaoNotificacoesScreen';
+import NotificacoesUsuarioScreen from './src/features/notificacoes/NotificacoesUsuarioScreen';
+import NotificacoesAlunoScreen from './src/features/notificacoes/NotificacoesAlunoScreen';
+import NotificacoesProfessorScreen from './src/features/notificacoes/NotificacoesProfessorScreen';
 import ViewConsultorConsultorListScreen from './src/screens/ViewConsultorConsultorListScreen';
 import ViewConsultorFormConsultorListScreen from './src/screens/ViewConsultorFormConsultorListScreen';
 
@@ -216,9 +219,9 @@ import ViewMensagemNapFormMensagemNapListScreen from './src/screens/ViewMensagem
 import ViewMensagemNapListMensagemNapListScreen from './src/screens/ViewMensagemNapListMensagemNapListScreen';
 import ViewMenuListMapaMenuListScreen from './src/screens/ViewMenuListMapaMenuListScreen';
 import ViewMetaFormMetaListScreen from './src/screens/ViewMetaFormMetaListScreen';
-import ViewMetaIndicadorMetaDinamicaListScreen from './src/screens/ViewMetaIndicadorMetaDinamicaListScreen';
+import ViewMetaFormMetaDinamicaListScreen from './src/features/configuracoes/meta/ViewMetaFormMetaDinamicaListScreen';
 import ViewMetaListMetaListScreen from './src/screens/ViewMetaListMetaListScreen';
-import ViewMetaListMetaDinamicaListScreen from './src/screens/ViewMetaListMetaDinamicaListScreen';
+import ViewMetaListMetaDinamicaListScreen from './src/features/configuracoes/meta/ViewMetaListMetaDinamicaListScreen';
 import ViewModuloFormModuloListScreen from './src/screens/ViewModuloFormModuloListScreen';
 import ViewModuloListModuloListScreen from './src/screens/ViewModuloListModuloListScreen';
 import ViewModuloListOrdemModuloListScreen from './src/screens/ViewModuloListOrdemModuloListScreen';
@@ -554,6 +557,10 @@ function AppRoutes() {
                       component={ViewConfiguracaoListConfiguracaoParcelaListScreen}/>
         <Stack.Screen name='view/configuracao/listLayout' component={ViewConfiguracaoListLayoutListScreen}/>
         <Stack.Screen name='config/notificacoes' component={ConfiguracaoNotificacoesScreen} options={{title: 'Configuração de Notificações'}}/>
+        <Stack.Screen name='view/configuracao/notificacoes' component={ConfiguracaoNotificacoesScreen} options={{title: 'Configuração de Notificações'}}/>
+        <Stack.Screen name='view/configuracao/notificacoes-usuario' component={NotificacoesUsuarioScreen} options={{title: 'Notificações do Usuário'}}/>
+        <Stack.Screen name='view/configuracao/notificacoes-aluno' component={NotificacoesAlunoScreen} options={{title: 'Notificações do Aluno'}}/>
+        <Stack.Screen name='view/configuracao/notificacoes-professor' component={NotificacoesProfessorScreen} options={{title: 'Notificações do Professor'}}/>
         <Stack.Screen name='view/consultor/consultor' component={ViewConsultorConsultorListScreen}/>
         <Stack.Screen name='view/consultor/formConsultor' component={ViewConsultorFormConsultorListScreen}/>
 
@@ -681,7 +688,7 @@ function AppRoutes() {
         <Stack.Screen name='view/mensagemNap/listMensagemNap' component={ViewMensagemNapListMensagemNapListScreen}/>
         <Stack.Screen name='view/menu/listMapaMenu' component={ViewMenuListMapaMenuListScreen}/>
         <Stack.Screen name='view/meta/formMeta' component={ViewMetaFormMetaListScreen}/>
-        <Stack.Screen name='view/meta/indicadorMetaDinamica' component={ViewMetaIndicadorMetaDinamicaListScreen}/>
+        <Stack.Screen name='view/meta/formMetaDinamica' component={ViewMetaFormMetaDinamicaListScreen}/>
         <Stack.Screen name='view/meta/listMeta' component={ViewMetaListMetaListScreen}/>
         <Stack.Screen name='view/meta/listMetaDinamica' component={ViewMetaListMetaDinamicaListScreen}/>
         <Stack.Screen name='view/modulo/formModulo' component={ViewModuloFormModuloListScreen}/>

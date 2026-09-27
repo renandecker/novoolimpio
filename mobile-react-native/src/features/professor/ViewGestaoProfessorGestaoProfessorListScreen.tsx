@@ -766,7 +766,7 @@ function GestaoTurmas({professorId, souProfessor}: { professorId: number | null;
         setSalvando(true);
         try {
             await api.post(`/api/professor/gestao-professor/turmas/${turmaSelecionada.id}/caderno/salvar`, {
-                usuarioId: null,
+                usuarioId: session?.idUsuario ?? null,
                 presencas: alteradas,
             });
             notificar('sucesso', 'Chamada salva com sucesso.');

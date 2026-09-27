@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {useSearchParams} from 'react-router-dom';
+import {useSearchParams, useNavigate} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
 import {PermissionGate} from '../../../shared/services/permissions';
 import {ReportFilters} from '../../../shared/components/ReportFilters';
@@ -13,6 +13,7 @@ import '../ReportView.css';
 export default function ViewRelatoriosViewMapaListScreen() {
     const [searchParams] = useSearchParams();
     const mapaId = Number(searchParams.get('id'));
+    const navigate = useNavigate();
     const [filtros, setFiltros] = useState<FiltroRelatorioWrapper[]>([]);
     const [loadingFiltros, setLoadingFiltros] = useState(true);
 
@@ -50,11 +51,11 @@ export default function ViewRelatoriosViewMapaListScreen() {
     const nomeRelatorio = report.data?.nome || 'View Mapa';
 
     if (loadingFiltros || report.isLoading) {
-        return <PermissionGate permission="READ"><main className="report-view"><div className="report-view-header"><div className="report-view-header-text"><span className="report-view-type">Mapa</span><h1>Carregando...</h1></div></div></main></PermissionGate>;
+        return <PermissionGate permission="READ"><main className="report-view"><div className="report-view-header"><div className="report-view-header-text"><span className="report-view-type">Mapa</span><h1>{nomeRelatorio}</h1></div></div></main></PermissionGate>;
     }
 
     if (report.isError || !report.data) {
-        return <PermissionGate permission="READ"><main className="report-view"><div className="report-view-header"><div className="report-view-header-text"><span className="report-view-type">Mapa</span><h1>Relatório indisponível</h1></div></div></main></PermissionGate>;
+        return <PermissionGate permission="READ"><main className="report-view"><div className="report-view-header"><div className="report-view-header-text"><span className="report-view-type">Mapa</span><h1>{nomeRelatorio}</h1></div></div></main></PermissionGate>;
     }
 
     return <PermissionGate permission="READ">
@@ -66,6 +67,7 @@ export default function ViewRelatoriosViewMapaListScreen() {
                 </div>
                 <div className="report-view-actions">
                     <HelpOverlay/>
+                    <button className="btnblack" onClick={() => navigate(`/view/relatorios/formMapa?id=${mapaId}`)}>Editar</button>
                 </div>
             </div>
             <div className="report-view-content">

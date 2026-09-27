@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {api} from './api';
-import type {PagedResponse} from './types';
+import {api} from '../../shared/services/api';
+import type {PagedResponse} from '../../shared/types/types';
 
 export type Notificacao = {
     id: number;

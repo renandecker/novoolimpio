@@ -400,13 +400,13 @@ const styles = StyleSheet.create({
     },
     buttonDestructive: {
         backgroundColor: Colors.btnRed,
-        borderColor: '#9a3323',
+        borderColor: Colors.btnRedHover,
         borderBottomWidth: 3,
     },
     buttonSecondary: {
-        backgroundColor: '#ffffff',
-        borderColor: '#d3d3d3',
-        borderBottomWidth: 2,
+        backgroundColor: '#f5c518',
+        borderColor: '#d8b53a',
+        borderBottomWidth: 3,
     },
     buttonText: {
         color: '#ffffff',
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
         fontWeight: Typography.weights.bold,
     },
     buttonSecondaryText: {
-        color: Colors.textSecondary,
+        color: '#3a2f00',
         fontSize: Typography.sizes.base,
         fontWeight: Typography.weights.bold,
     },

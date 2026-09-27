@@ -24,12 +24,30 @@ public class PreferenciaNotificacaoUsuario extends PanacheEntity {
 
     public static final String CATEGORIA_TURMA = "TURMA";
     public static final String CATEGORIA_CONTRATO = "CONTRATO";
+    public static final String CATEGORIA_USUARIO = "USUARIO";
+    public static final String CATEGORIA_ALUNO = "ALUNO";
+    public static final String CATEGORIA_PROFESSOR = "PROFESSOR";
+    public static final String CATEGORIA_AGENDA = "AGENDA";
 
     public static final String TIPO_NOTAS = "NOTAS";
     public static final String TIPO_PRESENCAS = "PRESENCAS";
     public static final String TIPO_AULAS = "AULAS";
     public static final String TIPO_REGISTRO_AULA = "REGISTRO_AULA";
     public static final String TIPO_ALTERACAO_CONTRATO = "ALTERACAO_CONTRATO";
+    // Usuario logado
+    public static final String TIPO_ALTERACAO_AGENDA = "ALTERACAO_AGENDA";
+    public static final String TIPO_ALTERACAO_CADASTRO = "ALTERACAO_CADASTRO";
+    // Aluno logado
+    public static final String TIPO_CONTRATO_CRIACAO = "CONTRATO_CRIACAO";
+    public static final String TIPO_CONTRATO_CANCELAMENTO = "CONTRATO_CANCELAMENTO";
+    public static final String TIPO_ALTERACAO_AULA = "ALTERACAO_AULA";
+    public static final String TIPO_ALTERACAO_NOTA = "ALTERACAO_NOTA";
+    public static final String TIPO_ALTERACAO_PRESENCA = "ALTERACAO_PRESENCA";
+    public static final String TIPO_ALTERACAO_REGISTRO_AULA = "ALTERACAO_REGISTRO_AULA";
+    // Professor logado
+    public static final String TIPO_PERGUNTA_RESPONDIDA = "PERGUNTA_RESPONDIDA";
+    public static final String TIPO_ALTERACAO_TURMA = "ALTERACAO_TURMA";
+    public static final String TIPO_ALTERACAO_PROFESSOR = "ALTERACAO_PROFESSOR";
 
     public static final String CANAL_PUSH = "PUSH";
     public static final String CANAL_TELEGRAM = "TELEGRAM";

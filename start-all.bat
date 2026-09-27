@@ -163,7 +163,7 @@ echo ============================================
 echo  Verificando compilacao dos microsservicos...
 echo ============================================
 
-set SVC_LIST=aluno asaas basico central comercial curriculo educacao estoque financeiro fiserv login notificacoes professor relatorios schedule
+set SVC_LIST=aluno asaas basico biblioteca biblioteca-virtual central comercial curriculo educacao estoque financeiro fiserv login notificacoes professor relatorios schedule
 
 set EXPECTED=0
 for %%s in (%SVC_LIST%) do (
@@ -211,7 +211,7 @@ echo ============================================
 echo  Subindo containers...
 echo ============================================
 
-set COMPOSE_SVC=postgres rabbitmq restore basico notificacoes central comercial educacao estoque financeiro relatorios schedule professor login aluno curriculo asaas fiserv
+set COMPOSE_SVC=postgres rabbitmq restore basico biblioteca biblioteca-virtual notificacoes central comercial educacao estoque financeiro relatorios schedule professor login aluno curriculo asaas fiserv
 
 %DC% up --build -d %COMPOSE_SVC% 2>> "%DOCKER_LOG%"
 if !errorlevel! neq 0 (
@@ -239,7 +239,7 @@ echo.
 echo Containers iniciados. Aguardando servicos ficarem saudaveis...
 echo.
 
-set SERVICES=login:8090 basico:8081 notificacoes:8082 central:8083 comercial:8084 educacao:8085 estoque:8086 financeiro:8087 relatorios:8088 schedule:8089 professor:8091 aluno:8092 asaas:8094 curriculo:8095 fiserv:8097 gateway:8080 web:3000
+set SERVICES=login:8090 basico:8081 notificacoes:8082 central:8083 comercial:8084 educacao:8085 estoque:8086 financeiro:8087 relatorios:8088 schedule:8089 professor:8091 aluno:8092 asaas:8094 curriculo:8095 biblioteca:8098 biblioteca-virtual:8099 fiserv:8097 gateway:8080 web:3000
 set TOTAL=0
 for %%s in (%SERVICES%) do set /a TOTAL+=1
 
@@ -312,6 +312,8 @@ echo   Postgres:     http://localhost:5454
 echo   aluno:        http://localhost:8092
 echo   asaas:        http://localhost:8094
 echo   basico:       http://localhost:8081
+echo   biblioteca:   http://localhost:8098
+echo   biblioteca-virtual: http://localhost:8099
 echo   central:      http://localhost:8083
 echo   comercial:    http://localhost:8084
 echo   curriculo:    http://localhost:8095

@@ -11,6 +11,7 @@ import br.com.sol7.olimpio.login.entity.LoginSession;
 import br.com.sol7.olimpio.login.permissao.service.ModulePermissionService;
 import br.com.sol7.olimpio.login.repository.LoginRepository;
 import br.com.sol7.olimpio.login.repository.LoginSessionRepository;
+import br.com.sol7.olimpio.shared.notificacao.NotificacaoEventProducer;
 import br.com.sol7.olimpio.shared.security.JwtTokenService;
 import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -48,6 +49,8 @@ public class LoginService {
     MailService mailService;
     @Inject
     ModulePermissionService modulePermissions;
+    @Inject
+    NotificacaoEventProducer notificacaoEventProducer;
 
     @WithTransaction
     public Uni<LoginResponse> authenticate(LoginRequest request) {
@@ -62,13 +65,18 @@ public class LoginService {
     @WithTransaction
     public Uni<LoginResponse> bootstrap(BootstrapRequest request) {
         return repository.count().onItem().transformToUni(count -> {
-            if (count > 0) return Uni.createFrom().failure(new BadRequestException("O usuário inicial já foi criado"));
+            if (count > 0) return Uni.createFrom().failure(new BadRequestException("O usuǭrio inicial jǭ foi criado"));
             var login = new Login();
             login.username = normalise(request.username());
             login.passwordHash = PasswordHasher.hash(request.password());
             login.permissions = String.join(",", ALL_PERMISSIONS);
             login.active = true;
-            return repository.persist(login).onItem().transformToUni(ignored -> issueSession(login));
+            return repository.persist(login).onItem().transformToUni(ignored -> issueSession(login))
+                    .chain(resp -> notificacaoEventProducer.enviar(login.username, "USUARIO", "ALTERACAO_CADASTRO",
+                            "Cadastro criado: " + login.username,
+                            "O cadastro do usuário '" + login.username + "' foi criado.",
+                            "/view/configuracao/notificacoes-usuario")
+                            .replaceWith(() -> resp));
         });
     }
 

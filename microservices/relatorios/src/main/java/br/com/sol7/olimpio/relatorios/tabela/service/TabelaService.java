@@ -33,6 +33,8 @@ import br.com.sol7.olimpio.relatorios.tabela.entity.TabelaColuna;
 import br.com.sol7.olimpio.relatorios.tabela.repository.TabelaRepository;
 import br.com.sol7.olimpio.relatorios.tabela.repository.TabelaColunaRepository;
 import io.quarkus.hibernate.reactive.panache.Panache;
+import br.com.sol7.olimpio.shared.TupleHelper;
+import jakarta.persistence.Tuple;
 
 @ApplicationScoped
 @WithTransaction
@@ -89,11 +91,11 @@ public class TabelaService {
                         : Uni.createFrom().failure(new NotFoundException("Tabela not found")));
     }
 
-    private static final String SQL_COLUNAS = "SELECT tc.ordem, d.nome_visualizacao, d.tipo_info_dimensao, dc.coluna, m.nome_visualizacao, m.tipo_info_medida, mc.coluna FROM rel_tabela_colunas tc LEFT JOIN rel_dimensao d ON d.id = tc.id_dimensao LEFT JOIN rel_coluna dc ON dc.id = d.id_coluna LEFT JOIN rel_medida m ON m.id = tc.id_medida LEFT JOIN rel_coluna mc ON mc.id = m.id_coluna WHERE tc.id_tabela = ?1 ORDER BY tc.ordem, tc.id";
-    private static final String SQL_ESTRUTURA = "SELECT e.tabela, e.condicao FROM rel_tabela t INNER JOIN rel_estrutura e ON e.id = t.id_estrutura WHERE t.id = ?1";
+    private static final String SQL_COLUNAS = "SELECT tc.ordem AS ordem, d.nome_visualizacao AS dim_nome, d.tipo_info_dimensao AS dim_tipo, dc.coluna AS dim_coluna, m.nome_visualizacao AS med_nome, m.tipo_info_medida AS med_tipo, mc.coluna AS med_coluna FROM rel_tabela_colunas tc LEFT JOIN rel_dimensao d ON d.id = tc.id_dimensao LEFT JOIN rel_coluna dc ON dc.id = d.id_coluna LEFT JOIN rel_medida m ON m.id = tc.id_medida LEFT JOIN rel_coluna mc ON mc.id = m.id_coluna WHERE tc.id_tabela = ?1 ORDER BY tc.ordem, tc.id";
+    private static final String SQL_ESTRUTURA = "SELECT e.tabela AS tabela, e.condicao AS condicao FROM rel_tabela t INNER JOIN rel_estrutura e ON e.id = t.id_estrutura WHERE t.id = ?1";
     // Migrado de FiltrosController (extracted_aceso): filtros atuam no WHERE e referenciam a mesma
     // expressao de rel_coluna.coluna (cortada no " as ") via rel_dimensao do rel_filtro.
-    private static final String SQL_FILTROS = "SELECT f.nome, dc.coluna, f.tipo_filtro, f.operacao, f.data_inicio, f.data_fim, f.periodo_dinamico, f.valor_fixo " +
+    private static final String SQL_FILTROS = "SELECT f.nome AS nome, dc.coluna AS coluna, f.tipo_filtro AS tipo_filtro, f.operacao AS operacao, f.data_inicio AS data_inicio, f.data_fim AS data_fim, f.periodo_dinamico AS periodo_dinamico, f.valor_fixo AS valor_fixo " +
             "FROM rel_filtro f " +
             "LEFT JOIN rel_dimensao d ON d.id = f.id_dimensao " +
             "LEFT JOIN rel_coluna dc ON dc.id = d.id_coluna " +
@@ -105,10 +107,10 @@ public class TabelaService {
     public Uni<TabelaExecutadaResponse> executar(Long tabelaId, int page, int size) {
         int p = Math.max(0, page);
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
-        return Panache.getSession().chain(session -> session.createNativeQuery(SQL_ESTRUTURA).setParameter(1, tabelaId).getSingleResultOrNull())
+        return Panache.getSession().chain(session -> session.createNativeQuery(SQL_ESTRUTURA, Tuple.class).setParameter(1, tabelaId).getSingleResultOrNull())
                 .onItem().ifNull().failWith(() -> new NotFoundException("Estrutura da tabela não encontrada"))
-                .onItem().transformToUni(estrutura -> Panache.getSession().chain(session -> session.createNativeQuery(SQL_COLUNAS).setParameter(1, tabelaId).getResultList())
-                        .onItem().transformToUni(colunas -> executarSql((Object[]) estrutura, colunas, p, s)))
+                .onItem().transformToUni(estrutura -> Panache.getSession().chain(session -> session.createNativeQuery(SQL_COLUNAS, Tuple.class).setParameter(1, tabelaId).getResultList())
+                        .onItem().transformToUni(colunas -> executarSql((Tuple) estrutura, colunas, p, s)))
                 .onFailure().recoverWithUni(throwable -> {
                     LOG.errorf(throwable, "Erro ao executar tabela ID %d: %s", tabelaId, throwable.getMessage());
                     if (throwable instanceof IllegalArgumentException) {
@@ -129,22 +131,22 @@ public class TabelaService {
     private record SqlMontado(String sql, List<String> cabecalhos) {
     }
 
-    private SqlMontado montarSql(Object[] estrutura, List<?> configuracoes) {
+    private SqlMontado montarSql(Tuple estrutura, List<?> configuracoes) {
         if (configuracoes.isEmpty()) return new SqlMontado("SELECT 1", List.of());
-        String origem = texto(estrutura[0]);
-        String condicao = texto(estrutura[1]);
+        String origem = texto(TupleHelper.getString(estrutura, "tabela"));
+        String condicao = texto(TupleHelper.getString(estrutura, "condicao"));
         validarFragmento(origem);
         validarFragmento(condicao);
         List<String> expressoes = new ArrayList<>(), cabecalhos = new ArrayList<>(), grupos = new ArrayList<>();
         boolean possuiAgregacao = false;
         for (Object configuracao : configuracoes) {
-            Object[] coluna = (Object[]) configuracao;
-            String dimNome = texto(coluna[1]);
-            String dimTipo = texto(coluna[2]);
-            String dimExpr = semAlias(texto(coluna[3]));
-            String medNome = texto(coluna[4]);
-            String medTipo = texto(coluna[5]);
-            String medExpr = semAlias(texto(coluna[6]));
+            Tuple coluna = (Tuple) configuracao;
+            String dimNome = texto(TupleHelper.getString(coluna, "dim_nome"));
+            String dimTipo = texto(TupleHelper.getString(coluna, "dim_tipo"));
+            String dimExpr = semAlias(texto(TupleHelper.getString(coluna, "dim_coluna")));
+            String medNome = texto(TupleHelper.getString(coluna, "med_nome"));
+            String medTipo = texto(TupleHelper.getString(coluna, "med_tipo"));
+            String medExpr = semAlias(texto(TupleHelper.getString(coluna, "med_coluna")));
             
             boolean dimensao = !dimExpr.isBlank();
             String nome = dimensao ? dimNome : medNome;
@@ -168,12 +170,12 @@ public class TabelaService {
         return new SqlMontado(sql.toString(), cabecalhos);
     }
 
-    private Uni<TabelaExecutadaResponse> executarSql(Object[] estrutura, List<?> configuracoes, int page, int size) {
+    private Uni<TabelaExecutadaResponse> executarSql(Tuple estrutura, List<?> configuracoes, int page, int size) {
         if (configuracoes.isEmpty()) return Uni.createFrom().item(new TabelaExecutadaResponse(List.of(), List.of()));
         SqlMontado montado = montarSql(estrutura, configuracoes);
         String mainSql = montado.sql();
-        String origem = texto(estrutura[0]);
-        String whereClause = texto(estrutura[1]);
+        String origem = texto(TupleHelper.getString(estrutura, "tabela"));
+        String whereClause = texto(TupleHelper.getString(estrutura, "condicao"));
         String countSql = "SELECT count(*) FROM (SELECT 1 " + origem + (whereClause.isBlank() ? "" : " " + whereClause) + ") _cnt";
 
         int offset = page * size;
@@ -183,8 +185,8 @@ public class TabelaService {
                 .chain(session -> session.createNativeQuery(countSql).getSingleResultOrNull())
                 .map(result -> result == null ? 0L : ((Number) result).longValue());
 
-        Uni<List<Object>> dataUni = Panache.getSession()
-                .chain(session -> session.createNativeQuery(paginatedSql).getResultList());
+        Uni<List<Tuple>> dataUni = Panache.getSession()
+                .chain(session -> session.createNativeQuery(paginatedSql, Tuple.class).getResultList());
 
         return countUni.chain(totalCount -> dataUni.map(resultado -> {
             int totalPages = (int) Math.ceil((double) totalCount / Math.max(1, size));
@@ -195,10 +197,10 @@ public class TabelaService {
     private List<Map<String, Object>> converterLinhas(List<?> resultado, List<String> cabecalhos) {
         List<Map<String, Object>> linhas = new ArrayList<>();
         for (Object registro : resultado) {
-            Object[] valores = registro instanceof Object[] array ? array : new Object[]{registro};
+            Tuple t = (Tuple) registro;
             Map<String, Object> linha = new LinkedHashMap<>();
             for (int indice = 0; indice < cabecalhos.size(); indice++)
-                linha.put(cabecalhos.get(indice), indice < valores.length ? valores[indice] : null);
+                linha.put(cabecalhos.get(indice), TupleHelper.get(t, cabecalhos.get(indice)));
             linhas.add(linha);
         }
         return linhas;
@@ -269,16 +271,16 @@ public class TabelaService {
 
     public Uni<TabelaOpcoesResponse> opcoes(Long estruturaId) {
         if (estruturaId == null) return Uni.createFrom().item(new TabelaOpcoesResponse(List.of(), List.of()));
-        String dimensoes = "SELECT id, nome_visualizacao, tipo_dimensao, tipo_info_dimensao FROM rel_dimensao WHERE id_estrutura = ?1 ORDER BY nome_visualizacao";
-        String medidas = "SELECT id, nome_visualizacao, tipo_medida, tipo_info_medida FROM rel_medida WHERE id_estrutura = ?1 ORDER BY nome_visualizacao";
-        return Panache.getSession().chain(session -> session.createNativeQuery(dimensoes).setParameter(1, estruturaId).getResultList())
+        String dimensoes = "SELECT id AS id, nome_visualizacao AS nome, tipo_dimensao AS tipo, tipo_info_dimensao AS tipo_info FROM rel_dimensao WHERE id_estrutura = ?1 ORDER BY nome_visualizacao";
+        String medidas = "SELECT id AS id, nome_visualizacao AS nome, tipo_medida AS tipo, tipo_info_medida AS tipo_info FROM rel_medida WHERE id_estrutura = ?1 ORDER BY nome_visualizacao";
+        return Panache.getSession().chain(session -> session.createNativeQuery(dimensoes, Tuple.class).setParameter(1, estruturaId).getResultList())
                 .map(this::campos)
-                .onItem().transformToUni(listaDimensoes -> Panache.getSession().chain(session -> session.createNativeQuery(medidas).setParameter(1, estruturaId).getResultList())
+                .onItem().transformToUni(listaDimensoes -> Panache.getSession().chain(session -> session.createNativeQuery(medidas, Tuple.class).setParameter(1, estruturaId).getResultList())
                         .map(this::campos).map(listaMedidas -> new TabelaOpcoesResponse(listaDimensoes, listaMedidas)));
     }
 
     private List<TabelaCampoResponse> campos(List<?> resultado) {
-        return resultado.stream().map(item -> (Object[]) item).map(item -> new TabelaCampoResponse(((Number) item[0]).longValue(), texto(item[1]), texto(item[2]), texto(item[3]))).toList();
+        return resultado.stream().map(item -> (Tuple) item).map(item -> new TabelaCampoResponse(TupleHelper.getLong(item, "id"), texto(TupleHelper.getString(item, "nome")), texto(TupleHelper.getString(item, "tipo")), texto(TupleHelper.getString(item, "tipo_info")))).toList();
     }
 
 
@@ -294,18 +296,18 @@ public class TabelaService {
     }
 
     public Uni<String> gerarSqlCompleto(Long tabelaId, Map<String, Object> filtros) {
-        return Panache.getSession().chain(session -> session.createNativeQuery(SQL_ESTRUTURA).setParameter(1, tabelaId).getSingleResultOrNull())
+        return Panache.getSession().chain(session -> session.createNativeQuery(SQL_ESTRUTURA, Tuple.class).setParameter(1, tabelaId).getSingleResultOrNull())
                 .onItem().ifNull().failWith(() -> new NotFoundException("Estrutura da tabela não encontrada"))
                 .onItem().transformToUni(estrutura -> Panache.getSession()
-                        .chain(session -> session.createNativeQuery(SQL_COLUNAS).setParameter(1, tabelaId).getResultList())
+                        .chain(session -> session.createNativeQuery(SQL_COLUNAS, Tuple.class).setParameter(1, tabelaId).getResultList())
                         .onItem().transformToUni(configuracoes -> Panache.getSession()
-                                .chain(session -> session.createNativeQuery(SQL_FILTROS).setParameter(1, tabelaId).getResultList())
+                                .chain(session -> session.createNativeQuery(SQL_FILTROS, Tuple.class).setParameter(1, tabelaId).getResultList())
                                 .map(configFiltros -> {
                                     if (configuracoes.isEmpty()) return "SELECT 1";
-                                    Object[] estruturaArr = (Object[]) estrutura;
+                                    Tuple estruturaArr = (Tuple) estrutura;
                                     SqlMontado montado = montarSql(estruturaArr, configuracoes);
                                     String base = montado.sql();
-                                    String condicao = texto(estruturaArr[1]);
+                                    String condicao = texto(TupleHelper.getString(estruturaArr, "condicao"));
                                     String fragmento = montarFiltroSql(configFiltros, filtros);
                                     if (fragmento == null || fragmento.isEmpty()) return base;
                                     return base + (condicao.isBlank() ? " WHERE " : " AND ") + fragmento;
@@ -318,10 +320,10 @@ public class TabelaService {
     // { operation, value [, value2] } como valor.
     private String montarFiltroSql(List<?> configFiltros, Map<String, Object> filtros) {
         if (filtros == null || filtros.isEmpty()) return "";
-        Map<String, Object[]> porNome = new HashMap<>();
+        Map<String, Tuple> porNome = new HashMap<>();
         for (Object item : configFiltros) {
-            Object[] cfg = (Object[]) item;
-            String nome = texto(cfg[0]);
+            Tuple cfg = (Tuple) item;
+            String nome = texto(TupleHelper.getString(cfg, "nome"));
             if (!nome.isEmpty()) porNome.put(nome.trim().toLowerCase(), cfg);
         }
         List<String> condicoes = new ArrayList<>();
@@ -329,14 +331,14 @@ public class TabelaService {
             Object condicaoObj = entrada.getValue();
             if (!(condicaoObj instanceof Map<?, ?>)) continue;
             Map<?, ?> cond = (Map<?, ?>) condicaoObj;
-            Object[] cfg = porNome.get(entrada.getKey().trim().toLowerCase());
+            Tuple cfg = porNome.get(entrada.getKey().trim().toLowerCase());
             if (cfg == null) continue;
-            String coluna = semAlias(texto(cfg[1]));
+            String coluna = semAlias(texto(TupleHelper.getString(cfg, "coluna")));
             if (coluna.isEmpty()) continue;
             String operador = operador(cond);
             String valor = texto(cond.get("value"));
             String valor2 = texto(cond.get("value2"));
-            String tipoFiltro = texto(cfg[2]);
+            String tipoFiltro = texto(TupleHelper.getString(cfg, "tipo_filtro"));
             String trecho = montarCondicao(coluna, operador, valor, valor2, tipoFiltro);
             if (trecho != null) condicoes.add(trecho);
         }

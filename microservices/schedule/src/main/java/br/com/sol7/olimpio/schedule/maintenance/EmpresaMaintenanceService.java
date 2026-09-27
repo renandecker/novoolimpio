@@ -113,7 +113,7 @@ public class EmpresaMaintenanceService {
     // Migrado de VagaService.enviarVagasAlunos() - processa lotes de ate 100 entrevistas sem
     // envio, avancando o cursor bas_config ID_VAGA_ALUNO a cada lote (evita reprocessamento).
     private static final String SQL_BUSCAR_CANDIDATOS = """
-    SELECT a.id,u.login,p.email,v.nome,v.titulo_email
+    SELECT a.id AS id,u.login AS login,p.email AS email,v.nome AS nome,v.titulo_email AS titulo_email
     FROM cur_entrevista_vaga_empresa
     a
     JOIN bas_usuario
@@ -131,6 +131,8 @@ public class EmpresaMaintenanceService {
     a.id
     LIMIT 100
             """;
+
+    private record Candidato(Long id, String login, String email, String vagaNome, String tituloEmail) {}
 
     public Uni<Map<String, Object>> enviarVagasAlunos() {
         return buscarConfigLong("ID_VAGA_ALUNO", 0L)
@@ -155,12 +157,12 @@ public class EmpresaMaintenanceService {
     private Uni<Map<String, Object>> processarLote(int total, int round, long ultimoId) {
         return pool.preparedQuery(SQL_BUSCAR_CANDIDATOS).execute(Tuple.of(ultimoId))
                 .map(rows -> {
-                    List<Object[]> candidatos = new ArrayList<>();
+                    List<Candidato> candidatos = new ArrayList<>();
                     for (Row row : rows) {
-                        candidatos.add(new Object[]{
+                        candidatos.add(new Candidato(
                                 row.getLong("id"), row.getString("login"), row.getString("email"),
                                 row.getString("nome"), row.getString("titulo_email")
-                        });
+                        ));
                     }
                     return candidatos;
                 })
@@ -170,12 +172,12 @@ public class EmpresaMaintenanceService {
                         return Uni.createFrom().item(Map.<String, Object>of("candidatos", total, "lotes", round));
                     }
                     long lastId = candidatos.stream()
-                            .map(c -> (Long) c[0]).max(Long::compare).orElse(ultimoId);
-                    for (Object[] cand : candidatos) {
-                        String email = (String) cand[2];
-                        String vagaNome = (String) cand[3];
-                        String tituloEmail = (String) cand[4];
-                        String login = (String) cand[1];
+                            .map(Candidato::id).max(Long::compare).orElse(ultimoId);
+                    for (Candidato cand : candidatos) {
+                        String email = cand.email();
+                        String vagaNome = cand.vagaNome();
+                        String tituloEmail = cand.tituloEmail();
+                        String login = cand.login();
                         
                         if (emailEnabled && email != null && !email.isBlank()) {
                             String assunto = tituloEmail != null ? tituloEmail : "Nova vaga disponível: " + vagaNome;

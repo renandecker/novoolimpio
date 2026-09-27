@@ -13,12 +13,16 @@ import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
 
+import br.com.sol7.olimpio.educacao.shared.notificacao.NotificacaoEventProducer;
+
 @ApplicationScoped
 @WithTransaction
 public class ContratoService {
 
     @Inject
     ContratoRepository repository;
+    @Inject
+    NotificacaoEventProducer notificacaoEventProducer;
 
     public Uni<List<ContratoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -42,14 +46,28 @@ public class ContratoService {
     public Uni<ContratoResponse> create(ContratoRequest r) {
         var e = new Contrato();
         apply(e, r);
-        return repository.persist(e).replaceWith(() -> toResponse(e));
+        return repository.persist(e)
+                .chain(persisted -> notificacaoEventProducer.enviar(null, "ALUNO", "CONTRATO_CRIACAO",
+                        "Contrato criado: " + persisted.id,
+                        "O contrato #" + persisted.id + " foi criado.",
+                        "/view/configuracao/notificacoes-aluno")
+                        .replaceWith(() -> toResponse(persisted)));
     }
 
     public Uni<ContratoResponse> update(Long id, ContratoRequest r) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Contrato not found"))
                 .invoke(e -> apply(e, r))
-                .map(this::toResponse);
+                .chain(e -> {
+                    boolean cancelado = r.dataCancelamento() != null || r.cancelamentoId() != null
+                            || Boolean.TRUE.equals(r.desistente());
+                    String tipo = cancelado ? "CONTRATO_CANCELAMENTO" : "ALTERACAO_CONTRATO";
+                    String categoria = cancelado ? "ALUNO" : "CONTRATO";
+                    String titulo = cancelado ? "Contrato cancelado: " + id : "Contrato alterado: " + id;
+                    return notificacaoEventProducer.enviar(null, categoria, tipo, titulo,
+                            titulo + ".", "/view/configuracao/notificacoes-aluno")
+                            .replaceWith(() -> toResponse(e));
+                });
     }
 
     public Uni<Void> delete(Long id) {

@@ -204,22 +204,22 @@ Uni<Integer> acc = Uni.createFrom().item(0);
                 .replaceWithVoid();
     }
 
-    private Uni<List<LocalDateTime[]>> buscarOcorrencias(long oId, String tipo) {
+    private Uni<List<LocalDateTime>> buscarOcorrencias(long oId, String tipo) {
         return pool.preparedQuery(SQL_OCORRENCIAS)
                 .execute(Tuple.tuple().addLong(oId).addString(tipo))
                 .onItem().transform(rows -> {
-                    List<LocalDateTime[]> result = new ArrayList<>();
+                    List<LocalDateTime> result = new ArrayList<>();
                     for (Row r : rows) {
                         LocalDateTime data = r.getLocalDateTime("data");
                         if (data != null) {
-                            result.add(new LocalDateTime[]{data});
+                            result.add(data);
                         }
                     }
                     return result;
                 });
     }
 
-    private Uni<Void> gerarChamadasParaOferecimento(long oId, int qtdeSequencia, List<LocalDateTime[]> ocorrencias, boolean coringa) {
+    private Uni<Void> gerarChamadasParaOferecimento(long oId, int qtdeSequencia, List<LocalDateTime> ocorrencias, boolean coringa) {
         int size = ocorrencias.size();
         int dividido = (size + qtdeSequencia - 1) / qtdeSequencia;
 
@@ -229,8 +229,8 @@ Uni<Integer> acc = Uni.createFrom().item(0);
             int inicioIdx = Math.min(qtdeSequencia * limite, size - 1);
             int fimIdx = Math.min(qtdeSequencia * (limite + 1), size) - 1;
 
-            LocalDateTime inicio = ocorrencias.get(inicioIdx)[0];
-            LocalDateTime fim = ocorrencias.get(Math.min(fimIdx, size - 1))[0];
+            LocalDateTime inicio = ocorrencias.get(inicioIdx);
+            LocalDateTime fim = ocorrencias.get(Math.min(fimIdx, size - 1));
 
             chain = chain.chain(() -> {
                 return pool.preparedQuery(SQL_EXISTE_PENDENTE)

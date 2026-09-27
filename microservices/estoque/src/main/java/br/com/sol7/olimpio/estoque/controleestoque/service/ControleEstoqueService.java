@@ -5,6 +5,7 @@ import br.com.sol7.olimpio.estoque.entrega.EntregaRepository;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import br.com.sol7.olimpio.estoque.produto.ProdutoRepository;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.NotFoundException;
 
 @ApplicationScoped
@@ -195,35 +197,40 @@ public class ControleEstoqueService {
     // // ... (truncado, ver fonte original)
     public Uni<Map<String, Object>> buscarEstoque(Long unidadeId) {
         String sql = """
-            SELECT ce.*, p.nome as produto_nome, p.valor as produto_valor
+            SELECT ce.id AS id, ce.valor AS valor, ce.quantidade AS quantidade,
+                ce.qtde_solicitado AS qtdeSolicitado, ce.qtde_defeito AS qtdeDefeito,
+                ce.qtde_falta AS qtdeFalta, ce.qtde_naoencontrado AS qtdeNaoEncontrado,
+                ce.qtde_reservado AS qtdeReservado,
+                ce.qtde_aprovadonaoentregue AS qtdeAprovadoNaoEntregue,
+                ce.id_produto AS produtoId, ce.id_unidade AS unidadeId,
+                p.nome AS produtoNome, p.valor AS produtoValor
             FROM est_controle_estoque ce
-            INNER JOIN est_produto p ON p.id = ce.produto_id
-            WHERE ce.unidade_id = ?
+            INNER JOIN est_produto p ON p.id = ce.id_produto
+            WHERE ce.id_unidade = ?
             ORDER BY p.nome
             """;
 
         return Panache.getSession()
-                .chain(s -> s.createNativeQuery(sql)
+                .chain(s -> s.createNativeQuery(sql, Tuple.class)
                         .setParameter(1, unidadeId)
                         .getResultList())
                 .map(rows -> {
                     List<Map<String, Object>> itens = new ArrayList<>();
-                    for (Object row : rows) {
-                        Object[] cols = (Object[]) row;
+                    for (Tuple row : rows) {
                         Map<String, Object> item = new HashMap<>();
-                        item.put("id", cols[0]);
-                        item.put("valor", cols[1]);
-                        item.put("quantidade", cols[2]);
-                        item.put("qtdeSolicitado", cols[3]);
-                        item.put("qtdeDefeito", cols[4]);
-                        item.put("qtdeFalta", cols[5]);
-                        item.put("qtdeNaoEncontrado", cols[6]);
-                        item.put("qtdeReservado", cols[7]);
-                        item.put("qtdeAprovadoNaoEntregue", cols[8]);
-                        item.put("produtoId", cols[9]);
-                        item.put("unidadeId", cols[10]);
-                        item.put("produtoNome", cols[11]);
-                        item.put("produtoValor", cols[12]);
+                        item.put("id", TupleHelper.getLong(row, "id"));
+                        item.put("valor", TupleHelper.getBigDecimal(row, "valor"));
+                        item.put("quantidade", TupleHelper.getInteger(row, "quantidade"));
+                        item.put("qtdeSolicitado", TupleHelper.getInteger(row, "qtdeSolicitado"));
+                        item.put("qtdeDefeito", TupleHelper.getInteger(row, "qtdeDefeito"));
+                        item.put("qtdeFalta", TupleHelper.getInteger(row, "qtdeFalta"));
+                        item.put("qtdeNaoEncontrado", TupleHelper.getInteger(row, "qtdeNaoEncontrado"));
+                        item.put("qtdeReservado", TupleHelper.getInteger(row, "qtdeReservado"));
+                        item.put("qtdeAprovadoNaoEntregue", TupleHelper.getInteger(row, "qtdeAprovadoNaoEntregue"));
+                        item.put("produtoId", TupleHelper.getLong(row, "produtoId"));
+                        item.put("unidadeId", TupleHelper.getLong(row, "unidadeId"));
+                        item.put("produtoNome", TupleHelper.getString(row, "produtoNome"));
+                        item.put("produtoValor", TupleHelper.getBigDecimal(row, "produtoValor"));
                         itens.add(item);
                     }
                     Map<String, Object> result = new HashMap<>();

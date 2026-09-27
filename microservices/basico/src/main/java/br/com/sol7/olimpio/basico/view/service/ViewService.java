@@ -1,9 +1,11 @@
 package br.com.sol7.olimpio.basico.view.service;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.NotFoundException;
 import org.hibernate.reactive.mutiny.Mutiny;
 
@@ -67,7 +69,19 @@ public class ViewService {
             Map.entry("filtros/listFiltros", "rel_filtro"),
             Map.entry("filtros/formFiltros", "rel_filtro"),
             Map.entry("relatorios/listDashboard", "rel_painel"),
-            Map.entry("relatorios/listPainel", "rel_painel"));
+            Map.entry("relatorios/listPainel", "rel_painel"),
+            // Indicador e Meta Dinamica: mappings explicitos para que o CRUD generico
+            // (/api/view/{feature}/{resource}) resolva a tabela mesmo quando o resource
+            // segue o padrao <dominio>_meta_dinamica e nao casa com a heuristica de nome.
+            // As leituras continuam usando CURATED_SELECTS (com JOINs) quando definidas.
+            Map.entry("indicador/listIndicador", "com_indicador"),
+            Map.entry("indicador/formIndicador", "com_indicador"),
+            Map.entry("meta/listMetaDinamica", "com_meta_dinamica"),
+            Map.entry("meta/formMetaDinamica", "com_meta_dinamica"),
+            Map.entry("meta/indicadorMetaDinamica", "com_indicador_meta"),
+            Map.entry("meta/indicadorMetaDinamica/valores", "com_meta_valor"),
+            Map.entry("meta/indicadorMetaDinamica/diasNaoUteis", "com_meta_dia_naoutil"),
+            Map.entry("meta/indicadorMetaDinamica/diarizacao", "com_meta_semana"));
 
     // Consultas com JOIN para telas que exibem colunas de relacionamentos aninhados
     // (ex.: logradouro -> bairro -> cidade -> estado), como no listLogradouro.xhtml legado.
@@ -132,11 +146,24 @@ public class ViewService {
 
     private static final String META_SEMANA_DINAMICA_SELECT =
             "SELECT msd.id, msd.semana, msd.percentual_semana AS percentualSemana, msd.valor_semana AS valorSemana, "
-                    + "msd.id_meta_valor AS id_meta_valor, mv.id_meta_dinamica, mv.id_indicador_meta "
+                    + "msd.id_meta_valor AS id_meta_valor, mv.id_meta_dinamica, mv.id_indicador_meta, "
+                    + "im.descricao AS indicadorMeta_descricao, im.formato "
                     + "FROM com_meta_semana msd "
-                    + "JOIN com_meta_valor mv ON mv.id = msd.id_meta_valor";
+                    + "JOIN com_meta_valor mv ON mv.id = msd.id_meta_valor "
+                    + "LEFT JOIN com_indicador_meta im ON im.id = mv.id_indicador_meta";
     private static final List<String> META_SEMANA_DINAMICA_COLUMNS = List.of(
-            "id", "semana", "percentualSemana", "valorSemana", "id_meta_valor", "id_meta_dinamica", "id_indicador_meta");
+            "id", "semana", "percentualSemana", "valorSemana", "id_meta_valor", "id_meta_dinamica",
+            "id_indicador_meta", "indicadorMeta_descricao", "formato");
+
+    private static final String META_DIA_DINAMICA_SELECT =
+            "SELECT mdd.id, mdd.id_meta AS id_meta_dinamica, mdd.data, mdd.dia, mdd.semana, mdd.valor, "
+                    + "mdd.id_meta_valor AS id_meta_valor, im.descricao AS indicadorMeta_descricao, im.formato "
+                    + "FROM com_meta_dia_dinamica mdd "
+                    + "LEFT JOIN com_meta_valor mv ON mv.id = mdd.id_meta_valor "
+                    + "LEFT JOIN com_indicador_meta im ON im.id = mv.id_indicador_meta";
+    private static final List<String> META_DIA_DINAMICA_COLUMNS = List.of(
+            "id", "id_meta_dinamica", "data", "dia", "semana", "valor",
+            "id_meta_valor", "indicadorMeta_descricao", "formato");
 
     // Operacional list: joins to com_pacote and com_acao_de_campanha for data_criacao and data_final
     private static final String OPERACIONAL_LIST_SELECT =
@@ -253,6 +280,7 @@ public class ViewService {
             Map.entry("meta/indicadorMetaDinamica/valores", new CuratedSelect(INDICADOR_META_DINAMICA_VALORES_SELECT, INDICADOR_META_DINAMICA_VALORES_COLUMNS)),
             Map.entry("meta/indicadorMetaDinamica/diasNaoUteis", new CuratedSelect(META_DIA_NAOUTIL_SELECT, META_DIA_NAOUTIL_COLUMNS)),
             Map.entry("meta/indicadorMetaDinamica/diarizacao", new CuratedSelect(META_SEMANA_DINAMICA_SELECT, META_SEMANA_DINAMICA_COLUMNS)),
+        Map.entry("meta/indicadorMetaDinamica/dias", new CuratedSelect(META_DIA_DINAMICA_SELECT, META_DIA_DINAMICA_COLUMNS)),
             Map.entry("operacional/listOperacional", new CuratedSelect(OPERACIONAL_LIST_SELECT, OPERACIONAL_LIST_COLUMNS)),
             Map.entry("operacional/formOperacional", new CuratedSelect(OPERACIONAL_LIST_SELECT, OPERACIONAL_LIST_COLUMNS)),
             Map.entry("compromisso/listCompromisso", new CuratedSelect(COMPROMISSO_LIST_SELECT, COMPROMISSO_LIST_COLUMNS)),
@@ -293,7 +321,7 @@ public class ViewService {
         if (curated != null) {
             return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                     .chain(session -> session.createNativeQuery(
-                                    "SELECT * FROM (" + curated.selectSql() + ") sub ORDER BY id")
+                                    "SELECT * FROM (" + curated.selectSql() + ") sub ORDER BY id", Tuple.class)
                             .getResultList())
                     .map(raw -> toMaps(curated.columns(), raw));
         }
@@ -311,7 +339,7 @@ private Uni<PagedResponse<Map<String, Object>>> doPagedCurated(Mutiny.Session se
         String countSql = "SELECT count(*) FROM (" + curated.selectSql() + ") sub";
         Uni<Long> total = session.createNativeQuery(countSql).getSingleResult()
                 .map(r -> ((Number) r).longValue());
-        Uni<List<Map<String, Object>>> rows = session.createNativeQuery(selectSql)
+        Uni<List<Map<String, Object>>> rows = session.createNativeQuery(selectSql, Tuple.class)
                 .setParameter("limit", s)
                 .setParameter("offset", (long) p * s)
                 .getResultList()
@@ -325,7 +353,7 @@ private Uni<PagedResponse<Map<String, Object>>> doPagedCuratedWithFilters(Mutiny
         String selectSql = "SELECT * FROM (" + curated.selectSql() + ") sub" + whereClause + " ORDER BY id LIMIT :limit OFFSET :offset";
         String countSql = "SELECT count(*) FROM (" + curated.selectSql() + ") sub" + whereClause;
         Mutiny.Query<?> countQuery = session.createNativeQuery(countSql);
-        Mutiny.Query<?> selectQuery = session.createNativeQuery(selectSql)
+        Mutiny.SelectionQuery<Tuple> selectQuery = session.createNativeQuery(selectSql, Tuple.class)
                 .setParameter("limit", s)
                 .setParameter("offset", (long) p * s);
         setFilterParameters(countQuery, filters);
@@ -347,18 +375,18 @@ private Uni<PagedResponse<Map<String, Object>>> doPagedCuratedWithFilters(Mutiny
                         String selectSql = "SELECT " + quoteColumns(cols) + " FROM " + quote(table)
                                 + whereClause + " ORDER BY " + quote(orderBy) + " LIMIT :limit OFFSET :offset";
                         String countSql = "SELECT count(*) FROM " + quote(table) + whereClause;
-                        Mutiny.Query<?> countQuery = session.createNativeQuery(countSql);
-                        Mutiny.Query<?> selectQuery = session.createNativeQuery(selectSql)
-                                .setParameter("limit", s)
-                                .setParameter("offset", (long) p * s);
+Mutiny.Query<?> countQuery = session.createNativeQuery(countSql);
+        Mutiny.SelectionQuery<Tuple> selectQuery = session.createNativeQuery(selectSql, Tuple.class)
+                .setParameter("limit", s)
+                .setParameter("offset", (long) p * s);
                         setFilterParameters(countQuery, filters);
                         setFilterParameters(selectQuery, filters);
                         Uni<Long> total = countQuery.getSingleResult().map(r -> ((Number) r).longValue());
                         Uni<List<Map<String, Object>>> rows = selectQuery.getResultList()
                                 .map(list -> list.stream().map(row -> {
-                                    Object[] arr = (Object[]) row;
+                                    Tuple t = (Tuple) row;
                                     Map<String, Object> m = new LinkedHashMap<>();
-                                    for (int i = 0; i < cols.size() && i < arr.length; i++) m.put(cols.get(i), arr[i]);
+                                    for (int i = 0; i < cols.size(); i++) m.put(cols.get(i), TupleHelper.get(t, cols.get(i)));
                                     return m;
                                 }).collect(Collectors.toList()))
                                 .flatMap(content -> enrichDescriptions(session, table, content));
@@ -444,7 +472,7 @@ private Uni<PagedResponse<Map<String, Object>>> doPagedCuratedWithFilters(Mutiny
         };
     }
 
-    private void setFilterParameters(Mutiny.Query<?> query, Map<String, Object> filters) {
+    private void setFilterParameters(Mutiny.SelectionQuery<?> query, Map<String, Object> filters) {
         Map<String, Object> unwrapped = unwrapFilters(filters);
         if (unwrapped == null || unwrapped.isEmpty()) return;
         for (Map.Entry<String, Object> entry : unwrapped.entrySet()) {
@@ -475,9 +503,9 @@ private Uni<PagedResponse<Map<String, Object>>> doPagedCuratedWithFilters(Mutiny
     private static List<Map<String, Object>> toMaps(List<String> cols, List<?> rawList) {
         List<Map<String, Object>> out = new ArrayList<>();
         for (Object rowObj : rawList) {
-            Object[] arr = (Object[]) rowObj;
+            Tuple t = (Tuple) rowObj;
             Map<String, Object> m = new LinkedHashMap<>();
-            for (int i = 0; i < cols.size() && i < arr.length; i++) m.put(cols.get(i), arr[i]);
+            for (int i = 0; i < cols.size(); i++) m.put(cols.get(i), TupleHelper.get(t, cols.get(i)));
             out.add(m);
         }
         return out;
@@ -497,11 +525,11 @@ private Uni<PagedResponse<Map<String, Object>>> doPagedCuratedWithFilters(Mutiny
             if (cols.isEmpty()) return Uni.createFrom().item(List.of());
             String orderBy = cols.contains("id") ? "id" : cols.get(0);
             String selectSql = "SELECT " + quoteColumns(cols) + " FROM " + quote(table) + " ORDER BY " + quote(orderBy);
-            return session.createNativeQuery(selectSql).getResultList()
+            return session.createNativeQuery(selectSql, Tuple.class).getResultList()
                     .map(list -> list.stream().map(row -> {
-                        Object[] arr = (Object[]) row;
+                        Tuple t = (Tuple) row;
                         Map<String, Object> m = new LinkedHashMap<>();
-                        for (int i = 0; i < cols.size() && i < arr.length; i++) m.put(cols.get(i), arr[i]);
+                        for (int i = 0; i < cols.size(); i++) m.put(cols.get(i), TupleHelper.get(t, cols.get(i)));
                         return m;
                     }).collect(Collectors.toList()))
                     .flatMap(rows -> enrichDescriptions(session, table, rows));
@@ -531,13 +559,13 @@ private Uni<PagedResponse<Map<String, Object>>> doPagedCuratedWithFilters(Mutiny
     private Uni<List<Map<String, Object>>> fetchRefOptions(Mutiny.Session session, RefInfo ref) {
         String sql = refOptionsSql(ref);
         if (sql == null) return Uni.createFrom().item(List.of());
-        return session.createNativeQuery(sql).getResultList().map(list -> {
+        return session.createNativeQuery(sql, Tuple.class).getResultList().map(list -> {
             List<Map<String, Object>> options = new ArrayList<>();
             for (Object row : list) {
-                Object[] arr = (Object[]) row;
+                Tuple t = (Tuple) row;
                 Map<String, Object> option = new LinkedHashMap<>();
-                option.put("id", arr[0]);
-                Object label = arr.length > 1 ? arr[1] : null;
+                option.put("id", TupleHelper.get(t, "id"));
+                Object label = TupleHelper.get(t, "label");
                 option.put("label", label != null ? String.valueOf(label) : null);
                 options.add(option);
             }
@@ -548,42 +576,42 @@ private Uni<PagedResponse<Map<String, Object>>> doPagedCuratedWithFilters(Mutiny
     private String refOptionsSql(RefInfo ref) {
         if (ref == null || ref.table == null) return null;
         if (PESSOA_TABLE.equals(ref.table)) {
-            return "SELECT p.id, " + PESSOA_DESC_SELECT
+            return "SELECT p.id AS id, " + PESSOA_DESC_SELECT + " AS label "
                     + "FROM " + quote(PESSOA_TABLE) + " p "
                     + "LEFT JOIN " + quote("bas_pessoa_fisica") + " pf ON pf.id_pessoa = p.id "
                     + "LEFT JOIN " + quote("bas_pessoa_juridica") + " pj ON pj.id_pessoa = p.id "
                     + "ORDER BY 2";
         }
         if ("bas_usuario".equals(ref.table)) {
-            return "SELECT u.id, COALESCE((" + pessoaDescriptionSubquery("u.id_pessoa") + "), u.login) "
+            return "SELECT u.id AS id, COALESCE((" + pessoaDescriptionSubquery("u.id_pessoa") + "), u.login) AS label "
                     + "FROM " + quote("bas_usuario") + " u ORDER BY 2";
         }
         if ("edc_professor".equals(ref.table)) {
-            return "SELECT pr.id, (" + pessoaDescriptionSubquery("pr.id_pessoa") + ") "
+            return "SELECT pr.id AS id, (" + pessoaDescriptionSubquery("pr.id_pessoa") + ") AS label "
                     + "FROM " + quote("edc_professor") + " pr ORDER BY 2";
         }
         if ("bas_fornecedor".equals(ref.table)) {
-            return "SELECT f.id, (" + pessoaDescriptionSubquery("f.id_pessoa") + ") "
+            return "SELECT f.id AS id, (" + pessoaDescriptionSubquery("f.id_pessoa") + ") AS label "
                     + "FROM " + quote("bas_fornecedor") + " f ORDER BY 2";
         }
         if ("com_consultor".equals(ref.table)) {
-            return "SELECT c.id, "
+            return "SELECT c.id AS id, "
                     + "(SELECT COALESCE((" + pessoaDescriptionSubquery("u.id_pessoa") + "), u.login) "
-                    + " FROM " + quote("bas_usuario") + " u WHERE u.id = c.id_usuario) "
+                    + " FROM " + quote("bas_usuario") + " u WHERE u.id = c.id_usuario) AS label "
                     + "FROM " + quote("com_consultor") + " c ORDER BY 2";
         }
         if ("bas_telefone".equals(ref.table)) {
-            return "SELECT id, numero FROM " + quote("bas_telefone") + " ORDER BY 2";
+            return "SELECT id AS id, numero AS label FROM " + quote("bas_telefone") + " ORDER BY 2";
         }
         if ("edc_curriculo".equals(ref.table)) {
-            return "SELECT c.id, "
-                    + "COALESCE(NULLIF(cr.nome, ''), NULLIF(c.descricao, ''), NULLIF(c.sucinto, ''), NULLIF(c.sigla, '')) "
+            return "SELECT c.id AS id, "
+                    + "COALESCE(NULLIF(cr.nome, ''), NULLIF(c.descricao, ''), NULLIF(c.sucinto, ''), NULLIF(c.sigla, '')) AS label "
                     + "FROM " + quote("edc_curriculo") + " c "
                     + "LEFT JOIN " + quote("edc_curso") + " cr ON cr.id = c.id_curso "
                     + "ORDER BY 2";
         }
         if (ref.descCol == null) return null;
-        return "SELECT id, " + quote(ref.descCol) + " FROM " + quote(ref.table) + " ORDER BY 2";
+        return "SELECT id AS id, " + quote(ref.descCol) + " AS label FROM " + quote(ref.table) + " ORDER BY 2";
     }
 
     private Uni<PagedResponse<Map<String, Object>>> doPaged(Mutiny.Session session, String feature, String resource, int p, int s) {
@@ -598,14 +626,14 @@ private Uni<PagedResponse<Map<String, Object>>> doPagedCuratedWithFilters(Mutiny
                         String countSql = "SELECT count(*) FROM " + quote(table);
                         Uni<Long> total = session.createNativeQuery(countSql).getSingleResult()
                                 .map(r -> ((Number) r).longValue());
-                        Uni<List<Map<String, Object>>> rows = session.createNativeQuery(selectSql)
+                        Uni<List<Map<String, Object>>> rows = session.createNativeQuery(selectSql, Tuple.class)
                                 .setParameter("limit", s)
                                 .setParameter("offset", (long) p * s)
                                 .getResultList()
                                 .map(list -> list.stream().map(row -> {
-                                    Object[] arr = (Object[]) row;
+                                    Tuple t = (Tuple) row;
                                     Map<String, Object> m = new LinkedHashMap<>();
-                                    for (int i = 0; i < cols.size() && i < arr.length; i++) m.put(cols.get(i), arr[i]);
+                                    for (int i = 0; i < cols.size(); i++) m.put(cols.get(i), TupleHelper.get(t, cols.get(i)));
                                     return m;
                                 }).collect(Collectors.toList()))
                                 .flatMap(content -> enrichDescriptions(session, table, content));
@@ -947,7 +975,7 @@ private Uni<PagedResponse<Map<String, Object>>> doPagedCuratedWithFilters(Mutiny
                             .filter(e -> e.getValue() != null)
                             .toList();
                     if (updatable.isEmpty())
-                        return Uni.createFrom().failure(new NotFoundException("Nenhum campo atualizável para /" + table + "/" + id));
+                        return Uni.createFrom().failure(new NotFoundException("Nenhum campo atualiz�vel para /" + table + "/" + id));
                     String setClause = updatable.stream()
                             .map(e -> quote(e.getKey()) + " = :" + e.getKey())
                             .collect(Collectors.joining(", "));
@@ -955,7 +983,7 @@ private Uni<PagedResponse<Map<String, Object>>> doPagedCuratedWithFilters(Mutiny
                     Mutiny.Query<?> query = session.createNativeQuery(sql).setParameter("id", id);
                     for (Map.Entry<String, Object> e : updatable) query.setParameter(e.getKey(), e.getValue());
                     return query.getSingleResult()
-                            .onItem().ifNull().failWith(() -> new NotFoundException("Registro " + id + " não encontrado em " + table))
+                            .onItem().ifNull().failWith(() -> new NotFoundException("Registro " + id + " n�o encontrado em " + table))
                             .map(ignored -> {
                                 Map<String, Object> m = new LinkedHashMap<>();
                                 m.put("id", id);
@@ -965,22 +993,60 @@ private Uni<PagedResponse<Map<String, Object>>> doPagedCuratedWithFilters(Mutiny
                 }));
     }
 
+    /**
+     * SQLs executados antes do DELETE da tabela principal, na ordem informada.
+     * Necessario para tabelas com FK sem ON DELETE CASCADE.
+     */
+    private static List<String> cascadeBefore(String table) {
+        if ("com_meta_dinamica".equals(table)) {
+            return List.of(
+                    "DELETE FROM com_meta_dia_dinamica WHERE id_meta = :id",
+                    "DELETE FROM com_meta_dia_naoutil WHERE id_meta = :id",
+                    "DELETE FROM com_meta_semana WHERE id_meta_valor IN (SELECT id FROM com_meta_valor WHERE id_meta_dinamica = :id)",
+                    "DELETE FROM com_meta_valor WHERE id_meta_dinamica = :id");
+        }
+        if ("com_indicador_meta".equals(table)) {
+            return List.of(
+                    "DELETE FROM com_meta_semana WHERE id_meta_valor IN (SELECT id FROM com_meta_valor WHERE id_indicador_meta = :id)",
+                    "DELETE FROM com_meta_dia_dinamica WHERE id_meta_valor IN (SELECT id FROM com_meta_valor WHERE id_indicador_meta = :id)",
+                    "DELETE FROM com_meta_valor WHERE id_indicador_meta = :id");
+        }
+        if ("com_meta_valor".equals(table)) {
+            return List.of(
+                    "DELETE FROM com_meta_semana WHERE id_meta_valor = :id",
+                    "DELETE FROM com_meta_dia_dinamica WHERE id_meta_valor = :id");
+        }
+        if ("com_indicador".equals(table)) {
+            return List.of(
+                    "DELETE FROM com_meta_semana WHERE id_meta_valor IN (SELECT id FROM com_meta_valor WHERE id_indicador_meta IN (SELECT id FROM com_indicador_meta WHERE id_indicador = :id))",
+                    "DELETE FROM com_meta_dia_dinamica WHERE id_meta_valor IN (SELECT id FROM com_meta_valor WHERE id_indicador_meta IN (SELECT id FROM com_indicador_meta WHERE id_indicador = :id))",
+                    "DELETE FROM com_meta_valor WHERE id_indicador_meta IN (SELECT id FROM com_indicador_meta WHERE id_indicador = :id)",
+                    "DELETE FROM com_meta_dia_dinamica WHERE id_meta IN (SELECT id FROM com_meta_dinamica WHERE id_indicador = :id)",
+                    "DELETE FROM com_meta_dia_naoutil WHERE id_meta IN (SELECT id FROM com_meta_dinamica WHERE id_indicador = :id)",
+                    "DELETE FROM com_meta_dinamica WHERE id_indicador = :id",
+                    "DELETE FROM com_indicador_meta WHERE id_indicador = :id");
+        }
+        if ("cen_turno_trabalho".equals(table)) {
+            return List.of("DELETE FROM cen_turno_trabalho_unidade WHERE id_turno_trabalho = :id");
+        }
+        if ("rel_painel".equals(table)) {
+            return List.of(
+                    "DELETE FROM rel_painel_topico WHERE id_painel = :id",
+                    "DELETE FROM rel_painel_usuario WHERE id_painel = :id",
+                    "DELETE FROM rel_painel_unidade WHERE id_painel = :id",
+                    "DELETE FROM rel_painel_perfil WHERE id_painel = :id",
+                    "DELETE FROM rel_painel_filtro WHERE id_painel = :id");
+        }
+        return List.of();
+    }
+
     private Uni<Void> delete(String table, Long id) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> {
-                    // limpa join antes para cen_turno_trabalho e rel_painel (FK sem cascade)
-                    Uni<Integer> pre;
-                    if ("cen_turno_trabalho".equals(table)) {
-                        pre = session.createNativeQuery("DELETE FROM cen_turno_trabalho_unidade WHERE id_turno_trabalho = :id").setParameter("id", id).executeUpdate();
-                    } else if ("rel_painel".equals(table)) {
-                        Uni<Integer> top = session.createNativeQuery("DELETE FROM rel_painel_topico WHERE id_painel = :id").setParameter("id", id).executeUpdate();
-                        Uni<Integer> usu = session.createNativeQuery("DELETE FROM rel_painel_usuario WHERE id_painel = :id").setParameter("id", id).executeUpdate();
-                        Uni<Integer> uni = session.createNativeQuery("DELETE FROM rel_painel_unidade WHERE id_painel = :id").setParameter("id", id).executeUpdate();
-                        Uni<Integer> per = session.createNativeQuery("DELETE FROM rel_painel_perfil WHERE id_painel = :id").setParameter("id", id).executeUpdate();
-                        Uni<Integer> fil = session.createNativeQuery("DELETE FROM rel_filtro_painel WHERE id_painel = :id").setParameter("id", id).executeUpdate();
-                        pre = Uni.combine().all().unis(top, usu, uni, per, fil).asTuple().replaceWith(0);
-                    } else {
-                        pre = Uni.createFrom().item(0);
+                    // limpa dependentes antes (FK sem ON DELETE CASCADE)
+                    Uni<Integer> pre = Uni.createFrom().item(0);
+                    for (String sql : cascadeBefore(table)) {
+                        pre = pre.chain(() -> session.createNativeQuery(sql).setParameter("id", id).executeUpdate());
                     }
                     return pre.flatMap(v -> {
                         String sql = "DELETE FROM " + quote(table) + " WHERE id = :id";
@@ -997,12 +1063,12 @@ private Uni<PagedResponse<Map<String, Object>>> doPagedCuratedWithFilters(Mutiny
                 .chain(session -> columns(session, table).flatMap(cols -> {
                     if (cols.isEmpty()) return Uni.createFrom().failure(new NotFoundException("Nenhuma coluna encontrada para " + table));
                     String selectSql = "SELECT " + quoteColumns(cols) + " FROM " + quote(table) + " WHERE id = :id";
-                    return session.createNativeQuery(selectSql).setParameter("id", id).getSingleResultOrNull()
+                    return session.createNativeQuery(selectSql, Tuple.class).setParameter("id", id).getSingleResultOrNull()
                             .flatMap(row -> {
                                 if (row == null) return Uni.createFrom().failure(new NotFoundException("Registro " + id + " não encontrado em " + table));
-                                Object[] arr = (Object[]) row;
+                                Tuple t = (Tuple) row;
                                 Map<String, Object> m = new LinkedHashMap<>();
-                                for (int i = 0; i < cols.size() && i < arr.length; i++) m.put(cols.get(i), arr[i]);
+                                for (int i = 0; i < cols.size(); i++) m.put(cols.get(i), TupleHelper.get(t, cols.get(i)));
                                 return enrichDescriptions(session, table, List.of(m)).map(list -> list.get(0));
                             });
                 }));
@@ -1147,16 +1213,18 @@ private Uni<PagedResponse<Map<String, Object>>> doPagedCuratedWithFilters(Mutiny
         if (custom != null) {
             sql = custom;
         } else {
-            sql = "SELECT id, " + quote(ref.descCol) + " FROM " + quote(ref.table)
+            sql = "SELECT id AS id, " + quote(ref.descCol) + " AS descricao FROM " + quote(ref.table)
                     + " WHERE id IN (" + placeholders + ")";
         }
-        Mutiny.Query<?> query = session.createNativeQuery(sql);
+        Mutiny.SelectionQuery<Tuple> query = session.createNativeQuery(sql, Tuple.class);
         for (int i = 0; i < ids.size(); i++) query.setParameter("id" + i, ids.get(i));
         return query.getResultList().map(list -> {
             Map<String, String> result = new HashMap<>();
             for (Object row : list) {
-                Object[] arr = (Object[]) row;
-                result.put(String.valueOf(arr[0]), arr.length > 1 && arr[1] != null ? String.valueOf(arr[1]) : null);
+                Tuple t = (Tuple) row;
+                Object id = TupleHelper.get(t, "id");
+                Object desc = TupleHelper.get(t, "descricao");
+                result.put(String.valueOf(id), desc != null ? String.valueOf(desc) : null);
             }
             return result;
         });
@@ -1164,40 +1232,40 @@ private Uni<PagedResponse<Map<String, Object>>> doPagedCuratedWithFilters(Mutiny
 
     private String customDescriptionSql(String table, String placeholders) {
         if (PESSOA_TABLE.equals(table)) {
-            return "SELECT p.id, " + PESSOA_DESC_SELECT
+            return "SELECT p.id AS id, " + PESSOA_DESC_SELECT + " AS descricao "
                     + "FROM " + quote(PESSOA_TABLE) + " p "
                     + "LEFT JOIN " + quote("bas_pessoa_fisica") + " pf ON pf.id_pessoa = p.id "
                     + "LEFT JOIN " + quote("bas_pessoa_juridica") + " pj ON pj.id_pessoa = p.id "
                     + "WHERE p.id IN (" + placeholders + ")";
         }
         if ("bas_usuario".equals(table)) {
-            return "SELECT u.id, COALESCE((" + pessoaDescriptionSubquery("u.id_pessoa") + "), u.login) "
+            return "SELECT u.id AS id, COALESCE((" + pessoaDescriptionSubquery("u.id_pessoa") + "), u.login) AS descricao "
                     + "FROM " + quote("bas_usuario") + " u "
                     + "WHERE u.id IN (" + placeholders + ")";
         }
         if ("edc_professor".equals(table)) {
-            return "SELECT pr.id, (" + pessoaDescriptionSubquery("pr.id_pessoa") + ") "
+            return "SELECT pr.id AS id, (" + pessoaDescriptionSubquery("pr.id_pessoa") + ") AS descricao "
                     + "FROM " + quote("edc_professor") + " pr "
                     + "WHERE pr.id IN (" + placeholders + ")";
         }
         if ("bas_fornecedor".equals(table)) {
-            return "SELECT f.id, (" + pessoaDescriptionSubquery("f.id_pessoa") + ") "
+            return "SELECT f.id AS id, (" + pessoaDescriptionSubquery("f.id_pessoa") + ") AS descricao "
                     + "FROM " + quote("bas_fornecedor") + " f "
                     + "WHERE f.id IN (" + placeholders + ")";
         }
         if ("com_consultor".equals(table)) {
-            return "SELECT c.id, "
+            return "SELECT c.id AS id, "
                     + "(SELECT COALESCE((" + pessoaDescriptionSubquery("u.id_pessoa") + "), u.login) "
-                    + " FROM " + quote("bas_usuario") + " u WHERE u.id = c.id_usuario) "
+                    + " FROM " + quote("bas_usuario") + " u WHERE u.id = c.id_usuario) AS descricao "
                     + "FROM " + quote("com_consultor") + " c "
                     + "WHERE c.id IN (" + placeholders + ")";
         }
         if ("bas_telefone".equals(table)) {
-            return "SELECT id, numero FROM " + quote("bas_telefone") + " WHERE id IN (" + placeholders + ")";
+            return "SELECT id AS id, numero AS descricao FROM " + quote("bas_telefone") + " WHERE id IN (" + placeholders + ")";
         }
         if ("edc_curriculo".equals(table)) {
-            return "SELECT c.id, "
-                    + "COALESCE(NULLIF(cr.nome, ''), NULLIF(c.descricao, ''), NULLIF(c.sucinto, ''), NULLIF(c.sigla, '')) "
+            return "SELECT c.id AS id, "
+                    + "COALESCE(NULLIF(cr.nome, ''), NULLIF(c.descricao, ''), NULLIF(c.sucinto, ''), NULLIF(c.sigla, '')) AS descricao "
                     + "FROM " + quote("edc_curriculo") + " c "
                     + "LEFT JOIN " + quote("edc_curso") + " cr ON cr.id = c.id_curso "
                     + "WHERE c.id IN (" + placeholders + ")";

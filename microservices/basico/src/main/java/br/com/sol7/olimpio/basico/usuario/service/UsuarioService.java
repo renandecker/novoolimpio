@@ -18,6 +18,7 @@ import br.com.sol7.olimpio.basico.usuario.dto.UsuarioRequest;
 import br.com.sol7.olimpio.basico.usuario.dto.UsuarioResponse;
 import br.com.sol7.olimpio.basico.usuario.entity.Usuario;
 import br.com.sol7.olimpio.basico.usuario.repository.UsuarioRepository;
+import br.com.sol7.olimpio.basico.shared.notificacao.NotificacaoEventProducer;
 
 @ApplicationScoped
 @WithTransaction
@@ -27,6 +28,8 @@ public class UsuarioService {
     UsuarioRepository repository;
     @Inject
     PessoaRepository pessoaRepository;
+    @Inject
+    NotificacaoEventProducer notificacaoEventProducer;
     private static final Logger logger = LoggerFactory.getLogger(UsuarioService.class);
 
     public Uni<List<UsuarioResponse>> list() {
@@ -62,7 +65,12 @@ public class UsuarioService {
         var e = new Usuario();
         apply(e, r);
         logger.info("Creating usuario with login: {}", r.login());
-        return repository.persist(e).replaceWith(() -> toResponse(e));
+        return repository.persist(e)
+                .chain(persisted -> notificacaoEventProducer.enviar(r.login(), "USUARIO", "ALTERACAO_CADASTRO",
+                        "Cadastro criado: " + r.login(),
+                        "O cadastro do usuário '" + r.login() + "' foi criado.",
+                        "/view/configuracao/notificacoes-usuario")
+                        .replaceWith(() -> toResponse(persisted)));
     }
 
     public Uni<UsuarioResponse> update(Long id, UsuarioRequest r) {
@@ -70,7 +78,11 @@ public class UsuarioService {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Usuario not found"))
                 .invoke(e -> apply(e, r))
-                .map(this::toResponse);
+                .chain(e -> notificacaoEventProducer.enviar(r.login(), "USUARIO", "ALTERACAO_CADASTRO",
+                        "Cadastro alterado: " + r.login(),
+                        "O cadastro do usuário '" + r.login() + "' foi alterado.",
+                        "/view/configuracao/notificacoes-usuario")
+                        .replaceWith(() -> toResponse(e)));
     }
 
     public Uni<Void> delete(Long id) {

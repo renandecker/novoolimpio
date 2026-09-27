@@ -2,6 +2,8 @@ package br.com.sol7.olimpio.educacao.oferecimentocomponentecurricular;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.shared.TupleHelper;
+import jakarta.persistence.Tuple;
 import br.com.sol7.olimpio.educacao.componentecurricular.ComponenteCurricular;
 import br.com.sol7.olimpio.educacao.componentecurricular.ComponenteCurricularRepository;
 import br.com.sol7.olimpio.educacao.criterio.Criterio;
@@ -849,7 +851,7 @@ public class OferecimentoComponenteCurricularService {
     //     }
     public Uni<List<Long>> buscarMatrizCurricular(Long curriculoId) {
         return repository.buscarMatrizCurricular(curriculoId).map(list -> list.stream()
-                .map(x -> ((Number) ((Object[]) x)[0]).longValue())
+                .map(x -> TupleHelper.getLong((Tuple) x, "id"))
                 .toList());
     }
 

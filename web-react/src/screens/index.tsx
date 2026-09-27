@@ -100,7 +100,24 @@ export { default as ViewConfiguracaoListConfiguracaoListScreen } from '../featur
 export { default as ViewConfiguracaoListConfiguracaoMarketingListScreen } from '../features/configuracoes/configuracao/ViewConfiguracaoListConfiguracaoMarketingListScreen.tsx';
 export { default as ViewConfiguracaoListConfiguracaoParcelaListScreen } from '../features/configuracoes/configuracao/ViewConfiguracaoListConfiguracaoParcelaListScreen.tsx';
 export { default as ViewConfiguracaoListLayoutListScreen } from '../features/configuracoes/configuracao/ViewConfiguracaoListLayoutListScreen.tsx';
+export { default as ViewObraListObraListScreen } from '../features/configuracoes/biblioteca/obra/ViewObraListObraListScreen.tsx';
+export { default as ViewObraFormObraListScreen } from '../features/configuracoes/biblioteca/obra/ViewObraFormObraListScreen.tsx';
+export { default as ViewExemplarListExemplarListScreen } from '../features/configuracoes/biblioteca/exemplar/ViewExemplarListExemplarListScreen.tsx';
+export { default as ViewExemplarFormExemplarListScreen } from '../features/configuracoes/biblioteca/exemplar/ViewExemplarFormExemplarListScreen.tsx';
+export { default as ViewLivroDigitalListLivroDigitalListScreen } from '../features/configuracoes/biblioteca/livro-digital/ViewLivroDigitalListLivroDigitalListScreen.tsx';
+export { default as ViewLivroDigitalFormLivroDigitalListScreen } from '../features/configuracoes/biblioteca/livro-digital/ViewLivroDigitalFormLivroDigitalListScreen.tsx';
+export { default as ViewLicencaListLicencaListScreen } from '../features/configuracoes/biblioteca/licenca/ViewLicencaListLicencaListScreen.tsx';
+export { default as ViewLicencaFormLicencaListScreen } from '../features/configuracoes/biblioteca/licenca/ViewLicencaFormLicencaListScreen.tsx';
+export { default as ViewEmprestimoDigitalListEmprestimoDigitalListScreen } from '../features/configuracoes/biblioteca/emprestimo-digital/ViewEmprestimoDigitalListEmprestimoDigitalListScreen.tsx';
+export { default as ViewEmprestimoDigitalFormEmprestimoDigitalListScreen } from '../features/configuracoes/biblioteca/emprestimo-digital/ViewEmprestimoDigitalFormEmprestimoDigitalListScreen.tsx';
+export { default as ViewFilaEsperaListFilaEsperaListScreen } from '../features/configuracoes/biblioteca/fila-espera/ViewFilaEsperaListFilaEsperaListScreen.tsx';
+export { default as ViewFilaEsperaFormFilaEsperaListScreen } from '../features/configuracoes/biblioteca/fila-espera/ViewFilaEsperaFormFilaEsperaListScreen.tsx';
+export { default as ViewProvedorListProvedorListScreen } from '../features/configuracoes/biblioteca/provedor/ViewProvedorListProvedorListScreen.tsx';
+export { default as ViewProvedorFormProvedorListScreen } from '../features/configuracoes/biblioteca/provedor/ViewProvedorFormProvedorListScreen.tsx';
 export { default as ConfiguracaoNotificacoesScreen } from '../features/configuracoes/notificacoes/ConfiguracaoNotificacoesScreen.tsx';
+export { default as NotificacoesUsuarioScreen } from '../features/configuracoes/notificacoes/NotificacoesUsuarioScreen.tsx';
+export { default as NotificacoesAlunoScreen } from '../features/configuracoes/notificacoes/NotificacoesAlunoScreen.tsx';
+export { default as NotificacoesProfessorScreen } from '../features/configuracoes/notificacoes/NotificacoesProfessorScreen.tsx';
 export { default as ViewConsultorConsultorListScreen } from '../features/configuracoes/consultor/ViewConsultorConsultorListScreen.tsx';
 export { default as ViewConsultorFormConsultorListScreen } from '../features/configuracoes/consultor/ViewConsultorFormConsultorListScreen.tsx';
 
@@ -202,7 +219,6 @@ export { default as ViewMensagemNapListMensagemNapListScreen } from '../features
 export { default as ViewMenuListMapaMenuListScreen } from '../features/configuracoes/menu/ViewMenuListMapaMenuListScreen.tsx';
 export { default as ViewMetaFormMetaListScreen } from '../features/configuracoes/meta/ViewMetaFormMetaListScreen.tsx';
 export { default as ViewMetaFormMetaDinamicaListScreen } from '../features/configuracoes/meta/ViewMetaFormMetaDinamicaListScreen.tsx';
-export { default as ViewMetaIndicadorMetaDinamicaListScreen } from '../features/configuracoes/meta/ViewMetaIndicadorMetaDinamicaListScreen.tsx';
 export { default as ViewMetaListMetaDinamicaListScreen } from '../features/configuracoes/meta/ViewMetaListMetaDinamicaListScreen.tsx';
 export { default as ViewMetaListMetaListScreen } from '../features/configuracoes/meta/ViewMetaListMetaListScreen.tsx';
 export { default as ViewModuloFormModuloListScreen } from '../features/configuracoes/modulo/ViewModuloFormModuloListScreen.tsx';

@@ -81,6 +81,9 @@ ViewComunicacaoListComunicacaoListScreen,
     ViewConfiguracaoListConfiguracaoParcelaListScreen,
     ViewConfiguracaoListLayoutListScreen,
     ConfiguracaoNotificacoesScreen,
+    NotificacoesUsuarioScreen,
+    NotificacoesAlunoScreen,
+    NotificacoesProfessorScreen,
     ViewConfiguracaoDocumentosListScreen,
     ViewConsultorConsultorListScreen,
     ViewConsultorFormConsultorListScreen,
@@ -183,7 +186,6 @@ ViewComunicacaoListComunicacaoListScreen,
     ViewMenuListMapaMenuListScreen,
     ViewMetaFormMetaListScreen,
     ViewMetaFormMetaDinamicaListScreen,
-    ViewMetaIndicadorMetaDinamicaListScreen,
     ViewMetaListMetaListScreen,
     ViewMetaListMetaDinamicaListScreen,
     ViewModuloFormModuloListScreen,
@@ -496,7 +498,10 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/configuracao/listConfiguracaoParcela"
            element={<ViewConfiguracaoListConfiguracaoParcelaListScreen/>}/>
     <Route path="/view/configuracao/listLayout" element={<ViewConfiguracaoListLayoutListScreen/>}/>
-    <Route path="/view/configuracao/notificacoes" element={<ConfiguracaoNotificacoesScreen/>}/>
+     <Route path="/view/configuracao/notificacoes" element={<ConfiguracaoNotificacoesScreen/>}/>
+     <Route path="/view/configuracao/notificacoes-usuario" element={<NotificacoesUsuarioScreen/>}/>
+     <Route path="/view/configuracao/notificacoes-aluno" element={<NotificacoesAlunoScreen/>}/>
+     <Route path="/view/configuracao/notificacoes-professor" element={<NotificacoesProfessorScreen/>}/>
     <Route path="/view/configuracao/listDocumentos" element={<ViewConfiguracaoDocumentosListScreen/>}/>
     <Route path="/view/consultor/consultor" element={<ViewConsultorConsultorListScreen/>}/>
     <Route path="/view/consultor/formConsultor" element={<ViewConsultorFormConsultorListScreen/>}/>
@@ -579,6 +584,8 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/horarioPeriodo/listHorarioPeriodo" element={<ViewHorarioPeriodoListHorarioPeriodoListScreen/>}/>
     <Route path="/view/impressora/formImpressora" element={<ViewImpressoraFormImpressoraListScreen/>}/>
     <Route path="/view/impressora/listImpressora" element={<ViewImpressoraListImpressoraListScreen/>}/>
+    <Route path="/view/indicador/listIndicador" element={<ViewIndicadorListIndicadorListScreen/>}/>
+    <Route path="/view/indicador/formIndicador" element={<ViewIndicadorFormIndicadorListScreen/>}/>
     <Route path="/view/indicador/listIndicadorGauge" element={<ViewRelatoriosListIndicadorGaugeListScreen/>}/>
     <Route path="/view/indicador/formIndicadorGauge" element={<ViewRelatoriosFormIndicadorGaugeListScreen/>}/>
     <Route path="/view/indicador/formIndicadorGauge/:id" element={<ViewRelatoriosFormIndicadorGaugeListScreen/>}/>
@@ -610,7 +617,6 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/icones/listIcones" element={<IconesListScreen/>}/>
     <Route path="/view/meta/formMeta" element={<ViewMetaFormMetaListScreen/>}/>
     <Route path="/view/meta/formMetaDinamica" element={<ViewMetaFormMetaDinamicaListScreen/>}/>
-    <Route path="/view/meta/indicadorMetaDinamica" element={<ViewMetaIndicadorMetaDinamicaListScreen/>}/>
     <Route path="/view/meta/listMeta" element={<ViewMetaListMetaListScreen/>}/>
     <Route path="/view/meta/listMetaDinamica" element={<ViewMetaListMetaDinamicaListScreen/>}/>
     <Route path="/view/modulo/formModulo" element={<ViewModuloFormModuloListScreen/>}/>

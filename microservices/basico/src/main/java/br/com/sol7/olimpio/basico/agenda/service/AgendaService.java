@@ -19,12 +19,15 @@ import br.com.sol7.olimpio.basico.agenda.dto.AgendaRequest;
 import br.com.sol7.olimpio.basico.agenda.dto.AgendaResponse;
 import br.com.sol7.olimpio.basico.agenda.entity.Agenda;
 import br.com.sol7.olimpio.basico.agenda.repository.AgendaRepository;
+import br.com.sol7.olimpio.basico.shared.notificacao.NotificacaoEventProducer;
 
 @ApplicationScoped
 @WithTransaction
 public class AgendaService {
     @Inject
     AgendaRepository repository;
+    @Inject
+    NotificacaoEventProducer notificacaoEventProducer;
 
     public Uni<List<AgendaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -46,12 +49,23 @@ public class AgendaService {
         validateSpecificRules(request);
         var entity = new Agenda();
         apply(entity, request);
-        return repository.persist(entity).replaceWith(() -> toResponse(entity));
+        return repository.persist(entity)
+                .chain(persisted -> notificarAgenda("criada", toResponse(persisted))
+                        .replaceWith(() -> toResponse(persisted)));
     }
 
     public Uni<AgendaResponse> update(Long id, AgendaRequest request) {
         validateSpecificRules(request);
-        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Agenda nao encontrada")).invoke(entity -> apply(entity, request)).map(this::toResponse);
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Agenda nao encontrada")).invoke(entity -> apply(entity, request))
+                .chain(entity -> notificarAgenda("alterada", toResponse(entity))
+                        .replaceWith(() -> toResponse(entity)));
+    }
+
+    private Uni<Void> notificarAgenda(String acao, AgendaResponse resp) {
+        return notificacaoEventProducer.enviar(null, "AGENDA", "ALTERACAO_AGENDA",
+                "Agenda " + acao + ": " + resp.descricao(),
+                "A agenda '" + resp.descricao() + "' foi " + acao + ".",
+                "/view/configuracao/notificacoes-usuario");
     }
 
     public Uni<Void> delete(Long id) {

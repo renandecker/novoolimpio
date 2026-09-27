@@ -1,9 +1,11 @@
 package br.com.sol7.olimpio.asaas;
 
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.Tuple;
 import org.hibernate.reactive.mutiny.Mutiny;
 
 import java.util.Map;
@@ -25,17 +27,17 @@ public class FinBancoConfigService {
     public Uni<Map<String, String>> getConfiguracao(Long unidadeId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> {
-                    String sql = "SELECT chave, valor FROM fin_bancos "
+                    String sql = "SELECT chave AS chave, valor AS valor FROM fin_bancos "
                             + "WHERE id_unidade = :unidadeId AND provedor = 'ASAAS' AND fl_ativo = true";
-                    return session.createNativeQuery(sql)
+                    return session.createNativeQuery(sql, Tuple.class)
                             .setParameter("unidadeId", unidadeId)
                             .getResultList()
                             .map(list -> {
                                 Map<String, String> config = new ConcurrentHashMap<>();
-                                for (Object row : list) {
-                                    Object[] arr = (Object[]) row;
-                                    String chave = String.valueOf(arr[0]);
-                                    String valor = arr[1] != null ? String.valueOf(arr[1]) : "";
+                                for (Tuple row : list) {
+                                    String chave = TupleHelper.getString(row, "chave");
+                                    String valor = TupleHelper.getString(row, "valor");
+                                    if (valor == null) valor = "";
                                     config.put(chave, valor);
                                 }
                                 return config;

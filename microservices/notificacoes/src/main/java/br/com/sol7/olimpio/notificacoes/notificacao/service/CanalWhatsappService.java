@@ -1,10 +1,12 @@
 package br.com.sol7.olimpio.notificacoes.notificacao.service;
 
 import br.com.sol7.olimpio.notificacoes.notificacao.dto.NotificacaoMessage;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
@@ -61,18 +63,19 @@ public class CanalWhatsappService {
         }
         return Panache.getSession()
                 .chain(session -> session.createNativeQuery("""
-                        SELECT p.telefone
+                        SELECT p.telefone AS telefone
                         FROM bas_login l
                         LEFT JOIN bas_usuario u ON u.id = l.id_usuario
                         LEFT JOIN bas_pessoa p ON p.id = u.id_pessoa
                         WHERE lower(l.username) = lower(?1)
                         LIMIT 1
-                        """)
+                        """, Tuple.class)
                         .setParameter(1, username)
                         .getResultList())
                 .map(list -> {
                     if (!list.isEmpty() && list.get(0) != null) {
-                        return list.get(0).toString().trim();
+                        String tel = TupleHelper.getString(list.get(0), "telefone");
+                        return tel == null ? "" : tel.trim();
                     }
                     return "";
                 });

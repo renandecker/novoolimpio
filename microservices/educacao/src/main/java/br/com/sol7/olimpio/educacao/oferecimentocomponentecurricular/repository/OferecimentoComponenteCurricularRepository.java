@@ -16,13 +16,13 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     // Migrado de OferecimentoComponenteCurricularRepository.buscarMatrizCurricular (legado) - HQL original:
     // select m from MatrizCurricular m where m.curriculo = ?1 order by m.ordem
     public static final String SQL_BUSCAR_MATRIZ_CURRICULAR =
-            "SELECT m.* FROM edc_matriz_curricular m WHERE m.id_curriculo = ?1 ORDER BY m.ordem";
+            "SELECT m.id AS id FROM edc_matriz_curricular m WHERE m.id_curriculo = ?1 ORDER BY m.ordem";
 
     // Atencao: a query original seleciona 'MatrizCurricular', nao 'OferecimentoComponenteCurricular'.
     // Se 'MatrizCurricular' existir como entidade neste microsservico, troque Object por MatrizCurricular.class abaixo.
-    public Uni<java.util.List<Object>> buscarMatrizCurricular(Long curriculoId) {
+    public Uni<java.util.List<Tuple>> buscarMatrizCurricular(Long curriculoId) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_BUSCAR_MATRIZ_CURRICULAR)
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_MATRIZ_CURRICULAR, Tuple.class)
                         .setParameter(1, curriculoId)
                         .getResultList());
     }

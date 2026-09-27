@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Alert} from 'react-native';
+import {Alert} from '../../../shared/components/SweetAlert';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import {FormLayout, FormTabConfig} from '../FormLayout';
 import {api} from '../api';

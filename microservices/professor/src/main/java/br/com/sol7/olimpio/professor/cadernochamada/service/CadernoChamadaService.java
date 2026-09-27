@@ -13,11 +13,15 @@ import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
 
+import br.com.sol7.olimpio.professor.shared.notificacao.NotificacaoEventProducer;
+
 @ApplicationScoped
 @WithTransaction
 public class CadernoChamadaService {
     @Inject
     CadernoChamadaRepository repository;
+    @Inject
+    NotificacaoEventProducer notificacaoEventProducer;
 
     public Uni<List<CadernoChamadaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -38,11 +42,21 @@ public class CadernoChamadaService {
     public Uni<CadernoChamadaResponse> create(CadernoChamadaRequest r) {
         var e = new CadernoChamada();
         apply(e, r);
-        return repository.persist(e).replaceWith(() -> toResponse(e));
+        return repository.persist(e)
+                .chain(persisted -> notificacaoEventProducer.enviar(null, "ALUNO", "ALTERACAO_PRESENCA",
+                        "Presença registrada: " + persisted.nome,
+                        "Houve alteração de presença no caderno '" + persisted.nome + "'.",
+                        "/view/configuracao/notificacoes-aluno")
+                        .replaceWith(() -> toResponse(persisted)));
     }
 
     public Uni<CadernoChamadaResponse> update(Long id, CadernoChamadaRequest r) {
-        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("CadernoChamada not found")).invoke(e -> apply(e, r)).map(this::toResponse);
+        return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("CadernoChamada not found")).invoke(e -> apply(e, r))
+                .chain(e -> notificacaoEventProducer.enviar(null, "ALUNO", "ALTERACAO_PRESENCA",
+                        "Presença alterada: " + e.nome,
+                        "A presença do caderno '" + e.nome + "' foi alterada.",
+                        "/view/configuracao/notificacoes-aluno")
+                        .replaceWith(() -> toResponse(e)));
     }
 
     public Uni<Void> delete(Long id) {
