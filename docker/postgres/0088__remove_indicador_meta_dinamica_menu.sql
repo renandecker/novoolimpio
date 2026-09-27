@@ -1,7 +1,9 @@
--- V94: Remove o menu "Indicador Meta Dinâmica" (/view/meta/indicadorMetaDinamica).
+-- 0088__remove_indicador_meta_dinamica_menu.sql
+-- Remove o menu "Indicador Meta Dinâmica" (/view/meta/indicadorMetaDinamica).
 -- A tela foi descontinuada: o CRUD de com_indicador_meta agora é feito no painel
 -- "Metas" do cadastro de Indicador (/view/indicador/formIndicador) e a lista de
 -- metas dinâmicas em /view/meta/listMetaDinamica.
+-- Espelha microservices/login V94.
 -- Idempotente: pode rodar mais de uma vez.
 
 BEGIN;
