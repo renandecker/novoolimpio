@@ -52,7 +52,7 @@ services:
     image: postgres:16-alpine
     container_name: olimpio-postgres
     restart: unless-stopped
-    command: postgres -c max_wal_size=2GB -c checkpoint_timeout=15min -c max_connections=300
+    command: postgres -c max_wal_size=2GB -c checkpoint_timeout=15min -c max_connections=500
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -89,10 +89,13 @@ services:
         until pg_isready -h postgres -U postgres; do sleep 1; done
         echo "[restore] Restaurando olimpio.sql no banco 'olimpio'..."
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -c "DROP DATABASE IF EXISTS olimpio WITH (FORCE);"
+        sleep 1
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -c "CREATE DATABASE olimpio;"
+        sleep 1
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/olimpio.sql
         echo "[restore] Aplicando migracoes..."
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/002_create_bas_login.sql
+        sleep 1
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/003__temas.sql
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/004__admin_login.sql
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/005__admin_acesso_total.sql
@@ -609,6 +612,7 @@ services:
       QUARKUS_DATASOURCE_BIBLIOTECA_VIRTUAL_MAX_SIZE: "12"
       QUARKUS_DATASOURCE_BIBLIOTECA_VIRTUAL_MIN_SIZE: "2"
       MP_MESSAGING_OUTGOING_EMPRESTIMO_DIGITAL_CONNECTOR_CONNECTOR: smallrye-rabbitmq
+      MP_MESSAGING_OUTGOING_EMPRESTIMO_CONNECTOR: smallrye-rabbitmq
     ports:
     - "8099:8099"
     healthcheck:
