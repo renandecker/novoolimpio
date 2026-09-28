@@ -3,6 +3,9 @@ import {PermissionGate} from '../../shared/services/permissions';
 import {DataTable} from '../../shared/components/DataTable';
 import {MasterDetail} from '../../shared/components/MasterDetail';
 import {Tabs} from '../../shared/components/Tabs';
+import {PerfilCombo} from '../../shared/components/PerfilCombo';
+import {AgendaCombo} from '../../shared/components/AgendaCombo';
+import type {AutoCompleteOption} from '../../shared/components/AutoComplete';
 import {
     UNIDADE_SOURCE,
     UNIDADE_COLUMNS,
@@ -44,6 +47,8 @@ export default function ViewComunicacaoFormComunicacaoListScreen() {
     const [componentes, setComponentes] = useState<ApiItem[]>([]);
     const [cursos, setCursos] = useState<ApiItem[]>([]);
     const [grupos, setGrupos] = useState<ApiItem[]>([]);
+    const [perfilSelected, setPerfilSelected] = useState<AutoCompleteOption | null>(null);
+    const [agendaSelected, setAgendaSelected] = useState<AutoCompleteOption | null>(null);
 
     return (
         <PermissionGate permission="READ">
@@ -79,30 +84,64 @@ export default function ViewComunicacaoFormComunicacaoListScreen() {
                                     key: 'agenda',
                                     label: 'Agenda',
                                     content: (
-                                        <MasterDetail
-                                            label="Agenda"
-                                            source={AGENDA_SOURCE}
-                                            valueKey="id"
-                                            searchKeys={AGENDA_SEARCH}
-                                            columns={AGENDA_COLUMNS}
-                                            items={agendas}
-                                            onChange={setAgendas}
-                                        />
+                                        <div className="form-grid">
+                                            <div style={{gridColumn: '1 / -1'}}>
+                                                <AgendaCombo
+                                                    label="Agenda"
+                                                    value={agendaSelected}
+                                                    onChange={setAgendaSelected}
+                                                    onAdd={(opt) => {
+                                                        if (opt) {
+                                                            setAgendas([...agendas, {id: opt.id, descricao: opt.label} as ApiItem]);
+                                                            setAgendaSelected(null);
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                            <div style={{gridColumn: '1 / -1', marginTop: 12}}>
+                                                <MasterDetail
+                                                    label="Agendas Selecionadas"
+                                                    source={AGENDA_SOURCE}
+                                                    valueKey="id"
+                                                    searchKeys={AGENDA_SEARCH}
+                                                    columns={AGENDA_COLUMNS}
+                                                    items={agendas}
+                                                    onChange={setAgendas}
+                                                />
+                                            </div>
+                                        </div>
                                     ),
                                 },
                                 {
                                     key: 'perfil',
                                     label: 'Perfil',
                                     content: (
-                                        <MasterDetail
-                                            label="Perfil"
-                                            source={PERFIL_SOURCE}
-                                            valueKey="id"
-                                            searchKeys={PERFIL_SEARCH}
-                                            columns={PERFIL_COLUMNS}
-                                            items={perfils}
-                                            onChange={setPerfils}
-                                        />
+                                        <div className="form-grid">
+                                            <div style={{gridColumn: '1 / -1'}}>
+                                                <PerfilCombo
+                                                    label="Perfil"
+                                                    value={perfilSelected}
+                                                    onChange={setPerfilSelected}
+                                                    onAdd={(opt) => {
+                                                        if (opt) {
+                                                            setPerfils([...perfils, {id: opt.id, descricao: opt.label} as ApiItem]);
+                                                            setPerfilSelected(null);
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                            <div style={{gridColumn: '1 / -1', marginTop: 12}}>
+                                                <MasterDetail
+                                                    label="Perfis Selecionados"
+                                                    source={PERFIL_SOURCE}
+                                                    valueKey="id"
+                                                    searchKeys={PERFIL_SEARCH}
+                                                    columns={PERFIL_COLUMNS}
+                                                    items={perfils}
+                                                    onChange={setPerfils}
+                                                />
+                                            </div>
+                                        </div>
                                     ),
                                 },
                                 {

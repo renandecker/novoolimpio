@@ -8,6 +8,8 @@ import {MasterDetail} from '../../../shared/components/MasterDetail';
 
 import {UnidadeCombo} from '../../../shared/components/UnidadeCombo';
 
+import {PerfilCombo} from '../../../shared/components/PerfilCombo';
+
 import {Tabs} from '../../../shared/components/Tabs';
 
 import {BooleanField} from '../../../shared/components/BooleanField';
@@ -19,6 +21,8 @@ import {API_PATHS} from '../../../shared/services/apiPaths';
 import {useModulePaged} from '../../../shared/hooks/useModulePaged';
 
 import type {ApiItem} from '../../../shared/types/types.ts';
+
+import type {AutoCompleteOption} from '../../../shared/components/AutoComplete';
 
 
 
@@ -157,6 +161,8 @@ export default function CurriculoVagaListScreen() {
     const [editItem, setEditItem] = useState<ApiItem | null>(null);
 
     const [formData, setFormData] = useState<VagaFormData>(getEmptyFormData());
+
+    const [perfilSelected, setPerfilSelected] = useState<AutoCompleteOption | null>(null);
 
     const [activeTab, setActiveTab] = useState('geral');
 
@@ -602,7 +608,26 @@ export default function CurriculoVagaListScreen() {
 
                 {key: 'unidades', label: 'Unidade', content: <UnidadeCombo label="Unidade" value={formData.unidade} onChange={opt => updateField('unidade', opt)} />},
 
-                {key: 'perfis', label: 'Perfis', content: <MasterDetail label="Perfil" source={PERFIL_SOURCE} valueKey="id" searchKeys={PERFIL_SEARCH} columns={PERFIL_COLUMNS} items={formData.perfis} onChange={items => updateField('perfis', items)} />},
+                {key: 'perfis', label: 'Perfis', content: (
+                    <div className="form-grid">
+                        <div style={{gridColumn: '1 / -1'}}>
+                            <PerfilCombo
+                                label="Perfil"
+                                value={perfilSelected}
+                                onChange={setPerfilSelected}
+                                onAdd={(opt) => {
+                                    if (opt) {
+                                        updateField('perfis', [...formData.perfis, {id: opt.id, descricao: opt.label} as ApiItem]);
+                                        setPerfilSelected(null);
+                                    }
+                                }}
+                            />
+                        </div>
+                        <div style={{gridColumn: '1 / -1', marginTop: 12}}>
+                            <MasterDetail label="Perfis Selecionados" source={PERFIL_SOURCE} valueKey="id" searchKeys={PERFIL_SEARCH} columns={PERFIL_COLUMNS} items={formData.perfis} onChange={items => updateField('perfis', items)} />
+                        </div>
+                    </div>
+                )},
 
                 {key: 'empresas', label: 'Empresas', content: <MasterDetail label="Empresa" source="/api/curriculo/empresa" valueKey="id" searchKeys={['pessoa_nomeFantasia', 'pessoa_razaoSocial', 'pessoa_cnpj']} columns={[{key: 'pessoa_nomeFantasia', label: 'Nome Fantasia'}, {key: 'pessoa_razaoSocial', label: 'Razão Social'}, {key: 'pessoa_cnpj', label: 'CNPJ'}]} items={formData.empresas} onChange={items => updateField('empresas', items)} />},
 

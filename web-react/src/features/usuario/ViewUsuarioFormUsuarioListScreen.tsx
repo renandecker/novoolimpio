@@ -6,6 +6,8 @@ import {Tabs} from '../../shared/components/Tabs';
 import {MasterDetail} from '../../shared/components/MasterDetail';
 import {BooleanField} from '../../shared/components/BooleanField';
 import {AutoComplete, AutoCompleteOption} from '../../shared/components/AutoComplete';
+import {PerfilCombo} from '../../shared/components/PerfilCombo';
+import {AgendaCombo} from '../../shared/components/AgendaCombo';
 import type {ApiItem} from '../../shared/types/index';
 
 function formatCep(v: string){ const d=v.replace(/\D/g,'').slice(0,8); if(d.length<=5) return d; return `${d.slice(0,5)}-${d.slice(5)}`; }
@@ -215,6 +217,8 @@ export default function ViewUsuarioFormUsuarioListScreen(){
     const [unidadeDefaultId,setUnidadeDefaultId]=useState('');
     const [perfis,setPerfis]=useState<ApiItem[]>([]);
     const [agendas,setAgendas]=useState<ApiItem[]>([]);
+    const [perfilSelected,setPerfilSelected]=useState<AutoCompleteOption | null>(null);
+    const [agendaSelected,setAgendaSelected]=useState<AutoCompleteOption | null>(null);
     // agenda permissões (aplica ao conjunto selecionado – simplificado)
     const [agendaPerm,setAgendaPerm]=useState({agendar:false, alterar:false, fechar:false, iniciar:false, atender:false});
 
@@ -571,8 +575,21 @@ export default function ViewUsuarioFormUsuarioListScreen(){
             content:(
                 <div className="form-grid">
                     <div style={{gridColumn: '1 / -1'}}>
-                        <MasterDetail
+                        <PerfilCombo
                             label="Perfil"
+                            value={perfilSelected}
+                            onChange={setPerfilSelected}
+                            onAdd={(opt) => {
+                                if (opt) {
+                                    setPerfis([...perfis, {id: opt.id, descricao: opt.label} as ApiItem]);
+                                    setPerfilSelected(null);
+                                }
+                            }}
+                        />
+                    </div>
+                    <div style={{gridColumn: '1 / -1', marginTop: 12}}>
+                        <MasterDetail
+                            label="Perfis Selecionados"
                             source={PERFIL_SOURCE}
                             valueKey="id"
                             searchKeys={PERFIL_SEARCH}
@@ -588,6 +605,19 @@ export default function ViewUsuarioFormUsuarioListScreen(){
             key:'agenda', label:'Agenda',
             content:(
                 <div className="form-grid">
+                    <div style={{gridColumn: '1 / -1'}}>
+                        <AgendaCombo
+                            label="Agenda"
+                            value={agendaSelected}
+                            onChange={setAgendaSelected}
+                            onAdd={(opt) => {
+                                if (opt) {
+                                    setAgendas([...agendas, {id: opt.id, descricao: opt.label} as ApiItem]);
+                                    setAgendaSelected(null);
+                                }
+                            }}
+                        />
+                    </div>
                     <div style={{gridColumn: '1 / -1', marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10}}>
                         <label className="form-field"><span className="form-label">Agendar</span><BooleanField value={agendaPerm.agendar} onChange={v => setAgendaPerm(p => ({...p, agendar: v}))} /></label>
                         <label className="form-field"><span className="form-label">Alterar</span><BooleanField value={agendaPerm.alterar} onChange={v => setAgendaPerm(p => ({...p, alterar: v}))} /></label>
@@ -598,7 +628,7 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                     <div style={{gridColumn: '1 / -1', marginTop: 4, fontSize: 11, color: '#777'}}>Permissões aplicadas às agendas selecionadas (tabela bas_usuario_agenda).</div>
                     <div style={{gridColumn: '1 / -1', marginTop: 8}}>
                         <MasterDetail
-                            label="Agenda"
+                            label="Agendas Selecionadas"
                             source={AGENDA_SOURCE}
                             valueKey="id"
                             searchKeys={AGENDA_SEARCH}

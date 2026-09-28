@@ -12,11 +12,17 @@ import {BooleanField} from '../../../shared/components/BooleanField';
 
 import {Tabs} from '../../../shared/components/Tabs';
 
+import {PerfilCombo} from '../../../shared/components/PerfilCombo';
+
+import {AgendaCombo} from '../../../shared/components/AgendaCombo';
+
+import type {AutoCompleteOption} from '../../../shared/components/AutoComplete';
+
 import type {ApiItem} from '../../../shared/types/types.ts';
 
 import {api} from '../../../shared/services/api';
 
-import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH, AGENDA_SOURCE, AGENDA_COLUMNS, AGENDA_SEARCH} from '../../../shared/services/masterDetailSources';
+import {UNIDADE_SOURCE, UNIDADE_COLUMNS, UNIDADE_SEARCH, AGENDA_SOURCE, AGENDA_COLUMNS, AGENDA_SEARCH, PERFIL_SOURCE, PERFIL_COLUMNS, PERFIL_SEARCH} from '../../../shared/services/masterDetailSources';
 
 import {EnderecoCampos} from '../../../shared/components/EnderecoForm';
 
@@ -211,6 +217,10 @@ export default function CadastroUsuarioScreen() {
     const [perfis, setPerfis] = useState<Perfil[]>([]);
 
     const [agendas, setAgendas] = useState<Agenda[]>([]);
+
+    const [perfilSelected, setPerfilSelected] = useState<AutoCompleteOption | null>(null);
+
+    const [agendaSelected, setAgendaSelected] = useState<AutoCompleteOption | null>(null);
 
 
 
@@ -2010,9 +2020,25 @@ export default function CadastroUsuarioScreen() {
 
                     <div style={{gridColumn: '1 / -1'}}>
 
+                        <PerfilCombo
+                            label="Perfil"
+                            value={perfilSelected}
+                            onChange={setPerfilSelected}
+                            onAdd={(opt) => {
+                                if (opt) {
+                                    setPerfis([...perfis, {id: opt.id, descricao: opt.label} as Perfil]);
+                                    setPerfilSelected(null);
+                                }
+                            }}
+                        />
+
+                    </div>
+
+                    <div style={{gridColumn: '1 / -1', marginTop: 12}}>
+
                         <MasterDetail
 
-                            label="Perfil"
+                            label="Perfis Selecionados"
 
                             source="/api/basico/perfil"
 
@@ -2042,9 +2068,25 @@ export default function CadastroUsuarioScreen() {
 
                     <div style={{gridColumn: '1 / -1'}}>
 
+                        <AgendaCombo
+                            label="Agenda"
+                            value={agendaSelected}
+                            onChange={setAgendaSelected}
+                            onAdd={(opt) => {
+                                if (opt) {
+                                    setAgendas([...agendas, {id: opt.id, descricao: opt.label} as Agenda]);
+                                    setAgendaSelected(null);
+                                }
+                            }}
+                        />
+
+                    </div>
+
+                    <div style={{gridColumn: '1 / -1', marginTop: 12}}>
+
                         <MasterDetail
 
-                            label="Agenda"
+                            label="Agendas Selecionadas"
 
                             source={AGENDA_SOURCE}
 

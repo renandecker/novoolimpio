@@ -3,6 +3,9 @@ import {ScrollView, StyleSheet, Text, TextInput, View, Pressable, Image, Platfor
 import {Alert} from '../../shared/components/SweetAlert';
 import {useQuery} from '@tanstack/react-query';
 import {MasterDetail} from '../MasterDetail';
+import {PerfilCombo} from '../shared/components/PerfilCombo';
+import {AgendaCombo} from '../shared/components/AgendaCombo';
+import type {AutoCompleteOption} from '../shared/components/AutoComplete';
 import {Colors, Spacing, BorderRadius, Typography, Shadows} from '../theme';
 import {api} from '../api';
 import type {ApiItem} from '../types';
@@ -182,6 +185,8 @@ export default function ViewUsuarioFormUsuarioListScreen({route}: {route?: any})
     const [unidadeDefaultId,setUnidadeDefaultId]=useState('');
     const [perfis,setPerfis]=useState<ApiItem[]>([]);
     const [agendas,setAgendas]=useState<ApiItem[]>([]);
+    const [perfilSelected,setPerfilSelected]=useState<AutoCompleteOption | null>(null);
+    const [agendaSelected,setAgendaSelected]=useState<AutoCompleteOption | null>(null);
     const [agendaPerm,setAgendaPerm]=useState({agendar:false,alterar:false,fechar:false,iniciar:false,atender:false});
 
     const {data:allUnidades=[]}=useQuery({queryKey:[UNIDADE_SOURCE], queryFn:async()=>(await api.get<ApiItem[]>(UNIDADE_SOURCE)).data});
@@ -490,10 +495,34 @@ export default function ViewUsuarioFormUsuarioListScreen({route}: {route?: any})
                             </View>
                         )}
                         {acessoSub==='perfil' && (
-                            <MasterDetail label="Perfil" source={PERFIL_SOURCE} valueKey="id" searchKeys={PERFIL_SEARCH} columns={PERFIL_COLUMNS} items={perfis} onChange={setPerfis}/>
+                            <View style={{gap: 12}}>
+                                <PerfilCombo
+                                    label="Perfil"
+                                    value={perfilSelected}
+                                    onChange={setPerfilSelected}
+                                    onAdd={(opt) => {
+                                        if (opt) {
+                                            setPerfis([...perfis, {id: opt.id, descricao: opt.label} as ApiItem]);
+                                            setPerfilSelected(null);
+                                        }
+                                    }}
+                                />
+                                <MasterDetail label="Perfis Selecionados" source={PERFIL_SOURCE} valueKey="id" searchKeys={PERFIL_SEARCH} columns={PERFIL_COLUMNS} items={perfis} onChange={setPerfis}/>
+                            </View>
                         )}
                         {acessoSub==='agenda' && (
-                            <View>
+                            <View style={{gap: 12}}>
+                                <AgendaCombo
+                                    label="Agenda"
+                                    value={agendaSelected}
+                                    onChange={setAgendaSelected}
+                                    onAdd={(opt) => {
+                                        if (opt) {
+                                            setAgendas([...agendas, {id: opt.id, descricao: opt.label} as ApiItem]);
+                                            setAgendaSelected(null);
+                                        }
+                                    }}
+                                />
                                 <View style={{marginBottom:12, gap:8}}>
                                     <Toggle label="Agendar" value={agendaPerm.agendar} onChange={v=>setAgendaPerm(p=>({...p,agendar:v}))}/>
                                     <Toggle label="Alterar" value={agendaPerm.alterar} onChange={v=>setAgendaPerm(p=>({...p,alterar:v}))}/>
@@ -502,7 +531,7 @@ export default function ViewUsuarioFormUsuarioListScreen({route}: {route?: any})
                                     <Toggle label="Atender" value={agendaPerm.atender} onChange={v=>setAgendaPerm(p=>({...p,atender:v}))}/>
                                 </View>
                                 <Text style={[s.hint, {marginBottom:8}]}>Permissões aplicadas às agendas selecionadas (bas_usuario_agenda).</Text>
-                                <MasterDetail label="Agenda" source={AGENDA_SOURCE} valueKey="id" searchKeys={AGENDA_SEARCH} columns={AGENDA_COLUMNS} items={agendas} onChange={setAgendas}/>
+                                <MasterDetail label="Agendas Selecionadas" source={AGENDA_SOURCE} valueKey="id" searchKeys={AGENDA_SEARCH} columns={AGENDA_COLUMNS} items={agendas} onChange={setAgendas}/>
                             </View>
                         )}
                     </View>

@@ -1,8 +1,11 @@
 import React, {useState} from 'react';
 import {ScrollView, StyleSheet, Text, View, Pressable} from 'react-native';
 import {MasterDetail} from '../MasterDetail';
+import {PerfilCombo} from '../shared/components/PerfilCombo';
+import {AgendaCombo} from '../shared/components/AgendaCombo';
 import {Colors, Spacing, BorderRadius, Typography, Shadows} from '../theme';
 import type {ApiItem} from '../types';
+import type {AutoCompleteOption} from '../shared/components/AutoComplete';
 import {
     TURNO_TRABALHO_SOURCE, TURNO_TRABALHO_COLUMNS, TURNO_TRABALHO_SEARCH,
     PERFIL_SOURCE, PERFIL_COLUMNS, PERFIL_SEARCH,
@@ -21,6 +24,8 @@ export default function ViewUsuarioCamposUsuarioTabViewListScreen(){
     const [perfis,setPerfis]=useState<ApiItem[]>([]);
     const [agendas,setAgendas]=useState<ApiItem[]>([]);
     const [unidades,setUnidades]=useState<ApiItem[]>([]);
+    const [perfilSelected,setPerfilSelected]=useState<AutoCompleteOption | null>(null);
+    const [agendaSelected,setAgendaSelected]=useState<AutoCompleteOption | null>(null);
 
     const tabs: Array<{key: typeof active; label:string}> = [
         {key:'pessoal', label:'Pessoal'},
@@ -98,8 +103,38 @@ export default function ViewUsuarioCamposUsuarioTabViewListScreen(){
                             ))}
                         </View>
                         {acessoSub==='unidade' && <MasterDetail label="Unidade" source={UNIDADE_SOURCE} valueKey="id" searchKeys={UNIDADE_SEARCH} columns={UNIDADE_COLUMNS} items={unidades} onChange={setUnidades}/>}
-                        {acessoSub==='perfil' && <MasterDetail label="Perfil" source={PERFIL_SOURCE} valueKey="id" searchKeys={PERFIL_SEARCH} columns={PERFIL_COLUMNS} items={perfis} onChange={setPerfis}/>}
-                        {acessoSub==='agenda' && <MasterDetail label="Agenda" source={AGENDA_SOURCE} valueKey="id" searchKeys={AGENDA_SEARCH} columns={AGENDA_COLUMNS} items={agendas} onChange={setAgendas}/>}
+                        {acessoSub==='perfil' && (
+                            <View style={{gap: 12}}>
+                                <PerfilCombo
+                                    label="Perfil"
+                                    value={perfilSelected}
+                                    onChange={setPerfilSelected}
+                                    onAdd={(opt) => {
+                                        if (opt) {
+                                            setPerfis([...perfis, {id: opt.id, descricao: opt.label} as ApiItem]);
+                                            setPerfilSelected(null);
+                                        }
+                                    }}
+                                />
+                                <MasterDetail label="Perfis Selecionados" source={PERFIL_SOURCE} valueKey="id" searchKeys={PERFIL_SEARCH} columns={PERFIL_COLUMNS} items={perfis} onChange={setPerfis}/>
+                            </View>
+                        )}
+                        {acessoSub==='agenda' && (
+                            <View style={{gap: 12}}>
+                                <AgendaCombo
+                                    label="Agenda"
+                                    value={agendaSelected}
+                                    onChange={setAgendaSelected}
+                                    onAdd={(opt) => {
+                                        if (opt) {
+                                            setAgendas([...agendas, {id: opt.id, descricao: opt.label} as ApiItem]);
+                                            setAgendaSelected(null);
+                                        }
+                                    }}
+                                />
+                                <MasterDetail label="Agendas Selecionadas" source={AGENDA_SOURCE} valueKey="id" searchKeys={AGENDA_SEARCH} columns={AGENDA_COLUMNS} items={agendas} onChange={setAgendas}/>
+                            </View>
+                        )}
                     </View>
                 )}
             </ScrollView>
