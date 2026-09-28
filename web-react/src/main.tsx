@@ -358,6 +358,8 @@ ViewComunicacaoListComunicacaoListScreen,
     CurriculumAttachmentModal,
     AlunoDashboardScreen,
     AlunoBoletimScreen,
+    AlunoBibliotecaFisicaScreen,
+    AlunoBibliotecaVirtualScreen,
     AlunoFrequenciaScreen,
     AlunoFinanceiroScreen,
     AlunoAulasScreen,
@@ -398,6 +400,8 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
                                                                                          element={
                                                                                              <ViewTemaListTemasListScreen/>}/>
     <Route path="/aluno/portalAluno" element={<AlunoDashboardScreen/>}/>
+    <Route path="/aluno/biblioteca-fisica" element={<AlunoBibliotecaFisicaScreen/>}/>
+    <Route path="/aluno/biblioteca-virtual" element={<AlunoBibliotecaVirtualScreen/>}/>
     <Route path="/aluno/boletim" element={<AlunoBoletimScreen/>}/>
     <Route path="/aluno/frequencia" element={<AlunoFrequenciaScreen/>}/>
     <Route path="/aluno/financeiro" element={<AlunoFinanceiroScreen/>}/>

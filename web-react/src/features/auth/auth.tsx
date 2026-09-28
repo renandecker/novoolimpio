@@ -20,7 +20,7 @@ export type
 }
 ;
 const KEY = 'olimpio.session';
-const MENU_KEY = 'olimpio.menu.v4';
+const MENU_KEY = 'olimpio.menu.v5';
 const MENU_TTL = 24 * 60 * 60 * 1000;
 type MenuCache = { at: number; modules: Module[] };
 

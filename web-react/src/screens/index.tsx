@@ -4,6 +4,8 @@ export { default as AlunoAulasTurmaScreen } from '../features/configuracoes/alun
 export { default as AlunoAvaliacaoResponderScreen } from '../features/configuracoes/aluno/AlunoAvaliacaoResponderScreen.tsx';
 export { default as AlunoAvaliacoesScreen } from '../features/configuracoes/aluno/AlunoAvaliacoesScreen.tsx';
 export { default as AlunoBoletimScreen } from '../features/configuracoes/aluno/AlunoBoletimScreen.tsx';
+export { default as AlunoBibliotecaFisicaScreen } from '../features/configuracoes/aluno/AlunoBibliotecaFisicaScreen.tsx';
+export { default as AlunoBibliotecaVirtualScreen } from '../features/configuracoes/aluno/AlunoBibliotecaVirtualScreen.tsx';
 export { default as AlunoDashboardScreen } from '../features/configuracoes/aluno/AlunoDashboardScreen.tsx';
 export { default as AlunoFinanceiroScreen } from '../features/configuracoes/aluno/AlunoFinanceiroScreen.tsx';
 export { default as AlunoFrequenciaScreen } from '../features/configuracoes/aluno/AlunoFrequenciaScreen.tsx';

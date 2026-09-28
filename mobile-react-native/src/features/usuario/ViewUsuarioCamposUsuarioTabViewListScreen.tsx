@@ -104,36 +104,30 @@ export default function ViewUsuarioCamposUsuarioTabViewListScreen(){
                         </View>
                         {acessoSub==='unidade' && <MasterDetail label="Unidade" source={UNIDADE_SOURCE} valueKey="id" searchKeys={UNIDADE_SEARCH} columns={UNIDADE_COLUMNS} items={unidades} onChange={setUnidades}/>}
                         {acessoSub==='perfil' && (
-                            <View style={{gap: 12}}>
-                                <PerfilCombo
-                                    label="Perfil"
-                                    value={perfilSelected}
-                                    onChange={setPerfilSelected}
-                                    onAdd={(opt) => {
-                                        if (opt) {
-                                            setPerfis([...perfis, {id: opt.id, descricao: opt.label} as ApiItem]);
-                                            setPerfilSelected(null);
-                                        }
-                                    }}
-                                />
-                                <MasterDetail label="Perfis Selecionados" source={PERFIL_SOURCE} valueKey="id" searchKeys={PERFIL_SEARCH} columns={PERFIL_COLUMNS} items={perfis} onChange={setPerfis}/>
-                            </View>
+                            <PerfilCombo
+                                label="Perfil"
+                                value={perfilSelected}
+                                onChange={setPerfilSelected}
+                                onAdd={(opt) => {
+                                    if (opt) {
+                                        setPerfis([...perfis, {id: opt.id, descricao: opt.label} as ApiItem]);
+                                        setPerfilSelected(null);
+                                    }
+                                }}
+                            />
                         )}
                         {acessoSub==='agenda' && (
-                            <View style={{gap: 12}}>
-                                <AgendaCombo
-                                    label="Agenda"
-                                    value={agendaSelected}
-                                    onChange={setAgendaSelected}
-                                    onAdd={(opt) => {
-                                        if (opt) {
-                                            setAgendas([...agendas, {id: opt.id, descricao: opt.label} as ApiItem]);
-                                            setAgendaSelected(null);
-                                        }
-                                    }}
-                                />
-                                <MasterDetail label="Agendas Selecionadas" source={AGENDA_SOURCE} valueKey="id" searchKeys={AGENDA_SEARCH} columns={AGENDA_COLUMNS} items={agendas} onChange={setAgendas}/>
-                            </View>
+                            <AgendaCombo
+                                label="Agenda"
+                                value={agendaSelected}
+                                onChange={setAgendaSelected}
+                                onAdd={(opt) => {
+                                    if (opt) {
+                                        setAgendas([...agendas, {id: opt.id, descricao: opt.label} as ApiItem]);
+                                        setAgendaSelected(null);
+                                    }
+                                }}
+                            />
                         )}
                     </View>
                 )}

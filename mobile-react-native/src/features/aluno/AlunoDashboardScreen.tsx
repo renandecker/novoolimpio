@@ -139,6 +139,12 @@ export default function AlunoDashboardScreen({navigation}: NativeStackScreenProp
                         <Pressable onPress={() => navigation.navigate('aluno/aulas')}>
                             <Text style={styles.link}>Ver aulas</Text>
                         </Pressable>
+                        <Pressable onPress={() => navigation.navigate('aluno/biblioteca-fisica')}>
+                            <Text style={styles.link}>Biblioteca física</Text>
+                        </Pressable>
+                        <Pressable onPress={() => navigation.navigate('aluno/biblioteca-virtual')}>
+                            <Text style={styles.link}>Biblioteca virtual</Text>
+                        </Pressable>
                     </View>
                 </View>
             ))}
@@ -176,6 +182,6 @@ const styles = StyleSheet.create({
     itemData: {flexDirection: 'row', marginTop: 10},
     itemDataText: {fontSize: 13, color: '#444', marginRight: 16},
     bold: {fontWeight: '700', color: '#2b2b2b'},
-    itemActions: {flexDirection: 'row', marginTop: 10},
+    itemActions: {flexDirection: 'row', flexWrap: 'wrap', rowGap: 8, marginTop: 10},
     link: {color: '#2a5a88', fontWeight: '600', fontSize: 13, marginRight: 20},
 });

@@ -424,6 +424,8 @@ import AlunoAulasScreen from './src/features/aluno/AlunoAulasScreen';
 import AlunoAulasTurmaScreen from './src/features/aluno/AlunoAulasTurmaScreen';
 import AlunoAulaScreen from './src/features/aluno/AlunoAulaScreen';
 import AlunoFinanceiroScreen from './src/features/aluno/AlunoFinanceiroScreen';
+import AlunoBibliotecaFisicaScreen from './src/features/aluno/AlunoBibliotecaFisicaScreen';
+import AlunoBibliotecaVirtualScreen from './src/features/aluno/AlunoBibliotecaVirtualScreen';
 import ViewCurriculoAttachmentScreen from './src/features/aluno/ViewCurriculoAttachmentScreen';
 
 import MeusDadosScreen from './src/screens/MeusDadosScreen';
@@ -449,6 +451,8 @@ function AppRoutes() {
         <Stack.Screen name='aluno/aulas/turma' component={AlunoAulasTurmaScreen} options={{title: 'Aulas da Turma'}}/>
         <Stack.Screen name='aluno/aulas/aula' component={AlunoAulaScreen} options={{title: 'Detalhe da Aula'}}/>
         <Stack.Screen name='aluno/financeiro' component={AlunoFinanceiroScreen} options={{title: 'Financeiro'}}/>
+        <Stack.Screen name='aluno/biblioteca-fisica' component={AlunoBibliotecaFisicaScreen} options={{title: 'Biblioteca Física'}}/>
+        <Stack.Screen name='aluno/biblioteca-virtual' component={AlunoBibliotecaVirtualScreen} options={{title: 'Biblioteca Virtual'}}/>
         <Stack.Screen name='aluno/curriculo-anexo' component={ViewCurriculoAttachmentScreen} options={{title: 'Anexar Currículo'}}/>
         <Stack.Screen name='meus-dados' component={MeusDadosScreen} options={{title: 'Meus dados'}}/>
         <Stack.Screen name='view/notificacao/listNotificacao' component={ViewNotificacaoListNotificacaoListScreen}

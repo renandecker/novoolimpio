@@ -168,11 +168,14 @@ services:
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0087__add_configuracao_notificacoes_menu.sql
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0088__remove_indicador_meta_dinamica_menu.sql
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0093__notificacoes_por_perfil_menu.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0089__cleanup_biblioteca_legacy.sql
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0090__create_biblioteca_tables.sql
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0091__create_biblioteca_virtual_tables.sql
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0092__create_biblioteca_menu.sql
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0093__create_biblioteca_virtual_provedor.sql
         psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0094__add_provedor_to_livro_digital.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0095__create_biblioteca_profile.sql
+        psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f /backup/0096__provision_admin_biblioteca_profile.sql
         echo "[restore] Restore concluido."
 
   # Broker RabbitMQ. Substitui o Kafka para mensageria entre microsservicos.

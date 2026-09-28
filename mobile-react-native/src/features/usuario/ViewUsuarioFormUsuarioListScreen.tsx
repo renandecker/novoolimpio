@@ -495,20 +495,17 @@ export default function ViewUsuarioFormUsuarioListScreen({route}: {route?: any})
                             </View>
                         )}
                         {acessoSub==='perfil' && (
-                            <View style={{gap: 12}}>
-                                <PerfilCombo
-                                    label="Perfil"
-                                    value={perfilSelected}
-                                    onChange={setPerfilSelected}
-                                    onAdd={(opt) => {
-                                        if (opt) {
-                                            setPerfis([...perfis, {id: opt.id, descricao: opt.label} as ApiItem]);
-                                            setPerfilSelected(null);
-                                        }
-                                    }}
-                                />
-                                <MasterDetail label="Perfis Selecionados" source={PERFIL_SOURCE} valueKey="id" searchKeys={PERFIL_SEARCH} columns={PERFIL_COLUMNS} items={perfis} onChange={setPerfis}/>
-                            </View>
+                            <PerfilCombo
+                                label="Perfil"
+                                value={perfilSelected}
+                                onChange={setPerfilSelected}
+                                onAdd={(opt) => {
+                                    if (opt) {
+                                        setPerfis([...perfis, {id: opt.id, descricao: opt.label} as ApiItem]);
+                                        setPerfilSelected(null);
+                                    }
+                                }}
+                            />
                         )}
                         {acessoSub==='agenda' && (
                             <View style={{gap: 12}}>
@@ -531,7 +528,6 @@ export default function ViewUsuarioFormUsuarioListScreen({route}: {route?: any})
                                     <Toggle label="Atender" value={agendaPerm.atender} onChange={v=>setAgendaPerm(p=>({...p,atender:v}))}/>
                                 </View>
                                 <Text style={[s.hint, {marginBottom:8}]}>Permissões aplicadas às agendas selecionadas (bas_usuario_agenda).</Text>
-                                <MasterDetail label="Agendas Selecionadas" source={AGENDA_SOURCE} valueKey="id" searchKeys={AGENDA_SEARCH} columns={AGENDA_COLUMNS} items={agendas} onChange={setAgendas}/>
                             </View>
                         )}
                     </View>

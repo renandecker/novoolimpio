@@ -44,6 +44,22 @@ const HIDDEN_OUTCOMES = [
 ];
 const CONFIGURACAO_DOCUMENTOS_OUTCOME = '/view/configuracao/listDocumentos';
 
+// Legado (V58): o grupo "Acesso do Aluno" foi renomeado no banco para "Portal Aluno".
+// Normaliza o grupo na exibição (a V97 corrige o banco e a V98 restaura o subitem
+// "Portal Aluno" com a tela do painel).
+const PORTAL_ALUNO_NOMES = new Set(['portalaluno', 'portaldoaluno']);
+const ACESSO_ALUNO_NOME = 'acessodoaluno';
+const BIB_FISICA_OUTCOME = '/aluno/biblioteca-fisica';
+const BIB_VIRTUAL_OUTCOME = '/aluno/biblioteca-virtual';
+
+function normalizeRotulo(value: string): string {
+    return (value ?? '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/g, '');
+}
+
 function isHiddenModulo(m: Modulo): boolean {
     const normalizeName = (value: string) =>
         value
@@ -79,7 +95,57 @@ export default function Sidebar({onPhotoAction}: SidebarProps) {
                 }
             }
         }
-        return rawModulos.filter(m => !hiddenIds.has(m.id));
+        const base = rawModulos.filter(m => !hiddenIds.has(m.id));
+        const childCount = new Map<number, number>();
+        for (const m of base) {
+            if (m.antecessorId != null) childCount.set(m.antecessorId, (childCount.get(m.antecessorId) ?? 0) + 1);
+        }
+        // 1) Renomeia o grupo legado "Portal Aluno" (com filhos ou raiz) para "Acesso do Aluno".
+        //    O grupo vira apenas expansor (sem outcome próprio) para não duplicar o destino
+        //    do painel do aluno, que segue acessível pela raiz "Aluno".
+        const renamed = base.map(m => {
+            if (!PORTAL_ALUNO_NOMES.has(normalizeRotulo(m.rotulo))) return m;
+            const isGroup = (childCount.get(m.id) ?? 0) > 0;
+            if (!isGroup && m.antecessorId != null) return m; // folha: tratada no passo 2
+            return {...m, rotulo: 'Acesso do Aluno', outcome: isGroup ? '' : m.outcome};
+        });
+        // 2) O subitem "Portal Aluno" (tela do painel, /aluno/portalAluno) é mantido
+        //    dentro do "Acesso do Aluno", junto aos demais subitens.
+        const withoutDupes = renamed;
+        // 3) Garante "Biblioteca Fisica" e "Biblioteca Virtual" dentro do "Acesso do
+        //    Aluno" mesmo quando o banco ainda não foi migrado (V97).
+        const result = [...withoutDupes];
+        const acessoGroup = result.find(m => normalizeRotulo(m.rotulo) === ACESSO_ALUNO_NOME && (childCount.get(m.id) ?? 0) > 0)
+            ?? result.find(m => normalizeRotulo(m.rotulo) === ACESSO_ALUNO_NOME);
+        if (acessoGroup) {
+            const outcomes = new Set(result.map(m => (m.outcome ?? '').replace(/\.xhtml$/i, '')));
+            const maxId = result.reduce((acc, m) => Math.max(acc, m.id), 0);
+            if (!outcomes.has(BIB_FISICA_OUTCOME)) {
+                result.push({
+                    id: Math.min(-1, maxId > 0 ? -(maxId + 1) : -1),
+                    antecessorId: acessoGroup.id,
+                    rotulo: 'Biblioteca Fisica',
+                    descricao: 'Acervo físico do aluno',
+                    icone: '📚',
+                    ajuda: 'Reservas, empréstimos, multas e livros disponíveis.',
+                    outcome: BIB_FISICA_OUTCOME,
+                    ordem: 7,
+                });
+            }
+            if (!outcomes.has(BIB_VIRTUAL_OUTCOME)) {
+                result.push({
+                    id: Math.min(-2, maxId > 0 ? -(maxId + 2) : -2),
+                    antecessorId: acessoGroup.id,
+                    rotulo: 'Biblioteca Virtual',
+                    descricao: 'Livros virtuais dos fornecedores',
+                    icone: '💻',
+                    ajuda: 'Acesso aos livros virtuais dos fornecedores.',
+                    outcome: BIB_VIRTUAL_OUTCOME,
+                    ordem: 8,
+                });
+            }
+        }
+        return result;
     }, [rawModulos]);
     const defaultPath = session?.defaultOutcome || '/default';
 
