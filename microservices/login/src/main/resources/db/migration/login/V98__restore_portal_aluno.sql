@@ -19,7 +19,7 @@ WHERE EXISTS (SELECT 1 FROM public.bas_modulo g WHERE lower(trim(g.rotulo)) = 'a
       SELECT 1 FROM public.bas_modulo m
       WHERE m.outcome = '/aluno/portalAluno'
         AND m.id_modulo IN (SELECT g.id FROM public.bas_modulo g WHERE lower(trim(g.rotulo)) = 'acesso do aluno'))
-  );
+;
 
 -- 2) Se a folha existe mas está fora do grupo (ou com rótulo divergente), corrige.
 UPDATE public.bas_modulo folha
