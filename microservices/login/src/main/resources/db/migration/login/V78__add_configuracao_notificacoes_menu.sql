@@ -3,7 +3,10 @@
 -- deseja receber para cada tipo de notificação (Notas, Presenças, Aulas, Registro aula, Alteração contrato).
 -- O pai é resolvido por rotulo com LIMIT 1, sem depender do id do módulo.
 
-INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem, fl_ativo)
+-- bas_modulo nao tem coluna fl_ativo (ver V1__base.sql): id, id_modulo, rotulo,
+-- descricao, icone, outcome, ajuda, ordem. Inserir fl_ativo abortava o Flyway
+-- com "column fl_ativo of relation bas_modulo does not exist".
+INSERT INTO public.bas_modulo (id, id_modulo, rotulo, descricao, icone, outcome, ajuda, ordem)
 SELECT nextval('public.bas_modulo_id_seq'),
        (SELECT c.id
           FROM public.bas_modulo c
@@ -15,8 +18,7 @@ SELECT nextval('public.bas_modulo_id_seq'),
        'fa fa-bell',
        '/view/configuracao/notificacoes',
        'Permite ao usuário habilitar/desabilitar canais (Push, Telegram, WhatsApp, Email, SMS) para cada tipo de notificação',
-       99,
-       true
+       99
 WHERE NOT EXISTS (SELECT 1 FROM public.bas_modulo WHERE rotulo = 'Configuração Notificações');
 
 -- Concede ao perfil Administrador acesso ao novo módulo
