@@ -16,7 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Path("/api/biblioteca/emprestimo")
+@Path("/api/biblioteca-fisica/emprestimo")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class EmprestimoController extends GenericActionController {

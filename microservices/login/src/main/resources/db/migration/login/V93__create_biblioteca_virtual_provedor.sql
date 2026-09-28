@@ -1,7 +1,7 @@
 -- V93__create_biblioteca_virtual_provedor.sql
 -- Criação da tabela de provedores digitais
 
-CREATE TABLE IF NOT EXISTS bib_provedor_digital (
+CREATE TABLE bib_provedor_digital (
     id BIGSERIAL PRIMARY KEY,
     nome VARCHAR(200) NOT NULL UNIQUE,
     descricao TEXT,
@@ -17,17 +17,10 @@ CREATE TABLE IF NOT EXISTS bib_provedor_digital (
     version BIGINT NOT NULL DEFAULT 0
 );
 
-CREATE INDEX IF NOT EXISTS idx_bib_provedor_nome ON bib_provedor_digital (nome);
+CREATE INDEX idx_bib_provedor_nome ON bib_provedor_digital (nome);
 
--- Inserir provedores padrão (idempotente)
-INSERT INTO bib_provedor_digital (nome, descricao, url_api, suporta_lti, suporta_sso, publico_alvo, area_conhecimento, data_cadastro, fl_ativo)
-SELECT 'Minha Biblioteca', 'Consórcio entre grandes editoras acadêmicas do Brasil (Grupo GEN, Atlas, Manole, Saraiva, etc.). Oferece integração via API e LTI para plataformas educacionais (LMS) e sistemas de gestão acadêmica (ERP).', 'https://api.minhabiblioteca.com.br', TRUE, FALSE, 'Ensino Superior', 'Todas as áreas do conhecimento acadêmico', CURRENT_DATE, TRUE
-WHERE NOT EXISTS (SELECT 1 FROM bib_provedor_digital WHERE nome = 'Minha Biblioteca');
-
-INSERT INTO bib_provedor_digital (nome, descricao, url_api, suporta_lti, suporta_sso, publico_alvo, area_conhecimento, data_cadastro, fl_ativo)
-SELECT 'Biblioteca Virtual Pearson', 'Focada no ensino superior e corporativo, possui catálogo amplo de diversas áreas do conhecimento. Suporta integração via API e SSO (Single Sign-On).', 'https://api.pearson.com', TRUE, TRUE, 'Ensino Superior e Corporativo', 'Diversas áreas do conhecimento', CURRENT_DATE, TRUE
-WHERE NOT EXISTS (SELECT 1 FROM bib_provedor_digital WHERE nome = 'Biblioteca Virtual Pearson');
-
-INSERT INTO bib_provedor_digital (nome, descricao, url_api, suporta_lti, suporta_sso, publico_alvo, area_conhecimento, data_cadastro, fl_ativo)
-SELECT 'Árvore (Livros / Educação)', 'Voltada principalmente para o ecossistema escolar (K-12) e corporativo, permitindo integração de catálogo e leitura diretamente em plataformas parceiras via API.', 'https://api.arvore.com.br', TRUE, FALSE, 'Escolar (K-12) e Corporativo', 'Educação básica, ensino médio e corporativo', CURRENT_DATE, TRUE
-WHERE NOT EXISTS (SELECT 1 FROM bib_provedor_digital WHERE nome = 'Árvore (Livros / Educação)');
+-- Inserir provedores padrão
+INSERT INTO bib_provedor_digital (nome, descricao, url_api, suporta_lti, suporta_sso, publico_alvo, area_conhecimento, data_cadastro, fl_ativo) VALUES
+('Minha Biblioteca', 'Consórcio entre grandes editoras acadêmicas do Brasil (Grupo GEN, Atlas, Manole, Saraiva, etc.). Oferece integração via API e LTI para plataformas educacionais (LMS) e sistemas de gestão acadêmica (ERP).', 'https://api.minhabiblioteca.com.br', TRUE, FALSE, 'Ensino Superior', 'Todas as áreas do conhecimento acadêmico', CURRENT_DATE, TRUE),
+('Biblioteca Virtual Pearson', 'Focada no ensino superior e corporativo, possui catálogo amplo de diversas áreas do conhecimento. Suporta integração via API e SSO (Single Sign-On).', 'https://api.pearson.com', TRUE, TRUE, 'Ensino Superior e Corporativo', 'Diversas áreas do conhecimento', CURRENT_DATE, TRUE),
+('Árvore (Livros / Educação)', 'Voltada principalmente para o ecossistema escolar (K-12) e corporativo, permitindo integração de catálogo e leitura diretamente em plataformas parceiras via API.', 'https://api.arvore.com.br', TRUE, FALSE, 'Escolar (K-12) e Corporativo', 'Educação básica, ensino médio e corporativo', CURRENT_DATE, TRUE);

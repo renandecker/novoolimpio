@@ -1,6 +1,6 @@
 -- V89__cleanup_biblioteca_legacy.sql
 -- Remove dados legados de biblioteca antes de criar novos módulos/tabelas
--- Executa ANTES dos scripts V90-V95
+-- Executa ANTES dos scripts V90-V96
 
 -- 1. Remover vínculos perfil-modulo legados de biblioteca
 DELETE FROM bas_perfil_modulo 
@@ -27,7 +27,7 @@ WHERE rotulo IN (
 
 -- 3. Remover perfil Biblioteca legado
 DELETE FROM bas_perfil 
-WHERE descricao = 'Biblioteca';
+WHERE rotulo = 'Biblioteca';
 
 -- 4. Dropar tabelas bib_* legadas (se existirem)
 DROP TABLE IF EXISTS bib_fila_espera_digital CASCADE;

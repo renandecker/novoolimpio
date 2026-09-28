@@ -15,7 +15,7 @@ import jakarta.ws.rs.core.Response;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Path("/api/biblioteca/reserva")
+@Path("/api/biblioteca-fisica/reserva")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ReservaController extends GenericActionController {

@@ -1,9 +1,8 @@
 -- V90__create_biblioteca_tables.sql
 -- Criação das tabelas do módulo Biblioteca (Acervo Físico)
--- Idempotente: usa IF NOT EXISTS pois o restore já cria estas tabelas
 
 -- Tabela de Obras/Títulos
-CREATE TABLE IF NOT EXISTS bib_obra (
+CREATE TABLE bib_obra (
     id BIGSERIAL PRIMARY KEY,
     titulo VARCHAR(500) NOT NULL,
     subtitulo VARCHAR(500),
@@ -23,13 +22,13 @@ CREATE TABLE IF NOT EXISTS bib_obra (
     version BIGINT NOT NULL DEFAULT 0
 );
 
-CREATE INDEX IF NOT EXISTS idx_bib_obra_titulo ON bib_obra (lower(titulo));
-CREATE INDEX IF NOT EXISTS idx_bib_obra_isbn ON bib_obra (isbn);
-CREATE INDEX IF NOT EXISTS idx_bib_obra_autores ON bib_obra (lower(autores));
-CREATE INDEX IF NOT EXISTS idx_bib_obra_categoria ON bib_obra (categoria);
+CREATE INDEX idx_bib_obra_titulo ON bib_obra (lower(titulo));
+CREATE INDEX idx_bib_obra_isbn ON bib_obra (isbn);
+CREATE INDEX idx_bib_obra_autores ON bib_obra (lower(autores));
+CREATE INDEX idx_bib_obra_categoria ON bib_obra (categoria);
 
 -- Tabela de Exemplares Físicos
-CREATE TABLE IF NOT EXISTS bib_exemplar (
+CREATE TABLE bib_exemplar (
     id BIGSERIAL PRIMARY KEY,
     codigo_barras VARCHAR(50) UNIQUE,
     tombo VARCHAR(50) UNIQUE,
@@ -48,13 +47,13 @@ CREATE TABLE IF NOT EXISTS bib_exemplar (
     version BIGINT NOT NULL DEFAULT 0
 );
 
-CREATE INDEX IF NOT EXISTS idx_bib_exemplar_obra ON bib_exemplar (obra_id);
-CREATE INDEX IF NOT EXISTS idx_bib_exemplar_status ON bib_exemplar (status);
-CREATE INDEX IF NOT EXISTS idx_bib_exemplar_codigo_barras ON bib_exemplar (codigo_barras);
-CREATE INDEX IF NOT EXISTS idx_bib_exemplar_tombo ON bib_exemplar (tombo);
+CREATE INDEX idx_bib_exemplar_obra ON bib_exemplar (obra_id);
+CREATE INDEX idx_bib_exemplar_status ON bib_exemplar (status);
+CREATE INDEX idx_bib_exemplar_codigo_barras ON bib_exemplar (codigo_barras);
+CREATE INDEX idx_bib_exemplar_tombo ON bib_exemplar (tombo);
 
 -- Tabela de Reservas
-CREATE TABLE IF NOT EXISTS bib_reserva (
+CREATE TABLE bib_reserva (
     id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT NOT NULL,
     obra_id BIGINT NOT NULL REFERENCES bib_obra(id),
@@ -70,13 +69,13 @@ CREATE TABLE IF NOT EXISTS bib_reserva (
     version BIGINT NOT NULL DEFAULT 0
 );
 
-CREATE INDEX IF NOT EXISTS idx_bib_reserva_usuario ON bib_reserva (usuario_id);
-CREATE INDEX IF NOT EXISTS idx_bib_reserva_obra ON bib_reserva (obra_id);
-CREATE INDEX IF NOT EXISTS idx_bib_reserva_status ON bib_reserva (status);
-CREATE INDEX IF NOT EXISTS idx_bib_reserva_posicao ON bib_reserva (obra_id, posicao_fila);
+CREATE INDEX idx_bib_reserva_usuario ON bib_reserva (usuario_id);
+CREATE INDEX idx_bib_reserva_obra ON bib_reserva (obra_id);
+CREATE INDEX idx_bib_reserva_status ON bib_reserva (status);
+CREATE INDEX idx_bib_reserva_posicao ON bib_reserva (obra_id, posicao_fila);
 
 -- Tabela de Empréstimos
-CREATE TABLE IF NOT EXISTS bib_emprestimo (
+CREATE TABLE bib_emprestimo (
     id BIGSERIAL PRIMARY KEY,
     exemplar_id BIGINT NOT NULL REFERENCES bib_exemplar(id),
     usuario_id BIGINT NOT NULL,
@@ -91,13 +90,13 @@ CREATE TABLE IF NOT EXISTS bib_emprestimo (
     version BIGINT NOT NULL DEFAULT 0
 );
 
-CREATE INDEX IF NOT EXISTS idx_bib_emprestimo_exemplar ON bib_emprestimo (exemplar_id);
-CREATE INDEX IF NOT EXISTS idx_bib_emprestimo_usuario ON bib_emprestimo (usuario_id);
-CREATE INDEX IF NOT EXISTS idx_bib_emprestimo_status ON bib_emprestimo (status);
-CREATE INDEX IF NOT EXISTS idx_bib_emprestimo_data_prevista ON bib_emprestimo (data_prevista_devolucao);
+CREATE INDEX idx_bib_emprestimo_exemplar ON bib_emprestimo (exemplar_id);
+CREATE INDEX idx_bib_emprestimo_usuario ON bib_emprestimo (usuario_id);
+CREATE INDEX idx_bib_emprestimo_status ON bib_emprestimo (status);
+CREATE INDEX idx_bib_emprestimo_data_prevista ON bib_emprestimo (data_prevista_devolucao);
 
 -- Tabela de Multas
-CREATE TABLE IF NOT EXISTS bib_multa (
+CREATE TABLE bib_multa (
     id BIGSERIAL PRIMARY KEY,
     emprestimo_id BIGINT NOT NULL REFERENCES bib_emprestimo(id),
     usuario_id BIGINT NOT NULL,
@@ -114,6 +113,6 @@ CREATE TABLE IF NOT EXISTS bib_multa (
     version BIGINT NOT NULL DEFAULT 0
 );
 
-CREATE INDEX IF NOT EXISTS idx_bib_multa_emprestimo ON bib_multa (emprestimo_id);
-CREATE INDEX IF NOT EXISTS idx_bib_multa_usuario ON bib_multa (usuario_id);
-CREATE INDEX IF NOT EXISTS idx_bib_multa_status ON bib_multa (status_pagamento);
+CREATE INDEX idx_bib_multa_emprestimo ON bib_multa (emprestimo_id);
+CREATE INDEX idx_bib_multa_usuario ON bib_multa (usuario_id);
+CREATE INDEX idx_bib_multa_status ON bib_multa (status_pagamento);
