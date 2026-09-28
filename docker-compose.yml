@@ -106,7 +106,11 @@ services:
         # O laco pega qualquer 0*.sql novo sem precisar editar o compose: o glob
         # ja ordena por nome, entao 004 -> 005 -> 006 sai na ordem. O $$ e o
         # escape de interpolacao do Compose (o mesmo do ASAAS_API_KEY mais abaixo).
+        # O entrypoint e /bin/sh (ash), entao nao da para usar shopt/nullglob:
+        # sem arquivos 0*.sql o glob nao expande e o laco receberia o padrao
+        # literal. O teste -f abaixo descarta esse caso.
         for f in /backup/0*.sql; do
+          [ -f "$$f" ] || continue
           echo "[restore]   $$f"
           psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d olimpio -f "$$f"
         done
