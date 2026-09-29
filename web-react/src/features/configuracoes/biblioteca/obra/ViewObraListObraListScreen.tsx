@@ -16,7 +16,7 @@ export default function ViewObraListObraListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <h1>Obras / Títulos</h1>
-                <DataTable path="/api/biblioteca/obra" columns={COLUMNS} maxMainColumns={COLUMNS.length} />
+                <DataTable path="/api/biblioteca-fisica/obra" module="biblioteca" columns={COLUMNS} maxMainColumns={COLUMNS.length} />
             </main>
         </PermissionGate>
     );

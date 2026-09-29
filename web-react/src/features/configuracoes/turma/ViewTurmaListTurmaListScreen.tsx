@@ -6,8 +6,9 @@ import {PermissionGate} from '../../../shared/services/permissions';
 
 import {
     DataTable,
+    legacyClassName,
     type DataTableColumn,
-    type DataTableRowAction,
+    type DataTableRowMenu,
     type DataTableToolbarButton,
 } from '../../../shared/components/DataTable';
 
@@ -48,18 +49,26 @@ const formatDate = (value: unknown): string => {
     return `${match[3]}/${match[2]}/${match[1]}`;
 };
 
+const val = (value: unknown): string => (value === null || value === undefined ? '' : String(value));
+
+/* Espelha view/turma/colunasTurma.xhtml, incluído pelo listTurma.xhtml.
+ * A primeira coluna do XHTML ("Turma", sortBy turma.id) é a coluna "Id" fixa
+ * que o DataTable já renderiza, por isso não é repetida aqui. */
 const TURMA_COLUMNS: DataTableColumn[] = [
-    {key: 'id', label: 'Turma'},
-    {key: 'unidade_descricao', label: 'Unidade'},
     {key: 'grupo_descricao', label: 'Grupo'},
+    {key: 'status', label: 'Status', render: (item) => (
+        <span style={{fontWeight: 700}} className={legacyClassName(statusOf(item)) ?? undefined}>
+            {statusOf(item)}
+        </span>
+    )},
+    {key: 'inscritos', label: 'Inscritos / Vagas', render: (item) => {
+        const record = asRecord(item);
+        return `${val(record.inscritos)} / ${val(record.vagas)}`;
+    }},
+    {key: 'unidade_descricao', label: 'Unidade'},
     {key: 'curriculo_descricao', label: 'Curso'},
     {key: 'componente_curricular_descricao', label: 'Componente Curricular'},
-    {key: 'professor_descricao', label: 'Professor'},
-    {key: 'sala_descricao', label: 'Sala'},
-    {key: 'status', label: 'Status'},
-    {key: 'inscritos', label: 'Inscritos'},
-    {key: 'vagas', label: 'Vagas'},
-    {key: 'cargaHoraria', label: 'C.H.'},
+    {key: 'cargaHoraria', label: 'C.H.', render: (item) => `${val(asRecord(item).cargaHoraria)} H/A`},
     {key: 'dataInicio', label: 'Data Início', render: (item) => formatDate(asRecord(item).dataInicio)},
     {key: 'dataFim', label: 'Data Fim', render: (item) => formatDate(asRecord(item).dataFim)},
 ];
@@ -91,134 +100,152 @@ export default function ViewTurmaListTurmaListScreen() {
     };
 
     /**
-     * Lista de botões de regra de negócio por linha da tabela, espelhando os
-     * 10 <p:menuitem> dos 4 <p:menuButton> do listTurma.xhtml
-     * (acessoNovo | acessoEditar | acessoRelatorios | acessoRemover).
-     * Cada botão mantém permission, styleClass/cor, disabled e ação do XHTML.
+     * Os 4 <p:menuButton> do listTurma.xhtml, na mesma ordem das <p:column> de
+     * ação da tabela: acessoNovo (btnstop) | acessoEditar (btngreen) |
+     * acessoRelatorios (btnyellow) | acessoRemover (btnred).
+     *
+     * A permissão fica na coluna inteira (equivalente ao `rendered` da
+     * <p:column>), e a regra de status vira o estado `disabled` do item — o
+     * DataTable converte `visible` em `disabled` dentro dos menus, que é
+     * exatamente a semântica do atributo `disabled` dos <p:menuitem>.
      */
-    const buildExtraRowActions = (): DataTableRowAction[] => [
+    const extraRowMenus: DataTableRowMenu[] = [
         {
-            key: 'trocarComponente',
-            title: 'Trocar Componente',
+            key: 'acessoNovo',
+            title: 'Novo',
+            className: 'btnstop',
+            icon: <i className="fa fa-plus-circle"/>,
+            permission: 'CREATE',
+            items: [
+                {
+                    key: 'trocarComponente',
+                    title: 'Trocar Componente',
+                    className: 'btngreen',
+                    onClick: async (item) => {
+                        setTurmaSelecionada(item);
+                        await api.post(`/api/educacao/turma/${item.id}/carrega-alunos`, {trocarComponente: true});
+                        setTrocarAberto(true);
+                    },
+                },
+                {
+                    key: 'alterarProfessor',
+                    title: 'Alterar professor',
+                    className: 'btnblack',
+                    onClick: async (item) => {
+                        setTurmaSelecionada(item);
+                        await api.post(`/api/educacao/turma/${item.id}/obter-professores`);
+                        window.dispatchEvent(new CustomEvent('turma:professores', {detail: item}));
+                        setProfessorAberto(true);
+                    },
+                },
+            ],
+        },
+        {
+            key: 'acessoEditar',
+            title: 'Editar',
             className: 'btngreen',
-            icon: '⇄',
-            permission: 'CREATE',
-            onClick: async (item) => {
-                setTurmaSelecionada(item);
-                await api.post(`/api/educacao/turma/${item.id}/carrega-alunos`, {trocarComponente: true});
-                setTrocarAberto(true);
-            },
-        },
-        {
-            key: 'alterarProfessor',
-            title: 'Alterar professor',
-            className: 'btnblack',
-            icon: '👤',
-            permission: 'CREATE',
-            onClick: async (item) => {
-                setTurmaSelecionada(item);
-                await api.post(`/api/educacao/turma/${item.id}/obter-professores`);
-                window.dispatchEvent(new CustomEvent('turma:professores', {detail: item}));
-                setProfessorAberto(true);
-            },
-        },
-        {
-            key: 'criarAulaCoringa',
-            title: 'Criar Aula coringa',
-            className: 'btnpurple',
-            icon: '📅',
+            icon: <i className="fa fa-pencil"/>,
             permission: 'UPDATE',
-            visible: (item) => statusOf(item) !== 'PENDENTE' && statusOf(item) !== 'CANCELADA',
-            onClick: async (item) => {
-                await api.post(`/api/educacao/calendario/recriar`, {turmaId: item.id});
-                alert('Aula coringa criada com sucesso!');
-            },
+            items: [
+                {
+                    key: 'criarAulaCoringa',
+                    title: 'Criar Aula coringa',
+                    className: 'btnpurple',
+                    visible: (item) => statusOf(item) !== 'PENDENTE' && statusOf(item) !== 'CANCELADA',
+                    onClick: async (item) => {
+                        await api.post(`/api/educacao/calendario/recriar`, {turmaId: item.id});
+                        alert('Aula coringa criada com sucesso!');
+                    },
+                },
+                {
+                    key: 'trocarTurma',
+                    title: 'Trocar Turma',
+                    className: 'btnblue',
+                    onClick: async (item) => {
+                        setTurmaSelecionada(item);
+                        await api.post(`/api/educacao/turma/${item.id}/carrega-alunos`, {trocarTurma: true});
+                        setTrocarAberto(true);
+                    },
+                },
+                {
+                    key: 'alterarSala',
+                    title: 'Alterar sala',
+                    className: 'btnorange',
+                    onClick: async (item) => {
+                        setTurmaSelecionada(item);
+                        await api.post(`/api/educacao/turma/${item.id}/obter-salas`);
+                        setSalaAberto(true);
+                    },
+                },
+            ],
         },
         {
-            key: 'trocarTurma',
-            title: 'Trocar Turma',
-            className: 'btnblue',
-            icon: '🔀',
-            permission: 'UPDATE',
-            onClick: async (item) => {
-                setTurmaSelecionada(item);
-                await api.post(`/api/educacao/turma/${item.id}/carrega-alunos`, {trocarTurma: true});
-                setTrocarAberto(true);
-            },
-        },
-        {
-            key: 'alterarSala',
-            title: 'Alterar sala',
-            className: 'btnorange',
-            icon: '🏫',
-            permission: 'UPDATE',
-            onClick: async (item) => {
-                setTurmaSelecionada(item);
-                await api.post(`/api/educacao/turma/${item.id}/obter-salas`);
-                setSalaAberto(true);
-            },
-        },
-        {
-            key: 'maisInformacoes',
-            title: 'Mais informações',
+            key: 'acessoRelatorios',
+            title: 'Relatórios',
             className: 'btnyellow',
-            icon: 'ℹ',
+            icon: <i className="fa fa-file-text-o"/>,
             permission: 'EXECUTE',
-            onClick: async (item) => {
-                setTurmaSelecionada(item);
-                await api.post(`/api/educacao/turma/${item.id}/informacoes`);
-                setInfoAberto(true);
-            },
+            items: [
+                {
+                    key: 'maisInformacoes',
+                    title: 'Mais informações',
+                    className: 'btnyellow',
+                    onClick: async (item) => {
+                        setTurmaSelecionada(item);
+                        await api.post(`/api/educacao/turma/${item.id}/informacoes`);
+                        setInfoAberto(true);
+                    },
+                },
+                {
+                    key: 'trocaTurmaSegundaVia',
+                    title: 'Troca Turma',
+                    className: 'btnblue',
+                    onClick: (item) => {
+                        window.open(`/api/educacao/turma/${item.id}/segunda-via-troca`, '_blank');
+                    },
+                },
+                {
+                    key: 'diarioClasse',
+                    title: 'Diário de Classe',
+                    className: 'btnblack',
+                    onClick: async (item) => {
+                        setTurmaSelecionada(item);
+                        setDiarioAberto(true);
+                    },
+                },
+            ],
         },
         {
-            key: 'trocaTurmaSegundaVia',
-            title: 'Troca Turma (2ª via)',
-            className: 'btnblue',
-            icon: '🖨',
-            permission: 'EXECUTE',
-            onClick: (item) => {
-                window.open(`/api/educacao/turma/${item.id}/segunda-via-troca`, '_blank');
-            },
-        },
-        {
-            key: 'diarioClasse',
-            title: 'Diário de Classe',
-            className: 'btnblack',
-            icon: '📓',
-            permission: 'EXECUTE',
-            onClick: async (item) => {
-                setTurmaSelecionada(item);
-                setDiarioAberto(true);
-            },
-        },
-        {
-            key: 'finalizar',
-            title: 'Finalizar',
-            className: 'btngrey',
-            icon: '✔',
-            permission: 'DELETE',
-            visible: (item) => statusOf(item) === 'EM_ANDAMENTO' || statusOf(item) === 'CANCELADA',
-            onClick: async (item) => {
-                await api.post(`/api/educacao/turma/${item.id}/listar-matriculas`);
-                navigate(`/view/turma/listTurmaFinalizando?id=${item.id}`);
-            },
-        },
-        {
-            key: 'cancelarProrrogar',
-            title: 'Cancelar ou Prorrogar',
+            key: 'acessoRemover',
+            title: 'Remover',
             className: 'btnred',
-            icon: '✖',
+            icon: <i className="fa fa-trash"/>,
             permission: 'DELETE',
-            visible: (item) => statusOf(item) !== 'CANCELADA',
-            onClick: async (item) => {
-                setTurmaSelecionada(item);
-                await api.post(`/api/educacao/turma/${item.id}/carrega-alunos`, {cancelarProrrogar: true});
-                setCancelarProrrogarAberto(true);
-            },
+            items: [
+                {
+                    key: 'finalizar',
+                    title: 'Finalizar',
+                    className: 'btngrey',
+                    visible: (item) => statusOf(item) === 'EM_ANDAMENTO' || statusOf(item) === 'CANCELADA',
+                    onClick: async (item) => {
+                        await api.post(`/api/educacao/turma/${item.id}/listar-matriculas`);
+                        navigate(`/view/turma/listTurmaFinalizando?id=${item.id}`);
+                    },
+                },
+                {
+                    key: 'cancelarProrrogar',
+                    title: 'Cancelar ou Prorrogar',
+                    className: 'btnred',
+                    visible: (item) => statusOf(item) !== 'CANCELADA',
+                    onClick: async (item) => {
+                        setTurmaSelecionada(item);
+                        await api.post(`/api/educacao/turma/${item.id}/carrega-alunos`, {cancelarProrrogar: true});
+                        setCancelarProrrogarAberto(true);
+                    },
+                },
+            ],
         },
     ];
-
-    const extraRowActions = buildExtraRowActions();
 
     const extraToolbarButtons: DataTableToolbarButton[] = [
         {
@@ -257,7 +284,8 @@ export default function ViewTurmaListTurmaListScreen() {
                         <DataTable
                             path="/api/educacao/turma"
                             columns={TURMA_COLUMNS}
-                            extraRowActions={extraRowActions}
+                            maxMainColumns={TURMA_COLUMNS.length}
+                            extraRowMenus={extraRowMenus}
                             extraToolbarButtons={extraToolbarButtons}
                             module="educacao"
                             outcome={screenOutcome}

@@ -15,8 +15,7 @@ WHERE m.rotulo IN (
     'Biblioteca', 'Acervo Físico', 'Obras / Títulos', 'Exemplares',
     'Circulação', 'Empréstimos', 'Reservas', 'Multas',
     'Biblioteca Virtual', 'Livros Digitais', 'Licenças de Acervo', 
-    'Empréstimos Digitais', 'Fila de Espera Virtual', 'Provedores Digitais',
-    'Relatórios Biblioteca'
+    'Empréstimos Digitais', 'Fila de Espera Virtual', 'Provedores Digitais'
 )
 ON CONFLICT (id_perfil, id_modulo) DO UPDATE SET
     editar = EXCLUDED.editar,

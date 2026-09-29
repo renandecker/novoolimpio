@@ -17,7 +17,7 @@ export default function ViewLicencaListLicencaListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <h1>Licenças de Acervo</h1>
-                <DataTable path="/api/biblioteca-virtual/licenca" columns={COLUMNS} maxMainColumns={COLUMNS.length} />
+                <DataTable path="/api/biblioteca-virtual/licenca" module="biblioteca-virtual" columns={COLUMNS} maxMainColumns={COLUMNS.length} />
             </main>
         </PermissionGate>
     );

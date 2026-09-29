@@ -30,6 +30,14 @@ public class EmprestimoDigitalController extends GenericActionController {
         return service.listar(null, page, size);
     }
 
+    @GET
+    @Path("/paged")
+    public Uni<PagedResponse<EmprestimoDigitalResponse>> paged(
+            @QueryParam("page") @DefaultValue("0") int page,
+            @QueryParam("size") @DefaultValue("20") int size) {
+        return service.listar(null, page, size);
+    }
+
     @POST
     @Path("/search")
     public Uni<PagedResponse<EmprestimoDigitalResponse>> search(SearchFilterRequest request,

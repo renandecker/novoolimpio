@@ -1,0 +1,238 @@
+// Grupos da tela de Auditoria espelhando o menu principal.
+// Nivel 1 (abas) = grupos do menu principal (Academico, Biblioteca, ...).
+// Nivel 2 (sub-abas) = telas/entidades com tabela _aud correspondente.
+// Toda chave `entidade` existe na whitelist do backend (AuditoriaRepository.TABELAS).
+// Telas do menu que compartilham a mesma tabela fisica usam uma unica sub-aba
+// (ex.: "Matricula" + "Rematricula" -> "Matricula / Rematricula").
+// Telas do menu sem tabela _aud (operacionais: NAP/Cobranca, Caixa, Mensagens)
+// nao geram sub-aba. As entradas marcadas como NOVAS cobrem as telas novas
+// (Biblioteca Fisica/Virtual, Curriculo/Vagas, Fiserv/Financeiro, Estoque...);
+// se a tabela _aud legada ainda nao existir no banco, a sub-aba exibe
+// "Erro ao carregar..." em vez de quebrar a tela.
+
+export interface AuditoriaSubAba {
+    key: string;
+    label: string;
+    entidade: string;
+}
+
+export interface AuditoriaGrupo {
+    key: string;
+    label: string;
+    itens: AuditoriaSubAba[];
+}
+
+export const AUDITORIA_GRUPOS: AuditoriaGrupo[] = [
+    {
+        key: 'academico',
+        label: 'Acadêmico',
+        itens: [
+            {key: 'matricula', label: 'Matrícula / Rematrícula', entidade: 'matricula'},
+            {key: 'oferecimento', label: 'Oferecimentos', entidade: 'oferecimento'},
+            {key: 'contrato', label: 'Contrato', entidade: 'contrato'},
+            {key: 'desistente', label: 'Desistentes', entidade: 'desistente'},
+            {key: 'turma', label: 'Turma', entidade: 'turma'},
+            {key: 'periodo', label: 'Período', entidade: 'periodo'},
+            {key: 'horarioPeriodo', label: 'Horário Período', entidade: 'horarioPeriodo'},
+            {key: 'componenteCurricular', label: 'Componente Curricular', entidade: 'componenteCurricular'},
+            {key: 'curso', label: 'Curso', entidade: 'curso'},
+            {key: 'curriculo', label: 'Currículo do Curso', entidade: 'curriculo'},
+            {key: 'tipoCurso', label: 'Tipo de Curso', entidade: 'tipoCurso'},
+            {key: 'grupo', label: 'Grupo do Oferecimento', entidade: 'grupo'},
+            {key: 'grupoComponenteCurricular', label: 'Grupo Componente Curricular', entidade: 'grupoComponenteCurricular'},
+            {key: 'tipoMatrizCurricular', label: 'Tipo de Matriz Curricular', entidade: 'tipoMatrizCurricular'},
+            {key: 'cronogramaComponenteCurricular', label: 'Cronograma Comp. Curricular', entidade: 'cronogramaComponenteCurricular'},
+            {key: 'contratoSituacao', label: 'Situação de Contrato', entidade: 'contratoSituacao'},
+            {key: 'baseTecnologica', label: 'Base Tecnológica', entidade: 'baseTecnologica'},
+            {key: 'criterio', label: 'Critérios de Curso', entidade: 'criterio'},
+            {key: 'grau', label: 'Grau (Requisito de Aprovação)', entidade: 'grau'},
+            {key: 'tempoAula', label: 'Tempo Aula', entidade: 'tempoAula'},
+            {key: 'tipoContrato', label: 'Tipo de Contrato', entidade: 'tipoContrato'},
+            {key: 'valorCurso', label: 'Valor do Curso', entidade: 'valorCurso'},
+            {key: 'professor', label: 'Professor', entidade: 'professor'},
+            {key: 'historicoAluno', label: 'Histórico do Aluno', entidade: 'historicoAluno'},
+            {key: 'chamadaAssinada', label: 'Chamada Assinada', entidade: 'chamadaAssinada'},
+            {key: 'referenciaBibliografica', label: 'Referência Bibliográfica', entidade: 'referenciaBibliografica'},
+            {key: 'atividadeComplementar', label: 'Atividade Complementar', entidade: 'atividadeComplementar'},
+            {key: 'sala', label: 'Sala', entidade: 'sala'},
+            {key: 'tipoSala', label: 'Tipo de Sala', entidade: 'tipoSala'},
+            {key: 'disponibilidadeSala', label: 'Disponibilidade de Sala', entidade: 'disponibilidadeSala'},
+            {key: 'disponibilidadeProfessor', label: 'Disponibilidade de Professor', entidade: 'disponibilidadeProfessor'},
+            {key: 'turnoAula', label: 'Turno Aula', entidade: 'turnoAula'},
+            {key: 'etapasNap', label: 'Etapas NAP', entidade: 'etapasNap'},
+            {key: 'resultadoLigacaoNap', label: 'Resultado Ligação NAP', entidade: 'resultadoLigacaoNap'},
+            {key: 'ligacaoNap', label: 'Ligação NAP', entidade: 'ligacaoNap'},
+            {key: 'mensagemNap', label: 'Mensagem NAP', entidade: 'mensagemNap'},
+        ],
+    },
+    {
+        key: 'biblioteca',
+        label: 'Biblioteca',
+        itens: [
+            {key: 'livro', label: 'Livros', entidade: 'livro'},
+            {key: 'configuracaoLivro', label: 'Configuração de Livros', entidade: 'configuracaoLivro'},
+            {key: 'obra', label: 'Obras (Acervo Físico)', entidade: 'obra'},
+            {key: 'exemplar', label: 'Exemplares', entidade: 'exemplar'},
+            {key: 'reserva', label: 'Reservas', entidade: 'reserva'},
+            {key: 'emprestimo', label: 'Empréstimos', entidade: 'emprestimo'},
+            {key: 'multa', label: 'Multas', entidade: 'multa'},
+        ],
+    },
+    {
+        key: 'bibliotecaVirtual',
+        label: 'Biblioteca Virtual',
+        itens: [
+            {key: 'livroDigital', label: 'Livros Digitais', entidade: 'livroDigital'},
+            {key: 'licencaAcervo', label: 'Licenças do Acervo', entidade: 'licencaAcervo'},
+            {key: 'emprestimoDigital', label: 'Empréstimos Digitais', entidade: 'emprestimoDigital'},
+            {key: 'filaEspera', label: 'Fila de Espera', entidade: 'filaEspera'},
+            {key: 'provedor', label: 'Provedores', entidade: 'provedor'},
+        ],
+    },
+    {
+        key: 'cadastros',
+        label: 'Cadastros Básicos',
+        itens: [
+            {key: 'pessoaFisica', label: 'Pessoa Física', entidade: 'pessoaFisica'},
+            {key: 'pessoaJuridica', label: 'Pessoa Jurídica', entidade: 'pessoaJuridica'},
+            {key: 'pessoaDocumento', label: 'Documentos de Pessoa', entidade: 'pessoaDocumento'},
+            {key: 'disponibilidadePessoa', label: 'Disponibilidade de Pessoa', entidade: 'disponibilidadePessoa'},
+            {key: 'unidade', label: 'Unidade', entidade: 'unidade'},
+            {key: 'rede', label: 'Rede de Franquias', entidade: 'rede'},
+            {key: 'agenda', label: 'Agenda', entidade: 'agenda'},
+            {key: 'compromisso', label: 'Compromisso', entidade: 'compromisso'},
+            {key: 'tipoCompromisso', label: 'Tipo de Compromisso', entidade: 'tipoCompromisso'},
+            {key: 'statusCompromisso', label: 'Status do Compromisso', entidade: 'statusCompromisso'},
+            {key: 'tipoAgenda', label: 'Tipo de Agenda', entidade: 'tipoAgenda'},
+            {key: 'resultado', label: 'Resultado de Agendamento', entidade: 'resultado'},
+            {key: 'horario', label: 'Horário', entidade: 'horario'},
+            {key: 'feriado', label: 'Feriado', entidade: 'feriado'},
+            {key: 'motivo', label: 'Motivo', entidade: 'motivo'},
+            {key: 'logradouro', label: 'Logradouro', entidade: 'logradouro'},
+            {key: 'bairro', label: 'Bairro', entidade: 'bairro'},
+            {key: 'cidade', label: 'Cidade', entidade: 'cidade'},
+            {key: 'estado', label: 'Estado', entidade: 'estado'},
+            {key: 'pais', label: 'País', entidade: 'pais'},
+            {key: 'regiao', label: 'Região', entidade: 'regiao'},
+            {key: 'telefone', label: 'Telefone', entidade: 'telefone'},
+            {key: 'tipoTelefone', label: 'Tipo de Telefone', entidade: 'tipoTelefone'},
+            {key: 'tipoUnidade', label: 'Tipo de Unidade', entidade: 'tipoUnidade'},
+            {key: 'escolaridade', label: 'Escolaridade', entidade: 'escolaridade'},
+            {key: 'estadoCivil', label: 'Estado Civil', entidade: 'estadoCivil'},
+            {key: 'etnia', label: 'Etnia', entidade: 'etnia'},
+            {key: 'genero', label: 'Gênero', entidade: 'genero'},
+            {key: 'funcao', label: 'Função de Funcionários', entidade: 'funcao'},
+            {key: 'turnoFuncionario', label: 'Turno de Funcionários', entidade: 'turnoFuncionario'},
+        ],
+    },
+    {
+        key: 'sistema',
+        label: 'Sistema e Segurança',
+        itens: [
+            {key: 'usuario', label: 'Usuário', entidade: 'usuario'},
+            {key: 'perfil', label: 'Perfil', entidade: 'perfil'},
+            {key: 'modulo', label: 'Módulo', entidade: 'modulo'},
+            {key: 'config', label: 'Configuração', entidade: 'config'},
+            {key: 'layout', label: 'Estrutura do Sistema', entidade: 'layout'},
+            {key: 'favoritoUsuario', label: 'Favoritos', entidade: 'favoritoUsuario'},
+            {key: 'favoritoPerfil', label: 'Favoritos do Perfil', entidade: 'favoritoPerfil'},
+            {key: 'cpfAlunosAntigos', label: 'CPF Alunos Antigos', entidade: 'cpfAlunosAntigos'},
+            {key: 'comunicacao', label: 'Comunicação', entidade: 'comunicacao'},
+            {key: 'fornecedor', label: 'Fornecedor', entidade: 'fornecedor'},
+            {key: 'apresentacao', label: 'Apresentação', entidade: 'apresentacao'},
+        ],
+    },
+    {
+        key: 'comercial',
+        label: 'Comercial / Call Center',
+        itens: [
+            {key: 'prospecto', label: 'Prospectos', entidade: 'prospecto'},
+            {key: 'campanha', label: 'Campanha', entidade: 'campanha'},
+            {key: 'acao', label: 'Ação', entidade: 'acao'},
+            {key: 'tipoAcao', label: 'Tipo de Ação', entidade: 'tipoAcao'},
+            {key: 'tipoCanal', label: 'Tipo do Canal', entidade: 'tipoCanal'},
+            {key: 'estrategia', label: 'Estratégia', entidade: 'estrategia'},
+            {key: 'indicador', label: 'Indicador', entidade: 'indicador'},
+            {key: 'pacote', label: 'Pacote', entidade: 'pacote'},
+            {key: 'campo', label: 'Campo', entidade: 'campo'},
+            {key: 'meta', label: 'Metas', entidade: 'meta'},
+            {key: 'consultor', label: 'Consultor', entidade: 'consultor'},
+            {key: 'arquivoProcon', label: 'Arquivo PROCON', entidade: 'arquivoProcon'},
+            {key: 'operacional', label: 'Operacional', entidade: 'operacional'},
+            {key: 'tipoPausa', label: 'Tipo de Pausa', entidade: 'tipoPausa'},
+            {key: 'turnoTrabalho', label: 'Turno de Trabalho', entidade: 'turnoTrabalho'},
+            {key: 'turnoUsuario', label: 'Turno dos Operadores', entidade: 'turnoUsuario'},
+            {key: 'resultadoContato', label: 'Resultado da Ligação', entidade: 'resultadoContato'},
+            {key: 'ligacao', label: 'Ligação', entidade: 'ligacao'},
+            {key: 'coordenador', label: 'Coordenador', entidade: 'coordenador'},
+            {key: 'configuracaoMarketing', label: 'Configuração de Marketing', entidade: 'configuracaoMarketing'},
+        ],
+    },
+    {
+        key: 'curriculo',
+        label: 'Currículo / Vagas',
+        itens: [
+            {key: 'vaga', label: 'Vagas', entidade: 'vaga'},
+            {key: 'empresa', label: 'Empresas', entidade: 'empresa'},
+            {key: 'empresaUnidade', label: 'Unidades da Empresa', entidade: 'empresaUnidade'},
+            {key: 'entrevista', label: 'Entrevistas', entidade: 'entrevista'},
+            {key: 'trabalho', label: 'Trabalhos (Currículo)', entidade: 'trabalho'},
+            {key: 'campoCurriculo', label: 'Campos do Currículo', entidade: 'campoCurriculo'},
+            {key: 'configCurriculo', label: 'Configuração de Currículo', entidade: 'configCurriculo'},
+        ],
+    },
+    {
+        key: 'financeiro',
+        label: 'Financeiro e Cobrança',
+        itens: [
+            {key: 'etapasCobranca', label: 'Etapas de Cobrança', entidade: 'etapasCobranca'},
+            {key: 'resultadoLigacaoCobranca', label: 'Resultado Ligação Cobrança', entidade: 'resultadoLigacaoCobranca'},
+            {key: 'ligacaoCobranca', label: 'Ligação de Cobrança', entidade: 'ligacaoCobranca'},
+            {key: 'campanhaNegociacao', label: 'Campanhas de Negociação', entidade: 'campanhaNegociacao'},
+            {key: 'movimento', label: 'Movimento Financeiro', entidade: 'movimento'},
+            {key: 'tipoHistorico', label: 'Tipo de Histórico', entidade: 'tipoHistorico'},
+            {key: 'contaCorrente', label: 'Conta Corrente', entidade: 'contaCorrente'},
+            {key: 'caixa', label: 'Caixa', entidade: 'caixa'},
+            {key: 'configuracaoCaixa', label: 'Configuração do Caixa', entidade: 'configuracaoCaixa'},
+            {key: 'configuracaoParcela', label: 'Configuração de Parcela', entidade: 'configuracaoParcela'},
+            {key: 'configuracaoFinanceira', label: 'Configuração Financeira', entidade: 'configuracaoFinanceira'},
+            {key: 'impressora', label: 'Cadastro de Impressora', entidade: 'impressora'},
+            {key: 'diaPagamento', label: 'Dias Pagamento de Parcelas', entidade: 'diaPagamento'},
+            {key: 'custoServico', label: 'Custo por Serviço', entidade: 'custoServico'},
+            {key: 'modeloCarta', label: 'Modelo de Carta', entidade: 'modeloCarta'},
+            {key: 'mensagemCobranca', label: 'Mensagem de Cobrança', entidade: 'mensagemCobranca'},
+            {key: 'mensagemFinanceira', label: 'Mensagem Financeira', entidade: 'mensagemFinanceira'},
+            {key: 'bandeira', label: 'Bandeira (Cartão)', entidade: 'bandeira'},
+            {key: 'valorProduto', label: 'Valor do Produto', entidade: 'valorProduto'},
+        ],
+    },
+    {
+        key: 'estoque',
+        label: 'Estoque',
+        itens: [
+            {key: 'produto', label: 'Produtos', entidade: 'produto'},
+            {key: 'categoria', label: 'Categorias', entidade: 'categoria'},
+            {key: 'subCategoria', label: 'Subcategorias', entidade: 'subCategoria'},
+            {key: 'marca', label: 'Marcas', entidade: 'marca'},
+            {key: 'entrega', label: 'Entrega', entidade: 'entrega'},
+            {key: 'controleEstoque', label: 'Controle de Estoque', entidade: 'controleEstoque'},
+            {key: 'movimentacaoEstoque', label: 'Movimentação de Estoque', entidade: 'movimentacaoEstoque'},
+            {key: 'configuracaoEstoque', label: 'Configuração de Estoque', entidade: 'configuracaoEstoque'},
+        ],
+    },
+    {
+        key: 'relatorios',
+        label: 'Relatórios',
+        itens: [
+            {key: 'estrutura', label: 'Estrutura de Relatório', entidade: 'estrutura'},
+            {key: 'tabela', label: 'Tabelas', entidade: 'tabela'},
+            {key: 'mapa', label: 'Mapas', entidade: 'mapa'},
+            {key: 'grafico', label: 'Gráfico', entidade: 'grafico'},
+            {key: 'organograma', label: 'Organograma', entidade: 'organograma'},
+            {key: 'painel', label: 'Painel (Dashboard)', entidade: 'painel'},
+            {key: 'extrator', label: 'Extrator', entidade: 'extrator'},
+            {key: 'filtros', label: 'Filtros', entidade: 'filtros'},
+            {key: 'cores', label: 'Cores', entidade: 'cores'},
+        ],
+    },
+];

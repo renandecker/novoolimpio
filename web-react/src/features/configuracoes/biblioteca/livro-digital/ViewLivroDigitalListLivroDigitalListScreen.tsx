@@ -18,7 +18,7 @@ export default function ViewLivroDigitalListLivroDigitalListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <h1>Livros Digitais</h1>
-                <DataTable path="/api/biblioteca-virtual/livro-digital" columns={COLUMNS} maxMainColumns={COLUMNS.length} />
+                <DataTable path="/api/biblioteca-virtual/livro-digital" module="biblioteca-virtual" columns={COLUMNS} maxMainColumns={COLUMNS.length} />
             </main>
         </PermissionGate>
     );

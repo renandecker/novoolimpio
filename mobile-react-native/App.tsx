@@ -33,9 +33,9 @@ import ViewBaseTecnologicaListBaseTecnologicaListScreen
     from './src/screens/ViewBaseTecnologicaListBaseTecnologicaListScreen';
 import ViewCaixaFormCaixaListScreen from './src/screens/ViewCaixaFormCaixaListScreen';
 import ViewCaixaListCaixaListScreen from './src/screens/ViewCaixaListCaixaListScreen';
-import ViewCampanhaFormCampanhaListScreen from './src/screens/ViewCampanhaFormCampanhaListScreen';
-import ViewCampanhaFormDirecionamentoListScreen from './src/screens/ViewCampanhaFormDirecionamentoListScreen';
-import ViewCampanhaFormGerarPacotesListScreen from './src/screens/ViewCampanhaFormGerarPacotesListScreen';
+import ViewCampanhaFormCampanhaListScreen from './src/features/marketing/ViewCampanhaFormCampanhaListScreen';
+import ViewCampanhaFormDirecionamentoListScreen from './src/features/marketing/ViewCampanhaFormDirecionamentoListScreen';
+import ViewCampanhaFormGerarPacotesListScreen from './src/features/marketing/ViewCampanhaFormGerarPacotesListScreen';
 import ViewCampanhaListCampanhaListScreen from './src/screens/ViewCampanhaListCampanhaListScreen';
 import ViewCampanhaNegociacaoFormCampanhaNegociacaoListScreen
     from './src/features/financeiro/ViewCampanhaNegociacaoFormCampanhaNegociacaoListScreen';

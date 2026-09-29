@@ -3,6 +3,11 @@ import {FlatList, Pressable, StyleSheet, Text, TextInput, View} from 'react-nati
 import {useQuery} from '@tanstack/react-query';
 import {api} from './shared/services/api';
 import type {ApiItem} from './shared/types/types';
+import {AutoComplete} from './shared/components/AutoComplete';
+import type {AutoCompleteOption} from './shared/components/AutoComplete';
+import {fetchUnidadeOptions, UNIDADE_LIST_SOURCE} from './shared/components/UnidadeCombo';
+import {fetchPerfilOptions} from './shared/components/PerfilCombo';
+import {fetchAgendaOptions} from './shared/components/AgendaCombo';
 
 export interface MasterDetailColumn {
     key: string;
@@ -106,6 +111,25 @@ const deriveColumns = (item: ApiItem): MasterDetailColumn[] => {
         });
 };
 
+/** Verdadeiro quando o source aponta para o catálogo da entidade (ex.: /api/basico/perfil, /api/view/agenda/listAgenda). */
+const matchesEntity = (source: string, entity: string): boolean => {
+    const path = source.split('?')[0].replace(/\/+$/, '').toLowerCase();
+    return path.endsWith(`/${entity}`) || path.includes(`/${entity}/`);
+};
+
+const autoCompleteConfigForSource = (source: string) => {
+    if (source === UNIDADE_LIST_SOURCE || source.toLowerCase().includes('unidade')) {
+        return {fetchOptions: fetchUnidadeOptions, placeholder: 'Digite para buscar unidade...'};
+    }
+    if (matchesEntity(source, 'perfil')) {
+        return {fetchOptions: fetchPerfilOptions, placeholder: 'Digite para buscar perfil...'};
+    }
+    if (matchesEntity(source, 'agenda')) {
+        return {fetchOptions: fetchAgendaOptions, placeholder: 'Digite para buscar agenda...'};
+    }
+    return null;
+};
+
 export function MasterDetail({
                                  label,
                                  source,
@@ -118,6 +142,23 @@ export function MasterDetail({
     const [query, setQuery] = useState('');
     const [open, setOpen] = useState(false);
     const [selected, setSelected] = useState<ApiItem | null>(null);
+    const [autoCompleteOpt, setAutoCompleteOpt] = useState<AutoCompleteOption | null>(null);
+
+    const autoCompleteConfig = useMemo(() => autoCompleteConfigForSource(source), [source]);
+
+    const handleAutoCompleteChange = (opt: AutoCompleteOption | null) => {
+        setAutoCompleteOpt(opt);
+        if (opt && opt.id) {
+            const found = all.find((i) => String(asRecord(i)[valueKey]) === String(opt.id));
+            if (found) {
+                setSelected(found);
+            } else {
+                setSelected({[valueKey]: opt.id, descricao: opt.label, nome: opt.label} as ApiItem);
+            }
+        } else {
+            setSelected(null);
+        }
+    };
 
     const {data: all = []} = useQuery({
         queryKey: [source, 'master-detail'],
@@ -148,6 +189,7 @@ export function MasterDetail({
         if (!exists) onChange([...items, selected]);
         setSelected(null);
         setQuery('');
+        setAutoCompleteOpt(null);
         setOpen(false);
     };
 
@@ -167,17 +209,27 @@ export function MasterDetail({
 
             <View style={styles.searchRow}>
                 <View style={styles.searchBox}>
-                    <TextInput
-                        style={styles.input}
-                        value={query}
-                        placeholder="Digite para buscar..."
-                        onFocus={() => setOpen(true)}
-                        onChangeText={(text) => {
-                            setQuery(text);
-                            setSelected(null);
-                            setOpen(true);
-                        }}
-                    />
+                    {autoCompleteConfig ? (
+                        <AutoComplete
+                            value={autoCompleteOpt}
+                            onChange={handleAutoCompleteChange}
+                            fetchOptions={autoCompleteConfig.fetchOptions}
+                            minChars={0}
+                            placeholder={autoCompleteConfig.placeholder}
+                        />
+                    ) : (
+                        <TextInput
+                            style={styles.input}
+                            value={query}
+                            placeholder="Digite para buscar..."
+                            onFocus={() => setOpen(true)}
+                            onChangeText={(text) => {
+                                setQuery(text);
+                                setSelected(null);
+                                setOpen(true);
+                            }}
+                        />
+                    )}
                     {open && suggestions.length > 0 && (
                         <View style={styles.suggestions}>
                             {suggestions.slice(0, 8).map((item) => (

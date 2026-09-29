@@ -4,9 +4,6 @@ import {Tabs} from '../../shared/components/Tabs';
 import {MasterDetail} from '../../shared/components/MasterDetail';
 import {BooleanField} from '../../shared/components/BooleanField';
 import {EnderecoCampos} from '../../shared/components/EnderecoForm';
-import {PerfilCombo} from '../../shared/components/PerfilCombo';
-import {AgendaCombo} from '../../shared/components/AgendaCombo';
-import type {AutoCompleteOption} from '../../shared/components/AutoComplete';
 import type {Endereco} from '../../shared/components/EnderecoForm';
 import type {ApiItem} from '../../shared/types/index';
 import {
@@ -31,8 +28,6 @@ export default function ViewUsuarioCamposUsuarioTabViewListScreen(){
     const [enderecos,setEnderecos]=useState<Endereco[]>([]);
     const [agendaPerm,setAgendaPerm]=useState({agendar:false,alterar:false,fechar:false,iniciar:false,atender:false});
     const [acessoSub,setAcessoSub]=useState<'unidade'|'perfil'|'agenda'>('unidade');
-    const [perfilSelected,setPerfilSelected]=useState<AutoCompleteOption | null>(null);
-    const [agendaSelected,setAgendaSelected]=useState<AutoCompleteOption | null>(null);
 
     // — Pessoal (resumo dos campos do XHTML) —
     const pessoal = (
@@ -116,41 +111,21 @@ export default function ViewUsuarioCamposUsuarioTabViewListScreen(){
             {acessoSub==='perfil' && (
                 <div className="form-grid">
                     <div style={{gridColumn:'1 / -1'}}>
-                        <PerfilCombo
-                            label="Perfil"
-                            value={perfilSelected}
-                            onChange={setPerfilSelected}
-                            onAdd={(opt) => {
-                                if (opt) {
-                                    setPerfis([...perfis, {id: opt.id, descricao: opt.label} as ApiItem]);
-                                    setPerfilSelected(null);
-                                }
-                            }}
-                        />
+                        <MasterDetail label="Perfis Selecionados" source={PERFIL_SOURCE} valueKey="id" searchKeys={PERFIL_SEARCH} columns={PERFIL_COLUMNS} items={perfis} onChange={setPerfis}/>
                     </div>
                 </div>
             )}
             {acessoSub==='agenda' && (
                 <div className="form-grid">
-                    <div style={{gridColumn:'1 / -1'}}>
-                        <AgendaCombo
-                            label="Agenda"
-                            value={agendaSelected}
-                            onChange={setAgendaSelected}
-                            onAdd={(opt) => {
-                                if (opt) {
-                                    setAgendas([...agendas, {id: opt.id, descricao: opt.label} as ApiItem]);
-                                    setAgendaSelected(null);
-                                }
-                            }}
-                        />
-                    </div>
                     <div style={{marginBottom:14, display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(150px,1fr))', gap:10}}>
-                        <label className="form-field"><span className="form-label">Agendar</span><BooleanField value={agendaPerm.agendar} onChange={v=>setAgendaPerm(p=>({...p,agendar:v}))}/></label>
-                        <label className="form-field"><span className="form-label">Alterar</span><BooleanField value={agendaPerm.alterar} onChange={v=>setAgendaPerm(p=>({...p,alterar:v}))}/></label>
-                        <label className="form-field"><span className="form-label">Fechar</span><BooleanField value={agendaPerm.fechar} onChange={v=>setAgendaPerm(p=>({...p,fechar:v}))}/></label>
-                        <label className="form-field"><span className="form-label">Iniciar</span><BooleanField value={agendaPerm.iniciar} onChange={v=>setAgendaPerm(p=>({...p,iniciar:v}))}/></label>
-                        <label className="form-field"><span className="form-label">Atender</span><BooleanField value={agendaPerm.atender} onChange={v=>setAgendaPerm(p=>({...p,atender:v}))}/></label>
+                        <label style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap:8}}><span className="form-label">Agendar</span><BooleanField value={agendaPerm.agendar} onChange={v=>setAgendaPerm(p=>({...p,agendar:v}))}/></label>
+                        <label style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap:8}}><span className="form-label">Alterar</span><BooleanField value={agendaPerm.alterar} onChange={v=>setAgendaPerm(p=>({...p,alterar:v}))}/></label>
+                        <label style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap:8}}><span className="form-label">Fechar</span><BooleanField value={agendaPerm.fechar} onChange={v=>setAgendaPerm(p=>({...p,fechar:v}))}/></label>
+                        <label style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap:8}}><span className="form-label">Iniciar</span><BooleanField value={agendaPerm.iniciar} onChange={v=>setAgendaPerm(p=>({...p,iniciar:v}))}/></label>
+                        <label style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap:8}}><span className="form-label">Atender</span><BooleanField value={agendaPerm.atender} onChange={v=>setAgendaPerm(p=>({...p,atender:v}))}/></label>
+                    </div>
+                    <div style={{gridColumn:'1 / -1', marginTop: 12}}>
+                        <MasterDetail label="Agendas Selecionadas" source={AGENDA_SOURCE} valueKey="id" searchKeys={AGENDA_SEARCH} columns={AGENDA_COLUMNS} items={agendas} onChange={setAgendas}/>
                     </div>
                 </div>
             )}

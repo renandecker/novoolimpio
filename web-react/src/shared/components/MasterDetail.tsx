@@ -5,6 +5,8 @@ import {api} from '../services/api';
 import type {ApiItem} from '../types/index';
 import {AutoComplete, AutoCompleteOption} from './AutoComplete';
 import {fetchUnidadeOptions, fetchUnidadeById, UNIDADE_LIST_SOURCE} from './UnidadeCombo';
+import {fetchPerfilOptions, fetchPerfilById} from './PerfilCombo';
+import {fetchAgendaOptions, fetchAgendaById} from './AgendaCombo';
 
 export interface MasterDetailColumn {
     key: string;
@@ -112,6 +114,31 @@ const deriveColumns = (item: ApiItem): MasterDetailColumn[] => {
         });
 };
 
+/** Verdadeiro quando o source aponta para o catálogo da entidade (ex.: /api/basico/perfil, /api/view/agenda/listAgenda). */
+const matchesEntity = (source: string, entity: string): boolean => {
+    const path = source.split('?')[0].replace(/\/+$/, '').toLowerCase();
+    return path.endsWith(`/${entity}`) || path.includes(`/${entity}/`);
+};
+
+interface AutoCompleteConfig {
+    fetchOptions: (query: string) => Promise<AutoCompleteOption[]>;
+    fetchById?: (id: number) => Promise<AutoCompleteOption | null>;
+    placeholder: string;
+}
+
+const autoCompleteConfigForSource = (source: string): AutoCompleteConfig | null => {
+    if (source === UNIDADE_LIST_SOURCE || source.includes('unidade')) {
+        return {fetchOptions: fetchUnidadeOptions, fetchById: fetchUnidadeById, placeholder: 'Digite para buscar unidade...'};
+    }
+    if (matchesEntity(source, 'perfil')) {
+        return {fetchOptions: fetchPerfilOptions, fetchById: fetchPerfilById, placeholder: 'Digite para buscar perfil...'};
+    }
+    if (matchesEntity(source, 'agenda')) {
+        return {fetchOptions: fetchAgendaOptions, fetchById: fetchAgendaById, placeholder: 'Digite para buscar agenda...'};
+    }
+    return null;
+};
+
 export function MasterDetail({
                                  label,
                                  source,
@@ -128,7 +155,7 @@ export function MasterDetail({
     const [autoCompleteOpt, setAutoCompleteOpt] = useState<AutoCompleteOption | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const isUnidade = source === UNIDADE_LIST_SOURCE || source.includes('unidade');
+    const autoCompleteConfig = useMemo(() => autoCompleteConfigForSource(source), [source]);
 
     const {data: all = []} = useQuery({
         queryKey: [source, 'master-detail'],
@@ -190,7 +217,7 @@ export function MasterDetail({
                         setQuery(opt.label);
                     }
                 } catch {
-                    setSelected({[valueKey]: opt.id, nome: opt.label} as any);
+                    setSelected({[valueKey]: opt.id, descricao: opt.label, nome: opt.label} as any);
                     setQuery(opt.label);
                 }
             }
@@ -222,16 +249,16 @@ export function MasterDetail({
         <div className="master-detail">
             <span className="form-label master-detail-label">{label}</span>
             <div className="master-detail-inputs">
-                {isUnidade ? (
+                {autoCompleteConfig ? (
                     <div style={{flex: 1, display: 'flex', gap: '8px', alignItems: 'center'}}>
                         <div style={{flex: 1}}>
                             <AutoComplete
                                 value={autoCompleteOpt}
                                 onChange={handleAutoCompleteChange}
-                                fetchOptions={fetchUnidadeOptions}
-                                fetchById={fetchUnidadeById}
+                                fetchOptions={autoCompleteConfig.fetchOptions}
+                                fetchById={autoCompleteConfig.fetchById}
                                 minChars={2}
-                                placeholder="Digite para buscar unidade..."
+                                placeholder={autoCompleteConfig.placeholder}
                             />
                         </div>
                     </div>

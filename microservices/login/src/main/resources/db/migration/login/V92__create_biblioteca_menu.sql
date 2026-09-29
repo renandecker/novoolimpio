@@ -11,12 +11,12 @@
 
 -- Menu principal Biblioteca
 INSERT INTO bas_modulo (rotulo, descricao, icone, ajuda, outcome, ordem, id_modulo)
-SELECT 'Biblioteca', 'Gestão de Acervo e Empréstimos', 'fa fa-university', 'Módulo de gestão da biblioteca física e virtual', '/view/biblioteca', 90, NULL
+SELECT 'Biblioteca', 'Gestão de Acervo e Empréstimos', 'fa fa-university', 'Módulo de gestão da biblioteca física e virtual', NULL, 90, NULL
 WHERE NOT EXISTS (SELECT 1 FROM bas_modulo WHERE rotulo = 'Biblioteca');
 
 -- Submenu: Acervo Físico (filho de Biblioteca)
 INSERT INTO bas_modulo (rotulo, descricao, icone, ajuda, outcome, ordem, id_modulo)
-SELECT 'Acervo Físico', 'Gestão de obras e exemplares físicos', 'fa fa-archive', 'Cadastro e consulta de livros físicos', '/view/biblioteca/acervo-fisico', 10, m.id
+SELECT 'Acervo Físico', 'Gestão de obras e exemplares físicos', 'fa fa-archive', 'Cadastro e consulta de livros físicos', NULL, 10, m.id
 FROM bas_modulo m
 WHERE m.rotulo = 'Biblioteca'
   AND m.id_modulo IS NULL
@@ -38,7 +38,7 @@ WHERE m.rotulo = 'Acervo Físico'
 
 -- Submenu: Circulação
 INSERT INTO bas_modulo (rotulo, descricao, icone, ajuda, outcome, ordem, id_modulo)
-SELECT 'Circulação', 'Empréstimos, devoluções e reservas', 'fa fa-exchange', 'Processos de empréstimo, devolução e reserva de exemplares', '/view/biblioteca/circulacao', 20, m.id
+SELECT 'Circulação', 'Empréstimos, devoluções e reservas', 'fa fa-exchange', 'Processos de empréstimo, devolução e reserva de exemplares', NULL, 20, m.id
 FROM bas_modulo m
 WHERE m.rotulo = 'Biblioteca'
   AND m.id_modulo IS NULL
@@ -67,7 +67,7 @@ WHERE m.rotulo = 'Circulação'
 
 -- Submenu: Biblioteca Virtual
 INSERT INTO bas_modulo (rotulo, descricao, icone, ajuda, outcome, ordem, id_modulo)
-SELECT 'Biblioteca Virtual', 'Acervo digital e empréstimos online', 'fa fa-globe', 'Gestão de livros digitais, licenças e empréstimos virtuais', '/view/biblioteca-virtual', 30, m.id
+SELECT 'Biblioteca Virtual', 'Acervo digital e empréstimos online', 'fa fa-globe', 'Gestão de livros digitais, licenças e empréstimos virtuais', NULL, 30, m.id
 FROM bas_modulo m
 WHERE m.rotulo = 'Biblioteca'
   AND m.id_modulo IS NULL
@@ -108,13 +108,23 @@ FROM bas_modulo m
 WHERE m.rotulo = 'Biblioteca Virtual'
   AND NOT EXISTS (SELECT 1 FROM bas_modulo WHERE rotulo = 'Provedores Digitais');
 
--- Relatórios da Biblioteca
-INSERT INTO bas_modulo (rotulo, descricao, icone, ajuda, outcome, ordem, id_modulo)
-SELECT 'Relatórios Biblioteca', 'Relatórios e estatísticas da biblioteca', 'fa fa-bar-chart', 'Relatórios de acervo, circulação, multas e uso digital', '/view/biblioteca/relatorios', 40, m.id
-FROM bas_modulo m
-WHERE m.rotulo = 'Biblioteca'
-  AND m.id_modulo IS NULL
-  AND NOT EXISTS (SELECT 1 FROM bas_modulo WHERE rotulo = 'Relatórios Biblioteca');
+-- "Relatorios Biblioteca" NAO e criado aqui: nao existe controller de relatorios nos
+-- microsservicos biblioteca/biblioteca-virtual, e um item de menu sem outcome cai no
+-- catch-all do front ("Selecione uma tela."). Se um dia houver a tela, basta inserir
+-- o modulo com outcome '/view/biblioteca/relatorios'.
+DELETE FROM public.bas_perfil_modulo
+WHERE id_modulo IN (
+    SELECT id FROM public.bas_modulo
+    WHERE rotulo = 'Relatórios Biblioteca'
+      AND (outcome IS NULL OR outcome NOT LIKE '/view/biblioteca/relatorios%')
+);
+DELETE FROM public.bas_modulo
+WHERE rotulo = 'Relatórios Biblioteca'
+  AND (outcome IS NULL OR outcome NOT LIKE '/view/biblioteca/relatorios%');
+
+-- Grupos (sem tela propria) ficam so como expansor: outcome NULL, como o grupo
+-- "Acesso do Aluno" no V97. Sem isso o clique cai no catch-all "Selecione uma tela.".
+UPDATE public.bas_modulo SET outcome = NULL WHERE rotulo IN ('Biblioteca', 'Acervo Físico', 'Circulação', 'Biblioteca Virtual') AND (outcome IS NOT NULL AND btrim(outcome) <> '');
 
 -- Normaliza os ícones já gravados por execuções anteriores desta migration ou por
 -- seeds antigos: qualquer valor sem prefixo de classe Font Awesome vira a classe correta.
@@ -132,7 +142,6 @@ UPDATE public.bas_modulo SET icone = 'fa fa-key'          WHERE rotulo = 'Licen�
 UPDATE public.bas_modulo SET icone = 'fa fa-cloud-download' WHERE rotulo = 'Empréstimos Digitais'  AND (icone IS NULL OR btrim(icone) = '' OR icone NOT LIKE 'fa %');
 UPDATE public.bas_modulo SET icone = 'fa fa-users'        WHERE rotulo = 'Fila de Espera Virtual'  AND (icone IS NULL OR btrim(icone) = '' OR icone NOT LIKE 'fa %');
 UPDATE public.bas_modulo SET icone = 'fa fa-server'       WHERE rotulo = 'Provedores Digitais'    AND (icone IS NULL OR btrim(icone) = '' OR icone NOT LIKE 'fa %');
-UPDATE public.bas_modulo SET icone = 'fa fa-bar-chart'    WHERE rotulo = 'Relatórios Biblioteca'  AND (icone IS NULL OR btrim(icone) = '' OR icone NOT LIKE 'fa %');
 
 -- Vincula menus ao perfil ADMIN (id = 1)
 INSERT INTO bas_perfil_modulo (id_perfil, id_modulo, editar, remover, relatorio, novo)
@@ -142,8 +151,7 @@ WHERE m.rotulo IN (
     'Biblioteca', 'Acervo Físico', 'Obras / Títulos', 'Exemplares',
     'Circulação', 'Empréstimos', 'Reservas', 'Multas',
     'Biblioteca Virtual', 'Livros Digitais', 'Licenças de Acervo', 
-    'Empréstimos Digitais', 'Fila de Espera Virtual', 'Provedores Digitais',
-    'Relatórios Biblioteca'
+    'Empréstimos Digitais', 'Fila de Espera Virtual', 'Provedores Digitais'
 )
 ON CONFLICT (id_perfil, id_modulo) DO UPDATE SET
     editar = EXCLUDED.editar,

@@ -12,12 +12,6 @@ import {BooleanField} from '../../../shared/components/BooleanField';
 
 import {Tabs} from '../../../shared/components/Tabs';
 
-import {PerfilCombo} from '../../../shared/components/PerfilCombo';
-
-import {AgendaCombo} from '../../../shared/components/AgendaCombo';
-
-import type {AutoCompleteOption} from '../../../shared/components/AutoComplete';
-
 import type {ApiItem} from '../../../shared/types/types.ts';
 
 import {api} from '../../../shared/services/api';
@@ -218,10 +212,6 @@ export default function CadastroUsuarioScreen() {
 
     const [agendas, setAgendas] = useState<Agenda[]>([]);
 
-    const [perfilSelected, setPerfilSelected] = useState<AutoCompleteOption | null>(null);
-
-    const [agendaSelected, setAgendaSelected] = useState<AutoCompleteOption | null>(null);
-
 
 
     const [etniaOptions, setEtniaOptions] = useState<Array<{value: string, label: string}>>([]);
@@ -413,17 +403,24 @@ export default function CadastroUsuarioScreen() {
     // A API de vínculo (/api/basico/usuario/{id}/agendas) retorna só os ids;
     // resolve no catálogo para exibir as colunas booleanas da agenda.
     const agendasResolved = useMemo(() => {
+
         const catalogo = new Map(
+
             (allAgendas as unknown as Array<Record<string, unknown>>).map((item) => [String(item.id), item]),
+
         );
+
         return agendas.map((a) => {
+
             const id = String((a as unknown as Record<string, unknown>).id ?? '');
+
             const encontrado = catalogo.get(id);
+
             return ((encontrado ?? a) as unknown as Agenda);
+
         });
+
     }, [agendas, allAgendas]);
-
-
 
     useEffect(() => {
 
@@ -2020,16 +2017,22 @@ export default function CadastroUsuarioScreen() {
 
                     <div style={{gridColumn: '1 / -1'}}>
 
-                        <PerfilCombo
-                            label="Perfil"
-                            value={perfilSelected}
-                            onChange={setPerfilSelected}
-                            onAdd={(opt) => {
-                                if (opt) {
-                                    setPerfis([...perfis, {id: opt.id, descricao: opt.label} as Perfil]);
-                                    setPerfilSelected(null);
-                                }
-                            }}
+                        <MasterDetail
+
+                            label="Perfis Selecionados"
+
+                            source={PERFIL_SOURCE}
+
+                            valueKey="id"
+
+                            searchKeys={PERFIL_SEARCH}
+
+                            columns={PERFIL_COLUMNS}
+
+                            items={perfis as unknown as ApiItem[]}
+
+                            onChange={(itens) => setPerfis(itens as unknown as Perfil[])}
+
                         />
 
                     </div>
@@ -2046,16 +2049,22 @@ export default function CadastroUsuarioScreen() {
 
                     <div style={{gridColumn: '1 / -1'}}>
 
-                        <AgendaCombo
-                            label="Agenda"
-                            value={agendaSelected}
-                            onChange={setAgendaSelected}
-                            onAdd={(opt) => {
-                                if (opt) {
-                                    setAgendas([...agendas, {id: opt.id, descricao: opt.label} as Agenda]);
-                                    setAgendaSelected(null);
-                                }
-                            }}
+                        <MasterDetail
+
+                            label="Agendas Selecionadas"
+
+                            source={AGENDA_SOURCE}
+
+                            valueKey="id"
+
+                            searchKeys={AGENDA_SEARCH}
+
+                            columns={AGENDA_COLUMNS}
+
+                            items={agendasResolved as unknown as ApiItem[]}
+
+                            onChange={(itens) => setAgendas(itens as unknown as Agenda[])}
+
                         />
 
                     </div>

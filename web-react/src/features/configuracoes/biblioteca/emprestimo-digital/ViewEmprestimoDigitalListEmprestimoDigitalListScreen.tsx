@@ -16,7 +16,7 @@ export default function ViewEmprestimoDigitalListEmprestimoDigitalListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <h1>Empréstimos Digitais</h1>
-                <DataTable path="/api/biblioteca-virtual/emprestimo-digital" columns={COLUMNS} maxMainColumns={COLUMNS.length} />
+                <DataTable path="/api/biblioteca-virtual/emprestimo-digital" module="biblioteca-virtual" columns={COLUMNS} maxMainColumns={COLUMNS.length} />
             </main>
         </PermissionGate>
     );

@@ -28,6 +28,14 @@ public class LicencaAcervoController extends GenericActionController {
         return service.listar(null, page, size);
     }
 
+    @GET
+    @Path("/paged")
+    public Uni<PagedResponse<LicencaAcervoResponse>> paged(
+            @QueryParam("page") @DefaultValue("0") int page,
+            @QueryParam("size") @DefaultValue("20") int size) {
+        return service.listar(null, page, size);
+    }
+
     @POST
     @Path("/search")
     public Uni<PagedResponse<LicencaAcervoResponse>> search(SearchFilterRequest request,

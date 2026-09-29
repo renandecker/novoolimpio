@@ -16,7 +16,7 @@ import {Tabs} from '../../Tabs';
 import {Wizard} from '../../shared/components/Wizard';
 import {
     ModuleList,
-    type ModuleListExtraAction,
+    type ModuleListActionGroup,
 } from '../../shared/components/ModuleListScreen';
 import {Alert} from '../../shared/components/SweetAlert';
 import {api} from '../../shared/services/api';
@@ -846,112 +846,128 @@ export default function ViewTurmaListTurmaListScreen() {
     };
 
     /**
-     * Lista de botões de regra de negócio por linha da tabela, espelhando os
-     * 10 <p:menuitem> dos 4 <p:menuButton> do listTurma.xhtml
-     * (acessoNovo | acessoEditar | acessoRelatorios | acessoRemover).
-     * A permissão de cada botão é filtrada pelo próprio ModuleList; as regras
-     * de status (disabled do XHTML) são validadas no clique com alerta.
+     * Os 4 <p:menuButton> do listTurma.xhtml, na mesma ordem das <p:column> de
+     * ação da tabela: acessoNovo (btnstop) | acessoEditar (btngreen) |
+     * acessoRelatorios (btnyellow) | acessoRemover (btnred).
+     *
+     * `rowActionGroups` recebe a linha, então a regra de status vira o estado
+     * `disabled` de cada item — a semântica do atributo `disabled` dos
+     * <p:menuitem>. A permissão fica no grupo inteiro (equivalente ao
+     * `rendered` da <p:column>).
      */
-    const rowActions: ModuleListExtraAction[] = [
-        {
-            key: 'trocarComponente',
-            title: 'Trocar Componente',
-            icon: '⇄',
-            permission: 'CREATE',
-            onPress: (item) => abrir(item, setTrocarAberto),
-        },
-        {
-            key: 'alterarProfessor',
-            title: 'Alterar professor',
-            icon: '👤',
-            permission: 'CREATE',
-            onPress: (item) => abrir(item, setProfessorAberto),
-        },
-        {
-            key: 'criarAulaCoringa',
-            title: 'Criar Aula coringa',
-            icon: '📅',
-            permission: 'UPDATE',
-            onPress: async (item) => {
-                const status = statusOf(item);
-                if (status === 'PENDENTE' || status === 'CANCELADA') {
-                    Alert.alert('Aula coringa', 'Ação indisponível para turmas PENDENTE ou CANCELADA.');
-                    return;
-                }
-                try {
-                    await api.post('/api/educacao/calendario/recriar', {turmaId: item.id});
-                    Alert.alert('Aula coringa', 'Aula coringa criada com sucesso!');
-                } catch (e) {
-                    Alert.alert('Erro', apiErrorMessage(e));
-                }
+    const rowActionGroups = (item: ApiItem): ModuleListActionGroup[] => {
+        const status = statusOf(item);
+        return [
+            {
+                title: 'Novo',
+                className: 'btnstop',
+                permission: 'CREATE',
+                icon: <Text style={styles.menuIcon}>➕</Text>,
+                items: [
+                    {
+                        key: 'trocarComponente',
+                        label: 'Trocar Componente',
+                        className: 'btngreen',
+                        onSelect: () => abrir(item, setTrocarAberto),
+                    },
+                    {
+                        key: 'alterarProfessor',
+                        label: 'Alterar professor',
+                        className: 'btnblack',
+                        onSelect: () => abrir(item, setProfessorAberto),
+                    },
+                ],
             },
-        },
-        {
-            key: 'trocarTurma',
-            title: 'Trocar Turma',
-            icon: '🔀',
-            permission: 'UPDATE',
-            onPress: (item) => abrir(item, setTrocarAberto),
-        },
-        {
-            key: 'alterarSala',
-            title: 'Alterar sala',
-            icon: '🏫',
-            permission: 'UPDATE',
-            onPress: (item) => abrir(item, setSalaAberto),
-        },
-        {
-            key: 'maisInformacoes',
-            title: 'Mais informações',
-            icon: 'ℹ',
-            permission: 'EXECUTE',
-            onPress: (item) => abrir(item, setInfoAberto),
-        },
-        {
-            key: 'trocaTurmaSegundaVia',
-            title: 'Troca Turma (2ª via)',
-            icon: '🖨',
-            permission: 'EXECUTE',
-            onPress: (item) => {
-                api.get(`/api/educacao/turma/${item.id}/segunda-via-troca`).catch(() => {});
-                Alert.alert('Segunda via', 'Segunda via gerada. O documento é disponibilizado pelo portal web.');
+            {
+                title: 'Editar',
+                className: 'btngreen',
+                permission: 'UPDATE',
+                icon: <Text style={styles.menuIcon}>✏️</Text>,
+                items: [
+                    {
+                        key: 'criarAulaCoringa',
+                        label: 'Criar Aula coringa',
+                        className: 'btnpurple',
+                        disabled: status === 'PENDENTE' || status === 'CANCELADA',
+                        onSelect: async () => {
+                            try {
+                                await api.post('/api/educacao/calendario/recriar', {turmaId: item.id});
+                                Alert.alert('Aula coringa', 'Aula coringa criada com sucesso!');
+                            } catch (e) {
+                                Alert.alert('Erro', apiErrorMessage(e));
+                            }
+                        },
+                    },
+                    {
+                        key: 'trocarTurma',
+                        label: 'Trocar Turma',
+                        className: 'btnblue',
+                        onSelect: () => abrir(item, setTrocarAberto),
+                    },
+                    {
+                        key: 'alterarSala',
+                        label: 'Alterar sala',
+                        className: 'btnorange',
+                        onSelect: () => abrir(item, setSalaAberto),
+                    },
+                ],
             },
-        },
-        {
-            key: 'diarioClasse',
-            title: 'Diário de Classe',
-            icon: '📓',
-            permission: 'EXECUTE',
-            onPress: (item) => abrir(item, setDiarioAberto),
-        },
-        {
-            key: 'finalizar',
-            title: 'Finalizar',
-            icon: '✔',
-            permission: 'DELETE',
-            onPress: (item) => {
-                const status = statusOf(item);
-                if (status !== 'EM_ANDAMENTO' && status !== 'CANCELADA') {
-                    Alert.alert('Finalizar', 'Somente turmas EM_ANDAMENTO ou CANCELADA podem ser finalizadas.');
-                    return;
-                }
-                navigation.navigate('view/turma/listTurmaFinalizando' as never, {turmaId: item.id});
+            {
+                title: 'Relatórios',
+                className: 'btnyellow',
+                permission: 'EXECUTE',
+                icon: <Text style={styles.menuIcon}>📄</Text>,
+                items: [
+                    {
+                        key: 'maisInformacoes',
+                        label: 'Mais informações',
+                        className: 'btnyellow',
+                        onSelect: () => abrir(item, setInfoAberto),
+                    },
+                    {
+                        key: 'trocaTurmaSegundaVia',
+                        label: 'Troca Turma',
+                        className: 'btnblue',
+                        onSelect: () => {
+                            api.get(`/api/educacao/turma/${item.id}/segunda-via-troca`).catch(() => {});
+                            Alert.alert('Segunda via', 'Segunda via gerada. O documento é disponibilizado pelo portal web.');
+                        },
+                    },
+                    {
+                        key: 'diarioClasse',
+                        label: 'Diário de Classe',
+                        className: 'btnblack',
+                        onSelect: () => abrir(item, setDiarioAberto),
+                    },
+                ],
             },
-        },
-        {
-            key: 'cancelarProrrogar',
-            title: 'Cancelar ou Prorrogar',
-            icon: '✖',
-            permission: 'DELETE',
-            onPress: (item) => {
-                if (statusOf(item) === 'CANCELADA') {
-                    Alert.alert('Cancelar ou Prorrogar', 'Ação indisponível para turmas CANCELADA.');
-                    return;
-                }
-                abrir(item, setCancelarProrrogarAberto);
+            {
+                title: 'Remover',
+                className: 'btnred',
+                permission: 'DELETE',
+                icon: <Text style={styles.menuIcon}>🗑️</Text>,
+                items: [
+                    {
+                        key: 'finalizar',
+                        label: 'Finalizar',
+                        className: 'btngrey',
+                        disabled: status !== 'EM_ANDAMENTO' && status !== 'CANCELADA',
+                        onSelect: () => {
+                            navigation.navigate('view/turma/listTurmaFinalizando' as never, {turmaId: item.id});
+                        },
+                    },
+                    {
+                        key: 'cancelarProrrogar',
+                        label: 'Cancelar ou Prorrogar',
+                        className: 'btnred',
+                        disabled: status === 'CANCELADA',
+                        onSelect: () => abrir(item, setCancelarProrrogarAberto),
+                    },
+                ],
             },
-        },
-    ];
+        ];
+    };
+
 
     return (
         <ScrollView style={styles.page} contentContainerStyle={styles.pageContent}>
@@ -987,7 +1003,7 @@ export default function ViewTurmaListTurmaListScreen() {
                     ...(unidade ? {unidadeId: unidade.id} : {}),
                     ...(componente ? {componenteCurricularId: componente.id} : {}),
                 }}
-                extraActions={rowActions}
+                rowActionGroups={rowActionGroups}
                 hideCreate
                 hideUpdate
                 hideDelete
@@ -1031,6 +1047,7 @@ const styles = StyleSheet.create({
     },
     pageTitle: {fontSize: Typography.sizes.heading, fontWeight: Typography.weights.bold, color: Colors.textWhite},
     sectionLabel: {fontSize: Typography.sizes.xxl, fontWeight: Typography.weights.semibold, color: Colors.textSecondary, marginBottom: Spacing.sm},
+    menuIcon: {fontSize: 20},
     center: {alignItems: 'center', justifyContent: 'center', padding: Spacing.xl},
     loadingText: {marginTop: Spacing.sm, color: Colors.textMuted, fontSize: Typography.sizes.base},
 

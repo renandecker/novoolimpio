@@ -360,6 +360,16 @@ ViewComunicacaoListComunicacaoListScreen,
     AlunoBoletimScreen,
     AlunoBibliotecaFisicaScreen,
     AlunoBibliotecaVirtualScreen,
+    ViewObraListObraListScreen,
+    ViewExemplarListExemplarListScreen,
+    ViewReservaListReservaListScreen,
+    ViewEmprestimoListEmprestimoListScreen,
+    ViewMultaListMultaListScreen,
+    ViewLivroDigitalListLivroDigitalListScreen,
+    ViewLicencaListLicencaListScreen,
+    ViewEmprestimoDigitalListEmprestimoDigitalListScreen,
+    ViewFilaEsperaListFilaEsperaListScreen,
+    ViewProvedorListProvedorListScreen,
     AlunoFrequenciaScreen,
     AlunoFinanceiroScreen,
     AlunoAulasScreen,
@@ -403,6 +413,16 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/aluno/biblioteca-fisica" element={<AlunoBibliotecaFisicaScreen/>}/>
     <Route path="/aluno/biblioteca-virtual" element={<AlunoBibliotecaVirtualScreen/>}/>
     <Route path="/aluno/boletim" element={<AlunoBoletimScreen/>}/>
+    <Route path="/view/biblioteca-fisica/obra/list" element={<ViewObraListObraListScreen/>}/>
+    <Route path="/view/biblioteca-fisica/exemplar/list" element={<ViewExemplarListExemplarListScreen/>}/>
+    <Route path="/view/biblioteca-fisica/reserva/list" element={<ViewReservaListReservaListScreen/>}/>
+    <Route path="/view/biblioteca-fisica/emprestimo/list" element={<ViewEmprestimoListEmprestimoListScreen/>}/>
+    <Route path="/view/biblioteca-fisica/multa/list" element={<ViewMultaListMultaListScreen/>}/>
+    <Route path="/view/biblioteca-virtual/livro-digital/list" element={<ViewLivroDigitalListLivroDigitalListScreen/>}/>
+    <Route path="/view/biblioteca-virtual/licenca/list" element={<ViewLicencaListLicencaListScreen/>}/>
+    <Route path="/view/biblioteca-virtual/emprestimo-digital/list" element={<ViewEmprestimoDigitalListEmprestimoDigitalListScreen/>}/>
+    <Route path="/view/biblioteca-virtual/fila-espera/list" element={<ViewFilaEsperaListFilaEsperaListScreen/>}/>
+    <Route path="/view/biblioteca-virtual/provedor/list" element={<ViewProvedorListProvedorListScreen/>}/>
     <Route path="/aluno/frequencia" element={<AlunoFrequenciaScreen/>}/>
     <Route path="/aluno/financeiro" element={<AlunoFinanceiroScreen/>}/>
     <Route path="/aluno/aulas" element={<AlunoAulasScreen/>}/>

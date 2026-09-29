@@ -1,4 +1,4 @@
-﻿import {useMemo, useState} from 'react';
+﻿import {useEffect, useMemo, useState} from 'react';
 import {Link, useLocation} from 'react-router-dom';
 import {useAuth} from '../../features/auth/auth';
 import {normalizeOutcome} from '../services/permissions';
@@ -8,6 +8,8 @@ import './Sidebar.css';
 type Modulo = { id: number; antecessorId: number | null; rotulo: string; descricao: string; icone: string; ajuda: string; outcome: string; ordem: number };
 
 interface SidebarProps {
+    open: boolean;
+    onClose: () => void;
     onPhotoAction?: () => void;
 }
 
@@ -72,12 +74,32 @@ function isHiddenModulo(m: Modulo): boolean {
     return HIDDEN_OUTCOMES.some(p => out.startsWith(p.toLowerCase()));
 }
 
-export default function Sidebar({onPhotoAction}: SidebarProps) {
+export default function Sidebar({open, onClose, onPhotoAction}: SidebarProps) {
     const {session} = useAuth();
     const {menuIcon} = useMenuIcon();
-    const [expanded, setExpanded] = useState(false);
+    const location = useLocation();
     const [search, setSearch] = useState('');
-    const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+    // Fecha o drawer ao navegar (padrão Drawer do react-navigation)
+    useEffect(() => {
+        onClose();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [location.pathname]);
+
+    // ESC fecha + trava scroll do body enquanto aberto
+    useEffect(() => {
+        if (!open) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', onKey);
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            window.removeEventListener('keydown', onKey);
+            document.body.style.overflow = prev;
+        };
+    }, [open, onClose]);
 
     const rawModulos = (session?.modules ?? []) as Modulo[];
     // Filtra módulos ocultos e também filhos de módulos ocultos (recursivo)
@@ -169,8 +191,8 @@ export default function Sidebar({onPhotoAction}: SidebarProps) {
             {label: 'Início', parent: null, path: defaultPath, icon: menuIcon('paginainicial'), keywords: 'inicio paginainicial'},
             {label: 'Configuração Documentos', parent: null, path: CONFIGURACAO_DOCUMENTOS_OUTCOME, icon: menuIcon('configuracao documentos'), keywords: 'configuracao documentos relatorios'},
             {label: 'Fiserv', parent: null, path: '/view/fiserv/cartao-pessoa', icon: menuIcon('fiserv'), keywords: 'fiserv cartao pagamento'},
-            {label: 'Biblioteca', parent: null, path: '/view/biblioteca', icon: menuIcon('biblioteca'), keywords: 'biblioteca acervo livro emprestimo'},
-            {label: 'Biblioteca Virtual', parent: null, path: '/view/biblioteca-virtual', icon: menuIcon('biblioteca virtual'), keywords: 'biblioteca virtual digital livro licenca'},
+            {label: 'Biblioteca', parent: null, path: '/view/biblioteca-fisica/obra/list', icon: menuIcon('biblioteca'), keywords: 'biblioteca acervo livro emprestimo'},
+            {label: 'Biblioteca Virtual', parent: null, path: '/view/biblioteca-virtual/livro-digital/list', icon: menuIcon('biblioteca virtual'), keywords: 'biblioteca virtual digital livro licenca'},
         ];
         const walk = (modulo: Modulo, parent: string | null) => {
             items.push({
@@ -218,35 +240,43 @@ export default function Sidebar({onPhotoAction}: SidebarProps) {
     }, [query, flatItems]);
 
     return (
-        <aside
-            className={`sidebar ${expanded ? 'expanded' : 'collapsed'}`}
-            onMouseEnter={() => setExpanded(true)}
-            onMouseLeave={() => { if (!isSearchFocused) setExpanded(false); }}
-        >
+        <>
+            <div
+                className={`sidebar-backdrop ${open ? 'visible' : ''}`}
+                onClick={onClose}
+                aria-hidden={!open}
+            />
+            <aside
+                className={`sidebar ${open ? 'open' : ''}`}
+                aria-hidden={!open}
+                aria-label="Menu lateral"
+            >
             <div className="sidebar-header">
                 <span className="sidebar-logo">O</span>
                 <span className="sidebar-title">Olímpio</span>
+                <button type="button" className="sidebar-close" onClick={onClose} aria-label="Fechar menu">
+                    ×
+                </button>
+            </div>
+            {/* Busca fixa no topo do drawer */}
+            <div className="sidebar-search">
+                <span className="sidebar-search-icon"><SearchIcon/></span>
+                <input
+                    type="text"
+                    className="sidebar-search-input"
+                    placeholder="Buscar menu ou tela..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    aria-label="Buscar menu ou tela"
+                />
+                {search && (
+                    <button type="button" className="sidebar-search-clear" onClick={() => setSearch('')}
+                            aria-label="Limpar busca">
+                        ×
+                    </button>
+                )}
             </div>
             <nav className="sidebar-nav">
-                <div className="sidebar-search">
-                    <span className="sidebar-search-icon"><SearchIcon/></span>
-                    <input
-                        type="text"
-                        className="sidebar-search-input"
-                        placeholder="Buscar menu ou tela..."
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        aria-label="Buscar menu ou tela"
-                        onFocus={() => { setExpanded(true); setIsSearchFocused(true); }}
-                        onBlur={() => setIsSearchFocused(false)}
-                    />
-                    {search && (
-                        <button type="button" className="sidebar-search-clear" onClick={() => setSearch('')}
-                                aria-label="Limpar busca">
-                            ×
-                        </button>
-                    )}
-                </div>
                 {query ? (
                     searchTree.length === 0 ? (
                         <div className="sidebar-search-empty">Nenhum item encontrado</div>
@@ -275,6 +305,7 @@ export default function Sidebar({onPhotoAction}: SidebarProps) {
                 )}
             </nav>
         </aside>
+        </>
     );
 }
 

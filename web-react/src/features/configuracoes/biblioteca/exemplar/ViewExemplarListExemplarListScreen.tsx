@@ -16,7 +16,7 @@ export default function ViewExemplarListExemplarListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <h1>Exemplares</h1>
-                <DataTable path="/api/biblioteca/exemplar" columns={COLUMNS} maxMainColumns={COLUMNS.length} />
+                <DataTable path="/api/biblioteca-fisica/exemplar" module="biblioteca" columns={COLUMNS} maxMainColumns={COLUMNS.length} />
             </main>
         </PermissionGate>
     );

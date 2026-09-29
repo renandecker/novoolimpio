@@ -15,7 +15,7 @@ export default function ViewProvedorListProvedorListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <h1>Provedores Digitais</h1>
-                <DataTable path="/api/biblioteca-virtual/provedor" columns={COLUMNS} maxMainColumns={COLUMNS.length} />
+                <DataTable path="/api/biblioteca-virtual/provedor" module="biblioteca-virtual" columns={COLUMNS} maxMainColumns={COLUMNS.length} />
             </main>
         </PermissionGate>
     );

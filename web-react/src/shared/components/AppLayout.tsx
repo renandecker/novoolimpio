@@ -1,4 +1,4 @@
-﻿import type {ReactNode} from 'react';
+﻿import {useCallback, useState, type ReactNode} from 'react';
 import {useAuth} from '../../features/auth/auth';
 import {NotificationBell} from '../../features/notificacoes/NotificationBell';
 import {ReportButton} from '../../ReportButton';
@@ -15,6 +15,8 @@ function AppLayoutContent({children}: { children: ReactNode }) {
     const {session} = useAuth();
     const {tema} = useTheme();
     const {isOpen, open, close, currentFoto, username, onPhotoUpdate} = usePhotoModal();
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const closeDrawer = useCallback(() => setDrawerOpen(false), []);
     
     const appLayoutStyle: React.CSSProperties = {
         backgroundImage: tema?.imagemFundo ? `url(${tema.imagemFundo})` : 'none',
@@ -37,10 +39,21 @@ function AppLayoutContent({children}: { children: ReactNode }) {
 
     return (
         <div className="app-layout" style={appLayoutStyle}>
-            <Sidebar onPhotoAction={() => { if (session) open(session.foto, session.username); }} />
+            <Sidebar open={drawerOpen} onClose={closeDrawer} onPhotoAction={() => { if (session) open(session.foto, session.username); }} />
             <div className="app-main">
                 <header className="app-header" style={headerStyle}>
                     <div className="app-header-left">
+                        <button
+                            type="button"
+                            className="app-menu-toggle"
+                            onClick={() => setDrawerOpen(prev => !prev)}
+                            aria-label={drawerOpen ? 'Fechar menu lateral' : 'Abrir menu lateral'}
+                            aria-expanded={drawerOpen}
+                        >
+                            <span />
+                            <span />
+                            <span />
+                        </button>
                         <span className="app-header-logo">O</span>
                         <span className="app-header-title">Olímpio</span>
                     </div>
