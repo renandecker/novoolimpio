@@ -2034,28 +2034,6 @@ export default function CadastroUsuarioScreen() {
 
                     </div>
 
-                    <div style={{gridColumn: '1 / -1', marginTop: 12}}>
-
-                        <MasterDetail
-
-                            label="Perfis Selecionados"
-
-                            source="/api/basico/perfil"
-
-                            valueKey="id"
-
-                            searchKeys={['descricao']}
-
-                            columns={[{key: 'descricao', label: 'Descrição'}]}
-
-                            items={perfis}
-
-                            onChange={setPerfis}
-
-                        />
-
-                    </div>
-
                 </>
 
             )}
@@ -2078,28 +2056,6 @@ export default function CadastroUsuarioScreen() {
                                     setAgendaSelected(null);
                                 }
                             }}
-                        />
-
-                    </div>
-
-                    <div style={{gridColumn: '1 / -1', marginTop: 12}}>
-
-                        <MasterDetail
-
-                            label="Agendas Selecionadas"
-
-                            source={AGENDA_SOURCE}
-
-                            valueKey="id"
-
-                            searchKeys={AGENDA_SEARCH}
-
-                            columns={AGENDA_COLUMNS}
-
-                            items={agendasResolved}
-
-                            onChange={(itens) => setAgendas(itens as unknown as Agenda[])}
-
                         />
 
                     </div>

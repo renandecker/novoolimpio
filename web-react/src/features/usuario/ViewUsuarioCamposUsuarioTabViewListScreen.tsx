@@ -128,9 +128,6 @@ export default function ViewUsuarioCamposUsuarioTabViewListScreen(){
                             }}
                         />
                     </div>
-                    <div style={{gridColumn:'1 / -1', marginTop: 12}}>
-                        <MasterDetail label="Perfis Selecionados" source={PERFIL_SOURCE} valueKey="id" searchKeys={PERFIL_SEARCH} columns={PERFIL_COLUMNS} items={perfis} onChange={setPerfis}/>
-                    </div>
                 </div>
             )}
             {acessoSub==='agenda' && (
@@ -154,9 +151,6 @@ export default function ViewUsuarioCamposUsuarioTabViewListScreen(){
                         <label className="form-field"><span className="form-label">Fechar</span><BooleanField value={agendaPerm.fechar} onChange={v=>setAgendaPerm(p=>({...p,fechar:v}))}/></label>
                         <label className="form-field"><span className="form-label">Iniciar</span><BooleanField value={agendaPerm.iniciar} onChange={v=>setAgendaPerm(p=>({...p,iniciar:v}))}/></label>
                         <label className="form-field"><span className="form-label">Atender</span><BooleanField value={agendaPerm.atender} onChange={v=>setAgendaPerm(p=>({...p,atender:v}))}/></label>
-                    </div>
-                    <div style={{gridColumn:'1 / -1', marginTop: 12}}>
-                        <MasterDetail label="Agendas Selecionadas" source={AGENDA_SOURCE} valueKey="id" searchKeys={AGENDA_SEARCH} columns={AGENDA_COLUMNS} items={agendas} onChange={setAgendas}/>
                     </div>
                 </div>
             )}

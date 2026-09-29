@@ -587,17 +587,6 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                             }}
                         />
                     </div>
-                    <div style={{gridColumn: '1 / -1', marginTop: 12}}>
-                        <MasterDetail
-                            label="Perfis Selecionados"
-                            source={PERFIL_SOURCE}
-                            valueKey="id"
-                            searchKeys={PERFIL_SEARCH}
-                            columns={PERFIL_COLUMNS}
-                            items={perfis}
-                            onChange={setPerfis}
-                        />
-                    </div>
                 </div>
             ),
         },
@@ -626,17 +615,6 @@ export default function ViewUsuarioFormUsuarioListScreen(){
                         <label className="form-field"><span className="form-label">Atender</span><BooleanField value={agendaPerm.atender} onChange={v => setAgendaPerm(p => ({...p, atender: v}))} /></label>
                     </div>
                     <div style={{gridColumn: '1 / -1', marginTop: 4, fontSize: 11, color: '#777'}}>Permissões aplicadas às agendas selecionadas (tabela bas_usuario_agenda).</div>
-                    <div style={{gridColumn: '1 / -1', marginTop: 8}}>
-                        <MasterDetail
-                            label="Agendas Selecionadas"
-                            source={AGENDA_SOURCE}
-                            valueKey="id"
-                            searchKeys={AGENDA_SEARCH}
-                            columns={AGENDA_COLUMNS}
-                            items={agendas}
-                            onChange={setAgendas}
-                        />
-                    </div>
                 </div>
             ),
         },
