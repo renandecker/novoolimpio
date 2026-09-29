@@ -1245,9 +1245,9 @@
 .row-menu-item.btnblack { color: #3f3f3f !important; background-color: transparent !important; background-image: none !important; }
 .row-menu-item.btnstop { color: #339bb9 !important; background-color: transparent !important; background-image: none !important; }
 .row-menu-item.btnpurple { color: #6a3fa0 !important; background-color: transparent !important; background-image: none !important; }
-.row-menu-item.btnsky { color: #2a8a8a !important; background-color: transparent !important; background-image: none !important; }
-.row-menu-item.btnbrown { color: #8b4513 !important; background-color: transparent !important; background-image: none !important; }
-.row-menu-item.btnpink { color: #c2185b !important; background-color: #c2185b !important; background-image: none !important; }
+.row-menu-item.btnsky { color: #ffffff !important; background-color: #00838f !important; background-image: none !important; }
+.row-menu-item.btnbrown { color: #ffffff !important; background-color: #795548 !important; background-image: none !important; }
+.row-menu-item.btnpink { color: #ffffff !important; background-color: #c2185b !important; background-image: none !important; }
 
 .row-menu-item.btngreen:hover:not(:disabled),
 .row-menu-item.btnblue:hover:not(:disabled),
@@ -1604,30 +1604,36 @@
 }
 
 .btnbrown:not(.gp-btn-acoes) {
-    background-color: rgb(139, 69, 19) !important;
-    background-image: linear-gradient(180deg, rgb(139, 69, 19) 0%, rgb(160, 82, 45) 100%) !important;
+    color: #ffffff !important;
+    background-color: rgb(121, 85, 72) !important;
+    background-image: linear-gradient(180deg, rgb(141, 105, 92) 0%, rgb(121, 85, 72) 100%) !important;
 }
 .btnbrown:not(.gp-btn-acoes):hover {
-    background-color: rgb(139, 69, 19) !important;
-    background-image: linear-gradient(180deg, rgb(139, 69, 19) 0%, rgb(160, 82, 45) 100%) !important;
+    color: #ffffff !important;
+    background-color: rgb(93, 64, 55) !important;
+    background-image: linear-gradient(180deg, rgb(121, 85, 72) 0%, rgb(93, 64, 55) 100%) !important;
 }
 
 .btnpink:not(.gp-btn-acoes) {
-    background-color: rgb(255, 0, 255) !important;
-    background-image: linear-gradient(180deg, rgb(255, 0, 255) 0%, rgb(255, 90, 255) 100%) !important;
+    color: #ffffff !important;
+    background-color: rgb(194, 24, 91) !important;
+    background-image: linear-gradient(180deg, rgb(216, 27, 96) 0%, rgb(194, 24, 91) 100%) !important;
 }
 .btnpink:not(.gp-btn-acoes):hover {
-    background-color: rgb(255, 0, 255) !important;
-    background-image: linear-gradient(180deg, rgb(255, 0, 255) 0%, rgb(255, 90, 255) 100%) !important;
+    color: #ffffff !important;
+    background-color: rgb(136, 14, 79) !important;
+    background-image: linear-gradient(180deg, rgb(194, 24, 91) 0%, rgb(136, 14, 79) 100%) !important;
 }
 
 .btnsky:not(.gp-btn-acoes) {
-    background-color: rgb(83, 191, 191) !important;
-    background-image: linear-gradient(180deg, rgb(83, 191, 191) 0%, rgb(48, 113, 113) 100%) !important;
+    color: #ffffff !important;
+    background-color: rgb(0, 131, 143) !important;
+    background-image: linear-gradient(180deg, rgb(0, 151, 167) 0%, rgb(0, 131, 143) 100%) !important;
 }
 .btnsky:not(.gp-btn-acoes):hover {
-    background-color: rgb(83, 191, 191) !important;
-    background-image: linear-gradient(180deg, rgb(83, 191, 191) 0%, rgb(48, 113, 113) 100%) !important;
+    color: #ffffff !important;
+    background-color: rgb(0, 96, 100) !important;
+    background-image: linear-gradient(180deg, rgb(0, 131, 143) 0%, rgb(0, 96, 100) 100%) !important;
 }
 
 .btngrey:not(.gp-btn-acoes) {

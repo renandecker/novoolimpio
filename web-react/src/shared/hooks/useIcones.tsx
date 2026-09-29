@@ -197,13 +197,17 @@ export function useMenuIcon() {
     const menuIcon = useCallback((rotulo: string, storedIcone?: string): React.ReactNode => {
         const stored = (storedIcone ?? '').trim();
         
-        if (stored && !stored.startsWith('ui-icon') && !stored.startsWith('fa ')) {
+        const isPlaceholder = !stored || 
+            stored.startsWith('ui-icon') || 
+            stored.includes('500px');
+
+        if (!isPlaceholder && !stored.startsWith('fa ')) {
             return stored;
         }
         
-        const isFaClass = stored.startsWith('fa ') || stored.startsWith('fas ') || stored.startsWith('far ') || stored.startsWith('fab ') || stored.includes('fa-');
+        const isFaClass = !isPlaceholder && (stored.startsWith('fa ') || stored.startsWith('fas ') || stored.startsWith('far ') || stored.startsWith('fab ') || stored.includes('fa-'));
         
-        if (stored && isFaClass) {
+        if (!isPlaceholder && isFaClass) {
             const cleanStored = (stored.startsWith('fa ') || stored.startsWith('fas ') || stored.startsWith('far ') || stored.startsWith('fab ')) ? stored : `fa ${stored}`;
             const icone = getIconeByClasse(cleanStored) || getIconeByClasse(stored);
             if (icone) {

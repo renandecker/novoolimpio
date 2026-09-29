@@ -25,10 +25,10 @@ const CLASS_COLORS: Record<string, string> = {
     btnyellow: Colors.goldBg,
     btnorange: '#FF9800',
     btnpurple: '#9C27B0',
-    btnpink: '#E91E63',
+    btnpink: '#C2185B',
     btnbrown: '#795548',
     btnblack: '#333',
-    btnsky: '#00BCD4',
+    btnsky: '#00838f',
     btnstop: '#FF5722',
     btngrey: '#9E9E9E',
 };
@@ -63,28 +63,31 @@ export function RowMenu({icon, className, title, items, triggerStyle}: RowMenuPr
                                 <Text style={styles.dropdownTitle}>{title}</Text>
                             </View>
                         )}
-                        {items.map((item) => (
-                            <TouchableOpacity
-                                key={item.key}
-                                style={styles.item}
-                                disabled={item.disabled}
-                                onPress={() => {
-                                    setOpen(false);
-                                    item.onSelect?.();
-                                }}
-                                activeOpacity={0.7}
-                            >
-                                <Text
-                                    style={[
-                                        styles.itemText,
-                                        item.className && {color: CLASS_COLORS[item.className] || Colors.textPrimary},
-                                        item.disabled && styles.itemTextDisabled,
-                                    ]}
+                        {items.map((item) => {
+                            const itemBg = item.className ? (CLASS_COLORS[item.className] || Colors.primary) : Colors.primary;
+                            return (
+                                <TouchableOpacity
+                                    key={item.key}
+                                    style={[styles.item, {backgroundColor: itemBg, marginHorizontal: 8, marginVertical: 4, borderRadius: 6}]}
+                                    disabled={item.disabled}
+                                    onPress={() => {
+                                        setOpen(false);
+                                        item.onSelect?.();
+                                    }}
+                                    activeOpacity={0.7}
                                 >
-                                    {item.label}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
+                                    <Text
+                                        style={[
+                                            styles.itemText,
+                                            {color: '#ffffff', fontWeight: 'bold'},
+                                            item.disabled && styles.itemTextDisabled,
+                                        ]}
+                                    >
+                                        {item.label}
+                                    </Text>
+                                </TouchableOpacity>
+                            );
+                        })}
                     </View>
                 </TouchableOpacity>
             </Modal>
