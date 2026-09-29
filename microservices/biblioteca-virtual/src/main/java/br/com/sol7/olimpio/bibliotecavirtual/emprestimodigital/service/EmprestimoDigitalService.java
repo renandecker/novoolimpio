@@ -10,6 +10,7 @@ import br.com.sol7.olimpio.bibliotecavirtual.licencaacervo.service.LicencaAcervo
 import br.com.sol7.olimpio.bibliotecavirtual.livrodigital.entity.LivroDigital;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.SearchFilterRequest;
+import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -22,6 +23,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
+@WithTransaction
 public class EmprestimoDigitalService {
 
     @Inject

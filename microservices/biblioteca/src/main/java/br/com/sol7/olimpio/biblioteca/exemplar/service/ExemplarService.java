@@ -7,6 +7,7 @@ import br.com.sol7.olimpio.biblioteca.exemplar.repository.ExemplarRepository;
 import br.com.sol7.olimpio.biblioteca.obra.entity.Obra;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.SearchFilterRequest;
+import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
+@WithTransaction
 public class ExemplarService {
 
     @Inject

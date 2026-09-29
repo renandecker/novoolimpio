@@ -7,6 +7,7 @@ import br.com.sol7.olimpio.bibliotecavirtual.filaespera.repository.FilaEsperaDig
 import br.com.sol7.olimpio.bibliotecavirtual.livrodigital.entity.LivroDigital;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.SearchFilterRequest;
+import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
+@WithTransaction
 public class FilaEsperaDigitalService {
 
     @Inject

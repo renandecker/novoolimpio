@@ -31,16 +31,17 @@ public class AuditoriaService {
 
     @WithSession
     public Uni<PagedResponse<AuditoriaResponse>> paged(String entidade, int page, int size) {
-        if (entidade == null || !repository.existeEntidade(entidade)) {
-            return Uni.createFrom().failure(new BadRequestException("Entidade de auditoria inválida: " + entidade));
-        }
         int p = Math.max(0, page);
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
+        if (entidade == null || !repository.existeEntidade(entidade)) {
+            return Uni.createFrom().item(new PagedResponse<>(List.of(), 0, p, s));
+        }
         return repository.listar(entidade, p, s)
                 .onItem().transformToUni(rows -> repository.contar(entidade)
                         .map(total -> new PagedResponse<>(
                                 rows.stream().map(row -> toResponse(entidade, row)).toList(),
-                                total, p, s)));
+                                total, p, s)))
+                .onFailure().recoverWithItem(new PagedResponse<>(List.of(), 0, p, s));
     }
 
     private AuditoriaResponse toResponse(String entidade, Tuple row) {
