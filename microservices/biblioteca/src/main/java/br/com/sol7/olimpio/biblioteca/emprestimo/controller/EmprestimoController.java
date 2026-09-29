@@ -28,7 +28,7 @@ public class EmprestimoController extends GenericActionController {
     public Uni<PagedResponse<EmprestimoResponse>> listar(
             @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("size") @DefaultValue("20") int size) {
-        return service.listar(null, page, size);
+        return service.listar(null, page, size, "id", "asc");
     }
 
     @GET
@@ -47,7 +47,7 @@ public class EmprestimoController extends GenericActionController {
     public Uni<PagedResponse<EmprestimoResponse>> search(SearchFilterRequest request,
             @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("size") @DefaultValue("20") int size) {
-        return service.listar(request, page, size);
+        return service.listar(request, page, size, "id", "asc");
     }
 
     @GET
