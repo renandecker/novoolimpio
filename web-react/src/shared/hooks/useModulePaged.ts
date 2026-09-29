@@ -26,7 +26,7 @@ export const useModulePaged = (
     const query = useQuery({
         queryKey: [path, hasFilters ? 'search' : 'paged', page, size, paramsKey, filtersKey, sortKey],
         queryFn: async () => {
-            const queryParams = {page, size, ...params, sort: sort?.field, order: sort?.direction};
+            const queryParams = {page, size, ...params};
             if (hasFilters) {
                 return (await api.post<PagedResponse<ApiItem>>(`${basePath}/search`, filters, {
                     params: queryParams

@@ -35,8 +35,11 @@ public class EmprestimoController extends GenericActionController {
     @Path("/paged")
     public Uni<PagedResponse<EmprestimoResponse>> paged(
             @QueryParam("page") @DefaultValue("0") int page,
-            @QueryParam("size") @DefaultValue("20") int size) {
-        return service.listar(null, page, size);
+            @QueryParam("size") @DefaultValue("20") int size,
+            @QueryParam("sort") String sort,
+            @QueryParam("order") String order) {
+        var direction = "asc".equals(order) ? "ASC" : "DESC";
+        return service.listar(null, page, size, sort, direction);
     }
 
     @POST

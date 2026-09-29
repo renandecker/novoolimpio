@@ -32,10 +32,48 @@ public class EmprestimoService {
     @Inject
     MultaService multaService;
 
-    public Uni<PagedResponse<EmprestimoResponse>> listar(SearchFilterRequest request, int page, int size) {
+    public Uni<PagedResponse<EmprestimoResponse>> listar(SearchFilterRequest request, int page, int size, String sort, String direction) {
+        boolean asc = "asc".equalsIgnoreCase(direction);
         return repository.listAll()
                 .onItem().transform(list -> list.stream()
                         .filter(e -> e.flAtivo)
+                        .sorted((a, b) -> {
+                            EmprestimoResponse ra = EmprestimoResponse.fromEntity(a);
+                            EmprestimoResponse rb = EmprestimoResponse.fromEntity(b);
+                            int cmp;
+                            switch (sort) {
+                                case "id":
+                                    cmp = Long.compare(ra.id, rb.id);
+                                    break;
+                                case "dataRetirada":
+                                    cmp = ra.dataRetirada.compareTo(rb.dataRetirada);
+                                    break;
+                                case "dataPrevistaDevolucao":
+                                    cmp = ra.dataPrevistaDevolucao.compareTo(rb.dataPrevistaDevolucao);
+                                    break;
+                                case "dataEfetivaDevolucao":
+                                    cmp = ra.dataEfetivaDevolucao.compareTo(rb.dataEfetivaDevolucao);
+                                    break;
+                                case "quantidadeRenovacoes":
+                                    cmp = Integer.compare(ra.quantidadeRenovacoes, rb.quantidadeRenovacoes);
+                                    break;
+                                case "status":
+                                    cmp = ra.status.name().compareTo(rb.status.name());
+                                    break;
+                                case "observacoes":
+                                    cmp = ra.observacoes == null ? rb.observacoes == null ? 0 : -1 : ra.observacoes.compareTo(rb.observacoes);
+                                    break;
+                                case "usuarioId":
+                                    cmp = Long.compare(ra.usuarioId, rb.usuarioId);
+                                    break;
+                                case "dataCadastro":
+                                    cmp = ra.dataCadastro.compareTo(rb.dataCadastro);
+                                    break;
+                                default:
+                                    cmp = Long.compare(ra.id, rb.id);
+                            }
+                            return asc ? cmp : -cmp;
+                        })
                         .map(EmprestimoResponse::fromEntity)
                         .collect(Collectors.toList()))
                 .onItem().transform(list -> {
