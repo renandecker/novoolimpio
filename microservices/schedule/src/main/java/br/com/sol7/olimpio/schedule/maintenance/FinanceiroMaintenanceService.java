@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.schedule.maintenance;
+﻿package br.com.sol7.olimpio.schedule.maintenance;
 
 import br.com.sol7.olimpio.schedule.financeiro.FechamentoCaixaEmailEvent;
 import br.com.sol7.olimpio.schedule.financeiro.FechamentoEmailProducer;
@@ -31,7 +31,6 @@ public class FinanceiroMaintenanceService {
     @Inject
     FechamentoEmailProducer fechamentoEmailProducer;
 
-    // Migrado de FormaPagamentoService.verificarCotaAuto()
     private static final String SQL_VERIFICAR_COTA_DIARIO =
             "UPDATE fin_forma_pagamento taxa SET data_controle_cota = now(), valor_controle_cota = valor_cota " +
                     "where taxa.cota = true and taxa.ativo = true and periodicidade = 'DIARIO' and taxa.data_controle_cota != current_date";
@@ -51,7 +50,6 @@ public class FinanceiroMaintenanceService {
                 .replaceWithVoid();
     }
 
-    // Migrado de CustoServico / Cobrança / NAP / Central de Cobrança:
     // Acumula o valor ao mês para cada uso (ligação na central de cobrança ou nap, e-mail, sms)
     // e cria uma parcela no primeiro dia do mês a partir e somente do mês anterior,
     // vinculada ao contrato ligado da central.
@@ -95,7 +93,6 @@ public class FinanceiroMaintenanceService {
             .onFailure().invoke(e -> LOG.error("Erro ao processar custos de serviço e parcelas mensais: " + e.getMessage()));
     }
 
-    // Migrado de SchedulingService.fechamentoCaixaAbertos()
     private static final String SQL_BUSCAR_CAIXAS_ABERTOS =
             "SELECT c.id, c.id_unidade, c.id_usuario, c.id_caixa_unidade " +
                     "FROM fin_caixa c WHERE c.data_fechamento IS NULL";

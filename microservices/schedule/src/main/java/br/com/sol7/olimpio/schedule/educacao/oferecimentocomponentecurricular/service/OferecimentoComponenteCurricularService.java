@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.schedule.educacao.oferecimentocomponentecurricular.service;
+﻿package br.com.sol7.olimpio.schedule.educacao.oferecimentocomponentecurricular.service;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;

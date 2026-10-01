@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.schedule.jobs;
+﻿package br.com.sol7.olimpio.schedule.jobs;
 
 import br.com.sol7.olimpio.schedule.pagamento.PagamentoConfirmadoEvent;
 import br.com.sol7.olimpio.schedule.pagamento.PagamentoConfirmadoService;

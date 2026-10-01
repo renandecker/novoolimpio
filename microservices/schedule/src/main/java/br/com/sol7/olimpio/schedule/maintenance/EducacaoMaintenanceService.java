@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.schedule.maintenance;
+﻿package br.com.sol7.olimpio.schedule.maintenance;
 
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;
@@ -136,7 +136,6 @@ Uni<Integer> acc = Uni.createFrom().item(0);
 
     // ---------------------------------------------------------------------------
     // Carregar chamadas assinadas pendentes automaticamente
-    // Migrado de ChamadaAssinadaImpressaService.carregarChamadasPendentes() (legado).
     //
     // Logica:
     // 1. Busca todos os oferecimentos_componente_curricular que NAO possuem
@@ -255,7 +254,6 @@ Uni<Integer> acc = Uni.createFrom().item(0);
 
     // ---------------------------------------------------------------------------
     // Corrigir avaliacoes
-    // Migrado de SchedulingService.desativarCorrigirAvaliacoes() (legado) +
     // AvaliacaoService.executaCorrecao() (legado).
     //
     // Logica:

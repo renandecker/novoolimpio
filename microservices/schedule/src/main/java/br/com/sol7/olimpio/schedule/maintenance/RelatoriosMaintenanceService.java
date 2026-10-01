@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.schedule.maintenance;
+﻿package br.com.sol7.olimpio.schedule.maintenance;
 
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;
@@ -26,7 +26,6 @@ public class RelatoriosMaintenanceService {
     @Inject
     Pool pool;
 
-    // Migrado de ExtratorService.remove() - marcar extratores antigos como Removidos
     private static final String SQL_MARCAR_REMOVIDOS_ANTIGOS =
             "UPDATE rel_extrator SET situacao = 'Removido' where cast(data_fim as date) <= current_date-1 and data_fim is not null";
     private static final String SQL_MARCAR_REMOVIDOS_SEM_FIM =

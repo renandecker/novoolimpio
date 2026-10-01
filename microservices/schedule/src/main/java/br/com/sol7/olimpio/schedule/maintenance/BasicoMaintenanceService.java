@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.schedule.maintenance;
+﻿package br.com.sol7.olimpio.schedule.maintenance;
 
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;
@@ -16,7 +16,6 @@ public class BasicoMaintenanceService {
     @Inject
     Pool pool;
 
-    // Migrado de SchedulingService.tudo() - atualiza a situacao (inadimplente) das contas
     private static final String SQL_ATUALIZAR_SITUACAO_CONTA =
             "UPDATE bas_conta con SET fl_situacao = case when " +
                     "exists(select * from bas_conta_controle_pagamento pag where pag.id_conta = con.id and data_vencimento < current_date " +
@@ -26,7 +25,6 @@ public class BasicoMaintenanceService {
         return pool.query(SQL_ATUALIZAR_SITUACAO_CONTA).execute().replaceWithVoid();
     }
 
-    // Migrado de SchedulingService.tudo() - inativa usuarios sem acesso ha X dias (bas_config)
     private static final String SQL_INATIVAR_USUARIOS_SEM_ACESSO =
             "update bas_usuario usu set fl_ativo = false where fl_ativo = true and " +
                     "not exists(select ace.id from bas_acesso ace where cast(ace.data as date) > " +
@@ -38,7 +36,6 @@ public class BasicoMaintenanceService {
         return pool.query(SQL_INATIVAR_USUARIOS_SEM_ACESSO).execute().replaceWithVoid();
     }
 
-    // Migrado de ContaService.verificaConta()
     private static final String SQL_VERIFICAR_CONTA =
             "UPDATE bas_conta ccc SET fl_situacao = true where " +
                     "exists(select pp.id from bas_conta_controle_pagamento pp where ccc.id = pp.id_conta and " +
@@ -48,7 +45,6 @@ public class BasicoMaintenanceService {
         return pool.query(SQL_VERIFICAR_CONTA).execute().replaceWithVoid();
     }
 
-    // Migrado de ConfiguracaoEmailService.verificarCotaAuto() + SchedulingService.verificarCotaEmailAutomatico()
     private static final String SQL_VERIFICAR_COTA_EMAIL_DIARIO =
             "UPDATE bas_email taxa SET data_atualizacao = now(), usado = cota " +
                     "where taxa.fl_api_email = true and periodicidade = 'DIARIO' and taxa.data_atualizacao != current_date";
@@ -77,7 +73,6 @@ public class BasicoMaintenanceService {
                 });
     }
 
-    // Migrado de SchedulingService.atualizarCompromissosAutomaticos() - traduzido para um unico
     // UPDATE (mesmo efeito final: troca o status do compromisso para o "status de troca
     // automatica" configurado). NAO cria o registro de auditoria CompromissoPessoaStatus -
     // essa feature nao existe em nenhum microsservico ainda, ver RELATORIO_SCHEDULE.md.
@@ -93,7 +88,6 @@ public class BasicoMaintenanceService {
         return pool.query(SQL_ATUALIZAR_COMPROMISSOS_AUTOMATICOS).execute().replaceWithVoid();
     }
 
-    // Migrado de LogradouroService.atualizar() - so a limpeza (2 deletes); a parte que consulta
     // o webservice dos Correios (CorreioQualCep) nao foi portada (integracao externa).
     private static final String SQL_LIMPAR_LOGRADOUROS_ORFAOS =
             "DELETE FROM bas_logradouro log WHERE " +

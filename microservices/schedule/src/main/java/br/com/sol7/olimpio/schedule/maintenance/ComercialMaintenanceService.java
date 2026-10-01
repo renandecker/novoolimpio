@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.schedule.maintenance;
+﻿package br.com.sol7.olimpio.schedule.maintenance;
 
 import java.util.Date;
 
@@ -18,7 +18,6 @@ public class ComercialMaintenanceService {
     @Inject
     Pool comercialPool;
 
-    // Migrado de SchedulingService.atualizarIdadeProspectos()
     // OBS: depende da funcao PostgreSQL customizada is_date(...), que existia no banco legado
     // mas nao foi encontrada em nenhuma migration do Flyway - precisa existir no banco
     // "olimpio_comercial" para esta query funcionar. Ver RELATORIO_SCHEDULE.md.

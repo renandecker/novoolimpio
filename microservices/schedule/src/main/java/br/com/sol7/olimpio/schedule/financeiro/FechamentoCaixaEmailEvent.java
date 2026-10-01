@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.schedule.financeiro;
+﻿package br.com.sol7.olimpio.schedule.financeiro;
 
 import java.math.BigDecimal;
 

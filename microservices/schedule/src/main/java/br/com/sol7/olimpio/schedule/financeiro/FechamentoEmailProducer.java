@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.schedule.financeiro;
+﻿package br.com.sol7.olimpio.schedule.financeiro;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.smallrye.mutiny.Uni;

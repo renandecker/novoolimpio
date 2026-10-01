@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.schedule.jobs;
+﻿package br.com.sol7.olimpio.schedule.jobs;
 
 import io.quarkus.scheduler.Scheduled;
 import io.smallrye.common.annotation.RunOnVirtualThread;
@@ -27,7 +27,6 @@ public class SchedulingJobs {
     @Inject
     MaintenanceConsumer maintenance;
 
-    // Migrado de SchedulingService.tudo() - dominio empresa/curriculo (VagaService), 1h da manha
     @Scheduled(cron = "{scheduler.tudo.cron:0 0 1 * * ?}", timeZone = "America/Sao_Paulo")
     @RunOnVirtualThread
     public void rotinaEmpresa() {
@@ -38,7 +37,6 @@ public class SchedulingJobs {
         maintenance.processarEmpresa("scheduled");
     }
 
-    // Migrado de SchedulingService.tudo() - dominio basico, 1h da manha
     @Scheduled(cron = "{scheduler.tudo.cron:0 0 1 * * ?}", timeZone = "America/Sao_Paulo")
     @RunOnVirtualThread
     public void rotinaBasico() {
@@ -49,7 +47,6 @@ public class SchedulingJobs {
         maintenance.processarBasico("scheduled");
     }
 
-    // Migrado de SchedulingService.tudo() - dominio educacao, 1h da manha
     @Scheduled(cron = "{scheduler.tudo.cron:0 0 1 * * ?}", timeZone = "America/Sao_Paulo")
     @RunOnVirtualThread
     public void rotinaEducacao() {
@@ -60,7 +57,6 @@ public class SchedulingJobs {
         maintenance.processarEducacao("scheduled");
     }
 
-    // Migrado de SchedulingService.tudo() - dominio financeiro, 1h da manha
     @Scheduled(cron = "{scheduler.tudo.cron:0 0 1 * * ?}", timeZone = "America/Sao_Paulo")
     @RunOnVirtualThread
     public void rotinaFinanceiro() {
@@ -71,7 +67,6 @@ public class SchedulingJobs {
         maintenance.processarFinanceiro("scheduled");
     }
 
-    // Migrado de SchedulingService.tudo() - dominio central, 1h da manha
     @Scheduled(cron = "{scheduler.tudo.cron:0 0 1 * * ?}", timeZone = "America/Sao_Paulo")
     @RunOnVirtualThread
     public void rotinaCentral() {
@@ -82,7 +77,6 @@ public class SchedulingJobs {
         maintenance.processarCentral("scheduled");
     }
 
-    // Migrado de SchedulingService.tudo() - dominio comercial, 1h da manha
     @Scheduled(cron = "{scheduler.tudo.cron:0 0 1 * * ?}", timeZone = "America/Sao_Paulo")
     @RunOnVirtualThread
     public void rotinaComercial() {
@@ -93,7 +87,6 @@ public class SchedulingJobs {
         maintenance.processarComercial("scheduled");
     }
 
-    // Migrado de SchedulingService.tudo() - dominio relatorios, 1h da manha
     @Scheduled(cron = "{scheduler.tudo.cron:0 0 1 * * ?}", timeZone = "America/Sao_Paulo")
     @RunOnVirtualThread
     public void rotinaRelatorios() {
@@ -104,7 +97,6 @@ public class SchedulingJobs {
         maintenance.processarRelatorios("scheduled");
     }
 
-    // Migrado de SchedulingService.tudo() - rotinas de email (NAP + cobranca), 1h da manha
     @Scheduled(cron = "{scheduler.tudo.cron:0 0 1 * * ?}", timeZone = "America/Sao_Paulo")
     @RunOnVirtualThread
     public void rotinaEmails() {
@@ -115,7 +107,6 @@ public class SchedulingJobs {
         maintenance.processarEmails("scheduled");
     }
 
-    // Migrado de SchedulingService.tudo() - verificaFeriadosParaajustar.
     // A regra agora e executada diretamente no schedule (FeriadoAjusteMaintenanceService),
     // que foi migrada do basico. O cron e o trigger manual via Kafka executam aqui.
     @Scheduled(cron = "{scheduler.tudo.cron:0 0 1 * * ?}", timeZone = "America/Sao_Paulo")
@@ -128,7 +119,6 @@ public class SchedulingJobs {
         maintenance.processarFeriado("scheduled");
     }
 
-    // Migrado de SchedulingService.fechamentoCaixaAbertos() - 23h (fluxo de caixa)
     @Scheduled(cron = "{scheduler.fechamento-caixa.cron:0 0 23 * * ?}", timeZone = "America/Sao_Paulo")
     @RunOnVirtualThread
     public void rotinaFechamentoCaixa() {
@@ -139,7 +129,6 @@ public class SchedulingJobs {
         maintenance.processarFechamentoCaixa("scheduled");
     }
 
-    // Migrado de SchedulingService.desativarCorrigirAvaliacoes() - 23h
     @Scheduled(cron = "{scheduler.corrigir-avaliacoes.cron:0 0 23 * * ?}", timeZone = "America/Sao_Paulo")
     @RunOnVirtualThread
     public void rotinaCorrigirAvaliacoes() {

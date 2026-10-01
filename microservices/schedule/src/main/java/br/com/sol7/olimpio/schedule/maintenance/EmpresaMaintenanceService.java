@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.schedule.maintenance;
+﻿package br.com.sol7.olimpio.schedule.maintenance;
 
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;
@@ -39,7 +39,6 @@ public class EmpresaMaintenanceService {
     @ConfigProperty(name = "schedule.email.enabled", defaultValue = "true")
     boolean emailEnabled;
 
-    // Migrado de VagaService.criarEntrevistas() - desativa vagas expiradas e cria as entrevistas
     // dos usuarios alcancados pelas associacoes (perfil/unidade/componente/oferecimento/
     // grupo/curriculo/empresa/usuario), puxando a data_final da vaga.
     private static final String SQL_DESATIVAR_VAGAS_EXPIRADAS =
@@ -110,7 +109,6 @@ public class EmpresaMaintenanceService {
                 });
     }
 
-    // Migrado de VagaService.enviarVagasAlunos() - processa lotes de ate 100 entrevistas sem
     // envio, avancando o cursor bas_config ID_VAGA_ALUNO a cada lote (evita reprocessamento).
     private static final String SQL_BUSCAR_CANDIDATOS = """
     SELECT a.id AS id,u.login AS login,p.email AS email,v.nome AS nome,v.titulo_email AS titulo_email
