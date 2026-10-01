@@ -11,7 +11,6 @@ import java.util.Date;
 @ApplicationScoped
 public class MetaRepository implements PanacheRepository<Meta> {
 
-    // Migrado de MetaRepository.buscarMetaOperadorDia (legado) - HQL original:
     // Select m from Meta m where m.data = date(?1) and m.operador = ?2 order by m.id desc
     public static final String SQL_BUSCAR_META_OPERADOR_DIA =
             "SELECT m.* FROM cen_meta m WHERE m.data = date(?1) and m.id_operador = ?2 ORDER BY m.id desc LIMIT 10";
@@ -25,7 +24,6 @@ public class MetaRepository implements PanacheRepository<Meta> {
     }
 
 
-    // Migrado de MetaRepository.buscarMetaOperadorPeriodo (legado) - HQL original:
     // Select m from Meta m where date(?1) BETWEEN m.dataInicial AND m.dataFinal and m.operador = ?2 order by  m.id  desc
     public static final String SQL_BUSCAR_META_OPERADOR_PERIODO =
             "SELECT m.* FROM cen_meta m WHERE date(?1) BETWEEN m.data_inicial AND m.data_final and m.id_operador = ?2 ORDER BY m.id desc LIMIT 10";
@@ -39,7 +37,6 @@ public class MetaRepository implements PanacheRepository<Meta> {
     }
 
 
-    // Migrado de MetaRepository.buscarConflitoDatasComEquipe (legado) - HQL original:
     // SELECT m from Meta m where m.operacional=?3 AND (m.dataInicial BETWEEN ?1 AND ?2 or m.dataFinal BETWEEN ?1 AND ?2)
     public static final String SQL_BUSCAR_CONFLITO_DATAS_COM_EQUIPE =
             "SELECT m.* FROM cen_meta m WHERE m.id_operacional=?3 AND (m.data_inicial BETWEEN ?1 AND ?2 or m.data_final BETWEEN ?1 AND ?2)";
@@ -54,7 +51,6 @@ public class MetaRepository implements PanacheRepository<Meta> {
     }
 
 
-    // Migrado de MetaRepository.buscarConflitoDatasComEquipeComMeta (legado) - HQL original:
     // SELECT m from Meta m where m.operacional=?3 AND (m.dataInicial BETWEEN ?1 AND ?2 or m.dataFinal BETWEEN ?1 AND ?2) and m.id <> ?4
     public static final String SQL_BUSCAR_CONFLITO_DATAS_COM_EQUIPE_COM_META =
             "SELECT m.* FROM cen_meta m WHERE m.id_operacional=?3 AND (m.data_inicial BETWEEN ?1 AND ?2 or m.data_final BETWEEN ?1 AND ?2) and m.id <> ?4";
@@ -70,7 +66,6 @@ public class MetaRepository implements PanacheRepository<Meta> {
     }
 
 
-    // Migrado de MetaRepository.buscarConflitoDatasComOperador (legado) - HQL original:
     // SELECT m from Meta m where m.operador=?3 AND (m.dataInicial BETWEEN ?1 AND ?2 or m.dataFinal BETWEEN ?1 AND ?2)
     public static final String SQL_BUSCAR_CONFLITO_DATAS_COM_OPERADOR =
             "SELECT m.* FROM cen_meta m WHERE m.id_operador=?3 AND (m.data_inicial BETWEEN ?1 AND ?2 or m.data_final BETWEEN ?1 AND ?2)";
@@ -85,7 +80,6 @@ public class MetaRepository implements PanacheRepository<Meta> {
     }
 
 
-    // Migrado de MetaRepository.buscarConflitoDatasComOperadorComMeta (legado) - HQL original:
     // SELECT m from Meta m where m.operador=?3 AND (m.dataInicial BETWEEN ?1 AND ?2 or m.dataFinal BETWEEN ?1 AND ?2) and m.id <> ?4
     public static final String SQL_BUSCAR_CONFLITO_DATAS_COM_OPERADOR_COM_META =
             "SELECT m.* FROM cen_meta m WHERE m.id_operador=?3 AND (m.data_inicial BETWEEN ?1 AND ?2 or m.data_final BETWEEN ?1 AND ?2) and m.id <> ?4";
@@ -101,7 +95,6 @@ public class MetaRepository implements PanacheRepository<Meta> {
     }
 
 
-    // Migrado de MetaRepository.buscarMetaOperador (legado) - HQL original:
     // Select m from Meta m where  (m.data = date(?1) and m.operador = ?2 and m.operacional is null) or  (date(?1) BETWEEN m.dataInicial AND m.dataFinal and m.operador = ?2 and m.operacional is null) or (m.data = date(?1) and m.operacional = ?2 and m.operador is null) or  (date(?1) BETWEEN m.dataInicial AND m.dataFinal and m.operacional = ?2 and m.operador is null) order by m.id desc
     public static final String SQL_BUSCAR_META_OPERADOR =
             "SELECT m.* FROM cen_meta m WHERE (m.data = date(?1) and m.id_operador = ?2 and m.id_operacional is null) or (date(?1) BETWEEN m.data_inicial AND m.data_final and m.id_operador = ?2 and m.id_operacional is null) or (m.data = date(?1) and m.id_operacional = ?2 and m.id_operador is null) or (date(?1) BETWEEN m.data_inicial AND m.data_final and m.id_operacional = ?2 and m.id_operador is null) ORDER BY m.id desc LIMIT 10";

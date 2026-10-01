@@ -10,7 +10,6 @@ import br.com.sol7.olimpio.basico.pessoadocumento.entity.PessoaDocumento;
 @ApplicationScoped
 public class PessoaDocumentoRepository implements PanacheRepository<PessoaDocumento> {
 
-    // Migrado de PessoaDocumentoRepository.buscarPessoaDocumento (legado) - HQL original:
     // select c from PessoaDocumento c where c.pessoa = ?1
     public static final String SQL_BUSCAR_PESSOA_DOCUMENTO =
             "SELECT c.* FROM bas_pessoa_documento c WHERE c.id_pessoa = ?1";

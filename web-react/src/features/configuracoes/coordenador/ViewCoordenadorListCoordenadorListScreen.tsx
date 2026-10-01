@@ -189,6 +189,9 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
     const [modal, setModal] = useState<null | 'ligacao' | 'ligacaoCoord' | 'ordem' | 'prioritaria' | 'prioritariaCoord' | 'pausa' | 'pausaCoord' | 'agend' | 'pie' | 'trocaLig' | 'trocaPri'>(null);
 
     const [pieData, setPieData] = useState<Record<string, number> | null>(null);
+    const [pieTitle, setPieTitle] = useState('Ligações de Todos Operadores');
+    const [pieUsuarios, setPieUsuarios] = useState<{id: number; login: string}[]>([]);
+    const [pieUsuarioSelecionado, setPieUsuarioSelecionado] = useState<number | null>(null);
 
     const [detailPage, setDetailPage] = useState(0);
 
@@ -384,13 +387,61 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
 
         try {
 
-            const r = await api.get(`/api/central/coordenador/${row.id_operador}/pie`);
+            const [users, pie] = await Promise.all([
 
-            setPieData(r.data as Record<string, number>);
+                api.get<{id: number; login: string}[]>(`/api/central/coordenador/${row.id_operador}/usuarios`),
+
+                api.get<Record<string, number>>(`/api/central/coordenador/${row.id_operador}/pie`),
+
+            ]);
+
+            setPieUsuarios(users.data ?? []);
+
+            setPieData(pie.data ?? {});
+
+            setPieTitle(`Ligações de ${row.operador_login}`);
+
+            setPieUsuarioSelecionado(null);
 
         } catch { setPieData({ total: 0 }); }
 
         setModal('pie');
+
+    };
+
+    const onPieUsuarioChange = async (usuarioId: number | null) => {
+
+        if (!modalOperador) return;
+
+        setPieUsuarioSelecionado(usuarioId);
+
+        try {
+
+            if (usuarioId) {
+
+                const pie = await api.get<Record<string, number>>(`/api/central/coordenador/${modalOperador.id}/pie?usuarioId=${usuarioId}`);
+
+                setPieData(pie.data ?? {});
+
+                const user = pieUsuarios.find(u => u.id === usuarioId);
+
+                setPieTitle(user ? `Ligações do(a): ${user.login}` : 'Ligações de Todos Operadores');
+
+            } else {
+
+                const pie = await api.get<Record<string, number>>(`/api/central/coordenador/${modalOperador.id}/pie`);
+
+                setPieData(pie.data ?? {});
+
+                setPieTitle('Ligações de Todos Operadores');
+
+            }
+
+        } catch (e) {
+
+            console.error('Erro ao buscar ligações por usuário', e);
+
+        }
 
     };
 
@@ -678,23 +729,69 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
 
                         <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 8, padding: 16, minWidth: 360, maxWidth: 600 }}>
 
-                            <h3 style={{ margin: '0 0 10px' }}>Ligações de {modalOperador?.login}</h3>
+                            <div style={{textAlign: 'center'}}>
 
-                            {!pieData ? <p>Carregando...</p> : (
+                                <button
 
-                                <div style={{ display: 'grid', gap: 6 }}>
+                                    className="btnyellow"
 
-                                    {Object.entries(pieData).filter(([k]) => k !== 'total').map(([k, v]) => (
+                                    style={{marginBottom: '16px'}}
 
-                                        <div key={k} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', padding: '4px 0' }}><span>{k}</span><strong>{v}</strong></div>
+                                    onClick={() => onPieUsuarioChange(null)}
 
-                                    ))}
+                                >
 
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, marginTop: 6 }}><span>Total</span><span>{String((pieData as Record<string, unknown>).total ?? 0)}</span></div>
+                                    Todos os operadores
+
+                                </button>
+
+                                <div style={{display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '16px', flexWrap: 'wrap'}}>
+
+                                    <label style={{fontWeight: 'bold'}}>Operadores:</label>
+
+                                    <select
+
+                                        className="form-input form-select"
+
+                                        value={pieUsuarioSelecionado ?? ''}
+
+                                        onChange={e => onPieUsuarioChange(e.target.value ? Number(e.target.value) : null)}
+
+                                        style={{minWidth: '200px'}}
+
+                                    >
+
+                                        <option value="">-- Selecione --</option>
+
+                                        {pieUsuarios.map(u => (
+
+                                            <option key={u.id} value={u.id}>{u.login}</option>
+
+                                        ))}
+
+                                    </select>
 
                                 </div>
 
-                            )}
+                                <h3>{pieTitle}</h3>
+
+                                {!pieData ? <p>Carregando...</p> : (
+
+                                    <div style={{ display: 'grid', gap: 6 }}>
+
+                                        {Object.entries(pieData).filter(([k]) => k !== 'total').map(([k, v]) => (
+
+                                            <div key={k} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', padding: '4px 0' }}><span>{k}</span><strong>{v}</strong></div>
+
+                                        ))}
+
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, marginTop: 6 }}><span>Total</span><span>{String((pieData as Record<string, unknown>).total ?? 0)}</span></div>
+
+                                    </div>
+
+                                )}
+
+                            </div>
 
                             <div style={{ textAlign: 'right', marginTop: 12 }}><button onClick={() => setModal(null)} style={{ padding: '6px 12px', background: '#1976d2', color: '#fff', border: 0, borderRadius: 4 }}>Fechar</button></div>
 

@@ -10,7 +10,6 @@ import br.com.sol7.olimpio.basico.cpfalunos.entity.CpfAlunos;
 @ApplicationScoped
 public class CpfAlunosRepository implements PanacheRepository<CpfAlunos> {
 
-    // Migrado de CpfAlunosRepository.verificaExistenciaCpf (legado) - HQL original:
     // Select a from CpfAlunos a where a.cpf = ?1
     public static final String SQL_VERIFICA_EXISTENCIA_CPF =
             "SELECT a.* FROM bas_cpf_alunos_antigos a WHERE a.cpf = ?1";
@@ -23,7 +22,6 @@ public class CpfAlunosRepository implements PanacheRepository<CpfAlunos> {
     }
 
 
-    // Migrado de CpfAlunosRepository.verificaExistenciaCpfComId (legado) - HQL original:
     // Select a from CpfAlunos a where a.cpf = ?1 and a.id <> ?2
     public static final String SQL_VERIFICA_EXISTENCIA_CPF_COM_ID =
             "SELECT a.* FROM bas_cpf_alunos_antigos a WHERE a.cpf = ?1 and a.id <> ?2 LIMIT 10";

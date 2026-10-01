@@ -9,7 +9,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class GrauRepository implements PanacheRepository<Grau> {
 
-    // Migrado de GrauRepository.buscarGrauComNota (legado) - HQL original:
     // select g from Grau g left join fetch g.grauNota n where g = ?1 order by n.numeroNota
     public static final String SQL_BUSCAR_GRAU_COM_NOTA =
             "SELECT g.* FROM edc_grau g LEFT JOIN edc_grau_nota n ON n.id_grau = g.id WHERE g.id = ?1 ORDER BY n.numero_nota";
@@ -22,7 +21,6 @@ public class GrauRepository implements PanacheRepository<Grau> {
     }
 
 
-    // Migrado de GrauRepository.buscarGrauComConceito (legado) - HQL original:
     // select g from Grau g left join fetch g.grauConceito c where g = ?1 order by c.ordem
     public static final String SQL_BUSCAR_GRAU_COM_CONCEITO =
             "SELECT g.* FROM edc_grau g LEFT JOIN edc_grau_conceito c ON c.id_grau = g.id WHERE g.id = ?1 ORDER BY c.ordem";

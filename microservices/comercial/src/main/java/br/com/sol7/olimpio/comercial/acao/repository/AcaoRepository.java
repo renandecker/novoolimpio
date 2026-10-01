@@ -9,7 +9,6 @@ import java.util.List;
 @ApplicationScoped
 public class AcaoRepository implements PanacheRepository<Acao> {
 
-    // Migrado de AcaoRepository.buscarAcaoComCampos (legado) - HQL original:
     // select a from Acao a left join fetch a.acaoCampos as ac where a.id = ?1 order by ac.ordem
     public static final String SQL_BUSCAR_ACAO_COM_CAMPOS =
             "SELECT a.* FROM com_acao a LEFT JOIN com_acao_campo as ON as.id_acao = a.id WHERE a.id = ?1 ORDER BY ac.ordem";
@@ -22,7 +21,6 @@ public class AcaoRepository implements PanacheRepository<Acao> {
     }
 
 
-    // Migrado de AcaoRepository.buscarAcaoComUnidades (legado) - HQL original:
     // select a from Acao a left join fetch a.unidades where a = ?1
     public static final String SQL_BUSCAR_ACAO_COM_UNIDADES =
             "SELECT a.* FROM com_acao a WHERE a.id = ?1";
@@ -35,7 +33,6 @@ public class AcaoRepository implements PanacheRepository<Acao> {
     }
 
 
-    // Migrado de AcaoRepository.autoCompleteEmAberto (legado) - HQL original:
     // select distinct a from Acao a inner join a.unidades un  where (a.dataFinal is null OR current_date <= a.dataFinal) AND (a.descricao like '%' || ?1 || '%' OR str(a.id) = ?1)  AND un in (?2)
     public static final String SQL_AUTO_COMPLETE_EM_ABERTO =
             "SELECT DISTINCT a.* FROM com_acao a INNER JOIN com_acao_unidade a_un_jt ON a_un_jt.id_acao = a.id INNER JOIN bas_unidade un ON un.id = a_un_jt.id_unidade WHERE (a.data_final is null OR current_date <= a.data_final) AND (a.descricao like '%' || ?1 || '%' OR CAST(a.id AS text) = ?1) AND un in (?2)";
@@ -49,7 +46,6 @@ public class AcaoRepository implements PanacheRepository<Acao> {
     }
 
 
-    // Migrado de AcaoRepository.autoComplete (legado) - HQL original:
     // select distinct a from Acao a left join a.prospectos p where (a.descricao like '%' || ?1 || '%' OR str(a.id) = ?1) AND p is not null
     public static final String SQL_AUTO_COMPLETE =
             "SELECT DISTINCT a.* FROM com_acao a LEFT JOIN com_historico_acoes a_p_jt ON a_p_jt.id_acao = a.id LEFT JOIN com_prospecto p ON p.id = a_p_jt.id_prospecto WHERE (a.descricao like '%' || ?1 || '%' OR CAST(a.id AS text) = ?1) AND p is not null";
@@ -62,7 +58,6 @@ public class AcaoRepository implements PanacheRepository<Acao> {
     }
 
 
-    // Migrado de AcaoRepository.acaoUnidade (legado) - HQL original:
     // select distinct a from Acao a inner join a.unidades un left join a.prospectos p where  p is not null AND un in (?1) order by a.id desc
     public static final String SQL_ACAO_UNIDADE =
             "SELECT DISTINCT a.* FROM com_acao a INNER JOIN com_acao_unidade a_un_jt ON a_un_jt.id_acao = a.id INNER JOIN bas_unidade un ON un.id = a_un_jt.id_unidade LEFT JOIN com_historico_acoes a_p_jt ON a_p_jt.id_acao = a.id LEFT JOIN com_prospecto p ON p.id = a_p_jt.id_prospecto WHERE p is not null AND un in (?1) ORDER BY a.id desc";

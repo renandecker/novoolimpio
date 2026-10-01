@@ -10,7 +10,6 @@ import br.com.sol7.olimpio.basico.favoritoperfil.entity.FavoritoPerfil;
 @ApplicationScoped
 public class FavoritoPerfilRepository implements PanacheRepository<FavoritoPerfil> {
 
-    // Migrado de FavoritoPerfilRepository.buscarPerfilComFavoritos (legado) - HQL original:
     // select p from FavoritoPerfil p where  p.perfil = ?1
     public static final String SQL_BUSCAR_PERFIL_COM_FAVORITOS =
             "SELECT p.* FROM bas_favorito_perfil p WHERE p.id_perfil = ?1";
@@ -23,7 +22,6 @@ public class FavoritoPerfilRepository implements PanacheRepository<FavoritoPerfi
     }
 
 
-    // Migrado de FavoritoPerfilRepository.buscarPerfilsComFavoritos (legado) - HQL original:
     // select p from FavoritoPerfil p where  p.perfil in (?1)
     public static final String SQL_BUSCAR_PERFILS_COM_FAVORITOS =
             "SELECT p.* FROM bas_favorito_perfil p WHERE p.id_perfil in (?1)";

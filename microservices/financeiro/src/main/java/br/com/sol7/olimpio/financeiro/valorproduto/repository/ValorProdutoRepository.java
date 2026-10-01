@@ -55,7 +55,6 @@ public class ValorProdutoRepository implements PanacheRepository<ValorProduto> {
                         .getResultList());
     }
 
-    // Migrado de ValorProdutoRepository.buscarExistenciaEmVenda (legado) - HQL original:
     // select v from VendaProduto vp inner join vp.formaPagamento v where v = ?1
     public static final String SQL_BUSCAR_EXISTENCIA_EM_VENDA =
             "SELECT v.* FROM fin_venda_produto vp INNER JOIN fin_valor_produto v ON v.id = vp.id_forma_pagamento WHERE v.id = ?1";

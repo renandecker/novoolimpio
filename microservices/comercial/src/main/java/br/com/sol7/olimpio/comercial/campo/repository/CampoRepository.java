@@ -9,7 +9,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class CampoRepository implements PanacheRepository<Campo> {
 
-    // Migrado de CampoRepository.autoComplete (legado) - HQL original:
     // select c from Campo c where lower(c.rotulo) like '%' || ?1 || '%' OR lower(c.nome) like '%' || ?1 || '%'  OR str(c.id) = ?1 order by c.rotulo
     public static final String SQL_AUTO_COMPLETE =
             "SELECT c.* FROM com_campo c WHERE lower(c.rotulo) like '%' || ?1 || '%' OR lower(c.nome) like '%' || ?1 || '%' OR CAST(c.id AS text) = ?1 ORDER BY c.rotulo LIMIT 10";
@@ -22,7 +21,6 @@ public class CampoRepository implements PanacheRepository<Campo> {
     }
 
 
-    // Migrado de CampoRepository.buscaDezPrimeiros (legado) - HQL original:
     // select c from Campo c  order by c.rotulo
     public static final String SQL_BUSCA_DEZ_PRIMEIROS =
             "SELECT c.* FROM com_campo c ORDER BY c.rotulo LIMIT 10";

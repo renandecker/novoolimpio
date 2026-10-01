@@ -16,7 +16,6 @@ import org.hibernate.reactive.mutiny.Mutiny;
 @ApplicationScoped
 public class PainelRepository implements PanacheRepository<Painel> {
 
-    // Migrado de PainelRepository.autoComplete (legado, metodo comentado) - HQL original:
     // select p from Tabela p where (lower(p.nome) like '%' || ?1 || '%' OR  str(p.id) = ?1) and  p.estrutura = ?2 order by p.nome
     // Obs: condicao removida (Painel nao possui coluna id_estrutura neste microsservico)
     public static final String SQL_AUTO_COMPLETE =
@@ -31,19 +30,16 @@ public class PainelRepository implements PanacheRepository<Painel> {
 
 
     // NAO TRADUZIDA AUTOMATICAMENTE (campo 'unidades' sem coluna mapeada)
-    // Migrado de PainelRepository.buscarUnidades (legado) - HQL original:
     public static final String SQL_BUSCAR_UNIDADES_HQL_ORIGINAL =
             "select a.unidades from Painel a where a = ?1";
 
 
     // NAO TRADUZIDA AUTOMATICAMENTE (campo 'perfils' sem coluna mapeada)
-    // Migrado de PainelRepository.buscarPerfils (legado) - HQL original:
     public static final String SQL_BUSCAR_PERFILS_HQL_ORIGINAL =
             "select a.perfils from Painel a where a = ?1";
 
 
     // NAO TRADUZIDA AUTOMATICAMENTE (campo 'usuarios' sem coluna mapeada)
-    // Migrado de PainelRepository.buscarUsuarios (legado) - HQL original:
     public static final String SQL_BUSCAR_USUARIOS_HQL_ORIGINAL =
             "select a.usuarios from Painel a where a = ?1";
 

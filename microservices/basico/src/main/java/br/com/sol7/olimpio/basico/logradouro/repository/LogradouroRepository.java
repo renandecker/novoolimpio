@@ -30,7 +30,6 @@ public class LogradouroRepository implements PanacheRepository<Logradouro> {
                 .replaceWithVoid();
     }
 
-    // Migrado de LogradouroRepository.autoComplete (legado) - HQL original:
     // select distinct c from Logradouro c where lower(c.descricao) like '%' || ?1 || '%'  OR str(c.id) = ?1  order by c.descricao
     public static final String SQL_AUTO_COMPLETE =
             "SELECT DISTINCT c.* FROM bas_logradouro c WHERE lower(c.descricao) like '%' || ?1 || '%' OR CAST(c.id AS text) = ?1 ORDER BY c.descricao LIMIT 10";
@@ -43,7 +42,6 @@ public class LogradouroRepository implements PanacheRepository<Logradouro> {
     }
 
 
-    // Migrado de LogradouroRepository.autoCompleteComBairro (legado) - HQL original:
     // select distinct c from Logradouro c where c.bairro = ?2 and (lower(c.descricao) like '%' || ?1 || '%')  order by c.descricao
     public static final String SQL_AUTO_COMPLETE_COM_BAIRRO =
             "SELECT DISTINCT c.* FROM bas_logradouro c WHERE c.id_bairro = ?2 and (lower(c.descricao) like '%' || ?1 || '%') ORDER BY c.descricao LIMIT 10";
@@ -57,7 +55,6 @@ public class LogradouroRepository implements PanacheRepository<Logradouro> {
     }
 
 
-    // Migrado de LogradouroRepository.buscaCep (legado) - HQL original:
     // select distinct c from Logradouro c where c.cep = ?1 order by c.descricao
     public static final String SQL_BUSCA_CEP =
             "SELECT DISTINCT c.* FROM bas_logradouro c WHERE c.cep = ?1 ORDER BY c.descricao";
@@ -70,7 +67,6 @@ public class LogradouroRepository implements PanacheRepository<Logradouro> {
     }
 
 
-    // Migrado de LogradouroRepository.buscaLogradouro (legado) - HQL original:
     // select distinct c from Logradouro c where c.bairro = ?1
     public static final String SQL_BUSCA_LOGRADOURO =
             "SELECT DISTINCT c.* FROM bas_logradouro c WHERE c.id_bairro = ?1";
@@ -83,7 +79,6 @@ public class LogradouroRepository implements PanacheRepository<Logradouro> {
     }
 
 
-    // Migrado de LogradouroRepository.buscaLogradouroSemLogradouro (legado) - HQL original:
     // select distinct c from Logradouro c where c.descricao is null and c.cep is not null
     public static final String SQL_BUSCA_LOGRADOURO_SEM_LOGRADOURO =
             "SELECT DISTINCT c.* FROM bas_logradouro c WHERE c.descricao is null and c.cep is not null";

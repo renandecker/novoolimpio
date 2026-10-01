@@ -27,7 +27,6 @@ public class ExtratorRepository implements PanacheRepository<Extrator> {
                 .replaceWithVoid();
     }
 
-    // Migrado de ExtratorRepository.listExtratornaFila (legado) - HQL original:
     // select r from Extrator r where  r.situacao = 'Na fila' order by id
     public static final String SQL_LIST_EXTRATORNA_FILA =
             "SELECT r.* FROM rel_extrator r WHERE r.situacao = 'Na fila' ORDER BY id";
@@ -40,7 +39,6 @@ public class ExtratorRepository implements PanacheRepository<Extrator> {
     }
 
 
-    // Migrado de ExtratorRepository.buscaTodosComCOnexao (legado) - HQL original:
     // select r from Extrator r where  r.tabela = ?1
     public static final String SQL_BUSCA_TODOS_COM_C_ONEXAO =
             "SELECT r.* FROM rel_extrator r WHERE r.id_tabela = ?1";
@@ -53,7 +51,6 @@ public class ExtratorRepository implements PanacheRepository<Extrator> {
     }
 
 
-    // Migrado de ExtratorRepository.buscaSituacaoExtrator (legado) - HQL original:
     // select r.situacao from Extrator r where  r = ?1
     public static final String SQL_BUSCA_SITUACAO_EXTRATOR =
             "SELECT r.situacao FROM rel_extrator r WHERE r.id = ?1";
@@ -66,7 +63,6 @@ public class ExtratorRepository implements PanacheRepository<Extrator> {
     }
 
 
-    // Migrado de ExtratorRepository.buscaEstratorComTabela (legado) - HQL original:
     // select r from Extrator r join r.tabela t where t = ?1
     public static final String SQL_BUSCA_ESTRATOR_COM_TABELA =
             "SELECT r.* FROM rel_extrator r INNER JOIN rel_tabela t ON t.id = r.id_tabela WHERE t.id = ?1";

@@ -11,7 +11,6 @@ import br.com.sol7.olimpio.basico.horario.entity.Horario;
 @ApplicationScoped
 public class HorarioRepository implements PanacheRepository<Horario> {
 
-    // Migrado de HorarioRepository.autoComplete (legado) - HQL original:
     // Select h from Horario h where h.hora like '%' || ?1 || '%'  order by h.hora
     public static final String SQL_AUTO_COMPLETE =
             "SELECT h.* FROM bas_horario h WHERE h.hora like '%' || ?1 || '%' ORDER BY h.hora";
@@ -24,7 +23,6 @@ public class HorarioRepository implements PanacheRepository<Horario> {
     }
 
 
-    // Migrado de HorarioRepository.buscarHorarioPorHora (legado) - HQL original:
     // select h from Horario h where h.hora = ?1
     public static final String SQL_BUSCAR_HORARIO_POR_HORA =
             "SELECT h.* FROM bas_horario h WHERE h.hora = ?1";
@@ -37,7 +35,6 @@ public class HorarioRepository implements PanacheRepository<Horario> {
     }
 
 
-    // Migrado de HorarioRepository.buscarHorariosPrenchidos (legado) - HQL original:
     // select c2.horario from Compromisso c2 where c2.agenda = ?1 AND c2.data = ?2
     public static final String SQL_BUSCAR_HORARIOS_PRENCHIDOS =
             "SELECT c2.id_horario FROM bas_compromisso c2 WHERE c2.id_agenda = ?1 AND c2.data = ?2";

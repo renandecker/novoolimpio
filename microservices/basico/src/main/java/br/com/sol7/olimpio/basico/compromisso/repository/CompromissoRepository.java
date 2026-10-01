@@ -31,7 +31,6 @@ public class CompromissoRepository implements PanacheRepository<Compromisso> {
                 .replaceWithVoid();
     }
 
-    // Migrado de CompromissoRepository.buscarCompromissoAuto (legado) - HQL original:
     // Select c from Compromisso c where c.statusCompromisso.trocaautomatomatica = true AND  current_date > cast(Date((c.data) - (c.statusCompromisso.dias)) as date) and  c.statusCompromisso.id <> c.statusCompromisso.statusCompromissoTrocaAuto.id
     public static final String SQL_BUSCAR_COMPROMISSO_AUTO =
             "SELECT c.* FROM bas_compromisso c LEFT JOIN bas_status_compromisso j_c_statusCompromisso ON j_c_statusCompromisso.id = c.id_status_compromisso LEFT JOIN bas_status_compromisso j_j_c_statusCompromisso_statusCompromissoTrocaAuto ON j_j_c_statusCompromisso_statusCompromissoTrocaAuto.id = j_c_statusCompromisso.id_status_troca_auto WHERE j_c_statusCompromisso.trocaautomatomatica = true AND current_date > cast(Date((c.data) - (j_c_statusCompromisso.dias)) as date) and j_c_statusCompromisso.id <> j_j_c_statusCompromisso_statusCompromissoTrocaAuto.id";
@@ -44,7 +43,6 @@ public class CompromissoRepository implements PanacheRepository<Compromisso> {
     }
 
 
-    // Migrado de CompromissoRepository.buscarCompromissoComResultados (legado) - HQL original:
     // Select c from Compromisso c left join fetch c.resultados r where c.id = ?1
     public static final String SQL_BUSCAR_COMPROMISSO_COM_RESULTADOS =
             "SELECT c.* FROM bas_compromisso c LEFT JOIN bas_compromisso_resultado c_r_jt ON c_r_jt.id_compromisso = c.id LEFT JOIN bas_resultado r ON r.id = c_r_jt.id_resultado WHERE c.id = ?1";
@@ -57,7 +55,6 @@ public class CompromissoRepository implements PanacheRepository<Compromisso> {
     }
 
 
-    // Migrado de CompromissoRepository.listarCompromissosComAgendaComStatus (legado) - HQL original:
     // Select c from Compromisso c left join fetch c.statusCompromisso inner join c.horario h where c.agenda = ?1 AND c.data = ?2 and c.statusCompromisso.id = ?3 order by h.hora
     public static final String SQL_LISTAR_COMPROMISSOS_COM_AGENDA_COM_STATUS =
             "SELECT c.* FROM bas_compromisso c LEFT JOIN bas_status_compromisso inner ON inner.id = c.id_status_compromisso INNER JOIN bas_horario h ON h.id = c.id_horario LEFT JOIN bas_status_compromisso j_c_statusCompromisso ON j_c_statusCompromisso.id = c.id_status_compromisso WHERE c.id_agenda = ?1 AND c.data = ?2 and j_c_statusCompromisso.id = ?3 ORDER BY h.hora";
@@ -72,7 +69,6 @@ public class CompromissoRepository implements PanacheRepository<Compromisso> {
     }
 
 
-    // Migrado de CompromissoRepository.listarCompromissosComAgenda (legado) - HQL original:
     // Select c from Compromisso c  left join fetch c.statusCompromisso inner join c.horario h where c.agenda = ?1 AND c.data = ?2 order by h.hora
     public static final String SQL_LISTAR_COMPROMISSOS_COM_AGENDA =
             "SELECT c.* FROM bas_compromisso c LEFT JOIN bas_status_compromisso inner ON inner.id = c.id_status_compromisso INNER JOIN bas_horario h ON h.id = c.id_horario WHERE c.id_agenda = ?1 AND c.data = ?2 ORDER BY h.hora";
@@ -86,7 +82,6 @@ public class CompromissoRepository implements PanacheRepository<Compromisso> {
     }
 
 
-    // Migrado de CompromissoRepository.listarCompromissosPeloProspecto (legado) - HQL original:
     // Select c from Compromisso c where c.prospecto = ?1
     public static final String SQL_LISTAR_COMPROMISSOS_PELO_PROSPECTO =
             "SELECT c.* FROM bas_compromisso c WHERE c.id_prospecto = ?1";
@@ -111,7 +106,6 @@ public class CompromissoRepository implements PanacheRepository<Compromisso> {
     }
 
 
-    // Migrado de CompromissoRepository.modificarStatusCompromisso (legado) - HQL original:
     // Update Compromisso c set c.statusCompromisso = ?2 where c = ?1
     // Correcao: SQL nativo valido (removido o alias 'c.') + data_alteracao = now().
     public static final String SQL_MODIFICAR_STATUS_COMPROMISSO =
@@ -202,7 +196,6 @@ public class CompromissoRepository implements PanacheRepository<Compromisso> {
     }
 
 
-    // Migrado de CompromissoRepository.buscarProspectoDoCompromisso (legado) - HQL original:
     // Select c.prospecto from Compromisso c left join fetch c.prospecto.prospectoCampos where c=?1
     public static final String SQL_BUSCAR_PROSPECTO_DO_COMPROMISSO =
             "SELECT c.id_prospecto FROM bas_compromisso c WHERE c.id=?1";
@@ -215,7 +208,6 @@ public class CompromissoRepository implements PanacheRepository<Compromisso> {
     }
 
 
-    // Migrado de CompromissoRepository.buscarLigacaoAgendamentoVencido (legado) - HQL original:
     // select l from Ligacao l where l.compromisso = ?1
     public static final String SQL_BUSCAR_LIGACAO_AGENDAMENTO_VENCIDO =
             "SELECT l.* FROM cen_ligacao l WHERE l.id_compromisso = ?1";

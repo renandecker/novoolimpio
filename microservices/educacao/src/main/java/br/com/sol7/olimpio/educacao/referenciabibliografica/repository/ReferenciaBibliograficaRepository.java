@@ -9,7 +9,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class ReferenciaBibliograficaRepository implements PanacheRepository<ReferenciaBibliografica> {
 
-    // Migrado de ReferenciaBibliograficaRepository.autoComplete (legado) - HQL original:
     // select r from ReferenciaBibliografica r where lower(r.autor) like '%' || ?1 || '%' OR lower(r.titulo) like '%' || ?1 || '%' OR str(r.id) = ?1 order by r.autor
     public static final String SQL_AUTO_COMPLETE =
             "SELECT r.* FROM edc_referencia_bibliografica r WHERE lower(r.autor) like '%' || ?1 || '%' OR lower(r.titulo) like '%' || ?1 || '%' OR CAST(r.id AS text) = ?1 ORDER BY r.autor";

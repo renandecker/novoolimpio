@@ -9,7 +9,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class CriterioRepository implements PanacheRepository<Criterio> {
 
-    // Migrado de CriterioRepository.buscarCriterioComTurno (legado) - HQL original:
     // Select c from Criterio c left join fetch c.turnoEducacao where c.curriculo =?1 AND c.unidade = ?2
     public static final String SQL_BUSCAR_CRITERIO_COM_TURNO =
             "SELECT c.* FROM edc_criterio c WHERE c.id_curriculo =?1 AND c.id_unidade = ?2";
@@ -23,7 +22,6 @@ public class CriterioRepository implements PanacheRepository<Criterio> {
     }
 
 
-    // Migrado de CriterioRepository.buscarCriterioComDiasSemana (legado) - HQL original:
     // Select c from Criterio c left join fetch c.diaSemana where c.curriculo =?1 AND c.unidade = ?2
     public static final String SQL_BUSCAR_CRITERIO_COM_DIAS_SEMANA =
             "SELECT c.* FROM edc_criterio c WHERE c.id_curriculo =?1 AND c.id_unidade = ?2";
@@ -37,7 +35,6 @@ public class CriterioRepository implements PanacheRepository<Criterio> {
     }
 
 
-    // Migrado de CriterioRepository.buscarCriterio (legado) - HQL original:
     // Select c from Criterio c where c.curriculo =?1 AND c.unidade = ?2 order by c.id desc
     public static final String SQL_BUSCAR_CRITERIO =
             "SELECT c.* FROM edc_criterio c WHERE c.id_curriculo =?1 AND c.id_unidade = ?2 ORDER BY c.id desc";

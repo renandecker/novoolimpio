@@ -9,7 +9,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class MetaDinamicaRepository implements PanacheRepository<MetaDinamica> {
 
-    // Migrado de MetaDinamicaRepository.verificarMetaAnoMesUnidade (legado) - HQL original:
     // select m from MetaDinamica m where m.mes = ?1 and m.ano = ?2 and m.indicador = ?3 and m.unidade = ?4
     public static final String SQL_VERIFICAR_META_ANO_MES_UNIDADE =
             "SELECT m.* FROM com_meta_dinamica m WHERE m.mes = ?1 and m.ano = ?2 and m.id_indicador = ?3 and m.id_unidade = ?4";
@@ -25,7 +24,6 @@ public class MetaDinamicaRepository implements PanacheRepository<MetaDinamica> {
     }
 
 
-    // Migrado de MetaDinamicaRepository.verificarMetaAnoUnidade (legado) - HQL original:
     // select m from MetaDinamica m where m.ano = ?1 and m.indicador = ?2 and m.unidade = ?3
     public static final String SQL_VERIFICAR_META_ANO_UNIDADE =
             "SELECT m.* FROM com_meta_dinamica m WHERE m.ano = ?1 and m.id_indicador = ?2 and m.id_unidade = ?3";
@@ -40,7 +38,6 @@ public class MetaDinamicaRepository implements PanacheRepository<MetaDinamica> {
     }
 
 
-    // Migrado de MetaDinamicaRepository.verificarMetaUnidade (legado) - HQL original:
     // select m from MetaDinamica m where m.indicador = ?2 and m.unidade = ?3
     public static final String SQL_VERIFICAR_META_UNIDADE =
             "SELECT m.* FROM com_meta_dinamica m WHERE m.id_indicador = ?2 and m.id_unidade = ?3";
@@ -54,7 +51,6 @@ public class MetaDinamicaRepository implements PanacheRepository<MetaDinamica> {
     }
 
 
-    // Migrado de MetaDinamicaRepository.getMetaDinamicasByIndicador (legado) - HQL original:
     // select m from MetaDinamica m where m.indicador = ?1 order by m.id desc
     public static final String SQL_GET_META_DINAMICAS_BY_INDICADOR =
             "SELECT m.* FROM com_meta_dinamica m WHERE m.id_indicador = ?1 ORDER BY m.id desc";

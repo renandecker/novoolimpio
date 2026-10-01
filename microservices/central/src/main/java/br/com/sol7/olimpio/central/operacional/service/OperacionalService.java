@@ -1,16 +1,23 @@
 package br.com.sol7.olimpio.central.operacional;
 
+import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.SearchFilterRequest;
 import br.com.sol7.olimpio.shared.GenericSearchService;
+import br.com.sol7.olimpio.shared.TupleHelper;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.NotFoundException;
+import org.hibernate.reactive.mutiny.Mutiny;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @ApplicationScoped
 @WithTransaction
@@ -231,6 +238,51 @@ public class OperacionalService {
     //     }
     public Uni<Long> buscarCoordenadorOperacional(Long operacionalId) {
         return repository.buscarCoordenadorOperacional(operacionalId).map(list -> list.isEmpty() ? null : ((Number) list.get(0)).longValue());
+    }
+
+    public Uni<Map<String,Object>> buscarLigacoesPie(Long operacionalId, Long usuarioId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session -> {
+            StringBuilder where = new StringBuilder(" WHERE l.operacional_id = :opId ");
+            Map<String, Object> params = new HashMap<>();
+            params.put("opId", operacionalId.intValue());
+            if (usuarioId != null) {
+                where.append(" AND l.usuario_id = :usrId ");
+                params.put("usrId", usuarioId.intValue());
+            }
+            String sql = "SELECT rc.descricao AS descricao, count(l.id) AS cnt FROM cen_ligacao l JOIN cen_resultado_contato rc ON rc.id = l.id_resultado_contato" + where + " GROUP BY rc.descricao";
+            Mutiny.Query query = session.createNativeQuery(sql, Tuple.class);
+            for (var e : params.entrySet()) query.setParameter(e.getKey(), e.getValue());
+            return query.getResultList().map(list -> {
+                Map<String,Object> out = new LinkedHashMap<>();
+                long total = 0;
+                for (Object rowObj : list) {
+                    Tuple t = (Tuple) rowObj;
+                    String desc = TupleHelper.getString(t, "descricao");
+                    long cnt = TupleHelper.getLong(t, "cnt");
+                    out.put(desc, cnt);
+                    total += cnt;
+                }
+                out.put("total", total);
+                return out;
+            });
+        });
+    }
+
+    public Uni<List<UsuarioSimplesResponse>> buscarUsuarios(Long operacionalId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session ->
+            session.createNativeQuery(
+                "SELECT u.id AS id, u.login AS login FROM bas_usuario u " +
+                " JOIN cen_operacional_usuario ou ON ou.id_operador = u.id " +
+                " WHERE ou.id_operacional = :opId ORDER BY u.login", Tuple.class
+            ).setParameter("opId", operacionalId.intValue()).getResultList().map(list -> {
+                List<UsuarioSimplesResponse> out = new ArrayList<>();
+                for (Object rowObj : list) {
+                    Tuple t = (Tuple) rowObj;
+                    out.add(new UsuarioSimplesResponse(TupleHelper.getLong(t, "id"), TupleHelper.getString(t, "login")));
+                }
+                return out;
+            })
+        );
     }
 
 }

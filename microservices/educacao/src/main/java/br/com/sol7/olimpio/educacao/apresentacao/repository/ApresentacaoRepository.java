@@ -9,7 +9,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class ApresentacaoRepository implements PanacheRepository<Apresentacao> {
 
-    // Migrado de ApresentacaoRepository.maiorOrdem (legado) - HQL original:
     // Select max(a.ordem) from Apresentacao a
     public static final String SQL_MAIOR_ORDEM =
             "SELECT max(a.ordem) FROM bas_apresentacao a";
@@ -22,7 +21,6 @@ public class ApresentacaoRepository implements PanacheRepository<Apresentacao> {
     }
 
 
-    // Migrado de ApresentacaoRepository.listarApresentacoesOrdenado (legado) - HQL original:
     // Select a from Apresentacao a order by a.ordem
     public static final String SQL_LISTAR_APRESENTACOES_ORDENADO =
             "SELECT a.* FROM bas_apresentacao a ORDER BY a.ordem";

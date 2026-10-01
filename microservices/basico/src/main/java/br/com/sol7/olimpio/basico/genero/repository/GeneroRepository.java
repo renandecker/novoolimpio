@@ -10,7 +10,6 @@ import br.com.sol7.olimpio.basico.genero.entity.Genero;
 @ApplicationScoped
 public class GeneroRepository implements PanacheRepository<Genero> {
 
-    // Migrado de GeneroRepository.buscaTodosOrdenado (legado) - HQL original:
     // select u from Genero u order by u.id
     public static final String SQL_BUSCA_TODOS_ORDENADO =
             "SELECT u.* FROM bas_genero u ORDER BY u.id";

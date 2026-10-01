@@ -9,7 +9,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class ImpressoraRepository implements PanacheRepository<Impressora> {
 
-    // Migrado de ImpressoraRepository.buscarImpressorasUnidade (legado) - HQL original:
     // Select i from Impressora i where i.unidade = ?1 order by i.dataAlteracao desc
     // (unidadeId agora é uma coluna simples Long, não associação cross-service)
     public static final String HQL_BUSCAR_IMPRESSORAS_UNIDADE =
@@ -23,7 +22,6 @@ public class ImpressoraRepository implements PanacheRepository<Impressora> {
     }
 
 
-    // Migrado de ImpressoraRepository.verificarImpressorasComUnidade (legado) - HQL original:
     // Select i from Impressora i where i.unidade = ?1 and i.id <> ?2 order by i.dataAlteracao desc
     public static final String HQL_VERIFICAR_IMPRESSORAS_COM_UNIDADE =
             "SELECT i FROM Impressora i WHERE i.unidadeId = ?1 and i.id <> ?2 ORDER BY i.dataAlteracao DESC";

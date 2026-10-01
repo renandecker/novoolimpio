@@ -9,7 +9,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class CronogramaComponenteCurricularRepository implements PanacheRepository<CronogramaComponenteCurricular> {
 
-    // Migrado de CronogramaComponenteCurricularRepository.buscarCronogramaComComponente (legado) - HQL original:
     // select m from CronogramaComponenteCurricular m where m.componenteCurricular = ?1 order by m.ordem
     public static final String SQL_BUSCAR_CRONOGRAMA_COM_COMPONENTE =
             "SELECT m.* FROM edc_cronograma_componente_curricular m WHERE m.id_componente_curricular = ?1 ORDER BY m.ordem";

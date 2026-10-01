@@ -10,7 +10,6 @@ import br.com.sol7.olimpio.basico.bairro.entity.Bairro;
 @ApplicationScoped
 public class BairroRepository implements PanacheRepository<Bairro> {
 
-    // Migrado de BairroRepository.autoComplete (legado) - HQL original:
     // select distinct c from Bairro c where lower(c.descricao) like '%' || ?1 || '%'  OR str(c.id) = ?1  order by c.descricao
     public static final String SQL_AUTO_COMPLETE =
             "SELECT DISTINCT c.* FROM bas_bairro c WHERE lower(c.descricao) like '%' || ?1 || '%' OR CAST(c.id AS text) = ?1 ORDER BY c.descricao LIMIT 10";
@@ -23,7 +22,6 @@ public class BairroRepository implements PanacheRepository<Bairro> {
     }
 
 
-    // Migrado de BairroRepository.autoCompleteComCep (legado) - HQL original:
     // select distinct c.bairro from Logradouro c where c.cep = ?2 and lower(c.bairro.descricao) like '%' || ?1 || '%'  OR str(c.id) = ?1  order by c.descricao
     public static final String SQL_AUTO_COMPLETE_COM_CEP =
             "SELECT DISTINCT c.id_bairro FROM bas_logradouro c LEFT JOIN bas_bairro j_c_bairro ON j_c_bairro.id = c.id_bairro WHERE c.cep = ?2 and lower(j_c_bairro.descricao) like '%' || ?1 || '%' OR CAST(c.id AS text) = ?1 ORDER BY c.descricao LIMIT 10";
@@ -37,7 +35,6 @@ public class BairroRepository implements PanacheRepository<Bairro> {
     }
 
 
-    // Migrado de BairroRepository.autoCompleteComCidade (legado) - HQL original:
     // select distinct c from Bairro c where c.cidade = ?2 and (lower(c.descricao) like '%' || ?1 || '%')  order by c.descricao
     public static final String SQL_AUTO_COMPLETE_COM_CIDADE =
             "SELECT DISTINCT c.* FROM bas_bairro c WHERE c.id_cidade = ?2 and (lower(c.descricao) like '%' || ?1 || '%') ORDER BY c.descricao LIMIT 10";
@@ -51,7 +48,6 @@ public class BairroRepository implements PanacheRepository<Bairro> {
     }
 
 
-    // Migrado de BairroRepository.autoCompleteComCidadeComCep (legado) - HQL original:
     // select distinct c.bairro from Logradouro c where c.bairro.cidade = ?2 and c.cep = ?3 and (lower(c.bairro.descricao) like '%' || ?1 || '%')  order by c.bairro.descricao
     public static final String SQL_AUTO_COMPLETE_COM_CIDADE_COM_CEP =
             "SELECT DISTINCT c.id_bairro FROM bas_logradouro c LEFT JOIN bas_bairro j_c_bairro ON j_c_bairro.id = c.id_bairro WHERE j_c_bairro.id_cidade = ?2 and c.cep = ?3 and (lower(j_c_bairro.descricao) like '%' || ?1 || '%') ORDER BY j_c_bairro.descricao LIMIT 10";
@@ -66,7 +62,6 @@ public class BairroRepository implements PanacheRepository<Bairro> {
     }
 
 
-    // Migrado de BairroRepository.autoCompleteComCidadeEstado (legado) - HQL original:
     // select distinct c from Bairro c where c.cidade = ?2 and c.cidade.estado = ?3 and (lower(c.descricao) like '%' || ?1 || '%')  order by c.descricao
     public static final String SQL_AUTO_COMPLETE_COM_CIDADE_ESTADO =
             "SELECT DISTINCT c.* FROM bas_bairro c LEFT JOIN bas_cidade j_c_cidade ON j_c_cidade.id = c.id_cidade WHERE c.id_cidade = ?2 and j_c_cidade.id_estado = ?3 and (lower(c.descricao) like '%' || ?1 || '%') ORDER BY c.descricao LIMIT 10";
@@ -81,7 +76,6 @@ public class BairroRepository implements PanacheRepository<Bairro> {
     }
 
 
-    // Migrado de BairroRepository.autoCompleteComCidadeEstadoComCep (legado) - HQL original:
     // select distinct c.bairro from Logradouro c where c.cep = ?4 and c.bairro.cidade = ?2 and c.bairro.cidade.estado = ?3 and (lower(c.bairro.descricao) like '%' || ?1 || '%')  order by c.bairro.descricao
     public static final String SQL_AUTO_COMPLETE_COM_CIDADE_ESTADO_COM_CEP =
             "SELECT DISTINCT c.id_bairro FROM bas_logradouro c LEFT JOIN bas_bairro j_c_bairro ON j_c_bairro.id = c.id_bairro LEFT JOIN bas_cidade j_j_c_bairro_cidade ON j_j_c_bairro_cidade.id = j_c_bairro.id_cidade WHERE c.cep = ?4 and j_c_bairro.id_cidade = ?2 and j_j_c_bairro_cidade.id_estado = ?3 and (lower(j_c_bairro.descricao) like '%' || ?1 || '%') ORDER BY j_c_bairro.descricao LIMIT 10";
@@ -97,7 +91,6 @@ public class BairroRepository implements PanacheRepository<Bairro> {
     }
 
 
-    // Migrado de BairroRepository.buscaBairro (legado) - HQL original:
     // select distinct c from Bairro c where c.cidade = ?1
     public static final String SQL_BUSCA_BAIRRO =
             "SELECT DISTINCT c.* FROM bas_bairro c WHERE c.id_cidade = ?1";

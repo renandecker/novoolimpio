@@ -11,7 +11,6 @@ import br.com.sol7.olimpio.basico.agenda.entity.Agenda;
 @ApplicationScoped
 public class AgendaRepository implements PanacheRepository<Agenda> {
 
-    // Migrado de AgendaRepository.buscarAgendasPorUnidade (legado) - HQL original:
     // Select a from Agenda a where a.unidade.ativo = true and a.unidade = ?1
     public static final String SQL_BUSCAR_AGENDAS_POR_UNIDADE =
             "SELECT a.* FROM bas_agenda a LEFT JOIN bas_unidade j_a_unidade ON j_a_unidade.id = a.id_unidade WHERE j_a_unidade.fl_ativo = true and a.id_unidade = ?1";
@@ -24,7 +23,6 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     }
 
 
-    // Migrado de AgendaRepository.autoComplete (legado) - HQL original:
     // Select a from Agenda a where  a.unidade.ativo = true and str(a.id) = ?1 or lower(a.descricao) like '%' || ?1 || '%' order by a.descricao
     public static final String SQL_AUTO_COMPLETE =
             "SELECT a.* FROM bas_agenda a LEFT JOIN bas_unidade j_a_unidade ON j_a_unidade.id = a.id_unidade WHERE j_a_unidade.fl_ativo = true and CAST(a.id AS text) = ?1 or lower(a.descricao) like '%' || ?1 || '%' ORDER BY a.descricao";
@@ -37,7 +35,6 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     }
 
 
-    // Migrado de AgendaRepository.buscarAgendaComResultados (legado) - HQL original:
     // Select a from Agenda a left join fetch a.resultados where  a.unidade.ativo = true and a = ?1
     public static final String SQL_BUSCAR_AGENDA_COM_RESULTADOS =
             "SELECT a.* FROM bas_agenda a LEFT JOIN bas_unidade j_a_unidade ON j_a_unidade.id = a.id_unidade WHERE j_a_unidade.fl_ativo = true and a.id = ?1";
@@ -50,7 +47,6 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     }
 
 
-    // Migrado de AgendaRepository.buscarAgendaComStatus (legado) - HQL original:
     // Select a from Agenda a left join fetch a.status where  a.unidade.ativo = true and a = ?1
     public static final String SQL_BUSCAR_AGENDA_COM_STATUS =
             "SELECT a.* FROM bas_agenda a LEFT JOIN bas_unidade j_a_unidade ON j_a_unidade.id = a.id_unidade WHERE j_a_unidade.fl_ativo = true and a.id = ?1";
@@ -63,7 +59,6 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     }
 
 
-    // Migrado de AgendaRepository.buscarAgendaComUsuarios (legado) - HQL original:
     // Select ua from Agenda a inner join a.usuarioAgendas ua where  a.unidade.ativo = true and a = ?1
     public static final String SQL_BUSCAR_AGENDA_COM_USUARIOS =
             "SELECT ua.* FROM bas_agenda a INNER JOIN bas_usuario_agenda ua ON ua.id_agenda = a.id LEFT JOIN bas_unidade j_a_unidade ON j_a_unidade.id = a.id_unidade WHERE j_a_unidade.fl_ativo = true and a.id = ?1";
@@ -78,7 +73,6 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     }
 
 
-    // Migrado de AgendaRepository.buscarAgendasDoUsuario (legado) - HQL original:
     // Select a from Agenda a left join a.usuarioAgendas ua where  a.unidade.ativo = true and ?1 in(ua.usuario)
     public static final String SQL_BUSCAR_AGENDAS_DO_USUARIO =
             "SELECT a.* FROM bas_agenda a LEFT JOIN bas_usuario_agenda ua ON ua.id_agenda = a.id LEFT JOIN bas_unidade j_a_unidade ON j_a_unidade.id = a.id_unidade WHERE j_a_unidade.fl_ativo = true and ?1 in(ua.id_usuario)";
@@ -91,7 +85,6 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     }
 
 
-    // Migrado de AgendaRepository.verificaAgendasDoUsuario (legado) - HQL original:
     // Select a from Agenda a left join a.usuarioAgendas ua where  a.unidade.ativo = true and ?1 in(ua.usuario)
     public static final String SQL_VERIFICA_AGENDAS_DO_USUARIO =
             "SELECT a.* FROM bas_agenda a LEFT JOIN bas_usuario_agenda ua ON ua.id_agenda = a.id LEFT JOIN bas_unidade j_a_unidade ON j_a_unidade.id = a.id_unidade WHERE j_a_unidade.fl_ativo = true and ?1 in(ua.id_usuario) LIMIT 10";
@@ -104,7 +97,6 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     }
 
 
-    // Migrado de AgendaRepository.autoCompleteAll (legado) - HQL original:
     // select a from Agenda a where  a.unidade.ativo = true  order by a.descricao
     public static final String SQL_AUTO_COMPLETE_ALL =
             "SELECT a.* FROM bas_agenda a LEFT JOIN bas_unidade j_a_unidade ON j_a_unidade.id = a.id_unidade WHERE j_a_unidade.fl_ativo = true ORDER BY a.descricao LIMIT 10";
@@ -117,7 +109,6 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     }
 
 
-    // Migrado de AgendaRepository.autoCompleteComUsuario (legado) - HQL original:
     // select distinct a from Usuario usu inner join usu.usuarioAgendas u inner join u.agenda a  where  a.unidade.ativo = true and usu = ?2 and (lower(a.descricao) like '%' || ?1 || '%' OR str(a.id) = ?1) order by a.descricao
     public static final String SQL_AUTO_COMPLETE_COM_USUARIO =
             "SELECT DISTINCT a.* FROM bas_usuario usu INNER JOIN bas_usuario_agenda u ON u.id_usuario = usu.id INNER JOIN bas_agenda a ON a.id = u.id_agenda LEFT JOIN bas_unidade j_a_unidade ON j_a_unidade.id = a.id_unidade WHERE j_a_unidade.fl_ativo = true and usu.id = ?2 and (lower(a.descricao) like '%' || ?1 || '%' OR CAST(a.id AS text) = ?1) ORDER BY a.descricao LIMIT 10";
@@ -131,7 +122,6 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     }
 
 
-    // Migrado de AgendaRepository.autoCompleteDoUsuario (legado) - HQL original:
     // select distinct a from Usuario usu inner join usu.usuarioAgendas u inner join u.agenda a where  a.unidade.ativo = true and usu = ?1 order by a.descricao
     public static final String SQL_AUTO_COMPLETE_DO_USUARIO =
             "SELECT DISTINCT a.* FROM bas_usuario usu INNER JOIN bas_usuario_agenda u ON u.id_usuario = usu.id INNER JOIN bas_agenda a ON a.id = u.id_agenda LEFT JOIN bas_unidade j_a_unidade ON j_a_unidade.id = a.id_unidade WHERE j_a_unidade.fl_ativo = true and usu.id = ?1 ORDER BY a.descricao LIMIT 10";
@@ -144,7 +134,6 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     }
 
 
-    // Migrado de AgendaRepository.autoCompleteEstrategicoComUsuario (legado) - HQL original:
     // select distinct a from Usuario usu inner join usu.usuarioAgendas u inner join u.agenda a where  a.unidade.ativo = true and (usu.hierarquia = 'ESTRATEGICO' or usu = ?2) and (lower(a.descricao) like '%' || ?1 || '%' OR str(a.id) = ?1) order by a.descricao
     public static final String SQL_AUTO_COMPLETE_ESTRATEGICO_COM_USUARIO =
             "SELECT DISTINCT a.* FROM bas_usuario usu INNER JOIN bas_usuario_agenda u ON u.id_usuario = usu.id INNER JOIN bas_agenda a ON a.id = u.id_agenda LEFT JOIN bas_unidade j_a_unidade ON j_a_unidade.id = a.id_unidade WHERE j_a_unidade.fl_ativo = true and (usu.hierarquia = 'ESTRATEGICO' or usu.id = ?2) and (lower(a.descricao) like '%' || ?1 || '%' OR CAST(a.id AS text) = ?1) ORDER BY a.descricao LIMIT 10";
@@ -158,7 +147,6 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     }
 
 
-    // Migrado de AgendaRepository.autoCompleteEstrategicoDoUsuario (legado) - HQL original:
     // select distinct a from Usuario usu inner join usu.usuarioAgendas u inner join u.agenda a where  a.unidade.ativo = true and usu.hierarquia = 'ESTRATEGICO' or usu = ?1 order by a.descricao
     public static final String SQL_AUTO_COMPLETE_ESTRATEGICO_DO_USUARIO =
             "SELECT DISTINCT a.* FROM bas_usuario usu INNER JOIN bas_usuario_agenda u ON u.id_usuario = usu.id INNER JOIN bas_agenda a ON a.id = u.id_agenda LEFT JOIN bas_unidade j_a_unidade ON j_a_unidade.id = a.id_unidade WHERE j_a_unidade.fl_ativo = true and usu.hierarquia = 'ESTRATEGICO' or usu.id = ?1 ORDER BY a.descricao LIMIT 10";

@@ -9,7 +9,6 @@ import java.util.List;
 @ApplicationScoped
 public class ProfessorRepository implements PanacheRepository<Professor> {
 
-    // Migrado de ProfessorRepository.buscarListaProfessoresParaTurma (legado) - HQL original:
     // Select distinct p from Professor p inner join p.disponibilidadesProfessor dp inner join p.componentesCurriculares c where c in (?1) and d.unidade = ?2 and d.professor.ativo = true
     public static final String SQL_BUSCAR_LISTA_PROFESSORES_PARA_TURMA =
             "SELECT DISTINCT p.* FROM edc_professor p " +

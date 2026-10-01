@@ -33,7 +33,6 @@ public class ConfiguracaoEmailRepository implements PanacheRepository<Configurac
                 .replaceWithVoid();
     }
 
-    // Migrado de ConfiguracaoEmailRepository.listEmailComCota (legado) - HQL original:
     // Select a from ConfiguracaoEmail a where a.habilitarApi = true and a.cota is not null
     public static final String SQL_LIST_EMAIL_COM_COTA =
             "SELECT a.* FROM bas_email a WHERE a.fl_api_email = true and a.cota is not null";
@@ -46,7 +45,6 @@ public class ConfiguracaoEmailRepository implements PanacheRepository<Configurac
     }
 
 
-    // Migrado de ConfiguracaoEmailRepository.autoCompleteTokenGoogle (legado) - HQL original:
     // select u from ConfiguracaoEmail u where (u.googleMapsApi is not null or trim(u.googleMapsApi) <> '') and lower(u.username) like '%' || ?1 || '%'
     public static final String SQL_AUTO_COMPLETE_TOKEN_GOOGLE =
             "SELECT u.* FROM bas_email u WHERE (u.google_maps_api is not null or trim(u.google_maps_api) <> '') and lower(u.username) like '%' || ?1 || '%' LIMIT 10";
@@ -59,7 +57,6 @@ public class ConfiguracaoEmailRepository implements PanacheRepository<Configurac
     }
 
 
-    // Migrado de ConfiguracaoEmailRepository.busaConfiguracaoEmailPadrao (legado) - HQL original:
     // select u from ConfiguracaoEmail u where u.principal = true
     public static final String SQL_BUSA_CONFIGURACAO_EMAIL_PADRAO =
             "SELECT u.* FROM bas_email u WHERE u.fl_principal = true LIMIT 10";

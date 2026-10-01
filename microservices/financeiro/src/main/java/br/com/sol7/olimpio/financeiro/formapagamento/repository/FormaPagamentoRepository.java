@@ -62,7 +62,6 @@ public class FormaPagamentoRepository implements PanacheRepository<FormaPagament
                 .replaceWithVoid();
     }
 
-    // Migrado de FormaPagamentoRepository.autoComplete (legado) - HQL original:
     // select f from FormaPagamento f where (f.vezes) = ?1
     public static final String SQL_AUTO_COMPLETE =
             "SELECT f.* FROM fin_forma_pagamento f WHERE (f.qtd_vezes) = ?1";
@@ -75,7 +74,6 @@ public class FormaPagamentoRepository implements PanacheRepository<FormaPagament
     }
 
 
-    // Migrado de FormaPagamentoRepository.buscaordemVezes (legado) - HQL original:
     // select f from FormaPagamento f order by f.vezes
     public static final String SQL_BUSCAORDEM_VEZES =
             "SELECT f.* FROM fin_forma_pagamento f ORDER BY f.qtd_vezes";

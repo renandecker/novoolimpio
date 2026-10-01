@@ -92,6 +92,18 @@ public class OperacionalController {
         return service.buscarLigacoesComUsuario(usuarioId);
     }
 
+    @GET
+    @Path("/{id}/ligacoes/pie")
+    public Uni<Map<String,Object>> ligacoesPie(@PathParam("id") Long operacionalId, @QueryParam("usuarioId") Long usuarioId) {
+        return service.buscarLigacoesPie(operacionalId, usuarioId);
+    }
+
+    @GET
+    @Path("/{id}/usuarios")
+    public Uni<List<UsuarioSimplesResponse>> usuarios(@PathParam("id") Long operacionalId) {
+        return service.buscarUsuarios(operacionalId);
+    }
+
 
     @GET
     @Path("/buscar-operacional-com-coordenador")

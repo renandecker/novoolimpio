@@ -9,7 +9,6 @@ import java.util.List;
 @ApplicationScoped
 public class ConsultorRepository implements PanacheRepository<Consultor> {
 
-    // Migrado de ConsultorRepository.buscarConsultorComTurnos (legado) - HQL original:
     // Select c from Consultor c left join fetch c.turnoTrabalhos where c = ?1
     public static final String SQL_BUSCAR_CONSULTOR_COM_TURNOS =
             "SELECT c.* FROM com_consultor c WHERE c.id = ?1";
@@ -22,7 +21,6 @@ public class ConsultorRepository implements PanacheRepository<Consultor> {
     }
 
 
-    // Migrado de ConsultorRepository.buscarUsuarioNoConsultor (legado) - HQL original:
     // Select c from Consultor c where c.usuario = ?1
     public static final String SQL_BUSCAR_USUARIO_NO_CONSULTOR =
             "SELECT c.* FROM com_consultor c WHERE c.id_usuario = ?1";
@@ -35,7 +33,6 @@ public class ConsultorRepository implements PanacheRepository<Consultor> {
     }
 
 
-    // Migrado de ConsultorRepository.autoCompleteComUnidade (legado) - HQL original:
     // select distinct c.usuario from Consultor c left join fetch c.usuario.unidades un where ( lower(c.usuario.login) like '%' || ?1 || '%' or str(c.usuario.id) = ?1 and c.usuario.ativo = true ) AND un in (?2) order by c.usuario.login
     public static final String SQL_AUTO_COMPLETE_COM_UNIDADE =
             "SELECT DISTINCT c.id_usuario FROM com_consultor c LEFT JOIN bas_usuario j_c_usuario ON j_c_usuario.id = c.id_usuario WHERE ( lower(j_c_usuario.login) like '%' || ?1 || '%' or CAST(j_c_usuario.id AS text) = ?1 and j_c_usuario.fl_ativo = true ) AND un in (?2) ORDER BY j_c_usuario.login";

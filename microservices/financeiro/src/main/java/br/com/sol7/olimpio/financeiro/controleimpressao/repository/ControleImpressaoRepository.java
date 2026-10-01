@@ -9,7 +9,6 @@ import br.com.sol7.olimpio.financeiro.controleimpressao.entity.ControleImpressao
 @ApplicationScoped
 public class ControleImpressaoRepository implements PanacheRepository<ControleImpressao> {
 
-    // Migrado de ControleImpressaoRepository.verificarControle (legado) - HQL original:
     // Select count (c) from ControleImpressao c where c.movimentacaoFinanceira.caixa = ?1 and c.movimentacaoFinanceira = ?2
     public static final String SQL_VERIFICAR_CONTROLE =
             "SELECT count(c) FROM fin_controle_impressao c " +

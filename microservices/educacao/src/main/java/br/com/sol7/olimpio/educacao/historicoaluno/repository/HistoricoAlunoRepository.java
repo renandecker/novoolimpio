@@ -9,7 +9,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class HistoricoAlunoRepository implements PanacheRepository<HistoricoAluno> {
 
-    // Migrado de HistoricoAlunoRepository.buscarHistoricoAlunoComCompromissos (legado) - HQL original:
     // select p from HistoricoAluno p left join fetch p.compromissos where p.id = ?1
     public static final String SQL_BUSCAR_HISTORICO_ALUNO_COM_COMPROMISSOS =
             "SELECT p.* FROM edc_historico_aluno p WHERE p.id = ?1";

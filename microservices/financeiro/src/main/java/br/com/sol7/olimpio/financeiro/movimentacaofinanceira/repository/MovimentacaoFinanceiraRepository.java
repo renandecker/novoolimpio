@@ -16,7 +16,6 @@ import br.com.sol7.olimpio.financeiro.movimentacaofinanceira.entity.TipoPagament
 @ApplicationScoped
 public class MovimentacaoFinanceiraRepository implements PanacheRepository<MovimentacaoFinanceira> {
 
-    // Migrado de MovimentacaoFinanceiraService.buscarMovimentacaoCaixaDia (legado) - HQL original:
     // select m from MovimentacaoFinanceira m where m.caixa = ?1 order by m.dataMovimento
     public Uni<List<MovimentacaoFinanceira>> buscarMovimentacaoCaixaDia(Long caixaId) {
         return find("caixaId = ?1 order by dataMovimento", caixaId).list();

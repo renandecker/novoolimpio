@@ -9,7 +9,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class SalaRepository implements PanacheRepository<Sala> {
 
-    // Migrado de SalaRepository.buscarSalasDaUnidade (legado) - HQL original:
     // Select c from Sala c where c.unidade = ?1 order by c.sucinto
     public static final String SQL_BUSCAR_SALAS_DA_UNIDADE =
             "SELECT c.* FROM edc_sala c WHERE c.id_unidade = ?1 ORDER BY c.sucinto";

@@ -10,7 +10,6 @@ import br.com.sol7.olimpio.basico.resultado.entity.Resultado;
 @ApplicationScoped
 public class ResultadoRepository implements PanacheRepository<Resultado> {
 
-    // Migrado de ResultadoRepository.autoComplete (legado) - HQL original:
     // select r from Resultado r where lower(r.descricao) like '%' || ?1 || '%' OR str(r.id) = ?1 order by r.descricao
     public static final String SQL_AUTO_COMPLETE =
             "SELECT r.* FROM bas_resultado r WHERE lower(r.descricao) like '%' || ?1 || '%' OR CAST(r.id AS text) = ?1 ORDER BY r.descricao";

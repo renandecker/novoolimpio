@@ -10,7 +10,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class EstruturaRepository implements PanacheRepository<Estrutura> {
 
-    // Migrado de EstruturaRepository.buscarEstruturas (legado) - HQL original:
     // select a from Estrutura a order by a.nome
     public static final String SQL_BUSCAR_ESTRUTURAS =
             "SELECT a.* FROM rel_estrutura a ORDER BY a.nome";
@@ -23,7 +22,6 @@ public class EstruturaRepository implements PanacheRepository<Estrutura> {
     }
 
 
-    // Migrado de EstruturaRepository.buscarBancos (legado) - HQL original:
     // select a from Estrutura a where a.nomeBanco = ?1 order by a.id desc
     public static final String SQL_BUSCAR_BANCOS =
             "SELECT a.* FROM rel_estrutura a WHERE a.nome_banco = ?1 ORDER BY a.id desc";
@@ -36,7 +34,6 @@ public class EstruturaRepository implements PanacheRepository<Estrutura> {
     }
 
 
-    // Migrado de EstruturaRepository.buscarBancosComId (legado) - HQL original:
     // select a from Estrutura a where a.nomeBanco = ?1 and a.id <> ?2 order by a.id desc
     public static final String SQL_BUSCAR_BANCOS_COM_ID =
             "SELECT a.* FROM rel_estrutura a WHERE a.nome_banco = ?1 and a.id <> ?2 ORDER BY a.id desc";
@@ -50,7 +47,6 @@ public class EstruturaRepository implements PanacheRepository<Estrutura> {
     }
 
 
-    // Migrado de EstruturaRepository.autoComplete (legado) - HQL original:
     // select p from Estrutura p where lower(p.nome) like '%' || ?1 || '%' OR str(p.id) = ?1 order by p.nome
     public static final String SQL_AUTO_COMPLETE =
             "SELECT p.* FROM rel_estrutura p WHERE lower(p.nome) like '%' || ?1 || '%' OR CAST(p.id AS text) = ?1 ORDER BY p.nome LIMIT 10";

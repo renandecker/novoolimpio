@@ -11,7 +11,6 @@ import br.com.sol7.olimpio.basico.pessoa.entity.Pessoa;
 @ApplicationScoped
 public class PessoaRepository implements PanacheRepository<Pessoa> {
 
-    // Migrado de PessoaRepository.buscarPessoaComUnidades (legado) - HQL original:
     // Select p from Pessoa p left join fetch p.unidades u where  p = ?1
     public static final String SQL_BUSCAR_PESSOA_COM_UNIDADES =
             "SELECT p.* FROM bas_pessoa p LEFT JOIN bas_pessoa_unidade p_u_jt ON p_u_jt.id_pessoa = p.id LEFT JOIN bas_unidade u ON u.id = p_u_jt.id_unidade WHERE p.id = ?1";
@@ -24,7 +23,6 @@ public class PessoaRepository implements PanacheRepository<Pessoa> {
     }
 
 
-    // Migrado de PessoaRepository.existenciaUsuarioComNome (legado) - HQL original:
     // select u from Usuario u left join fetch u.unidades where trim(u.pessoa.pessoaFisica.nome) = ?1
     public static final String SQL_EXISTENCIA_USUARIO_COM_NOME =
             "SELECT u.* FROM bas_usuario u LEFT JOIN bas_pessoa j_u_pessoa ON j_u_pessoa.id = u.id_pessoa LEFT JOIN bas_pessoa_fisica j_j_u_pessoa_pessoaFisica ON j_j_u_pessoa_pessoaFisica.id_pessoa = j_u_pessoa.id WHERE trim(j_j_u_pessoa_pessoaFisica.nome) = ?1";
@@ -39,7 +37,6 @@ public class PessoaRepository implements PanacheRepository<Pessoa> {
     }
 
 
-    // Migrado de PessoaRepository.existenciaPessoaComNome (legado) - HQL original:
     // select p.pessoa from PessoaFisica p where trim(p.nome) = ?1
     public static final String SQL_EXISTENCIA_PESSOA_COM_NOME =
             "SELECT p.id_pessoa FROM bas_pessoa_fisica p WHERE trim(p.nome) = ?1";
@@ -52,7 +49,6 @@ public class PessoaRepository implements PanacheRepository<Pessoa> {
     }
 
 
-    // Migrado de PessoaRepository.existenciaUsuarioComRg (legado) - HQL original:
     // select u from Usuario u where u.pessoa.pessoaFisica.rg = ?1
     public static final String SQL_EXISTENCIA_USUARIO_COM_RG =
             "SELECT u.* FROM bas_usuario u LEFT JOIN bas_pessoa j_u_pessoa ON j_u_pessoa.id = u.id_pessoa LEFT JOIN bas_pessoa_fisica j_j_u_pessoa_pessoaFisica ON j_j_u_pessoa_pessoaFisica.id_pessoa = j_u_pessoa.id WHERE j_j_u_pessoa_pessoaFisica.rg = ?1";
@@ -67,7 +63,6 @@ public class PessoaRepository implements PanacheRepository<Pessoa> {
     }
 
 
-    // Migrado de PessoaRepository.existenciaPessoaComRg (legado) - HQL original:
     // select p.pessoa from PessoaFisica p where p.rg = ?1
     public static final String SQL_EXISTENCIA_PESSOA_COM_RG =
             "SELECT p.id_pessoa FROM bas_pessoa_fisica p WHERE p.rg = ?1";
@@ -80,7 +75,6 @@ public class PessoaRepository implements PanacheRepository<Pessoa> {
     }
 
 
-    // Migrado de PessoaRepository.existenciaPessoaComRg (legado) - HQL original:
     // select p.pessoa from PessoaFisica p where p.rg = ?1 and p.pessoa.id <> ?2
     public static final String SQL_EXISTENCIA_PESSOA_COM_RG_COM_ID =
             "SELECT p.id_pessoa FROM bas_pessoa_fisica p LEFT JOIN bas_pessoa j_p_pessoa ON j_p_pessoa.id = p.id_pessoa WHERE p.rg = ?1 and j_p_pessoa.id <> ?2";
@@ -94,7 +88,6 @@ public class PessoaRepository implements PanacheRepository<Pessoa> {
     }
 
 
-    // Migrado de PessoaRepository.existenciaUsuarioComCpf (legado) - HQL original:
     // select u from Usuario u where u.pessoa.pessoaFisica.cpf = ?1
     public static final String SQL_EXISTENCIA_USUARIO_COM_CPF =
             "SELECT u.* FROM bas_usuario u LEFT JOIN bas_pessoa j_u_pessoa ON j_u_pessoa.id = u.id_pessoa LEFT JOIN bas_pessoa_fisica j_j_u_pessoa_pessoaFisica ON j_j_u_pessoa_pessoaFisica.id_pessoa = j_u_pessoa.id WHERE j_j_u_pessoa_pessoaFisica.cpf = ?1";
@@ -109,7 +102,6 @@ public class PessoaRepository implements PanacheRepository<Pessoa> {
     }
 
 
-    // Migrado de PessoaRepository.existenciaPessoaComCpf (legado) - HQL original:
     // select p.pessoa from PessoaFisica p where p.cpf = ?1
     public static final String SQL_EXISTENCIA_PESSOA_COM_CPF =
             "SELECT p.id_pessoa FROM bas_pessoa_fisica p WHERE p.cpf = ?1";
@@ -122,7 +114,6 @@ public class PessoaRepository implements PanacheRepository<Pessoa> {
     }
 
 
-    // Migrado de PessoaRepository.existenciaPessoaComCpf (legado) - HQL original:
     // select p.pessoa from PessoaFisica p where p.cpf = ?1 and p.pessoa.id <> ?2
     public static final String SQL_EXISTENCIA_PESSOA_COM_CPF_COM_ID =
             "SELECT p.id_pessoa FROM bas_pessoa_fisica p LEFT JOIN bas_pessoa j_p_pessoa ON j_p_pessoa.id = p.id_pessoa WHERE p.cpf = ?1 and j_p_pessoa.id <> ?2";
@@ -136,7 +127,6 @@ public class PessoaRepository implements PanacheRepository<Pessoa> {
     }
 
 
-    // Migrado de PessoaRepository.existenciaPessoaComCnpj (legado) - HQL original:
     // select p.pessoa from PessoaJuridica p where p.cnpj = ?1  and p.pessoa.id <> ?2
     public static final String SQL_EXISTENCIA_PESSOA_COM_CNPJ =
             "SELECT p.id_pessoa FROM bas_pessoa_juridica p LEFT JOIN bas_pessoa j_p_pessoa ON j_p_pessoa.id = p.id_pessoa WHERE p.cnpj = ?1 and j_p_pessoa.id <> ?2";
@@ -150,7 +140,6 @@ public class PessoaRepository implements PanacheRepository<Pessoa> {
     }
 
 
-    // Migrado de PessoaRepository.existenciaPessoaComCnpj (legado) - HQL original:
     // select p.pessoa from PessoaJuridica p where p.cnpj = ?1
     public static final String SQL_EXISTENCIA_PESSOA_COM_CNPJ_SEM_ID =
             "SELECT p.id_pessoa FROM bas_pessoa_juridica p WHERE p.cnpj = ?1";
@@ -163,7 +152,6 @@ public class PessoaRepository implements PanacheRepository<Pessoa> {
     }
 
 
-    // Migrado de PessoaRepository.existenciaPessoaComRazaoSocial (legado) - HQL original:
     // select p.pessoa from PessoaJuridica p where trim(lower(p.razaoSocial)) = ?1 and p.pessoa.id <> ?2
     public static final String SQL_EXISTENCIA_PESSOA_COM_RAZAO_SOCIAL =
             "SELECT p.id_pessoa FROM bas_pessoa_juridica p LEFT JOIN bas_pessoa j_p_pessoa ON j_p_pessoa.id = p.id_pessoa WHERE trim(lower(p.razao_social)) = ?1 and j_p_pessoa.id <> ?2";
@@ -177,7 +165,6 @@ public class PessoaRepository implements PanacheRepository<Pessoa> {
     }
 
 
-    // Migrado de PessoaRepository.existenciaUsuarioComEmail (legado) - HQL original:
     // select u from Usuario u where u.pessoa.email = ?1
     public static final String SQL_EXISTENCIA_USUARIO_COM_EMAIL =
             "SELECT u.* FROM bas_usuario u LEFT JOIN bas_pessoa j_u_pessoa ON j_u_pessoa.id = u.id_pessoa WHERE j_u_pessoa.email = ?1";
@@ -192,7 +179,6 @@ public class PessoaRepository implements PanacheRepository<Pessoa> {
     }
 
 
-    // Migrado de PessoaRepository.existenciaPessoaComEmail (legado) - HQL original:
     // select p.pessoa from PessoaFisica p where p.pessoa.email = ?1
     public static final String SQL_EXISTENCIA_PESSOA_COM_EMAIL =
             "SELECT p.id_pessoa FROM bas_pessoa_fisica p LEFT JOIN bas_pessoa j_p_pessoa ON j_p_pessoa.id = p.id_pessoa WHERE j_p_pessoa.email = ?1";
@@ -205,7 +191,6 @@ public class PessoaRepository implements PanacheRepository<Pessoa> {
     }
 
 
-    // Migrado de PessoaRepository.existenciaPessoaComEmail (legado) - HQL original:
     // select p.pessoa from PessoaFisica p where p.pessoa.email = ?1 and p.pessoa.id <> ?2
     public static final String SQL_EXISTENCIA_PESSOA_COM_EMAIL_COM_ID =
             "SELECT p.id_pessoa FROM bas_pessoa_fisica p LEFT JOIN bas_pessoa j_p_pessoa ON j_p_pessoa.id = p.id_pessoa WHERE j_p_pessoa.email = ?1 and j_p_pessoa.id <> ?2";
@@ -219,7 +204,6 @@ public class PessoaRepository implements PanacheRepository<Pessoa> {
     }
 
 
-    // Migrado de PessoaRepository.pessoaComUnidades (legado) - HQL original:
     // select distinct p from Pessoa p inner join p.unidades u where u = ?1 order by p.id desc
     public static final String SQL_PESSOA_COM_UNIDADES =
             "SELECT DISTINCT p.* FROM bas_pessoa p INNER JOIN bas_pessoa_unidade p_u_jt ON p_u_jt.id_pessoa = p.id INNER JOIN bas_unidade u ON u.id = p_u_jt.id_unidade WHERE u.id = ?1 ORDER BY p.id desc";
@@ -232,7 +216,6 @@ public class PessoaRepository implements PanacheRepository<Pessoa> {
     }
 
 
-    // Migrado de PessoaRepository.buscarPessoaPorUnidades (legado) - HQL original:
     // select distinct p from Pessoa p inner join p.unidades u where u in (?1) order by p.id desc
     public static final String SQL_BUSCAR_PESSOA_POR_UNIDADES =
             "SELECT DISTINCT p.* FROM bas_pessoa p INNER JOIN bas_pessoa_unidade p_u_jt ON p_u_jt.id_pessoa = p.id INNER JOIN bas_unidade u ON u.id = p_u_jt.id_unidade WHERE u in (?1) ORDER BY p.id desc";

@@ -9,7 +9,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class ProdutoRepository implements PanacheRepository<Produto> {
 
-    // Migrado de ProdutoRepository.carregarUnidade (legado) - HQL original:
     // select p from Produto p left join fetch p.unidades where p = ?1
     public static final String SQL_CARREGAR_UNIDADE =
             "SELECT p.* FROM est_produto p WHERE p.id = ?1";
@@ -22,7 +21,6 @@ public class ProdutoRepository implements PanacheRepository<Produto> {
     }
 
 
-    // Migrado de ProdutoRepository.carregarFornecedor (legado) - HQL original:
     // select p from Produto p left join fetch p.fornecedores where p = ?1
     public static final String SQL_CARREGAR_FORNECEDOR =
             "SELECT p.* FROM est_produto p WHERE p.id = ?1";
@@ -35,7 +33,6 @@ public class ProdutoRepository implements PanacheRepository<Produto> {
     }
 
 
-    // Migrado de ProdutoRepository.buscarProdutoEstoque (legado) - HQL original:
     // Select distinct p from ControleEstoque c inner join c.produto p where c.id = ?1
     public static final String SQL_BUSCAR_PRODUTO_ESTOQUE =
             "SELECT DISTINCT p.* FROM est_controle_estoque c INNER JOIN est_produto p ON p.id = c.id_produto WHERE c.id = ?1";
@@ -48,7 +45,6 @@ public class ProdutoRepository implements PanacheRepository<Produto> {
     }
 
 
-    // Migrado de ProdutoRepository.autoComplete (legado) - HQL original:
     // select distinct p from Produto p left join p.produtoCampos lc where (lower(lc.valor) like '%' || ?1 || '%' OR (p.id) like '%' || ?1 || '%')
     public static final String SQL_AUTO_COMPLETE =
             "SELECT DISTINCT p.* FROM est_produto p LEFT JOIN est_produto_campo_informacao lc ON lc.id_produto = p.id WHERE (lower(lc.valor) like '%' || ?1 || '%' OR (p.id) like '%' || ?1 || '%') LIMIT 10";
@@ -61,7 +57,6 @@ public class ProdutoRepository implements PanacheRepository<Produto> {
     }
 
 
-    // Migrado de ProdutoRepository.carregarCampos (legado) - HQL original:
     // select p from Produto p left join fetch p.produtoCampos where p = ?1
     public static final String SQL_CARREGAR_CAMPOS =
             "SELECT p.* FROM est_produto p WHERE p.id = ?1";

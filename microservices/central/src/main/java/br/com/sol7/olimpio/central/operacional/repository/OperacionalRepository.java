@@ -9,7 +9,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class OperacionalRepository implements PanacheRepository<Operacional> {
 
-    // Migrado de OperacionalRepository.buscarOperacionalComCoordenador (legado) - HQL original:
     // select op from Operacional op left join fetch op.coordenador where op.id = ?1
     public static final String SQL_BUSCAR_OPERACIONAL_COM_COORDENADOR =
             "SELECT op.* FROM cen_operacional op WHERE op.id = ?1";
@@ -22,7 +21,6 @@ public class OperacionalRepository implements PanacheRepository<Operacional> {
     }
 
 
-    // Migrado de OperacionalRepository.buscarOperacionaisDoCoordenador (legado) - HQL original:
     // select op from Operacional op where op.coordenador = ?1 AND op.status = 'INICIADO'
     public static final String SQL_BUSCAR_OPERACIONAIS_DO_COORDENADOR =
             "SELECT op.* FROM cen_operacional op WHERE op.id_coordenador = ?1 AND op.status = 'INICIADO'";
@@ -35,7 +33,6 @@ public class OperacionalRepository implements PanacheRepository<Operacional> {
     }
 
 
-    // Migrado de OperacionalRepository.buscarOperacionalExpirados (legado) - HQL original:
     // SELECT op from Operacional op WHERE op.status <> 'CONCLUIDO' AND op.status <> 'EXPIRADO' AND op.pacote.acaoDeCampanha.dataFinal < current_date
     public static final String SQL_BUSCAR_OPERACIONAL_EXPIRADOS =
             "SELECT op.* FROM cen_operacional op LEFT JOIN com_pacote j_op_pacote ON j_op_pacote.id = op.id_pacote LEFT JOIN com_acao_de_campanha j_j_op_pacote_acaoDeCampanha ON j_j_op_pacote_acaoDeCampanha.id = j_op_pacote.id_acao_de_campanha WHERE op.status <> 'CONCLUIDO' AND op.status <> 'EXPIRADO' AND j_j_op_pacote_acaoDeCampanha.data_final < current_date";
@@ -48,7 +45,6 @@ public class OperacionalRepository implements PanacheRepository<Operacional> {
     }
 
 
-    // Migrado de OperacionalRepository.buscarCoordenadorOperacional (legado) - HQL original:
     // Select o.coordenador from Operacional o where o = ?1
     public static final String SQL_BUSCAR_COORDENADOR_OPERACIONAL =
             "SELECT o.id_coordenador FROM cen_operacional o WHERE o.id = ?1";
@@ -61,7 +57,6 @@ public class OperacionalRepository implements PanacheRepository<Operacional> {
     }
 
 
-    // Migrado de OperacionalRepository.buscarProspectos (legado) - HQL original:
     // Select distinct po from Operacional o inner join o.pacote p  inner join p.prospectos po left join fetch po.prospectoCampos pc  where o = ?1
     public static final String SQL_BUSCAR_PROSPECTOS =
             "SELECT DISTINCT po.* FROM cen_operacional o INNER JOIN com_pacote p ON p.id = o.id_pacote INNER JOIN com_pacote_prospecto p_po_jt ON p_po_jt.id_pacote = p.id INNER JOIN com_prospecto po ON po.id = p_po_jt.id_prospecto LEFT JOIN com_prospecto_campo pc ON pc.id_prospecto = po.id WHERE o.id = ?1";
@@ -76,7 +71,6 @@ public class OperacionalRepository implements PanacheRepository<Operacional> {
     }
 
 
-    // Migrado de OperacionalRepository.atualizarStatusExpirado (legado) - HQL original:
     // Update Operacional op set op.status='EXPIRADO' where op = ?1
     public static final String SQL_ATUALIZAR_STATUS_EXPIRADO =
             "UPDATE cen_operacional SET status ='EXPIRADO' WHERE op.id = ?1";

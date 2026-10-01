@@ -9,7 +9,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class ConfiguracaoEstoqueRepository implements PanacheRepository<ConfiguracaoEstoque> {
 
-    // Migrado de ConfiguracaoEstoqueRepository.buscarConfiguracaoComUnidadeUsuario (legado) - HQL original:
     // Select c from ConfiguracaoEstoque c where  c.unidade = ?1 order by c.id desc
     public static final String SQL_BUSCAR_CONFIGURACAO_COM_UNIDADE_USUARIO =
             "SELECT c.* FROM est_configuracao_estoque c WHERE c.id_unidade = ?1 ORDER BY c.id desc";
@@ -22,7 +21,6 @@ public class ConfiguracaoEstoqueRepository implements PanacheRepository<Configur
     }
 
 
-    // Migrado de ConfiguracaoEstoqueRepository.buscarCentral (legado) - HQL original:
     // Select c from ConfiguracaoEstoque c where c.central = true order by c.id desc
     public static final String SQL_BUSCAR_CENTRAL =
             "SELECT c.* FROM est_configuracao_estoque c WHERE c.fl_estoque_central = true ORDER BY c.id desc";

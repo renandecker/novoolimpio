@@ -9,7 +9,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class CobrancaRepository implements PanacheRepository<Cobranca> {
 
-    // Migrado de CobrancaRepository.listaLigacaoCobrancaComEtapaAtivos (legado) - HQL original:
     // select l from Cobranca l where l.etapasCobranca = ?1
     public static final String SQL_LISTA_LIGACAO_COBRANCA_COM_ETAPA_ATIVOS =
             "SELECT l.* FROM fin_cobranca l WHERE l.id_etapa_cobranca = ?1";
@@ -22,7 +21,6 @@ public class CobrancaRepository implements PanacheRepository<Cobranca> {
     }
 
 
-    // Migrado de CobrancaRepository.listaLigacaoSemEtapaAtivos (legado) - HQL original:
     // select l from Cobranca l where l.etapasCobranca is null
     public static final String SQL_LISTA_LIGACAO_SEM_ETAPA_ATIVOS =
             "SELECT l.* FROM fin_cobranca l WHERE l.id_etapa_cobranca is null";
@@ -35,7 +33,6 @@ public class CobrancaRepository implements PanacheRepository<Cobranca> {
     }
 
 
-    // Migrado de CobrancaRepository.buscaObjeto (legado) - HQL original:
     // select l from Cobranca l where l.id = ?1
     public static final String SQL_BUSCA_OBJETO =
             "SELECT l.* FROM fin_cobranca l WHERE l.id = ?1";

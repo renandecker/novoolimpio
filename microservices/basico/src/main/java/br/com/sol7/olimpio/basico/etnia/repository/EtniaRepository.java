@@ -10,7 +10,6 @@ import br.com.sol7.olimpio.basico.etnia.entity.Etnia;
 @ApplicationScoped
 public class EtniaRepository implements PanacheRepository<Etnia> {
 
-    // Migrado de EtniaRepository.buscaTodosOrdenado (legado) - HQL original:
     // select u from Etnia u order by u.descricao
     public static final String SQL_BUSCA_TODOS_ORDENADO =
             "SELECT u.* FROM bas_etnia u ORDER BY u.descricao";

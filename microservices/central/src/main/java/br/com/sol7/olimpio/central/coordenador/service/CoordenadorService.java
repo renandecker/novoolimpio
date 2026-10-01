@@ -383,22 +383,51 @@ public class CoordenadorService {
         );
     }
 
-    public Uni<Map<String,Object>> buscarLigacoesPie(Long operadorId) {
+    public Uni<Map<String,Object>> buscarLigacoesPie(Long operadorId, Long usuarioId) {
+        return Panache.getSession().chain(session -> {
+            StringBuilder where = new StringBuilder(" WHERE l.id_usuario = :op ");
+            Map<String, Object> params = new HashMap<>();
+            params.put("op", operadorId.intValue());
+            if (usuarioId != null) {
+                where.append(" AND l.id_usuario = :usr ");
+                params.put("usr", usuarioId.intValue());
+            }
+            String sql = "SELECT rc.descricao AS descricao, count(l.id) AS cnt FROM cen_ligacao l JOIN cen_resultado_contato rc ON rc.id = l.id_resultado_contato" + where + " GROUP BY rc.descricao";
+            Mutiny.Query query = session.createNativeQuery(sql, Tuple.class);
+            for (var e : params.entrySet()) query.setParameter(e.getKey(), e.getValue());
+            return query.getResultList().map(list -> {
+                Map<String,Object> out = new LinkedHashMap<>();
+                long total = 0;
+                for (Object rowObj : list) {
+                    Tuple t = (Tuple) rowObj;
+                    String desc = TupleHelper.getString(t, "descricao");
+                    long cnt = TupleHelper.getLong(t, "cnt");
+                    out.put(desc, cnt);
+                    total += cnt;
+                }
+                out.put("total", total);
+                return out;
+            });
+        });
+    }
+
+    public Uni<List<Map<String,Object>>> buscarUsuarios(Long operadorId) {
         return Panache.getSession().chain(session ->
-            session.createNativeQuery("SELECT rc.descricao AS descricao, count(l.id) AS cnt FROM cen_ligacao l JOIN cen_resultado_contato rc ON rc.id = l.id_resultado_contato WHERE l.id_usuario = :op GROUP BY rc.descricao", Tuple.class)
-                .setParameter("op", operadorId.intValue()).getResultList().map(list -> {
-                    Map<String,Object> out = new LinkedHashMap<>();
-                    long total = 0;
-                    for (Object rowObj : list) {
-                        Tuple t = (Tuple) rowObj;
-                        String desc = TupleHelper.getString(t, "descricao");
-                        long cnt = TupleHelper.getLong(t, "cnt");
-                        out.put(desc, cnt);
-                        total += cnt;
-                    }
-                    out.put("total", total);
-                    return out;
-                })
+            session.createNativeQuery(
+                "SELECT u.id AS id, u.login AS login FROM bas_usuario u " +
+                " JOIN cen_coordenador c ON c.id_operador = u.id " +
+                " WHERE c.id_coordenador = (SELECT id_coordenador FROM cen_coordenador WHERE id_operador = :opId LIMIT 1) ORDER BY u.login", Tuple.class
+            ).setParameter("opId", operadorId.intValue()).getResultList().map(list -> {
+                List<Map<String,Object>> out = new ArrayList<>();
+                for (Object rowObj : list) {
+                    Tuple t = (Tuple) rowObj;
+                    Map<String,Object> m = new LinkedHashMap<>();
+                    m.put("id", TupleHelper.getLong(t, "id"));
+                    m.put("login", TupleHelper.getString(t, "login"));
+                    out.add(m);
+                }
+                return out;
+            })
         );
     }
 

@@ -13,7 +13,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class OferecimentoComponenteCurricularRepository implements PanacheRepository<OferecimentoComponenteCurricular> {
 
-    // Migrado de OferecimentoComponenteCurricularRepository.buscarMatrizCurricular (legado) - HQL original:
     // select m from MatrizCurricular m where m.curriculo = ?1 order by m.ordem
     public static final String SQL_BUSCAR_MATRIZ_CURRICULAR =
             "SELECT m.id AS id FROM edc_matriz_curricular m WHERE m.id_curriculo = ?1 ORDER BY m.ordem";
@@ -28,7 +27,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.autocompleteComCurriculoGrupoComQuery (legado) - HQL original:
     // select distinct off.componenteCurricular from OferecimentoComponenteCurricular off where off.unidade.ativo = true and off.grupo = ?2 and off.curriculo = ?3 and off.status <> 'CANCELADA' and   (lower(off.componenteCurricular.descricao) like '%' || ?1 || '%'  OR str(off.id) = ?1 or lower(off.componenteCurricular.sucinto) like '%' || ?1 || '%')
     public static final String SQL_AUTOCOMPLETE_COM_CURRICULO_GRUPO_COM_QUERY =
             "SELECT DISTINCT off.id_componente_curricular FROM edc_oferecimento_componente_curricular off LEFT JOIN bas_unidade j_off_unidade ON j_off_unidade.id = off.id_unidade LEFT JOIN edc_componente_curricular j_off_componenteCurricular ON j_off_componenteCurricular.id = off.id_componente_curricular WHERE j_off_unidade.fl_ativo = true and off.id_grupo = ?2 and off.id_curso = ?3 and off.status <> 'CANCELADA' and (lower(j_off_componenteCurricular.descricao) like '%' || ?1 || '%' OR CAST(off.id AS text) = ?1 or lower(j_off_componenteCurricular.sucinto) like '%' || ?1 || '%') LIMIT 10";
@@ -43,7 +41,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.autocompleteComCurriculoGrupoSemQuery (legado) - HQL original:
     // select distinct off.componenteCurricular from OferecimentoComponenteCurricular off where off.unidade.ativo = true and  off.grupo = ?1 and off.curriculo = ?2 and off.status <> 'CANCELADA'
     public static final String SQL_AUTOCOMPLETE_COM_CURRICULO_GRUPO_SEM_QUERY =
             "SELECT DISTINCT off.id_componente_curricular FROM edc_oferecimento_componente_curricular off LEFT JOIN bas_unidade j_off_unidade ON j_off_unidade.id = off.id_unidade WHERE j_off_unidade.fl_ativo = true and off.id_grupo = ?1 and off.id_curso = ?2 and off.status <> 'CANCELADA' LIMIT 10";
@@ -57,7 +54,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.autocompleteComCurriculoComQuery (legado) - HQL original:
     // select distinct off.componenteCurricular from OferecimentoComponenteCurricular off where off.unidade.ativo = true and  off.curriculo = ?2 and off.status <> 'CANCELADA' and   (lower(off.componenteCurricular.descricao) like '%' || ?1 || '%'  OR str(off.id) = ?1 or lower(off.componenteCurricular.sucinto) like '%' || ?1 || '%')
     public static final String SQL_AUTOCOMPLETE_COM_CURRICULO_COM_QUERY =
             "SELECT DISTINCT off.id_componente_curricular FROM edc_oferecimento_componente_curricular off LEFT JOIN bas_unidade j_off_unidade ON j_off_unidade.id = off.id_unidade LEFT JOIN edc_componente_curricular j_off_componenteCurricular ON j_off_componenteCurricular.id = off.id_componente_curricular WHERE j_off_unidade.fl_ativo = true and off.id_curso = ?2 and off.status <> 'CANCELADA' and (lower(j_off_componenteCurricular.descricao) like '%' || ?1 || '%' OR CAST(off.id AS text) = ?1 or lower(j_off_componenteCurricular.sucinto) like '%' || ?1 || '%') LIMIT 10";
@@ -71,7 +67,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.autocompleteComCurriculoSemQuery (legado) - HQL original:
     // select distinct off.componenteCurricular from OferecimentoComponenteCurricular off where off.unidade.ativo = true and off.curriculo = ?1 and off.status <> 'CANCELADA'
     public static final String SQL_AUTOCOMPLETE_COM_CURRICULO_SEM_QUERY =
             "SELECT DISTINCT off.id_componente_curricular FROM edc_oferecimento_componente_curricular off LEFT JOIN bas_unidade j_off_unidade ON j_off_unidade.id = off.id_unidade WHERE j_off_unidade.fl_ativo = true and off.id_curso = ?1 and off.status <> 'CANCELADA' LIMIT 10";
@@ -84,7 +79,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.todos (legado) - HQL original:
     // select m from OferecimentoComponenteCurricular m where m.unidade.ativo = true order by m.id
     public static final String SQL_TODOS =
             "SELECT m.* FROM edc_oferecimento_componente_curricular m LEFT JOIN bas_unidade j_m_unidade ON j_m_unidade.id = m.id_unidade WHERE j_m_unidade.fl_ativo = true ORDER BY m.id";
@@ -97,7 +91,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.verificarExisteConflito (legado) - HQL original:
     // select o from OcorrenciaComponenteCurricular o where o.oferecimentoComponenteCurricular.unidade.ativo = true and o.ativo = true and o.data = ?1 AND o.sala = ?2 and o.oferecimentoComponenteCurricular.unidade = ?3
     public static final String SQL_VERIFICAR_EXISTE_CONFLITO =
             "SELECT o.* FROM edc_ocorrencia_componente_curricular o LEFT JOIN edc_oferecimento_componente_curricular j_o_oferecimentoComponenteCurricular ON j_o_oferecimentoComponenteCurricular.id = o.id_oferecimento_componente_curricular LEFT JOIN bas_unidade j_j_o_oferecimentoComponenteCurricular_unidade ON j_j_o_oferecimentoComponenteCurricular_unidade.id = j_o_oferecimentoComponenteCurricular.id_unidade WHERE j_j_o_oferecimentoComponenteCurricular_unidade.fl_ativo = true and o.fl_ativo = true and o.data = ?1 AND o.id_sala = ?2 and j_o_oferecimentoComponenteCurricular.id_unidade = ?3";
@@ -114,7 +107,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.verificarExisteConflitoComOferecimento (legado) - HQL original:
     // select o from OcorrenciaComponenteCurricular o where o.oferecimentoComponenteCurricular.unidade.ativo = true  and o.ativo = true and o.data = ?1 AND o.sala = ?2 and o.oferecimentoComponenteCurricular <> ?3 and o.oferecimentoComponenteCurricular.unidade = ?4
     public static final String SQL_VERIFICAR_EXISTE_CONFLITO_COM_OFERECIMENTO =
             "SELECT o.* FROM edc_ocorrencia_componente_curricular o LEFT JOIN edc_oferecimento_componente_curricular j_o_oferecimentoComponenteCurricular ON j_o_oferecimentoComponenteCurricular.id = o.id_oferecimento_componente_curricular LEFT JOIN bas_unidade j_j_o_oferecimentoComponenteCurricular_unidade ON j_j_o_oferecimentoComponenteCurricular_unidade.id = j_o_oferecimentoComponenteCurricular.id_unidade WHERE j_j_o_oferecimentoComponenteCurricular_unidade.fl_ativo = true and o.fl_ativo = true and o.data = ?1 AND o.id_sala = ?2 and o.id_oferecimento_componente_curricular <> ?3 and j_o_oferecimentoComponenteCurricular.id_unidade = ?4";
@@ -132,7 +124,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.verificarExisteConflitoComOferecimentos (legado) - HQL original:
     // select o from OcorrenciaComponenteCurricular o where o.oferecimentoComponenteCurricular.unidade.ativo = true  and o.ativo = true and o.data = ?1 AND o.sala = ?2 and o.oferecimentoComponenteCurricular not in (?3) and o.oferecimentoComponenteCurricular.unidade = ?4
     public static final String SQL_VERIFICAR_EXISTE_CONFLITO_COM_OFERECIMENTOS =
             "SELECT o.* FROM edc_ocorrencia_componente_curricular o LEFT JOIN edc_oferecimento_componente_curricular j_o_oferecimentoComponenteCurricular ON j_o_oferecimentoComponenteCurricular.id = o.id_oferecimento_componente_curricular LEFT JOIN bas_unidade j_j_o_oferecimentoComponenteCurricular_unidade ON j_j_o_oferecimentoComponenteCurricular_unidade.id = j_o_oferecimentoComponenteCurricular.id_unidade WHERE j_j_o_oferecimentoComponenteCurricular_unidade.fl_ativo = true and o.fl_ativo = true and o.data = ?1 AND o.id_sala = ?2 and o.id_oferecimento_componente_curricular not in (?3) and j_o_oferecimentoComponenteCurricular.id_unidade = ?4";
@@ -150,7 +141,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.buscarComponentessDoOferecimentos (legado) - HQL original:
     // select o from OferecimentoComponenteCurricular o where o.unidade.ativo = true and o.componenteCurricular = ?1
     public static final String SQL_BUSCAR_COMPONENTESS_DO_OFERECIMENTOS =
             "SELECT o.* FROM edc_oferecimento_componente_curricular o LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade WHERE j_o_unidade.fl_ativo = true and o.id_componente_curricular = ?1";
@@ -163,7 +153,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.verificarExisteConflitoProrrogandoDisciplina (legado) - HQL original:
     // select o from OcorrenciaComponenteCurricular o where o.oferecimentoComponenteCurricular.unidade.ativo = true  and o.ativo = true and o.data = ?1 AND o.sala = ?2 AND o.oferecimentoComponenteCurricular <> ?3
     public static final String SQL_VERIFICAR_EXISTE_CONFLITO_PRORROGANDO_DISCIPLINA =
             "SELECT o.* FROM edc_ocorrencia_componente_curricular o LEFT JOIN edc_oferecimento_componente_curricular j_o_oferecimentoComponenteCurricular ON j_o_oferecimentoComponenteCurricular.id = o.id_oferecimento_componente_curricular LEFT JOIN bas_unidade j_j_o_oferecimentoComponenteCurricular_unidade ON j_j_o_oferecimentoComponenteCurricular_unidade.id = j_o_oferecimentoComponenteCurricular.id_unidade WHERE j_j_o_oferecimentoComponenteCurricular_unidade.fl_ativo = true and o.fl_ativo = true and o.data = ?1 AND o.id_sala = ?2 AND o.id_oferecimento_componente_curricular <> ?3";
@@ -180,7 +169,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.buscarOferecimentoComOcorrencia (legado) - HQL original:
     // select o from OferecimentoComponenteCurricular o join fetch o.ocorrenciaComponenteCurriculares c where  o.unidade.ativo = true  and c.ativo = true and o = ?1 order by c.data
     public static final String SQL_BUSCAR_OFERECIMENTO_COM_OCORRENCIA =
             "SELECT o.* FROM edc_oferecimento_componente_curricular o INNER JOIN edc_ocorrencia_componente_curricular c ON c.id_oferecimento_componente_curricular = o.id LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade WHERE j_o_unidade.fl_ativo = true and c.fl_ativo = true and o.id = ?1 ORDER BY c.data";
@@ -193,7 +181,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.buscarOferecimentoComOcorrenciaTodos (legado) - HQL original:
     // select o from OferecimentoComponenteCurricular o join fetch o.ocorrenciaComponenteCurriculares c where o = ?1 order by c.data
     public static final String SQL_BUSCAR_OFERECIMENTO_COM_OCORRENCIA_TODOS =
             "SELECT o.* FROM edc_oferecimento_componente_curricular o INNER JOIN edc_ocorrencia_componente_curricular c ON c.id_oferecimento_componente_curricular = o.id WHERE o.id = ?1 ORDER BY c.data";
@@ -206,7 +193,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.buscarOferecimentoAbertasComSala (legado) - HQL original:
     // select o from OferecimentoComponenteCurricular o  where  o.unidade.ativo = true and o.sala = ?1 and (o.status = 'LIBERADA' or o.status  = 'PENDENTE' or o.status  = 'LOTADA' or o.status = 'EM_ANDAMENTO')
     public static final String SQL_BUSCAR_OFERECIMENTO_ABERTAS_COM_SALA =
             "SELECT o.* FROM edc_oferecimento_componente_curricular o LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade WHERE j_o_unidade.fl_ativo = true and o.id_sala = ?1 and (o.status = 'LIBERADA' or o.status = 'PENDENTE' or o.status = 'LOTADA' or o.status = 'EM_ANDAMENTO')";
@@ -219,7 +205,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.buscarOferecimentoComDiasAula (legado) - HQL original:
     // select o from OferecimentoComponenteCurricular o join fetch o.diasAula c where o.unidade.ativo = true and o = ?1
     public static final String SQL_BUSCAR_OFERECIMENTO_COM_DIAS_AULA =
             "SELECT o.* FROM edc_oferecimento_componente_curricular o INNER JOIN edc_oferecimento_dias_aula o_c_jt ON o_c_jt.id_oferecimento_componente_curricular = o.id INNER JOIN edc_dia_aula c ON c.id = o_c_jt.id_dia_aula LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade WHERE j_o_unidade.fl_ativo = true and o.id = ?1";
@@ -232,7 +217,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.listarOferecimentosEmAndamento (legado) - HQL original:
     // select distinct o from OferecimentoComponenteCurricular o  where o.unidade.ativo = true  and (o.status='LOTADA' or o.status='LIBERADA' ) AND o.dataInicio <= current_date
     public static final String SQL_LISTAR_OFERECIMENTOS_EM_ANDAMENTO =
             "SELECT DISTINCT o.* FROM edc_oferecimento_componente_curricular o LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade WHERE j_o_unidade.fl_ativo = true and (o.status='LOTADA' or o.status='LIBERADA' ) AND o.data_inicio <= current_date";
@@ -245,7 +229,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.listarOferecimentosPendentes (legado) - HQL original:
     // select o from OferecimentoComponenteCurricular o where  o.unidade.ativo = true and o.status='PENDENTE' AND o.unidade in (?1)
     public static final String SQL_LISTAR_OFERECIMENTOS_PENDENTES =
             "SELECT o.* FROM edc_oferecimento_componente_curricular o LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade WHERE j_o_unidade.fl_ativo = true and o.status='PENDENTE' AND o.id_unidade in (?1)";
@@ -258,7 +241,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.listarOferecimentosDisponiveis (legado) - HQL original:
     // select o from OferecimentoComponenteCurricular o where o.unidade.ativo = true and (o.status = 'LIBERADA' OR o.status = 'LOTADA' OR o.status = 'EM_ANDAMENTO') AND o.componenteCurricular in (?1) AND o.unidade in (?2) AND o not in(select m.oferecimentoComponenteCurricular from Matricula m where m.contrato.pessoa = ?3) order by o.componenteCurricular
     public static final String SQL_LISTAR_OFERECIMENTOS_DISPONIVEIS =
             "SELECT o.* FROM edc_oferecimento_componente_curricular o LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade WHERE j_o_unidade.fl_ativo = true and (o.status = 'LIBERADA' OR o.status = 'LOTADA' OR o.status = 'EM_ANDAMENTO') AND o.id_componente_curricular in (?1) AND o.id_unidade in (?2) AND o not in(select m.oferecimentoComponenteCurricular from Matricula m where m.contrato.pessoa = ?3) ORDER BY o.id_componente_curricular";
@@ -273,7 +255,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.listarOferecimentosDisponiveisComGrupo (legado) - HQL original:
     // select o from OferecimentoComponenteCurricular o where o.unidade.ativo = true and(o.status = 'LIBERADA' OR o.status = 'EM_ANDAMENTO')  AND o.componenteCurricular in (?1) AND o.unidade in (?2) and o.grupo.nome = ?4 AND  o not in(select m.oferecimentoComponenteCurricular from Matricula m where m.contrato.pessoa = ?3) order by o.componenteCurricular
     public static final String SQL_LISTAR_OFERECIMENTOS_DISPONIVEIS_COM_GRUPO =
             "SELECT o.* FROM edc_oferecimento_componente_curricular o LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade LEFT JOIN edc_grupo j_o_grupo ON j_o_grupo.id = o.id_grupo WHERE j_o_unidade.fl_ativo = true and(o.status = 'LIBERADA' OR o.status = 'EM_ANDAMENTO') AND o.id_componente_curricular in (?1) AND o.id_unidade in (?2) and j_o_grupo.nome = ?4 AND o not in(select m.oferecimentoComponenteCurricular from Matricula m where m.contrato.pessoa = ?3) ORDER BY o.id_componente_curricular";
@@ -289,7 +270,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.listarOferecimentosRematriculaDisponiveisComGrupo (legado) - HQL original:
     // select o from OferecimentoComponenteCurricular o where o.unidade.ativo = true and (o.status = 'LIBERADA' OR o.status = 'EM_ANDAMENTO')  AND o.componenteCurricular in (?1) AND o.unidade in (?2) and o.grupo.nome = ?4 AND  o in(select m.oferecimentoComponenteCurricular from Matricula m where m.contrato.pessoa = ?3 and (m.status = 'CANCELADO' or m.status = 'FINALIZADA')) order by o.componenteCurricular
     public static final String SQL_LISTAR_OFERECIMENTOS_REMATRICULA_DISPONIVEIS_COM_GRUPO =
             "SELECT o.* FROM edc_oferecimento_componente_curricular o LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade LEFT JOIN edc_grupo j_o_grupo ON j_o_grupo.id = o.id_grupo WHERE j_o_unidade.fl_ativo = true and (o.status = 'LIBERADA' OR o.status = 'EM_ANDAMENTO') AND o.id_componente_curricular in (?1) AND o.id_unidade in (?2) and j_o_grupo.nome = ?4 AND o in(select m.oferecimentoComponenteCurricular from Matricula m where m.contrato.pessoa = ?3 and (m.status = 'CANCELADO' or m.status = 'FINALIZADA')) ORDER BY o.id_componente_curricular";
@@ -305,7 +285,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.listarOferecimentosDisponiveisComGrupoUnidade (legado) - HQL original:
     // select o from OferecimentoComponenteCurricular o where  o.unidade.ativo = true and (o.status = 'LIBERADA' OR o.status = 'EM_ANDAMENTO')  AND o.componenteCurricular in (?1) AND o.unidade.id = ?2 and o.grupo.nome = ?4 AND  o not in(select m.oferecimentoComponenteCurricular from Matricula m where m.contrato.pessoa = ?3) order by o.componenteCurricular
     public static final String SQL_LISTAR_OFERECIMENTOS_DISPONIVEIS_COM_GRUPO_UNIDADE =
             "SELECT o.* FROM edc_oferecimento_componente_curricular o LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade LEFT JOIN edc_grupo j_o_grupo ON j_o_grupo.id = o.id_grupo WHERE j_o_unidade.fl_ativo = true and (o.status = 'LIBERADA' OR o.status = 'EM_ANDAMENTO') AND o.id_componente_curricular in (?1) AND j_o_unidade.id = ?2 and j_o_grupo.nome = ?4 AND o not in(select m.oferecimentoComponenteCurricular from Matricula m where m.contrato.pessoa = ?3) ORDER BY o.id_componente_curricular";
@@ -321,7 +300,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.buscarOcorrenciaComOFerecimento (legado) - HQL original:
     // select o from OferecimentoComponenteCurricular o join fetch o.ocorrenciaComponenteCurriculares oc where  o.unidade.ativo = true and oc.ativo = true  and o= ?1 order by oc.data
     public static final String SQL_BUSCAR_OCORRENCIA_COM_O_FERECIMENTO =
             "SELECT o.* FROM edc_oferecimento_componente_curricular o INNER JOIN edc_ocorrencia_componente_curricular oc ON oc.id_oferecimento_componente_curricular = o.id LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade WHERE j_o_unidade.fl_ativo = true and oc.fl_ativo = true and o.id= ?1 ORDER BY oc.data";
@@ -334,7 +312,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.buscarTodosOcorrenciaComOFerecimento (legado) - HQL original:
     // select o from OferecimentoComponenteCurricular o join fetch o.ocorrenciaComponenteCurriculares oc where   o.unidade.ativo = true and o= ?1 order by oc.data
     public static final String SQL_BUSCAR_TODOS_OCORRENCIA_COM_O_FERECIMENTO =
             "SELECT o.* FROM edc_oferecimento_componente_curricular o INNER JOIN edc_ocorrencia_componente_curricular oc ON oc.id_oferecimento_componente_curricular = o.id LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade WHERE j_o_unidade.fl_ativo = true and o.id= ?1 ORDER BY oc.data";
@@ -347,7 +324,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.listagemOferecimentoPorUnidadeCalendario (legado) - HQL original:
     // select oc from OcorrenciaComponenteCurricular oc inner join oc.oferecimentoComponenteCurricular o  where   o.unidade.ativo = true and oc.ativo = true and o.unidade in (?1) and date(oc.data) between ?2 and ?3 order by oc.data, oc.diaAula.turnoEducacao.descricao
     public static final String SQL_LISTAGEM_OFERECIMENTO_POR_UNIDADE_CALENDARIO =
             "SELECT oc.* FROM edc_ocorrencia_componente_curricular oc INNER JOIN edc_oferecimento_componente_curricular o ON o.id = oc.id_oferecimento_componente_curricular LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade LEFT JOIN edc_dia_aula j_oc_diaAula ON j_oc_diaAula.id = oc.id_dia_aula LEFT JOIN edc_turno j_j_oc_diaAula_turnoEducacao ON j_j_oc_diaAula_turnoEducacao.id = j_oc_diaAula.id_turno WHERE j_o_unidade.fl_ativo = true and oc.fl_ativo = true and o.id_unidade in (?1) and date(oc.data) between ?2 and ?3 ORDER BY oc.data, j_j_oc_diaAula_turnoEducacao.descricao";
@@ -364,7 +340,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.autoCompleteComUnidade (legado) - HQL original:
     // select distinct o from OferecimentoComponenteCurricular o where   o.unidade.ativo = true and (lower(o.componenteCurricular.descricao) like '%' || ?1 || '%' or str(o.id) like '%' || ?1 || '%')  and o.status = 'EM_ANDAMENTO'  AND o.unidade in (?2) order by o.id
     public static final String SQL_AUTO_COMPLETE_COM_UNIDADE =
             "SELECT DISTINCT o.* FROM edc_oferecimento_componente_curricular o LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade LEFT JOIN edc_componente_curricular j_o_componenteCurricular ON j_o_componenteCurricular.id = o.id_componente_curricular WHERE j_o_unidade.fl_ativo = true and (lower(j_o_componenteCurricular.descricao) like '%' || ?1 || '%' or CAST(o.id AS text) like '%' || ?1 || '%') and o.status = 'EM_ANDAMENTO' AND o.id_unidade in (?2) ORDER BY o.id LIMIT 10";
@@ -378,7 +353,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.autoCompleteComUnidadeChamadaAssinada (legado) - HQL original:
     // select distinct o from OferecimentoComponenteCurricular o where   o.unidade.ativo = true and (lower(o.componenteCurricular.descricao) like '%' || ?1 || '%' or str(o.id) like '%' || ?1 || '%')  and (o.status = 'EM_ANDAMENTO' or o.status = 'LIBERADA') AND o.unidade in (?2) order by o.id
     public static final String SQL_AUTO_COMPLETE_COM_UNIDADE_CHAMADA_ASSINADA =
             "SELECT DISTINCT o.* FROM edc_oferecimento_componente_curricular o LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade LEFT JOIN edc_componente_curricular j_o_componenteCurricular ON j_o_componenteCurricular.id = o.id_componente_curricular WHERE j_o_unidade.fl_ativo = true and (lower(j_o_componenteCurricular.descricao) like '%' || ?1 || '%' or CAST(o.id AS text) like '%' || ?1 || '%') and (o.status = 'EM_ANDAMENTO' or o.status = 'LIBERADA') AND o.id_unidade in (?2) ORDER BY o.id LIMIT 10";
@@ -392,7 +366,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.listarGruposDisponiveisComUnidades (legado) - HQL original:
     // select distinct o.grupo.nome from OferecimentoComponenteCurricular o where   o.unidade.ativo = true and o.curriculo = ?1 AND o.unidade in (?2) and o.grupo is not null   and (o.status = 'LIBERADA' OR o.status = 'EM_ANDAMENTO') order by o.grupo.nome
     public static final String SQL_LISTAR_GRUPOS_DISPONIVEIS_COM_UNIDADES =
             "SELECT DISTINCT j_o_grupo.nome FROM edc_oferecimento_componente_curricular o LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade LEFT JOIN edc_grupo j_o_grupo ON j_o_grupo.id = o.id_grupo WHERE j_o_unidade.fl_ativo = true and o.id_curso = ?1 AND o.id_unidade in (?2) and o.id_grupo is not null and (o.status = 'LIBERADA' OR o.status = 'EM_ANDAMENTO') ORDER BY j_o_grupo.nome";
@@ -406,7 +379,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.listarGruposDisponiveisComUnidadesRematricula (legado) - HQL original:
     // select distinct o.grupo.nome from OferecimentoComponenteCurricular o where   o.unidade.ativo = true and o.curriculo = ?1  AND o.unidade in (?2) and o.grupo is not null and (o.status = 'LIBERADA' OR o.status = 'EM_ANDAMENTO') and   o in(select m.oferecimentoComponenteCurricular from Matricula m where m.contrato.pessoa = ?3 and (m.status = 'CANCELADO' or m.status = 'FINALIZADA')) order by o.grupo.nome
     public static final String SQL_LISTAR_GRUPOS_DISPONIVEIS_COM_UNIDADES_REMATRICULA =
             "SELECT DISTINCT j_o_grupo.nome FROM edc_oferecimento_componente_curricular o LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade LEFT JOIN edc_grupo j_o_grupo ON j_o_grupo.id = o.id_grupo WHERE j_o_unidade.fl_ativo = true and o.id_curso = ?1 AND o.id_unidade in (?2) and o.id_grupo is not null and (o.status = 'LIBERADA' OR o.status = 'EM_ANDAMENTO') and o in(select m.oferecimentoComponenteCurricular from Matricula m where m.contrato.pessoa = ?3 and (m.status = 'CANCELADO' or m.status = 'FINALIZADA')) ORDER BY j_o_grupo.nome";
@@ -421,7 +393,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.ultimoOferecimentoDoGrupo (legado) - HQL original:
     // select  o from OferecimentoComponenteCurricular o where   o.unidade.ativo = true and o.grupo = ?1 and o.status <> 'CANCELADA'  and o.dataFim is not null and o.dataInicio is not null order by o.dataFim desc
     public static final String SQL_ULTIMO_OFERECIMENTO_DO_GRUPO =
             "SELECT o.* FROM edc_oferecimento_componente_curricular o LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade WHERE j_o_unidade.fl_ativo = true and o.id_grupo = ?1 and o.status <> 'CANCELADA' and o.data_fim is not null and o.data_inicio is not null ORDER BY o.data_fim desc LIMIT 10";
@@ -434,7 +405,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.ultimoOferecimentoDoGrupoCOmID (legado) - HQL original:
     // select  o from OferecimentoComponenteCurricular o where   o.unidade.ativo = true and o.grupo = ?1 and o.id <> ?2 and o.status <> 'CANCELADA'  and o.dataFim is not null and o.dataInicio is not null order by o.dataFim desc
     public static final String SQL_ULTIMO_OFERECIMENTO_DO_GRUPO_C_OM_I_D =
             "SELECT o.* FROM edc_oferecimento_componente_curricular o LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade WHERE j_o_unidade.fl_ativo = true and o.id_grupo = ?1 and o.id <> ?2 and o.status <> 'CANCELADA' and o.data_fim is not null and o.data_inicio is not null ORDER BY o.data_fim desc LIMIT 10";
@@ -448,7 +418,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.ultimoOferecimentoDoGrupoComponente (legado) - HQL original:
     // select  o from OferecimentoComponenteCurricular o where  o.unidade.ativo = true and o.grupo = ?1 and o.componenteCurricular = ?2 and o.status <> 'CANCELADA' order by o.dataFim desc
     public static final String SQL_ULTIMO_OFERECIMENTO_DO_GRUPO_COMPONENTE =
             "SELECT o.* FROM edc_oferecimento_componente_curricular o LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade WHERE j_o_unidade.fl_ativo = true and o.id_grupo = ?1 and o.id_componente_curricular = ?2 and o.status <> 'CANCELADA' ORDER BY o.data_fim desc LIMIT 10";
@@ -462,7 +431,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularRepository.consultaListarOferecimentos (legado) - HQL original:
     // select o from OferecimentoComponenteCurricular o where  o.unidade.ativo = true and (o.status = 'LIBERADA' OR o.status = 'EM_ANDAMENTO') AND o.unidade = ?1 order by o.id
     public static final String SQL_CONSULTA_LISTAR_OFERECIMENTOS =
             "SELECT o.* FROM edc_oferecimento_componente_curricular o LEFT JOIN bas_unidade j_o_unidade ON j_o_unidade.id = o.id_unidade WHERE j_o_unidade.fl_ativo = true and (o.status = 'LIBERADA' OR o.status = 'EM_ANDAMENTO') AND o.id_unidade = ?1 ORDER BY o.id";
@@ -475,7 +443,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
 
-    // Migrado de GrupoRepository.listarOferecimentos (legado) - HQL original:
     // select o from OferecimentoComponenteCurricular o where o.grupo = ?1 order by o.dataInicio desc
     public Uni<java.util.List<OferecimentoComponenteCurricular>> listarOferecimentosPorGrupo(Long grupoId) {
         return find("grupoId = ?1 order by dataInicio desc", grupoId).list();

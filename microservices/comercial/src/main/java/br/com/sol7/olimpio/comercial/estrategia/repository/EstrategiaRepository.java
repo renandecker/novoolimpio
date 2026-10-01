@@ -9,7 +9,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class EstrategiaRepository implements PanacheRepository<Estrategia> {
 
-    // Migrado de EstrategiaRepository.autocomplete (legado) - HQL original:
     // select e from Estrategia e where lower(e.descricao) like '%' || ?1 || '%' OR str(e.id) = ?1 order by e.descricao
     public static final String SQL_AUTOCOMPLETE =
             "SELECT e.* FROM com_estrategia e WHERE lower(e.descricao) like '%' || ?1 || '%' OR CAST(e.id AS text) = ?1 ORDER BY e.descricao";

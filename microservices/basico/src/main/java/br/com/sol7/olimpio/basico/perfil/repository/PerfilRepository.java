@@ -10,7 +10,6 @@ import br.com.sol7.olimpio.basico.perfil.entity.Perfil;
 @ApplicationScoped
 public class PerfilRepository implements PanacheRepository<Perfil> {
 
-    // Migrado de PerfilRepository.autoComplete (legado) - HQL original:
     // select p from Perfil p where lower(p.descricao) like '%' || ?1 || '%'  OR str(p.id) = ?1  order by p.descricao
     public static final String SQL_AUTO_COMPLETE =
             "SELECT p.* FROM bas_perfil p WHERE lower(p.descricao) like '%' || ?1 || '%' OR CAST(p.id AS text) = ?1 ORDER BY p.descricao";
@@ -24,12 +23,10 @@ public class PerfilRepository implements PanacheRepository<Perfil> {
 
 
     // NAO TRADUZIDA AUTOMATICAMENTE (campo 'perfisModulos' sem coluna mapeada)
-    // Migrado de PerfilRepository.buscarPerfilModulosComPerfil (legado) - HQL original:
     public static final String SQL_BUSCAR_PERFIL_MODULOS_COM_PERFIL_HQL_ORIGINAL =
             "select distinct p.perfisModulos from Perfil p join p.perfisModulos where p.id = ?1";
 
 
-    // Migrado de PerfilRepository.buscarPerfilModulosComPerfil (legado) - HQL original:
     // select distinct p.perfisModulos from Perfil p join p.perfisModulos where p.id = ?1
     public static final String SQL_BUSCAR_PERFIL_MODULOS_COM_PERFIL =
             "SELECT DISTINCT pm.id FROM bas_perfil_modulo pm WHERE pm.id_perfil = ?1";
@@ -42,7 +39,6 @@ public class PerfilRepository implements PanacheRepository<Perfil> {
     }
 
 
-    // Migrado de PerfilRepository.buscarPerfilComModulos (legado) - HQL original:
     // select p from Perfil p left join fetch p.perfisModulos where p.id = ?1
     public static final String SQL_BUSCAR_PERFIL_COM_MODULOS =
             "SELECT p.* FROM bas_perfil p WHERE p.id = ?1";
@@ -55,7 +51,6 @@ public class PerfilRepository implements PanacheRepository<Perfil> {
     }
 
 
-    // Migrado de PerfilRepository.perfilsDoUsuario (legado) - HQL original:
     // select distinct  u from Usuario usu inner join usu.perfis u where usu = ?1 order by u.descricao
     public static final String SQL_PERFILS_DO_USUARIO =
             "SELECT DISTINCT u.* FROM bas_usuario usu INNER JOIN bas_usuario_perfil usu_u_jt ON usu_u_jt.id_usuario = usu.id INNER JOIN bas_perfil u ON u.id = usu_u_jt.id_perfil WHERE usu.id = ?1 ORDER BY u.descricao";
@@ -68,7 +63,6 @@ public class PerfilRepository implements PanacheRepository<Perfil> {
     }
 
 
-    // Migrado de PerfilRepository.autoCompleteAll (legado) - HQL original:
     // select u from Perfil u order by u.descricao
     public static final String SQL_AUTO_COMPLETE_ALL =
             "SELECT u.* FROM bas_perfil u ORDER BY u.descricao LIMIT 10";
@@ -81,7 +75,6 @@ public class PerfilRepository implements PanacheRepository<Perfil> {
     }
 
 
-    // Migrado de PerfilRepository.autoCompleteComUsuario (legado) - HQL original:
     // select distinct  u from Usuario usu inner join usu.perfis u where usu = ?2 and (lower(u.descricao) like '%' || ?1 || '%' OR str(u.id) = ?1) order by u.descricao
     public static final String SQL_AUTO_COMPLETE_COM_USUARIO =
             "SELECT DISTINCT u.* FROM bas_usuario usu INNER JOIN bas_usuario_perfil usu_u_jt ON usu_u_jt.id_usuario = usu.id INNER JOIN bas_perfil u ON u.id = usu_u_jt.id_perfil WHERE usu.id = ?2 and (lower(u.descricao) like '%' || ?1 || '%' OR CAST(u.id AS text) = ?1) ORDER BY u.descricao LIMIT 10";
@@ -95,7 +88,6 @@ public class PerfilRepository implements PanacheRepository<Perfil> {
     }
 
 
-    // Migrado de PerfilRepository.autoCompleteDoUsuario (legado) - HQL original:
     // select distinct  u from Usuario usu inner join usu.perfis u where usu = ?1 order by u.descricao
     public static final String SQL_AUTO_COMPLETE_DO_USUARIO =
             "SELECT DISTINCT u.* FROM bas_usuario usu INNER JOIN bas_usuario_perfil usu_u_jt ON usu_u_jt.id_usuario = usu.id INNER JOIN bas_perfil u ON u.id = usu_u_jt.id_perfil WHERE usu.id = ?1 ORDER BY u.descricao LIMIT 10";

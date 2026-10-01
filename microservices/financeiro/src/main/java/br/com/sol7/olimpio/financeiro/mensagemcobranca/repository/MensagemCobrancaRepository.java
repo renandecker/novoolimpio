@@ -9,7 +9,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class MensagemCobrancaRepository implements PanacheRepository<MensagemCobranca> {
 
-    // Migrado de MensagemCobrancaRepository.listarModelosMensagens (legado) - HQL original:
     // Select m from MensagemCobranca m where m.flagEmail=?1
     public static final String SQL_LISTAR_MODELOS_MENSAGENS =
             "SELECT m.* FROM fin_mensagem_cobranca m WHERE m.fl_email=?1";

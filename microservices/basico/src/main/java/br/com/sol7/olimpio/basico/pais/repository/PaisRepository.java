@@ -10,7 +10,6 @@ import br.com.sol7.olimpio.basico.pais.entity.Pais;
 @ApplicationScoped
 public class PaisRepository implements PanacheRepository<Pais> {
 
-    // Migrado de PaisRepository.autoComplete (legado) - HQL original:
     // select p from Pais p where lower(p.nome) like '%' || ?1 || '%' OR str(p.id) = ?1  order by p.nome
     public static final String SQL_AUTO_COMPLETE =
             "SELECT p.* FROM bas_pais p WHERE lower(p.nome) like '%' || ?1 || '%' OR CAST(p.id AS text) = ?1 ORDER BY p.nome";

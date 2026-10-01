@@ -129,8 +129,14 @@ public class CoordenadorController {
 
     @GET
     @Path("/{id}/pie")
-    public Uni<Map<String,Object>> pie(@PathParam("id") Long operadorId) {
-        return service.buscarLigacoesPie(operadorId);
+    public Uni<Map<String,Object>> pie(@PathParam("id") Long operadorId, @QueryParam("usuarioId") Long usuarioId) {
+        return service.buscarLigacoesPie(operadorId, usuarioId);
+    }
+
+    @GET
+    @Path("/{id}/usuarios")
+    public Uni<List<Map<String,Object>>> usuarios(@PathParam("id") Long operadorId) {
+        return service.buscarUsuarios(operadorId);
     }
 
     @POST

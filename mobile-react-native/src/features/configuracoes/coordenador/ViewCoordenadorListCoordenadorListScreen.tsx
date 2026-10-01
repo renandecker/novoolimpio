@@ -65,6 +65,9 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
     const [modalOperadorOpt, setModalOperadorOpt] = useState<AutoCompleteOption | null>(null);
     const [modal, setModal] = useState<null | 'ligacao' | 'ligacaoCoord' | 'ordem' | 'prioritaria' | 'prioritariaCoord' | 'pausa' | 'pausaCoord' | 'agend' | 'pie' | 'trocaLig' | 'trocaPri'>(null);
     const [pieData, setPieData] = useState<Record<string, number> | null>(null);
+    const [pieTitle, setPieTitle] = useState('Ligações de Todos Operadores');
+    const [pieUsuarios, setPieUsuarios] = useState<{id: number; login: string}[]>([]);
+    const [pieUsuarioSelecionado, setPieUsuarioSelecionado] = useState<number | null>(null);
     const [detailPage, setDetailPage] = useState(0);
     const [enriched, setEnriched] = useState<Record<number, { turno: string; situacao: string }>>({});
 
@@ -137,8 +140,36 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
     };
     const handlePie = async (row: CoordenadorRow) => {
         setModalOperador({ id: row.id_operador, login: row.operador_login });
-        try { const r = await api.get(`/api/central/coordenador/${row.id_operador}/pie`); setPieData(r.data as Record<string, number>); } catch { setPieData({ total: 0 }); }
+        try {
+            const [users, pie] = await Promise.all([
+                api.get<{id: number; login: string}[]>(`/api/central/coordenador/${row.id_operador}/usuarios`),
+                api.get<Record<string, number>>(`/api/central/coordenador/${row.id_operador}/pie`),
+            ]);
+            setPieUsuarios(users.data ?? []);
+            setPieData(pie.data ?? {});
+            setPieTitle(`Ligações de ${row.operador_login}`);
+            setPieUsuarioSelecionado(null);
+        } catch { setPieData({ total: 0 }); }
         setModal('pie');
+    };
+
+    const onPieUsuarioChange = async (usuarioId: number | null) => {
+        if (!modalOperador) return;
+        setPieUsuarioSelecionado(usuarioId);
+        try {
+            if (usuarioId) {
+                const pie = await api.get<Record<string, number>>(`/api/central/coordenador/${modalOperador.id}/pie?usuarioId=${usuarioId}`);
+                setPieData(pie.data ?? {});
+                const user = pieUsuarios.find(u => u.id === usuarioId);
+                setPieTitle(user ? `Ligações do(a): ${user.login}` : 'Ligações de Todos Operadores');
+            } else {
+                const pie = await api.get<Record<string, number>>(`/api/central/coordenador/${modalOperador.id}/pie`);
+                setPieData(pie.data ?? {});
+                setPieTitle('Ligações de Todos Operadores');
+            }
+        } catch (e) {
+            console.error('Erro ao buscar ligações por usuário', e);
+        }
     };
     const handleTrocaPri = async () => {
         if (!selOperador || !selOperador2) { setNotice('Selecione Do e Para operador'); return; }
@@ -236,9 +267,27 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
             {/* Modais - usando React Native Modal */}
             <Modal visible={modal==='pie'} transparent animationType="fade" onRequestClose={()=>setModal(null)}>
                 <View style={styles.overlay}><View style={styles.modalBox}>
-                    <Text style={styles.modalTitle}>Ligações de {modalOperador?.login}</Text>
+                    <Text style={styles.modalTitle}>{pieTitle}</Text>
                     {!pieData ? <ActivityIndicator/> : (
-                        <ScrollView>{Object.entries(pieData).filter(([k])=>k!=='total').map(([k,v])=><View key={k} style={styles.row}><Text>{k}</Text><Text style={styles.bold}>{v}</Text></View>)}<View style={[styles.row, {borderTopWidth:1, borderColor:'#eee', marginTop:8}]}><Text style={styles.bold}>Total</Text><Text style={styles.bold}>{(pieData as Record<string, unknown>).total ?? 0 as unknown as string}</Text></View></ScrollView>
+                        <>
+                            <View style={{marginBottom: 12, alignItems: 'center'}}>
+                                <Pressable style={{backgroundColor: '#f9a825', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 4}} onPress={() => onPieUsuarioChange(null)}>
+                                    <Text style={{color: '#fff', fontWeight: 'bold'}}>Todos os operadores</Text>
+                                </Pressable>
+                            </View>
+                            <View style={{marginBottom: 12, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8}}>
+                                <Text style={{fontWeight: 'bold', marginTop: 8}}>Operadores:</Text>
+                                <View style={{width: '100%', marginTop: 4}}>
+                                    <AutoComplete
+                                        value={pieUsuarioSelecionado ? pieUsuarios.find(u => u.id === pieUsuarioSelecionado) || null : null}
+                                        onChange={opt => onPieUsuarioChange(opt?.id ?? null)}
+                                        fetchOptions={async () => pieUsuarios.map(u => ({id: u.id, label: u.login}))}
+                                        placeholder="Selecionar operador"
+                                    />
+                                </View>
+                            </View>
+                            <ScrollView>{Object.entries(pieData).filter(([k])=>k!=='total').map(([k,v])=><View key={k} style={styles.row}><Text>{k}</Text><Text style={styles.bold}>{v}</Text></View>)}<View style={[styles.row, {borderTopWidth:1, borderColor:'#eee', marginTop:8}]}><Text style={styles.bold}>Total</Text><Text style={styles.bold}>{(pieData as Record<string, unknown>).total ?? 0 as unknown as string}</Text></View></ScrollView>
+                        </>
                     )}
                     <Pressable style={styles.closeBtn} onPress={()=>setModal(null)}><Text style={styles.closeText}>Fechar</Text></Pressable>
                 </View></View>

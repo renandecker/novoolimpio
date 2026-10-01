@@ -65,7 +65,6 @@ public class CaixaRepository implements PanacheRepository<Caixa> {
                 .replaceWithVoid();
     }
 
-    // Migrado de CaixaRepository.buscarAberturaCaixa (legado) - HQL original:
     // select c from Caixa c where c.usuario = ?1 AND date(c.data) = current_date  order by c.id
     public static final String SQL_BUSCAR_ABERTURA_CAIXA =
             "SELECT c.id FROM fin_caixa c WHERE c.id_usuario = ?1 AND date(c.data) = current_date ORDER BY c.id";
@@ -79,7 +78,6 @@ public class CaixaRepository implements PanacheRepository<Caixa> {
     }
 
 
-    // Migrado de CaixaRepository.buscarAberturaCaixaComUsuarioUnidade (legado) - HQL original:
     // select c from Caixa c where c.usuario = ?1 and c.unidade = ?2  AND date(c.data) = current_date
     public static final String SQL_BUSCAR_ABERTURA_CAIXA_COM_USUARIO_UNIDADE =
             "SELECT c.id FROM fin_caixa c WHERE c.id_usuario = ?1 and c.id_unidade = ?2 AND date(c.data) = current_date";
@@ -94,14 +92,12 @@ public class CaixaRepository implements PanacheRepository<Caixa> {
     }
 
 
-    // Migrado de CaixaRepository.buscarCaixasAbertos (legado) - HQL original:
     // select c from Caixa c where c.dataFechamento is null order by c.id
     public Uni<java.util.List<Caixa>> buscarCaixasAbertos() {
         return find("dataFechamento is null order by id").list();
     }
 
 
-    // Migrado de CaixaRepository.countCaixaUnidade (legado) - HQL original:
     // select count(c) from Caixa c where c.unidade = ?1
     public static final String SQL_COUNT_CAIXA_UNIDADE =
             "SELECT count(c) FROM fin_caixa c WHERE c.id_unidade = ?1";

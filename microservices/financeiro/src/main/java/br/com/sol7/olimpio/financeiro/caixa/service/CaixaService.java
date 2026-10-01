@@ -522,7 +522,6 @@ public class CaixaService {
                 });
     }
 
-    // Migrado de ParcelaRepository.obterParcelaDaunidade (legado) - HQL original:
     // select p from Parcela p left join p.contrato c where p.contrato.unidade.ativo = true
     // and p.id = ?1 and c.unidadeResponsavel.id = ?2 and p.dataCancelamento is null
     private Uni<ParcelaResponse> buscarParcelaDaUnidade(Long parcelaId, Long unidadeId) {
