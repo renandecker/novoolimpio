@@ -86,7 +86,7 @@ public class NotificacaoService {
         return configCanalService.canaisAtivos()
                 .chain(canais -> aplicarPreferenciasUsuario(e.username, categoria, tipo, canais)
                         .map(filtrados -> new CanaisResolvidos(canais.sistema(), filtrados.mobile(), filtrados.email(),
-                                filtrados.telegram(), filtrados.sms(), filtrados.whatsapp())))
+                                filtrados.telegram(), filtrados.sms(), filtrados.whatsapp(), filtrados.notificacao())))
                 .invoke(resolvidos -> {
                     e.canalSistema = resolvidos.sistema();
                     // Override explicito no request tem prioridade sobre sistema+usuario.
@@ -95,11 +95,12 @@ public class NotificacaoService {
                     e.canalTelegram = r.canalTelegram() != null ? r.canalTelegram() : resolvidos.telegram();
                     e.canalSms = r.canalSms() != null ? r.canalSms() : resolvidos.sms();
                     e.canalWhatsapp = r.canalWhatsapp() != null ? r.canalWhatsapp() : resolvidos.whatsapp();
+                    e.canalNotificacao = r.canalNotificacao() != null ? r.canalNotificacao() : resolvidos.notificacao();
                 })
                 .chain(() -> repository.persist(e))
                 .chain(saved -> {
                     if (!e.canalSistema && !e.canalMobile && !e.canalEmail
-                            && !e.canalTelegram && !e.canalSms && !e.canalWhatsapp) {
+                            && !e.canalTelegram && !e.canalSms && !e.canalWhatsapp && !e.canalNotificacao) {
                         LOGGER.info("Notificacao {} sem nenhum canal habilitado (sistema/usuario) - persistida sem dispatch.", e.id);
                         return Uni.createFrom().voidItem();
                     }
@@ -111,7 +112,7 @@ public class NotificacaoService {
                 .replaceWith(() -> toResponse(e));
     }
 
-    private record CanaisResolvidos(boolean sistema, boolean mobile, boolean email, boolean telegram, boolean sms, boolean whatsapp) {
+    private record CanaisResolvidos(boolean sistema, boolean mobile, boolean email, boolean telegram, boolean sms, boolean whatsapp, boolean notificacao) {
     }
 
     /**
@@ -119,8 +120,8 @@ public class NotificacaoService {
      * Regra: canal final = canalSistema && preferenciaUsuario (default true quando sem registro).
      * Se categoria/tipo ausentes, mantem os canais do sistema.
      */
-    private Uni<ConfigCanalService.CanaisAtivos> aplicarPreferenciasUsuario(String username, String categoria, String tipo,
-                                                                            ConfigCanalService.CanaisAtivos canais) {
+private Uni<ConfigCanalService.CanaisAtivos> aplicarPreferenciasUsuario(String username, String categoria, String tipo,
+                                                                             ConfigCanalService.CanaisAtivos canais) {
         if (categoria == null || categoria.isBlank() || tipo == null || tipo.isBlank()
                 || username == null || username.isBlank()) {
             return Uni.createFrom().item(canais);
@@ -136,7 +137,8 @@ public class NotificacaoService {
             boolean telegram = canais.telegram() && prefOuDefault(idx, categoria, tipo, "TELEGRAM", true);
             boolean sms = canais.sms() && prefOuDefault(idx, categoria, tipo, "SMS", true);
             boolean whatsapp = canais.whatsapp() && prefOuDefault(idx, categoria, tipo, "WHATSAPP", true);
-            return new ConfigCanalService.CanaisAtivos(canais.sistema(), mobile, email, telegram, sms, whatsapp);
+            boolean notificacao = canais.notificacao() && prefOuDefault(idx, categoria, tipo, "NOTIFICACAO", true);
+            return new ConfigCanalService.CanaisAtivos(canais.sistema(), mobile, email, telegram, sms, whatsapp, notificacao);
         });
     }
 
@@ -177,6 +179,7 @@ public class NotificacaoService {
                     if (r.canalTelegram() != null) e.canalTelegram = r.canalTelegram();
                     if (r.canalSms() != null) e.canalSms = r.canalSms();
                     if (r.canalWhatsapp() != null) e.canalWhatsapp = r.canalWhatsapp();
+                    if (r.canalNotificacao() != null) e.canalNotificacao = r.canalNotificacao();
                 })
                 .map(this::toResponse);
     }
@@ -203,6 +206,7 @@ public class NotificacaoService {
 
     private NotificacaoResponse toResponse(Notificacao e) {
         return new NotificacaoResponse(e.id, e.username, e.titulo, e.mensagem, e.tipo, e.link, e.lida,
-                e.canalSistema, e.canalMobile, e.canalEmail, e.canalTelegram, e.canalSms, e.canalWhatsapp, e.emailEnviado, e.mobileEnviado, e.telegramEnviado, e.smsEnviado, e.whatsappEnviado, e.dataLeitura, e.createdAt);
+                e.canalSistema, e.canalMobile, e.canalEmail, e.canalTelegram, e.canalSms, e.canalWhatsapp, e.canalNotificacao,
+                e.emailEnviado, e.mobileEnviado, e.telegramEnviado, e.smsEnviado, e.whatsappEnviado, e.notificacaoEnviada, e.dataLeitura, e.createdAt);
     }
 }

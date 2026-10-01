@@ -37,7 +37,7 @@ public class NotificacaoEventProducer {
     public Uni<Void> enviar(String username, String categoria, String tipo,
                             String titulo, String mensagem, String link) {
         return enviar(new NotificacaoEvento(username, categoria, tipo, titulo, mensagem, link,
-                null, null, null, null, null));
+                null, null, null, null, null, null));
     }
 
     public Uni<Void> enviar(NotificacaoEvento evento) {

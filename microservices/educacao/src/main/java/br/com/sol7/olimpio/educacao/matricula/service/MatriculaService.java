@@ -2,6 +2,7 @@ package br.com.sol7.olimpio.educacao.matricula;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.educacao.contrato.ContratoRepository;
+import br.com.sol7.olimpio.educacao.basico.PessoaFisica;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.TupleHelper;
 
@@ -322,11 +323,11 @@ public class MatriculaService {
     // Migrado de MatriculaController.verificaAluno (legado). Retorna os paineis informativos
     // exibidos ao selecionar um aluno na tela de matricula.
     public Uni<InfoPessoaFisicaResponse> calcularInfoPessoaFisica(Long pessoaId) {
-        return repository.buscarInfoPessoaFisica(pessoaId).chain(rows -> {
-            Tuple row = rows == null || rows.isEmpty() ? null : rows.get(0);
-            String cpf = TupleHelper.getString(row, "cpf");
-            LocalDate dataNascimento = parseLocalDate(TupleHelper.getString(row, "data_nascimento"));
-            LocalDate dataAlteracao = parseLocalDate(TupleHelper.getString(row, "data_alteracao"));
+        return PessoaFisica.find("pessoaId", pessoaId).firstResult().chain(pfObj -> {
+            PessoaFisica pf = pfObj instanceof PessoaFisica ? (PessoaFisica) pfObj : null;
+            String cpf = pf != null ? pf.cpf : null;
+            LocalDate dataNascimento = pf != null ? pf.dataNascimento : null;
+            LocalDate dataAlteracao = null;
 
             Uni<Boolean> temContratoUni = contratoRepository.validaAluno(pessoaId)
                     .map(list -> list != null && !list.isEmpty());

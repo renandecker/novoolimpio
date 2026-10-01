@@ -68,13 +68,13 @@ public class RelatorioDisponivelController {
                                     return Uni.createFrom().failure(new ForbiddenException("Relatório não disponível para este usuário"));
                                 return switch (tipoNormalizado) {
                                     case "TABELA" ->tabelaService.find(id)
-                                            .chain(r -> tabelaService.executar(id)
+                                            .chain(r -> tabelaService.executar(id, 0, 500, filtros)
                                                     .map(dados -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, dados)));
                                     case "GRAFICO", "PIZZA", "LINHA", "COMBINADO", "CIRCULAR", "BARRA_VERTICAL", "BARRA_HORIZONTAL" ->graficoService.find(id)
                                             .chain(r -> graficoService.dados(id, filtros)
                                                     .map(dados -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, dados)));
                                     case "MAPA" ->mapaService.find(id)
-                                            .chain(mapa -> mapaService.buscarPontos(id)
+                                            .chain(mapa -> mapaService.buscarPontos(id, filtros)
                                                     .map(dados -> new RelatorioAbertoResponse(mapa.id(), mapa.nome(), tipoNormalizado, mapa, dados)));
                                     case "ORGANOGRAMA" ->organogramaService.find(id)
                                             .map(r -> new RelatorioAbertoResponse(r.id(), r.nome(), tipoNormalizado, r, null));

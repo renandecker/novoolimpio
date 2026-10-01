@@ -6,7 +6,7 @@ import {abrirRelatorio, type GraficoDados, type LinhaGrafico} from './relatorios
 import GraficoChart from './GraficoChart';
 import {Colors, Typography, Spacing} from '../../shared/styles/theme';
 import {ReportFilters} from '../../shared/components/ReportFilters';
-import type {FiltroRelatorioWrapper} from '../../shared/types/types';
+import type {FiltroRelatorioWrapper, ReportFilterSqlValues} from '../../shared/types/types';
 import {api} from '../../shared/services/api';
 
 const TIPO_LABEL: Record<string, string> = {
@@ -53,13 +53,16 @@ export default function GraficoRelatorioView({tipo}: { tipo: string }) {
     const idNumero = id ? Number(id) : NaN;
     const [filtros, setFiltros] = useState<FiltroRelatorioWrapper[]>([]);
     const [filtrosLoading, setFiltrosLoading] = useState(true);
+    const [filtrosAplicados, setFiltrosAplicados] = useState<ReportFilterSqlValues | undefined>(undefined);
 
     useEffect(() => {
         const fetchFiltros = async () => {
             if (!id) return;
             try {
                 setFiltrosLoading(true);
-                const response = await api.get<FiltroRelatorioWrapper[]>(`/api/relatorios/filtros/viewGrafico/${id}`);
+                const response = await api.get<FiltroRelatorioWrapper[]>('/api/relatorios/filtros/viewGrafico', {
+                    params: {graficoId: id},
+                });
                 setFiltros(response.data);
             } catch (err) {
                 console.error('Erro ao carregar filtros:', err);
@@ -71,8 +74,8 @@ export default function GraficoRelatorioView({tipo}: { tipo: string }) {
     }, [id]);
 
     const {data, isPending, isError} = useQuery({
-        queryKey: ['relatorio-aberto', tipo, id],
-        queryFn: () => abrirRelatorio(tipo, idNumero),
+        queryKey: ['relatorio-aberto', tipo, id, filtrosAplicados],
+        queryFn: () => abrirRelatorio(tipo, idNumero, filtrosAplicados),
         enabled: Boolean(id && Number.isInteger(idNumero) && idNumero > 0),
     });
 
@@ -121,8 +124,8 @@ export default function GraficoRelatorioView({tipo}: { tipo: string }) {
                     <ReportFilters
                         filtros={filtros}
                         onFiltersChange={setFiltros}
-                        onApplyFilters={() => {
-                            console.log('Aplicar filtros do gráfico');
+                        onApplyFilters={(valores) => {
+                            setFiltrosAplicados(valores && Object.keys(valores).length > 0 ? valores : undefined);
                         }}
                     />
                 )}

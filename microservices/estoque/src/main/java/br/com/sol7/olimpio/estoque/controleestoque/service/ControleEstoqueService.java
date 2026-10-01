@@ -115,6 +115,9 @@ public class ControleEstoqueService {
     }
 
     private Uni<List<ControleEstoqueResponse>> enrichResponses(List<ControleEstoqueResponse> responses) {
+        if (responses.isEmpty()) {
+            return Uni.createFrom().item(List.of());
+        }
         List<Uni<ControleEstoqueResponse>> unis = responses.stream().map(this::enrichSingleResponse).toList();
         return Uni.join().all(unis).andFailFast();
     }

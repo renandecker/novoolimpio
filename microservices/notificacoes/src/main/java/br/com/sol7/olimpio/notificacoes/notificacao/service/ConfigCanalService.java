@@ -27,8 +27,9 @@ public class ConfigCanalService {
     public static final String CANAL_TELEGRAM = "TELEGRAM";
     public static final String CANAL_SMS = "SMS";
     public static final String CANAL_WHATSAPP = "WHATSAPP";
+    public static final String CANAL_NOTIFICACAO = "NOTIFICACAO";
 
-    public record CanaisAtivos(boolean sistema, boolean mobile, boolean email, boolean telegram, boolean sms, boolean whatsapp) {
+    public record CanaisAtivos(boolean sistema, boolean mobile, boolean email, boolean telegram, boolean sms, boolean whatsapp, boolean notificacao) {
     }
 
     @Inject
@@ -51,6 +52,9 @@ public class ConfigCanalService {
 
     @ConfigProperty(name = "olimpio.notificacoes.canal.whatsapp", defaultValue = "false")
     boolean canalWhatsappDefault;
+
+    @ConfigProperty(name = "olimpio.notificacoes.canal.notificacao", defaultValue = "true")
+    boolean canalNotificacaoDefault;
 
     public Uni<List<ConfigCanalResponse>> list() {
         return repository.findAll(Sort.by("canal").ascending()).list()
@@ -99,6 +103,7 @@ public class ConfigCanalService {
             boolean telegram = canalTelegramDefault;
             boolean sms = canalSmsDefault;
             boolean whatsapp = canalWhatsappDefault;
+            boolean notificacao = canalNotificacaoDefault;
             for (ConfigCanal c : configs) {
                 switch (c.canal.toUpperCase().trim()) {
                     case CANAL_SISTEMA -> sistema = c.ativo;
@@ -107,11 +112,12 @@ public class ConfigCanalService {
                     case CANAL_TELEGRAM -> telegram = c.ativo;
                     case CANAL_SMS -> sms = c.ativo;
                     case CANAL_WHATSAPP -> whatsapp = c.ativo;
+                    case CANAL_NOTIFICACAO -> notificacao = c.ativo;
                     default -> {
                     }
                 }
             }
-            return new CanaisAtivos(sistema, mobile, email, telegram, sms, whatsapp);
+            return new CanaisAtivos(sistema, mobile, email, telegram, sms, whatsapp, notificacao);
         });
     }
 

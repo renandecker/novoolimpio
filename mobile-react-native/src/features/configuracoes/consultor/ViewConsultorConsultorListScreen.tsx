@@ -4,6 +4,7 @@ import {Alert} from '../../../shared/components/SweetAlert';
 import {ModuleList} from '../../../shared/components/ModuleListScreen';
 import {ModuleWizard} from '../../../shared/components/ModuleWizard';
 import ViewConsultorMatriculaLayoutScreen from './ViewConsultorMatriculaLayoutScreen';
+import ViewConsultorRematriculaScreen from './ViewConsultorRematriculaScreen';
 
 // consultor.xhtml (olimpio.zip) mostra um formulário por opção de menu, com as abas na
 // vertical. "menu==2" embute o mesmo <p:wizard id="wizardmatricula"> de formMatricula.xhtml,
@@ -70,7 +71,7 @@ export default function ViewConsultorConsultorListScreen() {
                 {menu === 'rematricula' && (
                     <View style={styles.panel}>
                         <Text style={styles.panelTitle}>Rematrícula</Text>
-                        <ModuleWizard steps={MATRICULA_FLOW_STEPS} />
+                        <ViewConsultorRematriculaScreen />
                     </View>
                 )}
                 {menu === 'troca' && (

@@ -966,7 +966,29 @@ export default function ViewMatriculaWizardScreen() {
 
             await api.post('/api/educacao/matricula', payload);
 
-            setMensagem('Matrícula realizada com sucesso!');
+            // Após a finalização da matrícula, insere em fin_venda_produto os
+            // registros definidos no cadastro de ValorProduto (unidade + curso).
+            try {
+                const {criarVendasProdutoDaMatricula} = await import('../../../shared/services/vendaProdutoMatricula');
+                const criadas = await criarVendasProdutoDaMatricula({
+                    unidadeId: data.entity.unidadeId,
+                    curriculoId: data.entity.curriculoId,
+                    pessoaId: data.entity.pessoaId,
+                    materiais: data.materialEscolar
+                        .filter((m) => (m.quantidade ?? 0) > 0)
+                        .map((m) => ({
+                            quantidade: m.quantidade,
+                            valor: m.controleEstoque?.produto?.valor ?? null,
+                        })),
+                });
+                if (criadas > 0) {
+                    setMensagem(`Matrícula realizada com sucesso! ${criadas} venda(s) de produto(s) gerada(s).`);
+                } else {
+                    setMensagem('Matrícula realizada com sucesso!');
+                }
+            } catch {
+                setMensagem('Matrícula realizada com sucesso!');
+            }
 
             setData(prev => ({...prev, verificaMatriculaFinalizada: true}));
 

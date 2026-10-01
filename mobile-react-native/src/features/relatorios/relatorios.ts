@@ -62,5 +62,7 @@ export type RelatorioAberto = {
 export const listarRelatoriosDisponiveis = async (): Promise<RelatorioDisponivel[]> =>
     (await api.get(API_PATHS.relatorios.relatorioDisponiveis)).data;
 
-export const abrirRelatorio = async (tipo: string, id: number): Promise<RelatorioAberto> =>
-    (await api.get<RelatorioAberto>(`${API_PATHS.relatorios.relatorioDisponiveis}/${tipo}/${id}`)).data;
+export const abrirRelatorio = async (tipo: string, id: number, filtros?: Record<string, any>): Promise<RelatorioAberto> => {
+    const params = filtros && Object.keys(filtros).length > 0 ? {filtros: JSON.stringify(filtros)} : {};
+    return (await api.get<RelatorioAberto>(`${API_PATHS.relatorios.relatorioDisponiveis}/${tipo}/${id}`, {params})).data;
+};

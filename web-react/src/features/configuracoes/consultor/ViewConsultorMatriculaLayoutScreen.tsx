@@ -1330,6 +1330,25 @@ export default function ViewConsultorMatriculaLayoutScreen() {
         } catch (e) {
             console.error('Erro ao finalizar matrícula:', e);
         }
+        // Após a finalização, insere em fin_venda_produto os registros
+        // definidos no cadastro de ValorProduto (unidade + curso).
+        try {
+            const {criarVendasProdutoDaMatricula} = await import('../../../shared/services/vendaProdutoMatricula');
+            const pessoa = contrato.pessoa as {id?: number} | undefined;
+            const curriculo = contrato.curriculo as {id?: number} | undefined;
+            const unidade = contrato.unidade as {id?: number} | undefined;
+            await criarVendasProdutoDaMatricula({
+                unidadeId: unidade?.id,
+                curriculoId: curriculo?.id,
+                pessoaId: pessoa?.id,
+                materiais: (materialContrato ?? []).map((m: {quantidade?: unknown; valor?: unknown}) => ({
+                    quantidade: Number(m.quantidade) || 1,
+                    valor: Number(m.valor) || null,
+                })),
+            });
+        } catch (e) {
+            console.warn('[venda-produto] falha pós-matrícula (consultor):', e);
+        }
         setVerificaMatriculaFinalizada(true);
     };
 

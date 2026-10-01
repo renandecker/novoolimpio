@@ -19,9 +19,10 @@ public record NotificacaoEvento(
         Boolean canalEmail,
         Boolean canalTelegram,
         Boolean canalSms,
-        Boolean canalWhatsapp) {
+        Boolean canalWhatsapp,
+        Boolean canalNotificacao) {
     public NotificacaoRequest toRequest() {
         return new NotificacaoRequest(username, titulo, mensagem, tipo, categoria, link,
-                canalMobile, canalEmail, canalTelegram, canalSms, canalWhatsapp);
+                canalMobile, canalEmail, canalTelegram, canalSms, canalWhatsapp, canalNotificacao);
     }
 }

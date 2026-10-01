@@ -1,6 +1,7 @@
 package br.com.sol7.olimpio.relatorios.mapa.controller;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.relatorios.shared.FiltrosQueryParam;
 import br.com.sol7.olimpio.relatorios.mapa.service.MapaService;
 import br.com.sol7.olimpio.relatorios.mapa.dto.MapaRequest;
 import br.com.sol7.olimpio.relatorios.mapa.dto.MapaResponse;
@@ -41,8 +42,8 @@ public class MapaController {
 
     @GET
     @Path("/{id}/pontos")
-    public Uni<MapaPontosResponse> buscarPontos(@PathParam("id") Long id) {
-        return service.buscarPontos(id);
+    public Uni<MapaPontosResponse> buscarPontos(@PathParam("id") Long id, @QueryParam("filtros") String filtrosJson) {
+        return service.buscarPontos(id, FiltrosQueryParam.parse(filtrosJson));
     }
 
     @POST

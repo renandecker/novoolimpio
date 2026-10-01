@@ -65,7 +65,15 @@ public class NotificacaoRabbitMQProducer {
                             .chain(() -> publish(e.canalTelegram, telegramOut, "TELEGRAM", json))
                             .chain(() -> publish(e.canalSms, smsOut, "SMS", json))
                             .chain(() -> publish(e.canalWhatsapp, whatsappOut, "WHATSAPP", json))
-                            .chain(() -> publish(e.canalSistema, webOut, "WEB", json));
+                            .chain(() -> publish(e.canalSistema, webOut, "WEB", json))
+                            .chain(() -> {
+                                // Canal NOTIFICACAO vai para WEB e MOBILE (centro de notificações/bell)
+                                if (e.canalNotificacao) {
+                                    return publish(true, webOut, "WEB", json)
+                                            .chain(() -> publish(true, mobileOut, "MOBILE", json));
+                                }
+                                return Uni.createFrom().voidItem();
+                            });
                 });
     }
 
@@ -94,7 +102,7 @@ public class NotificacaoRabbitMQProducer {
         try {
             return objectMapper.writeValueAsString(new NotificacaoMessage(
                     e.id, e.username, idUsuario, e.titulo, e.mensagem, e.tipo, e.link,
-                    e.canalSistema, e.canalMobile, e.canalEmail, e.canalTelegram, e.canalSms, e.canalWhatsapp, null));
+                    e.canalSistema, e.canalMobile, e.canalEmail, e.canalTelegram, e.canalSms, e.canalWhatsapp, e.canalNotificacao, null));
         } catch (JsonProcessingException ex) {
             throw new IllegalStateException("Erro ao serializar a notificação para o RabbitMQ", ex);
         }

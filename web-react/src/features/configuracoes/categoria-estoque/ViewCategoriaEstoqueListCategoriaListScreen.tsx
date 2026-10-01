@@ -3,6 +3,13 @@ import {DataTable} from '../../../shared/components/DataTable';
 
 export default function ViewCategoriaEstoqueListCategoriaListScreen() {
     return <PermissionGate permission="READ">
-        <main><h1>Categoria Estoque</h1><DataTable path="/api/view/categoriaEstoque/listCategoria"/></main>
-    </PermissionGate>
+        <main>
+            <h1>Categoria Estoque</h1>
+            <DataTable
+                path="/api/view/categoriaEstoque/listCategoria"
+                createNavigateTo="/view/categoriaEstoque/formCategoria"
+                editNavigateTo="/view/categoriaEstoque/formCategoria"
+            />
+        </main>
+    </PermissionGate>;
 }

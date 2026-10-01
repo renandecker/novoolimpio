@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, Database, Download, Expand } from 'lucide-react';
 import { GaugeChart } from './GaugeChart';
-import { executarSqlIndicador, carregarIndicadorGauge, type IndicadorGauge, DEFAULT_GAUGE_CONFIG } from './indicadorGauge';
+import { executarSqlIndicador, carregarIndicadorGauge, carregarFiltrosIndicadorGauge, type IndicadorGauge, DEFAULT_GAUGE_CONFIG } from './indicadorGauge';
+import { ReportFilters } from '../../shared/components/ReportFilters';
+import type { FiltroRelatorioWrapper, ReportFilterSqlValues } from '../../shared/types/types';
 
 export default function IndicadorGaugeViewScreen() {
   const { id } = useParams<{ id: string }>();
@@ -13,6 +15,8 @@ export default function IndicadorGaugeViewScreen() {
   const [gaugeData, setGaugeData] = useState<{ valorAtual: number; valorMinimo: number; valorMaximo: number } | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filtros, setFiltros] = useState<FiltroRelatorioWrapper[]>([]);
+  const [filtrosAplicados, setFiltrosAplicados] = useState<ReportFilterSqlValues | undefined>(undefined);
 
   const fetchData = async () => {
     if (!id) return;
@@ -29,11 +33,20 @@ export default function IndicadorGaugeViewScreen() {
     }
   };
 
+  const fetchFiltros = useCallback(async () => {
+    if (!id) return;
+    try {
+      setFiltros(await carregarFiltrosIndicadorGauge(parseInt(id)));
+    } catch (err) {
+      console.error('Erro ao carregar filtros do indicador:', err);
+    }
+  }, [id]);
+
   const fetchGaugeData = async () => {
     if (!indicador?.sql) return;
     setRefreshing(true);
     try {
-      const result = await executarSqlIndicador(indicador.sql);
+      const result = await executarSqlIndicador(indicador.sql, indicador.id, filtrosAplicados);
       setGaugeData(result);
     } catch (err) {
       console.error('Erro ao buscar dados do gauge:', err);
@@ -47,10 +60,14 @@ export default function IndicadorGaugeViewScreen() {
   }, [id]);
 
   useEffect(() => {
+    void fetchFiltros();
+  }, [fetchFiltros]);
+
+  useEffect(() => {
     if (indicador) {
       fetchGaugeData();
     }
-  }, [indicador]);
+  }, [indicador, filtrosAplicados]);
 
   const handleRefresh = () => {
     fetchGaugeData();
@@ -149,6 +166,15 @@ export default function IndicadorGaugeViewScreen() {
       </div>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
+        {filtros.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+            <ReportFilters
+              filtros={filtros}
+              onFiltersChange={setFiltros}
+              onApplyFilters={(valores) => setFiltrosAplicados(valores || undefined)}
+            />
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">

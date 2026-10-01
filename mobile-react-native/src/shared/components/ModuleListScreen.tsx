@@ -1,9 +1,10 @@
-import React, {useMemo, useState} from 'react';
+import React, {useMemo, useState, useEffect} from 'react';
 import {
     ActivityIndicator,
     FlatList,
     Linking,
     Modal,
+    Picker,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -17,8 +18,9 @@ import {useQuery} from '@tanstack/react-query';
 import {PAGE_SIZES, useModulePaged} from '../hooks/useModulePaged';
 import {executeAction} from '../services/actions';
 import {can, isAdmin} from '../services/permissions';
+import {api} from '../services/api';
 import {useAuth} from '../../features/auth/auth';
-import type {ApiItem, SearchFilterRequest, FilterCondition, QueryOperation} from '../types/types';
+import type {ApiItem, SearchFilterRequest, FilterCondition, QueryOperation, ComboSource} from '../types/types';
 import {STRING_OPERATIONS, NUMBER_OPERATIONS} from '../types/types';
 import {Colors, Spacing, BorderRadius, Typography, Shadows, Layout} from '../styles/theme';
 import {RowMenu, type RowMenuItem} from './RowMenu';
@@ -95,32 +97,37 @@ export interface ModuleListActionGroup {
 }
 
 export function ModuleList({
-                                path,
-                                title,
-                                params,
-                                extraActions,
-                                actionGroups,
-                                rowActionGroups,
-                                outcome: customOutcome,
-                                hideCreate = false,
-                                hideUpdate = false,
-                                hideDelete = false,
-                                hideView = false,
-                                createNavigateTo,
-                            }: {
+    path,
+    title,
+    params,
+    extraActions,
+    actionGroups,
+    rowActionGroups,
+    outcome: customOutcome,
+    hideCreate = false,
+    hideUpdate = false,
+    hideDelete = false,
+    hideView = false,
+    hideSearch = false,
+    createNavigateTo,
+    columns,
+    combos,
+}: {
     path: string;
     title?: string;
     params?: Record<string, string | number | boolean | undefined>;
     extraActions?: ModuleListExtraAction[];
     actionGroups?: ModuleListActionGroup[];
-    /** Menus por linha com acesso ao registro (ex.: listTurma com status-dependente). */
     rowActionGroups?: (item: ApiItem) => ModuleListActionGroup[];
     outcome?: string;
     hideCreate?: boolean;
     hideUpdate?: boolean;
     hideDelete?: boolean;
     hideView?: boolean;
+    hideSearch?: boolean;
     createNavigateTo?: string;
+    columns?: string[];
+    combos?: Record<string, ComboSource>;
 }) {
     const navigation = useNavigation();
     const [sortField, setSortField] = useState<string>('id');
@@ -185,8 +192,8 @@ export function ModuleList({
     
 
     const fields = useMemo(
-        () => (modal?.mode === 'edit' ? editableFields(modal.item) : editableFields(items[0] ?? null)),
-        [modal, items],
+        () => columns ?? (modal?.mode === 'edit' ? editableFields(modal.item) : editableFields(items[0] ?? null)),
+        [columns, modal, items],
     );
 
     const saveCreate = (values: Record<string, unknown>) => {
@@ -262,7 +269,7 @@ export function ModuleList({
         <View style={styles.page}>
             <View style={styles.header}>
                 <Text style={styles.title}>{screenTitle}</Text>
-                {canCreate && (
+                {canCreate && !hideCreate && (
                     <Pressable
                         style={styles.primaryButton}
                         onPress={() => {
@@ -273,9 +280,11 @@ export function ModuleList({
                         <Text style={styles.primaryButtonText}>Novo</Text>
                     </Pressable>
                 )}
-                <Pressable style={[styles.exportButton, styles.searchButton]} onPress={openFilterModal}>
-                    <Text style={styles.exportButtonText}>Buscar</Text>
-                </Pressable>
+                {!hideSearch && (
+                    <Pressable style={[styles.exportButton, styles.searchButton]} onPress={openFilterModal}>
+                        <Text style={styles.exportButtonText}>Buscar</Text>
+                    </Pressable>
+                )}
                 {canRelatorio && items.length > 0 && (
                     <>
                     </>
@@ -444,6 +453,7 @@ export function ModuleList({
                             submitLabel="Salvar"
                             onCancel={() => setModal(null)}
                             onSubmit={(values) => (modal?.mode === 'edit' ? saveEdit(modal.item, values) : saveCreate(values))}
+                            combos={combos}
                         />
                     </Pressable>
                 </Pressable>
@@ -471,19 +481,21 @@ export function ModuleList({
 }
 
 function RecordModal({
-                          title,
-                          fields,
-                          initial,
-                          submitLabel,
-                          onCancel,
-                          onSubmit,
-                      }: {
+    title,
+    fields,
+    initial,
+    submitLabel,
+    onCancel,
+    onSubmit,
+    combos,
+}: {
     title: string;
     fields: string[];
     initial: Record<string, unknown>;
     submitLabel: string;
     onCancel: () => void;
     onSubmit: (values: Record<string, unknown>) => void;
+    combos?: Record<string, ComboSource>;
 }) {
     const [values, setValues] = useState<Record<string, string>>(() => {
         const copy: Record<string, string> = {};
@@ -493,6 +505,32 @@ function RecordModal({
         }
         return copy;
     });
+
+    // Fetch combo options
+    const [comboOptions, setComboOptions] = useState<Record<string, Array<{id: number, label: string}>>>({});
+    const [comboLoading, setComboLoading] = useState<Record<string, boolean>>({});
+
+    useEffect(() => {
+        if (!combos) return;
+        for (const [field, source] of Object.entries(combos)) {
+            if (!fields.includes(field)) continue;
+            setComboLoading(prev => ({...prev, [field]: true}));
+            api.get<ApiItem[]>(source.path, {params: {size: 100}})
+                .then(res => {
+                    const data = res.data;
+                    const items = (data as any).content ?? data;
+                    const valueKey = source.valueKey ?? 'id';
+                    const labelKey = source.labelKey ?? 'descricao';
+                    const options = items.map((item: any) => ({
+                        id: item[valueKey],
+                        label: item[labelKey] ?? `#${item.id}`,
+                    }));
+                    setComboOptions(prev => ({...prev, [field]: options}));
+                    setComboLoading(prev => ({...prev, [field]: false}));
+                })
+                .catch(() => setComboLoading(prev => ({...prev, [field]: false})));
+        }
+    }, [combos, fields]);
 
     return (
         <View style={styles.recordModalContainer}>
@@ -506,16 +544,37 @@ function RecordModal({
                 {fields.length === 0 ? (
                     <Text style={styles.modalEmpty}>Nenhum campo disponível para edição.</Text>
                 ) : (
-                    fields.map((field) => (
-                        <View key={field} style={styles.field}>
-                            <Text style={styles.fieldLabel}>{toTitle(field)}</Text>
-                            <TextInput
-                                style={styles.fieldInput}
-                                value={values[field] ?? ''}
-                                onChangeText={(text) => setValues((prev) => ({...prev, [field]: text}))}
-                            />
-                        </View>
-                    ))
+                    fields.map((field) => {
+                        const combo = combos?.[field];
+                        const options = combo ? comboOptions[field] ?? [] : [];
+                        const loading = combo ? comboLoading[field] : false;
+                        return (
+                            <View key={field} style={styles.field}>
+                                <Text style={styles.fieldLabel}>{toTitle(field)}</Text>
+                                {combo && options.length > 0 ? (
+                                    <Picker
+                                        style={styles.fieldInput}
+                                        selectedValue={values[field] ?? ''}
+                                        onValueChange={(itemValue) => setValues(prev => ({...prev, [field]: itemValue}))}
+                                        mode="dropdown"
+                                    >
+                                        <Picker.Item label="-- Selecione --" value="" />
+                                        {options.map((option) => (
+                                            <Picker.Item key={option.id} label={option.label} value={String(option.id)} />
+                                        ))}
+                                    </Picker>
+                                ) : combo && loading ? (
+                                    <TextInput style={styles.fieldInput} value="Carregando..." editable={false} />
+                                ) : (
+                                    <TextInput
+                                        style={styles.fieldInput}
+                                        value={values[field] ?? ''}
+                                        onChangeText={(text) => setValues((prev) => ({...prev, [field]: text}))}
+                                    />
+                                )}
+                            </View>
+                        );
+                    })
                 )}
             </ScrollView>
             <View style={styles.modalActions}>

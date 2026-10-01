@@ -556,3 +556,16 @@
         gap: 12px;
     }
 }
+/* ---- Rematrícula (aba do Consultor) ---- */
+.wizard-step-label {
+    white-space: nowrap;
+}
+
+.btn-action.btn-select {
+    width: auto;
+    min-width: 88px;
+    height: 28px;
+    padding: 0 10px;
+    font-size: 12px;
+    font-weight: 600;
+}

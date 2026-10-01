@@ -11,9 +11,9 @@ import {
 } from 'react-native';
 import {useQuery} from '@tanstack/react-query';
 import {api} from '../services/api';
-import type {FiltroRelatorioWrapper, FilterDimensionType, TempoFilterState, DescritivoFilterState, FixoFilterState, FilterState, QueryOperation} from '../types/types';
+import type {FiltroRelatorioWrapper, FilterDimensionType, TempoFilterState, DescritivoFilterState, FixoFilterState, FilterState, QueryOperation, ReportFilterSqlValues} from '../types/types';
 import {STRING_OPERATIONS} from '../types/types';
-import {Colors, Spacing, BorderRadius, Typography, Shadows} from './theme';
+import {Colors, Spacing, BorderRadius, Typography, Shadows} from '../styles/theme';
 
 const TEMPO_TYPES = [
     {value: 0, label: 'Nenhum'},
@@ -35,13 +35,14 @@ const DYNAMIC_PERIODS = [
 interface ReportFiltersProps {
     filtros: FiltroRelatorioWrapper[];
     onFiltersChange: (filtros: FiltroRelatorioWrapper[]) => void;
-    onApplyFilters: () => void;
+    onApplyFilters: (filtros?: ReportFilterSqlValues) => void;
 }
 
 export function ReportFilters({filtros, onFiltersChange, onApplyFilters}: ReportFiltersProps) {
     const [modalVisible, setModalVisible] = useState(false);
     const [activeFiltro, setActiveFiltro] = useState<FiltroRelatorioWrapper | null>(null);
     const [filterStates, setFilterStates] = useState<Record<number, FilterState>>({});
+    const [availableInformacoes, setAvailableInformacoes] = useState<Record<number, string[]>>({});
 
     useEffect(() => {
         const initialStates: Record<number, FilterState> = {};
@@ -66,6 +67,23 @@ export function ReportFilters({filtros, onFiltersChange, onApplyFilters}: Report
             }
         });
         setFilterStates(initialStates);
+
+        const carregarRelacoes = async () => {
+            const infosMap: Record<number, string[]> = {};
+            for (const filtro of filtros) {
+                const fr = filtro.filtroRelatorio;
+                if (fr.dimensao.tipoInfo !== 'DESCRITIVO') continue;
+                try {
+                    const res = await api.get<any>(`/api/relatorios/filtros/${fr.id}/relacoes`);
+                    const data = res.data ?? {};
+                    infosMap[fr.id] = Array.isArray(data.informacoes) ? data.informacoes : (Array.isArray(data) ? data : []);
+                } catch {
+                    infosMap[fr.id] = [];
+                }
+            }
+            setAvailableInformacoes(prev => ({...prev, ...infosMap}));
+        };
+        void carregarRelacoes();
     }, [filtros]);
 
     const handleFiltroPress = (filtro: FiltroRelatorioWrapper) => {
@@ -77,6 +95,32 @@ export function ReportFilters({filtros, onFiltersChange, onApplyFilters}: Report
     const handleClose = () => {
         setModalVisible(false);
         setActiveFiltro(null);
+    };
+
+    const buildSqlValues = (): ReportFilterSqlValues => {
+        const values: ReportFilterSqlValues = {};
+        for (const filtro of filtros) {
+            const fr = filtro.filtroRelatorio;
+            const state = filterStates[fr.id];
+            if (!state || !isFilterActive(fr, state)) continue;
+            if (fr.dimensao.tipoInfo === 'TEMPO') {
+                const tempoState = state as TempoFilterState;
+                if (tempoState.tipo === 1) {
+                    values[fr.nome] = {operation: tempoState.queryOperation || 'EQUALS', value: tempoState.dataInicio || ''};
+                } else if (tempoState.tipo === 2) {
+                    values[fr.nome] = {operation: '=', value: tempoState.campoDinamico || ''};
+                } else if (tempoState.tipo === 3) {
+                    values[fr.nome] = {operation: 'BETWEEN', value: tempoState.dataInicio || '', value2: tempoState.dataFim || ''};
+                }
+            } else if (fr.dimensao.tipoInfo === 'DESCRITIVO') {
+                const descState = state as DescritivoFilterState;
+                values[fr.nome] = {operation: 'IN', value: descState.listaTodosSelected.map(s => s.informacao).join(',')};
+            } else if (fr.tipo === 'FIXO') {
+                const fixoState = state as FixoFilterState;
+                values[fr.nome] = {selected: fixoState.selected};
+            }
+        }
+        return values;
     };
 
     const handleApply = () => {
@@ -91,7 +135,7 @@ export function ReportFilters({filtros, onFiltersChange, onApplyFilters}: Report
             });
             onFiltersChange(updatedFiltros);
         }
-        onApplyFilters();
+        onApplyFilters(buildSqlValues());
         handleClose();
     };
 

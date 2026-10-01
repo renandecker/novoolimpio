@@ -14,4 +14,5 @@ public record NotificacaoRequest(
         Boolean canalEmail,
         Boolean canalTelegram,
         Boolean canalSms,
-        Boolean canalWhatsapp){}
+        Boolean canalWhatsapp,
+        Boolean canalNotificacao){}

@@ -17,5 +17,6 @@ public record NotificacaoEvento(
         Boolean canalEmail,
         Boolean canalTelegram,
         Boolean canalSms,
-        Boolean canalWhatsapp) {
+        Boolean canalWhatsapp,
+        Boolean canalNotificacao) {
 }

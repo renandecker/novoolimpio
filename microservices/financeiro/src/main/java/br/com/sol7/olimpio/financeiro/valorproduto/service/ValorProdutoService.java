@@ -14,6 +14,13 @@ import java.util.List;
 @WithTransaction
 public class ValorProdutoService {
 
+    private static final String TABELA_UNIDADE = "fin_valor_produto_unidade";
+    private static final String COLUNA_UNIDADE = "id_unidade";
+    private static final String TABELA_CURSO = "fin_valor_produto_curso";
+    private static final String COLUNA_CURSO = "id_curriculo";
+    private static final String TABELA_FORMA_PAGAMENTO = "fin_valor_produto_forma_pagamento";
+    private static final String COLUNA_FORMA_PAGAMENTO = "id_forma_pagamento";
+
     @Inject
     ValorProdutoRepository repository;
 
@@ -78,6 +85,34 @@ public class ValorProdutoService {
     //     }
     public Uni<List<Long>> buscarExistenciaEmVenda(Long valorProdutoId) {
         return repository.buscarExistenciaEmVenda(valorProdutoId).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    public Uni<List<Integer>> listarUnidades(Long id) {
+        return repository.listarVinculos(TABELA_UNIDADE, COLUNA_UNIDADE, id);
+    }
+
+    public Uni<Void> substituirUnidades(Long id, List<Integer> unidadeIds) {
+        return find(id).chain(() -> repository.substituirVinculos(TABELA_UNIDADE, COLUNA_UNIDADE, id, unidadeIds));
+    }
+
+    public Uni<List<Integer>> listarCursos(Long id) {
+        return repository.listarVinculos(TABELA_CURSO, COLUNA_CURSO, id);
+    }
+
+    public Uni<Void> substituirCursos(Long id, List<Integer> cursoIds) {
+        return find(id).chain(() -> repository.substituirVinculos(TABELA_CURSO, COLUNA_CURSO, id, cursoIds));
+    }
+
+    public Uni<List<Integer>> listarFormasPagamento(Long id) {
+        return repository.listarVinculos(TABELA_FORMA_PAGAMENTO, COLUNA_FORMA_PAGAMENTO, id);
+    }
+
+    public Uni<Void> substituirFormasPagamento(Long id, List<Integer> formaPagamentoIds) {
+        return find(id).chain(() -> repository.substituirVinculos(TABELA_FORMA_PAGAMENTO, COLUNA_FORMA_PAGAMENTO, id, formaPagamentoIds));
+    }
+
+    public Uni<List<ValorProdutoResponse>> buscarPorUnidadeCurso(Long unidadeId, Long curriculoId) {
+        return repository.buscarPorUnidadeCurso(unidadeId, curriculoId).map(items -> items.stream().map(this::toResponse).toList());
     }
 
 }

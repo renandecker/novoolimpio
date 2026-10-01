@@ -24,4 +24,5 @@ public record NotificacaoMessage(
         boolean canalTelegram,
         boolean canalSms,
         boolean canalWhatsapp,
+        boolean canalNotificacao,
         String destinatario){}

@@ -1,4 +1,4 @@
-import type { PagedResponse } from '../../shared/types/types';
+import type { FiltroRelatorioWrapper, PagedResponse, ReportFilterSqlValues } from '../../shared/types/types';
 
 export type TipoExibicaoGauge = 'valor' | 'percentual' | 'ambos';
 
@@ -103,7 +103,25 @@ export const excluirIndicadorGauge = async (id: number): Promise<void> => {
   await api.delete(`/api/relatorios/indicador-gauge/${id}`);
 };
 
-export const executarSqlIndicador = async (sql: string): Promise<{ valorAtual: number; valorMinimo: number; valorMaximo: number }> => {
+export const executarSqlIndicador = async (
+  sql: string,
+  indicadorGaugeId?: number,
+  filtros?: ReportFilterSqlValues,
+): Promise<{ valorAtual: number; valorMinimo: number; valorMaximo: number }> => {
   const { api } = await import('../../shared/services/api');
-  return (await api.post<{ valorAtual: number; valorMinimo: number; valorMaximo: number }>('/api/relatorios/indicador-gauge/executar', { sql })).data;
+  return (
+    await api.post<{ valorAtual: number; valorMinimo: number; valorMaximo: number }>('/api/relatorios/indicador-gauge/executar', {
+      sql,
+      ...(indicadorGaugeId ? { indicadorGaugeId } : {}),
+      ...(filtros && Object.keys(filtros).length > 0 ? { filtros } : {}),
+    })
+  ).data;
+};
+
+export const carregarFiltrosIndicadorGauge = async (indicadorGaugeId: number): Promise<FiltroRelatorioWrapper[]> => {
+  const { api } = await import('../../shared/services/api');
+  const resp = await api.get<FiltroRelatorioWrapper[]>('/api/relatorios/filtros/viewIndicadorGauge', {
+    params: { indicadorGaugeId },
+  });
+  return resp.data;
 };

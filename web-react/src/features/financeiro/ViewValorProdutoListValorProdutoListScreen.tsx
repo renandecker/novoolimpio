@@ -10,6 +10,7 @@ const formatValor = (value: unknown): string => {
 };
 
 const COLUMNS: DataTableColumn[] = [
+    {key: 'id', label: 'ID'},
     {key: 'vezes', label: 'Vezes'},
     {key: 'desconto', label: 'Desconto', render: (item) => formatValor(asRecord(item).desconto)},
     {key: 'juros', label: 'Juros', render: (item) => formatValor(asRecord(item).juros)},
@@ -24,7 +25,9 @@ export default function ViewValorProdutoListValorProdutoListScreen() {
             <main>
                 <h1>Valor Produto</h1>
                 <DataTable path="/api/view/valorProduto/listValorProduto" columns={COLUMNS}
-                           maxMainColumns={COLUMNS.length}/>
+                           maxMainColumns={COLUMNS.length}
+                           createNavigateTo="/view/valorProduto/formValorProduto"
+                           editNavigateTo="/view/valorProduto/formValorProduto"/>
             </main>
         </PermissionGate>
     );

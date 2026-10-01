@@ -5,7 +5,7 @@ import {useRoute, useNavigation} from '@react-navigation/native';
 import {api} from '../../shared/services/api';
 import type {MapaPontosResponse} from './relatorios';
 import {ReportFilters} from '../../shared/components/ReportFilters';
-import type {FiltroRelatorioWrapper} from '../../shared/types/types';
+import type {FiltroRelatorioWrapper, ReportFilterSqlValues} from '../../shared/types/types';
 
 type RouteParams = {
     id: string;
@@ -144,13 +144,18 @@ export default function ViewRelatoriosViewMapaScreen() {
     const [error, setError] = useState<string | null>(null);
     const [filtros, setFiltros] = useState<FiltroRelatorioWrapper[]>([]);
     const [filtrosLoading, setFiltrosLoading] = useState(true);
+    const [filtrosAplicados, setFiltrosAplicados] = useState<ReportFilterSqlValues | undefined>(undefined);
     const webViewRef = useRef<WebView>(null);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const response = await api.get<MapaPontosResponse>(`/api/relatorios/mapa/${id}/pontos`);
+                const response = await api.get<MapaPontosResponse>(`/api/relatorios/mapa/${id}/pontos`, {
+                    params: filtrosAplicados && Object.keys(filtrosAplicados).length > 0
+                        ? {filtros: JSON.stringify(filtrosAplicados)}
+                        : {},
+                });
                 setMapData(response.data);
                 setError(null);
             } catch (err) {
@@ -162,13 +167,15 @@ export default function ViewRelatoriosViewMapaScreen() {
         };
 
         fetchData();
-    }, [id]);
+    }, [id, filtrosAplicados]);
 
     useEffect(() => {
         const fetchFiltros = async () => {
             try {
                 setFiltrosLoading(true);
-                const response = await api.get<FiltroRelatorioWrapper[]>(`/api/relatorios/filtros/viewMapa/${id}`);
+                const response = await api.get<FiltroRelatorioWrapper[]>('/api/relatorios/filtros/viewMapa', {
+                    params: {mapaId: id},
+                });
                 setFiltros(response.data);
             } catch (err) {
                 console.error('Erro ao carregar filtros:', err);
@@ -228,11 +235,8 @@ export default function ViewRelatoriosViewMapaScreen() {
                     <ReportFilters
                         filtros={filtros}
                         onFiltersChange={setFiltros}
-                        onApplyFilters={() => {
-                            console.log('Aplicar filtros do mapa');
-                            if (mapData && webViewRef.current) {
-                                webViewRef.current.injectJavaScript(`renderMap(${JSON.stringify(mapData)});`);
-                            }
+                        onApplyFilters={(valores) => {
+                            setFiltrosAplicados(valores && Object.keys(valores).length > 0 ? valores : undefined);
                         }}
                     />
                 )}

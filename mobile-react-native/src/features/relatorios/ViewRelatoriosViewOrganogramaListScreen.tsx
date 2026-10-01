@@ -1,9 +1,11 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {ActivityIndicator, StyleSheet, Text, View} from 'react-native';
 import {useRoute} from '@react-navigation/native';
 import {WebView} from 'react-native-webview';
-import {api} from '../api';
-import {Colors, Spacing, Typography} from '../theme';
+import {api} from '../../shared/services/api';
+import {Colors, Spacing, Typography} from '../../shared/styles/theme';
+import {ReportFilters} from '../../shared/components/ReportFilters';
+import type {FiltroRelatorioWrapper, ReportFilterSqlValues} from '../../shared/types/types';
 
 interface OrganogramaNo {
     id: string | number;
@@ -139,6 +141,24 @@ export default function ViewRelatoriosViewOrganogramaListScreen() {
     const [dados, setDados] = useState<OrganogramaDados | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | undefined>();
+    const [filtros, setFiltros] = useState<FiltroRelatorioWrapper[]>([]);
+    const [filtrosAplicados, setFiltrosAplicados] = useState<ReportFilterSqlValues | undefined>(undefined);
+
+    useEffect(() => {
+        if (!id) return;
+        let ativo = true;
+        (async () => {
+            try {
+                const resp = await api.get<FiltroRelatorioWrapper[]>('/api/relatorios/filtros/viewOrganograma', {
+                    params: {organogramaId: id},
+                });
+                if (ativo) setFiltros(resp.data);
+            } catch (erro) {
+                console.error('Erro ao carregar filtros do organograma:', erro);
+            }
+        })();
+        return () => { ativo = false; };
+    }, [id]);
 
     useEffect(() => {
         if (!id) return;
@@ -147,7 +167,11 @@ export default function ViewRelatoriosViewOrganogramaListScreen() {
         setError(undefined);
         (async () => {
             try {
-                const resp = await api.get<OrganogramaDados>(`/api/relatorios/organograma/${id}/dados`);
+                const resp = await api.get<OrganogramaDados>(`/api/relatorios/organograma/${id}/dados`, {
+                    params: filtrosAplicados && Object.keys(filtrosAplicados).length > 0
+                        ? {filtros: JSON.stringify(filtrosAplicados)}
+                        : {},
+                });
                 if (!ativo) return;
                 setDados(resp.data);
             } catch (erro) {
@@ -158,7 +182,7 @@ export default function ViewRelatoriosViewOrganogramaListScreen() {
             }
         })();
         return () => { ativo = false; };
-    }, [id]);
+    }, [id, filtrosAplicados]);
 
     const htmlContent = useMemo(() => {
         if (!dados) return '';
@@ -169,6 +193,15 @@ export default function ViewRelatoriosViewOrganogramaListScreen() {
         <View style={styles.container}>
             <Text style={styles.title}>Organograma{dados ? `: ${dados.nome}` : ''}</Text>
             {!id && <Text style={styles.empty}>Selecione um organograma na listagem para visualizar.</Text>}
+            {filtros.length > 0 && (
+                <ReportFilters
+                    filtros={filtros}
+                    onFiltersChange={setFiltros}
+                    onApplyFilters={(valores) => {
+                        setFiltrosAplicados(valores && Object.keys(valores).length > 0 ? valores : undefined);
+                    }}
+                />
+            )}
             {loading && <ActivityIndicator size="large" color={Colors.primary} style={{marginTop: 20}} />}
             {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -188,17 +221,17 @@ export default function ViewRelatoriosViewOrganogramaListScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.background,
+        backgroundColor: Colors.bgPrimary,
         padding: Spacing.md,
     },
     title: {
-        fontSize: Typography.fontSizes.lg,
-        fontWeight: 'bold',
-        color: Colors.text,
+        fontSize: Typography.sizes.lg,
+        fontWeight: Typography.weights.bold,
+        color: Colors.textPrimary,
         marginBottom: Spacing.md,
     },
     error: {
-        color: 'crimson',
+        color: Colors.error,
         textAlign: 'center',
         marginTop: 20,
     },

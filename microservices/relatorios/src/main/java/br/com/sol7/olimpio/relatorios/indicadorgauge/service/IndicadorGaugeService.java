@@ -4,6 +4,7 @@ import br.com.sol7.olimpio.relatorios.indicadorgauge.dto.IndicadorGaugeRequest;
 import br.com.sol7.olimpio.relatorios.indicadorgauge.dto.IndicadorGaugeResponse;
 import br.com.sol7.olimpio.relatorios.indicadorgauge.entity.IndicadorGauge;
 import br.com.sol7.olimpio.relatorios.indicadorgauge.repository.IndicadorGaugeRepository;
+import br.com.sol7.olimpio.relatorios.shared.FiltroSqlBuilder;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -40,6 +41,13 @@ public class IndicadorGaugeService {
     private static final Pattern COMANDOS_BLOQUEADOS = Pattern.compile(
             "(?i)\\b(insert|update|delete|drop|alter|truncate|grant|revoke|create|exec|execute|call|copy|merge|vacuum|do|comment)\\b");
     private static final Pattern INICIA_COM_SELECT = Pattern.compile("(?is)^\\s*(with|select)\\b");
+
+    private static final String SQL_FILTROS_GAUGE = "SELECT f.nome AS nome, dc.coluna AS coluna, f.tipo_filtro AS tipo_filtro, f.operacao AS operacao, f.data_inicio AS data_inicio, f.data_fim AS data_fim, f.periodo_dinamico AS periodo_dinamico, f.valor_fixo AS valor_fixo " +
+            "FROM rel_filtro f " +
+            "JOIN rel_filtro_indicador_gauge fg ON fg.id_filtro = f.id " +
+            "LEFT JOIN rel_dimensao d ON d.id = f.id_dimensao " +
+            "LEFT JOIN rel_coluna dc ON dc.id = d.id_coluna " +
+            "WHERE fg.id_indicador_gauge = ?1";
 
     private Long getCurrentUserId() {
         if (requestContext != null) {
@@ -121,24 +129,53 @@ public class IndicadorGaugeService {
     }
 
     public Uni<IndicadorGaugeExecucaoResponse> executar(String sql) {
+        return executar(sql, null, null);
+    }
+
+    /**
+     * Executa o SQL do indicador aplicando os filtros vinculados ao gauge
+     * ({ nome do filtro -> { operation, value, value2 } }), com o mesmo predicado
+     * usado nas telas de tabela, grafico e mapa.
+     */
+    public Uni<IndicadorGaugeExecucaoResponse> executar(String sql, Long indicadorGaugeId, Map<String, Object> filtros) {
         validarSql(sql);
-        return pool.query(sql).execute().map(rowSet -> {
-            List<String> nomes = rowSet.columnsNames();
-            List<Map<String, Object>> linhas = new java.util.ArrayList<>();
-            for (Row row : rowSet) {
-                Map<String, Object> linha = new LinkedHashMap<>();
-                for (int i = 0; i < nomes.size(); i++) {
-                    String nome = nomes.get(i);
-                    Object valor = row.getValue(i);
-                    if (valor != null && !(valor instanceof Number) && !(valor instanceof String) && !(valor instanceof Boolean)) {
-                        valor = String.valueOf(valor);
+        return fragmentoFiltros(indicadorGaugeId, filtros)
+                .map(fragmento -> aplicarFiltros(sql, fragmento))
+                .chain(sqlComFiltros -> pool.query(sqlComFiltros).execute().map(rowSet -> {
+                    List<String> nomes = rowSet.columnsNames();
+                    List<Map<String, Object>> linhas = new java.util.ArrayList<>();
+                    for (Row row : rowSet) {
+                        Map<String, Object> linha = new LinkedHashMap<>();
+                        for (int i = 0; i < nomes.size(); i++) {
+                            String nome = nomes.get(i);
+                            Object valor = row.getValue(i);
+                            if (valor != null && !(valor instanceof Number) && !(valor instanceof String) && !(valor instanceof Boolean)) {
+                                valor = String.valueOf(valor);
+                            }
+                            linha.put(nome == null || nome.isBlank() ? "coluna" + i : nome, valor);
+                        }
+                        linhas.add(linha);
                     }
-                    linha.put(nome == null || nome.isBlank() ? "coluna" + i : nome, valor);
-                }
-                linhas.add(linha);
-            }
-            return extrairValores(linhas);
-        });
+                    return extrairValores(linhas);
+                }));
+    }
+
+    private Uni<String> fragmentoFiltros(Long indicadorGaugeId, Map<String, Object> filtros) {
+        if (filtros == null || filtros.isEmpty() || indicadorGaugeId == null) return Uni.createFrom().item("");
+        return Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_FILTROS_GAUGE, jakarta.persistence.Tuple.class)
+                        .setParameter(1, indicadorGaugeId).getResultList())
+                .map(configFiltros -> FiltroSqlBuilder.montarFiltroSql(configFiltros, filtros));
+    }
+
+    /**
+     * O predicado e aplicado como subquery para nao interferir em ORDER BY/LIMIT do SQL do indicador.
+     */
+    private String aplicarFiltros(String sql, String fragmento) {
+        String base = sql.trim();
+        while (base.endsWith(";")) base = base.substring(0, base.length() - 1).trim();
+        if (fragmento == null || fragmento.isBlank()) return base;
+        return "SELECT * FROM (" + base + ") _filtros WHERE " + fragmento;
     }
 
     private void validarSql(String sql) {

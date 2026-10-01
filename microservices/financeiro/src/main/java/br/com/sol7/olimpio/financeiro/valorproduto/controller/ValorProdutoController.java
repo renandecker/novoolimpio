@@ -56,4 +56,47 @@ public class ValorProdutoController {
         return service.buscarExistenciaEmVenda(valorProdutoId);
     }
 
+    @GET
+    @Path("/{id}/unidades")
+    public Uni<List<Integer>> listarUnidades(@PathParam("id") Long id) {
+        return service.listarUnidades(id);
+    }
+
+    @PUT
+    @Path("/{id}/unidades")
+    public Uni<Void> substituirUnidades(@PathParam("id") Long id, List<Integer> unidadeIds) {
+        return service.substituirUnidades(id, unidadeIds);
+    }
+
+    @GET
+    @Path("/{id}/cursos")
+    public Uni<List<Integer>> listarCursos(@PathParam("id") Long id) {
+        return service.listarCursos(id);
+    }
+
+    @PUT
+    @Path("/{id}/cursos")
+    public Uni<Void> substituirCursos(@PathParam("id") Long id, List<Integer> cursoIds) {
+        return service.substituirCursos(id, cursoIds);
+    }
+
+    @GET
+    @Path("/{id}/formas-pagamento")
+    public Uni<List<Integer>> listarFormasPagamento(@PathParam("id") Long id) {
+        return service.listarFormasPagamento(id);
+    }
+
+    @PUT
+    @Path("/{id}/formas-pagamento")
+    public Uni<Void> substituirFormasPagamento(@PathParam("id") Long id, List<Integer> formaPagamentoIds) {
+        return service.substituirFormasPagamento(id, formaPagamentoIds);
+    }
+
+    @GET
+    @Path("/por-unidade-curso")
+    public Uni<List<ValorProdutoResponse>> buscarPorUnidadeCurso(@QueryParam("unidadeId") Long unidadeId,
+                                                                @QueryParam("curriculoId") Long curriculoId) {
+        return service.buscarPorUnidadeCurso(unidadeId, curriculoId);
+    }
+
 }

@@ -4,6 +4,12 @@ export type PagedResponse<T> = { content: T[]; totalElements: number; page: numb
 export type SortRequest = { field?: string; direction?: 'asc' | 'desc' };
 export type ModulePermissions = Record<string, string[]>;
 
+export interface ComboSource {
+    path: string;
+    valueKey?: string;
+    labelKey?: string;
+}
+
 export type QueryOperation =
     | 'CONTAINS' | 'EQUALS' | 'NOT_EQUALS' | 'STARTS_WITH' | 'ENDS_WITH'
     | 'GREATER_THAN' | 'GREATER_THAN_OR_EQUAL' | 'LESS_THAN' | 'LESS_THAN_OR_EQUAL'
@@ -56,6 +62,15 @@ export interface FiltroRelatorioWrapper {
     selected: boolean;
     informacao?: string;
 }
+
+export interface ReportFilterSqlValue {
+    operation?: string;
+    value?: string;
+    value2?: string;
+    selected?: boolean;
+}
+
+export type ReportFilterSqlValues = Record<string, ReportFilterSqlValue>;
 
 export type TempoFilterType = 0 | 1 | 2 | 3;
 

@@ -36,6 +36,38 @@ const graphTypes = new Set<ReportType>(['GRAFICO', 'PIZZA', 'LINHA', 'COMBINADO'
 
 
 
+const graficoEndpoint = {path: '/api/relatorios/filtros/viewGrafico', param: 'graficoId'};
+
+
+
+const filtrosEndpointFor: Record<ReportType, {path: string; param: string}> = {
+
+    TABELA: {path: '/api/relatorios/filtros/viewTabela', param: 'tabelaId'},
+
+    GRAFICO: graficoEndpoint,
+
+    PIZZA: graficoEndpoint,
+
+    LINHA: graficoEndpoint,
+
+    COMBINADO: graficoEndpoint,
+
+    CIRCULAR: graficoEndpoint,
+
+    BARRA_VERTICAL: graficoEndpoint,
+
+    BARRA_HORIZONTAL: graficoEndpoint,
+
+    MAPA: {path: '/api/relatorios/filtros/viewMapa', param: 'mapaId'},
+
+    ORGANOGRAMA: {path: '/api/relatorios/filtros/viewOrganograma', param: 'organogramaId'},
+
+    DASHBOARD: {path: '/api/relatorios/filtros/viewPainel', param: 'painelId'},
+
+};
+
+
+
 const routeFor: Record<ReportType, string> = {
 
     TABELA: 'listTabela',
@@ -111,6 +143,8 @@ const pathToReportType: Record<string, ReportType> = {
     'viewMapa': 'MAPA',
 
     'viewOrganograma': 'ORGANOGRAMA',
+
+    'viewPainel': 'DASHBOARD',
 
     'viewDashboard': 'DASHBOARD',
 
@@ -234,23 +268,26 @@ export default function ReportViewScreen() {
 
     const isGraph = reportType ? graphTypes.has(reportType) : false;
 
+    const supportsFiltros = Boolean(reportType && filtrosEndpointFor[reportType]);
+
     useEffect(() => {
-        if (!isGraph) {
+        if (!reportType || !supportsFiltros) {
             setFiltros([]);
             setLoadingFiltros(false);
             setFiltrosAplicados(undefined);
             return;
         }
+        const endpoint = filtrosEndpointFor[reportType];
         let cancelled = false;
         setLoadingFiltros(true);
         const fetchFiltros = async () => {
             try {
-                const response = await api.get<FiltroRelatorioWrapper[]>('/api/relatorios/filtros/viewGrafico', {
-                    params: { graficoId: reportId }
+                const response = await api.get<FiltroRelatorioWrapper[]>(endpoint.path, {
+                    params: {[endpoint.param]: reportId}
                 });
                 if (!cancelled) setFiltros(response.data);
             } catch (error) {
-                console.error('Erro ao carregar filtros do grafico:', error);
+                console.error('Erro ao carregar filtros do relatorio:', error);
             } finally {
                 if (!cancelled) setLoadingFiltros(false);
             }
@@ -259,7 +296,7 @@ export default function ReportViewScreen() {
         return () => {
             cancelled = true;
         };
-    }, [isGraph, reportId]);
+    }, [reportType, reportId, supportsFiltros]);
 
     const report = useQuery({
 
@@ -341,7 +378,7 @@ export default function ReportViewScreen() {
 
     }
 
-    if (report.isLoading || (isGraph && loadingFiltros)) return <main><p>Carregando relatório...</p></main>;
+    if (report.isLoading || (supportsFiltros && loadingFiltros)) return <main><p>Carregando relatório...</p></main>;
 
     if (report.isError || !report.data) return <main><h1>Relatório indisponível</h1><p>Você não possui acesso a este
 
@@ -467,7 +504,7 @@ export default function ReportViewScreen() {
 
                     <h2>Relatório</h2>
 
-                    {isGraph && (
+                    {supportsFiltros && (
                         <ReportFilters
                             filtros={filtros}
                             onFiltersChange={setFiltros}

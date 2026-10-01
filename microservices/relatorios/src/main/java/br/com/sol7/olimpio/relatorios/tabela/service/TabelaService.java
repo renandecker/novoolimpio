@@ -33,6 +33,7 @@ import br.com.sol7.olimpio.relatorios.tabela.entity.TabelaColuna;
 import br.com.sol7.olimpio.relatorios.tabela.repository.TabelaRepository;
 import br.com.sol7.olimpio.relatorios.tabela.repository.TabelaColunaRepository;
 import io.quarkus.hibernate.reactive.panache.Panache;
+import br.com.sol7.olimpio.relatorios.shared.FiltroSqlBuilder;
 import br.com.sol7.olimpio.shared.TupleHelper;
 import jakarta.persistence.Tuple;
 
@@ -105,12 +106,21 @@ public class TabelaService {
      * Executa a consulta montada pela estrutura e pelas colunas configuradas, com paginação via LIMIT/OFFSET do PostgreSQL.
      */
     public Uni<TabelaExecutadaResponse> executar(Long tabelaId, int page, int size) {
+        return executar(tabelaId, page, size, null);
+    }
+
+    /**
+     * Executa a tabela aplicando também os filtros recebidos do frontend
+     * ({ nome do filtro -> { operation, value, value2 } }), usando as mesmas
+     * regras de montagem de predicado das demais views de relatório.
+     */
+    public Uni<TabelaExecutadaResponse> executar(Long tabelaId, int page, int size, Map<String, Object> filtros) {
         int p = Math.max(0, page);
         int s = (size == 10 || size == 20 || size == 50 || size == 100) ? size : 10;
         return Panache.getSession().chain(session -> session.createNativeQuery(SQL_ESTRUTURA, Tuple.class).setParameter(1, tabelaId).getSingleResultOrNull())
                 .onItem().ifNull().failWith(() -> new NotFoundException("Estrutura da tabela não encontrada"))
                 .onItem().transformToUni(estrutura -> Panache.getSession().chain(session -> session.createNativeQuery(SQL_COLUNAS, Tuple.class).setParameter(1, tabelaId).getResultList())
-                        .onItem().transformToUni(colunas -> executarSql((Tuple) estrutura, colunas, p, s)))
+                        .onItem().transformToUni(colunas -> executarSql(tabelaId, (Tuple) estrutura, colunas, p, s, filtros)))
                 .onFailure().recoverWithUni(throwable -> {
                     LOG.errorf(throwable, "Erro ao executar tabela ID %d: %s", tabelaId, throwable.getMessage());
                     if (throwable instanceof IllegalArgumentException) {
@@ -170,28 +180,52 @@ public class TabelaService {
         return new SqlMontado(sql.toString(), cabecalhos);
     }
 
-    private Uni<TabelaExecutadaResponse> executarSql(Tuple estrutura, List<?> configuracoes, int page, int size) {
+    private Uni<TabelaExecutadaResponse> executarSql(Long tabelaId, Tuple estrutura, List<?> configuracoes, int page, int size, Map<String, Object> filtros) {
         if (configuracoes.isEmpty()) return Uni.createFrom().item(new TabelaExecutadaResponse(List.of(), List.of()));
         SqlMontado montado = montarSql(estrutura, configuracoes);
-        String mainSql = montado.sql();
-        String origem = texto(TupleHelper.getString(estrutura, "tabela"));
-        String whereClause = texto(TupleHelper.getString(estrutura, "condicao"));
-        String countSql = "SELECT count(*) FROM (SELECT 1 " + origem + (whereClause.isBlank() ? "" : " " + whereClause) + ") _cnt";
-
         int offset = page * size;
-        String paginatedSql = mainSql + " LIMIT " + size + " OFFSET " + offset;
+        return fragmentoFiltros(tabelaId, filtros).map(fragmento -> {
+            String mainSql = aplicarFiltros(montado.sql(), fragmento);
+            String paginatedSql = mainSql + " LIMIT " + size + " OFFSET " + offset;
+            String countSql;
+            if (fragmento == null || fragmento.isBlank()) {
+                String origem = texto(TupleHelper.getString(estrutura, "tabela"));
+                String whereClause = texto(TupleHelper.getString(estrutura, "condicao"));
+                countSql = "SELECT count(*) FROM (SELECT 1 " + origem + (whereClause.isBlank() ? "" : " " + whereClause) + ") _cnt";
+            } else {
+                countSql = "SELECT count(*) FROM (SELECT * FROM (" + mainSql + ") _filtros WHERE " + fragmento + ") _cnt";
+            }
+            return new ExecucaoMontada(montado, mainSql, countSql, paginatedSql, size);
+        }).chain(execucao -> {
+            Uni<Long> countUni = Panache.getSession()
+                    .chain(session -> session.createNativeQuery(execucao.countSql()).getSingleResultOrNull())
+                    .map(result -> result == null ? 0L : ((Number) result).longValue());
+            Uni<List<Tuple>> dataUni = Panache.getSession()
+                    .chain(session -> session.createNativeQuery(execucao.paginatedSql(), Tuple.class).getResultList());
+            return countUni.chain(totalCount -> dataUni.map(resultado -> {
+                int totalPages = (int) Math.ceil((double) totalCount / Math.max(1, execucao.size()));
+                return new TabelaExecutadaResponse(execucao.montado().cabecalhos(), converterLinhas(resultado, execucao.montado().cabecalhos()), totalCount, page, execucao.size(), totalPages);
+            }));
+        });
+    }
 
-        Uni<Long> countUni = Panache.getSession()
-                .chain(session -> session.createNativeQuery(countSql).getSingleResultOrNull())
-                .map(result -> result == null ? 0L : ((Number) result).longValue());
+    private record ExecucaoMontada(SqlMontado montado, String mainSql, String countSql, String paginatedSql, int size) {
+    }
 
-        Uni<List<Tuple>> dataUni = Panache.getSession()
-                .chain(session -> session.createNativeQuery(paginatedSql, Tuple.class).getResultList());
+    /**
+     * O predicado e aplicado sobre a consulta ja montada (subquery), preservando
+     * GROUP BY, condicoes da estrutura e a paginação.
+     */
+    private String aplicarFiltros(String sql, String fragmento) {
+        if (fragmento == null || fragmento.isBlank()) return sql;
+        return "SELECT * FROM (" + sql + ") _filtros WHERE " + fragmento;
+    }
 
-        return countUni.chain(totalCount -> dataUni.map(resultado -> {
-            int totalPages = (int) Math.ceil((double) totalCount / Math.max(1, size));
-            return new TabelaExecutadaResponse(montado.cabecalhos(), converterLinhas(resultado, montado.cabecalhos()), totalCount, page, size, totalPages);
-        }));
+    private Uni<String> fragmentoFiltros(Long tabelaId, Map<String, Object> filtros) {
+        if (filtros == null || filtros.isEmpty()) return Uni.createFrom().item("");
+        return Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_FILTROS, Tuple.class).setParameter(1, tabelaId).getResultList())
+                .map(configFiltros -> montarFiltroSql(configFiltros, filtros));
     }
 
     private List<Map<String, Object>> converterLinhas(List<?> resultado, List<String> cabecalhos) {
@@ -306,120 +340,16 @@ public class TabelaService {
                                     if (configuracoes.isEmpty()) return "SELECT 1";
                                     Tuple estruturaArr = (Tuple) estrutura;
                                     SqlMontado montado = montarSql(estruturaArr, configuracoes);
-                                    String base = montado.sql();
-                                    String condicao = texto(TupleHelper.getString(estruturaArr, "condicao"));
                                     String fragmento = montarFiltroSql(configFiltros, filtros);
-                                    if (fragmento == null || fragmento.isEmpty()) return base;
-                                    return base + (condicao.isBlank() ? " WHERE " : " AND ") + fragmento;
+                                    return aplicarFiltros(montado.sql(), fragmento);
                                 })));
     }
 
-    // Migrado de FiltrosController.aplicarFiltro/ajustafiltro e convertOperationAndValue
-    // (extracted_aceso) + QueryBuilder: monta o predicado WHERE a partir dos filtros vindos do
-    // frontend. Cada entrada do mapa tem o NOME do rel_filtro como chave e
-    // { operation, value [, value2] } como valor.
+    // Delega ao construtor compartilhado (FiltroSqlBuilder) para manter o mesmo
+    // comportamento das demais views: filtros fixos ({ selected: true }) usam a
+    // operacao/valor configurados em rel_filtro.
     private String montarFiltroSql(List<?> configFiltros, Map<String, Object> filtros) {
-        if (filtros == null || filtros.isEmpty()) return "";
-        Map<String, Tuple> porNome = new HashMap<>();
-        for (Object item : configFiltros) {
-            Tuple cfg = (Tuple) item;
-            String nome = texto(TupleHelper.getString(cfg, "nome"));
-            if (!nome.isEmpty()) porNome.put(nome.trim().toLowerCase(), cfg);
-        }
-        List<String> condicoes = new ArrayList<>();
-        for (Map.Entry<String, Object> entrada : filtros.entrySet()) {
-            Object condicaoObj = entrada.getValue();
-            if (!(condicaoObj instanceof Map<?, ?>)) continue;
-            Map<?, ?> cond = (Map<?, ?>) condicaoObj;
-            Tuple cfg = porNome.get(entrada.getKey().trim().toLowerCase());
-            if (cfg == null) continue;
-            String coluna = semAlias(texto(TupleHelper.getString(cfg, "coluna")));
-            if (coluna.isEmpty()) continue;
-            String operador = operador(cond);
-            String valor = texto(cond.get("value"));
-            String valor2 = texto(cond.get("value2"));
-            String tipoFiltro = texto(TupleHelper.getString(cfg, "tipo_filtro"));
-            String trecho = montarCondicao(coluna, operador, valor, valor2, tipoFiltro);
-            if (trecho != null) condicoes.add(trecho);
-        }
-        return String.join(" AND ", condicoes);
-    }
-
-    private String operador(Map<?, ?> cond) {
-        Object op = cond.get("operation");
-        if (op == null) op = cond.get("operator");
-        return op == null ? "" : op.toString();
-    }
-
-    private String montarCondicao(String coluna, String operador, String valor, String valor2, String tipoFiltro) {
-        if (operador == null || operador.isBlank() || valor == null) return null;
-        String op = normalizarOperador(operador);
-        if (op == null) return null;
-        String dinamico = periodoDinamico(op, coluna, valor);
-        if (dinamico != null) return dinamico;
-        if ("BETWEEN".equals(op)) {
-            if (valor.isBlank() || valor2 == null || valor2.isBlank()) return null;
-            return "cast(" + coluna + " as date) BETWEEN '" + esc(valor) + "' AND '" + esc(valor2) + "'";
-        }
-        if ("IN".equals(op)) {
-            return coluna + " IN (" + listaValores(valor) + ")";
-        }
-        String pattern = patternIlike(op, valor);
-        if (pattern != null) return coluna + " ILIKE '" + esc(pattern) + "'";
-        boolean tempo = "NORMAL".equalsIgnoreCase(tipoFiltro) || "FAIXA".equalsIgnoreCase(tipoFiltro) || "PERIODICO".equalsIgnoreCase(tipoFiltro);
-        if (tempo) return "cast(" + coluna + " as date) " + op + " '" + esc(valor) + "'";
-        return coluna + " " + op + " '" + esc(valor) + "'";
-    }
-
-    private String periodoDinamico(String op, String coluna, String valor) {
-        if (!"=".equals(op)) return null;
-        String v = valor.trim().toUpperCase();
-        return switch (v) {
-            case "HOJE", "DIA ATUAL" -> "cast(" + coluna + " as date) = CURRENT_DATE";
-            case "ONTEM", "DIA ANTERIOR" -> "cast(" + coluna + " as date) = CURRENT_DATE - INTERVAL '1 DAY'";
-            case "ULTIMA_SEMANA", "SEMANA ANTERIOR" -> "date_trunc('week', cast(" + coluna + " as date)) = date_trunc('week', CURRENT_DATE) - INTERVAL '1 week'";
-            case "ULTIMO_MES", "MES ANTERIOR" -> "date_trunc('month', cast(" + coluna + " as date)) = date_trunc('month', CURRENT_DATE) - INTERVAL '1 month'";
-            case "ULTIMO_ANO", "ANO ANTERIOR" -> "date_trunc('year', cast(" + coluna + " as date)) = date_trunc('year', CURRENT_DATE) - INTERVAL '1 year'";
-            case "MES_ATUAL", "MES ATUAL" -> "date_trunc('month', cast(" + coluna + " as date)) = date_trunc('month', CURRENT_DATE)";
-            case "ANO_ATUAL", "ANO ATUAL" -> "date_trunc('year', cast(" + coluna + " as date)) = date_trunc('year', CURRENT_DATE)";
-            default -> null;
-        };
-    }
-
-    private String normalizarOperador(String operador) {
-        if (operador == null) return null;
-        return switch (operador.toUpperCase()) {
-            case "EQUALS", "EQ", "=" -> "=";
-            case "NOT_EQUALS", "NOT_EQUAL", "NE", "!=", "<>" -> "<>";
-            case "GREATER_THAN", "GT", ">" -> ">";
-            case "GREATER_THAN_OR_EQUAL", "GE", ">=" -> ">=";
-            case "LESS_THAN", "LT", "<" -> "<";
-            case "LESS_THAN_OR_EQUAL", "LE", "<=" -> "<=";
-            case "BETWEEN" -> "BETWEEN";
-            case "IN", "IN_LIST" -> "IN";
-            case "CONTAINS" -> "CONTAINS";
-            case "STARTS_WITH" -> "STARTS_WITH";
-            case "ENDS_WITH" -> "ENDS_WITH";
-            default -> null;
-        };
-    }
-
-    private String patternIlike(String op, String valor) {
-        return switch (op) {
-            case "CONTAINS" -> "%" + valor + "%";
-            case "STARTS_WITH" -> valor + "%";
-            case "ENDS_WITH" -> "%" + valor;
-            default -> null;
-        };
-    }
-
-    private String listaValores(String valor) {
-        return Arrays.stream(valor.split(",")).map(String::trim).filter(s -> !s.isEmpty())
-                .map(s -> "'" + esc(s) + "'").collect(Collectors.joining(", "));
-    }
-
-    private String esc(String v) {
-        return v.replace("'", "''");
+        return FiltroSqlBuilder.montarFiltroSql(configFiltros, filtros);
     }
 
 

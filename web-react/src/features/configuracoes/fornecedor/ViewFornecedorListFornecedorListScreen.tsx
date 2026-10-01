@@ -3,6 +3,6 @@ import {DataTable} from '../../../shared/components/DataTable';
 
 export default function ViewFornecedorListFornecedorListScreen() {
     return <PermissionGate permission="READ">
-        <main><h1>Fornecedor</h1><DataTable path="/api/view/fornecedor/listFornecedor"/></main>
+        <main><h1>Fornecedor</h1><DataTable path="/api/view/fornecedor/listFornecedor" createNavigateTo="/view/fornecedor/formFornecedor" editNavigateTo="/view/fornecedor/formFornecedor"/></main>
     </PermissionGate>
 }

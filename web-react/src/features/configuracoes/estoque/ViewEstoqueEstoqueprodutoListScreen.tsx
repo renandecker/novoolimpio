@@ -65,9 +65,10 @@ const formatDateTime = (value: string | null | undefined): string => {
 };
 
 function ProdutosEstoqueTab({unidadeId}: { unidadeId: string }) {
+    const unidadeIdNum = Number(unidadeId);
     const {data, isLoading} = useQuery({
         queryKey: ['estoque-produto-controle', unidadeId],
-        queryFn: async () => (await api.get<ControleEstoqueRow[]>('/api/estoque/estoque-produto/controle', {params: {unidadeId}})).data,
+        queryFn: async () => (await api.get<ControleEstoqueRow[]>('/api/estoque/estoque-produto/controle', {params: {unidadeId: unidadeIdNum}})).data,
         enabled: !!unidadeId,
     });
 
@@ -129,9 +130,10 @@ function ProdutosEstoqueTab({unidadeId}: { unidadeId: string }) {
 }
 
 function PendenciaVendaTab({unidadeId}: { unidadeId: string }) {
+    const unidadeIdNum = Number(unidadeId);
     const {data, isLoading} = useQuery({
         queryKey: ['estoque-pendencias', unidadeId],
-        queryFn: async () => (await api.get<PendenciaVendaRow[]>('/api/estoque/estoque-produto/pendencias', {params: {unidadeId}})).data,
+        queryFn: async () => (await api.get<PendenciaVendaRow[]>('/api/estoque/estoque-produto/pendencias', {params: {unidadeId: unidadeIdNum}})).data,
         enabled: !!unidadeId,
     });
 
@@ -139,7 +141,7 @@ function PendenciaVendaTab({unidadeId}: { unidadeId: string }) {
 
     const handleExport = async (format: 'pdf' | 'docx' | 'excel') => {
         try {
-            const response = await api.get(`/api/estoque/estoque-produto/exportar/${format}`, {params: {unidadeId}, responseType: 'blob'});
+            const response = await api.get(`/api/estoque/estoque-produto/exportar/${format}`, {params: {unidadeId: unidadeIdNum}, responseType: 'blob'});
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;

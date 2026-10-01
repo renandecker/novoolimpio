@@ -426,6 +426,26 @@ public class FiltrosService {
                 .map(this::toWrapperDTOs);
     }
 
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewOrganograma(Long organogramaId) {
+        return repository.findByOrganograma(organogramaId)
+                .map(this::toWrapperDTOs);
+    }
+
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewPainel(Long painelId) {
+        return repository.findByPainel(painelId)
+                .map(this::toWrapperDTOs);
+    }
+
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewIndicadorGauge(Long indicadorGaugeId) {
+        return repository.findByIndicadorGauge(indicadorGaugeId)
+                .map(this::toWrapperDTOs);
+    }
+
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForListIndicadorGauge() {
+        return repository.findAllForListIndicadorGauge()
+                .map(this::toWrapperDTOs);
+    }
+
     private List<FiltroRelatorioWrapperDTO> toWrapperDTOs(List<Filtros> filtros) {
         List<FiltroRelatorioWrapperDTO> result = new ArrayList<>();
         for (Filtros f : filtros) {

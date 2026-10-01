@@ -316,8 +316,9 @@ function SolicitacoesTab({unidadeId}: { unidadeId: string }) {
 
         queryKey: ['solicitacoes-estoque', unidadeId],
 
-        queryFn: async () => (await api.get<SolicitacaoRow[]>('/api/estoque/solicitacao-estoque')).data,
+        queryFn: async () => (await api.get<SolicitacaoRow[]>('/api/estoque/solicitacao-estoque', {params: {unidadeId}})).data,
 
+        enabled: !!unidadeId,
     });
 
 
@@ -480,8 +481,9 @@ function PedidosTab({unidadeId}: { unidadeId: string }) {
 
         queryKey: ['controle-pedidos', unidadeId],
 
-        queryFn: async () => (await api.get<ControlePedidosRow[]>('/api/estoque/controle-pedidos')).data,
+        queryFn: async () => (await api.get<ControlePedidosRow[]>('/api/estoque/controle-pedidos', {params: {unidadeId}})).data,
 
+        enabled: !!unidadeId,
     });
 
 

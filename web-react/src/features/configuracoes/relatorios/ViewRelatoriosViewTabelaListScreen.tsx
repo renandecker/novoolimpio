@@ -4,7 +4,7 @@ import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {PermissionGate, usePermissions} from '../../../shared/services/permissions';
 import {ReportFilters} from '../../../shared/components/ReportFilters';
 import HelpOverlay from '../../../shared/components/HelpOverlay';
-import type {FiltroRelatorioWrapper} from '../../../shared/types/types';
+import type {FiltroRelatorioWrapper, ReportFilterSqlValues} from '../../../shared/types/types';
 import {api} from '../../../shared/services/api';
 import {abrirRelatorio} from '../../relatorios/relatorios';
 import '../ReportView.css';
@@ -17,6 +17,7 @@ export default function ViewRelatoriosViewTabelaListScreen() {
     const [searchParams] = useSearchParams();
     const tabelaId = Number(id);
     const [filtros, setFiltros] = useState<FiltroRelatorioWrapper[]>([]);
+    const [filtrosAplicados, setFiltrosAplicados] = useState<ReportFilterSqlValues | undefined>(undefined);
     const [loadingFiltros, setLoadingFiltros] = useState(true);
     const [page, setPage] = useState(0);
     const [fetchLimit, setFetchLimit] = useState(10);
@@ -60,14 +61,15 @@ export default function ViewRelatoriosViewTabelaListScreen() {
     }, [tabelaId]);
 
     const report = useQuery({
-        queryKey: ['relatorio-tabela', tabelaId],
-        queryFn: () => abrirRelatorio('TABELA', tabelaId),
+        queryKey: ['relatorio-tabela', tabelaId, filtrosAplicados],
+        queryFn: () => abrirRelatorio('TABELA', tabelaId, filtrosAplicados),
         enabled: Number.isInteger(tabelaId) && tabelaId > 0,
     });
 
     useEffect(() => {
         setPage(0);
         setDataPage(null);
+        setFiltrosAplicados(undefined);
     }, [tabelaId]);
 
     useEffect(() => {
@@ -90,9 +92,9 @@ export default function ViewRelatoriosViewTabelaListScreen() {
         setFiltros(newFiltros);
     };
 
-    const handleApplyFilters = () => {
-        console.log('Aplicar filtros da tabela - recarregar dados');
-        report.refetch();
+    const handleApplyFilters = (valores?: ReportFilterSqlValues) => {
+        setFiltrosAplicados(valores && Object.keys(valores).length > 0 ? valores : undefined);
+        setPage(0);
     };
 
     const nomeRelatorio = report.data?.nome || 'View Tabela';

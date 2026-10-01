@@ -238,6 +238,59 @@ public class FiltrosRepository implements PanacheRepository<Filtros> {
                 }));
     }
 
+    public Uni<List<Filtros>> findByPainel(Long painelId) {
+        String sql = """
+                SELECT f.id AS id, f.nome AS nome, f.fl_fixo AS fl_fixo, f.fl_exibir AS fl_exibir,
+                       f.tipo_filtro AS tipo_filtro, f.valor_fixo AS valor_fixo,
+                       d.tipo_info_dimensao AS dados_json
+                FROM rel_filtro f
+                JOIN rel_filtro_painel fp ON fp.id_filtro = f.id
+                LEFT JOIN rel_dimensao d ON d.id = f.id_dimensao
+                WHERE fp.id_painel = :painelId
+                ORDER BY f.nome
+                """;
+        return Panache.getSession().chain(session -> session
+                .createNativeQuery(sql, Tuple.class)
+                .setParameter("painelId", painelId)
+                .getResultList()
+                .map(FiltrosRepository::toFiltros));
+    }
+
+    public Uni<List<Filtros>> findByIndicadorGauge(Long indicadorGaugeId) {
+        String sql = """
+                SELECT f.id AS id, f.nome AS nome, f.fl_fixo AS fl_fixo, f.fl_exibir AS fl_exibir,
+                       f.tipo_filtro AS tipo_filtro, f.valor_fixo AS valor_fixo,
+                       d.tipo_info_dimensao AS dados_json
+                FROM rel_filtro f
+                JOIN rel_filtro_indicador_gauge fg ON fg.id_filtro = f.id
+                LEFT JOIN rel_dimensao d ON d.id = f.id_dimensao
+                WHERE fg.id_indicador_gauge = :indicadorGaugeId
+                ORDER BY f.nome
+                """;
+        return Panache.getSession().chain(session -> session
+                .createNativeQuery(sql, Tuple.class)
+                .setParameter("indicadorGaugeId", indicadorGaugeId)
+                .getResultList()
+                .map(FiltrosRepository::toFiltros));
+    }
+
+    private static List<Filtros> toFiltros(List<?> rows) {
+        List<Filtros> result = new ArrayList<>();
+        for (Object row : rows) {
+            Tuple t = (Tuple) row;
+            Filtros f = new Filtros();
+            f.id = TupleHelper.getLong(t, "id");
+            f.nome = TupleHelper.getString(t, "nome");
+            f.flFixo = TupleHelper.getBoolean(t, "fl_fixo");
+            f.flExibir = TupleHelper.getBoolean(t, "fl_exibir");
+            f.tipoFiltro = TupleHelper.getString(t, "tipo_filtro");
+            f.valorFixo = TupleHelper.getString(t, "valor_fixo");
+            f.dadosJson = TupleHelper.getString(t, "dados_json");
+            result.add(f);
+        }
+        return result;
+    }
+
     public Uni<List<Filtros>> findAllForListTabela() {
         String sql = "SELECT DISTINCT f.id AS id, f.nome AS nome, f.fl_fixo AS fl_fixo, f.fl_exibir AS fl_exibir, f.tipo_filtro AS tipo_filtro, f.valor_fixo AS valor_fixo FROM rel_filtro f "
                 + "JOIN rel_filtro_tabela ft ON ft.id_filtro = f.id "
@@ -284,6 +337,22 @@ public class FiltrosRepository implements PanacheRepository<Filtros> {
                     }
                     return result;
                 }));
+    }
+
+    public Uni<List<Filtros>> findAllForListIndicadorGauge() {
+        String sql = """
+                SELECT DISTINCT f.id AS id, f.nome AS nome, f.fl_fixo AS fl_fixo, f.fl_exibir AS fl_exibir,
+                       f.tipo_filtro AS tipo_filtro, f.valor_fixo AS valor_fixo,
+                       d.tipo_info_dimensao AS dados_json
+                FROM rel_filtro f
+                JOIN rel_filtro_indicador_gauge fg ON fg.id_filtro = f.id
+                LEFT JOIN rel_dimensao d ON d.id = f.id_dimensao
+                ORDER BY f.nome
+                """;
+        return Panache.getSession().chain(session -> session
+                .createNativeQuery(sql, Tuple.class)
+                .getResultList()
+                .map(FiltrosRepository::toFiltros));
     }
 
     public Uni<List<Filtros>> buscarFiltrosTabelaComFiltros(Long filtroRelatorioId) {

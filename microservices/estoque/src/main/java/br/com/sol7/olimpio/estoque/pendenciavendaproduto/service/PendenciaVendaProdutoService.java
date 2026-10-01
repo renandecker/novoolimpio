@@ -125,6 +125,9 @@ public class PendenciaVendaProdutoService {
     }
 
     private Uni<List<PendenciaVendaProdutoResponse>> enrichResponses(List<PendenciaVendaProdutoResponse> responses) {
+        if (responses.isEmpty()) {
+            return Uni.createFrom().item(List.of());
+        }
         List<Uni<PendenciaVendaProdutoResponse>> unis = responses.stream().map(this::enrichSingleResponse).toList();
         return Uni.join().all(unis).andFailFast();
     }

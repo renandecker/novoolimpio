@@ -50,7 +50,7 @@ public class ViewService {
     }
 
     public static final Map<String, String> CURATED = Map.ofEntries(
-            Map.entry("categoriaEstoque/listCategoria", "bas_categoria"),
+            Map.entry("categoriaEstoque/listCategoria", "est_categoria"),
             Map.entry("genero/listGenero", "bas_genero"),
             Map.entry("marca/listMarca", "est_marca"),
             Map.entry("mensagemMeta/listMensagemMeta", "cen_mensagem_meta"),
@@ -255,6 +255,44 @@ public class ViewService {
                     + "LEFT JOIN edc_curso curso ON curso.id = cur.id_curso";
     private static final List<String> DIGITALIZACAO_CONTRATOS_COLUMNS = List.of(
             "id", "local", "pdf", "aluno_nome", "responsavel_string", "unidade_sucinto", "curso_nome");
+
+    // Rematrícula (aba "Contrato" do consultor): só contratos cujo currículo possui
+    // possui_rematricula = true, com as informações descritivas já resolvidas para exibição
+    // em colunas (nome do aluno/responsável, curso, currículo, unidade e indicadores financeiros).
+    private static final String CONTRATO_REMATRICULA_SELECT =
+            "SELECT c.id, "
+                    + "c.id_pessoa AS pessoa_id, "
+                    + "c.id_curso AS curriculo_id, "
+                    + "c.id_unidade AS unidade_id, "
+                    + "c.ativo, "
+                    + "c.data, "
+                    + "c.valor_parcelas, "
+                    + "COALESCE(pf_aluno.nome, pj_aluno.nome_fantasia, '') AS aluno_nome, "
+                    + "pf_aluno.cpf AS aluno_cpf, "
+                    + "COALESCE(pf_resp.nome, pj_resp.nome_fantasia, '') AS responsavel_nome, "
+                    + "u.sucinto AS unidade_sucinto, "
+                    + "cur.sucinto AS curriculo_sucinto, "
+                    + "cur.descricao AS curriculo_descricao, "
+                    + "cur.possui_rematricula AS possui_rematricula, "
+                    + "curso.nome AS curso_nome, "
+                    + "cur.carga_horaria AS carga_horaria, "
+                    + "cur.id_curso AS curso_id "
+                    + "FROM edc_contrato c "
+                    + "LEFT JOIN bas_pessoa p_aluno ON p_aluno.id = c.id_pessoa "
+                    + "LEFT JOIN bas_pessoa_fisica pf_aluno ON pf_aluno.id_pessoa = p_aluno.id "
+                    + "LEFT JOIN bas_pessoa_juridica pj_aluno ON pj_aluno.id_pessoa = p_aluno.id "
+                    + "LEFT JOIN bas_pessoa p_resp ON p_resp.id = c.id_responsavel "
+                    + "LEFT JOIN bas_pessoa_fisica pf_resp ON pf_resp.id_pessoa = p_resp.id "
+                    + "LEFT JOIN bas_pessoa_juridica pj_resp ON pj_resp.id_pessoa = p_resp.id "
+                    + "LEFT JOIN bas_unidade u ON u.id = c.id_unidade "
+                    + "LEFT JOIN edc_curriculo cur ON cur.id = c.id_curso "
+                    + "LEFT JOIN edc_curso curso ON curso.id = cur.id_curso "
+                    + "WHERE cur.possui_rematricula = true";
+    private static final List<String> CONTRATO_REMATRICULA_COLUMNS = List.of(
+            "id", "pessoa_id", "aluno_nome", "aluno_cpf", "responsavel_nome",
+            "curso_nome", "curriculo_id", "curriculo_sucinto", "curriculo_descricao", "carga_horaria",
+            "unidade_id", "unidade_sucinto", "ativo", "data", "valor_parcelas", "possui_rematricula",
+            "curso_id");
     private static final List<String> PESSOA_FISICA_COLUMNS = List.of(
             "id", "id_pessoa", "nome", "nome_social", "cpf", "rg",
             "nome_referencia", "telefone_referencia", "celular_referencia",
@@ -290,7 +328,9 @@ public class ViewService {
             Map.entry("pessoa/listPessoaFisica", new CuratedSelect(PESSOA_FISICA_SELECT, PESSOA_FISICA_COLUMNS)),
             Map.entry("pessoa/formPessoaFisica", new CuratedSelect(PESSOA_FISICA_SELECT, PESSOA_FISICA_COLUMNS)),
             Map.entry("pessoa-fisica/listPessoaFisica", new CuratedSelect(PESSOA_FISICA_SELECT, PESSOA_FISICA_COLUMNS)),
-            Map.entry("digitalizacaoDocumento/digitalizacaoDocumento", new CuratedSelect(DIGITALIZACAO_CONTRATOS_SELECT, DIGITALIZACAO_CONTRATOS_COLUMNS)));
+            Map.entry("digitalizacaoDocumento/digitalizacaoDocumento", new CuratedSelect(DIGITALIZACAO_CONTRATOS_SELECT, DIGITALIZACAO_CONTRATOS_COLUMNS)),
+            Map.entry("educacao/listContratoRematricula", new CuratedSelect(CONTRATO_REMATRICULA_SELECT, CONTRATO_REMATRICULA_COLUMNS)),
+            Map.entry("educacao/formContratoRematricula", new CuratedSelect(CONTRATO_REMATRICULA_SELECT, CONTRATO_REMATRICULA_COLUMNS)));
 
     public Uni<PagedResponse<Map<String, Object>>> paged(String feature, String resource, int page, int size) {
         int p = Math.max(0, page);

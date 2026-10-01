@@ -30,7 +30,11 @@ export default function ViewMovimentacaoListMovimentacaoEstoqueListScreen() {
             <main>
                 <h1>Movimentacao Estoque</h1>
                 <DataTable path="/api/view/movimentacao/listMovimentacaoEstoque" columns={COLUMNS}
-                           maxMainColumns={COLUMNS.length}/>
+                           maxMainColumns={COLUMNS.length}
+                           hideCreate={true}
+                           hideView={true}
+                           hideUpdate={true}
+                           hideDelete={true}/>
             </main>
         </PermissionGate>
     );

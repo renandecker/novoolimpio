@@ -66,8 +66,8 @@ export { default as ViewCargaListCargaListScreen } from '../features/configuraco
 export { default as ViewCategoriaCampoFormCategoriaCampoListScreen } from '../features/configuracoes/categoria-campo/ViewCategoriaCampoFormCategoriaCampoListScreen.tsx';
 export { default as ViewCategoriaCampoListCategoriaCampoListScreen } from '../features/configuracoes/categoria-campo/ViewCategoriaCampoListCategoriaCampoListScreen.tsx';
 export { default as ViewCategoriaEstoqueListCategoriaListScreen } from '../features/configuracoes/categoria-estoque/ViewCategoriaEstoqueListCategoriaListScreen.tsx';
+export { default as ViewCategoriaEstoqueFormCategoriaListScreen } from '../features/configuracoes/categoria-estoque/ViewCategoriaEstoqueFormCategoriaListScreen.tsx';
 export { default as ViewCategoriaFormCategoriaListScreen } from '../features/configuracoes/categoria/ViewCategoriaFormCategoriaListScreen.tsx';
-export { default as ViewCategoriaListCategoriaListScreen } from '../features/configuracoes/categoria/ViewCategoriaListCategoriaListScreen.tsx';
 export { default as ViewChamadaAssinadaListChamadaAssinadaListScreen } from '../features/professor/ViewChamadaAssinadaListChamadaAssinadaListScreen.tsx';
 export { default as ViewCidadeFormCidadeListScreen } from '../features/configuracoes/cidade/ViewCidadeFormCidadeListScreen.tsx';
 export { default as ViewCidadeListCidadeListScreen } from '../features/configuracoes/cidade/ViewCidadeListCidadeListScreen.tsx';
@@ -86,6 +86,7 @@ export { default as ViewCompromissoListTipoCompromissoListScreen } from '../feat
 export { default as ViewComunicacaoFormComunicacaoListScreen } from '../features/notificacoes/ViewComunicacaoFormComunicacaoListScreen.tsx';
 export { default as ViewComunicacaoFormComunicacaoMensagemListScreen } from '../features/notificacoes/ViewComunicacaoFormComunicacaoMensagemListScreen.tsx';
 export { default as ViewComunicacaoListComunicacaoMensagemListScreen } from '../features/notificacoes/ViewComunicacaoListComunicacaoMensagemListScreen.tsx';
+export { default as ViewComunicacaoCadastroScreen } from '../features/notificacoes/ViewComunicacaoCadastroScreen.tsx';
 export { default as ViewConfiguracaoDocumentosListScreen } from '../features/configuracoes/configuracao/ViewConfiguracaoDocumentosListScreen.tsx';
 export { default as ViewConfiguracaoFinanceiraFormConfiguracaoFinanceiraListScreen } from '../features/configuracoes/configuracao/ViewConfiguracaoFinanceiraFormConfiguracaoFinanceiraListScreen.tsx';
 export { default as ViewConfiguracaoFinanceiraListConfiguracaoFinanceiraListScreen } from '../features/configuracoes/configuracao/ViewConfiguracaoFinanceiraListConfiguracaoFinanceiraListScreen.tsx';
@@ -156,6 +157,7 @@ export { default as ViewEstadoFormEstadoListScreen } from '../features/configura
 export { default as ViewEstadoListEstadoListScreen } from '../features/configuracoes/estado/ViewEstadoListEstadoListScreen.tsx';
 export { default as ViewEstoqueControleestoqueListScreen } from '../features/configuracoes/estoque/ViewEstoqueControleestoqueListScreen.tsx';
 export { default as ViewEstoqueEstoqueprodutoListScreen } from '../features/configuracoes/estoque/ViewEstoqueEstoqueprodutoListScreen.tsx';
+export { default as ViewEstoqueVendaProdutoListScreen } from '../features/configuracoes/estoque/ViewEstoqueVendaProdutoListScreen.tsx';
 export { default as ViewEstrategiaFormEstrategiaListScreen } from '../features/configuracoes/estrategia/ViewEstrategiaFormEstrategiaListScreen.tsx';
 export { default as ViewEstrategiaListEstrategiaListScreen } from '../features/configuracoes/estrategia/ViewEstrategiaListEstrategiaListScreen.tsx';
 export { default as ViewEstruturaFormEstruturaListScreen } from '../features/configuracoes/estrutura/ViewEstruturaFormEstruturaListScreen.tsx';
@@ -321,12 +323,8 @@ export { default as ViewResultadoLigacaoNapListResultadoLigacaoNapListScreen } f
 export { default as ViewResultadoListResultadoListScreen } from '../features/configuracoes/resultado/ViewResultadoListResultadoListScreen.tsx';
 export { default as ViewSalaFormSalaListScreen } from '../features/configuracoes/sala/ViewSalaFormSalaListScreen.tsx';
 export { default as ViewSalaListSalaListScreen } from '../features/configuracoes/sala/ViewSalaListSalaListScreen.tsx';
-
 export { default as ViewStatusCompromissoFormStatusCompromissoListScreen } from '../features/configuracoes/status-compromisso/ViewStatusCompromissoFormStatusCompromissoListScreen.tsx';
 export { default as ViewStatusCompromissoListStatusCompromissoListScreen } from '../features/configuracoes/status-compromisso/ViewStatusCompromissoListStatusCompromissoListScreen.tsx';
-export { default as ViewSubcategoriaEstoqueListSubCategoriaListScreen } from '../features/configuracoes/subcategoria/ViewSubcategoriaEstoqueListSubCategoriaListScreen.tsx';
-export { default as ViewSubCategoriaFormSubCategoriaListScreen } from '../features/configuracoes/subcategoria/ViewSubCategoriaFormSubCategoriaListScreen.tsx';
-export { default as ViewSubCategoriaListSubCategoriaListScreen } from '../features/configuracoes/subcategoria/ViewSubCategoriaListSubCategoriaListScreen.tsx';
 
 export { default as ViewTelefoneFormTelefoneListScreen } from '../features/configuracoes/telefone/ViewTelefoneFormTelefoneListScreen.tsx';
 export { default as ViewTelefoneListTelefoneListScreen } from '../features/configuracoes/telefone/ViewTelefoneListTelefoneListScreen.tsx';

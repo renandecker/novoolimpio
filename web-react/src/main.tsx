@@ -48,6 +48,7 @@ import {
     ViewCategoriaCampoFormCategoriaCampoListScreen,
     ViewCategoriaCampoListCategoriaCampoListScreen,
     ViewCategoriaEstoqueListCategoriaListScreen,
+    ViewCategoriaEstoqueFormCategoriaListScreen,
     ViewChamadaAssinadaListChamadaAssinadaListScreen,
     ViewCidadeFormCidadeListScreen,
     ViewCidadeListCidadeListScreen,
@@ -63,10 +64,11 @@ import {
     ViewCompromissoFormTipoCompromissoListScreen,
     ViewCompromissoListCompromissoListScreen,
     ViewCompromissoListTipoCompromissoListScreen,
-    ViewComunicacaoFormComunicacaoListScreen,
+ViewComunicacaoFormComunicacaoListScreen,
     ViewComunicacaoFormComunicacaoMensagemListScreen,
-ViewComunicacaoListComunicacaoListScreen,
+    ViewComunicacaoListComunicacaoListScreen,
     ViewComunicacaoListComunicacaoMensagemListScreen,
+    ViewComunicacaoCadastroScreen,
     ViewConfiguracaoFormConfiguracaoListScreen,
     ViewConfiguracaoFormConfiguracaoCaixaListScreen,
     ViewConfiguracaoFormConfiguracaoEmailListScreen,
@@ -124,6 +126,7 @@ ViewComunicacaoListComunicacaoListScreen,
     ViewEstadoCivilListEstadoCivilListScreen,
     ViewEstoqueControleestoqueListScreen,
     ViewEstoqueEstoqueprodutoListScreen,
+    ViewEstoqueVendaProdutoListScreen,
     ViewEstrategiaFormEstrategiaListScreen,
     ViewEstrategiaListEstrategiaListScreen,
     ViewEstruturaFormEstruturaListScreen,
@@ -294,9 +297,6 @@ ViewComunicacaoListComunicacaoListScreen,
 
     ViewStatusCompromissoFormStatusCompromissoListScreen,
     ViewStatusCompromissoListStatusCompromissoListScreen,
-    ViewSubcategoriaEstoqueListSubCategoriaListScreen,
-    ViewSubCategoriaFormSubCategoriaListScreen,
-    ViewSubCategoriaListSubCategoriaListScreen,
 
     ViewTelefoneFormTelefoneListScreen,
     ViewTelefoneListTelefoneListScreen,
@@ -472,8 +472,8 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/carga/formCarga" element={<ViewCargaFormCargaListScreen/>}/>
     <Route path="/view/carga/listCarga" element={<ViewCargaListCargaListScreen/>}/>
     <Route path="/view/categoria/formCategoria" element={<ViewCategoriaFormCategoriaListScreen/>}/>
-    <Route path="/view/categoria/listCategoria" element={<ViewCategoriaListCategoriaListScreen/>}/>
     <Route path="/view/categoriaEstoque/listCategoria" element={<ViewCategoriaEstoqueListCategoriaListScreen/>}/>
+    <Route path="/view/categoriaEstoque/formCategoria" element={<ViewCategoriaEstoqueFormCategoriaListScreen/>}/>
     <Route path="/view/categoriaCampo/formCategoriaCampo" element={<ViewCategoriaCampoFormCategoriaCampoListScreen/>}/>
     <Route path="/view/categoriaCampo/listCategoriaCampo" element={<ViewCategoriaCampoListCategoriaCampoListScreen/>}/>
     <Route path="/view/chamadaAssinada/listChamadaAssinada"
@@ -497,9 +497,10 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/comunicacao/formComunicacao" element={<ViewComunicacaoFormComunicacaoListScreen/>}/>
     <Route path="/view/comunicacao/formComunicacaoMensagem"
            element={<ViewComunicacaoFormComunicacaoMensagemListScreen/>}/>
-    <Route path="/view/comunicacao/listComunicacao" element={<ViewComunicacaoListComunicacaoListScreen/>}/>
+    <Route path="/view/comunicacao/listComunicacao" element={<ViewComunicacaoCadastroScreen/>}/>
     <Route path="/view/comunicacao/listComunicacaoMensagem"
            element={<ViewComunicacaoListComunicacaoMensagemListScreen/>}/>
+    <Route path="/view/comunicacao/cadastro" element={<ViewComunicacaoCadastroScreen/>}/>
     <Route path="/view/configuracao/formConfiguracao" element={<ViewConfiguracaoFormConfiguracaoListScreen/>}/>
     <Route path="/view/configuracao/formConfiguracaoCaixa"
            element={<ViewConfiguracaoFormConfiguracaoCaixaListScreen/>}/>
@@ -569,6 +570,7 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/estadoCivil/listEstadoCivil" element={<ViewEstadoCivilListEstadoCivilListScreen/>}/>
     <Route path="/view/estoque/controleestoque" element={<ViewEstoqueControleestoqueListScreen/>}/>
     <Route path="/view/estoque/estoqueproduto" element={<ViewEstoqueEstoqueprodutoListScreen/>}/>
+    <Route path="/view/estoque/vendaproduto" element={<ViewEstoqueVendaProdutoListScreen/>}/>
     <Route path="/view/estrategia/formEstrategia" element={<ViewEstrategiaFormEstrategiaListScreen/>}/>
     <Route path="/view/estrategia/listEstrategia" element={<ViewEstrategiaListEstrategiaListScreen/>}/>
     <Route path="/view/estrutura/formEstrutura" element={<ViewEstruturaFormEstruturaListScreen/>}/>
@@ -735,7 +737,8 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
     <Route path="/view/relatorios/listOrganograma" element={<ViewRelatoriosListOrganogramaListScreen/>}/>
     <Route path="/view/relatorios/listTabela" element={<ListTabelaScreen/>}/>
     <Route path="/view/relatorios/listIndicadorGauge" element={<ViewRelatoriosListIndicadorGaugeListScreen/>}/>
-    <Route path="/view/relatorios/viewDashboard" element={<ReportViewScreen/>}/>
+        <Route path="/view/relatorios/viewDashboard" element={<ReportViewScreen/>}/>
+        <Route path="/view/relatorios/viewPainel" element={<ReportViewScreen/>}/>
     <Route path="/view/relatorios/viewGraficoBarrasHorizontal" element={<ReportViewScreen/>}/>
     <Route path="/view/relatorios/viewGraficoBarrasVertical" element={<ReportViewScreen/>}/>
     <Route path="/view/relatorios/viewGraficoCircular" element={<ReportViewScreen/>}/>
@@ -769,10 +772,6 @@ createRoot(document.getElementById('root')!).render(<QueryClientProvider
             element={<ViewStatusCompromissoFormStatusCompromissoListScreen/>}/>
     <Route path="/view/statusCompromisso/listStatusCompromisso"
             element={<ViewStatusCompromissoListStatusCompromissoListScreen/>}/>
-    <Route path="/view/subCategoria/formSubCategoria" element={<ViewSubCategoriaFormSubCategoriaListScreen/>}/>
-    <Route path="/view/subCategoria/listSubCategoria" element={<ViewSubCategoriaListSubCategoriaListScreen/>}/>
-    <Route path="/view/subcategoriaEstoque/listSubCategoria"
-           element={<ViewSubcategoriaEstoqueListSubCategoriaListScreen/>}/>
 
     <Route path="/view/telefone/formTelefone" element={<ViewTelefoneFormTelefoneListScreen/>}/>
     <Route path="/view/telefone/listTelefone" element={<ViewTelefoneListTelefoneListScreen/>}/>

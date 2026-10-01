@@ -1,5 +1,5 @@
 ﻿import {DataTable} from './DataTable';
-import type {DataTableColumn} from './DataTable';
+import type {DataTableColumn, ComboSource} from './DataTable';
 import {MasterDetail} from './MasterDetail';
 import type {MasterDetailColumn} from './MasterDetail';
 import {UnidadeCombo} from './UnidadeCombo';
@@ -29,6 +29,7 @@ export interface ModuleTabItem {
     path?: string;
     params?: Record<string, unknown>;
     columns?: DataTableColumn[];
+    combos?: Record<string, ComboSource>;
     empty?: string;
     maxMainColumns?: number;
     editNavigateTo?: string;
@@ -66,20 +67,21 @@ export function ModuleTabs({tabs, initial}: { tabs: ModuleTabItem[]; initial?: s
     const items: TabItem[] = tabs.map((tab) => ({
         key: tab.key,
         label: tab.label,
-        content: tab.masterDetail ? (
-            <MasterDetailTab config={tab.masterDetail}/>
-        ) : tab.unidadeCombo ? (
-            <UnidadeComboTab config={tab.unidadeCombo}/>
-        ) : tab.path ? (
-            <DataTable
-                path={tab.path}
-                params={tab.params}
-                columns={tab.columns}
-                maxMainColumns={tab.maxMainColumns}
-                editNavigateTo={tab.editNavigateTo}
-                createNavigateTo={tab.createNavigateTo}
-            />
-        ) : (
+content: tab.masterDetail ? (
+                <MasterDetailTab config={tab.masterDetail}/>
+            ) : tab.unidadeCombo ? (
+                <UnidadeComboTab config={tab.unidadeCombo}/>
+            ) : tab.path ? (
+                <DataTable
+                    path={tab.path}
+                    params={tab.params}
+                    columns={tab.columns}
+                    combos={tab.combos}
+                    maxMainColumns={tab.maxMainColumns}
+                    editNavigateTo={tab.editNavigateTo}
+                    createNavigateTo={tab.createNavigateTo}
+                />
+            ) : (
             <p className="master-detail-empty">{tab.empty ?? 'Sem conteúdo nesta aba.'}</p>
         ),
     }));

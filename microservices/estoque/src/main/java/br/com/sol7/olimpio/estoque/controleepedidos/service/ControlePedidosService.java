@@ -135,6 +135,9 @@ public class ControlePedidosService {
     }
 
     private Uni<List<ControlePedidosResponse>> enrichResponses(List<ControlePedidosResponse> responses) {
+        if (responses.isEmpty()) {
+            return Uni.createFrom().item(List.of());
+        }
         List<Uni<ControlePedidosResponse>> unis = responses.stream().map(this::enrichSingleResponse).toList();
         return Uni.join().all(unis).andFailFast();
     }

@@ -2,9 +2,9 @@ import React, {useState, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {ModuleList} from '../ModuleListScreen';
 import type {ModuleListExtraAction} from '../ModuleListScreen';
-import {ReportFilters} from '../shared/components/ReportFilters';
-import type {FiltroRelatorioWrapper} from '../shared/types/types';
-import {api} from '../shared/services/api';
+import {ReportFilters} from '../../shared/components/ReportFilters';
+import type {FiltroRelatorioWrapper} from '../../shared/types/types';
+import {api} from '../../shared/services/api';
 
 export default function ViewRelatoriosListIndicadorGaugeListScreen() {
     const navigation = useNavigation();

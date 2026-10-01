@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import { api } from '../../shared/services/api';
 import { GaugeChart, type GaugeConfig } from './GaugeChart';
+import { ReportFilters } from '../../shared/components/ReportFilters';
+import type { FiltroRelatorioWrapper, ReportFilterSqlValues } from '../../shared/types/types';
 
 const DEFAULT_CONFIG: GaugeConfig = {
     nrOfLevels: 3,
@@ -63,18 +65,39 @@ export default function ViewRelatoriosViewIndicadorGaugeScreen({
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [filtros, setFiltros] = useState<FiltroRelatorioWrapper[]>([]);
+    const [filtrosAplicados, setFiltrosAplicados] = useState<ReportFilterSqlValues | undefined>(undefined);
 
-    const fetchGaugeData = useCallback(async (sql: string) => {
+    const fetchGaugeData = useCallback(async (sql: string, filtros?: ReportFilterSqlValues) => {
         setRefreshing(true);
         try {
-            const resp = await api.post<GaugeData>('/api/relatorios/indicador-gauge/executar', { sql });
+            const resp = await api.post<GaugeData>('/api/relatorios/indicador-gauge/executar', {
+                sql,
+                ...(id != null ? { indicadorGaugeId: Number(id) } : {}),
+                ...(filtros && Object.keys(filtros).length > 0 ? { filtros } : {}),
+            });
             setGaugeData(resp.data);
         } catch (err) {
             console.error('Erro ao buscar dados do gauge:', err);
         } finally {
             setRefreshing(false);
         }
-    }, []);
+    }, [id]);
+
+    useEffect(() => {
+        if (id == null) return;
+        let ativo = true;
+        api.get<FiltroRelatorioWrapper[]>('/api/relatorios/filtros/viewIndicadorGauge', {
+            params: { indicadorGaugeId: id },
+        })
+            .then((resp) => {
+                if (ativo) setFiltros(resp.data);
+            })
+            .catch((err) => {
+                console.error('Erro ao carregar filtros do indicador:', err);
+            });
+        return () => { ativo = false; };
+    }, [id]);
 
     useEffect(() => {
         if (id == null) {
@@ -88,7 +111,7 @@ export default function ViewRelatoriosViewIndicadorGaugeScreen({
                 setIndicador(data);
                 setConfig(parseConfiguracao(data.configuracao));
                 if (data.sql) {
-                    fetchGaugeData(data.sql);
+                    fetchGaugeData(data.sql, filtrosAplicados);
                 }
             })
             .catch((err) => {
@@ -96,10 +119,10 @@ export default function ViewRelatoriosViewIndicadorGaugeScreen({
                 setError('Erro ao carregar o indicador.');
             })
             .finally(() => setLoading(false));
-    }, [id, fetchGaugeData]);
+    }, [id, filtrosAplicados, fetchGaugeData]);
 
     const handleRefresh = () => {
-        if (indicador?.sql) fetchGaugeData(indicador.sql);
+        if (indicador?.sql) fetchGaugeData(indicador.sql, filtrosAplicados);
     };
 
     if (loading) {
@@ -142,6 +165,18 @@ export default function ViewRelatoriosViewIndicadorGaugeScreen({
                 }
                 contentContainerStyle={styles.content}
             >
+                {filtros.length > 0 && (
+                    <View style={styles.filtersBox}>
+                        <ReportFilters
+                            filtros={filtros}
+                            onFiltersChange={setFiltros}
+                            onApplyFilters={(valores) => {
+                                setFiltrosAplicados(valores && Object.keys(valores).length > 0 ? valores : undefined);
+                            }}
+                        />
+                    </View>
+                )}
+
                 <View style={styles.gaugeBox}>
                     <GaugeChart
                         config={config}
@@ -318,6 +353,10 @@ const styles = StyleSheet.create({
     gaugeBox: {
         alignItems: 'center',
         paddingVertical: 20,
+    },
+    filtersBox: {
+        paddingHorizontal: 16,
+        paddingTop: 12,
     },
     section: {
         paddingHorizontal: 16,

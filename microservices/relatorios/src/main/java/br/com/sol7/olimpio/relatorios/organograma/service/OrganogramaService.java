@@ -3,8 +3,10 @@ package br.com.sol7.olimpio.relatorios.organograma.service;
 import io.quarkus.cache.CacheInvalidate;
 import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheResult;
+import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.relatorios.shared.FiltroSqlBuilder;
 import br.com.sol7.olimpio.relatorios.organograma.repository.OrganogramaRepository;
 import br.com.sol7.olimpio.relatorios.organograma.entity.Organograma;
 import br.com.sol7.olimpio.relatorios.organograma.dto.OrganogramaRequest;
@@ -50,6 +52,17 @@ public class OrganogramaService {
 
     public static final List<String> DIRECOES_VALIDAS = List.of("HORIZONTAL", "VERTICAL", "TOGGLE_REVERSE");
     private static final String DIRECAO_PADRAO = "VERTICAL";
+
+    /**
+     * Campos lidos por FiltroSqlBuilder: os filtros do organograma são vinculados por
+     * rel_filtro_organograma e a coluna vem da dimensao associada (rel_coluna).
+     */
+    private static final String SQL_FILTROS_ORGANOGRAMA = "SELECT f.nome AS nome, dc.coluna AS coluna, f.tipo_filtro AS tipo_filtro, f.operacao AS operacao, f.data_inicio AS data_inicio, f.data_fim AS data_fim, f.periodo_dinamico AS periodo_dinamico, f.valor_fixo AS valor_fixo " +
+            "FROM rel_filtro f " +
+            "JOIN rel_filtro_organograma fo ON fo.id_filtro = f.id " +
+            "LEFT JOIN rel_dimensao d ON d.id = f.id_dimensao " +
+            "LEFT JOIN rel_coluna dc ON dc.id = d.id_coluna " +
+            "WHERE fo.id_organograma = ?1";
 
     public Uni<List<OrganogramaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -149,6 +162,40 @@ public class OrganogramaService {
      */
     public Uni<OrganogramaDadosResponse> dados(Long id) {
         return self.dadosCacheado(id, mesReferenciaAtual());
+    }
+
+    /**
+     * Executa o SQL do organograma aplicando os filtros enviados pela tela
+     * ({ nome do filtro -> { operation, value, value2 } }). Como o resultado depende dos
+     * valores escolhidos, não passa pelo cache mensal (que é para a execução sem filtros).
+     */
+    public Uni<OrganogramaDadosResponse> dados(Long id, Map<String, Object> filtros) {
+        if (filtros == null || filtros.isEmpty()) {
+            return dados(id);
+        }
+        return repository.findById(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Organograma not found"))
+                .onItem().transformToUni(e -> fragmentoFiltros(id, filtros)
+                        .chain(fragmento -> {
+                            validarSql(e.sql);
+                            return pool.query(aplicarFiltros(e.sql, fragmento)).execute()
+                                    .map(rowSet -> montarResposta(e, rowSet));
+                        }));
+    }
+
+    private Uni<String> fragmentoFiltros(Long organogramaId, Map<String, Object> filtros) {
+        if (filtros == null || filtros.isEmpty() || organogramaId == null) return Uni.createFrom().item("");
+        return Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_FILTROS_ORGANOGRAMA, jakarta.persistence.Tuple.class)
+                        .setParameter(1, organogramaId).getResultList())
+                .map(configFiltros -> FiltroSqlBuilder.montarFiltroSql(configFiltros, filtros));
+    }
+
+    private String aplicarFiltros(String sql, String fragmento) {
+        String base = sql.trim();
+        while (base.endsWith(";")) base = base.substring(0, base.length() - 1).trim();
+        if (fragmento == null || fragmento.isBlank()) return base;
+        return "SELECT * FROM (" + base + ") _filtros WHERE " + fragmento;
     }
 
     @CacheResult(cacheName = CACHE_ORGANOGRAMA_DADOS)

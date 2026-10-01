@@ -279,3 +279,21 @@ export const GRUPO_COLUMNS: MasterDetailColumn[] = [
     {key: 'descricao', label: 'Descrição'},
 ];
 export const GRUPO_SEARCH = ['descricao'];
+
+export const PROFESSOR_SOURCE = '/api/educacao/professor';
+export const PROFESSOR_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'ID do Professor'},
+    {key: 'nome', label: 'Nome'},
+    {key: 'cpf', label: 'CPF'},
+    {key: 'email', label: 'E-mail'},
+];
+export const PROFESSOR_SEARCH = ['nome', 'cpf', 'email'];
+
+export const ALUNO_SOURCE = '/api/educacao/aluno';
+export const ALUNO_COLUMNS: MasterDetailColumn[] = [
+    {key: 'id', label: 'ID do Aluno'},
+    {key: 'nome', label: 'Nome'},
+    {key: 'cpf', label: 'CPF'},
+    {key: 'email', label: 'E-mail'},
+];
+export const ALUNO_SEARCH = ['nome', 'cpf', 'email'];

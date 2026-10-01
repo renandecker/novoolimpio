@@ -1,8 +1,7 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+﻿import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
-
-
-import {X} from 'lucide-react';
+import {X, Plus} from 'lucide-react';
+import {ProdutoSelectionModal} from '../produto/ProdutoSelectionModal';
 
 import {useNavigate, useSearchParams} from 'react-router-dom';
 
@@ -230,7 +229,7 @@ const semId = (obj: Record<string, unknown> | null): Record<string, unknown> => 
 
 const TIPOS_CURSO = [
 
-    {id: 1, descricao: 'Técnico'},
+    {id: 1, descricao: 'TÃ©cnico'},
 
     {id: 2, descricao: 'Superior'},
 
@@ -246,11 +245,11 @@ const GRAUS = [
 
     {id: 1, descricao: 'Fundamental'},
 
-    {id: 2, descricao: 'Médio'},
+    {id: 2, descricao: 'MÃ©dio'},
 
-    {id: 3, descricao: 'Superior de Graduação'},
+    {id: 3, descricao: 'Superior de GraduaÃ§Ã£o'},
 
-    {id: 4, descricao: 'Pós-Graduação'},
+    {id: 4, descricao: 'PÃ³s-GraduaÃ§Ã£o'},
 
 ];
 
@@ -262,15 +261,15 @@ const ESCOLARIDADES = [
 
     {id: 2, descricao: 'Ensino Fundamental Completo'},
 
-    {id: 3, descricao: 'Ensino Médio Incompleto'},
+    {id: 3, descricao: 'Ensino MÃ©dio Incompleto'},
 
-    {id: 4, descricao: 'Ensino Médio Completo'},
+    {id: 4, descricao: 'Ensino MÃ©dio Completo'},
 
     {id: 5, descricao: 'Superior Incompleto'},
 
     {id: 6, descricao: 'Superior Completo'},
 
-    {id: 7, descricao: 'Pós-Graduação'},
+    {id: 7, descricao: 'PÃ³s-GraduaÃ§Ã£o'},
 
 ];
 
@@ -308,7 +307,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
     const [novoRequisitoComponenteId, setNovoRequisitoComponenteId] = useState<number | ''>('');
 
-    const [novoRequisitoTipo, setNovoRequisitoTipo] = useState('PRÉ-REQUISITO');
+    const [novoRequisitoTipo, setNovoRequisitoTipo] = useState('PRÃ‰-REQUISITO');
 
     const [novoRequisitoCarga, setNovoRequisitoCarga] = useState<number | ''>('');
 
@@ -323,6 +322,8 @@ export default function ViewCurriculoFormCurriculoListScreen() {
     const [unidades, setUnidades] = useState<{ id: number; label: string } | null>(null);
 
     const [materialEscolar, setMaterialEscolar] = useState<MaterialEscolarItem[]>([]);
+
+    const [produtoModalOpen, setProdutoModalOpen] = useState(false);
 
     const [requisitos, setRequisitos] = useState<RequisitoItem[]>([]);
 
@@ -476,7 +477,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
                                 id: r.id,
                                 descricao: r.nome ?? r.descricao ?? '',
                                 componenteCurricularId: r.componenteCurricularId ?? r.componente_curricular_id,
-                                tipoRequisito: r.tipoRequisito ?? r.tipo_requisito ?? 'PRÉ-REQUISITO',
+                                tipoRequisito: r.tipoRequisito ?? r.tipo_requisito ?? 'PRÃ‰-REQUISITO',
                                 cargaHorariaMinima: r.cargaHorariaMinima ?? r.carga_horaria_minima,
                                 mediaMinima: r.mediaMinima ?? r.media_minima,
                             }));
@@ -487,9 +488,9 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                     } catch (erro) {
 
-                        console.error('Erro ao carregar currículo:', erro);
+                        console.error('Erro ao carregar currÃ­culo:', erro);
 
-                        alert('Não foi possível carregar o currículo para edição');
+                        alert('NÃ£o foi possÃ­vel carregar o currÃ­culo para ediÃ§Ã£o');
 
                     }
 
@@ -511,13 +512,13 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
         if (!currentData.entity.descricao || currentData.entity.descricao.trim().length < 3) {
 
-            return 'Descrição deve ter pelo menos 3 caracteres';
+            return 'DescriÃ§Ã£o deve ter pelo menos 3 caracteres';
 
         }
 
         if (!currentData.entity.sucinto || currentData.entity.sucinto.trim().length < 1) {
 
-            return 'Informe o sucinto do currículo';
+            return 'Informe o sucinto do currÃ­culo';
 
         }
 
@@ -525,13 +526,13 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
             currentData.entity.idadeMaxima < currentData.entity.idadeMinima) {
 
-            return 'A idade mínima não pode ser maior que a idade máxima';
+            return 'A idade mÃ­nima nÃ£o pode ser maior que a idade mÃ¡xima';
 
         }
 
         if (currentData.entity.qtdMaximaAlunos !== undefined && currentData.entity.qtdMaximaAlunos < 0) {
 
-            return 'A quantidade máxima de alunos não pode ser negativa';
+            return 'A quantidade mÃ¡xima de alunos nÃ£o pode ser negativa';
 
         }
 
@@ -545,7 +546,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
         if (!currentData.matrizCurricular || currentData.matrizCurricular.length === 0) {
 
-            return 'Adicione pelo menos um componente curricular à matriz';
+            return 'Adicione pelo menos um componente curricular Ã  matriz';
 
         }
 
@@ -559,7 +560,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
         if (!currentData.unidades?.id) {
 
-            return 'Selecione uma unidade para o currículo';
+            return 'Selecione uma unidade para o currÃ­culo';
 
         }
 
@@ -607,6 +608,22 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
 
 
+
+
+    const handleProdutoSelecionado = useCallback((produto: ApiItem) => {
+        setMaterialEscolar((prev) => [
+            ...prev,
+            {
+                key: `mat-${Date.now()}-${prev.length}`,
+                produtoId: produto.id,
+                produtoDescricao: produto.nome,
+                quantidade: 1,
+                valorUnitario: (produto as Record<string, unknown>).valor ? Number((produto as Record<string, unknown>).valor) : undefined,
+                obrigatorio: true,
+            },
+        ]);
+        setProdutoModalOpen(false);
+    }, []);
     const removerMaterial = useCallback((key: string) => {
 
         setMaterialEscolar((prev) => prev.filter((m) => m.key !== key));
@@ -617,7 +634,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
     const adicionarRequisito = useCallback(() => {
 
-        if (!novoRequisitoDescricao.trim()) { alert('Informe a descrição do requisito'); return; }
+        if (!novoRequisitoDescricao.trim()) { alert('Informe a descriÃ§Ã£o do requisito'); return; }
 
         setRequisitos((prev) => [
 
@@ -645,7 +662,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
         setNovoRequisitoComponenteId('');
 
-        setNovoRequisitoTipo('PRÉ-REQUISITO');
+        setNovoRequisitoTipo('PRÃ‰-REQUISITO');
 
         setNovoRequisitoCarga('');
 
@@ -687,7 +704,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
             const id = (salvo as any)?.id ?? edicaoId;
 
-            if (!id) { alert('Currículo salvo, mas o identificador não foi retornado.'); return; }
+            if (!id) { alert('CurrÃ­culo salvo, mas o identificador nÃ£o foi retornado.'); return; }
 
 
 
@@ -849,7 +866,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
 
 
-            alert('Currículo salvo com sucesso!');
+            alert('CurrÃ­culo salvo com sucesso!');
 
             if (continuar) {
 
@@ -865,7 +882,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
             console.error('Erro ao salvar:', error);
 
-            alert('Erro ao salvar currículo');
+            alert('Erro ao salvar currÃ­culo');
 
         } finally {
 
@@ -903,7 +920,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                     <label className="form-field">
 
-                        <span className="form-label">Descrição *</span>
+                        <span className="form-label">DescriÃ§Ã£o *</span>
 
                         <input className="form-input" value={data.entity.descricao ?? ''}
 
@@ -989,7 +1006,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                     <label className="form-field">
 
-                        <span className="form-label">Carga Horária</span>
+                        <span className="form-label">Carga HorÃ¡ria</span>
 
                         <input className="form-input" type="number" min={0}
 
@@ -1007,7 +1024,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                     <label className="form-field">
 
-                        <span className="form-label">Qtd. Máxima Alunos</span>
+                        <span className="form-label">Qtd. MÃ¡xima Alunos</span>
 
                         <input className="form-input" type="number" min={0}
 
@@ -1025,7 +1042,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                     <label className="form-field">
 
-                        <span className="form-label">Idade Mínima</span>
+                        <span className="form-label">Idade MÃ­nima</span>
 
                         <input className="form-input" type="number" min={0}
 
@@ -1043,7 +1060,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                     <label className="form-field">
 
-                        <span className="form-label">Idade Máxima</span>
+                        <span className="form-label">Idade MÃ¡xima</span>
 
                         <input className="form-input" type="number" min={0}
 
@@ -1105,7 +1122,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                     <div className="form-field">
 
-                        <span className="form-label">Possui Rematrícula</span>
+                        <span className="form-label">Possui RematrÃ­cula</span>
 
                         <BooleanField value={!!data.entity.possuiRematricula}
 
@@ -1123,7 +1140,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
             key: 'licenca',
 
-            label: 'Licença',
+            label: 'LicenÃ§a',
 
             content: (
 
@@ -1131,7 +1148,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                     <label className="form-field">
 
-                        <span className="form-label">Número do Parecer</span>
+                        <span className="form-label">NÃºmero do Parecer</span>
 
                         <input className="form-input" value={data.entity.numeroParecer ?? ''}
 
@@ -1141,7 +1158,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                     <label className="form-field">
 
-                        <span className="form-label">Licença</span>
+                        <span className="form-label">LicenÃ§a</span>
 
                         <input className="form-input" value={data.entity.licenca ?? ''}
 
@@ -1161,7 +1178,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                     <label className="form-field">
 
-                        <span className="form-label">Escolaridade Mínima</span>
+                        <span className="form-label">Escolaridade MÃ­nima</span>
 
                         <select className="form-input form-select"
 
@@ -1189,7 +1206,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                     <label className="form-field">
 
-                        <span className="form-label">Descrição Diploma</span>
+                        <span className="form-label">DescriÃ§Ã£o Diploma</span>
 
                         <input className="form-input"
 
@@ -1293,7 +1310,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                                 <div className="form-field">
 
-                                    <span className="form-label">Habilitar Aula Complementar na Criação</span>
+                                    <span className="form-label">Habilitar Aula Complementar na CriaÃ§Ã£o</span>
 
                                     <BooleanField value={!!data.entity.aulaComplementarCriacao}
 
@@ -1345,7 +1362,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                                                        })}/>
 
-                                                Existente / Criação
+                                                Existente / CriaÃ§Ã£o
 
                                             </label>
 
@@ -1363,7 +1380,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                                                        })}/>
 
-                                                Criação / Existente
+                                                CriaÃ§Ã£o / Existente
 
                                             </label>
 
@@ -1461,7 +1478,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
                         <label className="form-field">
 
-                            <span className="form-label">Carga Horária Total do Curso</span>
+                            <span className="form-label">Carga HorÃ¡ria Total do Curso</span>
 
                             <input className="form-input" disabled value={matriz.reduce((acc, m: any) => acc + (Number(m.cargaHoraria) || 0), 0)}/>
 
@@ -1775,7 +1792,7 @@ key: 'unidades',
 
                         <label className="form-field">
 
-                            <span className="form-label">Valor Unitário</span>
+                            <span className="form-label">Valor UnitÃ¡rio</span>
 
                             <input className="form-input" type="number" min={0} step={0.01}
 
@@ -1791,7 +1808,7 @@ key: 'unidades',
 
                         <div className="form-field">
 
-                            <span className="form-label">Obrigatório</span>
+                            <span className="form-label">ObrigatÃ³rio</span>
 
                             <BooleanField value={novoMaterialObrigatorio} onChange={setNovoMaterialObrigatorio}/>
 
@@ -1799,7 +1816,7 @@ key: 'unidades',
 
                     </div>
 
-                    <div className="form-buttons" style={{borderTop: 'none', marginTop: 8}}>
+                    <div className="form-buttons" style={{borderTop: 'none', marginTop: 8, display: 'flex', gap: 8}}>
 
                         <button type="button" className="btnblue" onClick={adicionarMaterial}>
 
@@ -1807,7 +1824,19 @@ key: 'unidades',
 
                         </button>
 
+                        <button type="button" className="btnstop" onClick={() => setProdutoModalOpen(true)}>
+
+                            <Plus className="icon" style={{marginRight: 4}}/> Selecionar Produto
+
+                        </button>
+
                     </div>
+
+                    <ProdutoSelectionModal
+                        isOpen={produtoModalOpen}
+                        onClose={() => setProdutoModalOpen(false)}
+                        onSelect={handleProdutoSelecionado}
+                    />
 
                     {materialEscolar.length > 0 ? (
 
@@ -1821,9 +1850,9 @@ key: 'unidades',
 
                                 <th>Quantidade</th>
 
-                                <th>Valor Unitário</th>
+                                <th>Valor UnitÃ¡rio</th>
 
-                                <th>Obrigatório</th>
+                                <th>ObrigatÃ³rio</th>
 
                                 <th style={{width: 50}}></th>
 
@@ -1843,7 +1872,7 @@ key: 'unidades',
 
                                     <td>{m.valorUnitario !== undefined ? m.valorUnitario.toFixed(2) : '-'}</td>
 
-                                    <td>{m.obrigatorio ? 'Sim' : 'Não'}</td>
+                                    <td>{m.obrigatorio ? 'Sim' : 'NÃ£o'}</td>
 
                                     <td>
 
@@ -1909,7 +1938,7 @@ key: 'unidades',
 
                         <label className="form-field">
 
-                            <span className="form-label">Tipo Modelo Promissória</span>
+                            <span className="form-label">Tipo Modelo PromissÃ³ria</span>
 
                             <input className="form-input" type="number" min={0}
 
@@ -2005,7 +2034,7 @@ key: 'unidades',
 
                         <label className="form-field">
 
-                            <span className="form-label">Template Promissória</span>
+                            <span className="form-label">Template PromissÃ³ria</span>
 
                             <textarea className="form-input" rows={4}
 
@@ -2037,7 +2066,7 @@ key: 'unidades',
 
                 <main>
 
-                    <h1>Currículo do Curso</h1>
+                    <h1>CurrÃ­culo do Curso</h1>
 
                     <div className="div_form">
 
@@ -2061,13 +2090,13 @@ key: 'unidades',
 
             <main>
 
-                <h1>{edicaoId ? `Editar Currículo #${edicaoId}` : 'Currículo do Curso'}</h1>
+                <h1>{edicaoId ? `Editar CurrÃ­culo #${edicaoId}` : 'CurrÃ­culo do Curso'}</h1>
 
                 <div className="div_form">
 
                     <div className="form-title">
 
-                        {edicaoId ? `Currículo #${edicaoId}` : 'Novo Currículo'}
+                        {edicaoId ? `CurrÃ­culo #${edicaoId}` : 'Novo CurrÃ­culo'}
 
                     </div>
 
@@ -2116,4 +2145,7 @@ key: 'unidades',
     );
 
 }
+
+
+
 

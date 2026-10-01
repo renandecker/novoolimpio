@@ -11,6 +11,7 @@ import {useState} from 'react';
 import {api} from '../../../shared/services/api';
 
 import ViewConsultorMatriculaLayoutScreen from './ViewConsultorMatriculaLayoutScreen';
+import ViewConsultorRematriculaScreen from './ViewConsultorRematriculaScreen';
 
 
 
@@ -396,55 +397,7 @@ function RematriculaWizardScreen() {
 
             <h3>Rematrícula</h3>
 
-            <Wizard
-
-                steps={[
-
-                    {
-
-                        key: 'contrato',
-
-                        label: 'Contrato',
-
-                        content: <DataTable path="/api/educacao/contrato" columns={CONTRATO_COLUMNS} hideCreate={true} />,
-
-                    },
-
-                    {
-
-                        key: 'matricula',
-
-                        label: 'Matrícula / Rematrícula',
-
-                        content: <DataTable path="/api/educacao/matricula" columns={MATRICULA_COLUMNS} hideCreate={true} />,
-
-                    },
-
-                    {
-
-                        key: 'material',
-
-                        label: 'Material',
-
-                        content: <DataTable path="/api/estoque/venda-produto" columns={MATERIAL_COLUMNS} hideCreate={true} />,
-
-                    },
-
-                    {
-
-                        key: 'valores',
-
-                        label: 'Valores',
-
-                        nextLabel: 'Salvar',
-
-                        content: <DataTable path="/api/educacao/valor-curso" columns={VALORES_COLUMNS} hideCreate={true} />,
-
-                    },
-
-                ]}
-
-            />
+            <ViewConsultorRematriculaScreen/>
 
         </div>
 

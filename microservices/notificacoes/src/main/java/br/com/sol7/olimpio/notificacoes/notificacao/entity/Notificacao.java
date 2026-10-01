@@ -58,6 +58,9 @@ public class Notificacao extends PanacheEntityBase {
     @Column(name = "canal_whatsapp", nullable = false)
     public boolean canalWhatsapp = false;
 
+    @Column(name = "canal_notificacao", nullable = false)
+    public boolean canalNotificacao = true;
+
     @Column(name = "email_enviado", nullable = false)
     public boolean emailEnviado = false;
 
@@ -72,6 +75,9 @@ public class Notificacao extends PanacheEntityBase {
 
     @Column(name = "whatsapp_enviado", nullable = false)
     public boolean whatsappEnviado = false;
+
+    @Column(name = "notificacao_enviada", nullable = false)
+    public boolean notificacaoEnviada = false;
 
     @Column(name = "data_leitura")
     public OffsetDateTime dataLeitura;

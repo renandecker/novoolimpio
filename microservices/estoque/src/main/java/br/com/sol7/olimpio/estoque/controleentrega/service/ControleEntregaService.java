@@ -99,6 +99,9 @@ public class ControleEntregaService {
     }
 
     private Uni<List<ControleEntregaResponse>> enrichResponses(List<ControleEntregaResponse> responses) {
+        if (responses.isEmpty()) {
+            return Uni.createFrom().item(List.of());
+        }
         List<Uni<ControleEntregaResponse>> unis = responses.stream().map(this::enrichSingleResponse).toList();
         return Uni.join().all(unis).andFailFast();
     }

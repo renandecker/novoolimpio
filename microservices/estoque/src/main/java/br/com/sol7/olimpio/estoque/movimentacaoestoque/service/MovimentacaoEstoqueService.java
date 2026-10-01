@@ -179,6 +179,9 @@ public class MovimentacaoEstoqueService {
     }
 
     private Uni<List<MovimentacaoEstoqueResponse>> enrichResponses(List<MovimentacaoEstoqueResponse> responses) {
+        if (responses.isEmpty()) {
+            return Uni.createFrom().item(List.of());
+        }
         List<Uni<MovimentacaoEstoqueResponse>> unis = responses.stream().map(this::enrichSingleResponse).toList();
         return Uni.join().all(unis).andFailFast();
     }

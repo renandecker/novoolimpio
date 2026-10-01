@@ -54,6 +54,6 @@ public class IndicadorGaugeController {
     @POST
     @Path("/executar")
     public Uni<IndicadorGaugeService.IndicadorGaugeExecucaoResponse> executar(@Valid IndicadorGaugeExecutarRequest request) {
-        return service.executar(request.sql());
+        return service.executar(request.sql(), request.indicadorGaugeId(), request.filtros());
     }
 }

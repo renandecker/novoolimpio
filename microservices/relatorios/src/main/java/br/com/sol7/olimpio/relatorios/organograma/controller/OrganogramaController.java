@@ -1,6 +1,7 @@
 package br.com.sol7.olimpio.relatorios.organograma.controller;
 
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.relatorios.shared.FiltrosQueryParam;
 import br.com.sol7.olimpio.relatorios.organograma.service.OrganogramaService;
 import br.com.sol7.olimpio.relatorios.organograma.dto.OrganogramaRequest;
 import br.com.sol7.olimpio.relatorios.organograma.dto.OrganogramaResponse;
@@ -44,8 +45,8 @@ public class OrganogramaController {
      */
     @GET
     @Path("/{id}/dados")
-    public Uni<OrganogramaDadosResponse> dados(@PathParam("id") Long id) {
-        return service.dados(id);
+    public Uni<OrganogramaDadosResponse> dados(@PathParam("id") Long id, @QueryParam("filtros") String filtrosJson) {
+        return service.dados(id, FiltrosQueryParam.parse(filtrosJson));
     }
 
     @POST

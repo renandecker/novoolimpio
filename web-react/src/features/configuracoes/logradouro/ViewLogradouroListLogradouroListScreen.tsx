@@ -126,7 +126,7 @@ export default function ViewLogradouroListLogradouroListScreen() {
 
                             key: 'atualizar',
 
-                            title: 'Atualizar logradouro',
+                            title: 'Atualiza',
 
                             className: 'btnblack',
 
@@ -142,7 +142,7 @@ export default function ViewLogradouroListLogradouroListScreen() {
 
                             key: 'troca',
 
-                            title: 'Troca e remove logradouro',
+                            title: 'Troca/Remove',
 
                             className: 'btnorange',
 

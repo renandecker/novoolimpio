@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import type {FiltroRelatorioWrapper, FilterDimensionType, TempoFilterState, DescritivoFilterState, FixoFilterState, FilterState, QueryOperation, FiltroRelatorio, ReportFilterSqlValues} from '../types/types';
 import {STRING_OPERATIONS} from '../types/types';
+import {api} from '../services/api';
 import {Modal} from './Modal';
 import {BooleanField} from './BooleanField';
 

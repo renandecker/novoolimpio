@@ -179,4 +179,43 @@ public class FiltrosController {
         return service.getFiltersForListGrafico();
     }
 
+    @GET
+    @Path("/viewOrganograma")
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewOrganograma(@QueryParam("organogramaId") Long organogramaId) {
+        if (organogramaId == null) {
+            return Uni.createFrom().item(List.of());
+        }
+        return service.getFiltersForViewOrganograma(organogramaId);
+    }
+
+    @GET
+    @Path("/viewPainel")
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewPainel(@QueryParam("painelId") Long painelId) {
+        if (painelId == null) {
+            return Uni.createFrom().item(List.of());
+        }
+        return service.getFiltersForViewPainel(painelId);
+    }
+
+    @GET
+    @Path("/viewDashboard")
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewDashboard(@QueryParam("painelId") Long painelId) {
+        return getFiltersForViewPainel(painelId);
+    }
+
+    @GET
+    @Path("/viewIndicadorGauge")
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewIndicadorGauge(@QueryParam("indicadorGaugeId") Long indicadorGaugeId) {
+        if (indicadorGaugeId == null) {
+            return Uni.createFrom().item(List.of());
+        }
+        return service.getFiltersForViewIndicadorGauge(indicadorGaugeId);
+    }
+
+    @GET
+    @Path("/listIndicadorGauge")
+    public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForListIndicadorGauge() {
+        return service.getFiltersForListIndicadorGauge();
+    }
+
 }

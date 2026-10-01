@@ -42,6 +42,9 @@ public class EstoqueProdutoService {
                     var responses = items.stream().map(ce -> new ControleEstoqueResponse(
                             ce.id, ce.valor, ce.quantidade, ce.qtdeSolicitado, ce.qtdeDefeito, ce.qtdeFalta,
                             ce.qtdeNaoEncontrado, ce.qtdeReservado, ce.qtdeAprovadoNaoEntregue, ce.produtoId, ce.unidadeId)).toList();
+                    if (responses.isEmpty()) {
+                        return Uni.createFrom().item(List.of());
+                    }
                     List<Uni<ControleEstoqueResponse>> unis = responses.stream().map(this::enrichControleResponse).toList();
                     return Uni.join().all(unis).andCollectFailures();
                 });

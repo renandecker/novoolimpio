@@ -45,7 +45,7 @@ export interface FormLayoutProps {
 
 export function FormLayout({
     title,
-    tabs,
+    tabs = [],
     initialValues = {},
     onSubmit,
     onCancel,
@@ -75,31 +75,66 @@ export function FormLayout({
     };
 
     const handleSubmit = () => {
-        onSubmit(values);
+        onSubmit?.(values);
     };
 
-    const tabItems: TabItem[] = tabs.map((tab) => ({
-        key: tab.key,
-        label: tab.label,
-        content: tab.content ?? (
-            <>
-                {(tab.fields ?? []).length > 0 && (
-                    <div className="form-grid">
-                        {(tab.fields ?? []).map((field) => (
-                            <label key={field.name} className="form-field">
-                                <span className="form-label">
-                                    {field.label} {field.required && <span style={{color: '#C90000', marginLeft: '2px'}}>*</span>}
-                                </span>
-                                {renderField(field, handleChange, values[field.name])}
-                            </label>
-                        ))}
+    // If tabs are provided, use the tab-based layout
+    if (tabs.length > 0) {
+        const tabItems: TabItem[] = tabs.map((tab) => ({
+            key: tab.key,
+            label: tab.label,
+            content: tab.content ?? (
+                <>
+                    {(tab.fields ?? []).length > 0 && (
+                        <div className="form-grid">
+                            {(tab.fields ?? []).map((field) => (
+                                <label key={field.name} className="form-field">
+                                    <span className="form-label">
+                                        {field.label} {field.required && <span style={{color: '#C90000', marginLeft: '2px'}}>*</span>}
+                                    </span>
+                                    {renderField(field, handleChange, values[field.name])}
+                                </label>
+                            ))}
+                        </div>
+                    )}
+                    {tab.customContent}
+                </>
+            ),
+        }));
+
+        return (
+            <div className={`form-layout ${className}`}>
+                <div className="page-header">
+                    <div className="page-header-breadcrumb">
+                        <nav className="breadcrumb" aria-label="Breadcrumb">
+                            <div className="breadcrumb-group">
+                                <span className="breadcrumb-item breadcrumb-current">{title}</span>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+
+                {error && <div className="form-erro">{error}</div>}
+
+                <Tabs tabs={tabItems} initial={tabs[0]?.key} className="form-tabs"/>
+
+                {footer && (
+                    <div className="form-footer">
+                        <button type="button" className="btn-form-back btnyellow" onClick={onCancel} disabled={saving}>
+                            {cancelLabel}
+                        </button>
+                        <button type="button" className="btn-form-save btnstop" onClick={handleSubmit} disabled={saving}>
+                            {saving ? 'Salvando...' : submitLabel}
+                        </button>
                     </div>
                 )}
-                {tab.customContent}
-            </>
-        ),
-    }));
 
+                {children}
+            </div>
+        );
+    }
+
+    // If no tabs but children provided, render children directly (legacy/simple pattern)
     return (
         <div className={`form-layout ${className}`}>
             <div className="page-header">
@@ -114,9 +149,9 @@ export function FormLayout({
 
             {error && <div className="form-erro">{error}</div>}
 
-            <Tabs tabs={tabItems} initial={tabs[0]?.key} className="form-tabs"/>
+            {children}
 
-            {footer && (
+            {footer && onSubmit && onCancel && (
                 <div className="form-footer">
                     <button type="button" className="btn-form-back btnyellow" onClick={onCancel} disabled={saving}>
                         {cancelLabel}
@@ -126,8 +161,6 @@ export function FormLayout({
                     </button>
                 </div>
             )}
-
-            {children}
         </div>
     );
 }

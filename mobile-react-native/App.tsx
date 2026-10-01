@@ -323,6 +323,7 @@ import ViewRelatoriosViewMapaScreen from './src/features/relatorios/ViewRelatori
 import ViewRelatoriosViewOrganogramaListScreen from './src/features/relatorios/ViewRelatoriosViewOrganogramaListScreen';
 import ViewRelatoriosViewTabelaListScreen from './src/features/relatorios/ViewRelatoriosViewTabelaListScreen';
 import ViewRelatoriosViewIndicadorGaugeScreen from './src/features/relatorios/ViewRelatoriosViewIndicadorGaugeScreen';
+import PainelRelatorioView from './src/features/relatorios/PainelRelatorioView';
 
 import ViewResultadoFormResultadoListScreen from './src/screens/ViewResultadoFormResultadoListScreen';
 import ViewResultadoListResultadoListScreen from './src/screens/ViewResultadoListResultadoListScreen';
@@ -434,8 +435,6 @@ import ViewCategoriaEstoqueListCategoriaListScreen from './src/screens/ViewCateg
 import ViewGeneroListGeneroListScreen from './src/screens/ViewGeneroListGeneroListScreen';
 import ViewMarcaListMarcaListScreen from './src/screens/ViewMarcaListMarcaListScreen';
 import ViewMensagemMetaListMensagemMetaListScreen from './src/screens/ViewMensagemMetaListMensagemMetaListScreen';
-import ViewSubcategoriaEstoqueListSubCategoriaListScreen
-    from './src/screens/ViewSubcategoriaEstoqueListSubCategoriaListScreen';
 
 const Stack = createNativeStackNavigator<ParamList>();
 const q = new QueryClient();
@@ -462,8 +461,6 @@ function AppRoutes() {
         <Stack.Screen name='view/genero/listGenero' component={ViewGeneroListGeneroListScreen}/>
         <Stack.Screen name='view/marca/listMarca' component={ViewMarcaListMarcaListScreen}/>
         <Stack.Screen name='view/mensagemMeta/listMensagemMeta' component={ViewMensagemMetaListMensagemMetaListScreen}/>
-        <Stack.Screen name='view/subcategoriaEstoque/listSubCategoria'
-                      component={ViewSubcategoriaEstoqueListSubCategoriaListScreen}/>
         <Stack.Screen name='view/acao/formAcao' component={ViewAcaoFormAcaoListScreen}/>
         <Stack.Screen name='view/acao/listAcao' component={ViewAcaoListAcaoListScreen}/>
         <Stack.Screen name='view/agenda/calendarioAgenda' component={ViewAgendaCalendarioAgendaListScreen}/>
@@ -795,8 +792,9 @@ function AppRoutes() {
         <Stack.Screen name='view/relatorios/viewGraficoPizza' component={ViewRelatoriosViewGraficoPizzaListScreen}/>
         <Stack.Screen name='view/relatorios/viewMapa' component={ViewRelatoriosViewMapaScreen}/>
         <Stack.Screen name='view/relatorios/viewOrganograma' component={ViewRelatoriosViewOrganogramaListScreen}/>
-        <Stack.Screen name='view/relatorios/viewTabela' component={ViewRelatoriosViewTabelaListScreen}/>
-        <Stack.Screen name='view/relatorios/viewIndicadorGauge/:id' component={ViewRelatoriosViewIndicadorGaugeScreen}/>
+      <Stack.Screen name='view/relatorios/viewTabela' component={ViewRelatoriosViewTabelaListScreen}/>
+      <Stack.Screen name='view/relatorios/viewPainel/:id' component={PainelRelatorioView}/>
+      <Stack.Screen name='view/relatorios/viewIndicadorGauge/:id' component={ViewRelatoriosViewIndicadorGaugeScreen}/>
 
         <Stack.Screen name='view/resultado/formResultado' component={ViewResultadoFormResultadoListScreen}/>
         <Stack.Screen name='view/resultado/listResultado' component={ViewResultadoListResultadoListScreen}/>

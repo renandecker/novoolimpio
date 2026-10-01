@@ -80,12 +80,6 @@ export default function ViewCobrancaListGerirCobrancaListScreen() {
   const [unidadeId, setUnidadeId] = useState<number | ''>('');
   const [mes, setMes] = useState<string>('');
   const [ano, setAno] = useState<string>('');
-  const [totals, setTotals] = useState<Totals>({
-    totalCartas: 0,
-    totalEmails: 0,
-    totalLigacoes: 0,
-    valorTotal: 0,
-  });
   const [notice, setNotice] = useState<string>('');
 
   const {data: unidades = []} = useQuery<Unidade[]>({
@@ -97,28 +91,25 @@ export default function ViewCobrancaListGerirCobrancaListScreen() {
     },
   });
 
-  const carregarCobrancas = useCallback(async () => {
-    if (!unidadeId || !mes || !ano) return;
-    setNotice('Carregando...');
-    try {
-      const response = await api.get<{content: GerirCobrancaItem[]}>('/api/view/cobranca/listGerirCobranca', {
-        params: {unidadeId, mes, ano, size: 1000},
-      });
-      const items = response.data.content ?? [];
-      
-      const totalCartas = items.reduce((sum, item) => sum + (item.qtdCartas || 0), 0);
-      const totalEmails = items.reduce((sum, item) => sum + (item.qtdEmails || 0), 0);
-      const totalLigacoes = items.reduce((sum, item) => sum + (item.qtdLigacoes || 0), 0);
-      const valorTotal = items.reduce((sum, item) => sum + (item.valorTotal || 0), 0);
-      
-      setTotals({totalCartas, totalEmails, totalLigacoes, valorTotal});
-      setNotice('');
-      return items;
-    } catch (error) {
-      setNotice(`Erro ao carregar: ${error}`);
-      return [];
-    }
-  }, [unidadeId, mes, ano]);
+  const {data: cobrancas = []} = useQuery<GerirCobrancaItem[]>({
+    queryKey: ['gerirCobrancas', unidadeId, mes, ano],
+    queryFn: async (): Promise<GerirCobrancaItem[]> => {
+      const params: Record<string, string | number> = {size: 1000};
+      if (unidadeId) params.unidadeId = unidadeId;
+      if (mes) params.mes = mes;
+      if (ano) params.ano = ano;
+      const response = await api.get<{content: GerirCobrancaItem[]}>('/api/view/cobranca/listGerirCobranca', {params});
+      return response.data.content ?? [];
+    },
+    enabled: !!(unidadeId || mes || ano),
+  });
+
+  const totals = cobrancas.reduce((acc, item) => ({
+    totalCartas: acc.totalCartas + (item.qtdCartas || 0),
+    totalEmails: acc.totalEmails + (item.qtdEmails || 0),
+    totalLigacoes: acc.totalLigacoes + (item.qtdLigacoes || 0),
+    valorTotal: acc.valorTotal + (item.valorTotal || 0),
+  }), {totalCartas: 0, totalEmails: 0, totalLigacoes: 0, valorTotal: 0} as Totals);
 
   const handleExport = useCallback(async (tipo: 'xlsx' | 'pdf' | 'csv' | 'xml', pageOnly: boolean) => {
     if (!unidadeId || !mes || !ano) return;
@@ -152,7 +143,6 @@ export default function ViewCobrancaListGerirCobrancaListScreen() {
     <PermissionGate permission="READ">
       <main>
         <div className="div_form">
-          <div className="form-title">Gerir Cobrança</div>
           <div className="table_form">
             <div style={{display: 'grid', gridTemplateColumns: 'minmax(120px,160px) 1fr minmax(120px,160px) 1fr', gap: '16px', marginBottom: '16px'}}>
               <div className="form-field">
@@ -200,67 +190,24 @@ export default function ViewCobrancaListGerirCobrancaListScreen() {
               </div>
             </div>
 
-            {(unidadeId && mes && ano) && (
-              <>
-                <div style={{display: 'flex', gap: '16px', marginBottom: '16px', flexWrap: 'wrap'}}>
-                  <div style={{flex: 1, minWidth: '200px'}}>
-                    <strong>Por página</strong>
-                    <div style={{display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap'}}>
-                      <button className="btn-primary btnstop" onClick={() => handleExport('xlsx', true)} title="Exporte para Excel na página atual">
-                        <i className="fa fa-file-excel-o"/> Excel
-                      </button>
-                      <button className="btn-primary btnred" onClick={() => handleExport('pdf', true)} title="Exporte para PDF na página atual">
-                        <i className="fa fa-file-pdf-o"/> PDF
-                      </button>
-                      <button className="btn-primary btngreen" onClick={() => handleExport('csv', true)} title="Exporte para CSV na página atual">
-                        <i className="fa fa-file-text-o"/> CSV
-                      </button>
-                      <button className="btn-primary btnyellow" onClick={() => handleExport('xml', true)} title="Exporte para XML na página atual">
-                        <i className="fa fa-code"/> XML
-                      </button>
-                    </div>
-                  </div>
-                  <div style={{flex: 1, minWidth: '200px'}}>
-                    <strong>Todas páginas</strong>
-                    <div style={{display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap'}}>
-                      <button className="btn-primary btnstop" onClick={() => handleExport('xlsx', false)} title="Exporte para Excel">
-                        <i className="fa fa-file-excel-o"/> Excel
-                      </button>
-                      <button className="btn-primary btnred" onClick={() => handleExport('pdf', false)} title="Exporte para PDF">
-                        <i className="fa fa-file-pdf-o"/> PDF
-                      </button>
-                      <button className="btn-primary btngreen" onClick={() => handleExport('csv', false)} title="Exporte para CSV">
-                        <i className="fa fa-file-text-o"/> CSV
-                      </button>
-                      <button className="btn-primary btnyellow" onClick={() => handleExport('xml', false)} title="Exporte para XML">
-                        <i className="fa fa-code"/> XML
-                      </button>
-                    </div>
-                  </div>
-                </div>
+            <DataTable
+              path="/api/view/cobranca/listGerirCobranca"
+              columns={COLUMNS}
+              params={{unidadeId: unidadeId || undefined, mes: mes || undefined, ano: ano || undefined}}
+              module="financeiro"
+              outcome="gerirCobranca"
+              maxMainColumns={COLUMNS.length}
+            />
 
-                <DataTable
-                  path="/api/view/cobranca/listGerirCobranca"
-                  columns={COLUMNS}
-                  params={{unidadeId, mes, ano}}
-                  module="financeiro"
-                  outcome="gerirCobranca"
-                  maxMainColumns={COLUMNS.length}
-                />
-              </>
-            )}
-
-            {(unidadeId && mes && ano) && (
-              <div style={{marginTop: '16px', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px'}}>
-                <strong>Totais:</strong>
-                <div style={{display: 'flex', gap: '24px', marginTop: '8px', flexWrap: 'wrap'}}>
-                  <span>Cartas Enviadas: <strong>{totals.totalCartas}</strong></span>
-                  <span>Emails Enviados: <strong>{totals.totalEmails}</strong></span>
-                  <span>Ligações Realizadas: <strong>{totals.totalLigacoes}</strong></span>
-                  <span>Valor Total: <strong>{new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(totals.valorTotal)}</strong></span>
-                </div>
+            <div style={{marginTop: '16px', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px'}}>
+              <strong>Totais:</strong>
+              <div style={{display: 'flex', gap: '24px', marginTop: '8px', flexWrap: 'wrap'}}>
+                <span>Cartas Enviadas: <strong>{totals.totalCartas}</strong></span>
+                <span>Emails Enviados: <strong>{totals.totalEmails}</strong></span>
+                <span>Ligações Realizadas: <strong>{totals.totalLigacoes}</strong></span>
+                <span>Valor Total: <strong>{new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(totals.valorTotal)}</strong></span>
               </div>
-            )}
+            </div>
 
             {notice && <p className="data-table-notice">{notice}</p>}
           </div>

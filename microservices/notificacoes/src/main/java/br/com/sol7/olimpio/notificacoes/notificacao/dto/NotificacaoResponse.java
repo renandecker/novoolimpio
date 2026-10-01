@@ -16,10 +16,12 @@ public record NotificacaoResponse(
         boolean canalTelegram,
         boolean canalSms,
         boolean canalWhatsapp,
+        boolean canalNotificacao,
         boolean emailEnviado,
         boolean mobileEnviado,
         boolean telegramEnviado,
         boolean smsEnviado,
         boolean whatsappEnviado,
+        boolean notificacaoEnviada,
         OffsetDateTime dataLeitura,
         OffsetDateTime createdAt){}

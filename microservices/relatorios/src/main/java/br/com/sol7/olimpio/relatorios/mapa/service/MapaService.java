@@ -24,6 +24,7 @@ import br.com.sol7.olimpio.relatorios.mapa.dto.MapaPontosResponse;
 import br.com.sol7.olimpio.relatorios.mapa.dto.Marcador;
 import br.com.sol7.olimpio.relatorios.mapa.dto.RegraPontos;
 import br.com.sol7.olimpio.shared.PagedResponse;
+import br.com.sol7.olimpio.relatorios.shared.FiltroSqlBuilder;
 import br.com.sol7.olimpio.shared.TupleHelper;
 import jakarta.persistence.Tuple;
 
@@ -38,6 +39,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
@@ -249,18 +251,47 @@ public class MapaService {
     private static final String COORDENADA_REGEX = "(?<!\\\\d)([-+]?(?:[1-8]?\\\\d(?:\\\\.\\\\d+)?|90(?:\\\\.0+)?)),\\\\s*([-+]?(?:180(?:\\\\.0+)?|(?:(?:1[0-7]\\\\d)|(?:[1-9]?\\\\d))(?:\\\\.\\\\d+)?))(?!\\\\d)";
     private static final Pattern COORDENADA_PATTERN = Pattern.compile(COORDENADA_REGEX);
 
+    // Mesmos campos usados por FiltroSqlBuilder: o filtro e resolvido pela coluna da
+    // dimensao associada (rel_dimensao -> rel_coluna) dentro da estrutura do mapa.
+    private static final String SQL_FILTROS_ESTRUTURA = "SELECT f.nome AS nome, dc.coluna AS coluna, f.tipo_filtro AS tipo_filtro, f.operacao AS operacao, f.data_inicio AS data_inicio, f.data_fim AS data_fim, f.periodo_dinamico AS periodo_dinamico, f.valor_fixo AS valor_fixo " +
+            "FROM rel_filtro f " +
+            "LEFT JOIN rel_dimensao d ON d.id = f.id_dimensao " +
+            "LEFT JOIN rel_coluna dc ON dc.id = d.id_coluna " +
+            "WHERE f.id_estrutura = ?1";
+
     public Uni<MapaPontosResponse> buscarPontos(Long id) {
+        return buscarPontos(id, null);
+    }
+
+    /**
+     * Busca os marcadores do mapa aplicando tambem os filtros recebidos do frontend
+     * ({ nome do filtro -> { operation, value, value2 } }), com o mesmo construtor de
+     * predicado usado nas demais views.
+     */
+    public Uni<MapaPontosResponse> buscarPontos(Long id, Map<String, Object> filtros) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Mapa not found"))
                 .onItem().transformToUni(mapa -> mapaRegraService.findByMapaId(id)
-                        .onItem().transformToUni(regras -> buildMapaPontosResponse(mapa, regras)))
+                        .chain(regras -> fragmentoFiltros(mapa.estruturaId, filtros)
+                                .chain(fragmento -> buildMapaPontosResponse(mapa, regras, fragmento))))
                 .onFailure().recoverWithItem(throwable -> {
                     LOG.error("Erro ao buscar pontos do mapa " + id, throwable);
                     return new MapaPontosResponse("0,0", "10", 400, 10, new ArrayList<>());
                 });
     }
 
+    private Uni<String> fragmentoFiltros(Long estruturaId, Map<String, Object> filtros) {
+        if (filtros == null || filtros.isEmpty() || estruturaId == null) return Uni.createFrom().item("");
+        return Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_FILTROS_ESTRUTURA, Tuple.class).setParameter(1, estruturaId).getResultList())
+                .map(configFiltros -> FiltroSqlBuilder.montarFiltroSql(configFiltros, filtros));
+    }
+
     private Uni<MapaPontosResponse> buildMapaPontosResponse(Mapa mapa, List<MapaRegraResponse> regras) {
+        return buildMapaPontosResponse(mapa, regras, "");
+    }
+
+    private Uni<MapaPontosResponse> buildMapaPontosResponse(Mapa mapa, List<MapaRegraResponse> regras, String fragmentoFiltros) {
         List<Uni<RegraPontos>> regraPontosUnis = new ArrayList<>();
 
         // Parse center coordinates from mapa.coordenada
@@ -271,7 +302,7 @@ public class MapaService {
         // For each regra, create RegraPontos with actual markers from SQL execution
         for (MapaRegraResponse regra : regras) {
             if (Boolean.TRUE.equals(regra.ativo())) {
-                regraPontosUnis.add(executarConsultaMarcadores(mapa, regra)
+                regraPontosUnis.add(executarConsultaMarcadores(mapa, regra, fragmentoFiltros)
                         .map(marcadores -> new RegraPontos(
                                 regra.id(),
                                 regra.descricao(),
@@ -300,7 +331,7 @@ public class MapaService {
                 ));
     }
 
-    private Uni<List<Marcador>> executarConsultaMarcadores(Mapa mapa, MapaRegraResponse regra) {
+    private Uni<List<Marcador>> executarConsultaMarcadores(Mapa mapa, MapaRegraResponse regra, String fragmentoFiltros) {
         return medidaService.find(regra.medidaId())
                 .onItem().transform(m -> m.estruturaColunaId())
                 .onItem().transformToUni(id -> estruturaColunaService.find(id))
@@ -381,8 +412,10 @@ public class MapaService {
                             whereClause = " where " + medidaCondicao;
                         }
 
-                        String sql = "select distinct " + geoColuna + " AS coordenada, " + colunasSelect +
-                                " " + estTabela + whereClause + " " + groupBy + " limit 1000";
+                        String sql = "select * from (select distinct " + geoColuna + " AS coordenada, " + colunasSelect +
+                                " " + estTabela + whereClause + " " + groupBy + ") _base" +
+                                (fragmentoFiltros == null || fragmentoFiltros.isBlank() ? "" : " where " + fragmentoFiltros) +
+                                " limit 1000";
                         boolean temDimensao = dimColuna != null && !dimColuna.isBlank();
 
                         return Panache.getSession().chain(session ->

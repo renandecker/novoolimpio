@@ -86,29 +86,17 @@ public class PessoaFisicaRepository implements PanacheRepository<PessoaFisica> {
             "OR lower(pf.nome || ' (' || COALESCE(pf.cpf,'' ) || ')') LIKE ?1) " +
             "ORDER BY pf.nome LIMIT 10";
 
-    public static final String SQL_AUTO_COMPLETE_TESTEMUNHA_ALL =
-            "SELECT pf.* FROM bas_pessoa_fisica pf " +
-            "INNER JOIN bas_pessoa p ON p.id = pf.id_pessoa " +
-            "INNER JOIN bas_usuario usu ON usu.id_pessoa = p.id " +
-            "WHERE usu.fl_ativo = true " +
-            "ORDER BY pf.nome LIMIT 10";
-
     public Uni<java.util.List<PessoaFisica>> autoCompleteTestemunha(String query) {
         String q = query == null ? "" : query.trim().toLowerCase();
         if (q.isEmpty()) {
-            return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                    .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_TESTEMUNHA_ALL, PessoaFisica.class)
-                            .getResultList());
+            return PessoaFisica.find("order by nome", io.quarkus.panache.common.Page.of(0, 10)).list();
         }
         String like = "%" + q + "%";
         String clean = q.replace(".", "").replace("-", "").replace("(", "").replace(")", "").trim();
         String likeClean = "%" + clean + "%";
-        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
-                .chain(session -> session.createNativeQuery(SQL_AUTO_COMPLETE_TESTEMUNHA, PessoaFisica.class)
-                        .setParameter(1, like)
-                        .setParameter(2, like)
-                        .setParameter(3, likeClean)
-                        .getResultList());
+        return PessoaFisica.find("lower(nome) like ?1 or cpf like ?2 or replace(replace(cpf, '.', ''), '-', '') like ?3 order by nome", like, like, likeClean)
+                .page(io.quarkus.panache.common.Page.of(0, 10))
+                .list();
     }
 
     // Mantido por compatibilidade com chamadas antigas (filtro por unidades).

@@ -1,28 +1,14 @@
 import {PermissionGate} from '../../../shared/services/permissions';
-import {ModuleTabs} from '../../../shared/components/ModuleTabs';
-import type {DataTableColumn} from '../../../shared/components/DataTable';
-import {MasterDetail} from '../../../shared/components/MasterDetail';
-import type {MasterDetailColumn} from '../../../shared/components/MasterDetail';
+import {DataTable, type DataTableColumn} from '../../../shared/components/DataTable';
+import type {ApiItem} from '../../../shared/types/types.ts';
+
+const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
 
 const COLUMNS: DataTableColumn[] = [
     {key: 'id', label: 'ID', width: '60px'},
     {key: 'descricao', label: 'Descrição'},
     {key: 'hierarquia', label: 'Hierarquia'},
-    {key: 'modulo_rotulo', label: 'Minha Página Inicial'},
-    {key: 'comunicar', label: 'Comunicar', render: (item) => item.comunicar ? 'Sim' : 'Não'},
-];
-
-const FAVORITO_COLUMNS: MasterDetailColumn[] = [
-    {key: 'icone', label: 'Ícone'},
-    {key: 'nome', label: 'Nome'},
-    {key: 'modulo_descricao', label: 'Módulo'},
-];
-
-const USUARIO_COLUMNS: MasterDetailColumn[] = [
-    {key: 'id', label: 'ID'},
-    {key: 'login', label: 'Login'},
-    {key: 'pessoa_pessoaFisica_nome', label: 'Nome'},
-    {key: 'ativo', label: 'Ativo', render: (item) => item.ativo ? 'Sim' : 'Não'},
+    {key: 'comunicar', label: 'Comunicar', render: (item) => (asRecord(item).comunicar ? 'Sim' : 'Não')},
 ];
 
 export default function ViewPerfilListPerfilListScreen() {
@@ -30,36 +16,12 @@ export default function ViewPerfilListPerfilListScreen() {
         <PermissionGate permission="READ">
             <main>
                 <h1>Perfil</h1>
-                <ModuleTabs
-                    tabs={[
-                        {
-                            key: 'list',
-                            label: 'Listagem',
-                            path: '/api/basico/perfil',
-                            columns: COLUMNS,
-                            maxMainColumns: COLUMNS.length,
-                            editNavigateTo: '/view/perfil/formPerfil',
-                            createNavigateTo: '/view/perfil/formPerfil',
-                            masterDetail: {
-                                label: 'Favoritos',
-                                source: '/api/basico/perfil',
-                                valueKey: 'id',
-                                searchKeys: ['nome', 'modulo_descricao'],
-                                columns: FAVORITO_COLUMNS,
-                            }
-                        },
-                        {
-                            key: 'usuarios',
-                            label: 'Usuários',
-                            masterDetail: {
-                                label: 'Usuários',
-                                source: '/api/basico/usuario',
-                                valueKey: 'id',
-                                searchKeys: ['login', 'pessoa_pessoaFisica_nome'],
-                                columns: USUARIO_COLUMNS,
-                            }
-                        },
-                    ]}
+                <DataTable
+                    path="/api/view/perfil/listPerfil"
+                    columns={COLUMNS}
+                    maxMainColumns={COLUMNS.length}
+                    editNavigateTo="/view/perfil/formPerfil"
+                    createNavigateTo="/view/perfil/formPerfil"
                 />
             </main>
         </PermissionGate>
