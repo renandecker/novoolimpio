@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.aluno.shared.security;
+﻿package br.com.sol7.olimpio.aluno.shared.security;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

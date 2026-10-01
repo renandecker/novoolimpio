@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.aluno.aula.dto;
+﻿package br.com.sol7.olimpio.aluno.aula.dto;
 
 import java.util.Date;
 

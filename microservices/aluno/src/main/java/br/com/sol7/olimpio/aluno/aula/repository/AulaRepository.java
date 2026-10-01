@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.aluno.aula.repository;
+﻿package br.com.sol7.olimpio.aluno.aula.repository;
 
 import br.com.sol7.olimpio.aluno.aula.entity.Aula;
 import br.com.sol7.olimpio.shared.TupleHelper;

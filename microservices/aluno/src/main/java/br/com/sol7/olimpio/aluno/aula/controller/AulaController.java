@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.aluno.aula.controller;
+﻿package br.com.sol7.olimpio.aluno.aula.controller;
 
 import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.AulaAssistidaRequest;
 import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.AulaAssistidaResponse;

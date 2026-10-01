@@ -1,4 +1,4 @@
-package br.com.sol7.olimpio.aluno.shared.security;
+﻿package br.com.sol7.olimpio.aluno.shared.security;
 
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
@@ -58,3 +58,5 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
         context.abortWith(Response.status(status).type(MediaType.APPLICATION_JSON).entity(Map.of("error", error)).build());
     }
 }
+
+
