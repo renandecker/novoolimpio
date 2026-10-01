@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.aluno.aula.repository;
+package br.com.sol7.olimpio.aluno.aula.repository;
 
 import br.com.sol7.olimpio.aluno.aula.entity.AulaAnexo;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
@@ -11,6 +11,6 @@ import java.util.List;
 public class AulaAnexoRepository implements PanacheRepository<AulaAnexo> {
 
     public Uni<List<AulaAnexo>> anexosDaAula(Long aulaId) {
-        return list("aulaId", aulaId);
+        return find("aulaId", aulaId).list();
     }
 }

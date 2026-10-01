@@ -16,6 +16,7 @@ import org.hibernate.reactive.mutiny.Mutiny;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.Calendar;
 
 @ApplicationScoped
 @WithTransaction
@@ -85,18 +86,17 @@ public class CoordenadorService {
                     " LEFT JOIN bas_usuario uCoord ON uCoord.id = c.id_coordenador " + where;
             String selectSql = baseSelect + where + " ORDER BY c.id DESC LIMIT :limit OFFSET :offset";
 
-            Mutiny.Query countQuery = session.createNativeQuery(countSql);
+            var countQuery = session.createNativeQuery(countSql);
             for (var e : params.entrySet()) countQuery.setParameter(e.getKey(), e.getValue());
             Uni<Long> total = countQuery.getSingleResult().map(r -> ((Number) r).longValue());
 
-            Mutiny.Query selectQuery = (Mutiny.Query) session.createNativeQuery(selectSql, Tuple.class);
+            var selectQuery = session.createNativeQuery(selectSql, Tuple.class);
             for (var e : params.entrySet()) selectQuery.setParameter(e.getKey(), e.getValue());
             selectQuery.setParameter("limit", s);
             selectQuery.setParameter("offset", (long) p * s);
             Uni<List<Map<String,Object>>> rows = selectQuery.getResultList().map(list -> {
                 List<Map<String,Object>> out = new ArrayList<>();
-                List<?> rawList = (List<?>) list;
-                for (Object rowObj : rawList) {
+                for (Object rowObj : list) {
                     Tuple t = (Tuple) rowObj;
                     Map<String,Object> m = new LinkedHashMap<>();
                     m.put("id", TupleHelper.getLong(t, "id"));
@@ -393,7 +393,7 @@ public class CoordenadorService {
                 params.put("usr", usuarioId.intValue());
             }
             String sql = "SELECT rc.descricao AS descricao, count(l.id) AS cnt FROM cen_ligacao l JOIN cen_resultado_contato rc ON rc.id = l.id_resultado_contato" + where + " GROUP BY rc.descricao";
-            Mutiny.Query query = session.createNativeQuery(sql, Tuple.class);
+            var query = session.createNativeQuery(sql, Tuple.class);
             for (var e : params.entrySet()) query.setParameter(e.getKey(), e.getValue());
             return query.getResultList().map(list -> {
                 Map<String,Object> out = new LinkedHashMap<>();
@@ -470,4 +470,5 @@ public class CoordenadorService {
                 .setParameter("pid", prospectoId.intValue()).getResultList().map(list -> list.stream().map(o -> o instanceof Tuple ? String.valueOf(TupleHelper.get(o, "valor")) : String.valueOf(o)).toList())
         );
     }
+
 }

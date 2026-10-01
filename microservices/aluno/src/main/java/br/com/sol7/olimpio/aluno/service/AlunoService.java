@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.aluno.service;
+package br.com.sol7.olimpio.aluno.service;
 
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.AlunoPerfilResponse;
 import br.com.sol7.olimpio.aluno.dto.AlunoDtos.AvaliacaoAlunoItemResponse;

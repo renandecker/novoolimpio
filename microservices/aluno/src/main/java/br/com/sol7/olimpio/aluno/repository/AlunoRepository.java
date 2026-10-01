@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.aluno.repository;
+package br.com.sol7.olimpio.aluno.repository;
 
 import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.Panache;

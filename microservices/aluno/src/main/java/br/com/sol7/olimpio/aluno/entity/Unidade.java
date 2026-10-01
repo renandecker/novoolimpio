@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.aluno.entity;
+package br.com.sol7.olimpio.aluno.entity;
 
 import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 import jakarta.persistence.Column;

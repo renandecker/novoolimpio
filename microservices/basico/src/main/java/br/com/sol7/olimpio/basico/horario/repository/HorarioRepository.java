@@ -47,4 +47,34 @@ public class HorarioRepository implements PanacheRepository<Horario> {
                         .getResultList());
     }
 
+    // Horarios disponiveis por consultor (exclui horarios ja preenchidos na data)
+    public static final String SQL_DISPONIVEIS_POR_CONSULTOR =
+            "SELECT h.* FROM bas_horario h " +
+            " WHERE h.id NOT IN (SELECT c.id_horario FROM bas_compromisso c WHERE c.id_agenda = ?1 AND c.data = ?2) " +
+            " ORDER BY h.hora";
+
+    public Uni<java.util.List<Horario>> disponiveisPorConsultor(Long agendaId, Date data, int diaSemana) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_DISPONIVEIS_POR_CONSULTOR, Horario.class)
+                        .setParameter(1, agendaId)
+                        .setParameter(2, data)
+                        .getResultList());
+    }
+
+    // Horarios disponiveis por turno da unidade do usuario
+    public static final String SQL_DISPONIVEIS_POR_TURNO_UNIDADE =
+            "SELECT h.* FROM bas_horario h " +
+            " JOIN bas_turno_horario th ON th.id_horario = h.id " +
+            " JOIN bas_turno_usuario tu ON tu.id_turno = th.id_turno " +
+            " WHERE tu.id_usuario = ?1 AND th.id_dia_semana = ?2 " +
+            " ORDER BY h.hora";
+
+    public Uni<java.util.List<Horario>> disponiveisPorTurnoUnidade(Long usuarioId, int diaSemana) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_DISPONIVEIS_POR_TURNO_UNIDADE, Horario.class)
+                        .setParameter(1, usuarioId)
+                        .setParameter(2, diaSemana)
+                        .getResultList());
+    }
+
 }

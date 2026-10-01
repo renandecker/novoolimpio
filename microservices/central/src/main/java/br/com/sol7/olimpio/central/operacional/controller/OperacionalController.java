@@ -9,6 +9,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Path("/api/central/operacional")
 @Produces(MediaType.APPLICATION_JSON)
@@ -91,6 +92,7 @@ public class OperacionalController {
     public Uni<List<Long>> buscarLigacoesComUsuario(@QueryParam("usuarioId") Long usuarioId) {
         return service.buscarLigacoesComUsuario(usuarioId);
     }
+
 
     @GET
     @Path("/{id}/ligacoes/pie")

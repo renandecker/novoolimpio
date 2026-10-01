@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.aluno.shared.notificacao;
+package br.com.sol7.olimpio.aluno.shared.notificacao;
 
 /**
  * Evento generico de notificacao publicado no exchange

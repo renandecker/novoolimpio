@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.aluno.shared.notificacao;
+package br.com.sol7.olimpio.aluno.shared.notificacao;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.logging.Log;

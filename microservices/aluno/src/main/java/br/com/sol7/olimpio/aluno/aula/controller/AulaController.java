@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.aluno.aula.controller;
+package br.com.sol7.olimpio.aluno.aula.controller;
 
 import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.AulaAssistidaRequest;
 import br.com.sol7.olimpio.aluno.aula.dto.AulaDtos.AulaAssistidaResponse;
@@ -72,7 +72,7 @@ public class AulaController {
     @GET
     @Path("/aulas-da-turma")
     public Uni<List<AulaTurmaResponse>> aulasDaTurma(@Context ContainerRequestContext ctx,
-                                                    @QueryParam("oferecimentoId") Long oferecimentoId) {
+                                                     @QueryParam("oferecimentoId") Long oferecimentoId) {
         return service.aulasDaTurma(username(ctx), oferecimentoId);
     }
 

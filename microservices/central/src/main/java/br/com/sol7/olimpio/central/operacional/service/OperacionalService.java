@@ -6,7 +6,6 @@ import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.SearchFilterRequest;
 import br.com.sol7.olimpio.shared.GenericSearchService;
 import br.com.sol7.olimpio.shared.TupleHelper;
-
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -16,6 +15,7 @@ import org.hibernate.reactive.mutiny.Mutiny;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -250,7 +250,7 @@ public class OperacionalService {
                 params.put("usrId", usuarioId.intValue());
             }
             String sql = "SELECT rc.descricao AS descricao, count(l.id) AS cnt FROM cen_ligacao l JOIN cen_resultado_contato rc ON rc.id = l.id_resultado_contato" + where + " GROUP BY rc.descricao";
-            Mutiny.Query query = session.createNativeQuery(sql, Tuple.class);
+            var query = session.createNativeQuery(sql, Tuple.class);
             for (var e : params.entrySet()) query.setParameter(e.getKey(), e.getValue());
             return query.getResultList().map(list -> {
                 Map<String,Object> out = new LinkedHashMap<>();

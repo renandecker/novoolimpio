@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.aluno.dto;
+package br.com.sol7.olimpio.aluno.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

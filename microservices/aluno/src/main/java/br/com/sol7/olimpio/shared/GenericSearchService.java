@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.shared;
+package br.com.sol7.olimpio.shared;
 
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.smallrye.mutiny.Uni;
