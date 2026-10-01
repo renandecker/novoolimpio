@@ -404,7 +404,7 @@ public class TabelaService {
     //     }
     public Uni<List<Long>> buscarUnidades(Long id) {
         return Panache.getSession().chain(session ->
-                session.createNativeQuery("SELECT id FROM bas_unidade").getResultList())
+                session.createNativeQuery("SELECT id FROM bas_unidade WHERE id = ?1").setParameter(1, id).getResultList())
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
@@ -417,7 +417,7 @@ public class TabelaService {
     //     }
     public Uni<List<Long>> buscarPerfils(Long id) {
         return Panache.getSession().chain(session ->
-                session.createNativeQuery("SELECT id FROM bas_perfil").getResultList())
+                session.createNativeQuery("SELECT id FROM bas_perfil WHERE id = ?1").setParameter(1, id).getResultList())
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
@@ -430,7 +430,7 @@ public class TabelaService {
     //     }
     public Uni<List<Long>> buscarUsuarios(Long id) {
         return Panache.getSession().chain(session ->
-                session.createNativeQuery("SELECT id FROM bas_usuario").getResultList())
+                session.createNativeQuery("SELECT id FROM bas_usuario WHERE id = ?1").setParameter(1, id).getResultList())
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
