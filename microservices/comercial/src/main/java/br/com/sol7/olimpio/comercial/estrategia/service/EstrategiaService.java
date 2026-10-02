@@ -63,17 +63,6 @@ public class EstrategiaService {
         return new EstrategiaResponse(e.id, e.descricao);
     }
 
-
-    // Migrado de EstrategiaController.autocomplete (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/EstrategiaController.java:74, camada controller)
-    // Logica original (adaptar):
-    // public List<Estrategia> autocomplete(String query) {
-    //         if (ObjectUtil.nullOrEmpty(query)) {
-    //             return estrategiaService.findAll();
-    //         }
-    // 
-    //         return estrategiaService.autocomplete(query);
-    // 
-    //     }
     public Uni<List<Long>> autocomplete(String query) {
         if (query == null || query.isEmpty()) {
             return repository.listAll().map(list -> list.stream().map(x -> x.id).toList());

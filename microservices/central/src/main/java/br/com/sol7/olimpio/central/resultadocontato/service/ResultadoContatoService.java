@@ -83,22 +83,10 @@ public class ResultadoContatoService {
         return new ResultadoContatoResponse(e.id, e.nota, e.descricao, e.voltar, e.relato, e.visivel, e.qtdeRetorno, e.outro, e.tela);
     }
 
-
-    // Migrado de ResultadoContatoService.buscarResultadosOrdenado (src/main/java/br/com/sol7/olimpio/service/services/central/ResultadoContatoService.java:21, camada service)
-    // Logica original (adaptar):
-    // public List<ResultadoContato> buscarResultadosOrdenado() {
-    //         return getResultadoContatoRepository().buscarResultadosOrdenado();
-    //     }
     public Uni<List<Long>> buscarResultadosOrdenado() {
         return repository.find("order by descricao").list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de ResultadoContatoService.buscarResultadosOrdenadoLigacao (src/main/java/br/com/sol7/olimpio/service/services/central/ResultadoContatoService.java:25, camada service)
-    // Logica original (adaptar):
-    // public List<ResultadoContato> buscarResultadosOrdenadoLigacao() {
-    //         return getResultadoContatoRepository().buscarResultadosOrdenadoLigacao();
-    //     }
     public Uni<List<Long>> buscarResultadosOrdenadoLigacao() {
         return repository.find("visivel = true order by descricao").list().map(list -> list.stream().map(x -> x.id).toList());
     }

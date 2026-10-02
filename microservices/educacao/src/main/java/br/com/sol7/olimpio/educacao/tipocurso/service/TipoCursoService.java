@@ -70,11 +70,6 @@ public class TipoCursoService {
     }
 
 
-    // Migrado de TipoCursoController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/TipoCursoController.java:80, camada controller)
-    // Logica original (adaptar):
-    // public List<TipoCurso> autoComplete(String query) {
-    //         return tipoCursoService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query).map(list -> list.stream().map(x -> x.id).toList());
     }

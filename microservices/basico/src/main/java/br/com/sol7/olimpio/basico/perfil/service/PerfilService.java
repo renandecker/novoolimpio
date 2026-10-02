@@ -12,8 +12,10 @@ import java.util.List;
 
 import br.com.sol7.olimpio.basico.perfil.dto.PerfilRequest;
 import br.com.sol7.olimpio.basico.perfil.dto.PerfilResponse;
+import br.com.sol7.olimpio.basico.perfil.dto.PerfilUsuariosResponse;
 import br.com.sol7.olimpio.basico.perfil.entity.Perfil;
 import br.com.sol7.olimpio.basico.perfil.repository.PerfilRepository;
+import br.com.sol7.olimpio.basico.usuario.repository.UsuarioRepository;
 
 @ApplicationScoped
 @WithTransaction
@@ -21,6 +23,9 @@ public class PerfilService {
 
     @Inject
     PerfilRepository repository;
+
+    @Inject
+    UsuarioRepository usuarioRepository;
 
     public Uni<List<PerfilResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());

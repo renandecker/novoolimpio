@@ -66,7 +66,7 @@ public class AcaoRepository implements PanacheRepository<Acao> {
 public Uni<java.util.List<Acao>> acaoUnidade(List<Long> unidadeIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_ACAO_UNIDADE, Acao.class)
-                        .setParameter(1, unidadesIds)
+                        .setParameter(1, unidadeIds)
                         .getResultList());
     }
 
@@ -88,7 +88,5 @@ public Uni<java.util.List<Acao>> acaoUnidade(List<Long> unidadeIds) {
                         .setParameter(1, acaoId)
                         .getResultList());
     }
-
-}
 
 }

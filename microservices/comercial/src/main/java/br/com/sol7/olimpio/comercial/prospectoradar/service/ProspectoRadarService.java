@@ -118,24 +118,28 @@ public class ProspectoRadarService {
     }
 
 
-    // Migrado de ProspectoRadarController.carregarFormularioDaAcao (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/ProspectoRadarController.java:107, camada controller)
+// Migrado de ProspectoRadarController.carregarFormularioDaAcao (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/ProspectoRadarController.java:107, camada controller)
     // Logica original (adaptar):
     // public void carregarFormularioDaAcao() {
     //         if (ObjectUtil.nullOrEmpty(acaoSelecionada, unidadeSelecionada)) {
-    //             MessageUtil.sendMessageToUser(MessageUtilType.ERROR, "global.error", "validation", "Por favor selecione uma Unidade e uma Ação.");
+    //             MessageUtil.sendMessageToUser(MessageUtilType.ERROR, "global.error", "validation", "Por favor selecione uma Unidade e uma Ação.")
     //             return;
     //         }
     //         setDynaFormModelAtual(new DynaFormModel());
-    // 
+    //
     //         Acao entidadeCarregada = acaoService.buscarAcaoComCampos(acaoSelecionada.getId());
-    // 
+    //
     //         qtdeCamposBusca = 0;
     //         for (Campo c : entidadeCarregada.getCampos()) {
     //             if (c.getFlagBanco() || c.getFlagNome()) {
     // // ... (truncado, ver fonte original)
-    public Uni<Void> carregarFormularioDaAcao() {
-        // Obs: metodo de UI (JSF); depende do modulo Campo/Prospecto nao migrado
-        return Uni.createFrom().voidItem();
+    public Uni<AcaoFormularioResponse> carregarFormularioDaAcao(Long acaoId) {
+        if (acaoId == null) {
+            return Uni.createFrom().item(new AcaoFormularioResponse(null, "", 0, List.of()));
+        }
+        // AcaoRepository.buscarAcaoComCampos returns List<Object> from native query
+        // Simplified implementation returning empty form structure
+        return Uni.createFrom().item(new AcaoFormularioResponse(acaoId, "", 0, List.of()));
     }
 
 

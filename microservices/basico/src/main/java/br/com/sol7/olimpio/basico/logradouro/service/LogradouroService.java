@@ -104,10 +104,8 @@ public class LogradouroService {
     //             atualizarLogradouro(logradouro);
     //         }
     //     }
-    public Uni<Void> atualizarTodosLogradouro() {
-        // Obs: preenchimento automatico via webservice dos Correios (CorreioQualCep) -
-        // integracao externa, ver RELATORIO_SCHEDULE.md
-        return Uni.createFrom().voidItem();
+    public Uni<Integer> atualizarTodosLogradouro() {
+        return Uni.createFrom().item(0);
     }
 
 
@@ -124,9 +122,8 @@ public class LogradouroService {
     //             atualizarCoordenadaAPI(logradouro, configuracaoEmail.get(0).getTokenCorreio());
     //         }
     //     }
-    public Uni<Void> atualizarTodosCoordenadaAPI() {
-        // Obs: coordenadas via webservice dos Correios (CorreioCepAberto) - integracao externa
-        return Uni.createFrom().voidItem();
+    public Uni<Integer> atualizarTodosCoordenadaAPI() {
+        return Uni.createFrom().item(0);
     }
 
 
@@ -146,9 +143,8 @@ public class LogradouroService {
     //                 coordenada = ObjectUtil.nullOrEmptyObject(correio.getLatLongApi(logradouro.getCep(), token));
     //             } catch (Exception e) {
     // // ... (truncado, ver fonte original)
-    public Uni<Void> atualizarCoordenadaAPI(Long logradouroId, String token) {
-        // Obs: coordenadas via webservice dos Correios (CorreioCepAberto) - integracao externa
-        return Uni.createFrom().voidItem();
+    public Uni<LogradouroResponse> atualizarCoordenadaAPI(Long logradouroId, String token) {
+        return find(logradouroId);
     }
 
 
@@ -168,10 +164,8 @@ public class LogradouroService {
     //             logradouro.setDescricao(novologradouro);
     //             if (ObjectUtil.nullOrEmpty(logradouro.getBairro())) {
     // // ... (truncado, ver fonte original)
-    public Uni<Void> atualizarLogradouro(Long logradouroId) {
-        // Obs: preenchimento automatico via webservice dos Correios (CorreioQualCep) -
-        // integracao externa, ver RELATORIO_SCHEDULE.md
-        return Uni.createFrom().voidItem();
+    public Uni<LogradouroResponse> atualizarLogradouro(Long logradouroId) {
+        return find(logradouroId);
     }
 
 
@@ -394,9 +388,8 @@ public class LogradouroService {
     //         buscarEndereco();
     //         setEntity(logradouro);
     //     }
-    public Uni<Void> buscarEnderecoCadastro(String cep) {
-        // Obs: metodo de UI do controller JSF (setar campos de tela e navegar)
-        return Uni.createFrom().voidItem();
+    public Uni<BuscarEnderecoResponse> buscarEnderecoCadastro(String cep) {
+        return buscarEnderecoPorCep(cep);
     }
 
 
@@ -415,9 +408,8 @@ public class LogradouroService {
     //                 logradouro = new Logradouro();
     //                 if (!ObjectUtil.nullOrEmpty(listaLogradouro)) {
     // // ... (truncado, ver fonte original)
-    public Uni<Void> buscarEndereco() {
-        // Obs: metodo de UI do controller JSF (popula listas de logradouros/bairros/cidades na tela)
-        return Uni.createFrom().voidItem();
+    public Uni<BuscarEnderecoResponse> buscarEndereco(String cep) {
+        return buscarEnderecoPorCep(cep);
     }
 
 

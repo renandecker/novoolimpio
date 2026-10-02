@@ -66,9 +66,9 @@ public class ProspectoRadarController {
 
 
     @GET
-    @Path("/carregar-formulario-da-acao")
-    public Uni<Void> carregarFormularioDaAcao() {
-        return service.carregarFormularioDaAcao();
+    @Path("/carregar-formulario-da-acao/{acaoId}")
+    public Uni<AcaoFormularioResponse> carregarFormularioDaAcao(@PathParam("acaoId") Long acaoId) {
+        return service.carregarFormularioDaAcao(acaoId);
     }
 
 

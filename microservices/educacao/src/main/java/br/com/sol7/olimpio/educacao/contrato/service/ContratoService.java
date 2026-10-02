@@ -121,22 +121,6 @@ public class ContratoService {
         return new ContratoResponse(e.id, e.curriculoId, e.unidadeId, e.unidadeResponsavelId, e.ultimoContratoId, e.contratoAnteriorId, e.compromissoId, e.valorCursoId, e.pessoaId, e.descontoCursoId, e.taxaCursoId, e.formaPagamentoId, e.valorDesconto, e.valorTaxa, e.responsavelId, e.dataConclusao, e.local, e.usuarioId, e.testemunha1Id, e.testemunha2Id, e.ativo, e.inscricao, e.desistente, e.contratoDesistenteId, e.pdf, e.data, e.dataReparcelamento, e.dataCancelamento, e.qtdeReparcelamento, e.cadernoComponenteCurricularId, e.ultimaParcelaId, e.cancelamentoId, e.proximaParcelaId, e.oferecimentoInicioId, e.oferecimentoFimId, e.qtdParcelasAtrasadas, e.qtdParcelasNaoPagas, e.valorParcelas, e.trocaTurma);
     }
 
-
-    // Migrado de ContratoController.autoCompleteContrato (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/ContratoController.java:146, camada controller)
-    // Logica original (adaptar):
-    // public List<Contrato> autoCompleteContrato(String query) {
-    // 
-    //         try {
-    //             FacesContext context = FacesContext.getCurrentInstance();
-    //             Pessoa pessoa = (Pessoa) UIComponent.getCurrentComponent(context).getAttributes().get("filter");
-    //             if (query.equals("")) {
-    //                 return contratoService.buscarContratoPessoa(pessoa);
-    //             } else {
-    //                 return contratoService.autoCompleteContrato(query, pessoa);
-    //             }
-    //         } catch (Exception e) {
-    //             e.printStackTrace();
-    // // ... (truncado, ver fonte original)
     public Uni<List<Long>> autoCompleteContrato(String query, Long pessoaId) {
         if (pessoaId == null) {
             return Uni.createFrom().item(java.util.List.of());
@@ -162,64 +146,27 @@ public class ContratoService {
         return Uni.createFrom().item(null);
     }
 
-
-    // Migrado de ContratoService.buscarContratosPessoa (src/main/java/br/com/sol7/olimpio/service/services/educacao/ContratoService.java:33, camada service)
-    // Observacao: parametro pessoaId: era Pessoa (referencia por id)
-    // Logica original (adaptar):
-    // public List<Contrato> buscarContratosPessoa(Pessoa pessoa) {
-    //         return getContratoRepository().buscarContratosPessoa(pessoa);
-    //     }
     public Uni<List<Long>> buscarContratosPessoa(Long pessoaId) {
         // Obs: condicao removida (depende de outro microservico): c.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): c.unidadeResponsavel.ativo = true
         return repository.find("pessoaId = ?1 order by id desc", pessoaId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de ContratoService.buscarResponsaveisPessoa (src/main/java/br/com/sol7/olimpio/service/services/educacao/ContratoService.java:53, camada service)
-    // Observacao: parametro pessoaId: era Pessoa (referencia por id)
-    // JPQL original: Select distinct c.responsavel from Contrato c where c.pessoa = ?1 and c.responsavel is not null
-    // Logica original (adaptar):
-    // public List<Pessoa> buscarResponsaveisPessoa(Pessoa pessoa) {
-    //         return getContratoRepository().buscarResponsaveisPessoa(pessoa);
-    //     }
     public Uni<List<Long>> buscarResponsaveisPessoa(Long pessoaId) {
         return repository.buscarResponsaveisPessoa(pessoaId)
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de ContratoService.autoCompleteContrato (src/main/java/br/com/sol7/olimpio/service/services/educacao/ContratoService.java:57, camada service)
-    // Observacao: parametro pessoaId: era Pessoa (referencia por id)
-    // JPQL original: select distinct c from Contrato c where  c.unidade.ativo = true and c.unidadeResponsavel.ativo = true and c.pessoa in (?2) and  lower(c.curriculo.sucinto) like '%' || ?1 || '%' OR str(c.id) like '%' || ?1 || '%' OR  lower(c.curriculo.curso.nome) like '%' || ?1 || '%'
-    // Logica original (adaptar):
-    // public List<Contrato> autoCompleteContrato(String query, Pessoa pessoa) {
-    //         return this.getContratoRepository().autoCompleteContrato(query.toLowerCase().trim(), pessoa, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteContrato2(String query, Long pessoaId) {
         return repository.autoCompleteContrato(query.toLowerCase().trim(), pessoaId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de ContratoService.buscarContratoPessoa (src/main/java/br/com/sol7/olimpio/service/services/educacao/ContratoService.java:61, camada service)
-    // Observacao: parametro pessoaId: era Pessoa (referencia por id)
-    // Logica original (adaptar):
-    // public List<Contrato> buscarContratoPessoa(Pessoa pessoa) {
-    //         return this.getContratoRepository().buscarContratoPessoa(pessoa, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> buscarContratoPessoa(Long pessoaId) {
         // Obs: condicao removida (depende de outro microservico): c.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): c.unidadeResponsavel.ativo = true
         return repository.find("pessoaId in (?1)", pessoaId).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de ContratoService.autoCompleteAluno (src/main/java/br/com/sol7/olimpio/service/services/educacao/ContratoService.java:73, camada service)
-    // JPQL original: select distinct p from Contrato c inner join c.pessoa p inner join p.unidades u  where  c.unidade.ativo = true and c.unidadeResponsavel.ativo = true and  (u in (?2) or c.unidadeResponsavel in (?2)) and (lower(p.pessoaFisica.nome) like '%' || ?1 || '%' OR (p.pessoaFisica.cpf) like '%' || ?1 || '%')
-    // Logica original (adaptar):
-    // public List<Pessoa> autoCompleteAluno(String query) {
-    //         return this.getContratoRepository().autoCompleteAluno(query.toLowerCase().trim(), usuarioLogadoController.getUnidadesDisponiveis(), new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<ContratoAutoCompleteResponse>> autoCompleteAluno(String query) {
         if (query == null || query.trim().length() < 3) {
             return Uni.createFrom().item(java.util.List.of());
@@ -235,14 +182,6 @@ public class ContratoService {
                 .toList());
     }
 
-
-    // Migrado de ContratoService.autoCompleteAlunoPagamentoPendenteUnidade (src/main/java/br/com/sol7/olimpio/service/services/educacao/ContratoService.java:77, camada service)
-    // Observacao: parametro unidadeId: era Unidade (referencia por id)
-    // JPQL original: select distinct p from Contrato c inner join c.pessoa p inner join p.unidades u  where  c.unidade.ativo = true and c.unidadeResponsavel = ?2 and  (lower(p.pessoaFisica.nome) like '%' || ?1 || '%' OR (p.pessoaFisica.cpf) like '%' || ?1 || '%') and exists(select par from Parcela par where par.dataPagamento is null and par.dataCancelamento is null and par.contrato = c)
-    // Logica original (adaptar):
-    // public List<Pessoa> autoCompleteAlunoPagamentoPendenteUnidade(String query, Unidade unidade) {
-    //         return this.getContratoRepository().autoCompleteAlunoPagamentoPendenteUnidade(query.toLowerCase().trim(), unidade, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteAlunoPagamentoPendenteUnidade(String query, Long unidadeId) {
         if (unidadeId == null || query == null || query.trim().isEmpty()) {
             return Uni.createFrom().item(java.util.List.of());
@@ -250,13 +189,6 @@ public class ContratoService {
         return repository.autoCompleteAlunoPagamentoPendenteUnidade(query.toLowerCase().trim(), unidadeId).map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de ContratoService.autoCompleteAlunoPagamentoPendente (src/main/java/br/com/sol7/olimpio/service/services/educacao/ContratoService.java:81, camada service)
-    // JPQL original: select distinct p from Contrato c inner join c.pessoa p inner join p.unidades u  where  c.unidade.ativo = true and c.unidadeResponsavel.ativo = true and  (u in (?2) or c.unidadeResponsavel in (?2)) and (lower(p.pessoaFisica.nome) like '%' || ?1 || '%' OR (p.pessoaFisica.cpf) like '%' || ?1 || '%') and exists(select par from Parcela par where par.dataPagamento is null and par.dataCancelamento is null and par.contrato = c)
-    // Logica original (adaptar):
-    // public List<Pessoa> autoCompleteAlunoPagamentoPendente(String query) {
-    //         return this.getContratoRepository().autoCompleteAlunoPagamentoPendente(query.toLowerCase().trim(), usuarioLogadoController.getUnidadesDisponiveis(), new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteAlunoPagamentoPendente(String query, List<Long> unidadesIds) {
         if (unidadesIds == null || unidadesIds.isEmpty() || query == null || query.trim().isEmpty()) {
             return Uni.createFrom().item(java.util.List.of());

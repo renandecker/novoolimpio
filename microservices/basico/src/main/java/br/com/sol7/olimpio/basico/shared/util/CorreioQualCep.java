@@ -28,6 +28,33 @@ public class CorreioQualCep {
                 .setIdleTimeoutUnit(TimeUnit.SECONDS));
     }
 
+    public Uni<String> getLatLong(String cep) {
+        return executeRequest(cep, this::parseLatLong);
+    }
+
+    private String parseLatLong(String html) {
+        try {
+            Document doc = Jsoup.parse(html);
+            Elements colunas = doc.getElementsByClass("col-sm-5");
+            if (colunas.size() < 2) {
+                return "";
+            }
+            String texto = colunas.get(1).text();
+            int indice = texto.indexOf("Latitude");
+            if (indice < 0) {
+                return "";
+            }
+            return texto.substring(indice)
+                    .replace("Latitude:", "")
+                    .replace("Longitude:", "")
+                    .replace("/", ",")
+                    .replace(" ", "")
+                    .trim();
+        } catch (Exception e) {
+        }
+        return "";
+    }
+
     public Uni<String> getEndereco(String cep) {
         return executeRequest(cep, this::parseEndereco);
     }

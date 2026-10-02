@@ -122,16 +122,6 @@ public class ControleEstoqueService {
         return Uni.join().all(unis).andFailFast();
     }
 
-
-    // Migrado de ControleEstoqueController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/estoque/ControleEstoqueController.java:275, camada controller)
-    // Logica original (adaptar):
-    // public List<ControleEstoque> autoComplete(String query) {
-    //         if (query.equals("")) {
-    //             return controleEstoqueService.autoCompleteComUnidade(unidade);
-    //         } else {
-    //             return controleEstoqueService.autoComplete(query, unidade);
-    //         }
-    //     }
     public Uni<List<Long>> autoComplete(String query, Long unidadesId) {
         if (unidadesId == null) {
             return Uni.createFrom().item(java.util.List.of());
@@ -142,23 +132,6 @@ public class ControleEstoqueService {
         return repository.autoComplete(query.toLowerCase(), unidadesId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-// Migrado de ControleEstoqueController.carregarMapa (src/main/java/br/com/sol7/olimpio/control/controllers/estoque/ControleEstoqueController.java:344, camada controller)
-    // Observacao: parametro controleEntregaId: era ControleEntrega (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarMapa(ControleEntrega controleEntrega) {
-    //         /*	polyline = new Polyline();*/
-    //         this.controleEntrega = controleEntrega;
-    //         if (controleEntrega != null) {
-    //             verificaMapa = true;
-    //             advancedModel = new DefaultMapModel();
-    //
-    //             if (configuracaoEstoqueService.findAll().size() != 0) {
-    //                 configuracaoEstoque = configuracaoEstoqueService.findAll().get(0);
-    //                 unidadeCentral = configuracaoEstoque.getUnidade();
-    //                 int countAcentos = 0;
-    //                 String longitude = "";
-    // // ... (truncado, ver fonte original)
     public Uni<Map<String, Object>> carregarMapa(Long controleEntregaId) {
         return controleEntregaService.find(controleEntregaId)
                 .onItem().ifNull().failWith(() -> new NotFoundException("ControleEntrega not found: " + controleEntregaId))
@@ -182,22 +155,6 @@ public class ControleEstoqueService {
                 });
     }
 
-
-    // Migrado de ControleEstoqueController.buscarEstoque (src/main/java/br/com/sol7/olimpio/control/controllers/estoque/ControleEstoqueController.java:771, camada controller)
-    // Logica original (adaptar):
-    // public void buscarEstoque() {
-    //         alerta = false;
-    //         Calendar cal = Calendar.getInstance();
-    //         Date inicio = DateUtil.somarDias(DateUtil.getPrimeiroDiaDoMes(cal.getTime()), -10);
-    //         cal = Calendar.getInstance();
-    //         cal.setTime(new Date());
-    //         cal.add(Calendar.DAY_OF_YEAR, 10);
-    //         Date fim = DateUtil.somarDias(DateUtil.getUltimoDiaDoMes(new Date()), 10);
-    //
-    //         Long quantidadeSolicitacaoExistente = new Long(0);
-    //         quantidadeSolicitacaoExistente = controlePedidosService.listarSolicitacaoUnidadesQtde(usuarioLogadoController.getUnidadesDisponiveis());
-    //
-    // // ... (truncado, ver fonte original)
     public Uni<Map<String, Object>> buscarEstoque(Long unidadeId) {
         String sql = """
             SELECT ce.id AS id, ce.valor AS valor, ce.quantidade AS quantidade,
@@ -245,58 +202,22 @@ public class ControleEstoqueService {
                 });
     }
 
-
-    // Migrado de ControleEstoqueService.autoComplete (src/main/java/br/com/sol7/olimpio/service/services/estoque/ControleEstoqueService.java:25, camada service)
-    // Observacao: parametro unidadesId: era Unidade (referencia por id)
-    // JPQL original: select distinct ce from ControleEstoque ce inner join ce.produto p left join p.produtoCampos lc where ce.unidade = ?2  and (lower(lc.valor) like '%' || ?1 || '%' OR (p.id) like '%' || ?1 || '%')
-    // Logica original (adaptar):
-    // public List<ControleEstoque> autoComplete(String query, Unidade unidades) {
-    //         return this.getControleEstoqueRepository().autoComplete(query.toLowerCase(), unidades, new PageRequest(0, 20)).getContent();
-    //     }
     public Uni<List<Long>> autoComplete2(String query, Long unidadesId) {
         return repository.autoComplete(query.toLowerCase(), unidadesId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de ControleEstoqueService.autoCompleteComUnidade (src/main/java/br/com/sol7/olimpio/service/services/estoque/ControleEstoqueService.java:29, camada service)
-    // Observacao: parametro unidadesId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public List<ControleEstoque> autoCompleteComUnidade(Unidade unidades) {
-    //         return this.getControleEstoqueRepository().autoCompleteComUnidade(unidades);
-    //     }
     public Uni<List<Long>> autoCompleteComUnidade(Long unidadesId) {
         return repository.find("unidadeId = ?1 order by produto.id", unidadesId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de ControleEstoqueService.buscarExistenciaProduto (src/main/java/br/com/sol7/olimpio/service/services/estoque/ControleEstoqueService.java:33, camada service)
-    // Observacao: retorno: era ControleEstoque (referencia por id); parametro unidadeId: era Unidade (referencia por id); parametro produtoId: era Produto (referencia por id)
-    // Logica original (adaptar):
-    // public ControleEstoque buscarExistenciaProduto(Unidade unidade, Produto produto) {
-    //         return getControleEstoqueRepository().buscarExistenciaProduto(unidade, produto);
-    //     }
     public Uni<Long> buscarExistenciaProduto(Long unidadeId, Long produtoId) {
         return repository.find("unidadeId = ?1 and produtoId = ?2", unidadeId, produtoId).firstResult().map(x -> x == null ? null : x.id);
     }
 
-
-    // Migrado de ControleEstoqueService.buscarProdutoEstoque (src/main/java/br/com/sol7/olimpio/service/services/estoque/ControleEstoqueService.java:37, camada service)
-    // Observacao: retorno: era ControleEstoque (referencia por id)
-    // Logica original (adaptar):
-    // public ControleEstoque buscarProdutoEstoque(int produtoestoque) {
-    //         return getControleEstoqueRepository().buscarProdutoEstoque(produtoestoque);
-    //     }
     public Uni<Long> buscarProdutoEstoque(Integer produtoestoque) {
         return repository.find("id = ?1", produtoestoque).firstResult().map(x -> x == null ? null : x.id);
     }
 
-
-    // Migrado de ControleEstoqueService.buscarItenUnidade (src/main/java/br/com/sol7/olimpio/service/services/estoque/ControleEstoqueService.java:41, camada service)
-    // Observacao: parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public List<ControleEstoque> buscarItenUnidade(Unidade unidade) {
-    //         return getControleEstoqueRepository().buscarItenUnidade(unidade);
-    //     }
     public Uni<List<Long>> buscarItenUnidade(Long unidadeId) {
         return repository.find("unidadeId = ?1 order by produto.id", unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }

@@ -72,12 +72,6 @@ public class EtapasNAPService {
         return new EtapasNAPResponse(e.id, e.descricao, e.usuario, e.perfil, e.campoCustomizado, e.tipoModeloDocumento, e.localDocumento, e.nomeDocumento, e.campoDetalhes, e.customizado, e.ordem);
     }
 
-
-    // Migrado de EtapasNAPController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/EtapasNAPController.java:267, camada controller)
-    // Logica original (adaptar):
-    // public List<EtapasNAP> autoComplete(String query) {
-    //         return etapasNAPService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
     }

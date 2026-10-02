@@ -119,17 +119,6 @@ public class GestaoAlunoService {
         return Uni.createFrom().voidItem();
     }
 
-
-    // Migrado de GestaoAlunoController.atualizarDataVencimento (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GestaoAlunoController.java:281, camada controller)
-    // Observacao: parametro parcelaId: era Parcela (referencia por id)
-    // Logica original (adaptar):
-    // public void atualizarDataVencimento(Parcela parcela) {
-    //         try {
-    //             hibernateService.executeUpdateSQL(" update fin_parcela set data_vencimento = '" + DateUtil.getDateAsFormatedUSAString(parcela.getDataVencimento()) + "' where data_pagamento is null and  id =" + parcela.getId());
-    //             gerarCarneController.setAlteracaoParcelas(true);
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.SAVE, "global.sucess", "validation", "Data vencimento da parcela atualizado com Sucesso.");
-    //         } catch (Exception e) {
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.ERROR, "global.error", "validation", "Erro ao atualizar data vencimento da parcela ...
     public Uni<Void> atualizarDataVencimento(Long parcelaId, Date novaData) {
         String sql = "UPDATE fin_parcela SET data_vencimento = ? WHERE data_pagamento IS NULL AND id = ?";
         return Panache.getSession()
@@ -141,19 +130,6 @@ public class GestaoAlunoService {
                 .onItem().invoke(() -> LOG.infof("Data de vencimento da parcela %d atualizada", parcelaId));
     }
 
-
-    // Migrado de GestaoAlunoController.atualizarValorVencimento (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GestaoAlunoController.java:291, camada controller)
-    // Observacao: parametro parcelaId: era Parcela (referencia por id)
-    // Logica original (adaptar):
-    // public void atualizarValorVencimento(Parcela parcela) {
-    //         try {
-    //             hibernateService.executeUpdateSQL(" update fin_parcela set valor = " + parcela.getValor() + " where data_pagamento is null and id =" + parcela.getId());
-    //             gerarCarneController.setAlteracaoParcelas(true);
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.SAVE, "global.sucess", "validation", "Valor da parcela atualizado com Sucesso.");
-    //         } catch (Exception e) {
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.ERROR, "global.error", "validation", "Erro ao atualizar valor parcela.");
-    //         }
-    //     }
     public Uni<Void> atualizarValorVencimento(Long parcelaId, Double novoValor) {
         String sql = "UPDATE fin_parcela SET valor = ? WHERE data_pagamento IS NULL AND id = ?";
         return Panache.getSession()
@@ -189,19 +165,6 @@ public class GestaoAlunoService {
                 .onItem().invoke(() -> LOG.infof("Desconto da parcela %d atualizado", parcelaId));
     }
 
-
-    // Migrado de GestaoAlunoController.atualizarJurosParcela (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GestaoAlunoController.java:311, camada controller)
-    // Observacao: parametro parcelaId: era Parcela (referencia por id)
-    // Logica original (adaptar):
-    // public void atualizarJurosParcela(Parcela parcela) {
-    //         try {
-    //             hibernateService.executeUpdateSQL(" update fin_parcela set juros = " + parcela.getJuros() + " where data_pagamento is null and id =" + parcela.getId());
-    //             gerarCarneController.setAlteracaoParcelas(true);
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.SAVE, "global.sucess", "validation", "Juros da parcela atualizado com Sucesso.");
-    //         } catch (Exception e) {
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.ERROR, "global.error", "validation", "Erro ao atualizar juros parcela.");
-    //         }
-    //     }
     public Uni<Void> atualizarJurosParcela(Long parcelaId, Double novosJuros) {
         String sql = "UPDATE fin_parcela SET juros = ? WHERE data_pagamento IS NULL AND id = ?";
         return Panache.getSession()
@@ -213,19 +176,6 @@ public class GestaoAlunoService {
                 .onItem().invoke(() -> LOG.infof("Juros da parcela %d atualizados", parcelaId));
     }
 
-
-    // Migrado de GestaoAlunoController.atualizarMultaParcela (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GestaoAlunoController.java:321, camada controller)
-    // Observacao: parametro parcelaId: era Parcela (referencia por id)
-    // Logica original (adaptar):
-    // public void atualizarMultaParcela(Parcela parcela) {
-    //         try {
-    //             hibernateService.executeUpdateSQL(" update fin_parcela set multa = " + parcela.getMulta() + " where data_pagamento is null and id =" + parcela.getId());
-    //             gerarCarneController.setAlteracaoParcelas(true);
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.SAVE, "global.sucess", "validation", "Multa da parcela atualizado com Sucesso.");
-    //         } catch (Exception e) {
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.ERROR, "global.error", "validation", "Erro ao atualizar multa parcela.");
-    //         }
-    //     }
     public Uni<Void> atualizarMultaParcela(Long parcelaId, Double novaMulta) {
         String sql = "UPDATE fin_parcela SET multa = ? WHERE data_pagamento IS NULL AND id = ?";
         return Panache.getSession()
@@ -269,22 +219,6 @@ public class GestaoAlunoService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-// Migrado de GestaoAlunoController.gerarContrato (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GestaoAlunoController.java:675, camada controller)
-    // Observacao: retorno: era StreamedContent no legado; parametro ccId: era Contrato (referencia por id)
-    // Logica original (adaptar):
-    // public StreamedContent gerarContrato(Contrato cc) {
-    //         this.contrato = cc;
-    //         ByteArrayOutputStream templateOutput = null;
-    //         InputStream inputStream = null;
-    //
-    //         try {
-    //             hibernateService.executeUpdateSQL(" insert into edc_contrato_download (data_download,qtde , id_usuario, id_contrato) " +
-    //                     " values (now(),1," + usuarioLogadoController.getUsuario().getId() + ", " + cc.getId() + ") on conflict on constraint uk_edc_contrato_download DO UPDATE " +
-    //                     " SET  qtde = edc_contrato_download.qtde + 1 ");
-    //
-    //             File file = new File(applicationResources.getPath("/contrato") + File.separator + contrato.getCurriculo().getTemplateCon ...
-    // // ... (truncado, ver fonte original)
     public Uni<String> gerarContrato(Long ccId, Long usuarioId) {
         return Uni.createFrom().item(() -> {
             try (InputStream templateStream = getClass().getResourceAsStream("/relatorios/modeloContrato.docx")) {
@@ -319,21 +253,6 @@ public class GestaoAlunoService {
         });
     }
 
-
-    // Migrado de GestaoAlunoController.gerarPromissoria (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GestaoAlunoController.java:722, camada controller)
-    // Observacao: retorno: era StreamedContent no legado; parametro ccId: era Contrato (referencia por id)
-    // Logica original (adaptar):
-    // public StreamedContent gerarPromissoria(Contrato cc) {
-    //         this.contrato = cc;
-    //         ByteArrayOutputStream templateOutput = null;
-    //         InputStream inputStream = null;
-    //         try {
-    //             hibernateService.executeUpdateSQL(" insert into edc_promissoria_download (data_download,qtde , id_usuario, id_contrato) " +
-    //                     " values (now(),1," + usuarioLogadoController.getUsuario().getId() + ", " + cc.getId() + ") on conflict on constraint uk_edc_promissoria_download DO UPDATE " +
-    //                     " SET  qtde = edc_promissoria_download.qtde + 1 ");
-    //
-    //             File file = new File(applicationResources.getPath("/promissoria") + File.separator + contrato.getCurriculo(). ...
-    // // ... (truncado, ver fonte original)
     public Uni<String> gerarPromissoria(Long ccId, Long usuarioId) {
         return Uni.createFrom().item(() -> {
             try (InputStream templateStream = getClass().getResourceAsStream("/relatorios/modeloPromissoria.docx")) {
@@ -431,24 +350,6 @@ public class GestaoAlunoService {
                 .subscribe().with(v -> LOG.infof("Download de promissória registrado: contrato=%d, usuario=%d", contratoId, usuarioId));
     }
 
-
-    // Migrado de GestaoAlunoController.buscarParcelas (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GestaoAlunoController.java:886, camada controller)
-    // Logica original (adaptar):
-    // public void buscarParcelas() {
-    //         parcelasSelecionadas = new ArrayList<>();
-    //         parcelasWapperSelecionadas = new ArrayList<>();
-    //         if (ObjectUtil.nullOrEmpty(listFormaPagamento)) {
-    //             return;
-    //         }
-    //         double valorNovoTotal = 0.0;
-    //         for (ParcelaWapper pw : parcelasWapperSelecionadasAntigas) {
-    //             valorNovoTotal += pw.getTotalpagar();
-    //         }
-    //         valorNovoTotal = valorNovoTotal / quantidadesVezes;
-    // 
-    // // ... (truncado, ver fonte original)
-    // Obs: logica de parcelas (fin_parcela, microservico financeiro) e estado da tela; nao portado
-    // Implementacao: retorna IDs de parcelas ativas nao pagas de um contrato (requer chamada ao microservico financeiro)
     public Uni<List<Long>> buscarParcelas(Long contratoId) {
         if (contratoId == null) {
             return Uni.createFrom().item(List.of());

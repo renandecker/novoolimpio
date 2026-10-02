@@ -105,64 +105,23 @@ public class ProdutoService {
                 .map(campos -> new ProdutoCamposVisualizacaoResponse(entityId, campos));
     }
 
-
-
-
-
-    // Migrado de ProdutoService.autoComplete (src/main/java/br/com/sol7/olimpio/service/services/estoque/ProdutoService.java:22, camada service)
-    // JPQL original: select distinct p from Produto p left join p.produtoCampos lc where (lower(lc.valor) like '%' || ?1 || '%' OR (p.id) like '%' || ?1 || '%')
-    // Logica original (adaptar):
-    // public List<Produto> autoComplete(String query) {
-    //         return this.getProdutoRepository().autoComplete(query.toLowerCase(), new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de ProdutoService.buscarProduto (src/main/java/br/com/sol7/olimpio/service/services/estoque/ProdutoService.java:26, camada service)
-    // Observacao: retorno: era Produto (referencia por id)
-    // JPQL original: Select distinct p from ControleEstoque c inner join c.produto p where c.id = ?1
-    // Logica original (adaptar):
-    // public Produto buscarProduto(int produtoestoque) {
-    //         return getProdutoRepository().buscarProdutoEstoque(produtoestoque);
-    //     }
     public Uni<Long> buscarProduto(Integer produtoestoque) {
         return repository.buscarProdutoEstoque(produtoestoque).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de ProdutoService.carregarCampos (src/main/java/br/com/sol7/olimpio/service/services/estoque/ProdutoService.java:30, camada service)
-    // Observacao: retorno: era Produto (referencia por id); parametro livroId: era Produto (referencia por id)
-    // JPQL original: select p from Produto p left join fetch p.produtoCampos where p = ?1
-    // Logica original (adaptar):
-    // public Produto carregarCampos(Produto livro) {
-    //         return getProdutoRepository().carregarCampos(livro);
-    //     }
     public Uni<Long> carregarCampos(Long livroId) {
         return repository.carregarCampos(livroId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de ProdutoService.carregarUnidade (src/main/java/br/com/sol7/olimpio/service/services/estoque/ProdutoService.java:34, camada service)
-    // Observacao: retorno: era Produto (referencia por id); parametro produtoId: era Produto (referencia por id)
-    // JPQL original: select p from Produto p left join fetch p.unidades where p = ?1
-    // Logica original (adaptar):
-    // public Produto carregarUnidade(Produto produto) {
-    //         return getProdutoRepository().carregarUnidade(produto);
-    //     }
     public Uni<Long> carregarUnidade(Long produtoId) {
         return repository.carregarUnidade(produtoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
 
-    // Migrado de ProdutoService.carregarFornecedor (src/main/java/br/com/sol7/olimpio/service/services/estoque/ProdutoService.java:38, camada service)
-    // Observacao: retorno: era Produto (referencia por id); parametro produtoId: era Produto (referencia por id)
-    // JPQL original: select p from Produto p left join fetch p.fornecedores where p = ?1
-    // Logica original (adaptar):
-    // public Produto carregarFornecedor(Produto produto) {
-    //         return getProdutoRepository().carregarFornecedor(produto);
-    //     }
     public Uni<Long> carregarFornecedor(Long produtoId) {
         return repository.carregarFornecedor(produtoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }

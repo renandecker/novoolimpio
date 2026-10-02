@@ -9,6 +9,8 @@ import jakarta.ws.rs.core.*;
 
 import java.util.List;
 
+import br.com.sol7.olimpio.educacao.ocorrenciacomponentecurricular.OcorrenciaComponenteCurricularResponse;
+
 @Path("/api/educacao/chamada-assinada-impressa")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -51,17 +53,13 @@ public class ChamadaAssinadaImpressaController {
     }
 
     @GET
-    @Path("/buscar-ocorrencias")
-    public Uni<Void> buscarOcorrencias(@QueryParam("event") String event) {
-        return service.buscarOcorrencias(event);
+    @Path("/buscar-ocorrencias/{chamadaId}")
+    public Uni<List<OcorrenciaComponenteCurricularResponse>> buscarOcorrencias(@PathParam("chamadaId") Long chamadaId) {
+        return service.buscarOcorrencias(chamadaId);
     }
 
 
-    @GET
-    @Path("/carregar-nova-chamada")
-    public Uni<Void> carregarNovaChamada() {
-        return service.carregarNovaChamada();
-    }
+
 
 
     @GET

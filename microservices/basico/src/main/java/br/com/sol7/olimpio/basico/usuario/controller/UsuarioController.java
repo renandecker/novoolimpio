@@ -19,6 +19,7 @@ import br.com.sol7.olimpio.basico.usuario.dto.UsuarioRequest;
 import br.com.sol7.olimpio.basico.usuario.dto.UsuarioResponse;
 import br.com.sol7.olimpio.basico.usuario.service.FileStorageService;
 import br.com.sol7.olimpio.basico.usuario.service.UsuarioService;
+import br.com.sol7.olimpio.basico.usuario.dto.UsuarioDetalheResponse;
 import org.jboss.resteasy.reactive.RestForm;
 import org.jboss.resteasy.reactive.multipart.FileUpload;
 
@@ -152,10 +153,9 @@ public class UsuarioController {
 
     @POST
     @Path("/gerar-login")
-    public Uni<Void> gerarLogin() {
-        return service.gerarLogin();
+    public Uni<String> gerarLogin(@QueryParam("pessoaId") Long pessoaId) {
+        return service.gerarLogin(pessoaId);
     }
-
 
     @GET
     @Path("/verificar-existencia")
@@ -163,13 +163,11 @@ public class UsuarioController {
         return service.verificarExistencia(id, idpessoa, nome, cpf, rg, email);
     }
 
-
     @GET
-    @Path("/buscar-detalhes")
-    public Uni<Void> buscarDetalhes(@QueryParam("event") String event) {
-        return service.buscarDetalhes(event);
+    @Path("/buscar-detalhes/{id}")
+    public Uni<UsuarioDetalheResponse> buscarDetalhes(@PathParam("id") Long id) {
+        return service.buscarDetalhes(id);
     }
-
 
     @GET
     @Path("/auto-complete")
@@ -179,20 +177,17 @@ public class UsuarioController {
                 .chain(unidadesIds -> service.autoComplete(query, true, unidadesIds));
     }
 
-
     @POST
     @Path("/gerar-relatorio")
     public Uni<String> gerarRelatorio(@QueryParam("localRelatorio") String localRelatorio, @QueryParam("lista") String lista, @QueryParam("nomeArquivoSaida") String nomeArquivoSaida) {
         return service.gerarRelatorio(localRelatorio, lista, nomeArquivoSaida);
     }
 
-
     @GET
-    @Path("/carregar-turnos")
-    public Uni<Void> carregarTurnos() {
-        return service.carregarTurnos();
+    @Path("/carregar-turnos/{id}")
+    public Uni<List<Long>> carregarTurnos(@PathParam("id") Long id) {
+        return service.carregarTurnos(id);
     }
-
 
     @GET
     @Path("/auto-complete-pessoa-fisica-unidade")
@@ -200,13 +195,11 @@ public class UsuarioController {
         return service.autoCompletePessoaFisicaUnidade(query, unidadeId);
     }
 
-
     @GET
     @Path("/auto-complete-pessoa-juridica-unidade")
     public Uni<List<Long>> autoCompletePessoaJuridicaUnidade(@QueryParam("query") String query, @QueryParam("unidadeId") Long unidadeId) {
         return service.autoCompletePessoaJuridicaUnidade(query, unidadeId);
     }
-
 
     @GET
     @Path("/buscar-usuario-com-turnos")
@@ -214,13 +207,11 @@ public class UsuarioController {
         return service.buscarUsuarioComTurnos(entityId);
     }
 
-
     @GET
     @Path("/buscar-usuario-por-perfil")
     public Uni<List<Long>> buscarUsuarioPorPerfil(@QueryParam("perfilId") Long perfilId) {
         return service.buscarUsuarioPorPerfil(perfilId);
     }
-
 
     @GET
     @Path("/buscar-usuario-por-unidades")
@@ -228,13 +219,11 @@ public class UsuarioController {
         return service.buscarUsuarioPorUnidades(unidade);
     }
 
-
     @GET
     @Path("/buscar-usuario-por-unidade")
     public Uni<List<Long>> buscarUsuarioPorUnidade(@QueryParam("unidadeId") Long unidadeId) {
         return service.buscarUsuarioPorUnidade(unidadeId);
     }
-
 
     @GET
     @Path("/auto-complete-usuario")
@@ -242,13 +231,11 @@ public class UsuarioController {
         return service.autoCompleteUsuario(query, unidadeId);
     }
 
-
     @GET
     @Path("/buscar-unidades-disponiveis")
     public Uni<List<Long>> buscarUnidadesDisponiveis(@QueryParam("usuarioId") Long usuarioId) {
         return service.buscarUnidadesDisponiveis(usuarioId);
     }
-
 
     @GET
     @Path("/buscar-unidades-disponiveis-rede")
@@ -256,13 +243,11 @@ public class UsuarioController {
         return service.buscarUnidadesDisponiveisRede(usuarioId);
     }
 
-
     @GET
     @Path("/buscar-usuario-com-unidades")
     public Uni<Long> buscarUsuarioComUnidades(@QueryParam("entityId") Long entityId) {
         return service.buscarUsuarioComUnidades(entityId);
     }
-
 
     @GET
     @Path("/buscar-usuario-com-agendas")
@@ -270,13 +255,11 @@ public class UsuarioController {
         return service.buscarUsuarioComAgendas(entityId);
     }
 
-
     @GET
     @Path("/buscar-agendas-disponiveis")
     public Uni<List<Long>> buscarAgendasDisponiveis(@QueryParam("usuarioId") Long usuarioId) {
         return service.buscarAgendasDisponiveis(usuarioId);
     }
-
 
     @GET
     @Path("/buscar-consultores-com-agenda")
@@ -284,13 +267,11 @@ public class UsuarioController {
         return service.buscarConsultoresComAgenda(agendaId, diaSemana);
     }
 
-
     @GET
     @Path("/buscar-login-existente")
     public Uni<Boolean> buscarLoginExistente(@QueryParam("login") String login) {
         return service.buscarLoginExistente(login);
     }
-
 
     @GET
     @Path("/buscar-login-eemail-existente")
@@ -298,13 +279,11 @@ public class UsuarioController {
         return service.buscarLoginEemailExistente(login, email);
     }
 
-
     @GET
     @Path("/buscar-usuario-com-perfil")
     public Uni<Long> buscarUsuarioComPerfil(@QueryParam("entityId") Long entityId) {
         return service.buscarUsuarioComPerfil(entityId);
     }
-
 
     @GET
     @Path("/buscar-usuario-seu-perfil")
@@ -312,13 +291,11 @@ public class UsuarioController {
         return service.buscarUsuarioSeuPerfil(entityId);
     }
 
-
     @GET
     @Path("/auto-complete-com-unidade")
     public Uni<List<Long>> autoCompleteComUnidade(@QueryParam("query") String query, @QueryParam("unidades") List<Long> unidades) {
         return service.autoCompleteComUnidade(query, unidades);
     }
-
 
     @GET
     @Path("/auto-complete-com-unidade-dia-semana-agenda")
@@ -327,14 +304,12 @@ public class UsuarioController {
                 .chain(unidadesIds -> service.autoCompleteComUnidadeDiaSemanaAgenda(query, diaSemana, agendaId, unidadesIds));
     }
 
-
     @GET
     @Path("/auto-complete-com-unidade-dia-semana-agenda-com-perfil")
     public Uni<List<Long>> autoCompleteComUnidadeDiaSemanaAgendaComPerfil(@HeaderParam("X-Authenticated-Username") String username, @QueryParam("query") String query, @QueryParam("diaSemana") Integer diaSemana, @QueryParam("agendaId") Long agendaId, @QueryParam("perfilId") Long perfilId) {
         return service.buscarUnidadesDisponiveisPorUsername(username)
                 .chain(unidadesIds -> service.autoCompleteComUnidadeDiaSemanaAgendaComPerfil(query, diaSemana, agendaId, perfilId, unidadesIds));
     }
-
 
     @GET
     @Path("/auto-complete-com-unidade-dia-semana")

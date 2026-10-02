@@ -21,4 +21,32 @@ public class TurnoFuncionarioRepository implements PanacheRepository<TurnoFuncio
                         .getResultList());
     }
 
+
+
+    // select tf.* from bas_turno_funcionario tf
+    // inner join bas_turno_trabalho_funcionario ttf on ttf.id_turno_funcionario = tf.id
+    // where tf.id_funcionario = ?1
+    public static final String SQL_BUSCAR_POR_FUNCIONARIO =
+            "SELECT tf.* FROM bas_turno_funcionario tf "
+            + "INNER JOIN bas_turno_trabalho_funcionario ttf ON ttf.id_turno_funcionario = tf.id "
+            + "WHERE tf.id_funcionario = ?1";
+
+    public Uni<TurnoFuncionario> buscarPorFuncionario(Long funcionarioId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_POR_FUNCIONARIO, TurnoFuncionario.class)
+                        .setParameter(1, funcionarioId)
+                        .getSingleResultOrNull());
+    }
+
+    // getTurnoTrabalhoIds from the join table
+    public static final String SQL_GET_TRABALHO_IDS =
+            "SELECT id_turno_trabalho FROM bas_turno_trabalho_funcionario WHERE id_turno_funcionario = ?1";
+
+        public Uni<List<Long>> getTurnoTrabalhoIds(Long turnoFuncionarioId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_GET_TRABALHO_IDS, Long.class)
+                        .setParameter(1, turnoFuncionarioId)
+                        .getResultList());
+    }
+
 }

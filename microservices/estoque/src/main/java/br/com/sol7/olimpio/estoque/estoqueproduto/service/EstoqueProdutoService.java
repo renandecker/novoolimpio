@@ -35,7 +35,6 @@ public class EstoqueProdutoService {
     @Inject
     ProdutoRepository produtoRepository;
 
-    // Migrado de EstoqueProdutoController.populaItens (legado) - controle de estoque da unidade
     public Uni<List<ControleEstoqueResponse>> listarControlePorUnidade(Long unidadeId) {
         return controleEstoqueRepository.buscarItenUnidade(unidadeId)
                 .chain(items -> {
@@ -65,7 +64,6 @@ public class EstoqueProdutoService {
                 });
     }
 
-    // Migrado de EstoqueProdutoController.salvaEntrada (legado): registra movimentacao ENTRADA e soma no ControleEstoque
     public Uni<Void> salvaEntrada(EstoqueProdutoEntradaRequest r) {
         var mov = new MovimentacaoEstoqueRequest(
                 r.valor(), r.quantidade(), null, null, r.usuarioId(), r.produtoId(), r.unidadeId(),
@@ -73,7 +71,6 @@ public class EstoqueProdutoService {
         return movimentacaoEstoqueService.saveOrUpdate(mov).replaceWithVoid();
     }
 
-    // Migrado de EstoqueProdutoController.salvaSolicitacao (legado): registra solicitacao ativa
     public Uni<Void> salvaSolicitacao(EstoqueProdutoSolicitacaoRequest r) {
         var sol = new SolicitacaoEstoqueRequest(
                 r.valor(), r.quantidade(), r.vendaProdutoId(), r.usuarioId(), r.produtoId(), r.unidadeId(),
@@ -81,17 +78,14 @@ public class EstoqueProdutoService {
         return solicitacaoEstoqueService.solicitarItem(sol).replaceWithVoid();
     }
 
-    // Migrado de EstoqueProdutoController.salvaPendenciaEntregue (legado)
     public Uni<Void> salvaPendenciaEntregue(Long pendenciaId) {
         return pendenciaVendaProdutoService.salvaPendenciaEntregue(pendenciaId).replaceWithVoid();
     }
 
-    // Migrado de EstoqueProdutoController.verificaEntregaPendencia (legado) - pendente quando nao ha data de entrega
     public boolean verificaEntregaPendencia(java.util.Date dataEntrega) {
         return dataEntrega == null;
     }
 
-    // Migrado de EstoqueProdutoController.itemDefeito/itemFalta/itemSoliciado/itemNaoEncontrado/itemReservado/itemAProvadoNaoEntregue
     public Uni<ContadoresEstoqueResponse> contadores(Long unidadeId, Long produtoId) {
         Uni<Long> solicitado = solicitacaoEstoqueService.countPorItem(unidadeId, produtoId, Motivo.SOLICITADO);
         Uni<Long> naoEncontrado = solicitacaoEstoqueService.countPorItem(unidadeId, produtoId, Motivo.NAOENCONTRATO);
@@ -104,7 +98,6 @@ public class EstoqueProdutoService {
                 .map(t -> new ContadoresEstoqueResponse(t.getItem1(), t.getItem2(), t.getItem3(), t.getItem4(), t.getItem5(), t.getItem6()));
     }
 
-    // Migrado de EstoqueProdutoController.calcularValorEntrada/calcularValorSolicitacao (legado)
     public Uni<ValorCalculadoResponse> calcularValor(BigDecimal valor, int quantidade) {
         BigDecimal total = BigDecimal.ZERO;
         if (valor != null) {

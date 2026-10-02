@@ -76,20 +76,6 @@ public class MetaDinamicaService {
         return new MetaDinamicaResponse(e.id, e.mes, e.ano, e.percSegunda, e.percTerca, e.percQuarta, e.percQuinta, e.percSexta, e.percSabado, e.percDomingo, e.indicadorId, e.unidadeId, e.dataAtualizacao);
     }
 
-
-    // Migrado de MetaDinamicaController.buscarMovimentacoes (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/MetaDinamicaController.java:153, camada controller)
-    // Observacao: parametro event: era ToggleEvent no legado
-    // Logica original (adaptar):
-    // public void buscarMovimentacoes(ToggleEvent event) {
-    //         if (event.getVisibility() == Visibility.VISIBLE) {
-    //             MetaDinamica mmdd = (MetaDinamica) event.getData();
-    //             listaMetaDiaDinamicas = metaDiaDinamicaService.trazerDiasMeta(mmdd);
-    //             listaMetaValors = metaValorService.metaValorComMetaDinamica(mmdd);
-    //             listaMetaSemanaDinamicas = metaSemanaDinamicaService.metaSemanaDinamicaComMetaDinamica(mmdd);
-    //         }
-    //     }
-    // Obs: metodo de UI (JSF); depende dos modulos MetaDiaDinamica/MetaValor/MetaSemanaDinamica nao migrados
-    // Implementacao: retorna IDs de detalhes de uma meta dinamica (requer chamadas aos modulos nao migrados)
     public Uni<MetaDinamicaDetalhesResponse> buscarMovimentacoes(Long metaDinamicaId) {
         if (metaDinamicaId == null) {
             return Uni.createFrom().item(new MetaDinamicaDetalhesResponse(List.of(), List.of(), List.of()));
@@ -238,13 +224,6 @@ public class MetaDinamicaService {
         ).replaceWithVoid();
     }
 
-
-    // Migrado de MetaDinamicaService.verificarMetaAnoMesUnidade (src/main/java/br/com/sol7/olimpio/service/services/comercial/MetaDinamicaService.java:29, camada service)
-    // Observacao: parametro indicadorId: era Indicador (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public List<MetaDinamica> verificarMetaAnoMesUnidade(Integer mes, Integer ano, Indicador indicador, Unidade unidade) {
-    //         return getMetaDinamicaRepository().verificarMetaAnoMesUnidade(mes, ano, indicador, unidade);
-    //     }
     public Uni<List<Long>> verificarMetaAnoMesUnidade(Integer mes, Integer ano, Long indicadorId, Long unidadeId) {
         return repository.find("mes = ?1 and ano = ?2 and indicadorId = ?3 and unidadeId = ?4", mes, ano, indicadorId, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }

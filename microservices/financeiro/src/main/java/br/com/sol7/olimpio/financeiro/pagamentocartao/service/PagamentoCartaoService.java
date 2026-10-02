@@ -36,7 +36,6 @@ public class PagamentoCartaoService {
         return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Pagamento com cartão não encontrado")).map(this::toResponse);
     }
 
-    // Migrado de CaixaController.salvar / pagamentoCartaoCredito (legado) - se o pagamento nao e
     // credito, a quantidade de parcelas nao se aplica e e zerada (nula) ao salvar.
     public Uni<PagamentoCartaoResponse> create(PagamentoCartaoRequest r) {
         var e = new PagamentoCartao();

@@ -84,14 +84,6 @@ public class HistoricoAlunoService {
         return Uni.createFrom().voidItem();
     }
 
-
-    // Migrado de HistoricoAlunoService.buscarHistoricoAlunoComCompromissos (src/main/java/br/com/sol7/olimpio/service/services/educacao/HistoricoAlunoService.java:23, camada service)
-    // Observacao: retorno: era HistoricoAluno (referencia por id)
-    // JPQL original: select p from HistoricoAluno p left join fetch p.compromissos where p.id = ?1
-    // Logica original (adaptar):
-    // public HistoricoAluno buscarHistoricoAlunoComCompromissos(Long historico) {
-    //         return getHistoricoAlunoRepository().buscarHistoricoAlunoComCompromissos(historico);
-    //     }
     public Uni<Long> buscarHistoricoAlunoComCompromissos(Long historico) {
         return repository.buscarHistoricoAlunoComCompromissos(historico).map(list -> list.isEmpty() ? null : list.get(0).id);
     }

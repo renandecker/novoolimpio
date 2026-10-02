@@ -63,7 +63,6 @@ public class ControleEntregaService {
                         : Uni.createFrom().failure(new NotFoundException("ControleEntrega not found")));
     }
 
-    // Migrado de ControleEntregaService.entregasproUnidade (legado)
     public Uni<List<ControleEntregaResponse>> entregasPorUnidade(Long unidadeId) {
         return repository.entregasPorUnidade(unidadeId).chain(items -> {
             var responses = items.stream().map(this::toResponse).toList();

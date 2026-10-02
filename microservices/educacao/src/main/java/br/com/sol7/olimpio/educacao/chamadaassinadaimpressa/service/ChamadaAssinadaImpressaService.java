@@ -124,9 +124,26 @@ public class ChamadaAssinadaImpressaService {
     //             ocorrenciaComponenteCurriculars = ocorrenciaComponenteCurricularService.buscarOcorrenciaPorOferecimentoEDatas(chamadaAssinadaImpressa.getOferecimentoComponenteCurricular(), chamadaAssinadaImpressa.getInicio(), chamadaAssinadaImpressa.getFim());
     //         }
     //     }
-    public Uni<Void> buscarOcorrencias(String event) {
-        // Obs: logica de UI (ToggleEvent) e depende do microservico matricula (ocorrenciaComponenteCurricularService.buscarOcorrenciaPorOferecimentoEDatas)
-        return Uni.createFrom().voidItem();
+    public Uni<List<OcorrenciaComponenteCurricularResponse>> buscarOcorrencias(Long chamadaId) {
+        return repository.findById(chamadaId).onItem().ifNull()
+                .failWith(() -> new NotFoundException("ChamadaAssinadaImpressa not found"))
+                .chain(chamada -> ocorrenciaComponenteCurricularService.buscarOcorrenciaPorOferecimentoEDatas(
+                        chamada.oferecimentoComponenteCurricularId,
+                        chamada.inicio.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate(),
+                        chamada.fim.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate()))
+                .chain(ids -> {
+                    if (ids == null || ids.isEmpty()) {
+                        return Uni.createFrom().item(List.of());
+                    }
+                    Uni<List<OcorrenciaComponenteCurricularResponse>> uni = Uni.createFrom().item(new ArrayList<>());
+                    for (Long id : ids) {
+                        uni = uni.chain(list -> ocorrenciaComponenteCurricularService.find(id).map(occ -> {
+                            list.add(occ);
+                            return list;
+                        }));
+                    }
+                    return uni;
+                });
     }
 
 
@@ -135,10 +152,7 @@ public class ChamadaAssinadaImpressaService {
     // public void carregarNovaChamada() {
     //         oferecimentoComponenteCurricular = new OferecimentoComponenteCurricular();
     //     }
-    public Uni<Void> carregarNovaChamada() {
-        // Obs: logica de UI (instancia novo oferecimentoComponenteCurricular na tela)
-        return Uni.createFrom().voidItem();
-    }
+
 
 
     // Migrado de ChamadaAssinadaImpressaController.autoCompleteOferecimento (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/ChamadaAssinadaImpressaController.java:130, camada controller)

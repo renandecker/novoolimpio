@@ -77,12 +77,6 @@ public class ConsultorService {
         return Uni.createFrom().item(null);
     }
 
-
-    // Migrado de ConsultorController.autoCompleteComUnidade (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/ConsultorController.java:171, camada controller)
-    // Logica original (adaptar):
-    // public List<Usuario> autoCompleteComUnidade(String query) {
-    //         return consultorService.autoCompleteComUnidade(query);
-    //     }
     public Uni<List<Long>> autoCompleteComUnidade(String query, List<Long> unidadesIds) {
         if (unidadesIds == null || unidadesIds.isEmpty()) {
             return Uni.createFrom().item(java.util.List.of());
@@ -90,25 +84,10 @@ public class ConsultorService {
         return repository.autoCompleteComUnidade(query.toLowerCase().trim(), unidadesIds).map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de ConsultorService.buscarConsultorComTurnos (src/main/java/br/com/sol7/olimpio/service/services/comercial/ConsultorService.java:34, camada service)
-    // Observacao: retorno: era Consultor (referencia por id); parametro entityId: era Consultor (referencia por id)
-    // JPQL original: Select c from Consultor c left join fetch c.turnoTrabalhos where c = ?1
-    // Logica original (adaptar):
-    // public Consultor buscarConsultorComTurnos(Consultor entity) {
-    //         return getConsultorRepository().buscarConsultorComTurnos(entity);
-    //     }
     public Uni<Long> buscarConsultorComTurnos(Long entityId) {
         return repository.buscarConsultorComTurnos(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de ConsultorService.buscarUsuarioNoConsultor (src/main/java/br/com/sol7/olimpio/service/services/comercial/ConsultorService.java:38, camada service)
-    // Observacao: retorno: era Consultor (referencia por id); parametro entityId: era Usuario (referencia por id)
-    // Logica original (adaptar):
-    // public Consultor buscarUsuarioNoConsultor(Usuario entity) {
-    //         return getConsultorRepository().buscarUsuarioNoConsultor(entity);
-    //     }
     public Uni<Long> buscarUsuarioNoConsultor(Long entityId) {
         return repository.find("usuarioId = ?1", entityId).firstResult().map(x -> x == null ? null : x.id);
     }

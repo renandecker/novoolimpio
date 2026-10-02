@@ -69,35 +69,14 @@ public class HorarioService {
         return new HorarioResponse(e.id, e.hora);
     }
 
-
-    // Migrado de HorarioController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/basico/HorarioController.java:78, camada controller)
-    // Logica original (adaptar):
-    // public List<Horario> autoComplete(String query) {
-    //         return horarioService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query.toLowerCase().trim()).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de HorarioService.buscarHorarioPorHora (src/main/java/br/com/sol7/olimpio/service/services/basico/HorarioService.java:26, camada service)
-    // Observacao: retorno: era Horario (referencia por id)
-    // Logica original (adaptar):
-    // public Horario buscarHorarioPorHora(String hora) {
-    //         return getHorarioRepository().buscarHorarioPorHora(hora);
-    //     }
     public Uni<Long> buscarHorarioPorHora(String hora) {
         return repository.find("hora = ?1", hora).firstResult().map(x -> x == null ? null : x.id);
     }
 
-
-    // Migrado de HorarioService.buscarHorariosPrenchidos (src/main/java/br/com/sol7/olimpio/service/services/basico/HorarioService.java:47, camada service)
-    // Observacao: parametro agendaId: era Agenda (referencia por id)
-    // JPQL original: select c2.horario from Compromisso c2 where c2.agenda = ?1 AND c2.data = ?2
-    // Logica original (adaptar):
-    // public List<Horario> buscarHorariosPrenchidos(Agenda agenda, Date data) {
-    //         return getHorarioRepository().buscarHorariosPrenchidos(agenda, data);
-    //     }
     public Uni<List<Long>> buscarHorariosPrenchidos(Long agendaId, Date data) {
         return repository.buscarHorariosPrenchidos(agendaId, data)
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());

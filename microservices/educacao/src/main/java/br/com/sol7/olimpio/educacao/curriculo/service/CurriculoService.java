@@ -136,15 +136,6 @@ public class CurriculoService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de CurriculoController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/CurriculoController.java:771, camada controller)
-    // Logica original (adaptar):
-    // public List<Curriculo> autoComplete(String query) {
-    //         if (query.equals("")) {
-    //             return curriculoService.unidadesCurso(usuarioLogadoController.getUnidadesDisponiveis());
-    //         }
-    //         return curriculoService.autoCompleteComUnidades(query.toLowerCase(), usuarioLogadoController.getUnidadesDisponiveis());
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         if (query.equals("")) {
             // Obs: condicao removida (depende de outro microservico): curriculo.unidades in (unidadesDisponiveis do usuario logado)
@@ -205,87 +196,34 @@ public class CurriculoService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de CurriculoService.buscarCursoComUnidades (src/main/java/br/com/sol7/olimpio/service/services/educacao/CurriculoService.java:28, camada service)
-    // Observacao: retorno: era Curriculo (referencia por id); parametro entityId: era Curriculo (referencia por id)
-    // Logica original (adaptar):
-    // public Curriculo buscarCursoComUnidades(Curriculo entity) {
-    //         return getCursoRepository().buscarCursoComUnidades(entity);
-    //     }
     public Uni<Long> buscarCursoComUnidades(Long entityId) {
         return repository.buscarCursoComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de CurriculoService.buscarCursoComMatrizCurriculares (src/main/java/br/com/sol7/olimpio/service/services/educacao/CurriculoService.java:32, camada service)
-    // Observacao: retorno: era Curriculo (referencia por id); parametro entityId: era Curriculo (referencia por id)
-    // Logica original (adaptar):
-    // public Curriculo buscarCursoComMatrizCurriculares(Curriculo entity) {
-    //         return getCursoRepository().buscarCursoComMatrizCurriculares(entity);
-    //     }
     public Uni<Long> buscarCursoComMatrizCurriculares(Long entityId) {
         return repository.buscarCursoComMatrizCurriculares(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de CurriculoService.autoCompleteComUnidades (src/main/java/br/com/sol7/olimpio/service/services/educacao/CurriculoService.java:36, camada service)
-    // Logica original (adaptar):
-    // public List<Curriculo> autoCompleteComUnidades(String query, List<Unidade> unidades) {
-    //         return this.getCursoRepository().autoCompleteComUnidades(query.toLowerCase().trim(), unidades, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteComUnidades(String query, List<Long> unidades) {
         return repository.autoCompleteComUnidades(query.toLowerCase().trim(), unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de CurriculoService.autoCompleteComUnidadesrematricula (src/main/java/br/com/sol7/olimpio/service/services/educacao/CurriculoService.java:40, camada service)
-    // Observacao: parametro pessoaId: era Pessoa (referencia por id)
-    // Logica original (adaptar):
-    // public List<Curriculo> autoCompleteComUnidadesrematricula(String query, List<Unidade> unidades, Pessoa pessoa) {
-    //         return this.getCursoRepository().autoCompleteComUnidadesrematricula(query.toLowerCase().trim(), unidades, pessoa, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteComUnidadesrematricula(String query, List<Long> unidades, Long pessoaId) {
         return repository.autoCompleteComUnidadesrematricula(query.toLowerCase().trim(), unidades, pessoaId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de CurriculoService.autoCompleteComUnidade (src/main/java/br/com/sol7/olimpio/service/services/educacao/CurriculoService.java:44, camada service)
-    // Observacao: parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public List<Curriculo> autoCompleteComUnidade(String query,Unidade unidade) {
-    //         return this.getCursoRepository().autoCompleteComUnidade(query.toLowerCase().trim(), unidade, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteComUnidade(String query, Long unidadeId) {
         return repository.autoCompleteComUnidade(query.toLowerCase().trim(), unidadeId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de CurriculoService.autoCompleteComUnidades (src/main/java/br/com/sol7/olimpio/service/services/educacao/CurriculoService.java:48, camada service)
-    // Logica original (adaptar):
-    // public List<Curriculo> autoCompleteComUnidades(List<Unidade> unidades) {
-    //         return this.getCursoRepository().autoCompleteComUnidades(unidades, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteComUnidades2(List<Long> unidades) {
         return repository.unidadesCurso(unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de CurriculoService.buscarCursosDaUnidade (src/main/java/br/com/sol7/olimpio/service/services/educacao/CurriculoService.java:56, camada service)
-    // Observacao: parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public List<Curriculo> buscarCursosDaUnidade(Unidade unidade) {
-    //         return getCursoRepository().buscarCursosDaUnidade(unidade);
-    //     }
     public Uni<List<Long>> buscarCursosDaUnidade(Long unidadeId) {
         return repository.buscarCursosDaUnidade(unidadeId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de CurriculoService.buscarCurriculoPorUnidades (src/main/java/br/com/sol7/olimpio/service/services/educacao/CurriculoService.java:76, camada service)
-    // Logica original (adaptar):
-    // public List<Curriculo> buscarCurriculoPorUnidades(List<Unidade> unidade) {
-    //         return getCursoRepository().buscarCurriculoPorUnidades(unidade);
-    //     }
     public Uni<List<Long>> buscarCurriculoPorUnidades(List<Long> unidade) {
         return repository.buscarCurriculoPorUnidades(unidade).map(list -> list.stream().map(x -> x.id).toList());
     }

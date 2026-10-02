@@ -228,7 +228,6 @@ public class PessoaRepository implements PanacheRepository<Pessoa> {
     }
 
 
-    // Migrado de PessoaRepository.buscarUnidades (legado) - retorna os ids de Unidade vinculados a uma Pessoa via bas_pessoa_unidade.
     public static final String SQL_BUSCAR_UNIDADES_POR_PESSOA =
             "SELECT DISTINCT p_u_jt.id_unidade FROM bas_pessoa_unidade p_u_jt WHERE p_u_jt.id_pessoa = ?1 ORDER BY p_u_jt.id_unidade";
 

@@ -62,7 +62,6 @@ public class MovimentacaoEstoqueService {
         return repository.persist(e).replaceWith(() -> toResponse(e));
     }
 
-    // Migrado de EstoqueProdutoController.salvaEntrada (src/main/java/br/com/sol7/olimpio/control/controllers/estoque/EstoqueProdutoController.java:163, camada controller)
     // Forca tipo ENTRADA, data do movimento atual, central=false e soma a quantidade no ControleEstoque da unidade/produto.
     public Uni<MovimentacaoEstoqueResponse> saveOrUpdate(MovimentacaoEstoqueRequest r) {
         var e = new MovimentacaoEstoque();

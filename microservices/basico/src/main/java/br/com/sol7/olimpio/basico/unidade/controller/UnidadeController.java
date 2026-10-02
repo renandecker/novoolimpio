@@ -13,6 +13,9 @@ import java.util.List;
 import br.com.sol7.olimpio.basico.unidade.dto.UnidadeRequest;
 import br.com.sol7.olimpio.basico.unidade.dto.UnidadeResponse;
 import br.com.sol7.olimpio.basico.unidade.service.UnidadeService;
+import br.com.sol7.olimpio.basico.unidade.dto.UnidadeIdsResponse;
+import br.com.sol7.olimpio.basico.unidade.dto.UnidadePessoasResponse;
+import br.com.sol7.olimpio.basico.unidade.dto.UnidadeUsuariosResponse;
 
 @Path("/api/basico/unidade")
 @Produces(MediaType.APPLICATION_JSON)
@@ -58,37 +61,37 @@ public class UnidadeController {
     }
 
     @GET
-    @Path("/carregar-usuarios")
-    public Uni<Void> carregarUsuarios(@QueryParam("unidadeId") Long unidadeId) {
-        return service.carregarUsuarios(unidadeId);
+    @Path("/carregar-usuarios/{unidadeId}/{usuarioLogadoId}")
+    public Uni<UnidadeUsuariosResponse> carregarUsuarios(@PathParam("unidadeId") Long unidadeId, @PathParam("usuarioLogadoId") Long usuarioLogadoId) {
+        return service.carregarUsuarios(unidadeId, usuarioLogadoId);
     }
 
 
     @GET
-    @Path("/carregar-professores")
-    public Uni<Void> carregarProfessores(@QueryParam("unidadeId") Long unidadeId) {
-        return service.carregarProfessores(unidadeId);
+    @Path("/carregar-professores/{unidadeId}/{usuarioLogadoId}")
+    public Uni<UnidadeIdsResponse> carregarProfessores(@PathParam("unidadeId") Long unidadeId, @PathParam("usuarioLogadoId") Long usuarioLogadoId) {
+        return service.carregarProfessores(unidadeId, usuarioLogadoId);
     }
 
 
     @GET
-    @Path("/carregar-curriculos")
-    public Uni<Void> carregarCurriculos(@QueryParam("unidadeId") Long unidadeId) {
-        return service.carregarCurriculos(unidadeId);
+    @Path("/carregar-curriculos/{unidadeId}/{usuarioLogadoId}")
+    public Uni<UnidadeIdsResponse> carregarCurriculos(@PathParam("unidadeId") Long unidadeId, @PathParam("usuarioLogadoId") Long usuarioLogadoId) {
+        return service.carregarCurriculos(unidadeId, usuarioLogadoId);
     }
 
 
     @GET
-    @Path("/carregar-pessoas")
-    public Uni<Void> carregarPessoas(@QueryParam("unidadeId") Long unidadeId) {
-        return service.carregarPessoas(unidadeId);
+    @Path("/carregar-pessoas/{unidadeId}/{usuarioLogadoId}")
+    public Uni<UnidadePessoasResponse> carregarPessoas(@PathParam("unidadeId") Long unidadeId, @PathParam("usuarioLogadoId") Long usuarioLogadoId) {
+        return service.carregarPessoas(unidadeId, usuarioLogadoId);
     }
 
 
     @GET
-    @Path("/carregar-turnos")
-    public Uni<Void> carregarTurnos() {
-        return service.carregarTurnos();
+    @Path("/carregar-turnos/{usuarioId}")
+    public Uni<List<Long>> carregarTurnos(@PathParam("usuarioId") Long usuarioId) {
+        return service.carregarTurnos(usuarioId);
     }
 
 

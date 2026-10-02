@@ -70,14 +70,6 @@ public class PeriodoService {
         return new PeriodoResponse(e.id, e.descricao, e.tipoCursoId, e.dataInicio, e.dataFim, e.frequenciaMinima, e.mediaSemExame, e.mediaFinal, e.conceitoFinal);
     }
 
-
-    // Migrado de PeriodoService.buscarPeriodoComUnidades (src/main/java/br/com/sol7/olimpio/service/services/educacao/PeriodoService.java:19, camada service)
-    // Observacao: retorno: era Periodo (referencia por id); parametro entityId: era Periodo (referencia por id)
-    // JPQL original: Select ca from Periodo ca left join fetch ca.unidades where ca = ?1
-    // Logica original (adaptar):
-    // public Periodo buscarPeriodoComUnidades(Periodo entity) {
-    //         return getPeriodoRepository().buscarPeriodoComUnidades(entity);
-    //     }
     public Uni<Long> buscarPeriodoComUnidades(Long entityId) {
         return repository.buscarPeriodoComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }

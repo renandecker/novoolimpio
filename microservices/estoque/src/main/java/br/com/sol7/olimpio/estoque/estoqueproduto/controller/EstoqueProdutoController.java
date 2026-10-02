@@ -21,42 +21,36 @@ public class EstoqueProdutoController {
     @Inject
     br.com.sol7.olimpio.estoque.pendenciavendaproduto.PendenciaVendaProdutoService pendenciaVendaProdutoService;
 
-    // Migrado de EstoqueProdutoController.populaItens (legado)
     @GET
     @Path("/controle")
     public Uni<List<ControleEstoqueResponse>> listarControlePorUnidade(@QueryParam("unidadeId") Long unidadeId) {
         return service.listarControlePorUnidade(unidadeId);
     }
 
-    // Migrado de EstoqueProdutoController.pendenciaVendaProdutoList (legado)
     @GET
     @Path("/pendencias")
     public Uni<List<PendenciaVendaProdutoResponse>> pendencias(@QueryParam("unidadeId") Long unidadeId) {
         return pendenciaVendaProdutoService.listarPorUnidade(unidadeId);
     }
 
-    // Migrado de EstoqueProdutoController.salvaEntrada (legado)
     @POST
     @Path("/entrada")
     public Uni<Response> salvaEntrada(@Valid EstoqueProdutoEntradaRequest r) {
         return service.salvaEntrada(r).replaceWith(() -> Response.status(Response.Status.CREATED).build());
     }
 
-    // Migrado de EstoqueProdutoController.salvaSolicitacao (legado)
     @POST
     @Path("/solicitacao")
     public Uni<Response> salvaSolicitacao(@Valid EstoqueProdutoSolicitacaoRequest r) {
         return service.salvaSolicitacao(r).replaceWith(() -> Response.status(Response.Status.CREATED).build());
     }
 
-    // Migrado de EstoqueProdutoController.salvaPendenciaEntregue (legado)
     @PUT
     @Path("/pendencia/{id}/entregar")
     public Uni<Void> salvaPendenciaEntregue(@PathParam("id") Long id) {
         return service.salvaPendenciaEntregue(id);
     }
 
-    // Migrado de EstoqueProdutoController.verificaEntregaPendencia (legado)
     @GET
     @Path("/verifica-entrega-pendencia")
     public Uni<Boolean> verificaEntregaPendencia(@QueryParam("dataEntrega") Long dataEntregaEpochMillis) {
@@ -64,14 +58,12 @@ public class EstoqueProdutoController {
         return Uni.createFrom().item(service.verificaEntregaPendencia(data));
     }
 
-    // Migrado de EstoqueProdutoController.itemDefeito/itemFalta/itemSoliciado/itemNaoEncontrado/itemReservado/itemAProvadoNaoEntregue
     @GET
     @Path("/contadores")
     public Uni<ContadoresEstoqueResponse> contadores(@QueryParam("unidadeId") Long unidadeId, @QueryParam("produtoId") Long produtoId) {
         return service.contadores(unidadeId, produtoId);
     }
 
-    // Migrado de EstoqueProdutoController.calcularValorEntrada/calcularValorSolicitacao (legado)
     @GET
     @Path("/calcular-valor")
     public Uni<ValorCalculadoResponse> calcularValor(@QueryParam("valor") BigDecimal valor, @QueryParam("quantidade") Integer quantidade) {

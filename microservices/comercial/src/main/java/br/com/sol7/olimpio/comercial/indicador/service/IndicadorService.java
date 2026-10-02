@@ -70,15 +70,6 @@ public class IndicadorService {
         return new IndicadorResponse(e.id, e.nome, e.data_criacao, e.formato_indicador, e.dia, e.mes, e.ano, e.semana, e.vinculadoVendedor);
     }
 
-
-    // Migrado de IndicadorController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/IndicadorController.java:185, camada controller)
-    // Logica original (adaptar):
-    // public List<Indicador> autoComplete(String query) {
-    //         if (ObjectUtil.nullOrEmpty(query)) {
-    //             return indicadorService.indicadorOrder();
-    //         }
-    //         return indicadorService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         if (query == null || query.isEmpty()) {
             return repository.indicadorOrder().map(list -> list.stream().map(x -> x.id).toList());

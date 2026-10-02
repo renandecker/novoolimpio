@@ -69,24 +69,10 @@ public class TipoCanalService {
         return new TipoCanalResponse(e.id, e.descricao);
     }
 
-
-    // Migrado de TipoCanalService.buscarTipoCanalTelemarketing (src/main/java/br/com/sol7/olimpio/service/services/comercial/TipoCanalService.java:25, camada service)
-    // Observacao: retorno: era Optional<TipoCanal> no legado
-    // Logica original (adaptar):
-    // public Optional<TipoCanal> buscarTipoCanalTelemarketing() {
-    //         return getBaseRepository().findById(4);
-    //     }
     public Uni<String> buscarTipoCanalTelemarketing() {
         return repository.findById(4L).map(x -> x == null ? null : x.descricao);
     }
 
-
-    // Migrado de TipoCanalService.buscarTipoCanalEmailmarketing (src/main/java/br/com/sol7/olimpio/service/services/comercial/TipoCanalService.java:29, camada service)
-    // Observacao: retorno: era Optional<TipoCanal> no legado
-    // Logica original (adaptar):
-    // public Optional<TipoCanal> buscarTipoCanalEmailmarketing() {
-    //         return getBaseRepository().findById(5);
-    //     }
     public Uni<String> buscarTipoCanalEmailmarketing() {
         return repository.findById(5L).map(x -> x == null ? null : x.descricao);
     }

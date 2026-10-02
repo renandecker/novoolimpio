@@ -91,7 +91,6 @@ public class OferecimentoComponenteCurricularService {
     @Inject
     PessoaFisicaRepository pessoaFisicaRepository;
 
-    // Migrado de SchedulingService.replicarOferecimentoAuto() (legado, L279-326): rotina automatica
     // de replicacao de oferecimentos. Roda verificarDisciplina (status de disciplinas), seleciona os
     // oferecimentos elegiveis usando o SQL configurado em bas_config (chave SQL_REPLICAR_OFERECIMENTOS,
     // com fallback para o SQL padrao do legado), replica cada id via replicarOferecimento e repete ate
@@ -385,7 +384,6 @@ public class OferecimentoComponenteCurricularService {
                 });
     }
 
-    // Migrado de OferecimentoComponenteCurricularService.gerarAula (legado, L975-985) -
     // DISPONIBILIDADE_LIVRE: gera as ocorrencias sem data nem diaAula (agendamento livre,
     // definido depois na UI), como no legado.
     private List<OcorrenciaComponenteCurricular> gerarOcorrenciasLivre(OferecimentoComponenteCurricular of, long quantidadeAulas) {
@@ -462,7 +460,6 @@ public class OferecimentoComponenteCurricularService {
                         : criterioRepository.findById(ids.get(0)));
     }
 
-    // Migrado de OferecimentoCursoController.periodoDefinidoNosCriterios (legado, L624) -
     // datas invalidas por criterio sao apenas informativas na UI.
     private boolean periodoDefinidoNosCriterios(Date data, Criterio criterio) {
         if (criterio == null || (criterio.dataInicio == null && criterio.dataFim == null)) {
@@ -655,7 +652,6 @@ public class OferecimentoComponenteCurricularService {
         return base;
     }
 
-    // Migrado de OferecimentoCursoController.buscarTurnoEducacao (legado) - "descricao: HH:mm as HH:mm".
     public Uni<String> buscarTurnoEducacao(Long ocorrenciaComponenteCurricularId) {
         if (ocorrenciaComponenteCurricularId == null) {
             return Uni.createFrom().item("");
@@ -809,222 +805,81 @@ public class OferecimentoComponenteCurricularService {
         return Uni.createFrom().voidItem();
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularController.gerarAula (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/OferecimentoComponenteCurricularController.java:830, camada controller)
-    // Logica original (adaptar):
-    // private void gerarAula() {
-    //         try {
-    //             alteracaodiaaula = true;
-    //             bloquearProximo = false;
-    //             Calendar calendario = Calendar.getInstance();
-    //             calendario.setTime(dataInicio);
-    //             listOcorrenciaRemove();
-    //             ocorrenciaComponenteCurriculars = new ArrayList<>();
-    //             if (ObjectUtil.nullOrEmpty(diasAulaSelecionado)) {
-    //                 MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.INFO, "global.warning", "validation", "Marque pelo menos um Dia da Semana.");
-    //                 return;
-    //             }
-    // // ... (truncado, ver fonte original)
     public Uni<Void> gerarAula() {
         // Obs: logica de UI do controller JSF (gera OcorrenciaComponenteCurricular/DiaAula)
         return Uni.createFrom().voidItem();
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularController.buscarTurnoEducacao (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/OferecimentoComponenteCurricularController.java:884, camada controller)
-    // Observacao: parametro ocorrenciaComponenteCurricularId: era OcorrenciaComponenteCurricular (referencia por id)
-    // Logica original (adaptar):
-    // public String buscarTurnoEducacao(OcorrenciaComponenteCurricular ocorrenciaComponenteCurricular) {
-    //         if (!ObjectUtil.nullOrEmpty(ocorrenciaComponenteCurricular.getDiaAula())) {
-    //             return (ocorrenciaComponenteCurricular.getDiaAula().getTurnoEducacao().getDescricao() + ": " + DateUtil.transformarDateEmHora(ocorrenciaComponenteCurricular.getDiaAula().getTurnoEducacao().getInicio()) + " as " + DateUtil.transformarDateEmHora(ocorrenciaComponenteCurricular.getDiaAula().getTurnoEducacao().getFim()));
-    //         }
-    //         return "";
-    //     }
-    // Obs: implementado em buscarTurnoEducacao(Long ocorrenciaComponenteCurricularId)
-
-
-    // Migrado de OferecimentoComponenteCurricularService.buscarMatrizCurricular (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:57, camada service)
-    // Observacao: parametro curriculoId: era Curriculo (referencia por id)
-    // Logica original (adaptar):
-    // public List<MatrizCurricular> buscarMatrizCurricular(Curriculo curriculo) {
-    //         return getOferecimentoComponenteCurricularRepository().buscarMatrizCurricular(curriculo);
-    //     }
     public Uni<List<Long>> buscarMatrizCurricular(Long curriculoId) {
         return repository.buscarMatrizCurricular(curriculoId).map(list -> list.stream()
                 .map(x -> TupleHelper.getLong((Tuple) x, "id"))
                 .toList());
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.autocompleteComCurriculoGrupoComQuery (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:61, camada service)
-    // Observacao: parametro grupoId: era Grupo (referencia por id); parametro curriculoId: era Curriculo (referencia por id)
-    // JPQL original: select distinct off.componenteCurricular from OferecimentoComponenteCurricular off where off.unidade.ativo = true and off.grupo = ?2 and off.curriculo = ?3 and off.status <> 'CANCELADA' and   (lower(off.componenteCurricular.descricao) like '%' || ?1 || '%'  OR str(off.id) = ?1 or lower(off.componenteCurricular.sucinto) like '%' || ?1 || '%')
-    // Logica original (adaptar):
-    // public List<ComponenteCurricular> autocompleteComCurriculoGrupoComQuery(String query, Grupo grupo, Curriculo curriculo) {
-    //         return getOferecimentoComponenteCurricularRepository().autocompleteComCurriculoGrupoComQuery(query.toLowerCase().trim(), grupo, curriculo, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autocompleteComCurriculoGrupoComQuery(String query, Long grupoId, Long curriculoId) {
         return repository.autocompleteComCurriculoGrupoComQuery(query.toLowerCase().trim(), grupoId, curriculoId)
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.autocompleteComCurriculoGrupoSemQuery (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:65, camada service)
-    // Observacao: parametro grupoId: era Grupo (referencia por id); parametro curriculoId: era Curriculo (referencia por id)
-    // JPQL original: select distinct off.componenteCurricular from OferecimentoComponenteCurricular off where off.unidade.ativo = true and  off.grupo = ?1 and off.curriculo = ?2 and off.status <> 'CANCELADA'
-    // Logica original (adaptar):
-    // public List<ComponenteCurricular> autocompleteComCurriculoGrupoSemQuery(Grupo grupo, Curriculo curriculo) {
-    //         return getOferecimentoComponenteCurricularRepository().autocompleteComCurriculoGrupoSemQuery(grupo, curriculo, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autocompleteComCurriculoGrupoSemQuery(Long grupoId, Long curriculoId) {
         return repository.autocompleteComCurriculoGrupoSemQuery(grupoId, curriculoId)
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.autocompleteComCurriculoComQuery (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:69, camada service)
-    // Observacao: parametro grupoId: era Grupo (referencia por id); parametro curriculoId: era Curriculo (referencia por id)
-    // JPQL original: select distinct off.componenteCurricular from OferecimentoComponenteCurricular off where off.unidade.ativo = true and  off.curriculo = ?2 and off.status <> 'CANCELADA' and   (lower(off.componenteCurricular.descricao) like '%' || ?1 || '%'  OR str(off.id) = ?1 or lower(off.componenteCurricular.sucinto) like '%' || ?1 || '%')
-    // Logica original (adaptar):
-    // public List<ComponenteCurricular> autocompleteComCurriculoComQuery(String query, Grupo grupo, Curriculo curriculo) {
-    //         return getOferecimentoComponenteCurricularRepository().autocompleteComCurriculoComQuery(query.toLowerCase().trim(), curriculo, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autocompleteComCurriculoComQuery(String query, Long grupoId, Long curriculoId) {
         return repository.autocompleteComCurriculoComQuery(query.toLowerCase().trim(), curriculoId)
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.autocompleteComCurriculoSemQuery (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:73, camada service)
-    // Observacao: parametro grupoId: era Grupo (referencia por id); parametro curriculoId: era Curriculo (referencia por id)
-    // JPQL original: select distinct off.componenteCurricular from OferecimentoComponenteCurricular off where off.unidade.ativo = true and off.curriculo = ?1 and off.status <> 'CANCELADA'
-    // Logica original (adaptar):
-    // public List<ComponenteCurricular> autocompleteComCurriculoSemQuery(Grupo grupo, Curriculo curriculo) {
-    //         return getOferecimentoComponenteCurricularRepository().autocompleteComCurriculoSemQuery(curriculo, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autocompleteComCurriculoSemQuery(Long grupoId, Long curriculoId) {
         return repository.autocompleteComCurriculoSemQuery(curriculoId)
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.buscarOcorrenciaComOFerecimento (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:77, camada service)
-    // Observacao: retorno: era OferecimentoComponenteCurricular (referencia por id); parametro entityId: era OferecimentoComponenteCurricular (referencia por id)
-    // JPQL original: select o from OferecimentoComponenteCurricular o join fetch o.ocorrenciaComponenteCurriculares oc where  o.unidade.ativo = true and oc.ativo = true  and o= ?1 order by oc.data
-    // Logica original (adaptar):
-    // public OferecimentoComponenteCurricular buscarOcorrenciaComOFerecimento(OferecimentoComponenteCurricular entity) {
-    //         return getOferecimentoComponenteCurricularRepository().buscarOcorrenciaComOFerecimento(entity);
-    //     }
     public Uni<Long> buscarOcorrenciaComOFerecimento(Long entityId) {
         return repository.buscarOcorrenciaComOFerecimento(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.buscarTodosOcorrenciaComOFerecimento (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:81, camada service)
-    // Observacao: retorno: era OferecimentoComponenteCurricular (referencia por id); parametro entityId: era OferecimentoComponenteCurricular (referencia por id)
-    // JPQL original: select o from OferecimentoComponenteCurricular o join fetch o.ocorrenciaComponenteCurriculares oc where   o.unidade.ativo = true and o= ?1 order by oc.data
-    // Logica original (adaptar):
-    // public OferecimentoComponenteCurricular buscarTodosOcorrenciaComOFerecimento(OferecimentoComponenteCurricular entity) {
-    //         return getOferecimentoComponenteCurricularRepository().buscarTodosOcorrenciaComOFerecimento(entity);
-    //     }
     public Uni<Long> buscarTodosOcorrenciaComOFerecimento(Long entityId) {
         return repository.buscarTodosOcorrenciaComOFerecimento(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.buscarOferecimentoAbertasComSala (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:85, camada service)
-    // Observacao: parametro salaId: era Sala (referencia por id)
-    // Logica original (adaptar):
-    // public List<OferecimentoComponenteCurricular> buscarOferecimentoAbertasComSala(Sala sala) {
-    //         return getOferecimentoComponenteCurricularRepository().buscarOferecimentoAbertasComSala(sala);
-    //     }
     public Uni<List<Long>> buscarOferecimentoAbertasComSala(Long salaId) {
         // Obs: condicao removida (depende de outro microservico): o.unidade.ativo = true
         return repository.find("salaId = ?1 and (status = 'LIBERADA' or status  = 'PENDENTE' or status  = 'LOTADA' or status = 'EM_ANDAMENTO')", salaId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.buscarOferecimentoComOcorrencia (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:89, camada service)
-    // Observacao: retorno: era OferecimentoComponenteCurricular (referencia por id); parametro entityId: era OferecimentoComponenteCurricular (referencia por id)
-    // JPQL original: select o from OferecimentoComponenteCurricular o join fetch o.ocorrenciaComponenteCurriculares c where  o.unidade.ativo = true  and c.ativo = true and o = ?1 order by c.data
-    // Logica original (adaptar):
-    // public OferecimentoComponenteCurricular buscarOferecimentoComOcorrencia(OferecimentoComponenteCurricular entity) {
-    //         return getOferecimentoComponenteCurricularRepository().buscarOferecimentoComOcorrencia(entity);
-    //     }
     public Uni<Long> buscarOferecimentoComOcorrencia(Long entityId) {
         return repository.buscarOferecimentoComOcorrencia(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.buscarOferecimentoComOcorrenciaTodos (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:93, camada service)
-    // Observacao: retorno: era OferecimentoComponenteCurricular (referencia por id); parametro entityId: era OferecimentoComponenteCurricular (referencia por id)
-    // JPQL original: select o from OferecimentoComponenteCurricular o join fetch o.ocorrenciaComponenteCurriculares c where o = ?1 order by c.data
-    // Logica original (adaptar):
-    // public OferecimentoComponenteCurricular buscarOferecimentoComOcorrenciaTodos(OferecimentoComponenteCurricular entity) {
-    //         return getOferecimentoComponenteCurricularRepository().buscarOferecimentoComOcorrenciaTodos(entity);
-    //     }
     public Uni<Long> buscarOferecimentoComOcorrenciaTodos(Long entityId) {
         return repository.buscarOferecimentoComOcorrenciaTodos(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.verificarExisteConflito (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:98, camada service)
-    // Observacao: parametro salaId: era Sala (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public List<OcorrenciaComponenteCurricular> verificarExisteConflito(Date data, Sala sala, Unidade unidade) {
-    //         return getOferecimentoComponenteCurricularRepository().verificarExisteConflito(data, sala, unidade);
-    //     }
     public Uni<List<Long>> verificarExisteConflito(Date data, Long salaId, Long unidadeId) {
         // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade = ?3
         return repository.find("ativo = true and data = ?1 and salaId = ?2", data, salaId, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.verificarExisteConflitoComOferecimento (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:102, camada service)
-    // Observacao: parametro salaId: era Sala (referencia por id); parametro oferecimentoComponenteCurricularId: era OferecimentoComponenteCurricular (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public List<OcorrenciaComponenteCurricular> verificarExisteConflitoComOferecimento(Date data, Sala sala, OferecimentoComponenteCurricular oferecimentoComponenteCurricular, Unidade unidade) {
-    //         return getOferecimentoComponenteCurricularRepository().verificarExisteConflitoComOferecimento(data, sala, oferecimentoComponenteCurricular, unidade);
-    //     }
     public Uni<List<Long>> verificarExisteConflitoComOferecimento(Date data, Long salaId, Long oferecimentoComponenteCurricularId, Long unidadeId) {
         // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade = ?4
         return repository.find("ativo = true and data = ?1 and salaId = ?2 and oferecimentoComponenteCurricular <> ?3", data, salaId, oferecimentoComponenteCurricularId, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.verificarExisteConflitoComOferecimentos (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:106, camada service)
-    // Observacao: parametro salaId: era Sala (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public List<OcorrenciaComponenteCurricular> verificarExisteConflitoComOferecimentos(Date data, Sala sala, List<OferecimentoComponenteCurricular> oferecimentoComponenteCurricular, Unidade unidade) {
-    //         return getOferecimentoComponenteCurricularRepository().verificarExisteConflitoComOferecimentos(data, sala, oferecimentoComponenteCurricular, unidade);
-    //     }
     public Uni<List<Long>> verificarExisteConflitoComOferecimentos(Date data, Long salaId, List<Long> oferecimentoComponenteCurricular, Long unidadeId) {
         // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade = ?4
         return repository.find("ativo = true and data = ?1 and salaId = ?2 and oferecimentoComponenteCurricular not in (?3)", data, salaId, oferecimentoComponenteCurricular, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.buscarComponentessDoOferecimentos (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:110, camada service)
-    // Observacao: parametro componenteCurricularId: era ComponenteCurricular (referencia por id)
-    // Logica original (adaptar):
-    // public List<OferecimentoComponenteCurricular> buscarComponentessDoOferecimentos(ComponenteCurricular componenteCurricular) {
-    //         return getOferecimentoComponenteCurricularRepository().buscarComponentessDoOferecimentos(componenteCurricular);
-    //     }
     public Uni<List<Long>> buscarComponentessDoOferecimentos(Long componenteCurricularId) {
         // Obs: condicao removida (depende de outro microservico): o.unidade.ativo = true
         return repository.find("componenteCurricularId = ?1", componenteCurricularId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.verificarExisteConflitoProrrogandoDisciplina (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:114, camada service)
-    // Observacao: parametro salaId: era Sala (referencia por id); parametro oId: era OferecimentoComponenteCurricular (referencia por id)
-    // Logica original (adaptar):
-    // public List<OcorrenciaComponenteCurricular> verificarExisteConflitoProrrogandoDisciplina(Date data, Sala sala, OferecimentoComponenteCurricular o) {
-    //         return getOferecimentoComponenteCurricularRepository().verificarExisteConflitoProrrogandoDisciplina(data, sala, o);
-    //     }
     public Uni<List<Long>> verificarExisteConflitoProrrogandoDisciplina(Date data, Long salaId, Long oId) {
         // Obs: condicao removida (depende de outro microservico): o.oferecimentoComponenteCurricular.unidade.ativo = true
         return repository.find("ativo = true and data = ?1 and salaId = ?2 and oferecimentoComponenteCurricular <> ?3", data, salaId, oId).list().map(list -> list.stream().map(x -> x.id).toList());
@@ -1048,14 +903,6 @@ public class OferecimentoComponenteCurricularService {
         return Uni.createFrom().voidItem();
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.buscarOferecimentoComDiasAula (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:329, camada service)
-    // Observacao: retorno: era OferecimentoComponenteCurricular (referencia por id); parametro entityId: era OferecimentoComponenteCurricular (referencia por id)
-    // JPQL original: select o from OferecimentoComponenteCurricular o join fetch o.diasAula c where o.unidade.ativo = true and o = ?1
-    // Logica original (adaptar):
-    // public OferecimentoComponenteCurricular buscarOferecimentoComDiasAula(OferecimentoComponenteCurricular entity) {
-    //         return getOferecimentoComponenteCurricularRepository().buscarOferecimentoComDiasAula(entity);
-    //     }
     public Uni<Long> buscarOferecimentoComDiasAula(Long entityId) {
         return repository.buscarOferecimentoComDiasAula(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
@@ -1077,66 +924,23 @@ public class OferecimentoComponenteCurricularService {
         return Uni.createFrom().voidItem();
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.ajustesreplica (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:359, camada service)
-    // Logica original (adaptar):
-    // public void ajustesreplica() {
-    //         hibernateService.executeUpdateSQL("   UPDATE edc_oferecimento_componente_curricular" +
-    //                 "        SET fl_replicar = false" +
-    //                 "        WHERE id_unidade is null or id_grupo is null or data_inicio is null or data_fim is null");
-    // 
-    //         List<Integer> oferecimentoComponenteCurriculars = (List<Integer>) hibernateService.executeSQL("select off.id as turma " +
-    //                 " from edc_oferecimento_componente_curricular off where " +
-    //                 "   id_unidade is not null and id_grupo is not null" +
-    //                 " and not exists(select oco.id_oferecimento_componente_curricular " +
-    //                 " from edc_oferecimento_di ...
-    // // ... (truncado, ver fonte original)
     public Uni<Void> ajustesreplica() {
         // Obs: rotina de manutencao com UPDATEs nativos e dependencia do DiaAulaService (dias de aula)
         return Uni.createFrom().voidItem();
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.autoCompleteComUnidade (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:491, camada service)
-    // Logica original (adaptar):
-    // public List<OferecimentoComponenteCurricular> autoCompleteComUnidade(String query, List<Unidade> unidades) {
-    //         return getOferecimentoComponenteCurricularRepository().autoCompleteComUnidade(query.toLowerCase().trim(), unidades, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteComUnidade(String query, List<Long> unidades) {
         // Obs: condicao removida (depende de outro microservico): o.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): (lower(o.componenteCurricular.descricao) like '%' || ?1 || '%' or str(o.id) like '%' || ?1 || '%')
         return repository.find("status = 'EM_ANDAMENTO' and unidadeId in (?2) order by id", query.toLowerCase().trim(), unidades).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.autoCompleteComUnidadeChamadaAssinada (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:495, camada service)
-    // Logica original (adaptar):
-    // public List<OferecimentoComponenteCurricular> autoCompleteComUnidadeChamadaAssinada(String query, List<Unidade> unidades) {
-    //         return getOferecimentoComponenteCurricularRepository().autoCompleteComUnidadeChamadaAssinada(query.toLowerCase().trim(), unidades, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteComUnidadeChamadaAssinada(String query, List<Long> unidades) {
         // Obs: condicao removida (depende de outro microservico): o.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): (lower(o.componenteCurricular.descricao) like '%' || ?1 || '%' or str(o.id) like '%' || ?1 || '%')
         return repository.find("(status = 'EM_ANDAMENTO' or status = 'LIBERADA') and unidadeId in (?2) order by id", query.toLowerCase().trim(), unidades).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.buscarCriterios (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:786, camada service)
-    // Observacao: retorno: era Criterio (referencia por id); parametro oferecimentoComponenteCurricularId: era OferecimentoComponenteCurricular (referencia por id)
-    // Logica original (adaptar):
-    // public Criterio buscarCriterios(OferecimentoComponenteCurricular oferecimentoComponenteCurricular) {
-    //         Criterio criterio = new Criterio();
-    //         List<Criterio> criterios = criterioService.buscarCriterio(oferecimentoComponenteCurricular.getCurriculo(), oferecimentoComponenteCurricular.getUnidade());
-    //         if (ObjectUtil.nullOrEmpty(criterios)) {
-    //             return criterio;
-    //         } else {
-    //             if (!ObjectUtil.nullOrEmpty(criterios)) {
-    //                 criterio = criterios.get(0);
-    //                 if (criterios.size() > 1) {
-    //                     criterioService.corrigeCriterioDuplicadoPorunidadeCurso(criterio);
-    //                 }
-    //             }
-    // // ... (truncado, ver fonte original)
     public Uni<Long> buscarCriterios(Long oferecimentoComponenteCurricularId) {
         return repository.findById(oferecimentoComponenteCurricularId)
                 .onItem().ifNull().continueWith(() -> null)

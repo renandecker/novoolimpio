@@ -226,67 +226,26 @@ public class MatriculaService {
         return Uni.createFrom().item(false);
     }
 
-
-    // Migrado de MatriculaService.buscarMatriculasPorOferecimento (src/main/java/br/com/sol7/olimpio/service/services/educacao/MatriculaService.java:30, camada service)
-    // Observacao: parametro oferecimentoComponenteCurricularId: era OferecimentoComponenteCurricular (referencia por id)
-    // Logica original (adaptar):
-    // public List<Matricula> buscarMatriculasPorOferecimento(OferecimentoComponenteCurricular oferecimentoComponenteCurricular) {
-    //         return getMatriculaRepository().buscarMatriculasPorOferecimento(oferecimentoComponenteCurricular);
-    //     }
     public Uni<List<Long>> buscarMatriculasPorOferecimento(Long oferecimentoComponenteCurricularId) {
         // Obs: condicao removida (depende de outro microservico): m.contrato.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): m.contrato.unidadeResponsavel.ativo = true
         return repository.find("oferecimentoComponenteCurricularId = ?1 and dataCancelamento is null order by contrato.pessoa.pessoaFisica.nome", oferecimentoComponenteCurricularId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de MatriculaService.buscarValorCurso (src/main/java/br/com/sol7/olimpio/service/services/educacao/MatriculaService.java:34, camada service)
-    // Observacao: retorno: era ValorCurso (referencia por id); parametro curriculoId: era Curriculo (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public ValorCurso buscarValorCurso(Curriculo curriculo, Unidade unidade) {
-    //         List<ValorCurso> valorCursos = getMatriculaRepository().buscarValorCurso(curriculo, unidade);
-    //         if (ObjectUtil.nullOrEmpty(valorCursos)) {
-    //             return new ValorCurso();
-    //         }
-    //         return valorCursos.get(0);
-    //     }
     public Uni<Long> buscarValorCurso2(Long curriculoId, Long unidadeId) {
         return repository.buscarValorCurso(curriculoId, unidadeId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de MatriculaService.buscarComponentesAprovadosPorAlunos (src/main/java/br/com/sol7/olimpio/service/services/educacao/MatriculaService.java:50, camada service)
-    // Observacao: parametro pessoaId: era Pessoa (referencia por id)
-    // JPQL original: select m.oferecimentoComponenteCurricular.componenteCurricular from Matricula m where m.contrato.unidade.ativo = true and m.contrato.unidadeResponsavel.ativo = true and m.contrato.pessoa = ?1 and m.status = 'APROVADO'
-    // Logica original (adaptar):
-    // public List<ComponenteCurricular> buscarComponentesAprovadosPorAlunos(Pessoa pessoa) {
-    //         return getMatriculaRepository().buscarComponentesAprovadosPorAlunos(pessoa);
-    //     }
     public Uni<List<Long>> buscarComponentesAprovadosPorAlunos(Long pessoaId) {
         return repository.buscarComponentesAprovadosPorAlunos(pessoaId).map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de MatriculaService.buscarMatriculasPorContrato (src/main/java/br/com/sol7/olimpio/service/services/educacao/MatriculaService.java:89, camada service)
-    // Observacao: parametro contratoId: era Contrato (referencia por id)
-    // Logica original (adaptar):
-    // public List<Matricula> buscarMatriculasPorContrato(Contrato contrato) {
-    //         return getMatriculaRepository().buscarMatriculasPorContrato(contrato);
-    //     }
     public Uni<List<Long>> buscarMatriculasPorContrato(Long contratoId) {
         // Obs: condicao removida (depende de outro microservico): m.contrato.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): m.contrato.unidadeResponsavel.ativo = true
         return repository.find("contratoId = ?1 order by oferecimentoComponenteCurricular.dataInicio, id,oferecimentoComponenteCurricular.id", contratoId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de MatriculaService.buscarMatriculasComCadernoPorContrato (src/main/java/br/com/sol7/olimpio/service/services/educacao/MatriculaService.java:93, camada service)
-    // Observacao: parametro contratoId: era Contrato (referencia por id)
-    // JPQL original: select m from Matricula m left join fetch m.cadernoComponenteCurriculars cc where m.contrato.unidade.ativo = true and m.contrato.unidadeResponsavel.ativo = true and m.contrato = ?1  ORDER By m.oferecimentoComponenteCurricular.dataInicio, m.id,m.oferecimentoComponenteCurricular.id
-    // Logica original (adaptar):
-    // public List<Matricula> buscarMatriculasComCadernoPorContrato(Contrato contrato) {
-    //         return getMatriculaRepository().buscarMatriculasComCadernoPorContrato(contrato);
-    //     }
     public Uni<List<Long>> buscarMatriculasComCadernoPorContrato(Long contratoId) {
         return repository.buscarMatriculasComCadernoPorContrato(contratoId).map(list -> list.stream().map(x -> x.id).toList());
     }
@@ -304,13 +263,6 @@ public class MatriculaService {
         return repository.find("contratoId = ?1 and dataCancelamento is null and status ='CURSANDO'", contratoId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de MatriculaService.buscarMatriculasCanceladas (src/main/java/br/com/sol7/olimpio/service/services/educacao/MatriculaService.java:101, camada service)
-    // Observacao: parametro contratoId: era Contrato (referencia por id)
-    // Logica original (adaptar):
-    // public List<Matricula> buscarMatriculasCanceladas(Contrato contrato) {
-    //         return getMatriculaRepository().buscarMatriculasCanceladas(contrato);
-    //     }
     public Uni<List<Long>> buscarMatriculasCanceladas(Long contratoId) {
         // Obs: condicao removida (depende de outro microservico): m.contrato.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): m.contrato.unidadeResponsavel.ativo = true
@@ -320,7 +272,6 @@ public class MatriculaService {
     }
 
 
-    // Migrado de MatriculaController.verificaAluno (legado). Retorna os paineis informativos
     // exibidos ao selecionar um aluno na tela de matricula.
     public Uni<InfoPessoaFisicaResponse> calcularInfoPessoaFisica(Long pessoaId) {
         return PessoaFisica.find("pessoaId", pessoaId).firstResult().chain(pfObj -> {

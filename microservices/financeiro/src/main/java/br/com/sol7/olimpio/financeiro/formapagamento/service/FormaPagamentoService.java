@@ -86,75 +86,22 @@ public class FormaPagamentoService {
         return new FormaPagamentoResponse(e.id, e.vezes, e.juros, e.desconto, e.ajusteParcelaAluno, e.ajusteParcela, e.operacao, e.tipoRegra, e.tipoRegraValor, e.periodicidade, e.perfilId, e.regra, e.ativo, e.usado, e.ajuste, e.cota, e.tipoPessoa, e.valorRegra, e.percentualMinimo, e.percentualMaximo, e.percentualMinimoAluno, e.percentualMaximoAluno, e.valorCota, e.valorCotaControle, e.dateCotaControle);
     }
 
-
-    // Migrado de FormaPagamentoController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/financeiro/FormaPagamentoController.java:80, camada controller)
-    // Logica original (adaptar):
-    // public List<FormaPagamento> autoComplete(String query) {
-    //         return formaPagamentoService.autoComplete(Integer.parseInt(query));
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(Integer.parseInt(query)).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de FormaPagamentoService.autoComplete (src/main/java/br/com/sol7/olimpio/service/services/financeiro/FormaPagamentoService.java:29, camada service)
-    // Logica original (adaptar):
-    // public List<FormaPagamento> autoComplete(int query) {
-    //         return this.getFormaPagamentoRepository().autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete2(Integer query) {
         return repository.find("(vezes) = ?1", query).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de FormaPagamentoService.verificarCotaAuto (src/main/java/br/com/sol7/olimpio/service/services/financeiro/FormaPagamentoService.java:41, camada service)
-    // Logica original (adaptar):
-    // public void verificarCotaAuto() {
-    //         try {
-    //             hibernateService.executeUpdateSQL("UPDATE fin_forma_pagamento taxa" +
-    //                     "  SET data_controle_cota = now(), valor_controle_cota = valor_cota" +
-    //                     "  where  taxa.cota = true and taxa.ativo = true and periodicidade = 'DIARIO' and " +
-    //                     " taxa.data_controle_cota != current_date  ");
-    // 
-    //             hibernateService.executeUpdateSQL("UPDATE fin_forma_pagamento taxa" +
-    //                     "  SET data_controle_cota = now(), valor_controle_cota = valor_cota" +
-    //                     "  where  taxa.cota = true and taxa.ativo = true and periodicidade = 'SEMANAL' " +
-    //                     " and ( d ...
-    // // ... (truncado, ver fonte original)
     public Uni<Void> verificarCotaAuto() {
         return repository.verificarCotaAutoNativo();
     }
 
-
-    // Migrado de FormaPagamentoService.verificarCota (src/main/java/br/com/sol7/olimpio/service/services/financeiro/FormaPagamentoService.java:89, camada service)
-    // Logica original (adaptar):
-    // public void verificarCota() {
-    //         try {
-    //             hibernateService.executeUpdateSQL("UPDATE fin_forma_pagamento taxa" +
-    //                     "  SET data_controle_cota = now(), valor_controle_cota = valor_cota" +
-    //                     "  where  taxa.cota = true and taxa.ativo = true  ");
-    //         } catch (Exception e) {
-    //             e.printStackTrace();
-    //         }
-    //     }
     public Uni<Void> verificarCota() {
         return repository.verificarCotaNativo();
     }
 
-
-    // Migrado de FormaPagamentoService.verificarCotaEntity (src/main/java/br/com/sol7/olimpio/service/services/financeiro/FormaPagamentoService.java:99, camada service)
-    // Observacao: parametro valorCursoId: era ValorCurso (referencia por id)
-    // Logica original (adaptar):
-    // public void verificarCotaEntity(ValorCurso valorCurso) {
-    //         try {
-    //             hibernateService.executeUpdateSQL("UPDATE fin_forma_pagamento taxa" +
-    //                     "  SET data_controle_cota = now(), valor_controle_cota = valor_cota" +
-    //                     "  from edc_valor_curso v  inner join edc_valor_curso_forma_pagamento vd on (vd.id_valor_curso = v.id) " +
-    //                     "  where taxa.id = vd.id_forma_pagamento and v.id = " + valorCurso.getId() + " and taxa.cota = true and taxa.ativo = true ");
-    //         } catch (Exception e) {
-    //             e.printStackTrace();
-    //         }
-    //     }
     public Uni<Void> verificarCotaEntity(Long valorCursoId) {
         return repository.verificarCotaEntityNativo(valorCursoId);
     }

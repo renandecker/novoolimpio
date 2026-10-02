@@ -11,6 +11,7 @@ import java.util.List;
 
 import br.com.sol7.olimpio.basico.perfil.dto.PerfilRequest;
 import br.com.sol7.olimpio.basico.perfil.dto.PerfilResponse;
+import br.com.sol7.olimpio.basico.perfil.dto.PerfilUsuariosResponse;
 import br.com.sol7.olimpio.basico.perfil.service.PerfilService;
 
 @Path("/api/basico/perfil")
@@ -56,8 +57,9 @@ public class PerfilController {
 
     @GET
     @Path("/carregar-usuarios")
-    public Uni<Void> carregarUsuarios(@QueryParam("perfilId") Long perfilId) {
-        return service.carregarUsuarios(perfilId);
+    public Uni<PerfilUsuariosResponse> carregarUsuarios(@QueryParam("perfilId") Long perfilId,
+                                                        @QueryParam("usuarioLogadoId") Long usuarioLogadoId) {
+        return service.carregarUsuarios(perfilId, usuarioLogadoId);
     }
 
 

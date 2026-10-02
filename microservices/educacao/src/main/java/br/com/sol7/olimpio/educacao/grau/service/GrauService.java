@@ -78,26 +78,10 @@ public class GrauService {
         return new GrauResponse(e.id, e.descricao, e.tipoGrau, e.frequenciaMinima, e.mediaSemExame, e.mediaFinal, e.notaMaxima, e.conceitoSemExame, e.conceitoFinal, e.cancelado, e.limiteManual, e.limiteManualAluno, e.recuperacao, e.manual, e.manualAluno, e.pesoDistinto, e.notasParciais);
     }
 
-
-    // Migrado de GrauService.buscarGrauComNota (src/main/java/br/com/sol7/olimpio/service/services/educacao/GrauService.java:19, camada service)
-    // Observacao: retorno: era Grau (referencia por id); parametro grauId: era Grau (referencia por id)
-    // JPQL original: select g from Grau g left join fetch g.grauNota n where g = ?1 order by n.numeroNota
-    // Logica original (adaptar):
-    // public Grau buscarGrauComNota(Grau grau) {
-    //         return getGrauRepository().buscarGrauComNota(grau);
-    //     }
     public Uni<Long> buscarGrauComNota(Long grauId) {
         return repository.buscarGrauComNota(grauId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de GrauService.buscarGrauComConceito (src/main/java/br/com/sol7/olimpio/service/services/educacao/GrauService.java:23, camada service)
-    // Observacao: retorno: era Grau (referencia por id); parametro grauId: era Grau (referencia por id)
-    // JPQL original: select g from Grau g left join fetch g.grauConceito c where g = ?1 order by c.ordem
-    // Logica original (adaptar):
-    // public Grau buscarGrauComConceito(Grau grau) {
-    //         return getGrauRepository().buscarGrauComConceito(grau);
-    //     }
     public Uni<Long> buscarGrauComConceito(Long grauId) {
         return repository.buscarGrauComConceito(grauId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }

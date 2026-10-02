@@ -59,7 +59,6 @@ public class SolicitacaoEstoqueService {
         return repository.persist(e).chain(() -> enrichSingleResponse(toResponse(e)));
     }
 
-    // Migrado de EstoqueProdutoController.solicitarItem/salvaSolicitacao (legado):
     // cria solicitacao ativa com data atual; motivo FALTA quando o controle nao tem estoque.
     public Uni<SolicitacaoEstoqueResponse> solicitarItem(SolicitacaoEstoqueRequest r) {
         var e = new SolicitacaoEstoque();
@@ -87,7 +86,6 @@ public class SolicitacaoEstoqueService {
                         : Uni.createFrom().failure(new NotFoundException("SolicitacaoEstoque not found")));
     }
 
-    // Migrado de EstoqueProdutoController.itemDefeito/itemFalta/itemSoliciado/itemNaoEncontrado/itemReservado
     public Uni<Long> countPorItem(Long unidadeId, Long produtoId, Motivo motivo) {
         return repository.buscaPorItem(unidadeId, produtoId, motivo).map(list -> (long) list.size());
     }

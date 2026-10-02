@@ -64,12 +64,6 @@ public class BaseTecnologicaService {
         return new BaseTecnologicaResponse(e.id, e.descricao, e.nome);
     }
 
-
-    // Migrado de BaseTecnologicaController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/BaseTecnologicaController.java:90, camada controller)
-    // Logica original (adaptar):
-    // public List<BaseTecnologica> autoComplete(String query) {
-    //         return baseTecnologicaService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query).map(list -> list.stream().map(x -> x.id).toList());
     }

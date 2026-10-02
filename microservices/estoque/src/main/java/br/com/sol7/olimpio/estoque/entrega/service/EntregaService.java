@@ -73,22 +73,6 @@ public class EntregaService {
         return new EntregaResponse(e.id, e.descricao, e.area, e.zoom, e.longitude, e.latitude, e.pessoaId);
     }
 
-
-    // Migrado de EntregaController.autoCompleteControleEntrega (src/main/java/br/com/sol7/olimpio/control/controllers/estoque/EntregaController.java:99, camada controller)
-    // Logica original (adaptar):
-    // public List<ControleEntrega> autoCompleteControleEntrega(String query) {
-    //         if (unidade != null) {
-    //             if (!query.equals("")) {
-    //                 return controleEntregaService.autoCompleteComUnidade(query, unidade);
-    //             } else {
-    //                 return controleEntregaService.controleEntregaComUnidade(unidade);
-    //             }
-    //         } else {
-    //             if (!query.equals("")) {
-    //                 return controleEntregaService.autoCompleteComUnidades(query, usuarioLogadoController.getUnidadesDisponiveis());
-    //             } else {
-    //                 return controleEntregaService.controleEntregaComUnidades(usuarioLogadoController.getUnidadesDisponiveis());
-    // // ... (truncado, ver fonte original)
     public Uni<List<Long>> autoCompleteControleEntrega(String query, Long unidadeId) {
         if (unidadeId != null) {
             if (query != null && !query.isBlank()) {

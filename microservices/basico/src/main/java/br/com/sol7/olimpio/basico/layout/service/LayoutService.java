@@ -82,12 +82,6 @@ public class LayoutService {
         return new LayoutResponse(e.id, e.keyFeriado, e.icon, e.folderLogin, e.folderDocumento, e.temaPadrao, e.folderBackgound, e.loginPosicao, e.temaEmail, e.tema, e.forderBarra, e.url, e.titulo, e.posicaoLogo, e.repositorio, e.imagemEmail);
     }
 
-
-    // Migrado de LayoutController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/basico/LayoutController.java:567, camada controller)
-    // Logica original (adaptar):
-    // public List<Layout> autoComplete(String query) {
-    //         return layoutService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query).map(list -> list.stream().map(x -> x.id).toList());
     }

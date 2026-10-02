@@ -94,7 +94,7 @@ public class TabelaService {
 
     private static final String SQL_COLUNAS = "SELECT tc.ordem AS ordem, d.nome_visualizacao AS dim_nome, d.tipo_info_dimensao AS dim_tipo, dc.coluna AS dim_coluna, m.nome_visualizacao AS med_nome, m.tipo_info_medida AS med_tipo, mc.coluna AS med_coluna FROM rel_tabela_colunas tc LEFT JOIN rel_dimensao d ON d.id = tc.id_dimensao LEFT JOIN rel_coluna dc ON dc.id = d.id_coluna LEFT JOIN rel_medida m ON m.id = tc.id_medida LEFT JOIN rel_coluna mc ON mc.id = m.id_coluna WHERE tc.id_tabela = ?1 ORDER BY tc.ordem, tc.id";
     private static final String SQL_ESTRUTURA = "SELECT e.tabela AS tabela, e.condicao AS condicao FROM rel_tabela t INNER JOIN rel_estrutura e ON e.id = t.id_estrutura WHERE t.id = ?1";
-    // Migrado de FiltrosController (extracted_aceso): filtros atuam no WHERE e referenciam a mesma
+
     // expressao de rel_coluna.coluna (cortada no " as ") via rel_dimensao do rel_filtro.
     private static final String SQL_FILTROS = "SELECT f.nome AS nome, dc.coluna AS coluna, f.tipo_filtro AS tipo_filtro, f.operacao AS operacao, f.data_inicio AS data_inicio, f.data_fim AS data_fim, f.periodo_dinamico AS periodo_dinamico, f.valor_fixo AS valor_fixo " +
             "FROM rel_filtro f " +
@@ -352,19 +352,6 @@ public class TabelaService {
         return FiltroSqlBuilder.montarFiltroSql(configFiltros, filtros);
     }
 
-
-    // Migrado de TabelaController.buscarMedidas (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/TabelaController.java:269, camada controller)
-    // Observacao: parametro fatoId: era Estrutura (referencia por id)
-    // Logica original (adaptar):
-    // public void buscarMedidas(Estrutura fato) {
-    //         if (fato != null) {
-    //             medidas = medidaService.buscarMedidasPeloFato(fato);
-    //         } else {
-    //             medidas = new ArrayList<>();
-    //         }
-    //     }
-    // Obs: nao existe entidade/repositorio Medida neste microservico (medidaService.buscarMedidasPeloFato)
-    // Implementacao: retorna IDs de medidas de uma estrutura (requer chamada ao microservico relatorios original ou modulo de medidas)
     public Uni<List<Long>> buscarMedidas(Long estruturaId) {
         if (estruturaId == null) {
             return Uni.createFrom().item(java.util.List.of());
@@ -395,63 +382,28 @@ public class TabelaService {
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de TabelaService.buscarUnidades (src/main/java/br/com/sol7/olimpio/service/services/relatorios/TabelaService.java:33, camada service)
-    // Observacao: parametro id: era Tabela (referencia por id)
-    // Logica original (adaptar):
-    // public List<Unidade> buscarUnidades(Tabela id) {
-    //         return getConexaoRepository().buscarUnidades(id);
-    //     }
     public Uni<List<Long>> buscarUnidades(Long id) {
         return Panache.getSession().chain(session ->
                 session.createNativeQuery("SELECT id FROM bas_unidade WHERE id = ?1").setParameter(1, id).getResultList())
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de TabelaService.buscarPerfils (src/main/java/br/com/sol7/olimpio/service/services/relatorios/TabelaService.java:37, camada service)
-    // Observacao: parametro id: era Tabela (referencia por id)
-    // Logica original (adaptar):
-    // public List<Perfil> buscarPerfils(Tabela id) {
-    //         return getConexaoRepository().buscarPerfils(id);
-    //     }
     public Uni<List<Long>> buscarPerfils(Long id) {
         return Panache.getSession().chain(session ->
                 session.createNativeQuery("SELECT id FROM bas_perfil WHERE id = ?1").setParameter(1, id).getResultList())
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de TabelaService.buscarUsuarios (src/main/java/br/com/sol7/olimpio/service/services/relatorios/TabelaService.java:41, camada service)
-    // Observacao: parametro id: era Tabela (referencia por id)
-    // Logica original (adaptar):
-    // public List<Usuario> buscarUsuarios(Tabela id) {
-    //         return getConexaoRepository().buscarUsuarios(id);
-    //     }
     public Uni<List<Long>> buscarUsuarios(Long id) {
         return Panache.getSession().chain(session ->
                 session.createNativeQuery("SELECT id FROM bas_usuario WHERE id = ?1").setParameter(1, id).getResultList())
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de TabelaService.buscarTabelaPeloFato (src/main/java/br/com/sol7/olimpio/service/services/relatorios/TabelaService.java:45, camada service)
-    // Observacao: parametro fatoId: era Estrutura (referencia por id)
-    // Logica original (adaptar):
-    // public List<Tabela> buscarTabelaPeloFato(Estrutura fato) {
-    //         return getConexaoRepository().buscarTabelaPeloFato(fato);
-    //     }
     public Uni<List<Long>> buscarTabelaPeloFato(Long fatoId) {
         return repository.buscarTabelaPeloFato(fatoId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de TabelaService.autoComplete (src/main/java/br/com/sol7/olimpio/service/services/relatorios/TabelaService.java:49, camada service)
-    // Observacao: parametro estruturaId: era Estrutura (referencia por id)
-    // Logica original (adaptar):
-    // public List<Tabela> autoComplete(String query, Estrutura estrutura) {
-    //         return this.getConexaoRepository().autoComplete(query.toLowerCase(), estrutura, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoComplete(String query, Long estruturaId) {
         return repository.autoComplete(query.toLowerCase(), estruturaId).map(list -> list.stream().map(x -> x.id).toList());
     }

@@ -52,8 +52,9 @@ public class AtendimentoConsultorController {
 
     @GET
     @Path("/buscar-turmas-oferecidas")
-    public Uni<Void> buscarTurmasOferecidas(@QueryParam("curriculoId") Long curriculoId) {
-        return service.buscarTurmasOferecidas(curriculoId);
+    public Uni<List<TurmaOferecidaResponse>> buscarTurmasOferecidas(@QueryParam("curriculoId") Long curriculoId,
+                                                                      @QueryParam("unidadesIds") List<Long> unidadesIds) {
+        return service.buscarTurmasOferecidas(curriculoId, unidadesIds);
     }
 
 }

@@ -29,7 +29,6 @@ public class OperacionalService {
     @Inject
     GenericSearchService genericSearch;
 
-    // Migrado de SchedulingService.verificarOperacionalVencidos()
     public Uni<Void> verificarOperacionalVencidos() {
         return repository.buscarOperacionalExpirados()
                 .chain(lista -> {
@@ -137,16 +136,6 @@ public class OperacionalService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de OperacionalController.buscarTodos (src/main/java/br/com/sol7/olimpio/control/controllers/central/OperacionalController.java:259, camada controller)
-    // Logica original (adaptar):
-    // public void buscarTodos() {
-    //         if (!ObjectUtil.nullOrEmpty(operacional)) {
-    //             buscarLigacoes(operacional);
-    //         }
-    //     }
-    // Obs: logica de UI do controlador JSF legado (navegacao de tela), sem equivalente reativo
-    // Implementacao: retorna IDs de todos os operacionais (ou delega para buscarLigacoes)
     public Uni<List<Long>> buscarTodos() {
         return repository.listAll().map(items -> items.stream().map(x -> x.id).toList());
     }
@@ -166,25 +155,6 @@ public class OperacionalService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de OperacionalController.buscarLigacoes (src/main/java/br/com/sol7/olimpio/control/controllers/central/OperacionalController.java:274, camada controller)
-    // Observacao: parametro opId: era Operacional (referencia por id)
-    // Logica original (adaptar):
-    // public void buscarLigacoes(Operacional op) {
-    //         if (!ObjectUtil.nullOrEmpty(op)) {
-    //             operacional = op;
-    //             pieModel = new PieChartModel();
-    //             long total = 0;
-    //             for (ResultadoContato resultadoContato : resultadoContatoService.findAll()) {
-    //                 long valor = ligacaoService.resultadoPorOperacional(operacional, resultadoContato.getId());
-    //                 pieModel.set(resultadoContato.getDescricao() + ": " + valor, valor);
-    //                 total = total + valor;
-    //             }
-    //             pieModel.set("Total: " + total, 0);
-    //             pieModel.setTitle(titulo);
-    // // ... (truncado, ver fonte original)
-    // Obs: logica de UI do controlador JSF legado (pie chart), sem equivalente reativo
-    // Implementacao: retorna IDs de ligacoes de um operacional (requer microservico central/financeiro)
     public Uni<List<Long>> buscarLigacoes(Long opId) {
         if (opId == null) {
             return Uni.createFrom().item(java.util.List.of());
@@ -205,37 +175,14 @@ public class OperacionalService {
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de OperacionalService.buscarOperacionalComCoordenador (src/main/java/br/com/sol7/olimpio/service/services/central/OperacionalService.java:32, camada service)
-    // Observacao: retorno: era Operacional (referencia por id)
-    // JPQL original: select op from Operacional op left join fetch op.coordenador where op.id = ?1
-    // Logica original (adaptar):
-    // public Operacional buscarOperacionalComCoordenador(Integer id) {
-    //         return getOperacionalRepository().buscarOperacionalComCoordenador(id);
-    //     }
     public Uni<Long> buscarOperacionalComCoordenador(Integer id) {
         return repository.buscarOperacionalComCoordenador(id).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de OperacionalService.buscarOperacionaisDoCoordenador (src/main/java/br/com/sol7/olimpio/service/services/central/OperacionalService.java:36, camada service)
-    // Observacao: parametro coordenadorId: era Usuario (referencia por id)
-    // Logica original (adaptar):
-    // public List<Operacional> buscarOperacionaisDoCoordenador(Usuario coordenador) {
-    //         return getOperacionalRepository().buscarOperacionaisDoCoordenador(coordenador);
-    //     }
     public Uni<List<Long>> buscarOperacionaisDoCoordenador2(Long coordenadorId) {
         return repository.find("coordenadorId = ?1 and status = 'INICIADO'", coordenadorId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de OperacionalService.buscarCoordenadorOperacional (src/main/java/br/com/sol7/olimpio/service/services/central/OperacionalService.java:40, camada service)
-    // Observacao: retorno: era Usuario (referencia por id); parametro operacionalId: era Operacional (referencia por id)
-    // JPQL original: Select o.coordenador from Operacional o where o = ?1
-    // Logica original (adaptar):
-    // public Usuario buscarCoordenadorOperacional(Operacional operacional) {
-    //         return getOperacionalRepository().buscarCoordenadorOperacional(operacional);
-    //     }
     public Uni<Long> buscarCoordenadorOperacional(Long operacionalId) {
         return repository.buscarCoordenadorOperacional(operacionalId).map(list -> list.isEmpty() ? null : ((Number) list.get(0)).longValue());
     }

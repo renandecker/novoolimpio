@@ -9,7 +9,6 @@ import java.util.List;
 @ApplicationScoped
 public class PendenciaVendaProdutoRepository implements PanacheRepository<PendenciaVendaProduto> {
 
-    // Migrado de PendenciaVendaProdutoRepository.buscaPendencias (legado):
     // Select c from PendenciaVendaProduto c inner join c.vendaProduto v where v.unidade = ?1 and c.dataEntrega is not null
     public static final String SQL_BUSCA_PENDENCIAS =
             "SELECT c.* FROM est_pendencia_venda_produto c " +

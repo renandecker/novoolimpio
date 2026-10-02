@@ -79,15 +79,6 @@ public class CampoService {
         return new CampoResponse(e.id, e.nome, e.rotulo, e.maskara, e.tipo, e.tamanho, e.categoriaId, e.flagNome, e.flagTelefone, e.flagEmail, e.flagRedeSocial, e.flagEndereco, e.flagIdade, e.flagBanco, e.flagMaskara, e.flagDataNascimento, e.flagLogradouro, e.flagUpload);
     }
 
-
-    // Migrado de CampoController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/CampoController.java:135, camada controller)
-    // Logica original (adaptar):
-    // public List<Campo> autoComplete(String query) {
-    //         if (ObjectUtil.nullOrEmpty(query)) {
-    //             return campoService.buscaDezPrimeiros();
-    //         }
-    //         return campoService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         if (query == null || query.isEmpty()) {
             return repository.buscaDezPrimeiros().map(list -> list.stream().map(x -> x.id).toList());

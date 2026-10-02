@@ -70,12 +70,6 @@ public class EstadoService {
         return new EstadoResponse(e.id, e.nome, e.uf, e.paisId);
     }
 
-
-    // Migrado de EstadoController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/basico/EstadoController.java:75, camada controller)
-    // Logica original (adaptar):
-    // public List<Estado> autoComplete(String query) {
-    //         return estadoService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
     }

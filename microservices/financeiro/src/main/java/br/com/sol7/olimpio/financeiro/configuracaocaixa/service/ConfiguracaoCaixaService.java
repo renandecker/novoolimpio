@@ -72,18 +72,6 @@ public class ConfiguracaoCaixaService {
         return new ConfiguracaoCaixaResponse(e.id, e.unidadeId, e.fundoCaixa, e.dias, e.email, e.impressao, e.pagPropriaUnid, e.usuarioId, e.responsavelId, e.templateCaixa, e.tipoModeloCaixa);
     }
 
-
-    // Migrado de ConfiguracaoCaixaController.autoCompleteUsuario (src/main/java/br/com/sol7/olimpio/control/controllers/financeiro/ConfiguracaoCaixaController.java:273, camada controller)
-    // Logica original (adaptar):
-    // public List<Usuario> autoCompleteUsuario(String query) {
-    //         if (getEntity().getUnidade() != null && !query.equals("")) {
-    //             return usuarioService.autoCompleteUsuario(query, getEntity().getUnidade());
-    //         }
-    //         if (getEntity().getUnidade() != null && query.equals("")) {
-    //             return usuarioService.buscarUsuarioPorUnidade(getEntity().getUnidade());
-    //         }
-    //         return new ArrayList<>();
-    //     }
     public Uni<List<Long>> autoCompleteUsuario(String query) {
         return Panache.getSession().chain(session ->
                 session.createNativeQuery("SELECT id FROM bas_usuario WHERE login ILIKE :query OR CAST(id AS TEXT) = :query")

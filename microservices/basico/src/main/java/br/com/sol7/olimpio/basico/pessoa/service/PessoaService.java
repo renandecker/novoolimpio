@@ -99,25 +99,10 @@ public class PessoaService {
         return Uni.createFrom().item(null);
     }
 
-
-    // Migrado de PessoaService.buscarPessoaComUnidades (src/main/java/br/com/sol7/olimpio/service/services/basico/PessoaService.java:24, camada service)
-    // Observacao: retorno: era Pessoa (referencia por id); parametro entityId: era Pessoa (referencia por id)
-    // JPQL original: Select p from Pessoa p left join fetch p.unidades u where  p = ?1
-    // Logica original (adaptar):
-    // public Pessoa buscarPessoaComUnidades(Pessoa entity) {
-    //         return getPessoaRepository().buscarPessoaComUnidades(entity);
-    //     }
     public Uni<Long> buscarPessoaComUnidades(Long entityId) {
         return repository.buscarPessoaComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de PessoaService.buscarPessoaPorUnidades (src/main/java/br/com/sol7/olimpio/service/services/basico/PessoaService.java:116, camada service)
-    // JPQL original: select distinct p from Pessoa p inner join p.unidades u where u in (?1) order by p.id desc
-    // Logica original (adaptar):
-    // public List<Pessoa> buscarPessoaPorUnidades(List<Unidade> unidade) {
-    //         return getPessoaRepository().buscarPessoaPorUnidades(unidade);
-    //     }
     public Uni<List<Long>> buscarPessoaPorUnidades(List<Long> unidade) {
         return repository.buscarPessoaPorUnidades(unidade).map(list -> list.stream().map(x -> x.id).toList());
     }

@@ -73,7 +73,6 @@ public class ControlePedidosService {
                         : Uni.createFrom().failure(new NotFoundException("ControlePedidos not found")));
     }
 
-    // Migrado de ControlePedidosService.listarPedidos (legado)
     public Uni<List<ControlePedidosResponse>> listarPedidos(Long unidadeId, Date inicio, Date fim) {
         return repository.listarPedidos(unidadeId, inicio, fim).chain(items -> {
             var responses = items.stream().map(this::toResponse).toList();
@@ -81,7 +80,6 @@ public class ControlePedidosService {
         });
     }
 
-    // Migrado de ControlePedidosService.listarPedidosSemEntrega (legado)
     public Uni<List<ControlePedidosResponse>> listarPedidosSemEntrega(Long unidadeId) {
         return repository.listarPedidosSemEntrega(unidadeId).chain(items -> {
             var responses = items.stream().map(this::toResponse).toList();
@@ -89,7 +87,6 @@ public class ControlePedidosService {
         });
     }
 
-    // Migrado de EstoqueProdutoController.itemAProvadoNaoEntregue (legado)
     public Uni<Long> countAprovadoNaoEntregue(Long unidadeId, Long produtoId) {
         return repository.buscaSolicitacaoEstoque(unidadeId, produtoId).map(list -> (long) list.size());
     }

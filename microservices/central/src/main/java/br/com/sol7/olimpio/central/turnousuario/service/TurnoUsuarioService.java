@@ -82,52 +82,18 @@ public class TurnoUsuarioService {
         return repository.buscarTurno(usuarioId).map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de TurnoUsuarioService.buscarTurno (src/main/java/br/com/sol7/olimpio/service/services/central/TurnoUsuarioService.java:25, camada service)
-    // Observacao: parametro operadorId: era Usuario (referencia por id)
-    // JPQL original: Select tu.turnoTrabalho from TurnoUsuario tu where tu.usuario = ?1 order by tu.turnoTrabalho.inicio
-    // Logica original (adaptar):
-    // public List<TurnoTrabalho> buscarTurno(Usuario operador) {
-    //         return getTurnoUsuarioRepository().buscarTurno(operador);
-    //     }
     public Uni<List<Long>> buscarTurno(Long operadorId) {
         return repository.buscarTurno(operadorId).map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de TurnoUsuarioService.buscarTurnoDiaSemana (src/main/java/br/com/sol7/olimpio/service/services/central/TurnoUsuarioService.java:29, camada service)
-    // Observacao: parametro operadorId: era Usuario (referencia por id)
-    // JPQL original: Select tu.turnoTrabalho from TurnoUsuario tu where tu.usuario = ?1 AND tu.turnoTrabalho.diaSemana.id = ?2 order by tu.turnoTrabalho.inicio
-    // Logica original (adaptar):
-    // public List<TurnoTrabalho> buscarTurnoDiaSemana(Usuario operador, int diaSemana) {
-    //         return getTurnoUsuarioRepository().buscarTurnoDiaSemana(operador, diaSemana);
-    //     }
     public Uni<List<Long>> buscarTurnoDiaSemana(Long operadorId, Integer diaSemana) {
         return repository.buscarTurnoDiaSemana(operadorId, diaSemana).map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de TurnoUsuarioService.verificarTurnoDiaSemana (src/main/java/br/com/sol7/olimpio/service/services/central/TurnoUsuarioService.java:33, camada service)
-    // Observacao: parametro operadorId: era Usuario (referencia por id)
-    // Logica original (adaptar):
-    // public boolean verificarTurnoDiaSemana(Usuario operador, int diaSemana) {
-    //         if (ObjectUtil.nullOrEmpty(getTurnoUsuarioRepository().verificarTurnoDiaSemana(operador, diaSemana, new PageRequest(0, 1)).getContent())) {
-    //             return false;
-    //         } else {
-    //             return true;
-    //         }
-    //     }
     public Uni<Boolean> verificarTurnoDiaSemana(Long operadorId, Integer diaSemana) {
         return repository.verificarTurnoDiaSemana(operadorId, diaSemana).map(list -> !list.isEmpty());
     }
 
-
-    // Migrado de TurnoUsuarioService.buscarTurnoUsuario (src/main/java/br/com/sol7/olimpio/service/services/central/TurnoUsuarioService.java:41, camada service)
-    // Observacao: parametro operadorId: era Usuario (referencia por id)
-    // Logica original (adaptar):
-    // public List<TurnoUsuario> buscarTurnoUsuario(Usuario operador) {
-    //         return getTurnoUsuarioRepository().buscarTurnoUsuario(operador);
-    //     }
     public Uni<List<Long>> buscarTurnoUsuario(Long operadorId) {
         return repository.find("usuarioId = ?1", operadorId).list().map(list -> list.stream().map(x -> x.turnoTrabalhoId).toList());
     }

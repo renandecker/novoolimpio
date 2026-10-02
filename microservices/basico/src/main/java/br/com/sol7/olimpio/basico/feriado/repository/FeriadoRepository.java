@@ -11,6 +11,151 @@ import br.com.sol7.olimpio.basico.feriado.entity.Feriado;
 @ApplicationScoped
 public class FeriadoRepository implements PanacheRepository<Feriado> {
 
+
+    public static final String SQL_IDS_FERIADO_FIXO =
+            "SELECT id FROM bas_feriado WHERE fl_feriado_fixo = true ORDER BY id";
+
+    public Uni<java.util.List<Long>> idsFeriadosFixos() {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_IDS_FERIADO_FIXO)
+                        .getResultList()
+                        .map(rows -> rows.stream()
+                                .map(row -> ((Number) row).longValue())
+                                .toList()));
+    }
+
+    public static final String SQL_UNIDADES_FERIADO =
+            "SELECT id_unidade FROM bas_feriado_unidade WHERE id_feriado = :feriado";
+
+    public Uni<java.util.List<Long>> unidadesDoFeriado(Long feriadoId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_UNIDADES_FERIADO)
+                        .setParameter("feriado", feriadoId)
+                        .getResultList()
+                        .map(rows -> rows.stream()
+                                .map(row -> ((Number) row).longValue())
+                                .toList()));
+    }
+
+    public static final String SQL_TIPOS_CURSO_FERIADO =
+            "SELECT id_tipo_curso FROM bas_feriado_tipo_curso WHERE id_feriado = :feriado";
+
+    public Uni<java.util.List<Long>> tiposCursoDoFeriado(Long feriadoId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_TIPOS_CURSO_FERIADO)
+                        .setParameter("feriado", feriadoId)
+                        .getResultList()
+                        .map(rows -> rows.stream()
+                                .map(row -> ((Number) row).longValue())
+                                .toList()));
+    }
+
+    public static final String SQL_INSERT_UNIDADE_FERIADO =
+            "INSERT INTO bas_feriado_unidade (id_feriado, id_unidade) VALUES (:feriado, :unidade)";
+
+    public Uni<Void> vincularUnidade(Long feriadoId, Long unidadeId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_INSERT_UNIDADE_FERIADO)
+                        .setParameter("feriado", feriadoId)
+                        .setParameter("unidade", unidadeId)
+                        .executeUpdate())
+                .replaceWithVoid();
+    }
+
+    public static final String SQL_INSERT_TIPO_CURSO_FERIADO =
+            "INSERT INTO bas_feriado_tipo_curso (id_feriado, id_tipo_curso) VALUES (:feriado, :tipoCurso)";
+
+    public Uni<Void> vincularTipoCurso(Long feriadoId, Long tipoCursoId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_INSERT_TIPO_CURSO_FERIADO)
+                        .setParameter("feriado", feriadoId)
+                        .setParameter("tipoCurso", tipoCursoId)
+                        .executeUpdate())
+                .replaceWithVoid();
+    }
+
+
+    // -------------------------------------------------------------------------
+    // Migrado de FeriadoService.atualizarOferecimento (legado) - parte que e
+    // possivel expressar em SQL sobre as tabelas edc_*
+    // -------------------------------------------------------------------------
+    public static final String SQL_CONTAR_CADERNO =
+            "SELECT count(*) FROM edc_caderno_componente_curricular WHERE id_ocorrencia_componente_curricular = :id";
+
+    public Uni<Long> contarCaderno(Long ocorrenciaId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_CONTAR_CADERNO)
+                        .setParameter("id", ocorrenciaId)
+                        .getResultList()
+                        .map(rows -> ((Number) rows.get(0)).longValue()));
+    }
+
+    public static final String SQL_ATUALIZAR_PRESENCA_CADERNO =
+            "UPDATE edc_caderno_componente_curricular SET presenca = 'r', data_alteracao = now() "
+                    + "WHERE presenca != 'i' and presenca != 'c' and presenca != 'v' "
+                    + "and id_ocorrencia_componente_curricular = :id";
+
+    public Uni<Void> atualizarPresencaCaderno(Long ocorrenciaId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_ATUALIZAR_PRESENCA_CADERNO)
+                        .setParameter("id", ocorrenciaId)
+                        .executeUpdate())
+                .replaceWithVoid();
+    }
+
+    public static final String SQL_DESATIVAR_OCORRENCIA =
+            "UPDATE edc_ocorrencia_componente_curricular SET fl_ativo = false WHERE id = :id";
+
+    public Uni<Void> desativarOcorrencia(Long ocorrenciaId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_DESATIVAR_OCORRENCIA)
+                        .setParameter("id", ocorrenciaId)
+                        .executeUpdate())
+                .replaceWithVoid();
+    }
+
+    public static final String SQL_OFERECIMENTO_DA_OCORRENCIA =
+            "SELECT id_oferecimento_componente_curricular FROM edc_ocorrencia_componente_curricular WHERE id = :id";
+
+    public Uni<Long> oferecimentoDaOcorrencia(Long ocorrenciaId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_OFERECIMENTO_DA_OCORRENCIA)
+                        .setParameter("id", ocorrenciaId)
+                        .getResultList()
+                        .map(rows -> rows.isEmpty() || rows.get(0) == null ? null : ((Number) rows.get(0)).longValue()));
+    }
+
+    public static final String SQL_ATUALIZAR_DATAS_OFERECIMENTO =
+            "UPDATE edc_oferecimento_componente_curricular o SET "
+                    + " data_inicio = (select oco.data from edc_ocorrencia_componente_curricular oco "
+                    + "   where oco.id_oferecimento_componente_curricular = o.id and oco.fl_ativo = true order by id limit 1),"
+                    + " data_fim = (select oco.data from edc_ocorrencia_componente_curricular oco "
+                    + "   where oco.id_oferecimento_componente_curricular = o.id and oco.fl_ativo = true order by id desc limit 1) "
+                    + " where o.id = :id";
+
+    public static final String SQL_ATUALIZAR_STATUS_OFERECIMENTO =
+            "UPDATE edc_oferecimento_componente_curricular o SET status = (case "
+                    + " when o.data_cancelamento is not null then 'CANCELADA' "
+                    + " when o.data_inicio > current_date and o.vagas <= o.inscritos then 'LOTADA' "
+                    + " when o.data_inicio > current_date then 'LIBERADA' "
+                    + " when o.data_inicio < current_date and o.data_fim > current_date then 'EM_ANDAMENTO' "
+                    + " when o.data_fim < current_date then 'FINALIZADA' "
+                    + " else 'LIBERADA' end) "
+                    + " where o.id = :id";
+
+    public Uni<Void> atualizarDatasOferecimento(Long oferecimentoId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_ATUALIZAR_DATAS_OFERECIMENTO)
+                        .setParameter("id", oferecimentoId)
+                        .executeUpdate())
+                .chain(r -> io.quarkus.hibernate.reactive.panache.Panache.getSession())
+                .chain(session -> session.createNativeQuery(SQL_ATUALIZAR_STATUS_OFERECIMENTO)
+                        .setParameter("id", oferecimentoId)
+                        .executeUpdate())
+                .replaceWithVoid();
+    }
+
+
     // Select f from Feriado f left join f.unidade u left join f.tipoCurso t where  ((u IN (?1)) or f.nacional = true )  and f.dataFeriado = ?2 and (t IN (?3) or f.todosCursos = true)
     public static final String SQL_BUSCAR_FERIADO_UNIDADE =
             "SELECT f.* FROM bas_feriado f LEFT JOIN bas_feriado_unidade f_u_jt ON f_u_jt.id_feriado = f.id LEFT JOIN bas_unidade u ON u.id = f_u_jt.id_unidade LEFT JOIN bas_feriado_tipo_curso f_t_jt ON f_t_jt.id_feriado = f.id LEFT JOIN edc_tipo_curso t ON t.id = f_t_jt.id_tipo_curso WHERE ((u IN (?1)) or f.fl_nacional = true ) and f.dt_feriado = ?2 and (t IN (?3) or f.fl_tipo_curso = true)";
@@ -114,7 +259,6 @@ public class FeriadoRepository implements PanacheRepository<Feriado> {
     }
 
 
-    // Migrado da troca de feriados (TrocaFeriadoDialog do listFeriado.xhtml) - reatribui as
     // unidades dos feriados de origem para o feriado de destino antes de removê-los.
     public static final String SQL_TROCAR_UNIDADE =
             "UPDATE bas_feriado_unidade SET id_feriado = :destino WHERE id_feriado = :origem";

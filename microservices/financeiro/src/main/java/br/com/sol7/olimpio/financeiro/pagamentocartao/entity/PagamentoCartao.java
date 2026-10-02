@@ -7,7 +7,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 
-// Migrado de br.com.sol7.olimpio.model.entity.financeiro.PagamentoCartao (legado)
 @Entity
 @Table(name = "fin_pagamento_cartao")
 public class PagamentoCartao extends PanacheEntity {

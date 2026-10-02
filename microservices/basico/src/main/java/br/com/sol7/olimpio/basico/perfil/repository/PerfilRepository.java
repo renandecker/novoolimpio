@@ -21,7 +21,6 @@ public class PerfilRepository implements PanacheRepository<Perfil> {
                         .getResultList());
     }
 
-    // Migrado de PerfilModuloService.buscarPerfilModulosComModulo (legado) - perfis vinculados a um modulo
     public static final String SQL_LISTAR_PERFIS_POR_MODULO =
             "SELECT p.id FROM bas_perfil p INNER JOIN bas_perfil_modulo pm ON pm.id_perfil = p.id WHERE pm.id_modulo = ?1 ORDER BY p.descricao";
 

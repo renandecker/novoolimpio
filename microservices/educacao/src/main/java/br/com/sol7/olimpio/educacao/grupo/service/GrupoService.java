@@ -65,15 +65,6 @@ public class GrupoService {
         return new GrupoResponse(e.id, e.unidadeId, e.curriculoId, e.nome);
     }
 
-
-    // Migrado de GrupoController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GrupoController.java:90, camada controller)
-    // Logica original (adaptar):
-    // public List<Grupo> autoComplete(String query) {
-    //         if (query.equals("")) {
-    //             return grupoService.unidadesGrupo(usuarioLogadoController.getUnidadesDisponiveis());
-    //         }
-    //         return grupoService.autoCompleteComUnidades(query.toLowerCase(), usuarioLogadoController.getUnidadesDisponiveis());
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         if (query.equals("")) {
             // Obs: condicao removida (depende de outro microservico): grupo.unidade in (unidadesDisponiveis do usuario logado)
@@ -82,23 +73,10 @@ public class GrupoService {
         return repository.find("(lower(nome) like '%' || ?1 || '%' OR str(id) = ?1) order by nome", query.toLowerCase()).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de GrupoService.autoCompleteComUnidades (src/main/java/br/com/sol7/olimpio/service/services/educacao/GrupoService.java:45, camada service)
-    // Logica original (adaptar):
-    // public List<Grupo> autoCompleteComUnidades(String lowerCase, List<Unidade> unidades) {
-    //         return getGrupoRepository().autoCompleteComUnidades(lowerCase, unidades);
-    //     }
     public Uni<List<Long>> autoCompleteComUnidades(String lowerCase, List<Long> unidades) {
         return repository.find("(lower(nome) like '%' || ?1 || '%'  OR str(id) = ?1) and unidadeId in (?2) order by nome", lowerCase, unidades).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de GrupoService.autoCompleteComCurriculo (src/main/java/br/com/sol7/olimpio/service/services/educacao/GrupoService.java:53, camada service)
-    // Observacao: parametro curriculoId: era Curriculo (referencia por id)
-    // Logica original (adaptar):
-    // public List<Grupo> autoCompleteComCurriculo(String lowerCase, Curriculo curriculo) {
-    //         return getGrupoRepository().autoCompleteComCurriculo(lowerCase, curriculo);
-    //     }
     public Uni<List<Long>> autoCompleteComCurriculo(String lowerCase, Long curriculoId) {
         return repository.find("(lower(nome) like '%' || ?1 || '%'  OR str(id) = ?1) and curriculoId = ?2 order by nome", lowerCase, curriculoId).list().map(list -> list.stream().map(x -> x.id).toList());
     }

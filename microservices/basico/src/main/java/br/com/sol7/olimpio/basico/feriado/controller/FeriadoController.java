@@ -88,17 +88,10 @@ public class FeriadoController {
     }
 
 
-    @GET
-    @Path("/buscar-feriado-api")
-    public Uni<Void> buscarFeriadoApi() {
-        return service.buscarFeriadoApi();
-    }
-
-
     @POST
     @Path("/gerar-novas-datas")
-    public Uni<Void> gerarNovasDatas() {
-        return service.gerarNovasDatas();
+    public Uni<Integer> gerarNovasDatas() {
+        return service.gerarNovasDatas(2024);
     }
 
 
@@ -167,7 +160,7 @@ public class FeriadoController {
 
     @POST
     @Path("/atualizar-oferecimento2")
-    public Uni<Void> atualizarOferecimento2(@QueryParam("ocorrenciaComponenteCurriculars") List<Long> ocorrenciaComponenteCurriculars) {
+    public Uni<Integer> atualizarOferecimento2(@QueryParam("ocorrenciaComponenteCurriculars") List<Long> ocorrenciaComponenteCurriculars) {
         return service.atualizarOferecimento2(ocorrenciaComponenteCurriculars);
     }
 

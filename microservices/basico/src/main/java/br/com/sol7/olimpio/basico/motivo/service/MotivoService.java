@@ -70,15 +70,6 @@ public class MotivoService {
         return new MotivoResponse(e.id, e.descricao, e.style, e.ativo);
     }
 
-
-    // Migrado de MotivoController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/basico/MotivoController.java:78, camada controller)
-    // Logica original (adaptar):
-    // public List<Motivo> autoComplete(String query) {
-    //         if (query.equals("")) {
-    //             return motivoService.autoCompleteList();
-    //         }
-    //         return motivoService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         if (query == null || query.equals("")) {
             return repository.autoCompleteList().map(list -> list.stream().map(x -> x.id).toList());
@@ -86,12 +77,6 @@ public class MotivoService {
         return repository.autoComplete(query).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de MotivoService.autoCompleteList (src/main/java/br/com/sol7/olimpio/service/services/basico/MotivoService.java:26, camada service)
-    // Logica original (adaptar):
-    // public List<Motivo> autoCompleteList() {
-    //         return getMotivoRepository().autoCompleteList(new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteList() {
         return repository.find("ativo = true order by descricao").page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }

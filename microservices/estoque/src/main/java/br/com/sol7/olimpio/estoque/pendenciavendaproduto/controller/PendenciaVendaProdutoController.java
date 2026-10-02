@@ -28,7 +28,6 @@ public class PendenciaVendaProdutoController {
         return service.paged(page == null ? 0 : page, size == null ? 10 : size);
     }
 
-    // Migrado de EstoqueProdutoController.salvaPendenciaEntregue
     @PUT
     @Path("/{id}/entregar")
     public Uni<PendenciaVendaProdutoResponse> salvaPendenciaEntregue(@PathParam("id") Long id) {

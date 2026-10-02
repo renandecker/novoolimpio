@@ -80,24 +80,10 @@ public class ConfiguracaoEstoqueService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de ConfiguracaoEstoqueService.buscarConfiguracaoComUnidadeUsuario (src/main/java/br/com/sol7/olimpio/service/services/estoque/ConfiguracaoEstoqueService.java:20, camada service)
-    // Observacao: retorno: era ConfiguracaoEstoque (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public ConfiguracaoEstoque buscarConfiguracaoComUnidadeUsuario(Unidade unidade) {
-    //         return getConfiguracaoEstoqueRepository().buscarConfiguracaoComUnidadeUsuario(unidade);
-    //     }
     public Uni<Long> buscarConfiguracaoComUnidadeUsuario(Long unidadeId) {
         return repository.find("unidadeId = ?1 order by id desc", unidadeId).firstResult().map(x -> x == null ? null : x.id);
     }
 
-
-    // Migrado de ConfiguracaoEstoqueService.buscarCentral (src/main/java/br/com/sol7/olimpio/service/services/estoque/ConfiguracaoEstoqueService.java:24, camada service)
-    // Observacao: retorno: era ConfiguracaoEstoque (referencia por id)
-    // Logica original (adaptar):
-    // public ConfiguracaoEstoque buscarCentral() {
-    //         return getConfiguracaoEstoqueRepository().buscarCentral();
-    //     }
     public Uni<Long> buscarCentral() {
         return repository.find("central = true order by id desc").firstResult().map(x -> x == null ? null : x.id);
     }

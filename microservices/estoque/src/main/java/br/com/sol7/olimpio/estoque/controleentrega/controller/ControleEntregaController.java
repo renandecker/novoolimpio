@@ -28,7 +28,6 @@ public class ControleEntregaController {
         return service.paged(page == null ? 0 : page, size == null ? 10 : size);
     }
 
-    // Migrado de ControleEntregaService.entregasproUnidade (legado)
     @GET
     @Path("/entregas-por-unidade")
     public Uni<List<ControleEntregaResponse>> entregasPorUnidade(@QueryParam("unidadeId") Long unidadeId) {

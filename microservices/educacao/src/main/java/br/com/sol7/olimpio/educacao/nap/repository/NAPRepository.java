@@ -71,7 +71,6 @@ public class NAPRepository implements PanacheRepository<NAP> {
                 .map(rows -> rows.stream().map(this::mapToNAP).toList());
     }
 
-    // Migrado de NAPService.atualizaNapsContrato (legado) - chama CadernoComponenteCurricularService.tratarfrequencias
     public static final String SQL_ATUALIZA_NAPS_CONTRATO_1 =
             "UPDATE edc_matricula mmm SET " +
                     "id_caderno_ultimo = (SELECT cad.id FROM edc_oferecimento_componente_curricular ofe " +
@@ -102,7 +101,6 @@ public class NAPRepository implements PanacheRepository<NAP> {
                 .replaceWithVoid();
     }
 
-    // Migrado de NAPService.atualizaNapsContratoPresenca (legado) - chama CadernoComponenteCurricularService.atualizaUltimoCadernoMatricualComOferecimento
     public static final String SQL_ATUALIZA_NAPS_CONTRATO_PRESENCA_1 =
             "UPDATE edc_matricula mmm SET " +
                     "id_caderno_ultimo = (SELECT cad.id FROM edc_oferecimento_componente_curricular ofe " +
@@ -133,7 +131,6 @@ public class NAPRepository implements PanacheRepository<NAP> {
                 .replaceWithVoid();
     }
 
-    // Migrado de NAPService.atualizaNapsContratoNota (legado)
     public static final String SQL_ATUALIZA_NAPS_CONTRATO_NOTA =
             "UPDATE edc_contrato ccc " +
                     "SET nota_executadas = 10 * (SELECT COUNT(a2.id) FROM edc_nota_componente_curricular_matricula a2 " +
@@ -152,7 +149,6 @@ public class NAPRepository implements PanacheRepository<NAP> {
                 .replaceWithVoid();
     }
 
-    // Migrado de NAPService.obterHorarioAula (legado)
     public static final String SQL_OBTER_HORARIO_AULA =
             "SELECT te.string_inicio || ' até ' || te.string_fim " +
                     "FROM edc_ocorrencia_componente_curricular oco " +

@@ -318,15 +318,6 @@ public class CampanhaService {
         });
     }
 
-    // Legacy wrappers mantidos para compatibilidade
-
-    // Migrado de CampanhaService.buscarCampanhaComAcoes (src/main/java/br/com/sol7/olimpio/service/services/comercial/CampanhaService.java:25, camada service)
-    // Observacao: retorno: era Campanha (referencia por id)
-    // JPQL original: select a from Campanha a left join fetch a.acoesDeCampanha where a.id = ?1
-    // Logica original (adaptar):
-    // public Campanha buscarCampanhaComAcoes(Integer id) {
-    //         return getCampanhaRepository().buscarCampanhaComAcoes(id);
-    //     }
     public Uni<Long> buscarCampanhaComAcoes(Integer id) {
         return repository.buscarCampanhaComAcoes(id).map(list -> list.isEmpty() ? null : list.get(0).id);
     }

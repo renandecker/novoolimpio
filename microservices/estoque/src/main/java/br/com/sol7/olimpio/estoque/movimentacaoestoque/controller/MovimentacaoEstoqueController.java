@@ -45,7 +45,6 @@ public class MovimentacaoEstoqueController {
         return service.create(r).map(item -> Response.status(Response.Status.CREATED).entity(item).build());
     }
 
-    // Migrado de EstoqueProdutoController.salvaEntrada: registra entrada e soma no ControleEstoque da unidade
     @POST
     @Path("/entrada")
     public Uni<Response> saveOrUpdate(@Valid MovimentacaoEstoqueRequest r) {

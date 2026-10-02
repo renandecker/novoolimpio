@@ -14,6 +14,7 @@ import br.com.sol7.olimpio.basico.logradouro.dto.LogradouroRequest;
 import br.com.sol7.olimpio.basico.logradouro.dto.LogradouroResponse;
 import br.com.sol7.olimpio.basico.logradouro.dto.TrocaLogradourosRequest;
 import br.com.sol7.olimpio.basico.logradouro.service.LogradouroService;
+import jakarta.ws.rs.BadRequestException;
 
 @Path("/api/basico/logradouro")
 @Produces(MediaType.APPLICATION_JSON)
@@ -58,28 +59,28 @@ public class LogradouroController {
 
     @POST
     @Path("/atualizar-todos-logradouro")
-    public Uni<Void> atualizarTodosLogradouro() {
+    public Uni<Integer> atualizarTodosLogradouro() {
         return service.atualizarTodosLogradouro();
     }
 
 
     @POST
     @Path("/atualizar-todos-coordenada-a-p-i")
-    public Uni<Void> atualizarTodosCoordenadaAPI() {
+    public Uni<Integer> atualizarTodosCoordenadaAPI() {
         return service.atualizarTodosCoordenadaAPI();
     }
 
 
     @POST
     @Path("/atualizar-coordenada-a-p-i")
-    public Uni<Void> atualizarCoordenadaAPI(@QueryParam("logradouroId") Long logradouroId, @QueryParam("token") String token) {
+    public Uni<LogradouroResponse> atualizarCoordenadaAPI(@QueryParam("logradouroId") Long logradouroId, @QueryParam("token") String token) {
         return service.atualizarCoordenadaAPI(logradouroId, token);
     }
 
 
     @POST
     @Path("/atualizar-logradouro")
-    public Uni<Void> atualizarLogradouro(@QueryParam("logradouroId") Long logradouroId) {
+    public Uni<LogradouroResponse> atualizarLogradouro(@QueryParam("logradouroId") Long logradouroId) {
         return service.atualizarLogradouro(logradouroId);
     }
 
@@ -156,16 +157,16 @@ public class LogradouroController {
 
 
     @GET
-    @Path("/buscar-endereco-cadastro")
-    public Uni<Void> buscarEnderecoCadastro(@QueryParam("cep") String cep) {
+    @Path("/buscar-endereco-cadastro/{cep}")
+    public Uni<BuscarEnderecoResponse> buscarEnderecoCadastro(@PathParam("cep") String cep) {
         return service.buscarEnderecoCadastro(cep);
     }
 
 
     @GET
-    @Path("/buscar-endereco")
-    public Uni<Void> buscarEndereco() {
-        return service.buscarEndereco();
+    @Path("/buscar-endereco/{cep}")
+    public Uni<BuscarEnderecoResponse> buscarEndereco(@PathParam("cep") String cep) {
+        return service.buscarEndereco(cep);
     }
 
 

@@ -15,6 +15,7 @@ import br.com.sol7.olimpio.basico.modulo.dto.ModuloMenuResponse;
 import br.com.sol7.olimpio.basico.modulo.dto.ModuloRequest;
 import br.com.sol7.olimpio.basico.modulo.dto.ModuloResponse;
 import br.com.sol7.olimpio.basico.modulo.service.ModuloService;
+import br.com.sol7.olimpio.basico.modulo.dto.ModuloPerfisResponse;
 
 @Path("/api/basico/modulo")
 @Produces(MediaType.APPLICATION_JSON)
@@ -74,8 +75,8 @@ public class ModuloController {
     }
 
     @GET
-    @Path("/carregar-perfis")
-    public Uni<Void> carregarPerfis(@QueryParam("moduloId") Long moduloId) {
+    @Path("/carregar-perfis/{moduloId}")
+    public Uni<ModuloPerfisResponse> carregarPerfis(@PathParam("moduloId") Long moduloId) {
         return service.carregarPerfis(moduloId);
     }
 

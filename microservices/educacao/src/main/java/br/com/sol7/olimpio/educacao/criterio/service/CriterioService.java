@@ -143,37 +143,14 @@ public class CriterioService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de CriterioService.buscarCriterioComDiasSemana (src/main/java/br/com/sol7/olimpio/service/services/educacao/CriterioService.java:27, camada service)
-    // Observacao: retorno: era Criterio (referencia por id); parametro curriculoId: era Curriculo (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // JPQL original: Select c from Criterio c left join fetch c.diaSemana where c.curriculo =?1 AND c.unidade = ?2
-    // Logica original (adaptar):
-    // public Criterio buscarCriterioComDiasSemana(Curriculo curriculo, Unidade unidade) {
-    //         return getCriterioRepository().buscarCriterioComDiasSemana(curriculo, unidade);
-    //     }
     public Uni<Long> buscarCriterioComDiasSemana(Long curriculoId, Long unidadeId) {
         return repository.buscarCriterioComDiasSemana(curriculoId, unidadeId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de CriterioService.buscarCriterioComTurno (src/main/java/br/com/sol7/olimpio/service/services/educacao/CriterioService.java:31, camada service)
-    // Observacao: retorno: era Criterio (referencia por id); parametro curriculoId: era Curriculo (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // JPQL original: Select c from Criterio c left join fetch c.turnoEducacao where c.curriculo =?1 AND c.unidade = ?2
-    // Logica original (adaptar):
-    // public Criterio buscarCriterioComTurno(Curriculo curriculo, Unidade unidade) {
-    //         return getCriterioRepository().buscarCriterioComTurno(curriculo, unidade);
-    //     }
     public Uni<Long> buscarCriterioComTurno(Long curriculoId, Long unidadeId) {
         return repository.buscarCriterioComTurno(curriculoId, unidadeId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de CriterioService.buscarCriterio (src/main/java/br/com/sol7/olimpio/service/services/educacao/CriterioService.java:35, camada service)
-    // Observacao: parametro curriculoId: era Curriculo (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public List<Criterio> buscarCriterio(Curriculo curriculo, Unidade unidade) {
-    //         return getCriterioRepository().buscarCriterio(curriculo, unidade);
-    //     }
     public Uni<List<Long>> buscarCriterio(Long curriculoId, Long unidadeId) {
         return repository.find("curriculoId =?1 and unidadeId = ?2 order by id desc", curriculoId, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }

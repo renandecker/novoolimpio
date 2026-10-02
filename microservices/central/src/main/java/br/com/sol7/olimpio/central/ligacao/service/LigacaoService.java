@@ -159,51 +159,20 @@ public class LigacaoService {
                         : Uni.createFrom().item(toResponse(list.get(0))));
     }
 
-
-    // Migrado de LigacaoService.buscarHistoricoLigacao (src/main/java/br/com/sol7/olimpio/service/services/central/LigacaoService.java:31, camada service)
-    // Logica original (adaptar):
-    // public List<Ligacao> buscarHistoricoLigacao(Integer prospecto) {
-    //         return getLigacaoRepository().buscarHistoricoLigacao(prospecto, new PageRequest(0, 5)).getContent();
-    //     }
     public Uni<List<Long>> buscarHistoricoLigacao(Integer prospecto) {
         // Obs: condicao removida (depende de outro microservico): l.ordemLigacao.prospecto.id = ?1
         return repository.find("resultadoContatoId is not null and dataFinal is not null order by dataInicial desc", prospecto).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de LigacaoService.buscarHistoricoTodasLigacaoProspecto (src/main/java/br/com/sol7/olimpio/service/services/central/LigacaoService.java:35, camada service)
-    // Logica original (adaptar):
-    // public List<Ligacao> buscarHistoricoTodasLigacaoProspecto(Integer prospecto) {
-    //         return getLigacaoRepository().buscarHistoricoTodasLigacaoProspecto(prospecto);
-    //     }
     public Uni<List<Long>> buscarHistoricoTodasLigacaoProspecto(Integer prospecto) {
         // Obs: condicao removida (depende de outro microservico): l.ordemLigacao.prospecto.id = ?1
         return repository.find("order by dataInicial desc", prospecto).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de LigacaoService.buscarQtdeLigadosProspectoComResultadoOperacional (src/main/java/br/com/sol7/olimpio/service/services/central/LigacaoService.java:39, camada service)
-    // Observacao: parametro prospectoId: era Prospecto (referencia por id); parametro resultadoContatoId: era ResultadoContato (referencia por id); parametro operacionalId: era Operacional (referencia por id)
-    // JPQL original: Select count(l.id) from Ligacao l where l.ordemLigacao.prospecto = ?1 and l.resultadoContato = ?2 and l.ordemLigacao.operacional = ?3
-    // Logica original (adaptar):
-    // public Long buscarQtdeLigadosProspectoComResultadoOperacional(Prospecto prospecto, ResultadoContato resultadoContato, Operacional operacional) {
-    //         return getLigacaoRepository().buscarQtdeLigadosProspectoComResultadoOperacional(prospecto, resultadoContato, operacional);
-    //     }
     public Uni<Long> buscarQtdeLigadosProspectoComResultadoOperacional(Long prospectoId, Long resultadoContatoId, Long operacionalId) {
         return repository.buscarQtdeLigadosProspectoComResultadoOperacional(prospectoId, resultadoContatoId, operacionalId).map(list -> list.isEmpty() ? null : ((Number) list.get(0)).longValue());
     }
 
-
-    // Migrado de LigacaoService.buscarLigacaoComNumero (src/main/java/br/com/sol7/olimpio/service/services/central/LigacaoService.java:55, camada service)
-    // Observacao: retorno: era Ligacao (referencia por id)
-    // Logica original (adaptar):
-    // public Ligacao buscarLigacaoComNumero(String numero) {
-    //         List<Ligacao> ligacoes = getLigacaoRepository().buscarLigacaoComNumero(usuarioLogadoController.getUsuario(), numero);
-    //         if (!ObjectUtil.nullOrEmpty(ligacoes)) {
-    //             return ligacoes.get(0);
-    //         }
-    //         return new Ligacao();
-    //     }
     public Uni<Long> buscarLigacaoComNumero2(String numero) {
         // Obs: condicao removida (depende do usuario logado do microservico basico): l.usuario = ?1
         return repository.find("telefoneDiscado = ?1 order by dataInicial desc", numero).firstResult().map(x -> x == null ? null : x.id);

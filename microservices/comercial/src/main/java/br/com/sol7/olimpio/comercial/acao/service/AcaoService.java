@@ -98,12 +98,6 @@ public class AcaoService {
         return new AcaoResponse(e.id, e.descricao, e.dataColeta, e.tipoAcaoId, e.dataInicial, e.dataFinalCaptacao, e.dataFinal, e.meta, e.custo, e.responsavelId);
     }
 
-
-    // Migrado de AcaoController.autoCompleteEmAberto (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/AcaoController.java:241, camada controller)
-    // Logica original (adaptar):
-    // public List<Acao> autoCompleteEmAberto(String query) {
-    //         return acaoService.autoCompleteEmAberto(query, usuarioLogadoController.getUnidadesDisponiveis());
-    //     }
     public Uni<List<Long>> autoCompleteEmAberto(String query, List<Long> unidadesIds) {
         if (unidadesIds == null || unidadesIds.isEmpty()) {
             return Uni.createFrom().item(java.util.List.of());
@@ -111,47 +105,18 @@ public class AcaoService {
         return repository.autoCompleteEmAberto(query.toLowerCase().trim(), unidadesIds).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de AcaoController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/AcaoController.java:245, camada controller)
-    // Logica original (adaptar):
-    // public List<Acao> autoComplete(String query) {
-    //         return new ArrayList<>(acaoService.autoComplete(query));
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de AcaoService.buscarAcaoComCampos (src/main/java/br/com/sol7/olimpio/service/services/comercial/AcaoService.java:39, camada service)
-    // Observacao: retorno: era Acao (referencia por id)
-    // JPQL original: select a from Acao a left join fetch a.acaoCampos as ac where a.id = ?1 order by ac.ordem
-    // Logica original (adaptar):
-    // public Acao buscarAcaoComCampos(Integer idAcao) {
-    //         return getAcaoRepository().buscarAcaoComCampos(idAcao);
-    //     }
     public Uni<Long> buscarAcaoComCampos(Integer idAcao) {
         return repository.buscarAcaoComCampos(idAcao).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de AcaoService.buscarAcaoComUnidades (src/main/java/br/com/sol7/olimpio/service/services/comercial/AcaoService.java:43, camada service)
-    // Observacao: retorno: era Acao (referencia por id); parametro acaoId: era Acao (referencia por id)
-    // JPQL original: select a from Acao a left join fetch a.unidades where a = ?1
-    // Logica original (adaptar):
-    // public Acao buscarAcaoComUnidades(Acao acao) {
-    //         return getAcaoRepository().buscarAcaoComUnidades(acao);
-    //     }
     public Uni<Long> buscarAcaoComUnidades(Long acaoId) {
         return repository.buscarAcaoComUnidades(acaoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de AcaoService.autoCompleteEmAberto (src/main/java/br/com/sol7/olimpio/service/services/comercial/AcaoService.java:51, camada service)
-    // JPQL original: select distinct a from Acao a inner join a.unidades un  where (a.dataFinal is null OR current_date <= a.dataFinal) AND (a.descricao like '%' || ?1 || '%' OR str(a.id) = ?1)  AND un in (?2)
-    // Logica original (adaptar):
-    // public List<Acao> autoCompleteEmAberto(String query, List<Unidade> unidades) {
-    //         return getAcaoRepository().autoCompleteEmAberto(query, unidades);
-    //     }
     public Uni<List<Long>> autoCompleteEmAberto2(String query, List<Long> unidades) {
         return repository.autoCompleteEmAberto(query, unidades).map(list -> list.stream().map(x -> x.id).toList());
     }

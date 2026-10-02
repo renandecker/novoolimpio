@@ -76,14 +76,6 @@ public class GerarPacoteService {
         return out;
     }
 
-    // Migrado de GerarPacoteController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/GerarPacoteController.java:197, camada controller)
-    // Observacao: retorno: era Set<Acao> no legado
-    // Logica original (adaptar):
-    // public Set<Acao> autoComplete(String query) {
-    //         return acaoService.autoComplete(query);
-    //     }
-    // Obs: autocomplete de UI; retorno original era Set<Acao>, incompativel com a assinatura
-    // Implementacao: retorna IDs de acoes que correspondem a query (requer modulo Acao)
     public Uni<List<Long>> autoComplete(String query) {
         return acaoRepository.autoComplete(query)
                 .map(list -> list.stream().map(a -> a.id).toList());
@@ -101,19 +93,6 @@ public class GerarPacoteService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de GerarPacoteController.carregarCampos (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/GerarPacoteController.java:260, camada controller)
-    // Logica original (adaptar):
-    // public void carregarCampos() {
-    //         List<Prospecto> prospectosTemp = new ArrayList<>();
-    //         for (Prospecto prospecto : prospectos) {
-    //             prospecto = prospectoService.carregarProspectoComCampos(prospecto.getId());
-    //             prospectosTemp.add(prospecto);
-    //         }
-    //         prospectos = prospectosTemp;
-    //     }
-    // Obs: metodo de UI (JSF); depende do modulo Prospecto nao migrado
-    // Implementacao: carrega campos dos prospectos selecionados (requer modulo Prospecto)
     public Uni<List<Map<String, Object>>> carregarCampos(List<Long> prospectoIds) {
         if (prospectoIds == null || prospectoIds.isEmpty()) {
             return Uni.createFrom().item(java.util.List.of());
@@ -150,24 +129,6 @@ public class GerarPacoteService {
                 });
     }
 
-
-// Migrado de GerarPacoteController.carregarOperacoes (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/GerarPacoteController.java:341, camada controller)
-    // Logica original (adaptar):
-    // public void carregarOperacoes() {
-    //         listOperation = new ArrayList<>();
-    //         listOperation.add(QueryOperation.EQ);
-    //         listOperation.add(QueryOperation.NOT_EQUAL);
-    //
-    //         if (!ObjectUtil.nullOrEmpty(filtroPacoteAtual.getCampo())) {
-    //             switch (filtroPacoteAtual.getCampo().getTipo()) {
-    //                 case DATA:
-    //                     listOperation.add(QueryOperation.GREATER_THAN);
-    //                     listOperation.add(QueryOperation.GREATER_THAN_OR_EQUAL);
-    //                     listOperation.add(QueryOperation.LESS_THAN);
-    //                     listOperation.add(QueryOperation.LESS_THAN_OR_EQUAL);
-    // // ... (truncado, ver fonte original)
-    // Obs: metodo de UI (JSF), sem logica de dados portaavel
-    // Implementacao: retorna operacoes disponiveis para um tipo de campo
     public Uni<List<String>> carregarOperacoes(String tipoCampo) {
         // Retorna operacoes basicas baseadas no tipo de campo
         if ("DATA".equalsIgnoreCase(tipoCampo)) {
@@ -204,33 +165,10 @@ public class GerarPacoteService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de GerarPacoteController.carregarOperacoe (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/GerarPacoteController.java:391, camada controller)
-    // Logica original (adaptar):
-    // public void carregarOperacoe(){
-    //         listOperationAcademico = new ArrayList<>();
-    //         listOperationAcademico.add(QueryOperation.EQ);
-    //         listOperationAcademico.add(QueryOperation.NOT_EQUAL);
-    //         listOperationAcademico.add(QueryOperation.GREATER_THAN);
-    //         listOperationAcademico.add(QueryOperation.GREATER_THAN_OR_EQUAL);
-    //         listOperationAcademico.add(QueryOperation.LESS_THAN);
-    //         listOperationAcademico.add(QueryOperation.LESS_THAN_OR_EQUAL);
-    //         listOperationAcademico.add(QueryOperation.BETWEEN);
-    //     }
-    // Obs: metodo de UI (JSF), sem logica de dados portaavel
-    // Implementacao: retorna operacoes academicas disponiveis
     public Uni<List<String>> carregarOperacoe() {
         return Uni.createFrom().item(List.of("EQ", "NOT_EQUAL", "GREATER_THAN", "GREATER_THAN_OR_EQUAL", "LESS_THAN", "LESS_THAN_OR_EQUAL", "BETWEEN"));
     }
 
-
-    // Migrado de GerarPacoteController.carregarOperacoesLigacao (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/GerarPacoteController.java:402, camada controller)
-    // Logica original (adaptar):
-    // public void carregarOperacoesLigacao() {
-    //         carregarOperacoe();
-    //     }
-    // Obs: metodo de UI (JSF), sem logica de dados portaavel
-    // Implementacao: delega para carregarOperacoe
     public Uni<List<String>> carregarOperacoesLigacao() {
         return carregarOperacoe();
     }
@@ -258,16 +196,6 @@ public class GerarPacoteService {
         return Uni.createFrom().item(List.of("EQ", "NOT_EQUAL"));
     }
 
-
-    // Migrado de GerarPacoteController.carregarProspectoParaVisualizacao (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/GerarPacoteController.java:430, camada controller)
-    // Observacao: parametro entityId: era Prospecto (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarProspectoParaVisualizacao(Prospecto entity) {
-    //         dynaFormModelAtual = new DynaFormModel();
-    //         ProspectoUtil.carregarProspectoParaVisualizacao(prospectoService.buscaProspectoComCampos(entity.getId()), getDynaFormModelAtual());
-    //     }
-    // Obs: metodo de UI (JSF); depende do modulo Prospecto nao migrado
-    // Implementacao: carrega prospecto para visualizacao (requer modulo Prospecto)
     public Uni<List<Map<String, Object>>> carregarProspectoParaVisualizacao(Long entityId) {
         String sql = """
             SELECT c.id AS campo_id, c.rotulo AS rotulo, c.tipo AS tipo, cat.descricao AS categoria, pc.valor AS valor

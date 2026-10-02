@@ -9,7 +9,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class FormaPagamentoRepository implements PanacheRepository<FormaPagamento> {
 
-    // Migrado de FormaPagamentoService.verificarCotaAuto (legado) - SQL nativo original (3 updates)
     public static final String SQL_VERIFICAR_COTA_DIARIO =
             "UPDATE fin_forma_pagamento taxa SET data_controle_cota = now(), valor_controle_cota = valor_cota " +
                     "where taxa.cota = true and taxa.ativo = true and periodicidade = 'DIARIO' and taxa.data_controle_cota != current_date";
@@ -32,7 +31,6 @@ public class FormaPagamentoRepository implements PanacheRepository<FormaPagament
                 .replaceWithVoid();
     }
 
-    // Migrado de FormaPagamentoService.verificarCota (legado) - SQL nativo original:
     // UPDATE fin_forma_pagamento taxa SET data_controle_cota = now(), valor_controle_cota = valor_cota
     // where taxa.cota = true and taxa.ativo = true
     public static final String SQL_VERIFICAR_COTA =
@@ -45,7 +43,6 @@ public class FormaPagamentoRepository implements PanacheRepository<FormaPagament
                 .replaceWithVoid();
     }
 
-    // Migrado de FormaPagamentoService.verificarCotaEntity (legado) - SQL nativo original:
     // UPDATE fin_forma_pagamento taxa SET data_controle_cota = now(), valor_controle_cota = valor_cota
     // from edc_valor_curso v inner join edc_valor_curso_forma_pagamento vd on (vd.id_valor_curso = v.id)
     // where taxa.id = vd.id_forma_pagamento and v.id = ?1 and taxa.cota = true and taxa.ativo = true

@@ -91,13 +91,11 @@ public class LigacaoCobrancaService {
         return new LigacaoCobrancaResponse(e.id, e.usuarioId, e.contratoId, e.dataInicial, e.dataFinal, e.resultadoCobrancaId, e.telefone, e.observacao, e.compromissoId, e.ativo, e.etapasCobrancaId, e.qtdeParcela, e.valor);
     }
 
-    // Migrado de LigacaoCobrancaService.cobradasPessoas (legado)
     // Retorna IDs de pessoas/contratos que foram cobradas em uma data
     public Uni<List<Long>> buscarPessoasCobradas(Long unidadeId, Date data) {
         return repository.buscarPessoasCobradas(unidadeId, data);
     }
 
-    // Migrado de LigacaoCobrancaService.quantidadeLigacoesRealizadasPessoa (legado)
     // Conta ligações realizadas para uma pessoa em uma data
     public Uni<Long> contarLigacoesRealizadasPessoa(Long unidadeId, Date data, Long pessoaId) {
         return repository.contarLigacoesRealizadasPessoa(unidadeId, data, pessoaId);

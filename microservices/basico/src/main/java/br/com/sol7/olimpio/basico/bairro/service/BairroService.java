@@ -69,34 +69,10 @@ public class BairroService {
         return new BairroResponse(e.id, e.descricao, e.cidadeId);
     }
 
-
-    // Migrado de BairroController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/basico/BairroController.java:81, camada controller)
-    // Logica original (adaptar):
-    // public List<Bairro> autoComplete(String query) {
-    //         if (cidade != null) {
-    //             return bairroService.autoCompleteComCidade(query, cidade);
-    //         } else {
-    //             return bairroService.autoComplete(query);
-    //         }
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de BairroController.autoCompleteLogradouroTroca (src/main/java/br/com/sol7/olimpio/control/controllers/basico/BairroController.java:89, camada controller)
-    // Logica original (adaptar):
-    // public List<Bairro> autoCompleteLogradouroTroca(String query) {
-    //         try {
-    //             if (!query.equals("")) {
-    //                 return bairroService.autoComplete(query);
-    //             } else {
-    //                 return new ArrayList<>();
-    //             }
-    //         } catch (Exception e) {
-    //             return new ArrayList<>();
-    //         }
-    //     }
     public Uni<List<Long>> autoCompleteLogradouroTroca(String query) {
         if (query == null || query.equals("")) {
             return Uni.createFrom().item(java.util.List.of());
@@ -104,60 +80,23 @@ public class BairroService {
         return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de BairroService.autoCompleteComCep (src/main/java/br/com/sol7/olimpio/service/services/basico/BairroService.java:28, camada service)
-    // JPQL original: select distinct c.bairro from Logradouro c where c.cep = ?2 and lower(c.bairro.descricao) like '%' || ?1 || '%'  OR str(c.id) = ?1  order by c.descricao
-    // Logica original (adaptar):
-    // public List<Bairro> autoCompleteComCep(String query, String cep) {
-    //         return this.getBairroRepository().autoCompleteComCep(query.toLowerCase(), cep, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteComCep(String query, String cep) {
         return repository.autoCompleteComCep(query.toLowerCase(), cep).map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de BairroService.autoCompleteComCidade (src/main/java/br/com/sol7/olimpio/service/services/basico/BairroService.java:33, camada service)
-    // Observacao: parametro cidadeId: era Cidade (referencia por id)
-    // Logica original (adaptar):
-    // public List<Bairro> autoCompleteComCidade(String query, Cidade cidade) {
-    //         return this.getBairroRepository().autoCompleteComCidade(query.toLowerCase(), cidade, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteComCidade(String query, Long cidadeId) {
         return repository.find("cidadeId = ?2 and (lower(descricao) like '%' || ?1 || '%') order by descricao", query.toLowerCase(), cidadeId).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de BairroService.autoCompleteComCidadeComCep (src/main/java/br/com/sol7/olimpio/service/services/basico/BairroService.java:37, camada service)
-    // Observacao: parametro cidadeId: era Cidade (referencia por id)
-    // JPQL original: select distinct c.bairro from Logradouro c where c.bairro.cidade = ?2 and c.cep = ?3 and (lower(c.bairro.descricao) like '%' || ?1 || '%')  order by c.bairro.descricao
-    // Logica original (adaptar):
-    // public List<Bairro> autoCompleteComCidadeComCep(String query, Cidade cidade, String cep) {
-    //         return this.getBairroRepository().autoCompleteComCidadeComCep(query.toLowerCase(), cidade, cep, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteComCidadeComCep(String query, Long cidadeId, String cep) {
         return repository.autoCompleteComCidadeComCep(query.toLowerCase(), cidadeId, cep).map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de BairroService.autoCompleteComCidadeEstado (src/main/java/br/com/sol7/olimpio/service/services/basico/BairroService.java:41, camada service)
-    // Observacao: parametro cidadeId: era Cidade (referencia por id); parametro estadoId: era Estado (referencia por id)
-    // Logica original (adaptar):
-    // public List<Bairro> autoCompleteComCidadeEstado(String query, Cidade cidade, Estado estado) {
-    //         return this.getBairroRepository().autoCompleteComCidadeEstado(query.toLowerCase(), cidade, estado, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteComCidadeEstado(String query, Long cidadeId, Long estadoId) {
         // Obs: condicao removida (depende de outro microservico): c.cidade.estado = ?3
         return repository.find("cidadeId = ?2 and (lower(descricao) like '%' || ?1 || '%') order by descricao", query.toLowerCase(), cidadeId, estadoId).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de BairroService.autoCompleteComCidadeEstadoComCep (src/main/java/br/com/sol7/olimpio/service/services/basico/BairroService.java:45, camada service)
-    // Observacao: parametro cidadeId: era Cidade (referencia por id); parametro estadoId: era Estado (referencia por id)
-    // JPQL original: select distinct c.bairro from Logradouro c where c.cep = ?4 and c.bairro.cidade = ?2 and c.bairro.cidade.estado = ?3 and (lower(c.bairro.descricao) like '%' || ?1 || '%')  order by c.bairro.descricao
-    // Logica original (adaptar):
-    // public List<Bairro> autoCompleteComCidadeEstadoComCep(String query, Cidade cidade, Estado estado, String cep) {
-    //         return this.getBairroRepository().autoCompleteComCidadeEstadoComCep(query.toLowerCase(), cidade, estado, cep, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteComCidadeEstadoComCep(String query, Long cidadeId, Long estadoId, String cep) {
         return repository.autoCompleteComCidadeEstadoComCep(query.toLowerCase(), cidadeId, estadoId, cep).map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }

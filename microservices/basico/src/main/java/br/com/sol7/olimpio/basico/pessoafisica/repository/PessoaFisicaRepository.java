@@ -100,4 +100,17 @@ public class PessoaFisicaRepository implements PanacheRepository<PessoaFisica> {
         return autoCompleteTestemunha(query).map(list -> (java.util.List<Object>) (java.util.List<?>) list);
     }
 
+
+
+    // select pf from PessoaFisica pf where pf.pessoaId = ?1
+    public static final String SQL_FIND_BY_PESSOA_ID =
+            "SELECT * FROM bas_pessoa_fisica WHERE id_pessoa = ?1";
+
+    public Uni<PessoaFisica> findByPessoaId(Long pessoaId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_FIND_BY_PESSOA_ID, PessoaFisica.class)
+                        .setParameter(1, pessoaId)
+                        .getSingleResultOrNull());
+    }
+
 }

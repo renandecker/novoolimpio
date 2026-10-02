@@ -18,6 +18,11 @@ import br.com.sol7.olimpio.basico.usuario.dto.UsuarioRequest;
 import br.com.sol7.olimpio.basico.usuario.dto.UsuarioResponse;
 import br.com.sol7.olimpio.basico.usuario.entity.Usuario;
 import br.com.sol7.olimpio.basico.usuario.repository.UsuarioRepository;
+import java.text.Normalizer;
+import br.com.sol7.olimpio.basico.pessoafisica.repository.PessoaFisicaRepository;
+import br.com.sol7.olimpio.basico.pessoafisica.entity.PessoaFisica;
+import br.com.sol7.olimpio.basico.usuario.dto.UsuarioDetalheResponse;
+import br.com.sol7.olimpio.basico.turnofuncionario.repository.TurnoFuncionarioRepository;
 import br.com.sol7.olimpio.basico.shared.notificacao.NotificacaoEventProducer;
 
 @ApplicationScoped
@@ -28,6 +33,10 @@ public class UsuarioService {
     UsuarioRepository repository;
     @Inject
     PessoaRepository pessoaRepository;
+    @Inject
+    PessoaFisicaRepository pessoaFisicaRepository;
+    @Inject
+    TurnoFuncionarioRepository turnoFuncionarioRepository;
     @Inject
     NotificacaoEventProducer notificacaoEventProducer;
     private static final Logger logger = LoggerFactory.getLogger(UsuarioService.class);
@@ -127,24 +136,29 @@ public class UsuarioService {
     }
 
 
-    // Migrado de UsuarioController.gerarLogin (src/main/java/br/com/sol7/olimpio/control/controllers/basico/UsuarioController.java:283, camada controller)
-    // Logica original (adaptar):
-    // public void gerarLogin() {
-    //         String nomecompleto = removerAcentos(getEntity().getPessoa().getPessoaFisica().getNome().toLowerCase());
-    //         String nome[] = nomecompleto.split(" ");
-    //         String login = nome[0];
-    //         if (nome.length >= 2) {
-    //             login = nome[0] + "." + nome[nome.length - 1];
-    //         }
-    //         boolean loginExiste = true;
-    //         int contador = 1;
-    //         String loginAux = login;
-    //         while (loginExiste) {
-    //             if (!usuarioService.buscarLoginExistente(login)) {
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> gerarLogin() {
-        // Obs: depende da entidade da sessao JSF (nome da pessoa) para montar o login - ver UsuarioController.gerarLogin
-        return Uni.createFrom().voidItem();
+    public Uni<String> gerarLogin(Long pessoaId) {
+        return pessoaFisicaRepository.findByPessoaId(pessoaId).onItem().ifNull()
+                .failWith(() -> new NotFoundException("PessoaFisica not found"))
+                .map(pf -> {
+                    String nome = pf.nome != null ? pf.nome.toLowerCase() : "";
+                    nome = Normalizer.normalize(nome, Normalizer.Form.NFD)
+                            .replaceAll("\\p{InCombiningDiacriticalMarks}", "");
+                    String[] partes = nome.split("\\s+");
+                    String login = partes[0];
+                    if (partes.length >= 2) {
+                        login = partes[0] + "." + partes[partes.length - 1];
+                    }
+                    String base = login;
+                    int contador = 1;
+                    while (true) {
+                        final String candidate = login;
+                        boolean exists = buscarLoginExistente(candidate).await().indefinitely();
+                        if (!exists) break;
+                        login = base + contador;
+                        contador++;
+                    }
+                    return login;
+                });
     }
 
 
@@ -197,25 +211,12 @@ public class UsuarioService {
     }
 
 
-    // Migrado de UsuarioController.buscarDetalhes (src/main/java/br/com/sol7/olimpio/control/controllers/basico/UsuarioController.java:960, camada controller)
-    // Observacao: parametro event: era ToggleEvent no legado
-    // Logica original (adaptar):
-    // public void buscarDetalhes(ToggleEvent event) {
-    //         if (event.getVisibility() == Visibility.VISIBLE) {
-    //             try {
-    //                 Usuario usuario = (Usuario) event.getData();
-    //                 Usuario usuarioCarregado = usuarioService.buscarUsuarioComPerfil(usuario);
-    //                 listaDetalhePerfil = usuarioCarregado.getPerfis();
-    //                 usuarioCarregado = usuarioService.buscarUsuarioComAgendas(usuario);
-    //                 listaDetalheAgenda = usuarioCarregado.getUsuarioAgendas();
-    //                 usuarioCarregado = usuarioService.buscarUsuarioComUnidades(usuario);
-    //                 listaDetalheUnidade = usuarioCarregado.getUnidades();
-    //             } catch (Exception e) {
-    //        ...
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> buscarDetalhes(String event) {
-        // Obs: metodo de UI (ToggleEvent) - depende da Usuario do evento e de buscarUsuarioComPerfil/ComAgendas/ComUnidades
-        return Uni.createFrom().voidItem();
+    public Uni<UsuarioDetalheResponse> buscarDetalhes(Long usuarioId) {
+        return Uni.combine().all().unis(
+                listarPerfis(usuarioId),
+                listarAgendas(usuarioId),
+                listarUnidades(usuarioId))
+            .with((perfis, agendas, unidades) -> new UsuarioDetalheResponse(usuarioId, perfis, agendas, unidades));
     }
 
 
@@ -267,17 +268,17 @@ public class UsuarioService {
     }
 
 
-    // Migrado de UsuarioController.carregarTurnos (src/main/java/br/com/sol7/olimpio/control/controllers/basico/UsuarioController.java:1826, camada controller)
-    // Logica original (adaptar):
-    // public void carregarTurnos() {
-    //         TurnoFuncionario turnoFuncionario1Carregado = turnoFuncionarioService.listarTurnosCarregado(turnoFuncionario);
-    //         if (!ObjectUtil.nullOrEmpty(turnoFuncionario1Carregado)) {
-    //             listaTurnosTrabalho = new LinkedHashSet<>(turnoFuncionario1Carregado.getTurnoTrabalhos());
-    //         }
-    //     }
-    public Uni<Void> carregarTurnos() {
-        // Obs: depende do JSF (turnoFuncionario da tela) - turnoFuncionarioService.listarTurnosCarregado
-        return Uni.createFrom().voidItem();
+    public Uni<List<Long>> carregarTurnos(Long usuarioId) {
+        return repository.findById(usuarioId).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Usuario not found"))
+                .chain(usuario -> {
+                    if (usuario.funcionarioId == null) {
+                        return Uni.createFrom().item(java.util.List.of());
+                    }
+                    return turnoFuncionarioRepository.buscarPorFuncionario(usuario.funcionarioId)
+                            .chain(tf -> tf == null ? Uni.createFrom().item(java.util.List.of())
+                                    : turnoFuncionarioRepository.getTurnoTrabalhoIds(tf.id));
+                });
     }
 
 

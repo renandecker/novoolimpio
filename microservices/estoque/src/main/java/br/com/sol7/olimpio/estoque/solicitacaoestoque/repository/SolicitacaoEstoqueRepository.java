@@ -11,7 +11,6 @@ import java.util.List;
 @ApplicationScoped
 public class SolicitacaoEstoqueRepository implements PanacheRepository<SolicitacaoEstoque> {
 
-    // Migrado de SolicitacaoEstoqueRepository.buscaPorItem* (legado) - contadores da tela EstoqueProduto
     public Uni<List<SolicitacaoEstoque>> buscaPorItem(Long unidadeId, Long produtoId, Motivo motivo) {
         return find("unidadeId = ?1 and produtoId = ?2 and motivo = ?3 and ativo = true", unidadeId, produtoId, motivo).list();
     }

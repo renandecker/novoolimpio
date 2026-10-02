@@ -10,6 +10,7 @@ import jakarta.persistence.Tuple;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class TurmaRepository implements PanacheRepository<Turma> {
@@ -153,17 +154,19 @@ public class TurmaRepository implements PanacheRepository<Turma> {
     };
 
     public Uni<Integer> corrigirCriterioDuplicado(Long criterioId, Long unidadeId, Long curriculoId) {
-        Uni<Integer> chain = Uni.createFrom().item(0);
-        for (String sql : SQL_CORRIGE_CRITERIO_DUPLICADO) {
-            chain = chain.chain(acc -> Panache.getSession()
-                    .flatMap(session -> session.createNativeQuery(sql)
-                            .setParameter(1, criterioId)
-                            .setParameter(2, unidadeId)
-                            .setParameter(3, curriculoId)
-                            .executeUpdate())
-                    .map(acc::plus));
-        }
-        return chain;
+        return Panache.getSession()
+                .flatMap(session -> {
+                    Uni<Integer> total = Uni.createFrom().item(0);
+                    for (String sql : SQL_CORRIGE_CRITERIO_DUPLICADO) {
+                        total = total.chain(acc -> session.createNativeQuery(sql)
+                                .setParameter(1, criterioId)
+                                .setParameter(2, unidadeId)
+                                .setParameter(3, curriculoId)
+                                .executeUpdate()
+                                .map(updateCount -> acc + updateCount));
+                    }
+                    return total;
+                });
     }
 
     // FilterOferecimentoTrocaTurma: unidade in (?2) and dataFim > ?3 and componenteCurricular = ?4

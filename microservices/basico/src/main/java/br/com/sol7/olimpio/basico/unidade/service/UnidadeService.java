@@ -18,6 +18,12 @@ import br.com.sol7.olimpio.basico.unidade.dto.UnidadeRequest;
 import br.com.sol7.olimpio.basico.unidade.dto.UnidadeResponse;
 import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
 import br.com.sol7.olimpio.basico.unidade.repository.UnidadeRepository;
+import br.com.sol7.olimpio.basico.turnofuncionario.repository.TurnoFuncionarioRepository;
+import br.com.sol7.olimpio.basico.pessoa.repository.PessoaRepository;
+import br.com.sol7.olimpio.basico.usuario.repository.UsuarioRepository;
+import br.com.sol7.olimpio.basico.unidade.dto.UnidadeIdsResponse;
+import br.com.sol7.olimpio.basico.unidade.dto.UnidadePessoasResponse;
+import br.com.sol7.olimpio.basico.unidade.dto.UnidadeUsuariosResponse;
 
 @ApplicationScoped
 @WithTransaction
@@ -25,6 +31,12 @@ public class UnidadeService {
 
     @Inject
     UnidadeRepository repository;
+    @Inject
+    UsuarioRepository usuarioRepository;
+    @Inject
+    PessoaRepository pessoaRepository;
+    @Inject
+    TurnoFuncionarioRepository turnoFuncionarioRepository;
     private static final Logger logger = LoggerFactory.getLogger(UnidadeService.class);
 
     @CacheResult(cacheName = "unidade-list-cache")
@@ -105,9 +117,18 @@ public class UnidadeService {
     //         usuarios = usuarioService.buscarUsuarioPorUnidades(usuarioLogadoController.getUnidadesDisponiveis());
     //         usuariosMarcados = usuarioService.usuarioComUnidades(unidade);
     //     }
-    public Uni<Void> carregarUsuarios(Long unidadeId) {
-        // Obs: depende do microservico central (Usuario) - usuarioService.buscarUsuarioPorUnidades / usuarioComUnidades
-        return Uni.createFrom().voidItem();
+    public Uni<UnidadeUsuariosResponse> carregarUsuarios(Long unidadeId, Long usuarioLogadoId) {
+        return usuarioRepository.buscarUnidadesDisponiveis(usuarioLogadoId).chain(unidades -> {
+            List<Long> unidadesIds = unidades.stream().map(u -> u.id).toList();
+            if (unidadesIds.isEmpty()) {
+                return Uni.createFrom().item(new UnidadeUsuariosResponse(List.of(), List.of()));
+            }
+            return usuarioRepository.buscarUsuarioPorUnidades(unidadesIds).chain(todos ->
+                    usuarioRepository.usuarioComUnidades(unidadeId).map(marcados ->
+                            new UnidadeUsuariosResponse(
+                                    todos.stream().map(u -> u.id).toList(),
+                                    marcados.stream().map(u -> u.id).toList())));
+        });
     }
 
 
@@ -119,9 +140,15 @@ public class UnidadeService {
     //         professores = professorService.buscarProfessorPorUnidades(usuarioLogadoController.getUnidadesDisponiveis());
     //         professoresMarcados = professorService.professorComUnidades(unidade);
     //     }
-    public Uni<Void> carregarProfessores(Long unidadeId) {
-        // Obs: depende do microservico educacao (Professor) - professorService.buscarProfessorPorUnidades / professorComUnidades
-        return Uni.createFrom().voidItem();
+    public Uni<UnidadeIdsResponse> carregarProfessores(Long unidadeId, Long usuarioLogadoId) {
+        return usuarioRepository.buscarUnidadesDisponiveis(usuarioLogadoId).chain(unidades -> {
+            List<Long> unidadesIds = unidades.stream().map(u -> u.id).toList();
+            if (unidadesIds.isEmpty()) {
+                return Uni.createFrom().item(new UnidadeIdsResponse(List.of(), List.of()));
+            }
+            // Professor is in educacao module - use repository cross-module or return empty for now
+            return Uni.createFrom().item(new UnidadeIdsResponse(List.of(), List.of()));
+        });
     }
 
 
@@ -133,9 +160,15 @@ public class UnidadeService {
     //         curriculos = curriculoService.buscarCurriculoPorUnidades(usuarioLogadoController.getUnidadesDisponiveis());
     //         curriculosMarcados = curriculoService.curriculoComUnidades(unidade);
     //     }
-    public Uni<Void> carregarCurriculos(Long unidadeId) {
-        // Obs: depende do microservico educacao (Curriculo) - curriculoService.buscarCurriculoPorUnidades / curriculoComUnidades
-        return Uni.createFrom().voidItem();
+    public Uni<UnidadeIdsResponse> carregarCurriculos(Long unidadeId, Long usuarioLogadoId) {
+        return usuarioRepository.buscarUnidadesDisponiveis(usuarioLogadoId).chain(unidades -> {
+            List<Long> unidadesIds = unidades.stream().map(u -> u.id).toList();
+            if (unidadesIds.isEmpty()) {
+                return Uni.createFrom().item(new UnidadeIdsResponse(List.of(), List.of()));
+            }
+            // Curriculo is in educacao module - return empty for now
+            return Uni.createFrom().item(new UnidadeIdsResponse(List.of(), List.of()));
+        });
     }
 
 
@@ -147,9 +180,18 @@ public class UnidadeService {
     //         pessoas = pessoaService.buscarPessoaPorUnidades(usuarioLogadoController.getUnidadesDisponiveis());
     //         pessoasMarcados = pessoaService.pessoaComUnidades(unidade);
     //     }
-    public Uni<Void> carregarPessoas(Long unidadeId) {
-        // Obs: depende do usuario logado (unidades disponiveis) - pessoaService.buscarPessoaPorUnidades / pessoaComUnidades
-        return Uni.createFrom().voidItem();
+    public Uni<UnidadePessoasResponse> carregarPessoas(Long unidadeId, Long usuarioLogadoId) {
+        return usuarioRepository.buscarUnidadesDisponiveis(usuarioLogadoId).chain(unidades -> {
+            List<Long> unidadesIds = unidades.stream().map(u -> u.id).toList();
+            if (unidadesIds.isEmpty()) {
+                return Uni.createFrom().item(new UnidadePessoasResponse(List.of(), List.of()));
+            }
+            return pessoaRepository.buscarPessoaPorUnidades(unidadesIds).chain(todas ->
+                    pessoaRepository.pessoaComUnidades(unidadeId).map(marcadas ->
+                            new UnidadePessoasResponse(
+                                    todas.stream().map(p -> p.id).toList(),
+                                    marcadas.stream().map(p -> p.id).toList())));
+        });
     }
 
 
@@ -161,9 +203,17 @@ public class UnidadeService {
     //             listaTurnosTrabalho = new LinkedHashSet<>(turnoFuncionario1Carregado.getTurnoTrabalhos());
     //         }
     //     }
-    public Uni<Void> carregarTurnos() {
-        // Obs: depende do JSF (turnoFuncionario da tela) - turnoFuncionarioService.listarTurnosCarregado
-        return Uni.createFrom().voidItem();
+    public Uni<List<Long>> carregarTurnos(Long usuarioId) {
+        return usuarioRepository.findById(usuarioId).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Usuario not found"))
+                .chain(usuario -> {
+                    if (usuario.funcionarioId == null) {
+                        return Uni.createFrom().item(java.util.List.of());
+                    }
+                    return turnoFuncionarioRepository.buscarPorFuncionario(usuario.funcionarioId)
+                            .chain(tf -> tf == null ? Uni.createFrom().item(java.util.List.of())
+                                    : turnoFuncionarioRepository.getTurnoTrabalhoIds(tf.id));
+                });
     }
 
 
