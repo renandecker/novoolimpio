@@ -51,10 +51,10 @@ public class TurnoUsuarioController {
         return service.delete(usuarioId, turnoTrabalhoId);
     }
 
-    @POST
+    @GET
     @Path("/atualizar-lista-de-turnos")
-    public Uni<Void> atualizarListaDeTurnos() {
-        return service.atualizarListaDeTurnos();
+    public Uni<List<Long>> atualizarListaDeTurnos(@QueryParam("usuarioId") Long usuarioId) {
+        return service.atualizarListaDeTurnos(usuarioId);
     }
 
 

@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.Tuple;
 import io.smallrye.mutiny.Uni;
 
 import java.util.Date;
@@ -86,6 +87,28 @@ public class LigacaoRepository implements PanacheRepository<Ligacao> {
                         .setParameter(1, data)
                         .setParameter(2, resultadoContato)
                         .setParameter(3, usuarioId)
+                        .getResultList());
+    }
+
+
+    // select p from Prospecto p left join fetch p.prospectoCampos pc where p.unidade.ativo = true and p.id = ?1 order by pc.campo
+    // (buscaProspectoComCampos mantem apenas o registro mais recente de alteracao de cada campo)
+    public static final String SQL_BUSCAR_PROSPECTO_COM_CAMPOS =
+            "SELECT c.id AS campo_id, c.rotulo AS rotulo, c.tipo AS tipo, cat.descricao AS categoria, pc.valor AS valor "
+            + "FROM com_prospecto p "
+            + "INNER JOIN bas_unidade un ON un.id = p.id_unidade AND un.fl_ativo = true "
+            + "INNER JOIN com_prospecto_campo pc ON pc.id_prospecto = p.id "
+            + "INNER JOIN com_campo c ON c.id = pc.id_campo "
+            + "LEFT JOIN com_categoria cat ON cat.id = c.id_categoria "
+            + "WHERE p.id = ?1 "
+            + "AND NOT EXISTS (SELECT 1 FROM com_prospecto_campo pc2 WHERE pc2.id_prospecto = pc.id_prospecto "
+            + "AND pc2.id_campo = pc.id_campo AND pc2.data_alteracao > pc.data_alteracao) "
+            + "ORDER BY cat.id, c.rotulo";
+
+    public Uni<java.util.List<Tuple>> buscarProspectoComCampos(Long prospectoId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_PROSPECTO_COM_CAMPOS, Tuple.class)
+                        .setParameter(1, prospectoId)
                         .getResultList());
     }
 

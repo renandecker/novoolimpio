@@ -1,6 +1,11 @@
 package br.com.sol7.olimpio.central.ligacao;
 
 import br.com.sol7.olimpio.central.filaprioritaria.FilaPrioritariaResponse;
+import br.com.sol7.olimpio.central.meta.MetaService;
+import br.com.sol7.olimpio.central.operacionalusuario.OperacionalUsuario;
+import br.com.sol7.olimpio.central.operacionalusuario.OperacionalUsuarioRepository;
+import br.com.sol7.olimpio.central.operacionalusuario.OperacionalUsuarioResponse;
+import br.com.sol7.olimpio.shared.TupleHelper;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.SearchFilterRequest;
@@ -11,6 +16,7 @@ import java.util.Date;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
 import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
@@ -24,6 +30,12 @@ public class LigacaoService {
 
     @Inject
     GenericSearchService genericSearch;
+
+    @Inject
+    MetaService metaService;
+
+    @Inject
+    OperacionalUsuarioRepository operacionalUsuarioRepository;
 
     public Uni<List<LigacaoResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -87,27 +99,29 @@ public class LigacaoService {
         return new LigacaoResponse(e.id, e.usuarioId, e.dataInicial, e.dataFinal, e.relato, e.ordemLigacaoId, e.resultadoContatoId, e.compromissoId, e.telefoneDiscado, e.cursoInteresseId);
     }
 
+    private OperacionalUsuarioResponse toOperacionalUsuarioResponse(OperacionalUsuario e) {
+        return new OperacionalUsuarioResponse(e.id, e.operacionalId, e.usuarioId, e.status, e.meta, e.ligacao, e.agendado, e.pausa, e.prioritario);
+    }
 
-    // Migrado de LigacaoController.buscarMeta (src/main/java/br/com/sol7/olimpio/control/controllers/central/LigacaoController.java:234, camada controller)
-    // Logica original (adaptar):
-    // public void buscarMeta() {
-    //         Date data = new Date();
-    //         metaHoje = metaService.buscarMetaOperador(data, usuarioLogadoController.getUsuario());
-    //     }
-    public Uni<Void> buscarMeta() {
-        // Obs: logica de UI do controlador JSF legado (estado metaHoje), sem equivalente reativo
-        return Uni.createFrom().voidItem();
+    private ProspectoCampoResponse toProspectoCampoResponse(Object row) {
+        Tuple t = (Tuple) row;
+        return new ProspectoCampoResponse(
+                TupleHelper.getLong(t, "campo_id"),
+                TupleHelper.getString(t, "rotulo"),
+                TupleHelper.getString(t, "tipo"),
+                TupleHelper.getString(t, "categoria"),
+                TupleHelper.getString(t, "valor"));
     }
 
 
-    // Migrado de LigacaoController.carregarPacotes (src/main/java/br/com/sol7/olimpio/control/controllers/central/LigacaoController.java:239, camada controller)
-    // Logica original (adaptar):
-    // public void carregarPacotes() {
-    //         listaPacotes = operacionalUsuarioService.buscarPacotesDisponiveis(operacionalSelecionado.getOperacional(), usuarioLogadoController.getUsuario());
-    //     }
-    public Uni<Void> carregarPacotes() {
-        // Obs: depende do microservico operacionalusuario (operacionalUsuarioService)
-        return Uni.createFrom().voidItem();
+    public Uni<Integer> buscarMeta(Long usuarioLogadoId) {
+        return metaService.buscarMetaOperador(new Date(), usuarioLogadoId);
+    }
+
+
+    public Uni<List<OperacionalUsuarioResponse>> carregarPacotes(Long operacionalId, Long usuarioLogadoId) {
+        return operacionalUsuarioRepository.buscarPacotesDisponiveis(operacionalId, usuarioLogadoId)
+                .map(list -> list.stream().map(this::toOperacionalUsuarioResponse).toList());
     }
 
 
@@ -132,31 +146,17 @@ public class LigacaoService {
     }
 
 
-    // Migrado de LigacaoController.carregarProspectoParaVisualizacao (src/main/java/br/com/sol7/olimpio/control/controllers/central/LigacaoController.java:783, camada controller)
-    // Logica original (adaptar):
-    // public void carregarProspectoParaVisualizacao() {
-    //         dynaFormModelAtual = new DynaFormModel();
-    //         Prospecto p = prospectoService.buscaProspectoComCampos(proxOrdemLigacao.getProspecto().getId());
-    //         ProspectoUtil.carregarProspectoParaVisualizacao(p, getDynaFormModelAtual());
-    //     }
-    public Uni<Void> carregarProspectoParaVisualizacao() {
-        // Obs: depende do microservico comercial (prospectoService) e logica de UI legada (ProspectoUtil/DynaFormModel)
-        return Uni.createFrom().voidItem();
+    public Uni<List<ProspectoCampoResponse>> carregarProspectoParaVisualizacao(Long prospectoId) {
+        return repository.buscarProspectoComCampos(prospectoId)
+                .map(rows -> rows.stream().map(this::toProspectoCampoResponse).toList());
     }
 
 
-    // Migrado de LigacaoController.buscarLigacaoComNumero (src/main/java/br/com/sol7/olimpio/control/controllers/central/LigacaoController.java:844, camada controller)
-    // Logica original (adaptar):
-    // public void buscarLigacaoComNumero() {
-    //         ligacaoRetornou = ligacaoService.buscarLigacaoComNumero(numeroRetornou);
-    //         if (ObjectUtil.nullOrEmpty(ligacaoRetornou.getId())) {
-    //             ligacaoRetornou = null;
-    //             MessageUtil.sendMessageToUser(MessageUtilType.INFO, "global.error", "validation", "Nenhum prospecto encontrado com este número.");
-    //         }
-    //     }
-    public Uni<Void> buscarLigacaoComNumero() {
-        // Obs: logica de UI do controlador JSF legado (estado ligacaoRetornou), sem equivalente reativo
-        return Uni.createFrom().voidItem();
+    public Uni<LigacaoResponse> buscarLigacaoComNumero(String numero, Long usuarioLogadoId) {
+        return repository.buscarLigacaoComNumero(usuarioLogadoId, numero)
+                .chain(list -> list.isEmpty()
+                        ? Uni.createFrom().failure(new NotFoundException("Ligacao not found"))
+                        : Uni.createFrom().item(toResponse(list.get(0))));
     }
 
 

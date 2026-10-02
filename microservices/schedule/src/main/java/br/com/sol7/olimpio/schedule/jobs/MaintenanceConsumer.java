@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.schedule.jobs;
+package br.com.sol7.olimpio.schedule.jobs;
 
 import br.com.sol7.olimpio.schedule.maintenance.BasicoMaintenanceService;
 import br.com.sol7.olimpio.schedule.maintenance.CentralMaintenanceService;

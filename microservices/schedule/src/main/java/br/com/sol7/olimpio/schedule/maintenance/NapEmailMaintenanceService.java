@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.schedule.maintenance;
+package br.com.sol7.olimpio.schedule.maintenance;
 
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;
@@ -43,7 +43,6 @@ public class NapEmailMaintenanceService {
             "insert into edc_nap_email (data, id_contrato, email, assunto, mensagem) " +
                     "values (now(), $1, $2, $3, $4)";
 
-    // Portado de NAPEmailService.rotinaEmailNap() - FROM identico ao legado.
     private static final String FROM =
             " from edc_contrato contrato " +
                     " inner join bas_pessoa pessoa on (pessoa.id = contrato.id_pessoa) " +
@@ -58,7 +57,6 @@ public class NapEmailMaintenanceService {
                     " left join bas_pessoa_fisica responsavelpf on (responsavelpf.id_pessoa = responsavel.id) " +
                     " left join bas_pessoa_juridica responsavelpj on (responsavelpj.id_pessoa = responsavel.id) ";
 
-    // Portado de NAPEmailService.rotinaEmailNap() - joins base (sem horario/caderno/ocorrencia,
     // que so entram quando a etapa e customizada, igual ao legado).
     private static final String INNER_BASE =
             " left join edc_nap nap on (contrato.id = nap.id_contrato) " +
@@ -183,7 +181,6 @@ public class NapEmailMaintenanceService {
         return "nap.qtde_email";
     }
 
-    // Portado de NAPEmailService.caseCor(String botao, SituacaoNap situacaoNap).
     // Ajustes de portabilidade (corrigindo SQL invalido do legado):
     //  - DISPONIVEL: "COALESCE(expr booleana, 0)" nao compila no Postgres -> vira "not (expr)".
     //  - SEM_RETORNO: envolto em COALESCE para nao quebrar quando botao for null.

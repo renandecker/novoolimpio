@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.schedule.maintenance;
+package br.com.sol7.olimpio.schedule.maintenance;
 
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;
@@ -43,7 +43,6 @@ public class CobrancaEmailMaintenanceService {
             "insert into fin_cobranca_email (data, id_contrato, email, assunto, mensagem) " +
                     "values (now(), $1, $2, $3, $4)";
 
-    // Portado de CobrancaEmailService.rotinaEmailCobranca() - FROM identico ao legado.
     private static final String FROM =
             " from edc_contrato contrato " +
                     " inner join bas_pessoa pessoa on (pessoa.id = contrato.id_pessoa) " +
@@ -58,7 +57,6 @@ public class CobrancaEmailMaintenanceService {
                     " left join bas_pessoa_fisica responsavelpf on (responsavelpf.id_pessoa = responsavel.id) " +
                     " left join bas_pessoa_juridica responsavelpj on (responsavelpj.id_pessoa = responsavel.id) ";
 
-    // Portado de CobrancaEmailService.rotinaEmailCobranca() - joins do legado.
     private static final String INNER_BASE =
             " left join fin_cobranca cobranca on (contrato.id = cobranca.id_contrato) " +
                     " left join fin_etapas_cobranca etapa on (cobranca.id_cobranca_etapas = etapa.id) " +
@@ -174,7 +172,6 @@ public class CobrancaEmailMaintenanceService {
         return "cobranca.qtde_email";
     }
 
-    // Portado de CobrancaEmailService.caseCor(String botao, SituacaoCobranca situacaoCobranca).
     static String caseCor(String botao, String situacao) {
         if ("AGENDADO".equals(situacao)) {
             return " and cobranca.id is not null and COALESCE(" + botao + ", 0 ) > 0 and prioritario.id is null and " +

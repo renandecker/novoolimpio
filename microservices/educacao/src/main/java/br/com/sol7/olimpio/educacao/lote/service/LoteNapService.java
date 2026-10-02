@@ -296,7 +296,6 @@ public class LoteNapService {
         return "nap.qtde_email";
     }
 
-    // Portado de NAPEmailService.caseCor(String botao, SituacaoNap situacaoNap).
     static String caseCor(String botao, String situacao) {
         if ("AGENDADO".equals(situacao)) {
             return " and compromisso.id is not null and prioritario.id is null and compromisso.data_chegada is null and " +

@@ -59,15 +59,19 @@ public class ProdutoController {
 
     @GET
     @Path("/carregar-prospecto-para-visualizacao")
-    public Uni<Void> carregarProspectoParaVisualizacao(@QueryParam("entityId") Long entityId) {
+    @GET
+    @Path("/carregar-prospecto-para-visualizacao")
+    public Uni<ProdutoCamposVisualizacaoResponse> carregarProspectoParaVisualizacao(@QueryParam("entityId") Long entityId) {
         return service.carregarProspectoParaVisualizacao(entityId);
     }
 
 
     @GET
     @Path("/carregar-dyna-form")
-    public Uni<Void> carregarDynaForm() {
-        return service.carregarDynaForm();
+    @GET
+    @Path("/carregar-dyna-form")
+    public Uni<ProdutoCamposVisualizacaoResponse> carregarDynaForm(@QueryParam("entityId") Long entityId) {
+        return service.carregarDynaForm(entityId);
     }
 
 

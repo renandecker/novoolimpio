@@ -60,8 +60,8 @@ public class AgendaController {
 
     @GET
     @Path("/carregar-usuarios")
-    public Uni<Void> carregarUsuarios(@QueryParam("agendaId") Long agendaId) {
-        return service.carregarUsuarios(agendaId);
+    public Uni<AgendaUsuariosResponse> carregarUsuarios(@QueryParam("agendaId") Long agendaId, @QueryParam("usuarioId") Long usuarioId) {
+        return service.carregarUsuarios(agendaId, usuarioId);
     }
 
 

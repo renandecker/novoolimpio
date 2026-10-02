@@ -15,11 +15,16 @@ import jakarta.ws.rs.NotFoundException;
 import java.util.List;
 import java.util.Date;
 
+import br.com.sol7.olimpio.basico.compromisso.dto.AgendaHorariosResponse;
+import br.com.sol7.olimpio.basico.compromisso.dto.CompromissoPessoaStatusResponse;
 import br.com.sol7.olimpio.basico.compromisso.dto.CompromissoRequest;
 import br.com.sol7.olimpio.basico.compromisso.dto.CompromissoResponse;
 import br.com.sol7.olimpio.basico.compromisso.dto.ResultadoResponse;
 import br.com.sol7.olimpio.basico.compromisso.entity.Compromisso;
 import br.com.sol7.olimpio.basico.compromisso.repository.CompromissoRepository;
+import br.com.sol7.olimpio.basico.compromisso.repository.CompromissoPessoaStatusRepository;
+import br.com.sol7.olimpio.basico.horario.dto.HorarioResponse;
+import br.com.sol7.olimpio.basico.horario.service.HorarioDisponivelService;
 
 @ApplicationScoped
 @WithTransaction
@@ -143,127 +148,51 @@ public class CompromissoService {
     }
 
 
-    // Migrado de CompromissoController.carregarProspectoParaVisualizacao (src/main/java/br/com/sol7/olimpio/control/controllers/basico/CompromissoController.java:260, camada controller)
-    // Observacao: parametro entityId: era Compromisso (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarProspectoParaVisualizacao(Compromisso entity) {
-    //         dynaFormModelAtual = new DynaFormModel();
-    //         ProspectoUtil.carregarProspectoParaVisualizacao(compromissoService.buscarProspectoDoCompromisso(entity), getDynaFormModelAtual());
-    //     }
-    public Uni<Void> carregarProspectoParaVisualizacao(Long entityId) {
-        // Obs: logica de UI (montar DynaFormModel de Prospecto)
-        return Uni.createFrom().voidItem();
+    public Uni<Long> carregarProspectoParaVisualizacao(Long entityId) {
+        return buscarProspectoDoCompromisso(entityId);
     }
 
 
-    // Migrado de CompromissoController.carregarProspectoParaVisualizacao (src/main/java/br/com/sol7/olimpio/control/controllers/basico/CompromissoController.java:265, camada controller)
-    // Logica original (adaptar):
-    // public void carregarProspectoParaVisualizacao() {
-    //         dynaFormModelAtual = new DynaFormModel();
-    //         ProspectoUtil.carregarProspectoParaVisualizacao(compromissoService.buscarProspectoDoCompromisso(getEntity()), getDynaFormModelAtual());
-    //     }
-    public Uni<Void> carregarProspectoParaVisualizacao2() {
-        // Obs: logica de UI (montar DynaFormModel de Prospecto)
-        return Uni.createFrom().voidItem();
+    public Uni<Long> carregarProspectoParaVisualizacao2(Long entityId) {
+        return buscarProspectoDoCompromisso(entityId);
     }
 
 
-    // Migrado de CompromissoController.atualizarHorariosResultados (src/main/java/br/com/sol7/olimpio/control/controllers/basico/CompromissoController.java:271, camada controller)
-    // Observacao: parametro event: era SelectEvent no legado
-    // Logica original (adaptar):
-    // public void atualizarHorariosResultados(SelectEvent event) {
-    //         getListaResultadosDisponiveis();
-    //         listaResultados = new ArrayList<>();
-    //         if (ObjectUtil.nullOrEmpty(getEntity().getData())) {
-    //             return;
-    //         }
-    //         buscarHorariosDisponiveis((Agenda) event.getObject(), getEntity().getData());
-    //     }
-    public Uni<Void> atualizarHorariosResultados(String event) {
-        // Obs: logica de UI (getListaResultadosDisponiveis + buscarHorariosDisponiveis)
-        return Uni.createFrom().voidItem();
+    public Uni<AgendaHorariosResponse> atualizarHorariosResultados(Long agendaId, Long usuarioId, Date data, int tipoHorario) {
+        return carregarAgendaHorarios(agendaId, usuarioId, data, tipoHorario);
     }
 
 
-    // Migrado de CompromissoController.atualizarHorariosResultadosAgenda (src/main/java/br/com/sol7/olimpio/control/controllers/basico/CompromissoController.java:280, camada controller)
-    // Observacao: parametro agendaId: era Agenda (referencia por id)
-    // Logica original (adaptar):
-    // public void atualizarHorariosResultadosAgenda(Agenda agenda) {
-    //         getEntity().setAgenda(agenda);
-    //         getListaResultadosDisponiveis();
-    //         listaResultados = new ArrayList<>();
-    //         if (ObjectUtil.nullOrEmpty(getEntity().getData())) {
-    //             return;
-    //         }
-    //         buscarHorariosDisponiveis(getEntity().getAgenda(), getEntity().getData());
-    //     }
-    public Uni<Void> atualizarHorariosResultadosAgenda(Long agendaId) {
-        // Obs: logica de UI (getListaResultadosDisponiveis + buscarHorariosDisponiveis)
-        return Uni.createFrom().voidItem();
+    public Uni<AgendaHorariosResponse> atualizarHorariosResultadosAgenda(Long agendaId, Long usuarioId, Date data, int tipoHorario) {
+        return carregarAgendaHorarios(agendaId, usuarioId, data, tipoHorario);
     }
 
 
-    // Migrado de CompromissoController.atualizarHorarios (src/main/java/br/com/sol7/olimpio/control/controllers/basico/CompromissoController.java:290, camada controller)
-    // Observacao: parametro event: era SelectEvent no legado
-    // Logica original (adaptar):
-    // public void atualizarHorarios(SelectEvent event) {
-    //         if (ObjectUtil.nullOrEmpty(getEntity().getAgenda())) {
-    //             MessageUtil.sendMessageToUser(MessageUtilType.INFO, "global.warning", "validation", "Selecione uma agenda para carregar os horários disponíveis");
-    //             return;
-    //         }
-    //         buscarHorariosDisponiveis(getEntity().getAgenda(), (Date) event.getObject());
-    //     }
-    public Uni<Void> atualizarHorarios(String event) {
-        // Obs: logica de UI (validar agenda selecionada + buscarHorariosDisponiveis)
-        return Uni.createFrom().voidItem();
+    public Uni<List<HorarioResponse>> atualizarHorarios(Long agendaId, Long usuarioId, Date data, int tipoHorario) {
+        return buscarHorariosDisponiveis(agendaId, usuarioId, data, tipoHorario);
     }
 
 
-    // Migrado de CompromissoController.atualizarHorarios (src/main/java/br/com/sol7/olimpio/control/controllers/basico/CompromissoController.java:309, camada controller)
-    // Logica original (adaptar):
-    // public void atualizarHorarios() {
-    //         if (ObjectUtil.nullOrEmpty(getEntity().getAgenda())) {
-    //             MessageUtil.sendMessageToUser(MessageUtilType.INFO, "global.warning", "validation", "Selecione uma agenda para carregar os horários disponíveis");
-    //             return;
-    //         }
-    //         buscarHorariosDisponiveis(getEntity().getAgenda(), getEntity().getData());
-    //     }
-    public Uni<Void> atualizarHorarios2() {
-        // Obs: logica de UI (validar agenda selecionada + buscarHorariosDisponiveis)
-        return Uni.createFrom().voidItem();
+    public Uni<List<HorarioResponse>> atualizarHorarios2(Long agendaId, Long usuarioId, Date data, int tipoHorario) {
+        return buscarHorariosDisponiveis(agendaId, usuarioId, data, tipoHorario);
     }
 
 
-    // Migrado de CompromissoController.buscarHorariosDisponiveis (src/main/java/br/com/sol7/olimpio/control/controllers/basico/CompromissoController.java:388, camada controller)
-    // Observacao: parametro agendaId: era Agenda (referencia por id)
-    // Logica original (adaptar):
-    // public void buscarHorariosDisponiveis(Agenda agenda, Date data) {
-    //         this.agenda = agenda;
-    //         getEntity().setData(data);
-    //         trocaTipoHorario();
-    // 
-    //         if (ObjectUtil.nullOrEmpty(horariosDisponiveis) && tipoHorario != 0) {
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.INFO, "global.warning", "validation", "Não existem horários disponíveis nesta data!");
-    //         }
-    //     }
-    public Uni<Void> buscarHorariosDisponiveis(Long agendaId, Date data) {
-        // Obs: logica de UI (seta agenda/data no controller e monta a lista de horarios disponiveis)
-        return Uni.createFrom().voidItem();
+    public Uni<List<HorarioResponse>> buscarHorariosDisponiveis(Long agendaId, Long usuarioId, Date data, int tipoHorario) {
+        return carregarHorariosDisponiveis(agendaId, usuarioId, data, tipoHorario);
     }
 
 
-    // Migrado de CompromissoController.buscarDetalhes (src/main/java/br/com/sol7/olimpio/control/controllers/basico/CompromissoController.java:423, camada controller)
-    // Observacao: parametro event: era ToggleEvent no legado
-    // Logica original (adaptar):
-    // public void buscarDetalhes(ToggleEvent event) {
-    //         if (event.getVisibility() == Visibility.VISIBLE) {
-    //             Compromisso compromisso = (Compromisso) event.getData();
-    //             compromissoPessoaStatuses = compromissoPessoaStatusService.getCompromissoPessoaStatusByCompromisso(compromisso);
-    //         }
-    //     }
-    public Uni<Void> buscarDetalhes(String event) {
-        // Obs: depende do microservico central (CompromissoPessoaStatus) - compromissoPessoaStatusService.getCompromissoPessoaStatusByCompromisso
-        return Uni.createFrom().voidItem();
+    public Uni<List<CompromissoPessoaStatusResponse>> buscarDetalhes(Long compromissoId) {
+        return compromissoPessoaStatusRepository.getCompromissoPessoaStatusByCompromisso(compromissoId)
+                .map(list -> list.stream().map(row -> new CompromissoPessoaStatusResponse(
+                        TupleHelper.getLong(row, "id"),
+                        TupleHelper.getLong(row, "id_compromisso"),
+                        TupleHelper.getLong(row, "id_status_anterior"),
+                        TupleHelper.getLong(row, "id_status_proximo"),
+                        TupleHelper.getLong(row, "id_pessoa"),
+                        TupleHelper.getLong(row, "id_usuario"),
+                        TupleHelper.getDate(row, "data"))).toList());
     }
 
 
@@ -283,44 +212,21 @@ public class CompromissoService {
     }
 
 
-    // Migrado de CompromissoController.atualizarHorariosData (src/main/java/br/com/sol7/olimpio/control/controllers/basico/CompromissoController.java:499, camada controller)
-    // Logica original (adaptar):
-    // public void atualizarHorariosData() {
-    //         buscarHorarios();
-    //     }
-    public Uni<Void> atualizarHorariosData() {
-        // Obs: logica de UI (buscarHorarios)
-        return Uni.createFrom().voidItem();
+    public Uni<List<HorarioResponse>> atualizarHorariosData(Long compromissoId, Long usuarioId, int tipoHorario) {
+        return buscarHorarios(compromissoId, usuarioId, tipoHorario);
     }
 
 
-    // Migrado de CompromissoController.buscarHorarios (src/main/java/br/com/sol7/olimpio/control/controllers/basico/CompromissoController.java:503, camada controller)
-    // Logica original (adaptar):
-    // public void buscarHorarios() {
-    //         horariosDisponiveis = new ArrayList<>();
-    //         trocaTipoHorario();
-    // 
-    //         if (ObjectUtil.nullOrEmpty(horariosDisponiveis)) {
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.INFO, "global.warning", "validation", "Não existem horários disponíveis nesta data!");
-    //         }
-    //     }
-    public Uni<Void> buscarHorarios() {
-        // Obs: logica de UI (montar lista de horarios disponiveis)
-        return Uni.createFrom().voidItem();
+    public Uni<List<HorarioResponse>> buscarHorarios(Long compromissoId, Long usuarioId, int tipoHorario) {
+        return repository.findById(compromissoId)
+                .onItem().ifNull().failWith(() -> new NotFoundException("Compromisso not found"))
+                .chain(c -> carregarHorariosDisponiveis(c.agendaId, usuarioId, c.data, tipoHorario));
     }
 
 
-    // Migrado de CompromissoController.carregarUsuarioAgenda (src/main/java/br/com/sol7/olimpio/control/controllers/basico/CompromissoController.java:512, camada controller)
-    // Logica original (adaptar):
-    // public void carregarUsuarioAgenda() {
-    //         if (unidade != null) {
-    //             agendas = agendaService.buscarAgendasPorUnidade(unidade);
-    //             resetCalendar();
-    //         }
-    //     }
-    public Uni<Void> carregarUsuarioAgenda() {
-        // Obs: logica de UI (agendaService.buscarAgendasPorUnidade + resetCalendar)
-        return Uni.createFrom().voidItem();
+    public Uni<List<Long>> carregarUsuarioAgenda(Long unidadeId) {
+        return agendaRepository.buscarAgendasPorUnidade(unidadeId)
+                .map(list -> list.stream().map(a -> a.id).toList());
     }
 
 
@@ -431,6 +337,12 @@ public class CompromissoService {
     @Inject
     br.com.sol7.olimpio.basico.agenda.repository.AgendaRepository agendaRepository;
 
+    @Inject
+    HorarioDisponivelService horarioDisponivelService;
+
+    @Inject
+    CompromissoPessoaStatusRepository compromissoPessoaStatusRepository;
+
     public Uni<List<br.com.sol7.olimpio.basico.pessoa.dto.PessoaResponse>> buscarPessoasPorAgendaOuUnidade(Long agendaId, Long unidadeId) {
         if (agendaId != null) {
             return agendaRepository.findById(agendaId)
@@ -448,6 +360,17 @@ public class CompromissoService {
         }
         return pessoaRepository.listAll()
                 .map(list -> list.stream().map(p -> new br.com.sol7.olimpio.basico.pessoa.dto.PessoaResponse(p.id, p.numero, p.complemento, p.email, p.telefone, p.celular, p.foto, p.observacao, p.comunicado, p.logradouroId, p.dataCadastro, p.dataAlteracao)).toList());
+    }
+
+
+    private Uni<List<HorarioResponse>> carregarHorariosDisponiveis(Long agendaId, Long usuarioId, Date data, int tipoHorario) {
+        return horarioDisponivelService.buscarDisponiveis(agendaId, usuarioId, data, tipoHorario);
+    }
+
+    private Uni<AgendaHorariosResponse> carregarAgendaHorarios(Long agendaId, Long usuarioId, Date data, int tipoHorario) {
+        return agendaRepository.listarResultadosIds(agendaId)
+                .chain(resultados -> carregarHorariosDisponiveis(agendaId, usuarioId, data, tipoHorario)
+                        .map(horarios -> new AgendaHorariosResponse(agendaId, data, tipoHorario, resultados, horarios)));
     }
 
 }

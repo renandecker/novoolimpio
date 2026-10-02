@@ -14,6 +14,9 @@ import br.com.sol7.olimpio.basico.rede.dto.RedeRequest;
 import br.com.sol7.olimpio.basico.rede.dto.RedeResponse;
 import br.com.sol7.olimpio.basico.rede.entity.Rede;
 import br.com.sol7.olimpio.basico.rede.repository.RedeRepository;
+import br.com.sol7.olimpio.basico.unidade.dto.UnidadeResponse;
+import br.com.sol7.olimpio.basico.unidade.entity.Unidade;
+import br.com.sol7.olimpio.basico.unidade.repository.UnidadeRepository;
 
 @ApplicationScoped
 @WithTransaction
@@ -21,6 +24,8 @@ public class RedeService {
 
     @Inject
     RedeRepository repository;
+    @Inject
+    UnidadeRepository unidadeRepository;
 
     public Uni<List<RedeResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -74,34 +79,11 @@ public class RedeService {
     }
 
 
-    // Migrado de RedeController.atualizarUsuario (src/main/java/br/com/sol7/olimpio/control/controllers/basico/RedeController.java:102, camada controller)
-    // Observacao: parametro event: era SelectEvent no legado
-    // Logica original (adaptar):
-    // public void atualizarUsuario(SelectEvent event) {
-    //         getEntity().setUsuario((Usuario) event.getObject());
-    //     }
-    public Uni<Void> atualizarUsuario(String event) {
-        // Obs: metodo de UI (SelectEvent) - apenas seta o usuario da entidade, sem logica de dados portaavel
-        return Uni.createFrom().voidItem();
-    }
-
-
-    // Migrado de RedeController.buscarDetalhes (src/main/java/br/com/sol7/olimpio/control/controllers/basico/RedeController.java:150, camada controller)
-    // Observacao: parametro event: era ToggleEvent no legado
-    // Logica original (adaptar):
-    // public void buscarDetalhes(ToggleEvent event) {
-    //         if (event.getVisibility() == Visibility.VISIBLE) {
-    //             try {
-    //                 Rede rede = (Rede) event.getData();
-    //                 listaDetalheUnidade = unidadeService.buscaUnidadesComRede(rede);
-    //             } catch (Exception e) {
-    //                 listaDetalheUnidade = new ArrayList<>();
-    //             }
-    //         }
-    //     }
-    public Uni<Void> buscarDetalhes(String event) {
-        // Obs: metodo de UI (ToggleEvent) - depende da Rede do evento e de unidadeService.buscaUnidadesComRede
-        return Uni.createFrom().voidItem();
+    public Uni<List<UnidadeResponse>> buscarDetalhes(Long redeId) {
+        return repository.findById(redeId).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Rede not found"))
+                .chain(rede -> unidadeRepository.buscaUnidadesComRede(redeId))
+                .map(items -> items.stream().map(this::toUnidadeResponse).toList());
     }
 
 
@@ -113,6 +95,13 @@ public class RedeService {
     //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
+    }
+
+    private UnidadeResponse toUnidadeResponse(Unidade u) {
+        return new UnidadeResponse(u.id, u.razaoSocial, u.nomeFantasia, u.CNPJ, u.inscricaoEstadual,
+                u.logradouroId, u.email, u.numero, u.area, u.emailRH, u.tipoUnidadeId, u.regiaoId,
+                u.responsavelId, u.layoutId, u.pontoReferencia, u.sucinto, u.diretorEnsino,
+                u.coordenador, u.cep, u.registro, u.ativo);
     }
 
 }

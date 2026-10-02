@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.schedule.maintenance;
+package br.com.sol7.olimpio.schedule.maintenance;
 
 import java.util.Date;
 

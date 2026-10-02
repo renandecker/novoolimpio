@@ -78,14 +78,8 @@ public class TurnoUsuarioService {
     }
 
 
-    // Migrado de TurnoUsuarioController.atualizarListaDeTurnos (src/main/java/br/com/sol7/olimpio/control/controllers/central/TurnoUsuarioController.java:107, camada controller)
-    // Logica original (adaptar):
-    // public void atualizarListaDeTurnos() {
-    //         listaTurnosDoUsuario = new HashSet<TurnoTrabalho>(turnoUsuarioService.buscarTurno(usuario));
-    //     }
-    public Uni<Void> atualizarListaDeTurnos() {
-        // Obs: logica de UI do controlador JSF legado (estado listaTurnosDoUsuario), sem equivalente reativo
-        return Uni.createFrom().voidItem();
+    public Uni<List<Long>> atualizarListaDeTurnos(Long usuarioId) {
+        return repository.buscarTurno(usuarioId).map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
 

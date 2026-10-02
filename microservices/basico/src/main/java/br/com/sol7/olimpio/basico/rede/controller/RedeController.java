@@ -12,6 +12,7 @@ import java.util.List;
 import br.com.sol7.olimpio.basico.rede.dto.RedeRequest;
 import br.com.sol7.olimpio.basico.rede.dto.RedeResponse;
 import br.com.sol7.olimpio.basico.rede.service.RedeService;
+import br.com.sol7.olimpio.basico.unidade.dto.UnidadeResponse;
 
 @Path("/api/basico/rede")
 @Produces(MediaType.APPLICATION_JSON)
@@ -54,17 +55,10 @@ public class RedeController {
         return service.delete(id);
     }
 
-    @POST
-    @Path("/atualizar-usuario")
-    public Uni<Void> atualizarUsuario(@QueryParam("event") String event) {
-        return service.atualizarUsuario(event);
-    }
-
-
     @GET
-    @Path("/buscar-detalhes")
-    public Uni<Void> buscarDetalhes(@QueryParam("event") String event) {
-        return service.buscarDetalhes(event);
+    @Path("/buscar-detalhes/{id}")
+    public Uni<List<UnidadeResponse>> buscarDetalhes(@PathParam("id") Long id) {
+        return service.buscarDetalhes(id);
     }
 
 

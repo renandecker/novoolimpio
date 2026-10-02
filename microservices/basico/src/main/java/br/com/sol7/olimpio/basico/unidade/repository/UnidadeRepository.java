@@ -205,8 +205,15 @@ public class UnidadeRepository implements PanacheRepository<Unidade> {
             "select distinct  u from OferecimentoComponenteCurricular oo, Usuario usu inner join usu.unidades u  where oo.unidade = u and oo.grupo = ?3 and usu = ?2 and (lower(u.sucinto) like '%' || ?1 || '%' OR  lower(u.CNPJ) like '%' || ?1 || '%' OR lower(u.razaoSocial) like '%' || ?1 || '%' OR str(u.id) = ?1) order by u.sucinto";
 
 
-    // NAO TRADUZIDA AUTOMATICAMENTE (campo 'unidades' sem coluna mapeada)
-    public static final String SQL_BUSCA_UNIDADES_COM_REDE_HQL_ORIGINAL =
-            "select distinct r.unidades from Rede r where r = ?1";
+    // select distinct r.unidades from Rede r where r = ?1
+    public static final String SQL_BUSCA_UNIDADES_COM_REDE =
+            "SELECT DISTINCT u.* FROM bas_rede r INNER JOIN bas_rede_unidade r_u_jt ON r_u_jt.id_rede = r.id INNER JOIN bas_unidade u ON u.id = r_u_jt.id_unidade WHERE r.id = ?1 ORDER BY u.sucinto";
+
+    public Uni<java.util.List<Unidade>> buscaUnidadesComRede(Long redeId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_BUSCA_UNIDADES_COM_REDE, Unidade.class)
+                        .setParameter(1, redeId)
+                        .getResultList());
+    }
 
 }

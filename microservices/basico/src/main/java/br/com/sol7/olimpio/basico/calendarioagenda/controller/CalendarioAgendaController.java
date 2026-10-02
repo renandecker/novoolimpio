@@ -13,6 +13,8 @@ import java.util.Date;
 import br.com.sol7.olimpio.basico.calendarioagenda.dto.CalendarioAgendaRequest;
 import br.com.sol7.olimpio.basico.calendarioagenda.dto.CalendarioAgendaResponse;
 import br.com.sol7.olimpio.basico.calendarioagenda.service.CalendarioAgendaService;
+import br.com.sol7.olimpio.basico.compromisso.dto.CompromissoPessoaStatusResponse;
+import br.com.sol7.olimpio.basico.horario.dto.HorarioResponse;
 
 @Path("/api/basico/calendario-agenda")
 @Produces(MediaType.APPLICATION_JSON)
@@ -57,36 +59,36 @@ public class CalendarioAgendaController {
 
     @GET
     @Path("/buscar-detalhes")
-    public Uni<Void> buscarDetalhes(@QueryParam("event") String event) {
-        return service.buscarDetalhes(event);
+    public Uni<List<CompromissoPessoaStatusResponse>> buscarDetalhes(@QueryParam("compromissoId") Long compromissoId) {
+        return service.buscarDetalhes(compromissoId);
     }
 
 
     @POST
     @Path("/atualizar-horarios")
-    public Uni<Void> atualizarHorarios(@QueryParam("event") String event) {
-        return service.atualizarHorarios(event);
+    public Uni<List<HorarioResponse>> atualizarHorarios(@QueryParam("agendaId") Long agendaId, @QueryParam("usuarioId") Long usuarioId, @QueryParam("data") Date data, @QueryParam("tipoHorario") Integer tipoHorario) {
+        return service.atualizarHorarios(agendaId, usuarioId, data, tipoHorario == null ? 0 : tipoHorario);
     }
 
 
     @POST
     @Path("/atualizar-horarios-data")
-    public Uni<Void> atualizarHorariosData() {
-        return service.atualizarHorariosData();
+    public Uni<List<HorarioResponse>> atualizarHorariosData(@QueryParam("compromissoId") Long compromissoId, @QueryParam("usuarioId") Long usuarioId, @QueryParam("tipoHorario") Integer tipoHorario) {
+        return service.atualizarHorariosData(compromissoId, usuarioId, tipoHorario == null ? 0 : tipoHorario);
     }
 
 
     @GET
     @Path("/buscar-horarios-disponiveis")
-    public Uni<Void> buscarHorariosDisponiveis(@QueryParam("agendaId") Long agendaId, @QueryParam("data") Date data) {
-        return service.buscarHorariosDisponiveis(agendaId, data);
+    public Uni<List<HorarioResponse>> buscarHorariosDisponiveis(@QueryParam("agendaId") Long agendaId, @QueryParam("usuarioId") Long usuarioId, @QueryParam("data") Date data, @QueryParam("tipoHorario") Integer tipoHorario) {
+        return service.buscarHorariosDisponiveis(agendaId, usuarioId, data, tipoHorario == null ? 0 : tipoHorario);
     }
 
 
     @GET
     @Path("/carregar-usuario-agenda")
-    public Uni<Void> carregarUsuarioAgenda() {
-        return service.carregarUsuarioAgenda();
+    public Uni<Long> carregarUsuarioAgenda(@QueryParam("agendaId") Long agendaId, @QueryParam("usuarioId") Long usuarioId) {
+        return service.carregarUsuarioAgenda(agendaId, usuarioId);
     }
 
 }

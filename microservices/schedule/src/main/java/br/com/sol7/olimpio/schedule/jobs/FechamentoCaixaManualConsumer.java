@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.schedule.jobs;
+package br.com.sol7.olimpio.schedule.jobs;
 
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import io.smallrye.reactive.messaging.annotations.Blocking;

@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.schedule.pagamento;
+package br.com.sol7.olimpio.schedule.pagamento;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

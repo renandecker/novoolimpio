@@ -21,6 +21,17 @@ public class PerfilRepository implements PanacheRepository<Perfil> {
                         .getResultList());
     }
 
+    // Migrado de PerfilModuloService.buscarPerfilModulosComModulo (legado) - perfis vinculados a um modulo
+    public static final String SQL_LISTAR_PERFIS_POR_MODULO =
+            "SELECT p.id FROM bas_perfil p INNER JOIN bas_perfil_modulo pm ON pm.id_perfil = p.id WHERE pm.id_modulo = ?1 ORDER BY p.descricao";
+
+    public Uni<java.util.List<Long>> listarPerfisPorModulo(Long moduloId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_LISTAR_PERFIS_POR_MODULO)
+                        .setParameter(1, moduloId)
+                        .getResultList())
+                .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
+    }
 
     // NAO TRADUZIDA AUTOMATICAMENTE (campo 'perfisModulos' sem coluna mapeada)
     public static final String SQL_BUSCAR_PERFIL_MODULOS_COM_PERFIL_HQL_ORIGINAL =

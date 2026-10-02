@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.schedule.educacao.oferecimentocomponentecurricular.repository;
+package br.com.sol7.olimpio.schedule.educacao.oferecimentocomponentecurricular.repository;
 
 import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;

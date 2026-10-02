@@ -2,6 +2,7 @@ package br.com.sol7.olimpio.central.ligacao;
 
 import br.com.sol7.olimpio.central.filaprioritaria.FilaPrioritariaResponse;
 import br.com.sol7.olimpio.central.filaprioritaria.FilaPrioritariaService;
+import br.com.sol7.olimpio.central.operacionalusuario.OperacionalUsuarioResponse;
 import br.com.sol7.olimpio.central.ordemligacao.OrdemLigacaoService;
 import br.com.sol7.olimpio.central.resultadocontato.ResultadoContatoResponse;
 import br.com.sol7.olimpio.central.resultadocontato.ResultadoContatoService;
@@ -69,14 +70,15 @@ public class LigacaoController {
 
     @GET
     @Path("/buscar-meta")
-    public Uni<Void> buscarMeta() {
-        return service.buscarMeta();
+    public Uni<Integer> buscarMeta(@QueryParam("usuarioId") Long usuarioId) {
+        return service.buscarMeta(usuarioId);
     }
 
     @GET
     @Path("/carregar-pacotes")
-    public Uni<Void> carregarPacotes() {
-        return service.carregarPacotes();
+    public Uni<List<OperacionalUsuarioResponse>> carregarPacotes(@QueryParam("operacionalId") Long operacionalId,
+            @QueryParam("usuarioId") Long usuarioId) {
+        return service.carregarPacotes(operacionalId, usuarioId);
     }
 
     @GET
@@ -87,14 +89,15 @@ public class LigacaoController {
 
     @GET
     @Path("/carregar-prospecto-para-visualizacao")
-    public Uni<Void> carregarProspectoParaVisualizacao() {
-        return service.carregarProspectoParaVisualizacao();
+    public Uni<List<ProspectoCampoResponse>> carregarProspectoParaVisualizacao(@QueryParam("prospectoId") Long prospectoId) {
+        return service.carregarProspectoParaVisualizacao(prospectoId);
     }
 
     @GET
     @Path("/buscar-ligacao-com-numero")
-    public Uni<Void> buscarLigacaoComNumero() {
-        return service.buscarLigacaoComNumero();
+    public Uni<LigacaoResponse> buscarLigacaoComNumero(@QueryParam("numero") String numero,
+            @QueryParam("usuarioId") Long usuarioId) {
+        return service.buscarLigacaoComNumero(numero, usuarioId);
     }
 
     @GET

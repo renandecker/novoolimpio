@@ -16,10 +16,12 @@ import io.smallrye.mutiny.Uni;
 import java.util.List;
 
 import br.com.sol7.olimpio.basico.agenda.dto.AgendaRequest;
+import br.com.sol7.olimpio.basico.agenda.dto.AgendaUsuariosResponse;
 import br.com.sol7.olimpio.basico.agenda.dto.AgendaResponse;
 import br.com.sol7.olimpio.basico.agenda.entity.Agenda;
 import br.com.sol7.olimpio.basico.agenda.repository.AgendaRepository;
 import br.com.sol7.olimpio.basico.shared.notificacao.NotificacaoEventProducer;
+import br.com.sol7.olimpio.basico.usuario.repository.UsuarioRepository;
 
 @ApplicationScoped
 @WithTransaction
@@ -28,6 +30,8 @@ public class AgendaService {
     AgendaRepository repository;
     @Inject
     NotificacaoEventProducer notificacaoEventProducer;
+    @Inject
+    UsuarioRepository usuarioRepository;
 
     public Uni<List<AgendaResponse>> list() {
         return repository.listAll().map(items -> items.stream().map(this::toResponse).toList());
@@ -100,17 +104,19 @@ public class AgendaService {
     }
 
 
-    // Migrado de AgendaController.carregarUsuarios (src/main/java/br/com/sol7/olimpio/control/controllers/basico/AgendaController.java:88, camada controller)
-    // Observacao: parametro agendaId: era Agenda (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarUsuarios(Agenda agenda) {
-    //         setEntity(agenda);
-    //         usuarios = usuarioService.buscarUsuarioPorUnidades(usuarioLogadoController.getUnidadesDisponiveis());
-    //         usuariosMarcados = usuarioService.usuariosComUnidadesAgenda(usuarioLogadoController.getUnidadesDisponiveis(), agenda);
-    //     }
-    public Uni<Void> carregarUsuarios(Long agendaId) {
-        // Obs: depende do microservico central (Usuario) - usuarioService.buscarUsuarioPorUnidades / usuariosComUnidadesAgenda
-        return Uni.createFrom().voidItem();
+    public Uni<AgendaUsuariosResponse> carregarUsuarios(Long agendaId, Long usuarioId) {
+        return usuarioRepository.buscarUnidadesDisponiveis(usuarioId)
+                .chain(unidades -> {
+                    List<Long> unidadesIds = unidades.stream().map(u -> u.id).toList();
+                    if (unidadesIds.isEmpty()) {
+                        return Uni.createFrom().item(new AgendaUsuariosResponse(List.of(), List.of()));
+                    }
+                    return usuarioRepository.buscarUsuarioPorUnidades(unidadesIds)
+                            .chain(usuarios -> usuarioRepository.usuariosComUnidadesAgendas(unidadesIds, agendaId)
+                                    .map(marcados -> new AgendaUsuariosResponse(
+                                            usuarios.stream().map(u -> u.id).toList(),
+                                            marcados.stream().map(u -> u.id).toList())));
+                });
     }
 
 

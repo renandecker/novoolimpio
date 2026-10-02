@@ -272,7 +272,6 @@ public class LoteCobrancaService {
         return "cobranca.qtde_email";
     }
 
-    // Portado de CobrancaEmailService.caseCor(String botao, SituacaoCobranca situacaoCobranca).
     static String caseCor(String botao, String situacao) {
         if ("AGENDADO".equals(situacao)) {
             return " and cobranca.id is not null and COALESCE(" + botao + ", 0 ) > 0 and prioritario.id is null and " +

@@ -2,6 +2,7 @@ package br.com.sol7.olimpio.comercial.acao;
 
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.Tuple;
 import io.smallrye.mutiny.Uni;
 
 import java.util.List;
@@ -62,11 +63,32 @@ public class AcaoRepository implements PanacheRepository<Acao> {
     public static final String SQL_ACAO_UNIDADE =
             "SELECT DISTINCT a.* FROM com_acao a INNER JOIN com_acao_unidade a_un_jt ON a_un_jt.id_acao = a.id INNER JOIN bas_unidade un ON un.id = a_un_jt.id_unidade LEFT JOIN com_historico_acoes a_p_jt ON a_p_jt.id_acao = a.id LEFT JOIN com_prospecto p ON p.id = a_p_jt.id_prospecto WHERE p is not null AND un in (?1) ORDER BY a.id desc";
 
-    public Uni<java.util.List<Acao>> acaoUnidade(List<Long> unidadeIds) {
+public Uni<java.util.List<Acao>> acaoUnidade(List<Long> unidadeIds) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(SQL_ACAO_UNIDADE, Acao.class)
-                        .setParameter(1, unidadeIds)
+                        .setParameter(1, unidadesIds)
                         .getResultList());
     }
+
+
+    // select a from Acao a left join fetch a.acaoCampos as ac where a.id = ?1 order by ac.ordem
+    public static final String SQL_BUSCAR_CAMPOS_FORMULARIO_ACAO =
+            "SELECT a.id AS acao_id, a.descricao AS descricao, c.id AS campo_id, c.rotulo AS rotulo, c.tipo AS tipo, "
+            + "c.maskara AS maskara, c.tamanho AS tamanho, ac.obrigatorio AS obrigatorio, ac.ordem AS ordem, "
+            + "ac.permitir_historico AS permitir_historico, c.flag_banco AS flag_banco, c.flag_nome AS flag_nome "
+            + "FROM com_acao a "
+            + "LEFT JOIN com_acao_campo ac ON ac.id_acao = a.id "
+            + "LEFT JOIN com_campo c ON c.id = ac.id_campo "
+            + "WHERE a.id = ?1 "
+            + "ORDER BY ac.ordem";
+
+    public Uni<java.util.List<Tuple>> buscarCamposFormularioAcao(Long acaoId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_CAMPOS_FORMULARIO_ACAO, Tuple.class)
+                        .setParameter(1, acaoId)
+                        .getResultList());
+    }
+
+}
 
 }

@@ -77,19 +77,19 @@ public class PerfilService {
     }
 
 
-    // Migrado de PerfilController.carregarUsuarios (src/main/java/br/com/sol7/olimpio/control/controllers/basico/PerfilController.java:108, camada controller)
-    // Observacao: parametro perfilId: era Perfil (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarUsuarios(Perfil perfil) {
-    //         setEntity(perfil);
-    //         usuarios = usuarioService.buscarUsuarioPorUnidades(usuarioLogadoController.getUnidadesDisponiveis());
-    //         usuariosMarcados = usuarioService.usuarioComUnidadesPerfil(usuarioLogadoController.getUnidadesDisponiveis(), perfil);
-    //     }
-    public Uni<Void> carregarUsuarios(Long perfilId) {
-        // Obs: metodo de UI do controller JSF (popula listas de usuarios na tela via usuarioService)
-        return Uni.createFrom().voidItem();
+    public Uni<PerfilUsuariosResponse> carregarUsuarios(Long perfilId, Long usuarioLogadoId) {
+        return usuarioRepository.buscarUnidadesDisponiveis(usuarioLogadoId).chain(unidades -> {
+            List<Long> unidadesIds = unidades.stream().map(u -> u.id).toList();
+            if (unidadesIds.isEmpty()) {
+                return Uni.createFrom().item(new PerfilUsuariosResponse(List.of(), List.of()));
+            }
+            return usuarioRepository.buscarUsuarioPorUnidades(unidadesIds).chain(todos ->
+                    usuarioRepository.usuarioComUnidadesPerfil(unidadesIds, perfilId).map(marcados ->
+                            new PerfilUsuariosResponse(
+                                    todos.stream().map(u -> u.id).toList(),
+                                    marcados.stream().map(u -> u.id).toList())));
+        });
     }
-
 
     // Migrado de PerfilController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/basico/PerfilController.java:364, camada controller)
     // Logica original (adaptar):

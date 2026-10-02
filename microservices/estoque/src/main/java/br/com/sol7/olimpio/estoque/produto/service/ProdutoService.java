@@ -86,36 +86,27 @@ public class ProdutoService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
+    @Inject
+    br.com.sol7.olimpio.estoque.produtocampoinformacao.ProdutoCampoInformacaoService produtoCampoInformacaoService;
 
-    // Migrado de ProdutoController.carregarProspectoParaVisualizacao (src/main/java/br/com/sol7/olimpio/control/controllers/estoque/ProdutoController.java:408, camada controller)
-    // Observacao: parametro entityId: era Produto (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarProspectoParaVisualizacao(Produto entity) {
-    //         ProdutoUtil.carregarProdutoParaVisualizacao(produtoService.carregarCampos(entity), getDynaFormModelAtual());
-    //     }
-    public Uni<Void> carregarProspectoParaVisualizacao(Long entityId) {
-        // Obs: logica de UI legada (ProdutoUtil/DynaFormModel), sem equivalente reativo
-        return Uni.createFrom().voidItem();
+    public Uni<ProdutoCamposVisualizacaoResponse> carregarProspectoParaVisualizacao(Long entityId) {
+        if (entityId == null) {
+            return Uni.createFrom().item(new ProdutoCamposVisualizacaoResponse(null, java.util.List.of()));
+        }
+        return produtoCampoInformacaoService.listByProduto(entityId)
+                .map(campos -> new ProdutoCamposVisualizacaoResponse(entityId, campos));
+    }
+
+    public Uni<ProdutoCamposVisualizacaoResponse> carregarDynaForm(Long entityId) {
+        if (entityId == null) {
+            return Uni.createFrom().item(new ProdutoCamposVisualizacaoResponse(null, java.util.List.of()));
+        }
+        return produtoCampoInformacaoService.listByProduto(entityId)
+                .map(campos -> new ProdutoCamposVisualizacaoResponse(entityId, campos));
     }
 
 
-    // Migrado de ProdutoController.carregarDynaForm (src/main/java/br/com/sol7/olimpio/control/controllers/estoque/ProdutoController.java:412, camada controller)
-    // Logica original (adaptar):
-    // public void carregarDynaForm() {
-    //         dynaFormModelUniao = new DynaFormModel();
-    //         dynaFormModelAtual = new DynaFormModel();
-    //         for (ProdutoCampo c : produtoCampos) {
-    //             PropertyFilter propFilter = new PropertyFilter(c.getCampo().toString(), c.getCampo(), c.getCampo().getTipo(), null);
-    //             ProdutoHelper hp = new ProdutoHelper(null, propFilter);
-    //             ProdutoUtil.adicionarCampo(hp, getDynaFormModelUniao());
-    //         }
-    //         carregarProspectoParaVisualizacao(getEntity());
-    //         setDynaFormModelAtual(ProdutoUtil.unirModelos(dynaFormModelAtual, dynaFormModelUniao));
-    //     }
-    public Uni<Void> carregarDynaForm() {
-        // Obs: logica de UI do controlador JSF legado (DynaFormModel), sem equivalente reativo
-        return Uni.createFrom().voidItem();
-    }
+
 
 
     // Migrado de ProdutoService.autoComplete (src/main/java/br/com/sol7/olimpio/service/services/estoque/ProdutoService.java:22, camada service)

@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.schedule.jobs;
+package br.com.sol7.olimpio.schedule.jobs;
 
 import io.quarkus.scheduler.Scheduled;
 import io.smallrye.common.annotation.RunOnVirtualThread;

@@ -1,4 +1,4 @@
-﻿package br.com.sol7.olimpio.schedule.maintenance;
+package br.com.sol7.olimpio.schedule.maintenance;
 
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.sqlclient.Pool;

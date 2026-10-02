@@ -216,6 +216,22 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
         return substituirFilhos(SQL_LIMPAR_AGENDA_USUARIOS, SQL_INSERIR_AGENDA_USUARIO, agendaId, usuarios);
     }
 
+    // Select u from Usuario u left join fetch u.usuarioAgendas where u = ?1  (vinculo do usuario logado com a agenda)
+    public static final String SQL_BUSCAR_USUARIO_AGENDA =
+            "SELECT ua.id FROM bas_usuario_agenda ua WHERE ua.id_usuario = ?1 AND ua.id_agenda = ?2";
+
+    public Uni<Long> buscarUsuarioAgenda(Long usuarioId, Long agendaId) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(SQL_BUSCAR_USUARIO_AGENDA)
+                        .setParameter(1, usuarioId)
+                        .setParameter(2, agendaId)
+                        .getResultList())
+                .map(list -> list.isEmpty() || list.get(0) == null
+                        ? null
+                        : ((Number) list.get(0)).longValue())
+                .onItem().ifNull().failWith(() -> new jakarta.ws.rs.NotFoundException("Usuario agenda not found"));
+    }
+
     private Uni<Void> substituirFilhos(String sqlLimpar, String sqlInserir, Long agendaId, java.util.List<Long> filhos) {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession()
                 .chain(session -> session.createNativeQuery(sqlLimpar)

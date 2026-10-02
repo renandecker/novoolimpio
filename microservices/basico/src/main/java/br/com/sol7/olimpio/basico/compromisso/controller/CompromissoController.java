@@ -12,6 +12,9 @@ import java.util.Date;
 
 import br.com.sol7.olimpio.basico.compromisso.dto.CompromissoRequest;
 import br.com.sol7.olimpio.basico.compromisso.dto.CompromissoResponse;
+import br.com.sol7.olimpio.basico.compromisso.dto.AgendaHorariosResponse;
+import br.com.sol7.olimpio.basico.compromisso.dto.CompromissoPessoaStatusResponse;
+import br.com.sol7.olimpio.basico.horario.dto.HorarioResponse;
 import br.com.sol7.olimpio.basico.compromisso.dto.ProximoStatusRequest;
 import br.com.sol7.olimpio.basico.compromisso.dto.ResultadoResponse;
 import br.com.sol7.olimpio.basico.compromisso.dto.TrocaStatusRequest;
@@ -74,57 +77,57 @@ public class CompromissoController {
 
     @GET
     @Path("/carregar-prospecto-para-visualizacao")
-    public Uni<Void> carregarProspectoParaVisualizacao(@QueryParam("entityId") Long entityId) {
+    public Uni<Long> carregarProspectoParaVisualizacao(@QueryParam("entityId") Long entityId) {
         return service.carregarProspectoParaVisualizacao(entityId);
     }
 
 
     @GET
     @Path("/carregar-prospecto-para-visualizacao2")
-    public Uni<Void> carregarProspectoParaVisualizacao2() {
-        return service.carregarProspectoParaVisualizacao2();
+    public Uni<Long> carregarProspectoParaVisualizacao2(@QueryParam("entityId") Long entityId) {
+        return service.carregarProspectoParaVisualizacao2(entityId);
     }
 
 
     @POST
     @Path("/atualizar-horarios-resultados")
-    public Uni<Void> atualizarHorariosResultados(@QueryParam("event") String event) {
-        return service.atualizarHorariosResultados(event);
+    public Uni<AgendaHorariosResponse> atualizarHorariosResultados(@QueryParam("agendaId") Long agendaId, @QueryParam("usuarioId") Long usuarioId, @QueryParam("data") Date data, @QueryParam("tipoHorario") Integer tipoHorario) {
+        return service.atualizarHorariosResultados(agendaId, usuarioId, data, tipoHorario == null ? 0 : tipoHorario);
     }
 
 
     @POST
     @Path("/atualizar-horarios-resultados-agenda")
-    public Uni<Void> atualizarHorariosResultadosAgenda(@QueryParam("agendaId") Long agendaId) {
-        return service.atualizarHorariosResultadosAgenda(agendaId);
+    public Uni<AgendaHorariosResponse> atualizarHorariosResultadosAgenda(@QueryParam("agendaId") Long agendaId, @QueryParam("usuarioId") Long usuarioId, @QueryParam("data") Date data, @QueryParam("tipoHorario") Integer tipoHorario) {
+        return service.atualizarHorariosResultadosAgenda(agendaId, usuarioId, data, tipoHorario == null ? 0 : tipoHorario);
     }
 
 
     @POST
     @Path("/atualizar-horarios")
-    public Uni<Void> atualizarHorarios(@QueryParam("event") String event) {
-        return service.atualizarHorarios(event);
+    public Uni<List<HorarioResponse>> atualizarHorarios(@QueryParam("agendaId") Long agendaId, @QueryParam("usuarioId") Long usuarioId, @QueryParam("data") Date data, @QueryParam("tipoHorario") Integer tipoHorario) {
+        return service.atualizarHorarios(agendaId, usuarioId, data, tipoHorario == null ? 0 : tipoHorario);
     }
 
 
     @POST
     @Path("/atualizar-horarios2")
-    public Uni<Void> atualizarHorarios2() {
-        return service.atualizarHorarios2();
+    public Uni<List<HorarioResponse>> atualizarHorarios2(@QueryParam("agendaId") Long agendaId, @QueryParam("usuarioId") Long usuarioId, @QueryParam("data") Date data, @QueryParam("tipoHorario") Integer tipoHorario) {
+        return service.atualizarHorarios2(agendaId, usuarioId, data, tipoHorario == null ? 0 : tipoHorario);
     }
 
 
     @GET
     @Path("/buscar-horarios-disponiveis")
-    public Uni<Void> buscarHorariosDisponiveis(@QueryParam("agendaId") Long agendaId, @QueryParam("data") Date data) {
-        return service.buscarHorariosDisponiveis(agendaId, data);
+    public Uni<List<HorarioResponse>> buscarHorariosDisponiveis(@QueryParam("agendaId") Long agendaId, @QueryParam("usuarioId") Long usuarioId, @QueryParam("data") Date data, @QueryParam("tipoHorario") Integer tipoHorario) {
+        return service.buscarHorariosDisponiveis(agendaId, usuarioId, data, tipoHorario == null ? 0 : tipoHorario);
     }
 
 
     @GET
     @Path("/buscar-detalhes")
-    public Uni<Void> buscarDetalhes(@QueryParam("event") String event) {
-        return service.buscarDetalhes(event);
+    public Uni<List<CompromissoPessoaStatusResponse>> buscarDetalhes(@QueryParam("compromissoId") Long compromissoId) {
+        return service.buscarDetalhes(compromissoId);
     }
 
 
@@ -137,22 +140,22 @@ public class CompromissoController {
 
     @POST
     @Path("/atualizar-horarios-data")
-    public Uni<Void> atualizarHorariosData() {
-        return service.atualizarHorariosData();
+    public Uni<List<HorarioResponse>> atualizarHorariosData(@QueryParam("compromissoId") Long compromissoId, @QueryParam("usuarioId") Long usuarioId, @QueryParam("tipoHorario") Integer tipoHorario) {
+        return service.atualizarHorariosData(compromissoId, usuarioId, tipoHorario == null ? 0 : tipoHorario);
     }
 
 
     @GET
     @Path("/buscar-horarios")
-    public Uni<Void> buscarHorarios() {
-        return service.buscarHorarios();
+    public Uni<List<HorarioResponse>> buscarHorarios(@QueryParam("compromissoId") Long compromissoId, @QueryParam("usuarioId") Long usuarioId, @QueryParam("tipoHorario") Integer tipoHorario) {
+        return service.buscarHorarios(compromissoId, usuarioId, tipoHorario == null ? 0 : tipoHorario);
     }
 
 
     @GET
     @Path("/carregar-usuario-agenda")
-    public Uni<Void> carregarUsuarioAgenda() {
-        return service.carregarUsuarioAgenda();
+    public Uni<List<Long>> carregarUsuarioAgenda(@QueryParam("unidadeId") Long unidadeId) {
+        return service.carregarUsuarioAgenda(unidadeId);
     }
 
 
