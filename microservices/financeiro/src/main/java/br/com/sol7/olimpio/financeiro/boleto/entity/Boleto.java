@@ -5,7 +5,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
-// Migrado de br.com.sol7.olimpio.model.entity.financeiro.Boleto (legado)
 @Entity
 @Table(name = "fin_boleto")
 public class Boleto extends PanacheEntity {

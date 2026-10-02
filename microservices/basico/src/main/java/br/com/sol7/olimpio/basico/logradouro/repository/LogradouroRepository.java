@@ -10,7 +10,6 @@ import br.com.sol7.olimpio.basico.logradouro.entity.Logradouro;
 @ApplicationScoped
 public class LogradouroRepository implements PanacheRepository<Logradouro> {
 
-    // Migrado de LogradouroService.atualizar() (legado, chamado por SchedulingService.tudo()) -
     // so a parte de limpeza (2 deletes); a parte que consulta o webservice dos Correios
     // (CorreioQualCep) para tentar completar o logradouro/bairro pelo CEP ficou de fora
     // (integracao externa) - ver RELATORIO_SCHEDULE.md.
@@ -83,7 +82,6 @@ public class LogradouroRepository implements PanacheRepository<Logradouro> {
     public static final String SQL_BUSCA_LOGRADOURO_SEM_LOGRADOURO =
             "SELECT DISTINCT c.* FROM bas_logradouro c WHERE c.descricao is null and c.cep is not null";
 
-    // Migrado de LogradouroController.trocarLogradouros (legado) - reatribui pessoas/unidades
     // ao logradouro de destino antes de remover os logradouros substituidos.
     public static final String SQL_TROCAR_PESSOA =
             "UPDATE bas_pessoa SET id_logradouro = :destino WHERE id_logradouro = :origem";

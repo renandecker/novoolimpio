@@ -141,19 +141,6 @@ public class GestaoAlunoService {
                 .onItem().invoke(() -> LOG.infof("Valor da parcela %d atualizado", parcelaId));
     }
 
-
-    // Migrado de GestaoAlunoController.atualizarDescontoParcela (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GestaoAlunoController.java:301, camada controller)
-    // Observacao: parametro parcelaId: era Parcela (referencia por id)
-    // Logica original (adaptar):
-    // public void atualizarDescontoParcela(Parcela parcela) {
-    //         try {
-    //             hibernateService.executeUpdateSQL(" update fin_parcela set desconto = " + parcela.getDesconto() + " where data_pagamento is null and id =" + parcela.getId());
-    //             gerarCarneController.setAlteracaoParcelas(true);
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.SAVE, "global.sucess", "validation", "Desconto da parcela atualizado com Sucesso.");
-    //         } catch (Exception e) {
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.ERROR, "global.error", "validation", "Erro ao atualizar desconto parcela.");
-    //         }
-    //     }
     public Uni<Void> atualizarDescontoParcela(Long parcelaId, Double novoDesconto) {
         String sql = "UPDATE fin_parcela SET desconto = ? WHERE data_pagamento IS NULL AND id = ?";
         return Panache.getSession()

@@ -76,14 +76,6 @@ public class ProspectoRadarService {
         return out;
     }
 
-    // Migrado de ProspectoRadarController.carregarProspectoParaVisualizacao (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/ProspectoRadarController.java:85, camada controller)
-    // Observacao: parametro entityId: era Prospecto (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarProspectoParaVisualizacao(Prospecto entity) {
-    //         ProspectoUtil.carregarProspectoParaVisualizacao(prospectoService.buscaProspectoComCampos(entity.getId()), getDynaFormModelAtual());
-    //     }
-    // Obs: metodo de UI (JSF); depende do modulo Prospecto nao migrado
-    // Implementacao: carrega prospecto para visualizacao (requer modulo Prospecto)
     public Uni<List<Map<String, Object>>> carregarProspectoParaVisualizacao(Long entityId) {
         String sql = """
             SELECT c.id AS campo_id, c.rotulo AS rotulo, c.tipo AS tipo, cat.descricao AS categoria, pc.valor AS valor
@@ -101,17 +93,6 @@ public class ProspectoRadarService {
                 .map(rows -> toMapList(rows, List.of("campo_id", "rotulo", "tipo", "categoria", "valor")));
     }
 
-
-    // Migrado de ProspectoRadarController.carregarFormularioDaAcaoComLlnk (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/ProspectoRadarController.java:101, camada controller)
-    // Observacao: parametro acaoId: era Acao (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public String carregarFormularioDaAcaoComLlnk(Acao acao, Unidade unidade) {
-    //         acaoSelecionada = acao;
-    //         unidadeSelecionada = unidade;
-    //         return getRadarPath();
-    //     }
-    // Obs: metodo de UI (JSF) de navegacao; sem logica de dados portaavel
-    // Implementacao: retorna path do radar para a acao/unidade (requer modulo Acao/Unidade)
     public Uni<String> carregarFormularioDaAcaoComLlnk(Long acaoId, Long unidadeId) {
         return acaoRepository.buscarAcaoComCampos(acaoId.intValue())
                 .onItem().transform(lista -> !lista.isEmpty() ? "/prospecto-radar" : "/prospecto-radar");
@@ -142,25 +123,6 @@ public class ProspectoRadarService {
         return Uni.createFrom().item(new AcaoFormularioResponse(acaoId, "", 0, List.of()));
     }
 
-
-// Migrado de ProspectoRadarController.atualizarRadar (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/ProspectoRadarController.java:128, camada controller)
-    // Observacao: parametro pro: era ProspectoHelper no legado
-    // Logica original (adaptar):
-    // public void atualizarRadar(ProspectoHelper pro) {
-    //         try {
-    //             ultimoCampoDigitado = pro;
-    //             PropertyFilter propertyFilterTemp;
-    //             // descobrir se o campo ja esta na lista
-    //             int index = camposDigitados.indexOf(ultimoCampoDigitado.getPropertyFilter());
-    //             Object valor = ultimoCampoDigitado.getPropertyFilter().getValue();
-    //
-    //             if (index == -1) { // não existe
-    //                 if (!ObjectUtil.nullOrEmpty(valor)) { // valor esta valido
-    //                     camposDigitados.add(ultimoCampoDigitado.getPropertyFilter());
-    //                 }
-    // // ... (truncado, ver fonte original)
-    // Obs: metodo de UI (JSF), sem logica de dados portaavel
-    // Implementacao: atualiza estado do radar com campo digitado (requer estado da tela)
     public Uni<Void> atualizarRadar(Long prospectoId, Long campoId, String valor) {
         // Store radar state in ProspectoRadar entity
         return repository.findById(prospectoId)

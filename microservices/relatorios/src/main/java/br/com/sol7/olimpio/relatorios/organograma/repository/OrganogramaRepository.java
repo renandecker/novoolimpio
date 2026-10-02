@@ -1,11 +1,16 @@
 package br.com.sol7.olimpio.relatorios.organograma.repository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import br.com.sol7.olimpio.relatorios.organograma.entity.Organograma;
+import br.com.sol7.olimpio.shared.TupleHelper;
+import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
+import jakarta.persistence.Tuple;
 
 @ApplicationScoped
 public class OrganogramaRepository implements PanacheRepository<Organograma> {
@@ -35,5 +40,43 @@ public class OrganogramaRepository implements PanacheRepository<Organograma> {
     // NAO TRADUZIDA AUTOMATICAMENTE (campo 'usuarios' sem coluna mapeada)
     public static final String SQL_BUSCAR_USUARIOS_HQL_ORIGINAL =
             "select a.usuarios from Organograma a where a = ?1";
+
+    public Uni<List<Long>> listUsuarios(Long organogramaId) {
+        return Panache.getSession().chain(session -> session
+                .createNativeQuery("SELECT id_usuario AS id FROM rel_organograma_usuario WHERE id_organograma = :id ORDER BY id_usuario")
+                .setParameter("id", organogramaId)
+                .getResultList())
+                .map(OrganogramaRepository::toLongs);
+    }
+
+    public Uni<List<Long>> listUnidades(Long organogramaId) {
+        return Panache.getSession().chain(session -> session
+                .createNativeQuery("SELECT id_unidade AS id FROM rel_organograma_unidade WHERE id_organograma = :id ORDER BY id_unidade")
+                .setParameter("id", organogramaId)
+                .getResultList())
+                .map(OrganogramaRepository::toLongs);
+    }
+
+    public Uni<List<Long>> listPerfis(Long organogramaId) {
+        return Panache.getSession().chain(session -> session
+                .createNativeQuery("SELECT id_perfil AS id FROM rel_organograma_perfil WHERE id_organograma = :id ORDER BY id_perfil")
+                .setParameter("id", organogramaId)
+                .getResultList())
+                .map(OrganogramaRepository::toLongs);
+    }
+
+    private static List<Long> toLongs(List<?> rows) {
+        List<Long> out = new ArrayList<>();
+        if (rows == null) return out;
+        for (Object row : rows) {
+            if (row instanceof Tuple t) {
+                Object id = TupleHelper.get(t, "id");
+                if (id != null) out.add(TupleHelper.toLong(id));
+            } else if (row != null) {
+                out.add(((Number) row).longValue());
+            }
+        }
+        return out.stream().filter(Objects::nonNull).toList();
+    }
 
 }

@@ -75,10 +75,6 @@ public class FeriadoRepository implements PanacheRepository<Feriado> {
     }
 
 
-    // -------------------------------------------------------------------------
-    // Migrado de FeriadoService.atualizarOferecimento (legado) - parte que e
-    // possivel expressar em SQL sobre as tabelas edc_*
-    // -------------------------------------------------------------------------
     public static final String SQL_CONTAR_CADERNO =
             "SELECT count(*) FROM edc_caderno_componente_curricular WHERE id_ocorrencia_componente_curricular = :id";
 

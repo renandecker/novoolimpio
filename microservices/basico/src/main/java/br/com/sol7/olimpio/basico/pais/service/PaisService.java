@@ -69,13 +69,6 @@ public class PaisService {
         return new PaisResponse(e.id, e.nome, e.nacionalidade);
     }
 
-
-    // Migrado de PaisService.autoComplete (src/main/java/br/com/sol7/olimpio/service/services/basico/PaisService.java:21, camada service)
-    // JPQL original: select p from Pais p where lower(p.nome) like '%' || ?1 || '%' OR str(p.id) = ?1  order by p.nome
-    // Logica original (adaptar):
-    // public List<Pais> autoComplete(String query) {
-    //         return this.getPaisRepository().autoComplete(query.toLowerCase());
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
     }

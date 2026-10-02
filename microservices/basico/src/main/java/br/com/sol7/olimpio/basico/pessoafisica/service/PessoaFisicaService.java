@@ -170,7 +170,6 @@ public class PessoaFisicaService {
     }
 
 
-    // Migrado de PessoaFisicaController.autoCompleteTestemunha (src/main/java/br/com/sol7/olimpio/control/controllers/basico/PessoaFisicaController.java:652, camada controller)
     // Referência legado:
     //   PessoaFisicaService.autoCompleteTestemunha -> repository.autoCompleteTestemunha(query, unidadesDisponiveis)
     //   Query: Usuario ativo + Pessoa com unidade ativa, filtro nome/cpf, exclui Professor, order by nome
@@ -182,23 +181,10 @@ public class PessoaFisicaService {
                 .map(list -> list.stream().map(this::toResponse).toList());
     }
 
-
-    // Migrado de PessoaFisicaController.autoCompleteAcao (src/main/java/br/com/sol7/olimpio/control/controllers/basico/PessoaFisicaController.java:656, camada controller)
-    // Logica original (adaptar):
-    // public List<Pessoa> autoCompleteAcao(String query) {
-    //         return pessoaFisicaService.autoCompleteAcao(query);
-    //     }
     public Uni<List<Long>> autoCompleteAcao(String query) {
         return repository.autoCompleteAcao(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de PessoaFisicaService.buscarPessoaComCpf (src/main/java/br/com/sol7/olimpio/service/services/basico/PessoaFisicaService.java:49, camada service)
-    // JPQL original: select p from PessoaFisica pf inner join pf.pessoa p inner join p.unidades u where u.ativo = true and pf.cpf = ?1
-    // Logica original (adaptar):
-    // public List<PessoaFisica> buscarPessoaComCpf(String cpf) {
-    //         return getPessoaFisicaRepository().buscarPessoaComCpf(cpf, new PageRequest(0, 1)).getContent();
-    //     }
     public Uni<List<Long>> buscarPessoaComCpf(String cpf) {
         return repository.buscarPessoaComCpf(cpf).map(list -> list.stream().map(x -> x.id).toList());
     }

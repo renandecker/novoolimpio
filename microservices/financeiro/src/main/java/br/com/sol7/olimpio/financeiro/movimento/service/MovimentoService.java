@@ -66,15 +66,6 @@ public class MovimentoService {
         return new MovimentoResponse(e.id, e.descricao, e.descricaocompleta, e.movimentoId, e.tipoMovimentoId);
     }
 
-
-    // Migrado de MovimentoController.autoCompleteCidade (src/main/java/br/com/sol7/olimpio/control/controllers/financeiro/MovimentoController.java:46, camada controller)
-    // Logica original (adaptar):
-    // public List<Movimento> autoCompleteCidade(String query) {
-    //         if (!query.equals("")) {
-    //             return movimentoService.autoComplete(query);
-    //         }
-    //         return movimentoService.findAll();
-    //     }
     public Uni<List<Long>> autoCompleteCidade(String query) {
         if (query != null && !query.equals("")) {
             return repository.autoComplete(query).map(list -> list.stream().map(x -> x.id).toList());
@@ -82,23 +73,10 @@ public class MovimentoService {
         return repository.listAll().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de MovimentoController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/financeiro/MovimentoController.java:63, camada controller)
-    // Logica original (adaptar):
-    // public List<Movimento> autoComplete(String query) {
-    //         return movimentoService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de MovimentoService.autoCompleteComTipo (src/main/java/br/com/sol7/olimpio/service/services/financeiro/MovimentoService.java:27, camada service)
-    // Observacao: parametro tipoMovimentoId: era TipoMovimento (referencia por id)
-    // Logica original (adaptar):
-    // public List<Movimento> autoCompleteComTipo(String query, TipoMovimento tipoMovimento) {
-    //         return getSubCategoriaRepository().autoCompleteComTipo(query.toLowerCase(), tipoMovimento, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteComTipo(String query, Long tipoMovimentoId) {
         return repository.autoCompleteComTipo(query, tipoMovimentoId).map(list -> list.stream().map(x -> x.id).toList());
     }

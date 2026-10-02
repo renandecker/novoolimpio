@@ -8,7 +8,6 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Date;
 
-// Migrado de br.com.sol7.olimpio.model.entity.financeiro.Sangria (legado)
 @Entity
 @Table(name = "fin_sangria")
 public class Sangria extends PanacheEntity {

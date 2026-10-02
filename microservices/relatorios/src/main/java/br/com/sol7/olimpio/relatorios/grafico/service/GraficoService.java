@@ -137,7 +137,6 @@ public class GraficoService {
                 });
     }
 
-    // Migrado de FiltrosController/QueryBuilder (extracted_aceso): filtra as colunas
     // da dimensao de cada rel_filtro vinculado ao grafico, para montar o WHERE no SQL do grafico.
     private static final String SQL_FILTROS_GRAFICO = "SELECT f.nome, dc.coluna, f.tipo_filtro, f.operacao, f.data_inicio, f.data_fim, f.periodo_dinamico, f.valor_fixo " +
             "FROM rel_filtro f " +
@@ -332,60 +331,28 @@ public class GraficoService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de GraficoService.buscarUnidades (src/main/java/br/com/sol7/olimpio/service/services/relatorios/GraficoService.java:29, camada service)
-    // Observacao: parametro id: era Grafico (referencia por id)
-    // Logica original (adaptar):
-    // public List<Unidade> buscarUnidades(Grafico id) {
-    //         return getConexaoRepository().buscarUnidades(id);
-    //     }
     public Uni<List<Long>> buscarUnidades(Long id) {
-        // Obs: depende do microservico basico (Unidade) - repository.buscarUnidades
-        return Uni.createFrom().item(java.util.List.of());
+        return repository.findById(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Grafico not found"))
+                .flatMap(e -> repository.listUnidades(id));
     }
 
-
-    // Migrado de GraficoService.buscarPerfils (src/main/java/br/com/sol7/olimpio/service/services/relatorios/GraficoService.java:33, camada service)
-    // Observacao: parametro id: era Grafico (referencia por id)
-    // Logica original (adaptar):
-    // public List<Perfil> buscarPerfils(Grafico id) {
-    //         return getConexaoRepository().buscarPerfils(id);
-    //     }
     public Uni<List<Long>> buscarPerfils(Long id) {
-        // Obs: depende do microservico basico (Perfil) - repository.buscarPerfils
-        return Uni.createFrom().item(java.util.List.of());
+        return repository.findById(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Grafico not found"))
+                .flatMap(e -> repository.listPerfis(id));
     }
 
-
-    // Migrado de GraficoService.buscarUsuarios (src/main/java/br/com/sol7/olimpio/service/services/relatorios/GraficoService.java:37, camada service)
-    // Observacao: parametro id: era Grafico (referencia por id)
-    // Logica original (adaptar):
-    // public List<Usuario> buscarUsuarios(Grafico id) {
-    //         return getConexaoRepository().buscarUsuarios(id);
-    //     }
     public Uni<List<Long>> buscarUsuarios(Long id) {
-        // Obs: depende do microservico basico (Usuario) - repository.buscarUsuarios
-        return Uni.createFrom().item(java.util.List.of());
+        return repository.findById(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Grafico not found"))
+                .flatMap(e -> repository.listUsuarios(id));
     }
 
-
-    // Migrado de GraficoService.buscarGraficoPeloFato (src/main/java/br/com/sol7/olimpio/service/services/relatorios/GraficoService.java:41, camada service)
-    // Observacao: parametro fatoId: era Estrutura (referencia por id)
-    // Logica original (adaptar):
-    // public List<Grafico> buscarGraficoPeloFato(Estrutura fato) {
-    //         return getConexaoRepository().buscarGraficoPeloFato(fato);
-    //     }
     public Uni<List<Long>> buscarGraficoPeloFato(Long fatoId) {
         return repository.buscarGraficoPeloFato(fatoId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de GraficoService.autoComplete (src/main/java/br/com/sol7/olimpio/service/services/relatorios/GraficoService.java:45, camada service)
-    // Observacao: parametro estruturaId: era Estrutura (referencia por id)
-    // Logica original (adaptar):
-    // public List<Grafico> autoComplete(String query, Estrutura estrutura) {
-    //         return this.getConexaoRepository().autoComplete(query.toLowerCase(), estrutura, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoComplete(String query, Long estruturaId) {
         return repository.autoComplete(query.toLowerCase(), estruturaId).map(list -> list.stream().map(x -> x.id).toList());
     }

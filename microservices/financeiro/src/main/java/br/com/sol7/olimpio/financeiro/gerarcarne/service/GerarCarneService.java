@@ -64,7 +64,6 @@ public class GerarCarneService {
 
     // ===== MÉTODOS MIGRADOS DO GERARCARNE SERVICE ORIGINAL =====
 
-    // Migrado de GerarCarneService.criarCarne
     // Cria um objeto Carne para impressão do boleto/carnê
     public Uni<Carne> criarCarne(ParcelaDTO parcela, int total, String logoPath, String pagoPath) {
         // Nota: Esta implementação requer dados de outros microserviços (Contrato, Pessoa, VendaProduto)
@@ -149,7 +148,6 @@ public class GerarCarneService {
         return Uni.createFrom().item(carne);
     }
 
-    // Migrado de GerarCarneService.criarCarneReparcelamento
     public Uni<Carne> criarCarneReparcelamento(ParcelaDTO parcela, int total, String logoPath, String pagoPath) {
         return criarCarne(parcela, total, logoPath, pagoPath)
                 .onItem().transform(carne -> {
@@ -169,7 +167,6 @@ public class GerarCarneService {
         return Uni.createFrom().item(new ArrayList<>());
     }
 
-    // Migrado de GerarCarneService.obterDesconto
     // Calcula desconto aplicável a uma parcela baseado na data atual, feriados, fim de semana
     public BigDecimal obterDesconto(ParcelaDTO parcela) {
         if (parcela == null || parcela.parcela() == 0) {
@@ -215,7 +212,6 @@ public class GerarCarneService {
         return BigDecimal.ZERO;
     }
 
-    // Migrado de GerarCarneService.obterMultaJuros
     // Calcula multa e juros de uma parcela em atraso
     public BigDecimal obterMultaJuros(ParcelaDTO parcela) {
         if (parcela == null || parcela.parcela() == 0) {
@@ -270,7 +266,6 @@ public class GerarCarneService {
         return multa.add(juros);
     }
 
-    // Migrado de GerarCarneService.obterValorCobrado
     // Calcula valor total a ser cobrado (valor + juros/multa - desconto)
     public BigDecimal obterValorCobrado(ParcelaDTO parcela) {
         if (parcela == null || parcela.id() == null) {
@@ -600,12 +595,10 @@ public class GerarCarneService {
         return Uni.createFrom().item(null);
     }
 
-    // Migrado de GerarCarneController.gerarViaDocumentoCancelamentoContratual
     public Uni<String> gerarViaDocumentoCancelamentoContratual(Long ccId) {
         return Uni.createFrom().item(null);
     }
 
-    // Migrado de GerarCarneController.gerarViaDocumentoCancelamentoMatricula
     public Uni<String> gerarViaDocumentoCancelamentoMatricula(Long mmId) {
         return Uni.createFrom().item(null);
     }

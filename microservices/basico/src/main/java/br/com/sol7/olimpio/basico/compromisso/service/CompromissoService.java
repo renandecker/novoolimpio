@@ -34,7 +34,6 @@ public class CompromissoService {
     CompromissoRepository repository;
     private static final Logger logger = LoggerFactory.getLogger(CompromissoService.class);
 
-    // Migrado de SchedulingService.atualizarCompromissosAutomaticos()
     public Uni<Void> atualizarCompromissosAutomaticos() {
         logger.info("Atualizando compromissos automaticamente");
 
@@ -109,18 +108,6 @@ public class CompromissoService {
         return new CompromissoResponse(e.id, e.descricao, e.data, e.horarioId, e.tipoCompromissoId, e.agendaId, e.pessoaId, e.dataChegada, e.dataAlteracao, e.dataInicio, e.dataConclusao, e.observacao, e.ativo, e.usuarioId, e.statusCompromissoId, e.prospectoId, e.atendenteId, e.usuarioFinalizouId);
     }
 
-
-    // Migrado de CompromissoController.atualizarAgendaSchedule (src/main/java/br/com/sol7/olimpio/control/controllers/basico/CompromissoController.java:136, camada controller)
-    // Observacao: parametro compromissoId: era Compromisso (referencia por id); parametro statusCompromissoId: era StatusCompromisso (referencia por id)
-    // Logica original (adaptar):
-    // public void atualizarAgendaSchedule(Compromisso compromisso, StatusCompromisso statusCompromisso) {
-    //         tipoEvento = false;
-    //         descricaoCompromisso = "";
-    //         compromissos = compromissoService.listarCompromissosComAgendaComStatus(compromisso.getAgenda(), compromisso.getData(), statusCompromisso.getId());
-    //         if (ObjectUtil.nullOrEmpty(compromissos)) {
-    //             RequestContext.getCurrentInstance().execute("PF('telaCompromissoDialogo').hide();");
-    //         }
-    //     }
     public Uni<Void> atualizarAgendaSchedule(Long compromissoId, Long statusCompromissoId) {
         return repository.findById(compromissoId)
                 .chain(c -> repository.listarCompromissosComAgendaComStatus(c.agendaId, c.data, statusCompromissoId.intValue()).replaceWithVoid());
@@ -223,63 +210,27 @@ public class CompromissoService {
                 .chain(c -> carregarHorariosDisponiveis(c.agendaId, usuarioId, c.data, tipoHorario));
     }
 
-
     public Uni<List<Long>> carregarUsuarioAgenda(Long unidadeId) {
         return agendaRepository.buscarAgendasPorUnidade(unidadeId)
                 .map(list -> list.stream().map(a -> a.id).toList());
     }
 
-
-    // Migrado de CompromissoController.verificaResultados (src/main/java/br/com/sol7/olimpio/control/controllers/basico/CompromissoController.java:708, camada controller)
-    // Observacao: parametro compromissoId: era Compromisso (referencia por id)
-    // Logica original (adaptar):
-    // public boolean verificaResultados(Compromisso compromisso) {
-    //         compromisso = compromissoService.buscarCompromissoComResultados(compromisso.getId());
-    //         if (!ObjectUtil.nullOrEmpty(compromisso)) {
-    //             return true;
-    //         }
-    //         return false;
-    //     }
     public Uni<Boolean> verificaResultados(Long compromissoId) {
         return repository.buscarCompromissoComResultados(compromissoId.intValue()).map(list -> !list.isEmpty());
     }
 
-
-    // Migrado de CompromissoService.buscarCompromissoComResultados (src/main/java/br/com/sol7/olimpio/service/services/basico/CompromissoService.java:37, camada service)
-    // Observacao: retorno: era Compromisso (referencia por id)
-    // JPQL original: Select c from Compromisso c left join fetch c.resultados r where c.id = ?1
-    // Logica original (adaptar):
-    // public Compromisso buscarCompromissoComResultados(Integer id) {
-    //         return getCompromissoRepository().buscarCompromissoComResultados(id);
-    //     }
     public Uni<Long> buscarCompromissoComResultados(Integer id) {
         return repository.buscarCompromissoComResultados(id).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de CompromissoService.buscarLigacaoAgendamentoVencido (src/main/java/br/com/sol7/olimpio/service/services/basico/CompromissoService.java:41, camada service)
-    // Observacao: retorno: era Ligacao (referencia por id); parametro compromissoId: era Compromisso (referencia por id)
-    // Logica original (adaptar):
-    // public Ligacao buscarLigacaoAgendamentoVencido(Compromisso compromisso) {
-    //         return getCompromissoRepository().buscarLigacaoAgendamentoVencido(compromisso);
-    //     }
     public Uni<Long> buscarLigacaoAgendamentoVencido(Long compromissoId) {
         return repository.find("compromisso = ?1", compromissoId).firstResult().map(x -> x == null ? null : x.id);
     }
 
-
-    // Migrado de CompromissoService.buscarProspectoDoCompromisso (src/main/java/br/com/sol7/olimpio/service/services/basico/CompromissoService.java:53, camada service)
-    // Observacao: retorno: era Prospecto (referencia por id); parametro compromissoId: era Compromisso (referencia por id)
-    // JPQL original: Select c.prospecto from Compromisso c left join fetch c.prospecto.prospectoCampos where c=?1
-    // Logica original (adaptar):
-    // public Prospecto buscarProspectoDoCompromisso(Compromisso compromisso) {
-    //         return getCompromissoRepository().buscarProspectoDoCompromisso(compromisso);
-    //     }
     public Uni<Long> buscarProspectoDoCompromisso(Long compromissoId) {
         return repository.buscarProspectoDoCompromisso(compromissoId).map(list -> list.isEmpty() ? null : ((Number) list.get(0)).longValue());
     }
 
-    // Migrado de CompromissoController.trocaStatus (linha 317, camada controller)
     public Uni<CompromissoResponse> trocarStatus(Long compromissoId, Long statusId) {
         if (statusId == null) {
             return Uni.createFrom().failure(new jakarta.ws.rs.WebApplicationException(
@@ -297,7 +248,6 @@ public class CompromissoService {
                         .replaceWith(() -> toResponse(c)));
     }
 
-    // Migrado de CompromissoController.proximoStatusCompromisso (linha 603, camada controller)
     public Uni<CompromissoResponse> proximoStatus(Long compromissoId, String observacao) {
         return repository.findById(compromissoId).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Compromisso not found"))
@@ -313,7 +263,6 @@ public class CompromissoService {
                                         .replaceWith(() -> toResponse(c)))));
     }
 
-    // Migrado de CompromissoController.fecharAgenda (linha 231, camada controller)
     public Uni<CompromissoResponse> fechar(Long compromissoId) {
         return repository.findById(compromissoId).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Compromisso not found"))

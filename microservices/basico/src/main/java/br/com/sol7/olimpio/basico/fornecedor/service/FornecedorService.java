@@ -119,59 +119,24 @@ public class FornecedorService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de FornecedorService.autoComplete (src/main/java/br/com/sol7/olimpio/service/services/basico/FornecedorService.java:25, camada service)
-    // JPQL original: select distinct f from Fornecedor f inner join f.pessoa p inner join  p.unidades u where u IN (?2) and (lower(p.pessoaJuridica.nomeFantasia) like '%' || ?1 || '%' OR (p.pessoaJuridica.cnpj) like '%' || ?1 || '%' OR (p.pessoaJuridica.razaoSocial) like '%' || ?1 || '%')  order by p.pessoaJuridica.nomeFantasia
-    // Logica original (adaptar):
-    // public List<Fornecedor> autoComplete(String query, List<Unidade> unidades) {
-    //         return this.getFornecedorRepository().autoComplete(query.toLowerCase(), unidades, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoComplete2(String query, List<Long> unidades) {
         return repository.autoComplete(query.toLowerCase(), unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de FornecedorService.autoCompletePessoa (src/main/java/br/com/sol7/olimpio/service/services/basico/FornecedorService.java:29, camada service)
-    // JPQL original: select distinct p from Pessoa p inner join  p.unidades u where u IN (?2) and (lower(p.pessoaJuridica.nomeFantasia) like '%' || ?1 || '%' OR (p.pessoaJuridica.cnpj) like '%' || ?1 || '%' OR (p.pessoaJuridica.razaoSocial) like '%' || ?1 || '%')  order by p.pessoaJuridica.nomeFantasia
-    // Logica original (adaptar):
-    // public List<Pessoa> autoCompletePessoa(String query, List<Unidade> unidades) {
-    //         return this.getFornecedorRepository().autoCompletePessoa(query.toLowerCase(), unidades, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompletePessoa2(String query, List<Long> unidades) {
         return repository.autoCompletePessoa(query.toLowerCase(), unidades)
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de FornecedorService.autoCompleteSOmenteUnidade (src/main/java/br/com/sol7/olimpio/service/services/basico/FornecedorService.java:38, camada service)
-    // JPQL original: select distinct p from PessoaJuridica f inner join f.pessoa p inner join  p.unidades u where u IN (?1)
-    // Logica original (adaptar):
-    // public List<Pessoa> autoCompleteSOmenteUnidade(List<Unidade> unidades) {
-    //         return this.getFornecedorRepository().autoCompleteSOmenteUnidade(unidades, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteSOmenteUnidade(List<Long> unidades) {
         return repository.autoCompleteSOmenteUnidade(unidades)
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de FornecedorService.autoCompleteFornecedor (src/main/java/br/com/sol7/olimpio/service/services/basico/FornecedorService.java:42, camada service)
-    // JPQL original: select distinct f from Fornecedor f inner join f.pessoa p inner join  p.unidades u where u IN (?2) and (lower(p.pessoaJuridica.nomeFantasia) like '%' || ?1 || '%' OR (p.pessoaJuridica.cnpj) like '%' || ?1 || '%' OR (p.pessoaJuridica.razaoSocial) like '%' || ?1 || '%')  order by p.pessoaJuridica.nomeFantasia
-    // Logica original (adaptar):
-    // public List<Fornecedor> autoCompleteFornecedor(String query, List<Unidade> unidades) {
-    //         return this.getFornecedorRepository().autoCompleteFornecedor(query.toLowerCase(), unidades, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteFornecedor2(String query, List<Long> unidades) {
         return repository.autoCompleteFornecedor(query.toLowerCase(), unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de FornecedorService.autoCompleteSOmenteUnidadeFornecedor (src/main/java/br/com/sol7/olimpio/service/services/basico/FornecedorService.java:46, camada service)
-    // JPQL original: select distinct f from Fornecedor f inner join f.pessoa p inner join  p.unidades u where u IN (?1)
-    // Logica original (adaptar):
-    // public List<Fornecedor> autoCompleteSOmenteUnidadeFornecedor(List<Unidade> unidades) {
-    //         return this.getFornecedorRepository().autoCompleteSOmenteUnidadeFornecedor(unidades, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteSOmenteUnidadeFornecedor(List<Long> unidades) {
         return repository.autoCompleteSOmenteUnidadeFornecedor(unidades).map(list -> list.stream().map(x -> x.id).toList());
     }

@@ -107,45 +107,18 @@ public class ConfiguracaoParcelaService {
         return Uni.createFrom().voidItem();
     }
 
-
-    // Migrado de ConfiguracaoParcelaService.buscarConf (src/main/java/br/com/sol7/olimpio/service/services/financeiro/ConfiguracaoParcelaService.java:22, camada service)
-    // Observacao: retorno: era ConfiguracaoParcela (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public ConfiguracaoParcela buscarConf(Unidade unidade) {
-    //         return getConfiguracaoParcelaRepository().buscarConf(unidade);
-    //     }
     public Uni<Long> buscarConf(Long unidadeId) {
         return repository.find("unidadeId = ?1 order by id desc", unidadeId).firstResult().map(x -> x == null ? null : x.id);
     }
 
-
-    // Migrado de ConfiguracaoParcelaService.buscarConf (src/main/java/br/com/sol7/olimpio/service/services/financeiro/ConfiguracaoParcelaService.java:26, camada service)
-    // Observacao: retorno: era ConfiguracaoParcela (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public ConfiguracaoParcela buscarConf(Unidade unidade, Integer id) {
-    //         return getConfiguracaoParcelaRepository().buscarConf(unidade, id);
-    //     }
     public Uni<Long> buscarConf2(Long unidadeId, Integer id) {
         return repository.find("unidadeId = ?1 order by id desc", unidadeId, id).firstResult().map(x -> x == null ? null : x.id);
     }
 
-
-    // Migrado de ConfiguracaoParcelaService.buscarConfComUnidades (src/main/java/br/com/sol7/olimpio/service/services/financeiro/ConfiguracaoParcelaService.java:30, camada service)
-    // Logica original (adaptar):
-    // public List<ConfiguracaoParcela> buscarConfComUnidades(List<Unidade> unidade) {
-    //         return getConfiguracaoParcelaRepository().buscarConfComUnidades(unidade);
-    //     }
     public Uni<List<Long>> buscarConfComUnidades(List<Long> unidade) {
         return repository.find("unidadeId in (?1) order by id desc", unidade).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de ConfiguracaoParcelaService.buscarConfComUnidadesNotCancelamento (src/main/java/br/com/sol7/olimpio/service/services/financeiro/ConfiguracaoParcelaService.java:34, camada service)
-    // JPQL original: Select c from ConfiguracaoParcela c left join fetch c.cancelamentos where c.unidade not in (?1) order by c.id desc
-    // Logica original (adaptar):
-    // public List<ConfiguracaoParcela> buscarConfComUnidadesNotCancelamento(List<Unidade> unidade) {
-    //         return getConfiguracaoParcelaRepository().buscarConfComUnidadesNotCancelamento(unidade);
-    //     }
     public Uni<List<Long>> buscarConfComUnidadesNotCancelamento(List<Long> unidade) {
         return repository.buscarConfComUnidadesNotCancelamento(unidade).map(list -> list.stream().map(x -> x.id).toList());
     }

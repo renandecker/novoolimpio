@@ -65,22 +65,6 @@ public class AtendimentoConsultorService {
         return new AtendimentoConsultorResponse(e.id, e.nome, e.dadosJson);
     }
 
-    // Migrado de AtendimentoConsultorController.buscarTurmasOferecidas (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/AtendimentoConsultorController.java:116, camada controller)
-    // Observacao: parametro curriculoId: era Curriculo (referencia por id)
-    // Logica original (adaptar):
-    // public void buscarTurmasOferecidas(Curriculo curriculo) {
-    //         listaDiasSemanas = new ArrayList<>();
-    //         filterOferecimentoComponenteCurriculars = new LinkedHashSet<>();
-    //         List<ComponenteCurricular> componentes = new ArrayList<>();
-    //         for (MatrizCurricular matriz : curriculo.getMatrizCurriculares()) {
-    //             componentes.add(matriz.getComponenteCurricular());
-    //         }
-    //         if (!ObjectUtil.nullOrEmpty(componentes)) {
-    //             oferecimentoComponenteCurriculars = oferecimentoComponenteCurricularService.listarOferecimentosDisponiveis(componentes, usuarioLogadoController.getUnidadesDisponiveis(), null);
-    //         }
-    // 
-    //         for (OferecimentoComponenteCurricular o : ofer ...
-    // // ... (truncado, ver fonte original)
     public Uni<List<TurmaOferecidaResponse>> buscarTurmasOferecidas(Long curriculoId, List<Long> unidadesIds) {
         if (unidadesIds == null || unidadesIds.isEmpty()) {
             return Uni.createFrom().item(List.of());

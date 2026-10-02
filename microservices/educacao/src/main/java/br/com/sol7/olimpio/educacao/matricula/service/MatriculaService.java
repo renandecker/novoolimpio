@@ -250,13 +250,6 @@ public class MatriculaService {
         return repository.buscarMatriculasComCadernoPorContrato(contratoId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de MatriculaService.buscarMatriculasAtivasNaoConcluidas (src/main/java/br/com/sol7/olimpio/service/services/educacao/MatriculaService.java:97, camada service)
-    // Observacao: parametro contratoId: era Contrato (referencia por id)
-    // Logica original (adaptar):
-    // public List<Matricula> buscarMatriculasAtivasNaoConcluidas(Contrato contrato) {
-    //         return getMatriculaRepository().buscarMatriculasAtivasNaoConcluidas(contrato);
-    //     }
     public Uni<List<Long>> buscarMatriculasAtivasNaoConcluidas(Long contratoId) {
         // Obs: condicao removida (depende de outro microservico): m.contrato.unidade.ativo = true
         // Obs: condicao removida (depende de outro microservico): m.contrato.unidadeResponsavel.ativo = true

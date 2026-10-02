@@ -12,7 +12,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class CaixaRepository implements PanacheRepository<Caixa> {
 
-    // Migrado de SchedulingService.fechamentoCaixaAbertos() (legado) - soma de entradas/saidas
     // (por tipo de movimento) e sangrias de um caixa, e fechamento propriamente dito.
     public static final String SQL_SOMAR_ENTRADAS =
             "SELECT COALESCE(SUM(m.valor), 0) FROM fin_movimentacao m " +
@@ -55,7 +54,6 @@ public class CaixaRepository implements PanacheRepository<Caixa> {
                 .replaceWithVoid();
     }
 
-    // Migrado de CaixaController.abrirCaixa - remove data_fechamento
     public static final String SQL_ABRIR_CAIXA =
             "UPDATE fin_caixa SET data_fechamento = null WHERE id = ?1";
 

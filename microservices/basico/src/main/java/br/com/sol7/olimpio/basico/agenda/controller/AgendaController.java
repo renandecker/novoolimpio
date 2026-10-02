@@ -140,7 +140,6 @@ public class AgendaController {
     }
 
 
-    // Migrado do formAgenda.xhtml: listas Resultados e Status (inputMestreDetalheAutoComplete).
     @GET
     @Path("/{id}/resultados")
     public Uni<List<Long>> listarResultados(@PathParam("id") Long id) {
@@ -165,8 +164,6 @@ public class AgendaController {
         return service.substituirStatus(id, statuses);
     }
 
-
-    // Migrado de AgendaController.carregarUsuarios/salvarPerfilUsuario (listAgenda.xhtml dialogPessoa).
     @GET
     @Path("/{id}/usuarios")
     public Uni<List<Long>> listarUsuarios(@PathParam("id") Long id) {

@@ -75,14 +75,6 @@ public class ValorProdutoService {
         return new ValorProdutoResponse(e.id, e.vezes, e.juros, e.desconto, e.multa, e.diasSpc, e.diasToleranciaMulta);
     }
 
-
-    // Migrado de ValorProdutoService.buscarExistenciaEmVenda (src/main/java/br/com/sol7/olimpio/service/services/financeiro/ValorProdutoService.java:22, camada service)
-    // Observacao: parametro valorProdutoId: era ValorProduto (referencia por id)
-    // JPQL original: select v from VendaProduto vp inner join vp.formaPagamento v where v = ?1
-    // Logica original (adaptar):
-    // public List<ValorProduto> buscarExistenciaEmVenda(ValorProduto valorProduto) {
-    //         return getValorProdutoRepository().buscarExistenciaEmVenda(valorProduto);
-    //     }
     public Uni<List<Long>> buscarExistenciaEmVenda(Long valorProdutoId) {
         return repository.buscarExistenciaEmVenda(valorProdutoId).map(list -> list.stream().map(x -> x.id).toList());
     }

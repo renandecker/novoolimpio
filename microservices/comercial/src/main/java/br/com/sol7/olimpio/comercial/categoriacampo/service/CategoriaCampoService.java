@@ -56,11 +56,6 @@ public class CategoriaCampoService {
         return new CategoriaCampoResponse(e.id, e.nome, e.dadosJson);
     }
 
-    // Migrado de CategoriaCampoService.autoComplete (src/main/java/br/com/sol7/olimpio/service/services/comercial/CategoriaCampoService.java:22, camada service)
-    // Logica original (adaptar):
-    // public List<Categoria> autoComplete(String query) {
-    //         return getCategoriaRepository().autoComplete(query.toLowerCase(), new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.find("lower(nome) like '%' || ?1 || '%' order by nome", query.toLowerCase())
                 .page(io.quarkus.panache.common.Page.of(0, 10))

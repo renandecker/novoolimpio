@@ -74,32 +74,14 @@ public class EstruturaService {
         return new EstruturaResponse(e.id, e.tabela, e.condicao, e.nome, e.zoom, e.configuracaoEmailId, e.dataAtualizacao, e.coordenada, e.nomeBanco);
     }
 
-
-    // Migrado de EstruturaController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/EstruturaController.java:105, camada controller)
-    // Logica original (adaptar):
-    // public List<Estrutura> autoComplete(String query) {
-    //         return estruturaService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de EstruturaService.buscarBancos (src/main/java/br/com/sol7/olimpio/service/services/relatorios/EstruturaService.java:26, camada service)
-    // Logica original (adaptar):
-    // public List<Estrutura> buscarBancos(String banco) {
-    //         return getEstruturaRepository().buscarBancos(banco);
-    //     }
     public Uni<List<Long>> buscarBancos(String banco) {
         return repository.find("nomeBanco = ?1 order by id desc", banco).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de EstruturaService.buscarBancosComId (src/main/java/br/com/sol7/olimpio/service/services/relatorios/EstruturaService.java:30, camada service)
-    // Logica original (adaptar):
-    // public List<Estrutura> buscarBancosComId(String banco, Long id) {
-    //         return getEstruturaRepository().buscarBancosComId(banco, id);
-    //     }
     public Uni<List<Long>> buscarBancosComId(String banco, Long id) {
         return repository.find("nomeBanco = ?1 and id <> ?2 order by id desc", banco, id).list().map(list -> list.stream().map(x -> x.id).toList());
     }

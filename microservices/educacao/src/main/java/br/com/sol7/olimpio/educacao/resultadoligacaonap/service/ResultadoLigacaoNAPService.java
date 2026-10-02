@@ -83,36 +83,14 @@ public class ResultadoLigacaoNAPService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de ResultadoLigacaoNAPController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/ResultadoLigacaoNAPController.java:83, camada controller)
-    // Logica original (adaptar):
-    // public List<ResultadoLigacaoNAP> autoComplete(String query) {
-    //         return resultadoLigacaoNAPService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query.toLowerCase().trim()).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de ResultadoLigacaoNAPService.buscarResultadoLigacaoNAPComEtapas (src/main/java/br/com/sol7/olimpio/service/services/educacao/ResultadoLigacaoNAPService.java:23, camada service)
-    // Observacao: retorno: era ResultadoLigacaoNAP (referencia por id); parametro resultadoLigacaoNAPId: era ResultadoLigacaoNAP (referencia por id)
-    // JPQL original: select r from ResultadoLigacaoNAP r left join fetch r.etapasNAPs where r = ?1
-    // Logica original (adaptar):
-    // public ResultadoLigacaoNAP buscarResultadoLigacaoNAPComEtapas(ResultadoLigacaoNAP resultadoLigacaoNAP) {
-    //         return getResultadoLigacaoNAPRepository().buscarResultadoLigacaoNAPComEtapas(resultadoLigacaoNAP);
-    //     }
     public Uni<Long> buscarResultadoLigacaoNAPComEtapas(Long resultadoLigacaoNAPId) {
         return repository.buscarResultadoLigacaoNAPComEtapas(resultadoLigacaoNAPId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de ResultadoLigacaoNAPService.autoCompleteComEtapa (src/main/java/br/com/sol7/olimpio/service/services/educacao/ResultadoLigacaoNAPService.java:31, camada service)
-    // Observacao: parametro etapasCobrancaId: era EtapasNAP (referencia por id)
-    // JPQL original: select distinct u from ResultadoLigacaoNAP u inner join u.etapasNAPs un  where un = ?2 and lower(u.descricao) like '%' || ?1 || '%' or str(u.id) like '%' || ?1 || '%' order by u.ordem, u.descricao
-    // Logica original (adaptar):
-    // public List<ResultadoLigacaoNAP> autoCompleteComEtapa(String query, EtapasNAP etapasCobranca) {
-    //         return getResultadoLigacaoNAPRepository().autoCompleteComEtapa(query.toLowerCase().trim(), etapasCobranca, new PageRequest(0, 20)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteComEtapa2(String query, Long etapasCobrancaId) {
         return repository.autoCompleteComEtapa(query.toLowerCase().trim(), etapasCobrancaId).map(list -> list.stream().map(x -> x.id).toList());
     }

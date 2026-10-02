@@ -57,7 +57,6 @@ public class CaixaService {
     // @Inject UsuarioService usuarioService; // Cross-service
     // @Inject ParcelaService parcelaService; // Cross-service (comercial)
 
-    // Migrado de SchedulingService.fechamentoCaixaAbertos() (legado)
     public Uni<List<FechamentoCaixaResumo>> fechamentoAutomatico() {
         return repository.buscarCaixasAbertos().chain(lista -> {
             List<Uni<FechamentoCaixaResumo>> unis = lista.stream().map(caixa ->
@@ -146,7 +145,6 @@ public class CaixaService {
         return new CaixaResponse(e.id, e.data, e.dataFechamento, e.usuarioId, e.fundoCaixa, e.impressoraId, e.unidadeId, e.idCaixaUnidade, e.documento);
     }
 
-    // Migrado de CaixaController.autoCompleteAlunoPagamentoPendente
     public Uni<List<Long>> autoCompleteAlunoPagamentoPendente(String query) {
         if (query == null || query.isBlank()) {
             return Uni.createFrom().item(java.util.List.of());
@@ -169,19 +167,16 @@ public class CaixaService {
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-    // Migrado de CaixaController.buscarDetalheCaixaParcelas
     public Uni<Void> buscarDetalheCaixaParcelas(String event) {
         // Obs: metodo de UI no legado (seta BaseLazyModelJPASpecific de parcelasDetalhes); sem logica de dados portaivel
         return Uni.createFrom().voidItem();
     }
 
-    // Migrado de CaixaController.autoCompleteMovimento
     // Obs: no legado depende de categoriaFinanceira.getId() (id de fin_tipo_movimento) - agora recebido como parametro
     public Uni<List<Long>> autoCompleteMovimento(String query, Long tipoMovimentoId) {
         if (query == null || query.isBlank() || tipoMovimentoId == null) {
             return Uni.createFrom().item(java.util.List.of());
         }
-        // Migrado de MovimentoRepository.autoCompleteComTipo (legado) - JPQL original:
         // select distinct m from Movimento m where m.tipoMovimento = ?2 and (lower(m.descricaoCompleta) like '%' || ?1 || '%' or str(m.id) = ?1)
         final String sql = "SELECT DISTINCT m.id FROM fin_movimento m " +
                 "WHERE m.id_tipo_movimento = ?2 AND (lower(m.descricaocompleta) like '%' || ?1 || '%' OR CAST(m.id AS text) = ?1) " +
@@ -228,7 +223,6 @@ public class CaixaService {
 
     // ===== MÉTODOS MIGRADOS DO CAIXACONTROLLER/CAIXASERVICE ORIGINAL =====
 
-    // Migrado de CaixaController.verificarSenhaResponsavel
     // Verifica senha do responsável configurado no caixa
     public Uni<Boolean> verificarSenhaResponsavel(Long configuracaoCaixaId, String senha) {
         if (configuracaoCaixaId == null || senha == null || senha.isBlank()) {
@@ -243,7 +237,6 @@ public class CaixaService {
                 });
     }
 
-    // Migrado de CaixaController.verificarSenhaOperador
     // Verifica senha do operador configurado no caixa
     public Uni<Boolean> verificarSenhaOperador(Long configuracaoCaixaId, String senha) {
         if (configuracaoCaixaId == null || senha == null || senha.isBlank()) {
@@ -268,7 +261,6 @@ public class CaixaService {
         return Uni.createFrom().item(false);
     }
 
-    // Migrado de CaixaController.fecharCaixa (via FundoCaixaController)
     // Fecha o caixa com data de fechamento atual
     public Uni<CaixaResponse> fecharCaixa(Long caixaId) {
         return find(caixaId)
@@ -282,7 +274,6 @@ public class CaixaService {
                 });
     }
 
-    // Migrado de CaixaController.abrirCaixa (via FundoCaixaController)
     // Abre o caixa removendo a data de fechamento
     public Uni<CaixaResponse> abrirCaixa(Long caixaId) {
         return find(caixaId)
@@ -295,14 +286,12 @@ public class CaixaService {
                 });
     }
 
-    // Migrado de CaixaController.registrarSangriaSegundaVia
     // Registra uma sangria (retirada de dinheiro do caixa)
     public Uni<SangriaResponse> registrarSangria(Long caixaId, BigDecimal valor) {
         var request = new SangriaRequest(caixaId, new Date(), valor);
         return sangriaService.create(request);
     }
 
-    // Migrado de CaixaController.relatorioMov / totalRelatorio
     // Calcula totais do caixa por forma de pagamento
     @SuppressWarnings("deprecation")
     public Uni<CaixaTotais> calcularTotaisCaixa(Long caixaId) {
@@ -460,7 +449,6 @@ public class CaixaService {
         });
     }
 
-    // Migrado de CaixaController.buscarMovimentacoes (via FundoCaixaController)
     // Busca movimentações de entrada do caixa + sangrias
     public Uni<List<MovimentacaoFinanceiraResponse>> buscarMovimentacaoCaixaEntrada(Long caixaId) {
         return movimentacaoFinanceiraService.buscarPorCaixa(caixaId)
@@ -483,7 +471,6 @@ public class CaixaService {
                         }));
     }
 
-    // Migrado de CaixaController.imprimirComprovantePagamento
     // Imprime comprovante de pagamento de parcela
     public Uni<Void> imprimirComprovantePagamento(Long movimentacaoFinanceiraId, Long usuarioId) {
         if (movimentacaoFinanceiraId == null) {
@@ -507,7 +494,6 @@ public class CaixaService {
         return Uni.createFrom().voidItem();
     }
 
-    // Migrado de CaixaController.buscarNumeroParcela
     // Busca parcela por número (ID) e valida se pertence à unidade do caixa
     public Uni<ParcelaResponse> buscarNumeroParcela(Long numeroLancamento, Long caixaId, boolean caixaUnico) {
         if (numeroLancamento == null || caixaId == null) {
@@ -593,12 +579,10 @@ public class CaixaService {
         return Uni.createFrom().voidItem();
     }
 
-    // Migrado de CaixaService.buscarAberturaCaixa (original service)
     public Uni<List<Long>> buscarAberturaCaixa(Long usuarioId) {
         return repository.buscarAberturaCaixa(usuarioId);
     }
 
-    // Migrado de CaixaService.buscarAberturaCaixaComUsuarioUnidade (original service)
     public Uni<Long> buscarAberturaCaixaComUsuarioUnidade(Long usuarioId, Long unidadeId) {
         return repository.buscarAberturaCaixaComUsuarioUnidade(usuarioId, unidadeId)
                 .map(list -> list.isEmpty() ? null : list.get(0));
@@ -613,7 +597,6 @@ public class CaixaService {
                 });
     }
 
-    // Migrado de CaixaService.textoEmailCaixa (original service)
     // Gera HTML do e-mail de fechamento automático de caixa
     public Uni<String> gerarTextoEmailCaixa(Long caixaId, LayoutDTO layout) {
         return find(caixaId)

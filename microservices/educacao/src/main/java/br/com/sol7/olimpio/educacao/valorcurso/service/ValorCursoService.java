@@ -108,124 +108,42 @@ public class ValorCursoService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de ValorCursoService.buscarValoresComDesconto (src/main/java/br/com/sol7/olimpio/service/services/educacao/ValorCursoService.java:23, camada service)
-    // Observacao: retorno: era ValorCurso (referencia por id); parametro valorCursoId: era ValorCurso (referencia por id)
-    // JPQL original: select v from ValorCurso v left join fetch v.desconto  d where v = ?1 order by d.descricao
-    // Logica original (adaptar):
-    // public ValorCurso buscarValoresComDesconto(ValorCurso valorCurso) {
-    //         return getValorCursoRepository().buscarValoresComDesconto(valorCurso);
-    //     }
     public Uni<Long> buscarValoresComDesconto(Long valorCursoId) {
         return repository.buscarValoresComDesconto(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de ValorCursoService.buscarexistenciaValorCursoContrato (src/main/java/br/com/sol7/olimpio/service/services/educacao/ValorCursoService.java:27, camada service)
-    // Observacao: parametro valorCursoId: era ValorCurso (referencia por id)
-    // Logica original (adaptar):
-    // public boolean buscarexistenciaValorCursoContrato(ValorCurso valorCurso) {
-    //         if (!ObjectUtil.nullOrEmpty(getValorCursoRepository().buscarexistenciaValorCursoContrato(valorCurso, new PageRequest(0, 1)).getContent())) {
-    //             return true;
-    //         }
-    //         return false;
-    //     }
     public Uni<Boolean> buscarexistenciaValorCursoContrato(Long valorCursoId) {
         return repository.buscarexistenciaValorCursoContrato(valorCursoId).map(list -> !list.isEmpty());
     }
 
-
-    // Migrado de ValorCursoService.buscarValoresComTaxas (src/main/java/br/com/sol7/olimpio/service/services/educacao/ValorCursoService.java:34, camada service)
-    // Observacao: retorno: era ValorCurso (referencia por id); parametro valorCursoId: era ValorCurso (referencia por id)
-    // JPQL original: select v from ValorCurso v left join fetch v.taxas t where v = ?1  order by t.descricao
-    // Logica original (adaptar):
-    // public ValorCurso buscarValoresComTaxas(ValorCurso valorCurso) {
-    //         return getValorCursoRepository().buscarValoresComTaxas(valorCurso);
-    //     }
     public Uni<Long> buscarValoresComTaxas(Long valorCursoId) {
         return repository.buscarValoresComTaxas(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de ValorCursoService.buscarValoresComFormasPagamento (src/main/java/br/com/sol7/olimpio/service/services/educacao/ValorCursoService.java:38, camada service)
-    // Observacao: retorno: era ValorCurso (referencia por id); parametro valorCursoId: era ValorCurso (referencia por id)
-    // JPQL original: select v from ValorCurso v left join fetch v.formasPagamento f where v = ?1 order by f.vezes
-    // Logica original (adaptar):
-    // public ValorCurso buscarValoresComFormasPagamento(ValorCurso valorCurso) {
-    //         return getValorCursoRepository().buscarValoresComFormaPagamento(valorCurso);
-    //     }
     public Uni<Long> buscarValoresComFormasPagamento(Long valorCursoId) {
         return repository.buscarValoresComFormaPagamento(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de ValorCursoService.buscarValoresComDescontoAtivos (src/main/java/br/com/sol7/olimpio/service/services/educacao/ValorCursoService.java:42, camada service)
-    // Observacao: retorno: era ValorCurso (referencia por id); parametro valorCursoId: era ValorCurso (referencia por id)
-    // JPQL original: select v from ValorCurso v left join fetch v.desconto d where v = ?1 and d.ativo = true order by d.descricao
-    // Logica original (adaptar):
-    // public ValorCurso buscarValoresComDescontoAtivos(ValorCurso valorCurso) {
-    //         return getValorCursoRepository().buscarValoresComDescontoAtivos(valorCurso);
-    //     }
     public Uni<Long> buscarValoresComDescontoAtivos(Long valorCursoId) {
         return repository.buscarValoresComDescontoAtivos(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de ValorCursoService.buscarValoresComTaxasAtivos (src/main/java/br/com/sol7/olimpio/service/services/educacao/ValorCursoService.java:46, camada service)
-    // Observacao: retorno: era ValorCurso (referencia por id); parametro valorCursoId: era ValorCurso (referencia por id)
-    // JPQL original: select v from ValorCurso v left join fetch v.taxas t where v = ?1 and t.ativo = true order by t.descricao
-    // Logica original (adaptar):
-    // public ValorCurso buscarValoresComTaxasAtivos(ValorCurso valorCurso) {
-    //         return getValorCursoRepository().buscarValoresComTaxasAtivos(valorCurso);
-    //     }
     public Uni<Long> buscarValoresComTaxasAtivos(Long valorCursoId) {
         return repository.buscarValoresComTaxasAtivos(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de ValorCursoService.buscarValoresComFormasPagamentoAtivos (src/main/java/br/com/sol7/olimpio/service/services/educacao/ValorCursoService.java:50, camada service)
-    // Observacao: retorno: era ValorCurso (referencia por id); parametro valorCursoId: era ValorCurso (referencia por id)
-    // JPQL original: select v from ValorCurso v left join fetch v.formasPagamento f where v = ?1 and f.ativo = true order by f.vezes
-    // Logica original (adaptar):
-    // public ValorCurso buscarValoresComFormasPagamentoAtivos(ValorCurso valorCurso) {
-    //         return getValorCursoRepository().buscarValoresComFormaPagamentoAtivos(valorCurso);
-    //     }
     public Uni<Long> buscarValoresComFormasPagamentoAtivos(Long valorCursoId) {
         return repository.buscarValoresComFormaPagamentoAtivos(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de ValorCursoService.buscarValoresComRetencao (src/main/java/br/com/sol7/olimpio/service/services/educacao/ValorCursoService.java:54, camada service)
-    // Observacao: retorno: era ValorCurso (referencia por id); parametro valorCursoId: era ValorCurso (referencia por id)
-    // JPQL original: select v from ValorCurso v left join fetch v.retencoes where v = ?1
-    // Logica original (adaptar):
-    // public ValorCurso buscarValoresComRetencao(ValorCurso valorCurso) {
-    //         return getValorCursoRepository().buscarValoresComRetencao(valorCurso);
-    //     }
     public Uni<Long> buscarValoresComRetencao(Long valorCursoId) {
         return repository.buscarValoresComRetencao(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de ValorCursoService.buscarValoresComUnidades (src/main/java/br/com/sol7/olimpio/service/services/educacao/ValorCursoService.java:58, camada service)
-    // Observacao: retorno: era ValorCurso (referencia por id); parametro valorCursoId: era ValorCurso (referencia por id)
-    // JPQL original: select v from ValorCurso v left join fetch v.unidades u where u.ativo = true and v = ?1
-    // Logica original (adaptar):
-    // public ValorCurso buscarValoresComUnidades(ValorCurso valorCurso) {
-    //         return getValorCursoRepository().buscarValoresComUnidades(valorCurso);
-    //     }
     public Uni<Long> buscarValoresComUnidades(Long valorCursoId) {
         return repository.buscarValoresComUnidades(valorCursoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de ValorCursoService.buscarValorCursoContrato (src/main/java/br/com/sol7/olimpio/service/services/educacao/ValorCursoService.java:62, camada service)
-    // Observacao: parametro valorCursoId: era ValorCurso (referencia por id)
-    // JPQL original: select v from Contrato c inner join c.valorCurso v where v = ?1
-    // Logica original (adaptar):
-    // public List<ValorCurso> buscarValorCursoContrato(ValorCurso valorCurso) {
-    //         return getValorCursoRepository().buscarValorCursoContrato(valorCurso);
-    //     }
     public Uni<List<Long>> buscarValorCursoContrato(Long valorCursoId) {
         return repository.buscarValorCursoContrato(valorCursoId).map(list -> list.stream().map(x -> x.id).toList());
     }

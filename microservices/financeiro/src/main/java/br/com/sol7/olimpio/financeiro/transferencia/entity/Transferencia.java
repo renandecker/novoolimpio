@@ -9,7 +9,6 @@ import jakarta.persistence.TemporalType;
 
 import java.util.Date;
 
-// Migrado de br.com.sol7.olimpio.model.entity.financeiro.Transferencia (legado)
 @Entity
 @Table(name = "fin_tranferencia")
 public class Transferencia extends PanacheEntity {

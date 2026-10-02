@@ -197,120 +197,42 @@ public class OcorrenciaComponenteCurricularService {
                 refs != null ? refs.tempoAulaId(e.diaAulaId) : null);
     }
 
-
-    // Migrado de OcorrenciaComponenteCurricularService.buscarOcorrenciaPorProfessor (src/main/java/br/com/sol7/olimpio/service/services/educacao/OcorrenciaComponenteCurricularService.java:25, camada service)
-    // Observacao: parametro professorId: era Professor (referencia por id)
-    // JPQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe  where o.ativo = true  and o.professor= ?1 and o.data  between ?2 and ?3  order by o.data
-    // Logica original (adaptar):
-    // public List<OcorrenciaComponenteCurricular> buscarOcorrenciaPorProfessor(Professor professor, Date inicio, Date fim) {
-    //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorProfessor(professor, inicio, fim);
-    //     }
     public Uni<List<Long>> buscarOcorrenciaPorProfessor(Long professorId, LocalDate inicio, LocalDate fim) {
         return repository.buscarOcorrenciaPorProfessor(professorId, toDate(inicio), toDate(fim)).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de OcorrenciaComponenteCurricularService.buscarOcorrenciaPorOferecimentoEDatas (src/main/java/br/com/sol7/olimpio/service/services/educacao/OcorrenciaComponenteCurricularService.java:29, camada service)
-    // Observacao: parametro oferecimentoComponenteCurricularId: era OferecimentoComponenteCurricular (referencia por id)
-    // JPQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe where o.ativo = true and o.oferecimentoComponenteCurricular= ?1 and o.data  between ?2 and ?3  order by o.data
-    // Logica original (adaptar):
-    // public List<OcorrenciaComponenteCurricular> buscarOcorrenciaPorOferecimentoEDatas(OferecimentoComponenteCurricular oferecimentoComponenteCurricular, Date inicio, Date fim) {
-    //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorOferecimentoEDatas(oferecimentoComponenteCurricular, inicio, fim);
-    //     }
     public Uni<List<Long>> buscarOcorrenciaPorOferecimentoEDatas(Long oferecimentoComponenteCurricularId, LocalDate inicio, LocalDate fim) {
         return repository.buscarOcorrenciaPorOferecimentoEDatas(oferecimentoComponenteCurricularId, toDate(inicio), toDate(fim)).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de OcorrenciaComponenteCurricularService.buscarOcorrenciaPorOferecimentoEDatasCoringa (src/main/java/br/com/sol7/olimpio/service/services/educacao/OcorrenciaComponenteCurricularService.java:33, camada service)
-    // Observacao: parametro oferecimentoComponenteCurricularId: era OferecimentoComponenteCurricular (referencia por id)
-    // JPQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe where o.ativo = true and o.oferecimentoComponenteCurricular= ?1 and o.data  between ?2 and ?3 and o.aulaCoringa = ?4 order by o.data
-    // Logica original (adaptar):
-    // public List<OcorrenciaComponenteCurricular> buscarOcorrenciaPorOferecimentoEDatasCoringa(OferecimentoComponenteCurricular oferecimentoComponenteCurricular, Date inicio, Date fim, Boolean coringa) {
-    //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorOferecimentoEDatasCoringa(oferecimentoComponenteCurricular, inicio, fim,coringa);
-    //     }
     public Uni<List<Long>> buscarOcorrenciaPorOferecimentoEDatasCoringa(Long oferecimentoComponenteCurricularId, LocalDate inicio, LocalDate fim, Boolean coringa) {
         return repository.buscarOcorrenciaPorOferecimentoEDatasCoringa(oferecimentoComponenteCurricularId, toDate(inicio), toDate(fim), coringa).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de OcorrenciaComponenteCurricularService.buscarOcorrenciaExtras (src/main/java/br/com/sol7/olimpio/service/services/educacao/OcorrenciaComponenteCurricularService.java:37, camada service)
-    // Observacao: parametro oferecimentoComponenteCurricularId: era OferecimentoComponenteCurricular (referencia por id)
-    // JPQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe where o.ativo = true and o.aulaCoringa = true and o.oferecimentoComponenteCurricular= ?1 order by o.data
-    // Logica original (adaptar):
-    // public List<OcorrenciaComponenteCurricular> buscarOcorrenciaExtras(OferecimentoComponenteCurricular oferecimentoComponenteCurricular) {
-    //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaExtras(oferecimentoComponenteCurricular);
-    //     }
     public Uni<List<Long>> buscarOcorrenciaExtras(Long oferecimentoComponenteCurricularId) {
         return repository.buscarOcorrenciaExtras(oferecimentoComponenteCurricularId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de OcorrenciaComponenteCurricularService.buscarOcorrenciaNormais (src/main/java/br/com/sol7/olimpio/service/services/educacao/OcorrenciaComponenteCurricularService.java:41, camada service)
-    // Observacao: parametro oferecimentoComponenteCurricularId: era OferecimentoComponenteCurricular (referencia por id)
-    // JPQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe where o.ativo = true and o.aulaCoringa = false and o.oferecimentoComponenteCurricular= ?1 order by o.data
-    // Logica original (adaptar):
-    // public List<OcorrenciaComponenteCurricular> buscarOcorrenciaNormais(OferecimentoComponenteCurricular oferecimentoComponenteCurricular) {
-    //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaNormais(oferecimentoComponenteCurricular);
-    //     }
     public Uni<List<Long>> buscarOcorrenciaNormais(Long oferecimentoComponenteCurricularId) {
         return repository.buscarOcorrenciaNormais(oferecimentoComponenteCurricularId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de OcorrenciaComponenteCurricularService.buscarOcorrenciaPorOferecimento (src/main/java/br/com/sol7/olimpio/service/services/educacao/OcorrenciaComponenteCurricularService.java:45, camada service)
-    // Observacao: parametro oferecimentoComponenteCurricularId: era OferecimentoComponenteCurricular (referencia por id)
-    // JPQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe  where o.ativo = true and ofe = ?1 order by o.data
-    // Logica original (adaptar):
-    // public List<OcorrenciaComponenteCurricular> buscarOcorrenciaPorOferecimento(OferecimentoComponenteCurricular oferecimentoComponenteCurricular) {
-    //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorOferecimento(oferecimentoComponenteCurricular);
-    //     }
     public Uni<List<Long>> buscarOcorrenciaPorOferecimento(Long oferecimentoComponenteCurricularId) {
         return repository.buscarOcorrenciaPorOferecimento(oferecimentoComponenteCurricularId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de OcorrenciaComponenteCurricularService.buscarTodasOcorrenciaPorOferecimento (src/main/java/br/com/sol7/olimpio/service/services/educacao/OcorrenciaComponenteCurricularService.java:49, camada service)
-    // Observacao: parametro oferecimentoComponenteCurricularId: era OferecimentoComponenteCurricular (referencia por id)
-    // JPQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe where ofe = ?1
-    // Logica original (adaptar):
-    // public List<OcorrenciaComponenteCurricular> buscarTodasOcorrenciaPorOferecimento(OferecimentoComponenteCurricular oferecimentoComponenteCurricular) {
-    //         return getOcorrenciaComponenteCurricularRepository().buscarTodasOcorrenciaPorOferecimento(oferecimentoComponenteCurricular);
-    //     }
     public Uni<List<Long>> buscarTodasOcorrenciaPorOferecimento(Long oferecimentoComponenteCurricularId) {
         return repository.buscarTodasOcorrenciaPorOferecimento(oferecimentoComponenteCurricularId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de OcorrenciaComponenteCurricularService.buscarOcorrenciaPorDataUnidade (src/main/java/br/com/sol7/olimpio/service/services/educacao/OcorrenciaComponenteCurricularService.java:54, camada service)
-    // JPQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe  where o.ativo = true and o.data  between Date(?1) and Date(?2)  and o.oferecimentoComponenteCurricular.unidade in (?3) order by o.oferecimentoComponenteCurricular.id
-    // Logica original (adaptar):
-    // public List<OcorrenciaComponenteCurricular> buscarOcorrenciaPorDataUnidade(Date date, List<Unidade> unidades) {
-    //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorDataUnidade(date, unidades);
-    //     }
     public Uni<List<Long>> buscarOcorrenciaPorDataUnidade(LocalDate date, List<Long> unidades) {
         return repository.buscarOcorrenciaPorDataUnidade(toDate(date), unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de OcorrenciaComponenteCurricularService.buscarOcorrenciaPorDataUnidade (src/main/java/br/com/sol7/olimpio/service/services/educacao/OcorrenciaComponenteCurricularService.java:58, camada service)
-    // JPQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe  where o.ativo = true and o.data  between Date(?1) and Date(?2)  and o.oferecimentoComponenteCurricular.unidade in (?3) order by o.oferecimentoComponenteCurricular.id
-    // Logica original (adaptar):
-    // public List<OcorrenciaComponenteCurricular> buscarOcorrenciaPorDataUnidade(Date inicio, Date fim, List<Unidade> unidades) {
-    //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorDataUnidade(inicio, fim, unidades);
-    //     }
     public Uni<List<Long>> buscarOcorrenciaPorDataUnidade2(LocalDate inicio, LocalDate fim, List<Long> unidades) {
         return repository.buscarOcorrenciaPorDataUnidade(toDate(inicio), toDate(fim), unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de OcorrenciaComponenteCurricularService.buscarOcorrenciaPorOferecimentoComGrupo (src/main/java/br/com/sol7/olimpio/service/services/educacao/OcorrenciaComponenteCurricularService.java:63, camada service)
-    // Observacao: parametro grupoId: era Grupo (referencia por id)
-    // JPQL original: select o from OcorrenciaComponenteCurricular o inner join o.oferecimentoComponenteCurricular ofe  where o.ativo = true and o.aulaCoringa = false and ofe.grupo = ?1 order by o.data
-    // Logica original (adaptar):
-    // public List<OcorrenciaComponenteCurricular> buscarOcorrenciaPorOferecimentoComGrupo(Grupo grupo) {
-    //         return getOcorrenciaComponenteCurricularRepository().buscarOcorrenciaPorOferecimentoComGrupo(grupo);
-    //     }
     public Uni<List<Long>> buscarOcorrenciaPorOferecimentoComGrupo(Long grupoId) {
         return repository.buscarOcorrenciaPorOferecimentoComGrupo(grupoId).map(list -> list.stream().map(x -> x.id).toList());
     }

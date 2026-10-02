@@ -77,22 +77,6 @@ public class PessoaJuridicaService {
         return new PessoaJuridicaResponse(e.id, e.pessoaId, e.nomeFantasia, e.razaoSocial, e.cnpj, e.fax, e.inscricaoMunicipal, e.inscricaoEstadual);
     }
 
-
-    // Migrado de PessoaJuridicaController.verificarExistencia (src/main/java/br/com/sol7/olimpio/control/controllers/basico/PessoaJuridicaController.java:97, camada controller)
-    // Logica original (adaptar):
-    // private boolean verificarExistencia(Integer id, String nome, String cnpj, String email) {
-    //         List<Pessoa> pessoas = new ArrayList<>();
-    //         if (!ObjectUtil.nullOrEmpty(cnpj)) {
-    //             if (!ObjectUtil.nullOrEmpty(id)) {
-    //                 pessoas = pessoaService.existenciaPessoaComCnpj(id, cnpj);
-    //             } else {
-    //                 pessoas = pessoaService.existenciaPessoaComCnpj(cnpj);
-    //             }
-    // 
-    //             if (!ObjectUtil.nullOrEmpty(pessoas) && !validapessoa) {
-    //                 pessoa = pessoaService.buscarPessoaComUnidades(pessoas.get(0));
-    //                 carregaFotoPessoa(pessoa);
-    // // ... (truncado, ver fonte original)
     public Uni<Boolean> verificarExistencia(Integer id, String nome, String cnpj, String email) {
         return verificaExistenciaCnpj(id, cnpj)
                 .chain(achou -> achou ? Uni.createFrom().item(true) : verificaExistenciaEmail(id, email));

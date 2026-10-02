@@ -1,11 +1,16 @@
 package br.com.sol7.olimpio.relatorios.mapa.repository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import br.com.sol7.olimpio.relatorios.mapa.entity.Mapa;
+import br.com.sol7.olimpio.shared.TupleHelper;
+import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import io.smallrye.mutiny.Uni;
+import jakarta.persistence.Tuple;
 
 @ApplicationScoped
 public class MapaRepository implements PanacheRepository<Mapa> {
@@ -60,5 +65,43 @@ public class MapaRepository implements PanacheRepository<Mapa> {
     // NAO TRADUZIDA AUTOMATICAMENTE (campo 'usuarios' sem coluna mapeada)
     public static final String SQL_BUSCAR_USUARIOS_HQL_ORIGINAL =
             "select a.usuarios from Mapa a where a = ?1";
+
+    public Uni<List<Long>> listUsuarios(Long mapaId) {
+        return Panache.getSession().chain(session -> session
+                .createNativeQuery("SELECT id_usuario AS id FROM rel_mapa_usuario WHERE id_mapa = :id ORDER BY id_usuario")
+                .setParameter("id", mapaId)
+                .getResultList())
+                .map(MapaRepository::toLongs);
+    }
+
+    public Uni<List<Long>> listUnidades(Long mapaId) {
+        return Panache.getSession().chain(session -> session
+                .createNativeQuery("SELECT id_unidade AS id FROM rel_mapa_unidade WHERE id_mapa = :id ORDER BY id_unidade")
+                .setParameter("id", mapaId)
+                .getResultList())
+                .map(MapaRepository::toLongs);
+    }
+
+    public Uni<List<Long>> listPerfis(Long mapaId) {
+        return Panache.getSession().chain(session -> session
+                .createNativeQuery("SELECT id_perfil AS id FROM rel_mapa_perfil WHERE id_mapa = :id ORDER BY id_perfil")
+                .setParameter("id", mapaId)
+                .getResultList())
+                .map(MapaRepository::toLongs);
+    }
+
+    private static List<Long> toLongs(List<?> rows) {
+        List<Long> out = new ArrayList<>();
+        if (rows == null) return out;
+        for (Object row : rows) {
+            if (row instanceof Tuple t) {
+                Object id = TupleHelper.get(t, "id");
+                if (id != null) out.add(TupleHelper.toLong(id));
+            } else if (row != null) {
+                out.add(((Number) row).longValue());
+            }
+        }
+        return out.stream().filter(Objects::nonNull).toList();
+    }
 
 }

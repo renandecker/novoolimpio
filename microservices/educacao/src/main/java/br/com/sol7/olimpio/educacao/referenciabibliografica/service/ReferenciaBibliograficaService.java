@@ -65,12 +65,6 @@ public class ReferenciaBibliograficaService {
         return new ReferenciaBibliograficaResponse(e.id, e.autor, e.titulo, e.volume);
     }
 
-
-    // Migrado de ReferenciaBibliograficaController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/ReferenciaBibliograficaController.java:93, camada controller)
-    // Logica original (adaptar):
-    // public List<ReferenciaBibliografica> autoComplete(String query) {
-    //         return referenciaBibliograficaService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query).map(list -> list.stream().map(x -> x.id).toList());
     }

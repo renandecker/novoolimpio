@@ -16,12 +16,10 @@ public class ControleImpressaoService {
     @Inject
     ControleImpressaoRepository repository;
 
-    // Migrado de ControleImpressaoService.verificarControle (legado)
     public Uni<Long> verificarControle(Long caixaId, Long movimentacaoId) {
         return repository.verificarControle(caixaId, movimentacaoId);
     }
 
-    // Migrado de FundoCaixaController.imprimirSegundaVia (legado) - registra o controle de impressao
     public Uni<Void> registrarImpressao(Long movimentacaoFinanceiraId, Long usuarioId) {
         var e = new ControleImpressao();
         e.data = new Date();

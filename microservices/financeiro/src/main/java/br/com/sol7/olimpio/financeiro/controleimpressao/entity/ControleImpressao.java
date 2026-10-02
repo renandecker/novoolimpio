@@ -7,7 +7,6 @@ import jakarta.persistence.Table;
 
 import java.util.Date;
 
-// Migrado de br.com.sol7.olimpio.model.entity.financeiro.ControleImpressao (legado)
 @Entity
 @Table(name = "fin_controle_impressao")
 public class ControleImpressao extends PanacheEntity {

@@ -71,15 +71,6 @@ public class GestaoContasService {
         return Uni.createFrom().item(false);
     }
 
-
-    // Migrado de GestaoContasController.ajustarSituacao (src/main/java/br/com/sol7/olimpio/control/controllers/basico/GestaoContasController.java:280, camada controller)
-    // Observacao: parametro contaId: era Conta (referencia por id)
-    // Logica original (adaptar):
-    // public void ajustarSituacao(Conta conta) {
-    //         hibernateService.executeUpdateSQL("UPDATE bas_conta con SET fl_situacao = case when" +
-    //                 " exists(select * from bas_conta_controle_pagamento pag where pag.id_conta = con.id and data_vencimento < current_date" +
-    //                 " and pag.data_aplicada is null) then true else false end where con.id =" + conta.getId());
-    //     }
     public Uni<Void> ajustarSituacao(Long contaId) {
         return repository.ajustarSituacao(contaId);
     }

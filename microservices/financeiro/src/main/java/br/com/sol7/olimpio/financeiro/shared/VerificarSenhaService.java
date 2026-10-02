@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-// Migrado de CaixaController.verificarSenhaResponsavel/verificarSenhaOperador (legado) via USB
 // UsuarioService.findByLoginAndSenha. Consulta o bas_usuario diretamente (SQL nativo no mesmo
 // Postgres compartilhado) e aceita tanto a senha crua (fluxo do microsservico basico) quanto o
 // SHA-256 uppercase hex gravado pelo legado (PwUtil.encryptPassword).

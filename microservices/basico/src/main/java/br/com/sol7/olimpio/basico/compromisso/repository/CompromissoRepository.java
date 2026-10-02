@@ -12,7 +12,6 @@ import jakarta.persistence.Tuple;
 @ApplicationScoped
 public class CompromissoRepository implements PanacheRepository<Compromisso> {
 
-    // Migrado de SchedulingService.atualizarCompromissosAutomaticos() (legado) - traduzido para
     // um unico UPDATE (o efeito final e o mesmo: troca o status do compromisso para o
     // "status de troca automatica" configurado). NAO cria o registro de auditoria
     // CompromissoPessoaStatus, pois essa feature ainda nao existe neste microsservico - ver

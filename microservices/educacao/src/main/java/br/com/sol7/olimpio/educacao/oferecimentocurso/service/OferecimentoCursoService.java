@@ -86,12 +86,10 @@ public class OferecimentoCursoService {
                 .map(ofs -> new OferecimentoCursoDetalheResponse(curso, ofs)));
     }
 
-    // Migrado de GrupoRepository.listarOferecimentos (legado) - turmas do grupo.
     public Uni<List<OferecimentoComponenteCurricularResponse>> listarOferecimentos(Long grupoId) {
         return oferecimentoService.listarOferecimentosPorGrupo(grupoId);
     }
 
-    // Migrado de OferecimentoCursoController.gerarAulaCursoSequencia + gerarAula (legado L537-760):
     // gera (e persiste) as OcorrenciaComponenteCurricular de todas as turmas do grupo a partir dos DiasAula.
     public Uni<Integer> gerarAulaCursoSequencia(GerarAulaCursoSequenciaRequest r) {
         if (r.grupoId() == null || r.diasAulaSelecionado() == null || r.diasAulaSelecionado().isEmpty()) {
@@ -103,7 +101,6 @@ public class OferecimentoCursoService {
                         r.dataInicio(), r.diasAulaSelecionado(), r.salaId(), r.professorId()));
     }
 
-    // Migrado de OferecimentoCursoController.buscarTurnoEducacao (legado, L196) -
     // "descricao: HH:mm as HH:mm" do turno da ocorrencia.
     public Uni<String> buscarTurnoEducacao(Long ocorrenciaComponenteCurricularId) {
         return oferecimentoService.buscarTurnoEducacao(ocorrenciaComponenteCurricularId);

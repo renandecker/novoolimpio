@@ -68,16 +68,6 @@ public class EstadoCivilService {
         return new EstadoCivilResponse(e.id, e.descricao);
     }
 
-
-    // Migrado de EstadoCivilController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/basico/EstadoCivilController.java:72, camada controller)
-    // Logica original (adaptar):
-    // public List<EstadoCivil> autoComplete(String query) {
-    //         if (!query.equals("")) {
-    //             return estadoCivilService.autoComplete(query);
-    //         } else {
-    //             return estadoCivilService.autoComplete();
-    //         }
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         if (!query.equals("")) {
             return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
@@ -86,13 +76,6 @@ public class EstadoCivilService {
         }
     }
 
-
-    // Migrado de EstadoCivilService.autoComplete (src/main/java/br/com/sol7/olimpio/service/services/basico/EstadoCivilService.java:30, camada service)
-    // JPQL original: select c from Curso c where lower(c.nome) like '%' || ?1 || '%'  OR str(c.id) = ?1 order by c.nome
-    // Logica original (adaptar):
-    // public List<EstadoCivil> autoComplete() {
-    //         return this.getCursoRepository().autoComplete(new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoComplete2() {
         return repository.autoCompleteAll().map(list -> list.stream().map(x -> x.id).toList());
     }

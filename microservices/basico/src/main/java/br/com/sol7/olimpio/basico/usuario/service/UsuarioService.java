@@ -161,22 +161,6 @@ public class UsuarioService {
                 });
     }
 
-
-    // Migrado de UsuarioController.verificarExistencia (src/main/java/br/com/sol7/olimpio/control/controllers/basico/UsuarioController.java:385, camada controller)
-    // Logica original (adaptar):
-    // public boolean verificarExistencia(Integer id, Integer idpessoa, String nome, String cpf, String rg, String email) {
-    //         List<Pessoa> pessoas = new ArrayList<>();
-    //         List<Usuario> usuarios = new ArrayList<>();
-    //         usuario = null;
-    //         pessoa = null;
-    //         if (!ObjectUtil.nullOrEmpty(cpf)) {
-    //             if (!ObjectUtil.nullOrEmpty(id)) {
-    //                 usuarios = pessoaService.existenciaUsuarioComCpf(id, cpf);
-    //             } else {
-    //                 usuarios = pessoaService.existenciaUsuarioComCpf(cpf);
-    //             }
-    //             if (!ObjectUtil.nullOrEmpty(usuarios)) {
-    // // ... (truncado, ver fonte original)
     public Uni<Boolean> verificarExistencia(Integer id, Integer idpessoa, String nome, String cpf, String rg, String email) {
         return verificaExistenciaCpf(id, idpessoa, cpf)
                 .chain(achou -> achou ? Uni.createFrom().item(true) : verificaExistenciaEmail(id, idpessoa, email))
@@ -219,21 +203,6 @@ public class UsuarioService {
             .with((perfis, agendas, unidades) -> new UsuarioDetalheResponse(usuarioId, perfis, agendas, unidades));
     }
 
-
-    // Migrado de UsuarioController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/basico/UsuarioController.java:1057, camada controller)
-    // Logica original (adaptar):
-    // public List<Usuario> autoComplete(String query) {
-    //         if (query.equals("") && usuarioLogadoController.getUsuario().getHierarquia().equals(HierarquiaPerfil.ADMIN)) {
-    //             return usuarioService.buscaTodos();
-    //         }
-    //         if (!query.equals("") && usuarioLogadoController.getUsuario().getHierarquia().equals(HierarquiaPerfil.ADMIN)) {
-    //             return usuarioService.autoComplete(query);
-    //         }
-    //         if (!query.equals("") && !usuarioLogadoController.getUsuario().getHierarquia().equals(HierarquiaPerfil.ADMIN)) {
-    //             return usuarioService.autoCompleteComUnidade(query, usuarioLogadoController.getUnidadesDisponiveis());
-    //         }
-    //         if (query.equals("") && !usuarioLo ...
-    // // ... (truncado, ver fonte original)
     public Uni<List<Long>> autoComplete(String query, Boolean isAdmin, List<Long> unidadesIds) {
         if (isAdmin != null && isAdmin) {
             if (query == null || query.isBlank()) {
@@ -281,97 +250,34 @@ public class UsuarioService {
                 });
     }
 
-
-    // Migrado de UsuarioService.autoCompletePessoaFisicaUnidade (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:128, camada service)
-    // Observacao: parametro unidadeId: era Unidade (referencia por id)
-    // JPQL original: select distinct u from Pessoa u inner join u.unidades un where un = ?2  and un.ativo = true and lower(u.pessoaFisica.nome) like '%' || ?1 || '%' or lower(u.pessoaFisica.cpf) like '%' || ?1 || '%'
-    // Logica original (adaptar):
-    // public List<Pessoa> autoCompletePessoaFisicaUnidade(String query, Unidade unidade) {
-    //         return getRepository().autoCompletePessoaFisicaUnidade(query.toLowerCase().trim(), unidade, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompletePessoaFisicaUnidade(String query, Long unidadeId) {
         return repository.autoCompletePessoaFisicaUnidade(query.toLowerCase().trim(), unidadeId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UsuarioService.autoCompletePessoaJuridicaUnidade (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:132, camada service)
-    // Observacao: parametro unidadeId: era Unidade (referencia por id)
-    // JPQL original: select distinct u from Pessoa u inner join u.unidades un where un = ?2  and un.ativo = true and lower(u.pessoaJuridica.cnpj) like '%' || ?1 || '%' or lower(u.pessoaJuridica.nomeFantasia) like '%' || ?1 || '%'
-    // Logica original (adaptar):
-    // public List<Pessoa> autoCompletePessoaJuridicaUnidade(String query, Unidade unidade) {
-    //         return getRepository().autoCompletePessoaJuridicaUnidade(query.toLowerCase().trim(), unidade, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompletePessoaJuridicaUnidade(String query, Long unidadeId) {
         return repository.autoCompletePessoaJuridicaUnidade(query.toLowerCase().trim(), unidadeId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UsuarioService.buscarUsuarioComTurnos (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:136, camada service)
-    // Observacao: retorno: era Usuario (referencia por id); parametro entityId: era Usuario (referencia por id)
-    // JPQL original: Select u from Usuario u left join fetch u.turnoTrabalhos t where u = ?1 order by t.diaSemana, t.descricao
-    // Logica original (adaptar):
-    // public Usuario buscarUsuarioComTurnos(Usuario entity) {
-    //         return getRepository().buscarUsuarioComTurnos(entity);
-    //     }
     public Uni<Long> buscarUsuarioComTurnos(Long entityId) {
         return repository.buscarUsuarioComTurnos(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de UsuarioService.buscarUsuarioPorPerfil (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:140, camada service)
-    // Observacao: parametro perfilId: era Perfil (referencia por id)
-    // JPQL original: select u from Usuario u left join fetch u.perfis perfis where ?1 in (perfis) and u.ativo = true order by u.login
-    // Logica original (adaptar):
-    // public List<Usuario> buscarUsuarioPorPerfil(Perfil perfil) {
-    //         return getRepository().buscarUsuarioPorPerfil(perfil);
-    //     }
     public Uni<List<Long>> buscarUsuarioPorPerfil(Long perfilId) {
         return repository.buscarUsuarioPorPerfil(perfilId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UsuarioService.buscarUsuarioPorUnidades (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:144, camada service)
-    // JPQL original: select distinct u from Usuario u inner join u.unidades p where p in (?1) and p.ativo = true and u.ativo = true order by u.login
-    // Logica original (adaptar):
-    // public List<Usuario> buscarUsuarioPorUnidades(List<Unidade> unidade) {
-    //         return getRepository().buscarUsuarioPorUnidades(unidade);
-    //     }
     public Uni<List<Long>> buscarUsuarioPorUnidades(List<Long> unidade) {
         return repository.buscarUsuarioPorUnidades(unidade).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UsuarioService.buscarUsuarioPorUnidade (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:152, camada service)
-    // Observacao: parametro unidadeId: era Unidade (referencia por id)
-    // JPQL original: select distinct u from Usuario u inner join u.unidades p where p = ?1 and p.ativo = true and u.ativo = true order by u.login
-    // Logica original (adaptar):
-    // public List<Usuario> buscarUsuarioPorUnidade(Unidade unidade) {
-    //         return getRepository().buscarUsuarioPorUnidade(unidade, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> buscarUsuarioPorUnidade(Long unidadeId) {
         return repository.buscarUsuarioPorUnidade(unidadeId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UsuarioService.autoCompleteUsuario (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:165, camada service)
-    // Observacao: parametro unidadeId: era Unidade (referencia por id)
-    // JPQL original: select distinct u from Usuario u left join u.unidades un where un.ativo = true and (lower(u.login) like '%' || ?1 || '%' or str(u.id) = ?1) and un in (?2) and u.ativo = true order by u.login
-    // Logica original (adaptar):
-    // public List<Usuario> autoCompleteUsuario(String query, Unidade unidade) {
-    //         return getRepository().autoCompleteUsuario(query.toLowerCase().trim(), unidade, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteUsuario(String query, Long unidadeId) {
         return repository.autoCompleteUsuario(query.toLowerCase().trim(), unidadeId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UsuarioService.buscarUnidadesDisponiveis (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:185, camada service)
-    // Observacao: parametro usuarioId: era Usuario (referencia por id)
-    // JPQL original: select uni from Usuario u inner join u.unidades uni where u = ?1 and uni.ativo = true and u.ativo = true order by uni.sucinto
-    // Logica original (adaptar):
-    // public List<Unidade> buscarUnidadesDisponiveis(Usuario usuario) {
-    //         return getRepository().buscarUnidadesDisponiveis(usuario);
-    //     }
     public Uni<List<Long>> buscarUnidadesDisponiveis(Long usuarioId) {
         return repository.buscarUnidadesDisponiveis(usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
@@ -388,50 +294,18 @@ public class UsuarioService {
                 .map(usuario -> usuario.id);
     }
 
-
-    // Migrado de UsuarioService.buscarUnidadesDisponiveisRede (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:189, camada service)
-    // Observacao: parametro usuarioId: era Usuario (referencia por id)
-    // JPQL original: select uni from Rede r inner join r.unidades uni where r.usuario = ?1 and uni.ativo = true order by uni.sucinto
-    // Logica original (adaptar):
-    // public List<Unidade> buscarUnidadesDisponiveisRede(Usuario usuario) {
-    //         return getRepository().buscarUnidadesDisponiveisRede(usuario);
-    //     }
     public Uni<List<Long>> buscarUnidadesDisponiveisRede(Long usuarioId) {
         return repository.buscarUnidadesDisponiveisRede(usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UsuarioService.buscarUsuarioComUnidades (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:193, camada service)
-    // Observacao: retorno: era Usuario (referencia por id); parametro entityId: era Usuario (referencia por id)
-    // JPQL original: Select u from Usuario u left join fetch u.unidades where u = ?1
-    // Logica original (adaptar):
-    // public Usuario buscarUsuarioComUnidades(Usuario entity) {
-    //         return getRepository().buscarUsuarioComUnidades(entity);
-    //     }
     public Uni<Long> buscarUsuarioComUnidades(Long entityId) {
         return repository.buscarUsuarioComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de UsuarioService.buscarUsuarioComAgendas (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:197, camada service)
-    // Observacao: retorno: era Usuario (referencia por id); parametro entityId: era Usuario (referencia por id)
-    // JPQL original: Select u from Usuario u left join fetch u.usuarioAgendas where u = ?1
-    // Logica original (adaptar):
-    // public Usuario buscarUsuarioComAgendas(Usuario entity) {
-    //         return getRepository().buscarUsuarioComAgendas(entity);
-    //     }
     public Uni<Long> buscarUsuarioComAgendas(Long entityId) {
         return repository.buscarUsuarioComAgendas(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de UsuarioService.buscarAgendasDisponiveis (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:201, camada service)
-    // Observacao: parametro usuarioId: era Usuario (referencia por id)
-    // JPQL original: select ua.agenda from Usuario u inner join u.usuarioAgendas ua where u = ?1 order by u.login
-    // Logica original (adaptar):
-    // public List<Agenda> buscarAgendasDisponiveis(Usuario usuario) {
-    //         return getRepository().buscarAgendasDisponiveis(usuario);
-    //     }
     public Uni<List<Long>> buscarAgendasDisponiveis(Long usuarioId) {
         return repository.buscarAgendasDisponiveis(usuarioId).map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
@@ -462,83 +336,30 @@ public class UsuarioService {
         return repository.substituirUnidades(usuarioId, unidades == null ? List.of() : unidades);
     }
 
-
-    // Migrado de UsuarioService.buscarConsultoresComAgenda (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:205, camada service)
-    // Observacao: parametro agendaId: era Agenda (referencia por id)
-    // JPQL original: Select distinct u from Usuario u left join fetch u.turnoTrabalhos tt inner join u.usuarioAgendas ag where ag.agenda in (?1) AND tt.diaSemana.id = ?2 and u.ativo = true and ag.atender = true order by tt.inicio
-    // Logica original (adaptar):
-    // public List<Usuario> buscarConsultoresComAgenda(Agenda agenda, int diaSemana) {
-    //         return getRepository().buscarConsultoresComAgenda(agenda, diaSemana);
-    //     }
     public Uni<List<Long>> buscarConsultoresComAgenda(Long agendaId, Integer diaSemana) {
         return repository.buscarConsultoresComAgenda(agendaId, diaSemana).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UsuarioService.buscarLoginExistente (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:209, camada service)
-    // Logica original (adaptar):
-    // public Boolean buscarLoginExistente(String login) {
-    //         return !ObjectUtil.nullOrEmpty(getRepository().buscarLoginExistente(login));
-    //     }
     public Uni<Boolean> buscarLoginExistente(String login) {
         return repository.buscarLoginExistente(login).map(list -> !list.isEmpty());
     }
 
-
-    // Migrado de UsuarioService.buscarLoginEemailExistente (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:213, camada service)
-    // Logica original (adaptar):
-    // public Boolean buscarLoginEemailExistente(String login, String email) {
-    //         return !ObjectUtil.nullOrEmpty(getRepository().buscarLoginEemailExistente(login, email));
-    //     }
     public Uni<Boolean> buscarLoginEemailExistente(String login, String email) {
         return repository.buscarLoginEemailExistente(login, email).map(list -> !list.isEmpty());
     }
 
-
-    // Migrado de UsuarioService.buscarUsuarioComPerfil (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:217, camada service)
-    // Observacao: retorno: era Usuario (referencia por id); parametro entityId: era Usuario (referencia por id)
-    // JPQL original: Select u from Usuario u left join fetch u.perfis where u = ?1
-    // Logica original (adaptar):
-    // public Usuario buscarUsuarioComPerfil(Usuario entity) {
-    //         return getRepository().buscarUsuarioComPerfil(entity);
-    //     }
     public Uni<Long> buscarUsuarioComPerfil(Long entityId) {
         return repository.buscarUsuarioComPerfil(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de UsuarioService.buscarUsuarioSeuPerfil (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:221, camada service)
-    // Observacao: parametro entityId: era Usuario (referencia por id)
-    // JPQL original: Select p from Usuario u inner join  u.perfis p where u = ?1
-    // Logica original (adaptar):
-    // public List<Perfil> buscarUsuarioSeuPerfil(Usuario entity) {
-    //         return getRepository().buscarUsuarioSeuPerfil(entity);
-    //     }
     public Uni<List<Long>> buscarUsuarioSeuPerfil(Long entityId) {
         return repository.buscarUsuarioSeuPerfil(entityId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UsuarioService.autoCompleteComUnidade (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:225, camada service)
-    // JPQL original: select distinct u from Usuario u inner join u.unidades un where un.ativo = true and ( lower(u.login) like '%' || ?1 || '%' or str(u.id) = ?1 and u.ativo = true ) AND un in (?2) order by u.login
-    // Logica original (adaptar):
-    // public List<Usuario> autoCompleteComUnidade(String query, List<Unidade> unidades) {
-    //         return getRepository().autoCompleteComUnidade(query.toLowerCase().trim(), unidades, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteComUnidade(String query, List<Long> unidades) {
         return repository.autoCompleteComUnidade(query.toLowerCase().trim(), unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UsuarioService.autoCompleteComUnidadeDiaSemanaAgenda (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:237, camada service)
-    // Observacao: parametro agendaId: era Agenda (referencia por id)
-    // Logica original (adaptar):
-    // public List<Usuario> autoCompleteComUnidadeDiaSemanaAgenda(String query, int diaSemana, Agenda agenda) {
-    //         if (agenda != null) {
-    //             return getRepository().autoCompleteComUnidadeDiaSemanaAgenda(query.toLowerCase().trim(), usuarioLogadoController.getUnidadesDisponiveis(), diaSemana, agenda);
-    //         }
-    //         return getRepository().autoCompleteComUnidadeDiaSemana(query.toLowerCase().trim(), usuarioLogadoController.getUnidadesDisponiveis(), diaSemana);
-    //     }
     public Uni<List<Long>> autoCompleteComUnidadeDiaSemanaAgenda(String query, Integer diaSemana, Long agendaId, List<Long> unidadesIds) {
         if (unidadesIds == null || unidadesIds.isEmpty() || diaSemana == null) {
             return Uni.createFrom().item(java.util.List.of());
@@ -549,16 +370,6 @@ public class UsuarioService {
         return repository.autoCompleteComUnidadeDiaSemana(query.toLowerCase().trim(), unidadesIds, diaSemana).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UsuarioService.autoCompleteComUnidadeDiaSemanaAgendaComPerfil (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:245, camada service)
-    // Observacao: parametro agendaId: era Agenda (referencia por id); parametro perfilId: era Perfil (referencia por id)
-    // Logica original (adaptar):
-    // public List<Usuario> autoCompleteComUnidadeDiaSemanaAgendaComPerfil(String query, int diaSemana, Agenda agenda, Perfil perfil) {
-    //         if (agenda != null) {
-    //             return getRepository().autoCompleteComUnidadeDiaSemanaAgendaComPerfil(query.toLowerCase().trim(), usuarioLogadoController.getUnidadesDisponiveis(), diaSemana, agenda, perfil);
-    //         }
-    //         return getRepository().autoCompleteComUnidadeDiaSemanaComPerfil(query.toLowerCase().trim(), usuarioLogadoController.getUnidadesDisponiveis(), diaSemana, perfil);
-    //     }
     public Uni<List<Long>> autoCompleteComUnidadeDiaSemanaAgendaComPerfil(String query, Integer diaSemana, Long agendaId, Long perfilId, List<Long> unidadesIds) {
         if (unidadesIds == null || unidadesIds.isEmpty() || diaSemana == null) {
             return Uni.createFrom().item(java.util.List.of());
@@ -569,13 +380,6 @@ public class UsuarioService {
         return repository.autoCompleteComUnidadeDiaSemanaComPerfil(query.toLowerCase().trim(), unidadesIds, diaSemana, perfilId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UsuarioService.autoCompleteComUnidadeDiaSemana (src/main/java/br/com/sol7/olimpio/service/services/basico/UsuarioService.java:252, camada service)
-    // JPQL original: select distinct u from Usuario u left join fetch u.unidades un inner join u.turnoTrabalhos tt where un.ativo = true and ( lower(u.login) like '%' || ?1 || '%' or str(u.id) = ?1) and u.ativo = true  AND un in (?2) AND tt.diaSemana.id = ?3 order by u.login
-    // Logica original (adaptar):
-    // public List<Usuario> autoCompleteComUnidadeDiaSemana(String query, int diaSemana) {
-    //         return getRepository().autoCompleteComUnidadeDiaSemana(query.toLowerCase().trim(), usuarioLogadoController.getUnidadesDisponiveis(), diaSemana);
-    //     }
     public Uni<List<Long>> autoCompleteComUnidadeDiaSemana(String query, Integer diaSemana, List<Long> unidadesIds) {
         if (unidadesIds == null || unidadesIds.isEmpty() || diaSemana == null) {
             return Uni.createFrom().item(java.util.List.of());

@@ -86,13 +86,6 @@ public class RedeService {
                 .map(items -> items.stream().map(this::toUnidadeResponse).toList());
     }
 
-
-    // Migrado de RedeService.autoComplete (src/main/java/br/com/sol7/olimpio/service/services/basico/RedeService.java:24, camada service)
-    // JPQL original: select r from Rede r where lower(r.nomeFantasia) like '%' || ?1 || '%' OR lower(r.cnpj) like '%' || ?1 || '%' OR lower(r.razaoSocial) like '%' || ?1 || '%' OR str(r.id) = ?1 order by r.nomeFantasia
-    // Logica original (adaptar):
-    // public List<Rede> autoComplete(String query) {
-    //         return getRedeRepository().autoComplete(query.toLowerCase(), new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
     }

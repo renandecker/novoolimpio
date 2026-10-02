@@ -147,15 +147,6 @@ public class MapaService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de MapaController.autoCompleteGeoreferencia (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/MapaController.java:142, camada controller)
-    // Logica original (adaptar):
-    // public List<Georeferencia> autoCompleteGeoreferencia(String query) {
-    //         if (getEntity().getEstrutura() != null) {
-    //             return georeferenciaService.autoCompleteGeoreferencia(query, getEntity().getEstrutura());
-    //         }
-    //         return new ArrayList<>();
-    //     }
     public Uni<List<Long>> autoCompleteGeoreferencia(String query, Long estruturaId) {
         if (estruturaId != null) {
             return georeferenciaService.list()
@@ -189,13 +180,6 @@ public class MapaService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de MapaService.buscarMapsPeloFato (src/main/java/br/com/sol7/olimpio/service/services/relatorios/MapaService.java:33, camada service)
-    // Observacao: parametro fatoId: era Estrutura (referencia por id)
-    // Logica original (adaptar):
-    // public List<Mapa> buscarMapsPeloFato(Estrutura fato) {
-    //         return getConexaoRepository().buscarMapsPeloFato(fato);
-    //     }
     public Uni<List<Long>> buscarMapsPeloFato(Long fatoId) {
         return repository.buscarMapsPeloFato(fatoId).map(list -> list.stream().map(x -> x.id).toList());
     }
@@ -208,20 +192,15 @@ public class MapaService {
     //         return getConexaoRepository().buscarUnidades(id);
     //     }
     public Uni<List<Long>> buscarUnidades(Long id) {
-        // Obs: depende do microservico basico (Unidade) - repository.buscarUnidades
-        return Uni.createFrom().item(java.util.List.of());
+        return repository.findById(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Mapa not found"))
+                .flatMap(e -> repository.listUnidades(id));
     }
 
-
-    // Migrado de MapaService.buscarPerfils (src/main/java/br/com/sol7/olimpio/service/services/relatorios/MapaService.java:41, camada service)
-    // Observacao: parametro id: era Mapa (referencia por id)
-    // Logica original (adaptar):
-    // public List<Perfil> buscarPerfils(Mapa id) {
-    //         return getConexaoRepository().buscarPerfils(id);
-    //     }
     public Uni<List<Long>> buscarPerfils(Long id) {
-        // Obs: depende do microservico basico (Perfil) - repository.buscarPerfils
-        return Uni.createFrom().item(java.util.List.of());
+        return repository.findById(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Mapa not found"))
+                .flatMap(e -> repository.listPerfis(id));
     }
 
 
@@ -232,8 +211,9 @@ public class MapaService {
     //         return getConexaoRepository().buscarUsuarios(id);
     //     }
     public Uni<List<Long>> buscarUsuarios(Long id) {
-        // Obs: depende do microservico basico (Usuario) - repository.buscarUsuarios
-        return Uni.createFrom().item(java.util.List.of());
+        return repository.findById(id).onItem().ifNull()
+                .failWith(() -> new NotFoundException("Mapa not found"))
+                .flatMap(e -> repository.listUsuarios(id));
     }
 
 

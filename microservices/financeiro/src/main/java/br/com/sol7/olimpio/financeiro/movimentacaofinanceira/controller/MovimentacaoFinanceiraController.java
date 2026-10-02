@@ -67,7 +67,6 @@ public class MovimentacaoFinanceiraController {
         return service.delete(id);
     }
 
-    // Migrado de CaixaController.exvluirMovimentação
     @DELETE
     @Path("/{id}/excluir-movimentacao")
     public Uni<Void> excluirMovimentacao(@PathParam("id") Long id) {

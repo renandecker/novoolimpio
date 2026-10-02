@@ -318,7 +318,6 @@ public class TabelaService {
     }
 
 
-    // Migrado de TabelaController.gerarSql (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/TabelaController.java:184, camada controller)
     // Logica original (adaptar):
     // public String gerarSql() {
     //         List<TabelaWapper> tabelaWapper = new ArrayList<>((Collection<? extends TabelaWapper>) lazyTabelaWapper.getWrappedData());

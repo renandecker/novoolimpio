@@ -76,7 +76,6 @@ public class FeriadoService {
                         : Uni.createFrom().failure(new NotFoundException("Feriado not found")));
     }
 
-    // Migrado da troca de feriados (TrocaFeriadoDialog do listFeriado.xhtml) - reatribui as
     // unidades/tipos de curso dos feriados de origem para o feriado de destino e remove os origens.
     // Padrão replicado de LogradouroService.trocarLogradouros.
     public Uni<Void> trocarFeriados(Long destinoId, List<Long> origemIds) {
@@ -158,25 +157,10 @@ public class FeriadoService {
                 .replaceWith(1);
     }
 
-
-    // Migrado de FeriadoService.buscarFeriadoUnidade (src/main/java/br/com/sol7/olimpio/service/services/basico/FeriadoService.java:54, camada service)
-    // Observacao: parametro unidadeId: era Unidade (referencia por id); parametro tipoCursoId: era TipoCurso (referencia por id)
-    // JPQL original: Select f from Feriado f left join f.unidade u left join f.tipoCurso t where  ((u IN (?1)) or f.nacional = true )  and f.dataFeriado = ?2 and (t IN (?3) or f.todosCursos = true)
-    // Logica original (adaptar):
-    // public List<Feriado> buscarFeriadoUnidade(Date data, Unidade unidade, TipoCurso tipoCurso) {
-    //         return getFeriadoRepository().buscarFeriadoUnidade(unidade, data, tipoCurso);
-    //     }
     public Uni<List<Long>> buscarFeriadoUnidade(Date data, Long unidadeId, Long tipoCursoId) {
         return repository.buscarFeriadoUnidade(unidadeId, data, tipoCursoId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de FeriadoService.buscarFeriadoFixo (src/main/java/br/com/sol7/olimpio/service/services/basico/FeriadoService.java:58, camada service)
-    // JPQL original: Select f from Feriado f left join fetch f.unidade u where f.feriadoFixo = true
-    // Logica original (adaptar):
-    // public List<Feriado> buscarFeriadoFixo() {
-    //         return getFeriadoRepository().buscarFeriadoFixo();
-    //     }
     public Uni<List<Long>> buscarFeriadoFixo() {
         return repository.buscarFeriadoFixo().map(list -> list.stream().map(x -> x.id).toList());
     }

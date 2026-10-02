@@ -497,7 +497,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
     }
 
     // Dias de aula de um oferecimento especifico (join table edc_oferecimento_dias_aula) -
-    // migrado de DiaAulaService.buscaDiasAulaOferecimentoList (legado).
     public static final String SQL_BUSCAR_DIAS_AULA_POR_OFERECIMENTO =
             "SELECT DISTINCT da.id, da.id_dia_semana, da.id_turno, da.id_tempo_aula, " +
                     "       te.descricao as turno_descricao, te.inicio as turno_inicio, te.fim as turno_fim, " +
@@ -548,7 +547,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
         return null;
     }
 
-    // Migrado de OferecimentoComponenteCurricularService.atualizaDataOferecimento (legado) -
     // recalcula data_inicio/data_fim a partir das ocorrencias ativas e o status.
     public static final String SQL_ATUALIZA_DATA_OFERECIMENTO_DATAS =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
@@ -576,7 +574,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
                         .setParameter(1, oferecimentoComponenteCurricularId).executeUpdate());
     }
 
-    // Migrado de OferecimentoComponenteCurricularService.atulizarStatosInscritosOferecimento
     // (legado) - recalcula inscritos (contratos ativos) e o status.
     public static final String SQL_ATUALIZA_INSCRITOS_OFERECIMENTO =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
@@ -605,7 +602,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
                         .setParameter(1, oferecimentoComponenteCurricularId).executeUpdate());
     }
 
-    // Migrado de OferecimentoComponenteCurricularService.verificarDisciplina (legado, L431-458) -
     // rotina de manutencao executada junto da replicacao automatica.
     public static final String[] SQL_VERIFICAR_DISCIPLINA = {
             "UPDATE edc_oferecimento_componente_curricular o SET status = 'CANCELADA' " +
@@ -631,7 +627,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
         return executeAll(SQL_VERIFICAR_DISCIPLINA);
     }
 
-    // Migrado de OferecimentoComponenteCurricularService.verificarchamadaAssinada (legado, L501-512)
     // - parte SQL da rotina (a geracao de PDF/chamadas nao foi portada, vive no dominio chamadaassinada).
     public static final String[] SQL_VERIFICAR_CHAMADA_ASSINADA = {
             "update edc_oferecimento_componente_curricular set qtde_sequencia = 1 where qtde_sequencia = 0",
@@ -677,7 +672,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
                 .map(list -> list.stream().map(r -> ((Number) r).longValue()).toList());
     }
 
-    // Migrado de OferecimentoComponenteCurricularService.atulizarStatosInscritosOferecimentoTrocaTurma (legado)
     public static final String SQL_ATUALIZA_INSCRITOS_OFERECIMENTO_TROCA_TURMA =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
                     " inscritos = COALESCE((SELECT COUNT(DISTINCT con.id) " +
@@ -707,7 +701,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
                 .replaceWithVoid();
     }
 
-    // Migrado de OferecimentoComponenteCurricularService.atulizarStatosInscritosOferecimentoGrupo (legado)
     public static final String SQL_ATUALIZA_INSCRITOS_OFERECIMENTO_GRUPO =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
                     " inscritos = COALESCE((SELECT COUNT(DISTINCT con.id) " +
@@ -737,7 +730,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
                 .replaceWithVoid();
     }
 
-    // Migrado de OferecimentoComponenteCurricularService.atulizarSalasOferecimentoComGrupo (legado)
     public static final String SQL_ATUALIZA_SALAS_OFERECIMENTO_COM_GRUPO =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
                     " id_sala = (SELECT s.id FROM edc_sala s " +
@@ -752,7 +744,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
                 .replaceWithVoid();
     }
 
-    // Migrado de OferecimentoComponenteCurricularService.atulizarSalasOferecimentoComOferecimento (legado)
     public static final String SQL_ATUALIZA_SALAS_OFERECIMENTO_COM_OFERECIMENTO =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
                     " id_sala = (SELECT s.id FROM edc_sala s " +
@@ -767,7 +758,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
                 .replaceWithVoid();
     }
 
-    // Migrado de OferecimentoComponenteCurricularService.atulizarVagasOferecimento (legado)
     public static final String SQL_ATUALIZA_VAGAS_OFERECIMENTO =
             "UPDATE edc_oferecimento_componente_curricular SET vagas = ?2 WHERE id = ?1";
 
@@ -779,14 +769,12 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
                 .replaceWithVoid();
     }
 
-    // Migrado de OferecimentoComponenteCurricularService.atulizarStatosInscritosOferecimento (legado)
     // Note: this method already exists as atualizaStatosInscritosOferecimento returning Uni<Integer>
     // Adding variant that returns Uni<Void> for service compatibility
     public Uni<Void> atulizarStatosInscritosOferecimento(Long oferecimentoComponenteCurricularId) {
         return atualizaStatosInscritosOferecimento(oferecimentoComponenteCurricularId).replaceWithVoid();
     }
 
-    // Migrado de OferecimentoComponenteCurricularService.atulizarStatosInscritosOferecimentoCurso (legado)
     public static final String SQL_ATUALIZA_INSCRITOS_OFERECIMENTO_CURSO =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
                     " inscritos = COALESCE((SELECT COUNT(DISTINCT con.id) " +
@@ -816,7 +804,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
                 .replaceWithVoid();
     }
 
-    // Migrado de OferecimentoComponenteCurricularService.atualizaDataOferecimentoGrupo (legado)
     public static final String SQL_ATUALIZA_DATA_OFERECIMENTO_GRUPO_DATAS =
             "UPDATE edc_oferecimento_componente_curricular o SET " +
                     " data_inicio = (SELECT oco.data FROM edc_ocorrencia_componente_curricular oco " +
@@ -844,7 +831,6 @@ public class OferecimentoComponenteCurricularRepository implements PanacheReposi
                 .replaceWithVoid();
     }
 
-    // Migrado de OferecimentoComponenteCurricularService.ajutarOferecimento (legado)
     public static final String SQL_AJUTAR_OFERECIMENTO =
             "UPDATE edc_oferecimento_componente_curricular SET id_dia_aula = ?2 WHERE id = ?1";
 

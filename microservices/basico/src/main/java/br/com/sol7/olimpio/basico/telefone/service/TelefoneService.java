@@ -71,16 +71,6 @@ public class TelefoneService {
         return new TelefoneResponse(e.id, e.numero, e.token, e.operadora, e.tipoTelefoneId);
     }
 
-
-    // Migrado de TelefoneController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/basico/TelefoneController.java:85, camada controller)
-    // Logica original (adaptar):
-    // public List<Telefone> autoComplete(String query) {
-    //         if (ObjectUtil.nullOrEmpty(query)) {
-    //             return telefoneService.findAll();
-    //         }
-    // 
-    //         return telefoneService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         if (query == null || query.isBlank()) {
             return repository.listAll().map(list -> list.stream().map(x -> x.id).toList());
@@ -88,14 +78,6 @@ public class TelefoneService {
         return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de TelefoneService.buscarTelefoneUnidadePorUsuario (src/main/java/br/com/sol7/olimpio/service/services/basico/TelefoneService.java:26, camada service)
-    // Observacao: parametro usuarioId: era Usuario (referencia por id)
-    // JPQL original: select tl from Usuario u left join u.unidades un left join un.telefones tl where u = ?1 and tl is not null
-    // Logica original (adaptar):
-    // public List<Telefone> buscarTelefoneUnidadePorUsuario(Usuario usuario) {
-    //         return getTelefoneRepository().buscarTelefoneUnidadePorUsuario(usuario);
-    //     }
     public Uni<List<Long>> buscarTelefoneUnidadePorUsuario(Long usuarioId) {
         return repository.buscarTelefoneUnidadePorUsuario(usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }

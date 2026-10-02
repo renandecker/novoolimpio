@@ -108,15 +108,6 @@ public class UnidadeService {
         return new UnidadeResponse(e.id, e.razaoSocial, e.nomeFantasia, e.CNPJ, e.inscricaoEstadual, e.logradouroId, e.email, e.numero, e.area, e.emailRH, e.tipoUnidadeId, e.regiaoId, e.responsavelId, e.layoutId, e.pontoReferencia, e.sucinto, e.diretorEnsino, e.coordenador, e.cep, e.registro, e.ativo);
     }
 
-
-    // Migrado de UnidadeController.carregarUsuarios (src/main/java/br/com/sol7/olimpio/control/controllers/basico/UnidadeController.java:299, camada controller)
-    // Observacao: parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarUsuarios(Unidade unidade) {
-    //         setEntity(unidade);
-    //         usuarios = usuarioService.buscarUsuarioPorUnidades(usuarioLogadoController.getUnidadesDisponiveis());
-    //         usuariosMarcados = usuarioService.usuarioComUnidades(unidade);
-    //     }
     public Uni<UnidadeUsuariosResponse> carregarUsuarios(Long unidadeId, Long usuarioLogadoId) {
         return usuarioRepository.buscarUnidadesDisponiveis(usuarioLogadoId).chain(unidades -> {
             List<Long> unidadesIds = unidades.stream().map(u -> u.id).toList();
@@ -131,15 +122,6 @@ public class UnidadeService {
         });
     }
 
-
-    // Migrado de UnidadeController.carregarProfessores (src/main/java/br/com/sol7/olimpio/control/controllers/basico/UnidadeController.java:305, camada controller)
-    // Observacao: parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarProfessores(Unidade unidade) {
-    //         setEntity(unidade);
-    //         professores = professorService.buscarProfessorPorUnidades(usuarioLogadoController.getUnidadesDisponiveis());
-    //         professoresMarcados = professorService.professorComUnidades(unidade);
-    //     }
     public Uni<UnidadeIdsResponse> carregarProfessores(Long unidadeId, Long usuarioLogadoId) {
         return usuarioRepository.buscarUnidadesDisponiveis(usuarioLogadoId).chain(unidades -> {
             List<Long> unidadesIds = unidades.stream().map(u -> u.id).toList();
@@ -151,15 +133,6 @@ public class UnidadeService {
         });
     }
 
-
-    // Migrado de UnidadeController.carregarCurriculos (src/main/java/br/com/sol7/olimpio/control/controllers/basico/UnidadeController.java:311, camada controller)
-    // Observacao: parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarCurriculos(Unidade unidade) {
-    //         setEntity(unidade);
-    //         curriculos = curriculoService.buscarCurriculoPorUnidades(usuarioLogadoController.getUnidadesDisponiveis());
-    //         curriculosMarcados = curriculoService.curriculoComUnidades(unidade);
-    //     }
     public Uni<UnidadeIdsResponse> carregarCurriculos(Long unidadeId, Long usuarioLogadoId) {
         return usuarioRepository.buscarUnidadesDisponiveis(usuarioLogadoId).chain(unidades -> {
             List<Long> unidadesIds = unidades.stream().map(u -> u.id).toList();
@@ -171,15 +144,6 @@ public class UnidadeService {
         });
     }
 
-
-    // Migrado de UnidadeController.carregarPessoas (src/main/java/br/com/sol7/olimpio/control/controllers/basico/UnidadeController.java:317, camada controller)
-    // Observacao: parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarPessoas(Unidade unidade) {
-    //         setEntity(unidade);
-    //         pessoas = pessoaService.buscarPessoaPorUnidades(usuarioLogadoController.getUnidadesDisponiveis());
-    //         pessoasMarcados = pessoaService.pessoaComUnidades(unidade);
-    //     }
     public Uni<UnidadePessoasResponse> carregarPessoas(Long unidadeId, Long usuarioLogadoId) {
         return usuarioRepository.buscarUnidadesDisponiveis(usuarioLogadoId).chain(unidades -> {
             List<Long> unidadesIds = unidades.stream().map(u -> u.id).toList();
@@ -194,15 +158,6 @@ public class UnidadeService {
         });
     }
 
-
-    // Migrado de UnidadeController.carregarTurnos (src/main/java/br/com/sol7/olimpio/control/controllers/basico/UnidadeController.java:394, camada controller)
-    // Logica original (adaptar):
-    // public void carregarTurnos() {
-    //         TurnoFuncionario turnoFuncionario1Carregado = turnoFuncionarioService.listarTurnosCarregado(turnoFuncionario);
-    //         if (!ObjectUtil.nullOrEmpty(turnoFuncionario1Carregado)) {
-    //             listaTurnosTrabalho = new LinkedHashSet<>(turnoFuncionario1Carregado.getTurnoTrabalhos());
-    //         }
-    //     }
     public Uni<List<Long>> carregarTurnos(Long usuarioId) {
         return usuarioRepository.findById(usuarioId).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Usuario not found"))
@@ -233,93 +188,34 @@ public class UnidadeService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de UnidadeService.buscarUnidadeComTelefones (src/main/java/br/com/sol7/olimpio/service/services/basico/UnidadeService.java:28, camada service)
-    // Observacao: retorno: era Unidade (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // JPQL original: select u from Unidade u left join fetch u.telefones where u = ?1
-    // Logica original (adaptar):
-    // public Unidade buscarUnidadeComTelefones(Unidade unidade) {
-    //         return getUnidadeRepository().buscarUnidadeComTelefones(unidade);
-    //     }
     public Uni<Long> buscarUnidadeComTelefones(Long unidadeId) {
         return repository.buscarUnidadeComTelefones(unidadeId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de UnidadeService.buscarUnidades (src/main/java/br/com/sol7/olimpio/service/services/basico/UnidadeService.java:32, camada service)
-    // Logica original (adaptar):
-    // public List<Unidade> buscarUnidades() {
-    //         return getUnidadeRepository().buscarUnidades();
-    //     }
     public Uni<List<Long>> buscarUnidades() {
         return repository.find("order by sucinto").list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UnidadeService.autoCompleteAll (src/main/java/br/com/sol7/olimpio/service/services/basico/UnidadeService.java:40, camada service)
-    // Logica original (adaptar):
-    // public List<Unidade> autoCompleteAll() {
-    //         return getUnidadeRepository().autoCompleteAll(new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteAll() {
         return repository.find("order by sucinto").page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UnidadeService.buscarTodos (src/main/java/br/com/sol7/olimpio/service/services/basico/UnidadeService.java:44, camada service)
-    // Logica original (adaptar):
-    // public List<Unidade> buscarTodos() {
-    //         return getUnidadeRepository().buscarTodos();
-    //     }
     public Uni<List<Long>> buscarTodos() {
         return repository.find("order by sucinto").list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UnidadeService.autoCompleteComUsuario (src/main/java/br/com/sol7/olimpio/service/services/basico/UnidadeService.java:48, camada service)
-    // Observacao: parametro usuarioId: era Usuario (referencia por id)
-    // JPQL original: select distinct  u from Usuario usu inner join usu.unidades u where usu = ?2 and (lower(u.sucinto) like '%' || ?1 || '%' OR lower(u.nomeFantasia) like '%' || ?1 || '%'  OR lower(u.CNPJ) like '%' || ?1 || '%' OR lower(u.razaoSocial) like '%' || ?1 || '%' OR str(u.id) = ?1) order by u.sucinto
-    // Logica original (adaptar):
-    // public List<Unidade> autoCompleteComUsuario(String query, Usuario usuario) {
-    //         return getUnidadeRepository().autoCompleteComUsuario(query.toLowerCase().trim(), usuario, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteComUsuario(String query, Long usuarioId) {
         return repository.autoCompleteComUsuario(query.toLowerCase().trim(), usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UnidadeService.autoCompleteDoUsuario (src/main/java/br/com/sol7/olimpio/service/services/basico/UnidadeService.java:52, camada service)
-    // Observacao: parametro usuarioId: era Usuario (referencia por id)
-    // JPQL original: select distinct  u from Usuario usu inner join usu.unidades u where usu = ?1 order by u.sucinto
-    // Logica original (adaptar):
-    // public List<Unidade> autoCompleteDoUsuario(Usuario usuario) {
-    //         return getUnidadeRepository().autoCompleteDoUsuario(usuario, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteDoUsuario(Long usuarioId) {
         return repository.autoCompleteDoUsuario(usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UnidadeService.autoCompleteComCurriculoSemBusca (src/main/java/br/com/sol7/olimpio/service/services/basico/UnidadeService.java:56, camada service)
-    // JPQL original: select distinct u from Curriculo usu inner join usu.unidades u where u in (?1) order by u.sucinto
-    // Logica original (adaptar):
-    // public List<Unidade> autoCompleteComCurriculoSemBusca(List<Unidade> unidades) {
-    //         return getUnidadeRepository().autoCompleteComCurriculoSemBusca(unidades);
-    //     }
     public Uni<List<Long>> autoCompleteComCurriculoSemBusca(List<Long> unidades) {
         return repository.autoCompleteComCurriculoSemBusca(unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UnidadeService.autoCompleteUnidadeUsuario (src/main/java/br/com/sol7/olimpio/service/services/basico/UnidadeService.java:60, camada service)
-    // Logica original (adaptar):
-    // public List<Unidade> autoCompleteUnidadeUsuario(String query) {
-    //         List<Unidade> unidades = usuarioLogadoController.getUnidadesDisponiveis();
-    //         if (ObjectUtil.nullOrEmpty(query)) {
-    //             return unidades;
-    //         }
-    //         return getUnidadeRepository().autoCompleteComUnidades(query.toLowerCase().trim(), unidades);
-    //     }
     public Uni<List<Long>> autoCompleteUnidadeUsuario(String query, List<Long> unidadesIds) {
         if (unidadesIds == null || unidadesIds.isEmpty()) {
             return Uni.createFrom().item(java.util.List.of());
@@ -327,24 +223,10 @@ public class UnidadeService {
         return repository.autoCompleteComUnidades(query.toLowerCase().trim(), unidadesIds).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UnidadeService.autoCompleteComUnidades (src/main/java/br/com/sol7/olimpio/service/services/basico/UnidadeService.java:68, camada service)
-    // JPQL original: select distinct  u from Curriculo usu inner join usu.unidades u  where (lower(u.sucinto) like '%' || ?1 || '%' OR lower(u.nomeFantasia) like '%' || ?1 || '%'  OR lower(u.CNPJ) like '%' || ?1 || '%' OR lower(u.razaoSocial) like '%' || ?1 || '%' OR str(u.id) = ?1)  and u in (?2) order by u.sucinto
-    // Logica original (adaptar):
-    // public List<Unidade> autoCompleteComUnidades(String query, List<Unidade> unidades) {
-    //         return getUnidadeRepository().autoCompleteComUnidades(query.toLowerCase().trim(), unidades);
-    //     }
     public Uni<List<Long>> autoCompleteComUnidades(String query, List<Long> unidades) {
         return repository.autoCompleteComUnidades(query.toLowerCase().trim(), unidades).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UnidadeService.buscarUnidadeComTurnosDiaSemana (src/main/java/br/com/sol7/olimpio/service/services/basico/UnidadeService.java:72, camada service)
-    // JPQL original: Select distinct  u from Usuario usu inner join usu.unidades u left join fetch u.turnoTrabalhos tt where tt.diaSemana.id = ?1 and usu = ?2 order by tt.inicio
-    // Logica original (adaptar):
-    // public List<Unidade> buscarUnidadeComTurnosDiaSemana(int diaSemana) {
-    //         return getUnidadeRepository().buscarUnidadeComTurnosDiaSemana(diaSemana, usuarioLogadoController.getUsuario());
-    //     }
     public Uni<List<Long>> buscarUnidadeComTurnosDiaSemana(Integer diaSemana, Long usuarioId) {
         if (diaSemana == null || usuarioId == null) {
             return Uni.createFrom().item(java.util.List.of());
@@ -352,13 +234,6 @@ public class UnidadeService {
         return repository.buscarUnidadeComTurnosDiaSemana(diaSemana, usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de UnidadeService.buscarUnidade (src/main/java/br/com/sol7/olimpio/service/services/basico/UnidadeService.java:76, camada service)
-    // Observacao: parametro regiaoId: era Regiao (referencia por id)
-    // Logica original (adaptar):
-    // public List<Unidade> buscarUnidade(Regiao regiao) {
-    //         return getUnidadeRepository().buscarUnidade(regiao);
-    //     }
     public Uni<List<Long>> buscarUnidade(Long regiaoId) {
         return repository.find("regiaoId = ?1", regiaoId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
@@ -376,14 +251,6 @@ public class UnidadeService {
         return Uni.createFrom().item(null);
     }
 
-
-    // Migrado de UnidadeService.buscarUnidadeComTurnos (src/main/java/br/com/sol7/olimpio/service/services/basico/UnidadeService.java:84, camada service)
-    // Observacao: retorno: era Unidade (referencia por id); parametro entityId: era Unidade (referencia por id)
-    // JPQL original: Select u from Unidade u left join fetch u.turnoTrabalhos t where u = ?1 order by t.diaSemana, t.descricao
-    // Logica original (adaptar):
-    // public Unidade buscarUnidadeComTurnos(Unidade entity) {
-    //         return getUnidadeRepository().buscarUnidadeComTurnos(entity);
-    //     }
     public Uni<Long> buscarUnidadeComTurnos(Long entityId) {
         return repository.buscarUnidadeComTurnos(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }

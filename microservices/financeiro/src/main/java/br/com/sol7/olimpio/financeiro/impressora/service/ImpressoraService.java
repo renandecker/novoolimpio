@@ -68,30 +68,10 @@ public class ImpressoraService {
         return new ImpressoraResponse(e.id, e.unidadeId, e.porta, e.modelo, e.manual, e.tamanho, e.dataAlteracao);
     }
 
-
-    // Migrado de ImpressoraService.buscarImpressorasUnidade (src/main/java/br/com/sol7/olimpio/service/services/financeiro/ImpressoraService.java:30, camada service)
-    // Observacao: retorno: era Impressora (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public Impressora buscarImpressorasUnidade(Unidade unidade) {
-    //         if (!ObjectUtil.nullOrEmpty(getImpressoraRepository().buscarImpressorasUnidade(unidade))) {
-    //             return getImpressoraRepository().buscarImpressorasUnidade(unidade).get(0);
-    //         }
-    //         return null;
-    //     }
     public Uni<Long> buscarImpressorasUnidade(Long unidadeId) {
         return repository.buscarImpressorasUnidade(unidadeId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de ImpressoraService.verificarImpressorasComUnidade (src/main/java/br/com/sol7/olimpio/service/services/financeiro/ImpressoraService.java:37, camada service)
-    // Observacao: retorno: era Impressora (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public Impressora verificarImpressorasComUnidade(Unidade unidade, int id) {
-    //         if (!ObjectUtil.nullOrEmpty(getImpressoraRepository().verificarImpressorasComUnidade(unidade, id))) {
-    //             return getImpressoraRepository().verificarImpressorasComUnidade(unidade, id).get(0);
-    //         }
-    //         return null;
-    //     }
     public Uni<Long> verificarImpressorasComUnidade(Long unidadeId, Integer id) {
         return repository.verificarImpressorasComUnidade(unidadeId, id).map(list -> list.isEmpty() ? null : list.get(0).id);
     }

@@ -21,7 +21,6 @@ public class MovimentacaoFinanceiraRepository implements PanacheRepository<Movim
         return find("caixaId = ?1 order by dataMovimento", caixaId).list();
     }
 
-    // Migrado de CaixaController.totalRelatorio (legado) - totaliza, por forma de pagamento, as
     // movimentacoes de ENTRADA (id_tipo_movimento = 1) menos as de SAIDA (id_tipo_movimento = 2)
     // de um caixa, ja descontando o troco de pagamentos em dinheiro.
     private static final String SQL_TOTAL_POR_FORMA =
@@ -39,7 +38,6 @@ public class MovimentacaoFinanceiraRepository implements PanacheRepository<Movim
                 .map(v -> v == null ? BigDecimal.ZERO : new BigDecimal(v.toString()));
     }
 
-    // Migrado de CaixaController.totalRelatorio (legado) - soma do troco concedido em pagamentos
     // em dinheiro (entradas) do caixa.
     private static final String SQL_TOTAL_TROCO =
             "SELECT COALESCE(SUM(m.valor_troco), 0) FROM fin_movimentacao m " +
@@ -53,7 +51,6 @@ public class MovimentacaoFinanceiraRepository implements PanacheRepository<Movim
                 .map(v -> v == null ? BigDecimal.ZERO : new BigDecimal(v.toString()));
     }
 
-    // Migrado de CaixaController.totalRelatorio (legado) - totais vinculados a pagamento de
     // parcela (id_parcela not null): valor bruto, desconto e multa/juros aplicados.
     private static final String SQL_TOTAIS_PARCELA =
             "SELECT COALESCE(SUM(m.valor), 0) AS valor, COALESCE(SUM(m.desconto), 0) AS desconto, COALESCE(SUM(m.multa_juros), 0) AS multa_juros " +
@@ -70,7 +67,6 @@ public class MovimentacaoFinanceiraRepository implements PanacheRepository<Movim
                 });
     }
 
-    // Migrado de CaixaController.buscarMovimentacaoCaixaEntrada (legado)
     // Busca apenas movimentações de ENTRADA (tipo_movimento = 1) de um caixa
     public static final String SQL_BUSCAR_MOVIMENTACAO_CAIXA_ENTRADA =
             "SELECT m.* FROM fin_movimentacao m " +

@@ -80,46 +80,18 @@ public class ConfiguracaoCaixaService {
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-
-    // Migrado de ConfiguracaoCaixaService.buscarConfiguracaoComUnidadeUsuario (src/main/java/br/com/sol7/olimpio/service/services/financeiro/ConfiguracaoCaixaService.java:45, camada service)
-    // Observacao: retorno: era ConfiguracaoCaixa (referencia por id); parametro usuarioId: era Usuario (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public ConfiguracaoCaixa buscarConfiguracaoComUnidadeUsuario(Usuario usuario, Unidade unidade) {
-    //         return getConfiguracaoCaixaRepository().buscarConfiguracaoComUnidadeUsuario(usuario, unidade);
-    //     }
     public Uni<Long> buscarConfiguracaoComUnidadeUsuario(Long usuarioId, Long unidadeId) {
         return repository.find("usuarioId =?1 and unidadeId =?2 order by id desc", usuarioId, unidadeId).firstResult().map(x -> x == null ? null : x.id);
     }
 
-
-    // Migrado de ConfiguracaoCaixaService.buscarConfiguracaoComUsuario (src/main/java/br/com/sol7/olimpio/service/services/financeiro/ConfiguracaoCaixaService.java:49, camada service)
-    // Observacao: parametro usuarioId: era Usuario (referencia por id)
-    // Logica original (adaptar):
-    // public List<ConfiguracaoCaixa> buscarConfiguracaoComUsuario(Usuario usuario) {
-    //         return getConfiguracaoCaixaRepository().buscarConfiguracaoComUsuario(usuario);
-    //     }
     public Uni<List<Long>> buscarConfiguracaoComUsuario(Long usuarioId) {
         return repository.find("usuarioId =?1 order by unidade.sucinto", usuarioId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de ConfiguracaoCaixaService.buscarConfiguracaoCaixaUnico (src/main/java/br/com/sol7/olimpio/service/services/financeiro/ConfiguracaoCaixaService.java:53, camada service)
-    // Observacao: parametro usuarioId: era Usuario (referencia por id)
-    // Logica original (adaptar):
-    // public List<ConfiguracaoCaixa> buscarConfiguracaoCaixaUnico(Usuario usuario) {
-    //         return getConfiguracaoCaixaRepository().buscarConfiguracaoCaixaUnico(usuario);
-    //     }
     public Uni<List<Long>> buscarConfiguracaoCaixaUnico(Long usuarioId) {
         return repository.find("usuarioId =?1 and pagPropriaUnid = true order by unidade.sucinto", usuarioId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de ConfiguracaoCaixaService.buscarConfiguracaoComUnidadeUsuarioId (src/main/java/br/com/sol7/olimpio/service/services/financeiro/ConfiguracaoCaixaService.java:57, camada service)
-    // Observacao: retorno: era ConfiguracaoCaixa (referencia por id); parametro usuarioId: era Usuario (referencia por id); parametro unidadeId: era Unidade (referencia por id); parametro configuracaoCaixaId: era ConfiguracaoCaixa (referencia por id)
-    // Logica original (adaptar):
-    // public ConfiguracaoCaixa buscarConfiguracaoComUnidadeUsuarioId(Usuario usuario, Unidade unidade, ConfiguracaoCaixa configuracaoCaixa) {
-    //         return getConfiguracaoCaixaRepository().buscarConfiguracaoComUnidadeUsuarioId(usuario, unidade, configuracaoCaixa);
-    //     }
     public Uni<Long> buscarConfiguracaoComUnidadeUsuarioId(Long usuarioId, Long unidadeId, Long configuracaoCaixaId) {
         return repository.find("usuarioId =?1 and unidadeId =?2 and c <> ?3 order by id desc", usuarioId, unidadeId, configuracaoCaixaId).firstResult().map(x -> x == null ? null : x.id);
     }

@@ -35,7 +35,6 @@ public class SangriaService {
         return repository.findById(id).onItem().ifNull().failWith(() -> new NotFoundException("Sangria não encontrada")).map(this::toResponse);
     }
 
-    // Migrado de CaixaController.registrarSangriaSegundaVia (legado) - buscarPorCaixa alimenta a
     // listagem de sangrias do caixa (usada tambem por CaixaService.registrarSangria)
     public Uni<List<SangriaResponse>> buscarPorCaixa(Long caixaId) {
         return repository.buscarPorCaixa(caixaId).map(items -> items.stream().map(this::toResponse).toList());

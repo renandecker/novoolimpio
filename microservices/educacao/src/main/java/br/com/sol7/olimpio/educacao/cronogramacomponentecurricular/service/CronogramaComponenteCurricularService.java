@@ -67,13 +67,6 @@ public class CronogramaComponenteCurricularService {
         return new CronogramaComponenteCurricularResponse(e.id, e.componenteCurricularId, e.assunto, e.descricao, e.ordem, e.numeroAula);
     }
 
-
-    // Migrado de CronogramaComponenteCurricularService.buscarCronogramaComComponente (src/main/java/br/com/sol7/olimpio/service/services/educacao/CronogramaComponenteCurricularService.java:26, camada service)
-    // Observacao: parametro componenteCurricularId: era ComponenteCurricular (referencia por id)
-    // Logica original (adaptar):
-    // public List<CronogramaComponenteCurricular> buscarCronogramaComComponente(ComponenteCurricular componenteCurricular) {
-    //         return getCronogramaComponenteCurricularRepository().buscarCronogramaComComponente(componenteCurricular);
-    //     }
     public Uni<List<Long>> buscarCronogramaComComponente(Long componenteCurricularId) {
         return repository.find("componenteCurricularId = ?1 order by ordem", componenteCurricularId).list().map(list -> list.stream().map(x -> x.id).toList());
     }

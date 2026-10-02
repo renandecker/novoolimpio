@@ -113,59 +113,22 @@ public class PerfilService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de PerfilService.autoCompleteAll (src/main/java/br/com/sol7/olimpio/service/services/basico/PerfilService.java:28, camada service)
-    // Logica original (adaptar):
-    // public List<Perfil> autoCompleteAll() {
-    //         return getPerfilRepository().autoCompleteAll(new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteAll() {
         return repository.find("order by descricao").page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de PerfilService.autoCompleteComUsuario (src/main/java/br/com/sol7/olimpio/service/services/basico/PerfilService.java:37, camada service)
-    // Observacao: parametro usuarioId: era Usuario (referencia por id)
-    // JPQL original: select distinct  u from Usuario usu inner join usu.perfis u where usu = ?2 and (lower(u.descricao) like '%' || ?1 || '%' OR str(u.id) = ?1) order by u.descricao
-    // Logica original (adaptar):
-    // public List<Perfil> autoCompleteComUsuario(String query, Usuario usuario) {
-    //         return getPerfilRepository().autoCompleteComUsuario(query.toLowerCase().trim(), usuario, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteComUsuario(String query, Long usuarioId) {
         return repository.autoCompleteComUsuario(query.toLowerCase().trim(), usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de PerfilService.autoCompleteDoUsuario (src/main/java/br/com/sol7/olimpio/service/services/basico/PerfilService.java:41, camada service)
-    // Observacao: parametro usuarioId: era Usuario (referencia por id)
-    // JPQL original: select distinct  u from Usuario usu inner join usu.perfis u where usu = ?1 order by u.descricao
-    // Logica original (adaptar):
-    // public List<Perfil> autoCompleteDoUsuario(Usuario usuario) {
-    //         return getPerfilRepository().autoCompleteDoUsuario(usuario, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteDoUsuario(Long usuarioId) {
         return repository.autoCompleteDoUsuario(usuarioId).map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de PerfilService.buscarPerfilComModulos (src/main/java/br/com/sol7/olimpio/service/services/basico/PerfilService.java:45, camada service)
-    // Observacao: retorno: era Perfil (referencia por id)
-    // JPQL original: select p from Perfil p left join fetch p.perfisModulos where p.id = ?1
-    // Logica original (adaptar):
-    // public Perfil buscarPerfilComModulos(Integer id) {
-    //         return getPerfilRepository().buscarPerfilComModulos(id);
-    //     }
     public Uni<Long> buscarPerfilComModulos(Integer id) {
         return repository.buscarPerfilComModulos(id).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de PerfilService.buscarPerfilModulosComPerfil (src/main/java/br/com/sol7/olimpio/service/services/basico/PerfilService.java:49, camada service)
-    // JPQL original: select distinct p.perfisModulos from Perfil p join p.perfisModulos where p.id = ?1
-    // Logica original (adaptar):
-    // public List<PerfilModulo> buscarPerfilModulosComPerfil(Integer id) {
-    //         return getPerfilRepository().buscarPerfilModulosComPerfil(id);
-    //     }
     public Uni<List<Long>> buscarPerfilModulosComPerfil(Integer id) {
         return repository.buscarPerfilModulosComPerfil(id)
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());

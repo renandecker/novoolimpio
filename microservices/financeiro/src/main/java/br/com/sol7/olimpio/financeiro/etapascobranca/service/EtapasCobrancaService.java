@@ -72,12 +72,6 @@ public class EtapasCobrancaService {
         return new EtapasCobrancaResponse(e.id, e.descricao, e.ordem, e.customizado, e.tipoModeloDocumento, e.campoCustomizado, e.localDocumento, e.nomeDocumento, e.campoDetalhes, e.usuario, e.perfil);
     }
 
-
-    // Migrado de EtapasCobrancaController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/financeiro/EtapasCobrancaController.java:173, camada controller)
-    // Logica original (adaptar):
-    // public List<EtapasCobranca> autoComplete(String query) {
-    //         return etapasCobrancaService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
     }

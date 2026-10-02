@@ -43,12 +43,10 @@ public class MovimentacaoFinanceiraService {
                 .map(this::toResponse);
     }
 
-    // Migrado de CaixaController.getMovimentacaoFinanceiras / MovimentacaoFinanceiraService.buscarMovimentacaoCaixaDia (legado)
     public Uni<List<MovimentacaoFinanceiraResponse>> buscarPorCaixa(Long caixaId) {
         return repository.buscarMovimentacaoCaixaDia(caixaId).map(items -> items.stream().map(this::toResponse).toList());
     }
 
-    // Migrado de CaixaController.buscarMovimentacaoCaixaEntrada (legado)
     // Busca apenas movimentações de ENTRADA (tipo_movimento = 1) de um caixa
     public Uni<List<MovimentacaoFinanceiraResponse>> buscarMovimentacaoCaixaEntrada(Long caixaId) {
         return repository.buscarMovimentacaoCaixaEntrada(caixaId).map(items -> items.stream().map(this::toResponse).toList());
@@ -73,7 +71,6 @@ public class MovimentacaoFinanceiraService {
                         : Uni.createFrom().failure(new NotFoundException("Movimentação financeira não encontrada")));
     }
 
-    // Migrado de CaixaController.salvar (src/main/java/.../control/controllers/financeiro/CaixaController.java:146)
     // Registra uma movimentacao extra (entrada/saida manual) do caixa. Regras de obrigatoriedade
     // ("Descrição", "Valor" e "Tipo Movimento"/"Movimento" sao obrigatorios) preservadas do legado;
     // o detalhe de forma de pagamento (cheque/cartao) e persistido pelos modulos cheque/pagamentocartao.
@@ -93,7 +90,6 @@ public class MovimentacaoFinanceiraService {
         return repository.persist(e).replaceWith(() -> toResponse(e));
     }
 
-    // Migrado de CaixaController.exvluirMovimentação (src/main/java/.../control/controllers/financeiro/CaixaController.java:554)
     // Obs: a limpeza da parcela associada (fin_parcela) pertence ao microservico comercial e nao e
     // executada aqui; os detalhes locais (cheque/cartao/boleto/transferencia/deposito) sao removidos
     // via native delete, preservando o comportamento do legado dentro do escopo do financeiro.

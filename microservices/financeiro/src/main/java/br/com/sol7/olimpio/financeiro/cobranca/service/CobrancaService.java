@@ -80,18 +80,6 @@ public class CobrancaService {
         return new CobrancaResponse(e.id, e.contratoId, e.etapasCobrancaId, e.devendoDesde, e.dataUltimaCarta, e.dataUltimoRetorno, e.dataUltimaSms, e.dataUltimaLigacao, e.dataUltimoEmail, e.ligacaoCobrancaId, e.qtdLigacoes, e.qtdEmails, e.qtdCartas, e.qtdSms);
     }
 
-
-    // Migrado de CobrancaController.atualizar (src/main/java/br/com/sol7/olimpio/control/controllers/financeiro/CobrancaController.java:221, camada controller)
-    // Logica original (adaptar):
-    // public void atualizar() {
-    //         try {
-    //             cobrancaService.atualizaCobrancasManual();
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.SAVE, "global.info", "validation", "Cobrança atualizado com sucesso.");
-    //         } catch (Exception e) {
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.ERROR, "global.error", "global.insert.error", null, "Ocorreu um erro ao atualizar Cobrança");
-    //             e.printStackTrace();
-    //         }
-    //     }
     public Uni<Void> atualizar() {
         return atualizarCobrancasAutomatico();
     }

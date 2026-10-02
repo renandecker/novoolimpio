@@ -89,29 +89,10 @@ public class CustoServicoService {
         return Uni.createFrom().voidItem();
     }
 
-
-    // Migrado de CustoServicoService.buscarCustoServicoComUnidade (src/main/java/br/com/sol7/olimpio/service/services/financeiro/CustoServicoService.java:24, camada service)
-    // Observacao: retorno: era CustoServico (referencia por id); parametro custoServicoId: era CustoServico (referencia por id)
-    // JPQL original: select c from CustoServico c left join fetch c.unidades where c = ?1
-    // Logica original (adaptar):
-    // public CustoServico buscarCustoServicoComUnidade(CustoServico custoServico) {
-    //         return getCustoServicoRepository().buscarCustoServicoComUnidade(custoServico);
-    //     }
     public Uni<Long> buscarCustoServicoComUnidade(Long custoServicoId) {
         return repository.buscarCustoServicoComUnidade(custoServicoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de CustoServicoService.buscarCustoServicoPorUnidade (src/main/java/br/com/sol7/olimpio/service/services/financeiro/CustoServicoService.java:28, camada service)
-    // Observacao: retorno: era CustoServico (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public CustoServico buscarCustoServicoPorUnidade(Unidade unidade) {
-    //         List<CustoServico> custoServicos = getCustoServicoRepository().buscarCustoServicoPorUnidade(unidade);
-    //         if (!ObjectUtil.nullOrEmpty(custoServicos)) {
-    //             return custoServicos.get(0);
-    //         }
-    //         return null;
-    //     }
     public Uni<Long> buscarCustoServicoPorUnidade(Long unidadeId) {
         return repository.buscarCustoServicoPorUnidade(unidadeId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }

@@ -81,7 +81,6 @@ public class GerirCobrancaService {
         return Uni.createFrom().item(true);
     }
 
-    // Migrado de GerirCobrancaController.carregarCobrancas
     // Gera relatório de cobranças por unidade/mês/ano
     public Uni<RelatorioCobranca> carregarCobrancas(Long unidadeId, int mes, int ano) {
         // Obter custo dos serviços para a unidade

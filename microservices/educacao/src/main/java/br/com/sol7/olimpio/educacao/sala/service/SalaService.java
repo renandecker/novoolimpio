@@ -118,13 +118,6 @@ public class SalaService {
         return Uni.createFrom().item(null);
     }
 
-
-    // Migrado de SalaService.buscarSalasDaUnidade (src/main/java/br/com/sol7/olimpio/service/services/educacao/SalaService.java:22, camada service)
-    // Observacao: parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public List<Sala> buscarSalasDaUnidade(Unidade unidade) {
-    //         return getSalaRepository().buscarSalasDaUnidade(unidade);
-    //     }
     public Uni<List<Long>> buscarSalasDaUnidade(Long unidadeId) {
         return repository.find("unidadeId = ?1 order by sucinto", unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }

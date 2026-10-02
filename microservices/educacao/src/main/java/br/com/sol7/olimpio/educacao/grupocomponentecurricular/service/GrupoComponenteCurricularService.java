@@ -63,12 +63,6 @@ public class GrupoComponenteCurricularService {
         return new GrupoComponenteCurricularResponse(e.id, e.descricao);
     }
 
-
-    // Migrado de GrupoComponenteCurricularService.buscarTodos (src/main/java/br/com/sol7/olimpio/service/services/educacao/GrupoComponenteCurricularService.java:22, camada service)
-    // Logica original (adaptar):
-    // public List<GrupoComponenteCurricular> buscarTodos() {
-    //         return getGrupoComponenteCurricularaRepository().buscarTodos();
-    //     }
     public Uni<List<Long>> buscarTodos() {
         return repository.buscarTodos().map(list -> list.stream().map(x -> x.id).toList());
     }

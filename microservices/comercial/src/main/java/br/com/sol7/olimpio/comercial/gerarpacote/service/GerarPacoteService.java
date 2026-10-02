@@ -173,22 +173,6 @@ public class GerarPacoteService {
         return carregarOperacoe();
     }
 
-
-    // Migrado de GerarPacoteController.carregarOperacoesAcademico (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/GerarPacoteController.java:406, camada controller)
-    // Logica original (adaptar):
-    // public void carregarOperacoesAcademico() {
-    //         if (filtroAcademico.getTipoFiltro() == 4 || filtroAcademico.getTipoFiltro() == 5 || filtroAcademico.getTipoFiltro() == 6) {
-    //             carregarOperacoe();
-    //         }
-    //         if (filtroAcademico.getTipoFiltro() == 1 || filtroAcademico.getTipoFiltro() == 2 || filtroAcademico.getTipoFiltro() == 3 ||
-    //                 filtroAcademico.getTipoFiltro() == 7 || filtroAcademico.getTipoFiltro() == 8) {
-    //             listOperationAcademico = new ArrayList<>();
-    //             listOperationAcademico.add(QueryOperation.EQ);
-    //             listOperationAcademico.add(QueryOperation.NOT_EQUAL);
-    //         }
-    //     }
-    // Obs: metodo de UI (JSF), sem logica de dados portaavel
-    // Implementacao: retorna operacoes academicas baseadas no tipo de filtro
     public Uni<List<String>> carregarOperacoesAcademico(Integer tipoFiltro) {
         if (tipoFiltro != null && (tipoFiltro == 4 || tipoFiltro == 5 || tipoFiltro == 6)) {
             return carregarOperacoe();

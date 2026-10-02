@@ -77,13 +77,6 @@ public class TipoCanalService {
         return repository.findById(5L).map(x -> x == null ? null : x.descricao);
     }
 
-
-    // Migrado de TipoCanalService.buscarTipoCanalMalaDireta (src/main/java/br/com/sol7/olimpio/service/services/comercial/TipoCanalService.java:33, camada service)
-    // Observacao: retorno: era Optional<TipoCanal> no legado
-    // Logica original (adaptar):
-    // public Optional<TipoCanal> buscarTipoCanalMalaDireta() {
-    //         return getBaseRepository().findById(6);
-    //     }
     public Uni<String> buscarTipoCanalMalaDireta() {
         return repository.findById(6L).map(x -> x == null ? null : x.descricao);
     }

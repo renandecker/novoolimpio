@@ -11,7 +11,6 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class ExtratorRepository implements PanacheRepository<Extrator> {
 
-    // Migrado de ExtratorService.remove() (legado, chamado por SchedulingService.tudo()) -
     // so a parte de banco (2 updates); a limpeza de arquivos temporarios em disco ficou de
     // fora porque nao faz sentido num microsservico stateless - ver RELATORIO_SCHEDULE.md.
     public static final String SQL_MARCAR_REMOVIDOS_ANTIGOS =

@@ -10,7 +10,6 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Date;
 
-// Migrado de br.com.sol7.olimpio.model.entity.financeiro.MovimentacaoFinanceira (legado)
 @Entity
 @Table(name = "fin_movimentacao")
 public class MovimentacaoFinanceira extends PanacheEntity {

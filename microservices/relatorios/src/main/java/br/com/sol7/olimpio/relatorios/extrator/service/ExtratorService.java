@@ -35,7 +35,6 @@ public class ExtratorService {
     @ConfigProperty(name = "relatorios.extrator.diretorio", defaultValue = "extrator")
     String diretorioArquivos;
 
-    // Migrado de ExtratorService.remove() (legado)
     public Uni<Void> remover() {
         return repository.removerAntigosNativo();
     }

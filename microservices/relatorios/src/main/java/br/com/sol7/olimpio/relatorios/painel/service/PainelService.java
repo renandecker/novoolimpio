@@ -100,52 +100,24 @@ public class PainelService {
         return new PainelResponse(e.id, e.nome, List.of(), List.of(), List.of(), List.of(), List.of());
     }
 
-
-    // Migrado de PainelService.buscarUnidades (src/main/java/br/com/sol7/olimpio/service/services/relatorios/PainelService.java:27, camada service)
-    // Observacao: parametro id: era Painel (referencia por id)
-    // Logica original (adaptar):
-    // public List<Unidade> buscarUnidades(Painel id) {
-    //         return getConexaoRepository().buscarUnidades(id);
-    //     }
     public Uni<List<Long>> buscarUnidades(Long id) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Painel not found"))
                 .flatMap(e -> repository.listUnidades(id));
     }
 
-
-    // Migrado de PainelService.buscarPerfils (src/main/java/br/com/sol7/olimpio/service/services/relatorios/PainelService.java:31, camada service)
-    // Observacao: parametro id: era Painel (referencia por id)
-    // Logica original (adaptar):
-    // public List<Perfil> buscarPerfils(Painel id) {
-    //         return getConexaoRepository().buscarPerfils(id);
-    //     }
     public Uni<List<Long>> buscarPerfils(Long id) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Painel not found"))
                 .flatMap(e -> repository.listPerfis(id));
     }
 
-
-    // Migrado de PainelService.buscarUsuarios (src/main/java/br/com/sol7/olimpio/service/services/relatorios/PainelService.java:35, camada service)
-    // Observacao: parametro id: era Painel (referencia por id)
-    // Logica original (adaptar):
-    // public List<Usuario> buscarUsuarios(Painel id) {
-    //         return getConexaoRepository().buscarUsuarios(id);
-    //     }
     public Uni<List<Long>> buscarUsuarios(Long id) {
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Painel not found"))
                 .flatMap(e -> repository.listUsuarios(id));
     }
 
-
-    // Migrado de PainelService.autoComplete (src/main/java/br/com/sol7/olimpio/service/services/relatorios/PainelService.java:40, camada service)
-    // Observacao: parametro estruturaId: era Estrutura (referencia por id)
-    // Logica original (adaptar):
-    // public List<Painel> autoComplete(String query,Estrutura estrutura) {
-    // 		return this.getConexaoRepository().autoComplete(query.toLowerCase(),estrutura, new PageRequest(0,10)).getContent();
-    // 	}
     public Uni<List<Long>> autoComplete(String query, Long estruturaId) {
         return repository.autoComplete(query.toLowerCase(), estruturaId).map(list -> list.stream().map(x -> x.id).toList());
     }

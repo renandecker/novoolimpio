@@ -9,7 +9,6 @@ import jakarta.persistence.TemporalType;
 
 import java.util.Date;
 
-// Migrado de br.com.sol7.olimpio.model.entity.financeiro.Deposito (legado)
 @Entity
 @Table(name = "fin_deposito")
 public class Deposito extends PanacheEntity {

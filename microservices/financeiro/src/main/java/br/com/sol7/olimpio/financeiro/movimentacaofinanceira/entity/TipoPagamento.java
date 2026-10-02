@@ -1,6 +1,5 @@
 package br.com.sol7.olimpio.financeiro.movimentacaofinanceira.entity;
 
-// Migrado de br.com.sol7.olimpio.enumm.TipoPagamento (legado, olimpio.zip / acesoalunoprofessor.zip)
 public enum TipoPagamento {
 
     DINHEIRO("Dinheiro"),

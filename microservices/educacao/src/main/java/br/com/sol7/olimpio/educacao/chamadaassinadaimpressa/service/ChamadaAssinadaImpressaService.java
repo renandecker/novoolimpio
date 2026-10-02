@@ -114,16 +114,6 @@ public class ChamadaAssinadaImpressaService {
         return new ChamadaAssinadaImpressaResponse(e.id, e.data, e.oferecimentoComponenteCurricularId, e.sequencia, e.quantidade, e.aulaCoringa, e.ativo, e.inicio, e.fim, e.pendente);
     }
 
-
-    // Migrado de ChamadaAssinadaImpressaController.buscarOcorrencias (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/ChamadaAssinadaImpressaController.java:83, camada controller)
-    // Observacao: parametro event: era ToggleEvent no legado
-    // Logica original (adaptar):
-    // public void buscarOcorrencias(ToggleEvent event) {
-    //         if (event.getVisibility() == Visibility.VISIBLE) {
-    //             ChamadaAssinadaImpressa chamadaAssinadaImpressa = (ChamadaAssinadaImpressa) event.getData();
-    //             ocorrenciaComponenteCurriculars = ocorrenciaComponenteCurricularService.buscarOcorrenciaPorOferecimentoEDatas(chamadaAssinadaImpressa.getOferecimentoComponenteCurricular(), chamadaAssinadaImpressa.getInicio(), chamadaAssinadaImpressa.getFim());
-    //         }
-    //     }
     public Uni<List<OcorrenciaComponenteCurricularResponse>> buscarOcorrencias(Long chamadaId) {
         return repository.findById(chamadaId).onItem().ifNull()
                 .failWith(() -> new NotFoundException("ChamadaAssinadaImpressa not found"))
@@ -165,19 +155,6 @@ public class ChamadaAssinadaImpressaService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-// Migrado de ChamadaAssinadaImpressaController.gerarChamadaAssinadaRetrato (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/ChamadaAssinadaImpressaController.java:135, camada controller)
-    // Observacao: retorno: era StreamedContent no legado; parametro ccId: era ChamadaAssinadaImpressa (referencia por id)
-    // Logica original (adaptar):
-    // public StreamedContent gerarChamadaAssinadaRetrato(ChamadaAssinadaImpressa cc) throws MalformedURLException {
-    //         hibernateService.executeUpdateSQL(" insert into edc_chamada_assinada_impressa_download (data_download,qtde , id_usuario, id_chamada_assinada_impressa) " +
-    //                 " values (now(),1," + usuarioLogadoController.getUsuario().getId() + ", " + cc.getId() + ") on conflict on constraint uk_edc_chamada_assinada_impressa_download DO UPDATE " +
-    //                 " SET  qtde = edc_chamada_assinada_impressa_download.qtde + 1 ");
-    //
-    //         chamadaAssinadaImpressa = cc;
-    //         chamadaAssinadaImpressa.setPendente(false);
-    //         chamadaAssinadaImpressa.setQuantidade(chamadaAssinadaImp ...
-    // // ... (truncado, ver fonte original)
     public Uni<String> gerarChamadaAssinadaRetrato(Long ccId, Long usuarioId) {
         return repository.findById(ccId)
                 .onItem().ifNull().failWith(() -> new NotFoundException("ChamadaAssinadaImpressa not found: " + ccId))
@@ -188,19 +165,6 @@ public class ChamadaAssinadaImpressaService {
                 });
     }
 
-
-    // Migrado de ChamadaAssinadaImpressaController.gerarChamadaAssinadaPaisagem (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/ChamadaAssinadaImpressaController.java:155, camada controller)
-    // Observacao: retorno: era StreamedContent no legado; parametro ccId: era ChamadaAssinadaImpressa (referencia por id)
-    // Logica original (adaptar):
-    // public StreamedContent gerarChamadaAssinadaPaisagem(ChamadaAssinadaImpressa cc) throws MalformedURLException {
-    //         hibernateService.executeUpdateSQL(" insert into edc_chamada_assinada_impressa_download (data_download,qtde , id_usuario, id_chamada_assinada_impressa) " +
-    //                 " values (now(),1," + usuarioLogadoController.getUsuario().getId() + ", " + cc.getId() + ") on conflict on constraint uk_edc_chamada_assinada_impressa_download DO UPDATE " +
-    //                 " SET  qtde = edc_chamada_assinada_impressa_download.qtde + 1 ");
-    //
-    //         chamadaAssinadaImpressa = cc;
-    //         chamadaAssinadaImpressa.setPendente(false);
-    //         chamadaAssinadaImpressa.setQuantidade(chamadaAssinadaIm ...
-    // // ... (truncado, ver fonte original)
     public Uni<String> gerarChamadaAssinadaPaisagem(Long ccId, Long usuarioId) {
         return repository.findById(ccId)
                 .onItem().ifNull().failWith(() -> new NotFoundException("ChamadaAssinadaImpressa not found: " + ccId))
@@ -296,17 +260,6 @@ public class ChamadaAssinadaImpressaService {
         }
     }
 
-
-    // Migrado de ChamadaAssinadaImpressaService.carregarChamadasPendentes (src/main/java/br/com/sol7/olimpio/service/services/educacao/ChamadaAssinadaImpressaService.java:56, camada service)
-    // Logica original (adaptar):
-    // public void carregarChamadasPendentes() {
-    //         System.out.println("chamadas assinadas pendentes inicio " + DateUtil.getDateAsFormattedText(new Date()) + " " + DateUtil.getHourMinAsFormattedString(new Date()));
-    //
-    //         List<Integer> oferecimentoComponenteCurriculars = (List<Integer>) hibernateService.executeSQL("select o.id from edc_oferecimento_componente_curricular o where " +
-    //                 " not exists(select ch from edc_chamada_assinada_impressa ch where ch.id_oferecimento_componente_curricular = o.id) and (o.status = 'LIBERADA' or o.status = 'EM_ANDAMENTO')");
-    //         if (!ObjectUtil.nullOrEmpty(oferecimentoComponenteCurriculars)) {
-    //             for (Integer ii : oferecimentoCompone ...
-    // // ... (truncado, ver fonte original)
     public Uni<Void> carregarChamadasPendentes() {
         String sql = """
             SELECT o.id FROM edc_oferecimento_componente_curricular o
@@ -356,16 +309,6 @@ public class ChamadaAssinadaImpressaService {
         return Uni.createFrom().voidItem();
     }
 
-
-    // Migrado de ChamadaAssinadaImpressaService.carregarChamadasCorringa (src/main/java/br/com/sol7/olimpio/service/services/educacao/ChamadaAssinadaImpressaService.java:103, camada service)
-    // Observacao: parametro oId: era OferecimentoComponenteCurricular (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarChamadasCorringa(OferecimentoComponenteCurricular o) {
-    //         List<OcorrenciaComponenteCurricular> aulasextras = ocorrenciaComponenteCurricularService.buscarOcorrenciaExtras(o);
-    //         if (!ObjectUtil.nullOrEmpty(o) && !ObjectUtil.nullOrEmpty(aulasextras)) {
-    //             carregarChamadas(o, aulasextras, maiorSequencia(o), true);
-    //         }
-    //     }
     public Uni<Void> carregarChamadasCorringa(Long oId) {
         if (oId == null) return Uni.createFrom().voidItem();
         return ocorrenciaComponenteCurricularService.buscarOcorrenciaExtras(oId)
@@ -378,18 +321,6 @@ public class ChamadaAssinadaImpressaService {
                 });
     }
 
-
-    // Migrado de ChamadaAssinadaImpressaService.carregarChamadasNormais (src/main/java/br/com/sol7/olimpio/service/services/educacao/ChamadaAssinadaImpressaService.java:110, camada service)
-    // Observacao: parametro oId: era OferecimentoComponenteCurricular (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarChamadasNormais(OferecimentoComponenteCurricular o, int chamadas) {
-    //         if (!ObjectUtil.nullOrEmpty(o)) {
-    //             List<OcorrenciaComponenteCurricular> aulasNormais = ocorrenciaComponenteCurricularService.buscarOcorrenciaNormais(o);
-    //             if (!ObjectUtil.nullOrEmpty(o) && !ObjectUtil.nullOrEmpty(aulasNormais)) {
-    //                 carregarChamadas(o, aulasNormais,  chamadas, false);
-    //             }
-    //         }
-    //     }
     public Uni<Void> carregarChamadasNormais(Long oId, Integer chamadas) {
         if (oId == null) return Uni.createFrom().voidItem();
         return ocorrenciaComponenteCurricularService.buscarOcorrenciaNormais(oId)
@@ -399,22 +330,6 @@ public class ChamadaAssinadaImpressaService {
                 });
     }
 
-
-    // Migrado de ChamadaAssinadaImpressaService.carregarChamadas (src/main/java/br/com/sol7/olimpio/service/services/educacao/ChamadaAssinadaImpressaService.java:119, camada service)
-    // Observacao: parametro oId: era OferecimentoComponenteCurricular (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarChamadas(OferecimentoComponenteCurricular o, List<OcorrenciaComponenteCurricular> ocorrenciaComponenteCurriculars, int chamadas, Boolean coringa) {
-    //         if (!ObjectUtil.nullOrEmpty(o)) {
-    //             List<ChamadaAssinadaImpressa> chamadaAssinadaImpressasPendenteTemp = new ArrayList<>();
-    //             ChamadaAssinadaImpressa chamadaAssinadaImpressaTemp = new ChamadaAssinadaImpressa();
-    // 
-    //             if (!ObjectUtil.nullOrEmpty(o)) {
-    //                 Collections.sort(ocorrenciaComponenteCurriculars);
-    //                 if (!ObjectUtil.nullOrEmpty(ocorrenciaComponenteCurriculars) && o.getQtdeSequencia() > 0) {
-    //                     int controlechamada = chamadas + 1;
-    // 
-    //                ...
-    // // ... (truncado, ver fonte original)
     public Uni<Void> carregarChamadas(Long oId, List<Long> ocorrenciaComponenteCurriculars, Integer chamadas, Boolean coringa) {
         if (oId == null) return Uni.createFrom().voidItem();
         return oferecimentoComponenteCurricularService.find(oId).chain(o -> {

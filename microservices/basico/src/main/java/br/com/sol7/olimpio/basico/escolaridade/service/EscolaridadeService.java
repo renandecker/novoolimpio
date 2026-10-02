@@ -69,16 +69,6 @@ public class EscolaridadeService {
         return new EscolaridadeResponse(e.id, e.descricao, e.ordem);
     }
 
-
-    // Migrado de EscolaridadeController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/basico/EscolaridadeController.java:97, camada controller)
-    // Logica original (adaptar):
-    // public List<Escolaridade> autoComplete(String query) {
-    //         if (!query.equals("")) {
-    //             return escolaridadeService.autoComplete(query);
-    //         } else {
-    //             return escolaridadeService.autoComplete();
-    //         }
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         if (!query.equals("")) {
             return repository.autoComplete(query.toLowerCase().trim()).map(list -> list.stream().map(x -> x.id).toList());
@@ -87,13 +77,6 @@ public class EscolaridadeService {
         }
     }
 
-
-    // Migrado de EscolaridadeService.autoComplete (src/main/java/br/com/sol7/olimpio/service/services/basico/EscolaridadeService.java:38, camada service)
-    // JPQL original: select c from Escolaridade c where  lower(c.descricao) like '%' || lower(?1) || '%'  OR  str(c.id) = ?1 order by c.descricao
-    // Logica original (adaptar):
-    // public List<Escolaridade> autoComplete() {
-    //         return this.getEscolaridadeRepository().autoComplete(new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoComplete2() {
         return repository.findAllEscolaridade().map(list -> list.stream().map(x -> x.id).toList());
     }

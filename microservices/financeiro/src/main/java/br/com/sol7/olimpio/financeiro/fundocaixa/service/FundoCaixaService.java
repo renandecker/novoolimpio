@@ -93,7 +93,6 @@ public class FundoCaixaService {
         return new FundoCaixaResponse(e.id, e.nome, e.dadosJson);
     }
 
-    // Migrado de FundoCaixaController.verificarSenhaResponsavel
     public Uni<Boolean> verificarSenhaResponsavel(Long configuracaoCaixaId, String senha) {
         if (configuracaoCaixaId == null) {
             return Uni.createFrom().item(false);
@@ -112,7 +111,6 @@ public class FundoCaixaService {
         return Uni.createFrom().item(false);
     }
 
-    // Migrado de FundoCaixaController.fecharCaixa
     public Uni<CaixaResponse> fecharCaixa(Long caixaId, Long configuracaoCaixaId, String senha) {
         return verificarSenhaResponsavel(configuracaoCaixaId, senha)
                 .chain(valido -> {
@@ -123,7 +121,6 @@ public class FundoCaixaService {
                 });
     }
 
-    // Migrado de FundoCaixaController.abrirCaixa
     public Uni<CaixaResponse> abrirCaixa(Long caixaId, Long configuracaoCaixaId, String senha) {
         return verificarSenhaResponsavel(configuracaoCaixaId, senha)
                 .chain(valido -> {
@@ -134,13 +131,11 @@ public class FundoCaixaService {
                 });
     }
 
-    // Migrado de FundoCaixaController.registrarSangriaSegundaVia
     public Uni<SangriaResponse> registrarSangria(Long caixaId, BigDecimal valor) {
         var request = new SangriaRequest(caixaId, new Date(), valor);
         return sangriaService.create(request);
     }
 
-    // Migrado de FundoCaixaController.relatorioMov
     public Uni<CaixaMovimentacaoResumo> gerarRelatorioMovimentacao(Long caixaId) {
         return caixaService.find(caixaId)
                 .chain(caixa -> movimentacaoFinanceiraService.buscarPorCaixa(caixaId)
@@ -202,7 +197,6 @@ public class FundoCaixaService {
                                         }))));
     }
 
-    // Migrado de FundoCaixaController.buscarMovimentacoes
     public Uni<List<MovimentacaoFinanceiraResponse>> buscarMovimentacoes(Long caixaId) {
         return movimentacaoFinanceiraService.buscarMovimentacaoCaixaEntrada(caixaId)
                 .chain(entradas -> sangriaService.buscarPorCaixa(caixaId)
@@ -220,7 +214,6 @@ public class FundoCaixaService {
                         }));
     }
 
-    // Migrado de FundoCaixaController.imprimirSegundaVia
     public Uni<Void> imprimirSegundaVia(Long movimentacaoFinanceiraId, Long usuarioId) {
         return movimentacaoFinanceiraService.find(movimentacaoFinanceiraId)
                 .chain(mov -> {
@@ -235,7 +228,6 @@ public class FundoCaixaService {
         return Uni.createFrom().voidItem();
     }
 
-    // Migrado de FundoCaixaController.buscarCaixa
     public Uni<CaixaComConfiguracao> buscarCaixaPorMovimentacao(Long movimentacaoFinanceiraId) {
         return movimentacaoFinanceiraService.find(movimentacaoFinanceiraId)
                 .chain(mov -> caixaService.find(mov.caixaId())
@@ -244,7 +236,6 @@ public class FundoCaixaService {
                                 .map(config -> new CaixaComConfiguracao(caixa, config))));
     }
 
-    // Migrado de FundoCaixaController.verificarCotaImpressao
     public Uni<Boolean> verificarCotaImpressao(Long movimentacaoFinanceiraId, Long usuarioId) {
         return movimentacaoFinanceiraService.find(movimentacaoFinanceiraId)
                 .chain(mov -> {
@@ -261,7 +252,6 @@ public class FundoCaixaService {
         return verificarCotaImpressao(movimentacaoFinanceiraId, null);
     }
 
-    // Migrado de FundoCaixaController.imprimirComprovantePagamento
     private ComprovantePagamento gerarComprovantePagamento(MovimentacaoFinanceiraResponse mov) {
         String valorStr = mov.valor().setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",");
         String descontoStr = mov.desconto().setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",");

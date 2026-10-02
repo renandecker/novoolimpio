@@ -136,24 +136,6 @@ public class MetaDinamicaService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de MetaDinamicaController.atualizarValorSemana (src/main/java/br/com/sol7/olimpio/control/controllers/comercial/MetaDinamicaController.java:1099, camada controller)
-    // Observacao: parametro metaDinamicaSemanaWapper: era MetaDinamicaSemanaWapper no legado; parametro metaDiaDinamicaWapper: era MetaDiaDinamicaWapper no legado
-    // Logica original (adaptar):
-    // public void atualizarValorSemana(MetaDinamicaSemanaWapper metaDinamicaSemanaWapper, MetaDiaDinamicaWapper metaDiaDinamicaWapper) {
-    //         BigDecimal valorSeparado = new BigDecimal(0);
-    //         BigDecimal valorRestante = new BigDecimal(0);
-    //         int qtde = 0;
-    //         boolean adicionando = false;
-    //         if (metaDiaDinamicaWapper.getValorAjusteSemana().floatValue() == metaDiaDinamicaWapper.getMetaDiaDinamica().getValor().floatValue()) {
-    //             MessageUtil.sendMessageToUser(MessageUtil.MessageUtilType.INFO, "aviso", "valor_igual", null, getMetaDinamica().getClass().getSimpleName());
-    //             return;
-    //         }
-    //         if (!metaDinamica.getIndicador().isSemana()) {
-    //             qtde = ca ...
-    // // ... (truncado, ver fonte original)
-    // Obs: metodo de UI (JSF); depende dos modulos MetaDiaDinamica/MetaSemanaDinamica/MetaValor nao migrados
-    // Implementacao: atualiza valor da semana de uma meta dinamica (requer modulos nao migrados)
     public Uni<Void> atualizarValorSemana(Long metaSemanaDinamicaId, Long metaDiaDinamicaId, BigDecimal valorAjuste) {
         if (metaSemanaDinamicaId == null || metaDiaDinamicaId == null || valorAjuste == null) {
             return Uni.createFrom().failure(new IllegalArgumentException("Parâmetros inválidos"));
@@ -228,24 +210,10 @@ public class MetaDinamicaService {
         return repository.find("mes = ?1 and ano = ?2 and indicadorId = ?3 and unidadeId = ?4", mes, ano, indicadorId, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de MetaDinamicaService.verificarMetaAnoUnidade (src/main/java/br/com/sol7/olimpio/service/services/comercial/MetaDinamicaService.java:33, camada service)
-    // Observacao: parametro indicadorId: era Indicador (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public List<MetaDinamica> verificarMetaAnoUnidade(Integer ano, Indicador indicador, Unidade unidade) {
-    //         return getMetaDinamicaRepository().verificarMetaAnoUnidade(ano, indicador, unidade);
-    //     }
     public Uni<List<Long>> verificarMetaAnoUnidade(Integer ano, Long indicadorId, Long unidadeId) {
         return repository.find("ano = ?1 and indicadorId = ?2 and unidadeId = ?3", ano, indicadorId, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de MetaDinamicaService.verificarMetaUnidade (src/main/java/br/com/sol7/olimpio/service/services/comercial/MetaDinamicaService.java:37, camada service)
-    // Observacao: parametro indicadorId: era Indicador (referencia por id); parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public List<MetaDinamica> verificarMetaUnidade(Indicador indicador, Unidade unidade) {
-    //         return getMetaDinamicaRepository().verificarMetaUnidade(indicador, unidade);
-    //     }
     public Uni<List<Long>> verificarMetaUnidade(Long indicadorId, Long unidadeId) {
         return repository.find("indicadorId = ?2 and unidadeId = ?3", indicadorId, unidadeId).list().map(list -> list.stream().map(x -> x.id).toList());
     }

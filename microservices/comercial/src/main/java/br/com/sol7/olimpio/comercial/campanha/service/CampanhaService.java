@@ -334,14 +334,6 @@ public class CampanhaService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de CampanhaService.buscarCampanhaComUnidades (src/main/java/br/com/sol7/olimpio/service/services/comercial/CampanhaService.java:33, camada service)
-    // Observacao: retorno: era Campanha (referencia por id); parametro entityId: era Campanha (referencia por id)
-    // JPQL original: Select ca from Campanha ca left join fetch ca.unidades where ca = ?1
-    // Logica original (adaptar):
-    // public Campanha buscarCampanhaComUnidades(Campanha entity) {
-    //         return getCampanhaRepository().buscarCampanhaComUnidades(entity);
-    //     }
     public Uni<Long> buscarCampanhaComUnidades(Long entityId) {
         return repository.buscarCampanhaComUnidades(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }

@@ -6,7 +6,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class LigacaoNapRepository implements io.quarkus.hibernate.reactive.panache.PanacheRepository<LigacaoNap> {
 
-    // Migrado de LigacaoNapService.listaLigacaoNapComEtapa (legado)
     // Logica original (adaptar): retorna ligacoes de NAP da etapa informada
     public static final String SQL_LISTA_LIGACAO_NAP_COM_ETAPA =
             "SELECT l.* FROM edc_ligacao_nap l WHERE l.id_etapas_nap = ?1 AND l.ativo = true";
@@ -18,7 +17,6 @@ public class LigacaoNapRepository implements io.quarkus.hibernate.reactive.panac
                         .getResultList());
     }
 
-    // Migrado de LigacaoNapService.listaLigacaoNapSemEtapa (legado)
     // Logica original (adaptar): retorna ligacoes de NAP sem etapa (tab "Ligacao NAP pendente")
     public static final String SQL_LISTA_LIGACAO_NAP_SEM_ETAPA =
             "SELECT l.* FROM edc_ligacao_nap l WHERE l.id_etapas_nap is null AND l.ativo = true";
@@ -40,7 +38,6 @@ public class LigacaoNapRepository implements io.quarkus.hibernate.reactive.panac
                         .getResultList());
     }
 
-    // Migrado de LigacaoNapService.buscaLigacaoNapPorContrato (legado)
     public static final String SQL_BUSCA_POR_CONTRATO =
             "SELECT l.* FROM edc_ligacao_nap l WHERE l.id_contrato = ?1";
 

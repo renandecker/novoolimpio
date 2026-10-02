@@ -159,7 +159,6 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
     }
 
 
-    // Migrado do formAgenda.xhtml: listas Resultados e Status (inputMestreDetalheAutoComplete) e
     // dialogPessoa (usuarios desta agenda). Tabelas de associacao sem entidade mapeada neste microsservico.
     private static final String SQL_LISTAR_AGENDA_RESULTADOS =
             "SELECT id_resultado FROM bas_agenda_resultado WHERE id_agenda = ?1 ORDER BY id_resultado";
@@ -211,7 +210,6 @@ public class AgendaRepository implements PanacheRepository<Agenda> {
                         .getResultList());
     }
 
-    // Migrado de UsuarioService.salvarPerfilUsuario (legado): apaga as ligacoes da agenda e reinsere os usuarios marcados.
     public Uni<Void> substituirUsuarios(Long agendaId, java.util.List<Long> usuarios) {
         return substituirFilhos(SQL_LIMPAR_AGENDA_USUARIOS, SQL_INSERIR_AGENDA_USUARIO, agendaId, usuarios);
     }

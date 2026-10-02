@@ -63,12 +63,6 @@ public class CursoService {
         return new CursoResponse(e.id, e.nome);
     }
 
-
-    // Migrado de CursoController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/CursoController.java:76, camada controller)
-    // Logica original (adaptar):
-    // public List<Curso> autoComplete(String query) {
-    //         return cursoService.autoComplete(query.toLowerCase());
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query.toLowerCase()).map(list -> list.stream().map(x -> x.id).toList());
     }

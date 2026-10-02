@@ -126,54 +126,14 @@ public class LogradouroService {
         return Uni.createFrom().item(0);
     }
 
-
-    // Migrado de LogradouroController.atualizarCoordenadaAPI (src/main/java/br/com/sol7/olimpio/control/controllers/basico/LogradouroController.java:180, camada controller)
-    // Observacao: parametro logradouroId: era Logradouro (referencia por id)
-    // Logica original (adaptar):
-    // private void atualizarCoordenadaAPI(Logradouro logradouro, String token) {
-    //         CorreioCepAberto correio = new CorreioCepAberto();
-    //         if (ObjectUtil.nullOrEmpty(logradouro.getLatitude()) && ObjectUtil.nullOrEmpty(logradouro.getLongitude())) {
-    //             if (ObjectUtil.nullOrEmpty(token)) {
-    //                 List<ConfiguracaoEmail> configuracaoEmail = configuracaoEmailService.busaConfiguracaoEmailPadrao();
-    // 
-    //                 token = configuracaoEmail.get(0).getTokenCorreio();
-    //             }
-    //             String coordenada = "";
-    //             try {
-    //                 coordenada = ObjectUtil.nullOrEmptyObject(correio.getLatLongApi(logradouro.getCep(), token));
-    //             } catch (Exception e) {
-    // // ... (truncado, ver fonte original)
     public Uni<LogradouroResponse> atualizarCoordenadaAPI(Long logradouroId, String token) {
         return find(logradouroId);
     }
 
-
-    // Migrado de LogradouroController.atualizarLogradouro (src/main/java/br/com/sol7/olimpio/control/controllers/basico/LogradouroController.java:210, camada controller)
-    // Observacao: parametro logradouroId: era Logradouro (referencia por id)
-    // Logica original (adaptar):
-    // public void atualizarLogradouro(Logradouro logradouro) {
-    //         CorreioQualCep correio = new CorreioQualCep();
-    // 
-    //         String novologradouro = "";
-    //         try {
-    //             novologradouro = ObjectUtil.nullOrEmptyObject(correio.getEndereco(logradouro.getCep()));
-    //         } catch (IOException e) {
-    //             novologradouro = "";
-    //         }
-    //         if (!ObjectUtil.nullOrEmpty(novologradouro)) {
-    //             logradouro.setDescricao(novologradouro);
-    //             if (ObjectUtil.nullOrEmpty(logradouro.getBairro())) {
-    // // ... (truncado, ver fonte original)
     public Uni<LogradouroResponse> atualizarLogradouro(Long logradouroId) {
         return find(logradouroId);
     }
 
-
-    // Migrado de LogradouroController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/basico/LogradouroController.java:418, camada controller)
-    // Logica original (adaptar):
-    // public List<Logradouro> autoComplete(String query) {
-    //         return logradouroService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
         return repository.autoComplete(query.toLowerCase().trim()).map(list -> list.stream().map(x -> x.id).toList());
     }
@@ -281,20 +241,6 @@ public class LogradouroService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de LogradouroController.autoCompleteLogradouroTroca (src/main/java/br/com/sol7/olimpio/control/controllers/basico/LogradouroController.java:549, camada controller)
-    // Logica original (adaptar):
-    // public List<Logradouro> autoCompleteLogradouroTroca(String query) {
-    //         try {
-    //             if (!query.equals("")) {
-    //                 return logradouroService.autoComplete(query);
-    //             } else {
-    //                 return new ArrayList<>();
-    //             }
-    //         } catch (Exception e) {
-    //             return new ArrayList<>();
-    //         }
-    //     }
     public Uni<List<Long>> autoCompleteLogradouroTroca(String query) {
         if (query == null || query.equals("")) {
             return Uni.createFrom().item(java.util.List.of());
@@ -380,65 +326,18 @@ public class LogradouroService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de LogradouroController.buscarEnderecoCadastro (src/main/java/br/com/sol7/olimpio/control/controllers/basico/LogradouroController.java:760, camada controller)
-    // Logica original (adaptar):
-    // public void buscarEnderecoCadastro(String cep) {
-    //         stringcep = cep;
-    //         buscarEndereco();
-    //         setEntity(logradouro);
-    //     }
     public Uni<BuscarEnderecoResponse> buscarEnderecoCadastro(String cep) {
         return buscarEnderecoPorCep(cep);
     }
 
-
-    // Migrado de LogradouroController.buscarEndereco (src/main/java/br/com/sol7/olimpio/control/controllers/basico/LogradouroController.java:766, camada controller)
-    // Logica original (adaptar):
-    // public void buscarEndereco() {
-    //         if (stringcep != null) {
-    //             stringcep = stringcep.replace("-", "");
-    //             stringcep = stringcep.replace(".", "");
-    //             listaLogradouro = logradouroService.buscaCep(stringcep);
-    //             if (!ObjectUtil.nullOrEmpty(listaLogradouro)) {
-    //                 listaBairro = new ArrayList<>();
-    //                 listaCidade = new ArrayList<>();
-    //                 bairro = new Bairro();
-    //                 cidade = new Cidade();
-    //                 logradouro = new Logradouro();
-    //                 if (!ObjectUtil.nullOrEmpty(listaLogradouro)) {
-    // // ... (truncado, ver fonte original)
     public Uni<BuscarEnderecoResponse> buscarEndereco(String cep) {
         return buscarEnderecoPorCep(cep);
     }
 
-
-    // Migrado de LogradouroService.autoCompleteComBairro (src/main/java/br/com/sol7/olimpio/service/services/basico/LogradouroService.java:59, camada service)
-    // Observacao: parametro bairroId: era Bairro (referencia por id)
-    // Logica original (adaptar):
-    // public List<Logradouro> autoCompleteComBairro(String query, Bairro bairro) {
-    //         return this.getLogradouroRepository().autoCompleteComBairro(query.toLowerCase().trim(), bairro, new PageRequest(0, 10)).getContent();
-    //     }
     public Uni<List<Long>> autoCompleteComBairro(String query, Long bairroId) {
         return repository.find("bairroId = ?2 and (lower(descricao) like '%' || ?1 || '%') order by descricao", query.toLowerCase().trim(), bairroId).page(io.quarkus.panache.common.Page.of(0, 10)).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-// Migrado de LogradouroService.atualizar (src/main/java/br/com/sol7/olimpio/service/services/basico/LogradouroService.java:75, camada service)
-    // Logica original (adaptar):
-    // public void atualizar() {
-    //         hibernateService.executeUpdateSQL("DELETE FROM bas_logradouro log WHERE " +
-    //                 " not exists(select pes.id FROM bas_pessoa pes WHERE log.id = pes.id_logradouro )" +
-    //                 " and " +
-    //                 " not exists(select pes.id FROM bas_unidade pes WHERE log.id = pes.id_unidade )");
-    //
-    //         hibernateService.executeUpdateSQL("DELETE FROM bas_bairro log WHERE" +
-    //                 "    not exists(select pes.id FROM bas_logradouro pes WHERE log.id = pes.id_bairro )");
-    //
-    //         CorreioQualCep correioQualCep = new CorreioQualCep();
-    //
-    //         List<Logradouro> logradouros = this.getLogradouroRepository().buscaLogradouroSemLogradouro();
-    // // ... (truncado, ver fonte original)
     public Uni<Void> atualizar() {
         return repository.limparOrfaosNativo()
                 .chain(() -> repository.buscaLogradouroSemLogradouro())

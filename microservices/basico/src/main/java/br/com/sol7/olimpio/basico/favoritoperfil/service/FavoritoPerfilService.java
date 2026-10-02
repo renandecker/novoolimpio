@@ -71,23 +71,10 @@ public class FavoritoPerfilService {
         return new FavoritoPerfilResponse(e.id, e.nome, e.icon, e.perfilId, e.moduloId);
     }
 
-
-    // Migrado de FavoritoPerfilService.buscarPerfilComFavoritos (src/main/java/br/com/sol7/olimpio/service/services/basico/FavoritoPerfilService.java:26, camada service)
-    // Observacao: parametro perfilId: era Perfil (referencia por id)
-    // Logica original (adaptar):
-    // public List<FavoritoPerfil> buscarPerfilComFavoritos(Perfil perfil) {
-    //         return getFavoritoPerfilRepository().buscarPerfilComFavoritos(perfil);
-    //     }
     public Uni<List<Long>> buscarPerfilComFavoritos(Long perfilId) {
         return repository.find("perfilId = ?1", perfilId).list().map(list -> list.stream().map(x -> x.id).toList());
     }
 
-
-    // Migrado de FavoritoPerfilService.buscarPerfilsComFavoritos (src/main/java/br/com/sol7/olimpio/service/services/basico/FavoritoPerfilService.java:30, camada service)
-    // Logica original (adaptar):
-    // public List<FavoritoPerfil> buscarPerfilsComFavoritos(List<Perfil> perfil) {
-    //         return getFavoritoPerfilRepository().buscarPerfilsComFavoritos(perfil);
-    //     }
     public Uni<List<Long>> buscarPerfilsComFavoritos(List<Long> perfil) {
         return repository.find("perfilId in (?1)", perfil).list().map(list -> list.stream().map(x -> x.id).toList());
     }
