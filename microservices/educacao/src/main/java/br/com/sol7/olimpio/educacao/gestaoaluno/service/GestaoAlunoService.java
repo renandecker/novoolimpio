@@ -72,52 +72,7 @@ public class GestaoAlunoService {
         return new GestaoAlunoResponse(e.id, e.nome, e.dadosJson);
     }
 
-    // Migrado de GestaoAlunoController.carregarPreCancelamentosContrato (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GestaoAlunoController.java:204, camada controller)
-    // Observacao: parametro contratoId: era Contrato (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarPreCancelamentosContrato(Contrato contrato) {
-    //         FilterPreCancelamentoContrato filterPreCancelamentoContrato = new FilterPreCancelamentoContrato(contrato);
-    //         cancelamentoContratoes = new BaseLazyModelJPASpecific<CancelamentoContrato>(cancelamentoContratoService.getCancelamentoContratoRepository(), filterPreCancelamentoContrato);
-    // 
-    //     }
-    public Uni<Void> carregarPreCancelamentosContrato(Long contratoId) {
-        // Obs: lazy data model de cancelamentoContratoService (microservico matricula) e estado da tela (contrato)
-        return Uni.createFrom().voidItem();
-    }
 
-
-    // Migrado de GestaoAlunoController.carregarPreCancelamentosMatricula (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GestaoAlunoController.java:210, camada controller)
-    // Observacao: parametro matriculaId: era Matricula (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarPreCancelamentosMatricula(Matricula matricula) {
-    //         FilterPreCancelamentoMatricula filterPreCancelamentoMatricula = new FilterPreCancelamentoMatricula(matricula);
-    //         cancelamentoMatriculas = new BaseLazyModelJPASpecific<CancelamentoMatricula>(cancelamentoMatriculaService.getCancelamentoMatriculaRepository(), filterPreCancelamentoMatricula);
-    //     }
-    public Uni<Void> carregarPreCancelamentosMatricula(Long matriculaId) {
-        // Obs: lazy data model de cancelamentoMatriculaService (microservico matricula) e estado da tela (matricula)
-        return Uni.createFrom().voidItem();
-    }
-
-
-    // Migrado de GestaoAlunoController.verificarCOnfiguraParcelaGlobal (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GestaoAlunoController.java:257, camada controller)
-    // Logica original (adaptar):
-    // private void verificarCOnfiguraParcelaGlobal() {
-    //         perfilPodeEditarParcelas = false;
-    //         if (usuarioLogadoController.getUsuario().getHierarquia().equals(HierarquiaPerfil.ADMIN)) {
-    //             perfilPodeEditarParcelas = true;
-    //         } else {
-    //             if (!ObjectUtil.nullOrEmpty(pessoa)) {
-    //                 List<Contrato> con = contratoService.buscarContratosPessoa(pessoa);
-    //                 for (Contrato contrato : con) {
-    //                     ConfiguracaoParcela confparcela = configuracaoParcelaService.buscarConf(contrato.getUnidadeResponsavel());
-    //                     if (confparcela != null) {
-    //                         for (Perfil perfil : usuarioLogadoController.getPerfis()) {
-    //         ...
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> verificarCOnfiguraParcelaGlobal() {
-        // Obs: depende do usuario logado (hierarquia/perfis) e dos microservicos financeiro (contratoService/configuracaoParcelaService) e basico (pessoa)
-        return Uni.createFrom().voidItem();
-    }
 
     public Uni<Void> atualizarDataVencimento(Long parcelaId, Date novaData) {
         String sql = "UPDATE fin_parcela SET data_vencimento = ? WHERE data_pagamento IS NULL AND id = ?";
@@ -196,21 +151,17 @@ public class GestaoAlunoService {
     }
 
 
-    // Migrado de GestaoAlunoController.autoCompleteAluno (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GestaoAlunoController.java:671, camada controller)
-    // Logica original (adaptar):
-    // public List<Pessoa> autoCompleteAluno(String query) {
-    //         return contratoService.autoCompleteAluno(query);
-    //     }
-    public Uni<List<Long>> autoCompleteAluno(String query) {
-        // Obs: depende do microservico financeiro (contratoService.autoCompleteAluno)
-        return Uni.createFrom().item(java.util.List.of());
+public Uni<List<Long>> autoCompleteAluno(String query) {
+        String q = query == null ? "" : query.toLowerCase();
+        return repository.find("lower(nome) like ?1", "%" + q + "%").list()
+                .map(list -> list.stream().map(x -> x.id).toList());
     }
 
     public Uni<String> gerarContrato(Long ccId, Long usuarioId) {
         return Uni.createFrom().item(() -> {
             try (InputStream templateStream = getClass().getResourceAsStream("/relatorios/modeloContrato.docx")) {
                 if (templateStream == null) {
-                    throw new RuntimeException("Template de contrato não encontrado");
+                    throw new RuntimeException("Template de contrato nÃ£o encontrado");
                 }
 
                 WordprocessingMLPackage wordPackage = WordprocessingMLPackage.load(templateStream);
@@ -244,7 +195,7 @@ public class GestaoAlunoService {
         return Uni.createFrom().item(() -> {
             try (InputStream templateStream = getClass().getResourceAsStream("/relatorios/modeloPromissoria.docx")) {
                 if (templateStream == null) {
-                    throw new RuntimeException("Template de promissória não encontrado");
+                    throw new RuntimeException("Template de promissÃ³ria nÃ£o encontrado");
                 }
 
                 WordprocessingMLPackage wordPackage = WordprocessingMLPackage.load(templateStream);
@@ -268,8 +219,8 @@ public class GestaoAlunoService {
 
                 return base64Pdf;
             } catch (Exception e) {
-                LOG.errorf(e, "Erro ao gerar promissória %d", ccId);
-                throw new RuntimeException("Erro ao gerar promissória: " + e.getMessage(), e);
+                LOG.errorf(e, "Erro ao gerar promissÃ³ria %d", ccId);
+                throw new RuntimeException("Erro ao gerar promissÃ³ria: " + e.getMessage(), e);
             }
         });
     }
@@ -334,7 +285,7 @@ public class GestaoAlunoService {
                         .setParameter(1, usuarioId)
                         .setParameter(2, contratoId)
                         .executeUpdate())
-                .subscribe().with(v -> LOG.infof("Download de promissória registrado: contrato=%d, usuario=%d", contratoId, usuarioId));
+                .subscribe().with(v -> LOG.infof("Download de promissÃ³ria registrado: contrato=%d, usuario=%d", contratoId, usuarioId));
     }
 
     public Uni<List<Long>> buscarParcelas(Long contratoId) {
@@ -438,7 +389,7 @@ public class GestaoAlunoService {
 
     public Uni<Void> ajustarResponsavel(Long contratoId, Long responsavelId) {
         if (contratoId == null || responsavelId == null) {
-            return Uni.createFrom().failure(new IllegalArgumentException("Parâmetros inválidos"));
+            return Uni.createFrom().failure(new IllegalArgumentException("ParÃ¢metros invÃ¡lidos"));
         }
         return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session ->
                 session.createNativeQuery("UPDATE edu_contrato SET responsavel_id = ?1 WHERE id = ?2")
@@ -448,7 +399,7 @@ public class GestaoAlunoService {
 
     public Uni<Void> ajustarUnidadeResponsavel(Long contratoId, Long unidadeResponsavelId) {
         if (contratoId == null || unidadeResponsavelId == null) {
-            return Uni.createFrom().failure(new IllegalArgumentException("Parâmetros inválidos"));
+            return Uni.createFrom().failure(new IllegalArgumentException("ParÃ¢metros invÃ¡lidos"));
         }
         return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session ->
                 session.createNativeQuery("UPDATE edu_contrato SET unidade_responsavel_id = ?1 WHERE id = ?2")
@@ -463,18 +414,6 @@ public class GestaoAlunoService {
         return io.quarkus.hibernate.reactive.panache.Panache.getSession().chain(session ->
                 session.createNativeQuery("SELECT responsavel_id FROM edu_contrato WHERE aluno_id = ?1").setParameter(1, alunoId).getResultList())
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
-    }
-
-
-    // Migrado de GestaoAlunoController.verificarAcesso (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GestaoAlunoController.java:1686, camada controller)
-    // Observacao: parametro tipo: era TipoAcesso no legado; parametro modulo: era ModuloFacade no legado
-    // Logica original (adaptar):
-    // protected boolean verificarAcesso(TipoAcesso tipo, ModuloFacade modulo) {
-    //         return JSFUtil.getUsuarioLogado().verificarAcesso(tipo, modulo);
-    //     }
-    public Uni<Boolean> verificarAcesso(String tipo, String modulo) {
-        // Obs: depende do usuario logado (JSFUtil.getUsuarioLogado().verificarAcesso, microservico de autenticacao)
-        return Uni.createFrom().item(false);
     }
 
 }

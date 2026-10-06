@@ -106,11 +106,6 @@ public class FundoCaixaService {
                 });
     }
 
-    // Versão sem parâmetros para compatibilidade com controller
-    public Uni<Boolean> verificarSenhaResponsavel() {
-        return Uni.createFrom().item(false);
-    }
-
     public Uni<CaixaResponse> fecharCaixa(Long caixaId, Long configuracaoCaixaId, String senha) {
         return verificarSenhaResponsavel(configuracaoCaixaId, senha)
                 .chain(valido -> {
@@ -221,11 +216,6 @@ public class FundoCaixaService {
                     return impressoraService.imprimirComprovante(comprovante)
                             .chain(v -> controleImpressaoService.registrarImpressao(movimentacaoFinanceiraId, usuarioId));
                 });
-    }
-
-    // Versão sem parâmetros para compatibilidade com controller
-    public Uni<Void> imprimirSegundaVia() {
-        return Uni.createFrom().voidItem();
     }
 
     public Uni<CaixaComConfiguracao> buscarCaixaPorMovimentacao(Long movimentacaoFinanceiraId) {

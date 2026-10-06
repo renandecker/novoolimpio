@@ -1,16 +1,15 @@
-﻿import {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import type {ReactNode} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
-import type {ApiItem, SearchFilterRequest, FilterCondition, QueryOperation} from '../types/types';
+import type {ApiItem, SearchFilterRequest, FilterCondition, QueryOperation, SortRequest} from '../types/types';
 import {STRING_OPERATIONS, NUMBER_OPERATIONS} from '../types/types';
 import {api} from '../services/api';
 import {useModulePaged} from '../hooks/useModulePaged';
-import {executeAction, type Action} from '../services/actions';
 import {usePermissions, useCurrentOutcome} from '../services/permissions';
 import {useAuth} from '../../features/auth/auth';
 import {BooleanField} from './BooleanField';
-import {PerfilModuloPermissions} from '../hooks/useModulePaged';
+import {VerificarAcessoResponse} from '../hooks/useModulePaged';
 import {IconPickerButton} from './IconPickerModal';
 import {RowMenu} from './RowMenu';
 import './IconPicker.css';
@@ -70,7 +69,7 @@ export interface DataTableRowMenu {
     items: DataTableRowAction[];
 }
 
-interface UsePagedHookResult {
+export interface UsePagedHookResult {
     data?: { content: ApiItem[]; totalElements: number; totalPages: number };
     isLoading: boolean;
     isError: boolean;
@@ -81,7 +80,7 @@ interface UsePagedHookResult {
     remove: { mutate: (id: number, options?: { onSuccess?: () => void; onError?: (error: unknown) => void }) => void };
 }
 
-type UsePagedHook = (page: number, size: number, params?: Record<string, unknown>, filters?: SearchFilterRequest, sort?: SortRequest) => UsePagedHookResult;
+export type UsePagedHook = (page: number, size: number, params?: Record<string, unknown>, filters?: SearchFilterRequest, sort?: SortRequest) => UsePagedHookResult;
 
 interface DataTableProps {
     path?: string;
@@ -120,7 +119,7 @@ const toTitle = (value: string) =>
         .replace(/_/g, ' ')
         .replace(/^./, (c) => c.toUpperCase());
 
-const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
 
 const fkBase = (key: string): string | null => (key.startsWith('id_') ? key.slice(3) : null);
 
@@ -296,7 +295,6 @@ export function DataTable({path = '', columns, params, module = 'basico', outcom
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(PAGE_SIZES[0]);
     const [modal, setModal] = useState<ModalState>(null);
-    const [executing, setExecuting] = useState<Action | null>(null);
     const [notice, setNotice] = useState<string>('');
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
     const [filterModal, setFilterModal] = useState<FilterModalState>({open: false, filters: {filters: {}}});
@@ -308,12 +306,22 @@ export function DataTable({path = '', columns, params, module = 'basico', outcom
     const routeOutcome = useCurrentOutcome();
     const screenOutcome = outcome ?? routeOutcome;
 
-    const hasPath = Boolean(path);
-    const q = hasPath
+    const hasPath = Boolean(path) || Boolean(useCustomPaged);
+    const noopMutate = () => {};
+    const q: UsePagedHookResult = hasPath
         ? (useCustomPaged
             ? useCustomPaged(page, size, params, filterParams, sortRequest)
             : useModulePaged(path, page, size, params, filterParams, sortRequest))
-        : {data: {content: data ?? [], totalElements: (data ?? []).length, totalPages: 1}, refetch: () => {}, isLoading: false, isError: false};
+        : {
+            data: {content: data ?? [], totalElements: (data ?? []).length, totalPages: 1},
+            refetch: () => {},
+            isLoading: false,
+            isError: false,
+            isFetching: false,
+            create: {mutate: noopMutate},
+            update: {mutate: noopMutate},
+            remove: {mutate: noopMutate},
+        };
     const items = q.data?.content ?? [];
     const totalElements = q.data?.totalElements ?? 0;
     const totalPages = Math.max(1, q.data?.totalPages ?? 0);
@@ -330,50 +338,44 @@ export function DataTable({path = '', columns, params, module = 'basico', outcom
     const subCols = cols.slice(mainLimit);
     const expandable = subCols.length > 0;
 
-    // Fetch perfil module permissions from bas_perfil_modulo
-    const [perfilModuloPermissions, setPerfilModuloPermissions] = useState<PerfilModuloPermissions | null>(null);
+// Fetch das permissoes do perfil na tela. O endpoint resolve as flags por outcome
+// da tela (bas_modulo.outcome) a partir dos booleanos de bas_perfil_modulo, e nao
+// pelo path da API: enviar `path` aqui nunca casaria com a chave do mapa.
+    const [perfilModuloPermissions, setPerfilModuloPermissions] = useState<VerificarAcessoResponse | null>(null);
     const [perfilModuloLoading, setPerfilModuloLoading] = useState(false);
 
     useEffect(() => {
-        if (!hasPath) return;
+        if (!screenOutcome) return;
+        let cancelado = false;
         const carregarPermissoes = async () => {
             setPerfilModuloLoading(true);
             try {
-                const response = await api.get<PerfilModuloPermissions>(`/api/permissao/permissoes?caminho=${path}`);
-                setPerfilModuloPermissions(response.data);
+                const response = await api.get<VerificarAcessoResponse>(
+                    `/api/basico/verificar-acesso?outcome=${encodeURIComponent(screenOutcome)}`);
+                if (!cancelado) setPerfilModuloPermissions(response.data);
             } catch (error) {
+                if (!cancelado) setPerfilModuloPermissions(null);
                 console.error('Erro ao carregar permissões do perfil-modulo:', error);
             } finally {
-                setPerfilModuloLoading(false);
+                if (!cancelado) setPerfilModuloLoading(false);
             }
         };
         carregarPermissoes();
-    }, [path, hasPath]);
+        return () => { cancelado = true; };
+    }, [screenOutcome]);
 
     const canCreate = !hideCreate && (can('CREATE', screenOutcome) || (perfilModuloPermissions?.novo ?? false));
     const canUpdate = !hideUpdate && (can('UPDATE', screenOutcome) || (perfilModuloPermissions?.editar ?? false));
     const canDelete = !hideDelete && (can('DELETE', screenOutcome) || (perfilModuloPermissions?.remover ?? false));
     const perfilPermissionsAdmin = perfilModuloPermissions?.admin ?? false;
-    const canRelatorio = !hideView && (isUserAdmin || perfilPermissionsAdmin || can('EXECUTE', screenOutcome));
+    const canRelatorio = !hideView && (isUserAdmin || perfilPermissionsAdmin
+        || can('EXECUTE', screenOutcome) || (perfilModuloPermissions?.relatorio ?? false));
 
     const feature = path.split('/').filter(Boolean)[2] ?? '';
     const resource = path.split('/').filter(Boolean)[3] ?? '';
     const entityTitle = toTitle(resource.replace(/^(form|list|colunas)/i, '') || resource);
 
-
-    const runAction = (action: Action, item: ApiItem) => {
-        setExecuting(action);
-        setNotice('');
-        executeAction(feature, action, JSON.stringify({id: item.id}), module, screenOutcome)
-            .then(() => {
-                setNotice(`Ação "${toTitle(action)}" executada no registro ${item.id}.`);
-                q.refetch();
-            })
-            .catch((error) => setNotice(`Falha ao executar "${toTitle(action)}": ${apiErrorMessage(error)}`))
-            .finally(() => setExecuting(null));
-    };
-
-const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem) => ReactNode }> = [];
+    const actionColumns: Array<{ key: string; label: string; render: (item: ApiItem) => ReactNode }> = [];
     if (canRelatorio) {
         actionColumns.push({
             key: 'ver',

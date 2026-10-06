@@ -61,24 +61,4 @@ public class RelatorioService {
         return new RelatorioResponse(e.id, e.nome, e.dadosJson);
     }
 
-    // Migrado de RelatorioController.carregarRelatorio (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/RelatorioController.java:34, camada controller)
-    // Logica original (adaptar):
-    // public void carregarRelatorio() {
-    //         String from = "";
-    //         conexaoOlimpio = new JdbcTemplate(dataSource);
-    // 
-    // 		/*String unidade = "";
-    // 		for(Unidade uni: usuarioLogadoController.getUnidadesDisponiveis()){
-    // 			if(!unidade.equals("")){
-    // 				unidade=unidade+","+uni.getId();
-    // 			}else{
-    // 				unidade= String.valueOf(uni.getId());
-    // 			}
-    // 		}
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> carregarRelatorio() {
-        // Obs: logica de UI do controlador JSF legado (monta lazy data models via JdbcTemplate) e depende do microservico basico (usuario logado), sem equivalente reativo
-        return Uni.createFrom().voidItem();
-    }
-
 }

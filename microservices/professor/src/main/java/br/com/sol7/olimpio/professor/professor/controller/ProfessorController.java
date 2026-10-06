@@ -55,28 +55,14 @@ public class ProfessorController {
         return service.delete(id);
     }
 
-    @GET
-    @Path("/buscar-detalhes")
-    public Uni<Void> buscarDetalhes(@QueryParam("event") String event) {
-        return service.buscarDetalhes(event);
-    }
-
-
-    @GET
+@GET
     @Path("/auto-complete-professor")
     public Uni<List<ProfessorAutoCompleteResponse>> autoCompleteProfessor(@QueryParam("query") String query) {
         return service.autoCompleteProfessor(query);
     }
 
 
-    @GET
-    @Path("/carregar-professor")
-    public Uni<Void> carregarProfessor(@QueryParam("professorId") Long professorId) {
-        return service.carregarProfessor(professorId);
-    }
-
-
-    @GET
+@GET
     @Path("/buscar-professor-com-unidades")
     public Uni<Long> buscarProfessorComUnidades(@QueryParam("entityId") Long entityId) {
         return service.buscarProfessorComUnidades(entityId);

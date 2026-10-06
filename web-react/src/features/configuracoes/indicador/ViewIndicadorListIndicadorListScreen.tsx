@@ -1,6 +1,6 @@
 import {Fragment, useEffect, useMemo, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {PermissionGate, usePermissions} from '../../../shared/services/permissions';
+import {PermissionGate, useCurrentOutcome, usePermissions} from '../../../shared/services/permissions';
 import {api} from '../../../shared/services/api';
 import {useModulePaged} from '../../../shared/hooks/useModulePaged';
 import type {ApiItem} from '../../../shared/types/types';
@@ -229,6 +229,7 @@ const asRecord = (item: ApiItem) => rec(item);
 export default function ViewIndicadorListIndicadorListScreen() {
     const navigate = useNavigate();
     const {can} = usePermissions();
+    const outcome = useCurrentOutcome();
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(10);
     const [busca, setBusca] = useState('');
@@ -259,7 +260,7 @@ export default function ViewIndicadorListIndicadorListScreen() {
                         </nav>
                     </div>
                     <div className="page-header-actions">
-                        {can('CREATE') && (
+                        {can('CREATE', outcome) && (
                             <button
                                 type="button"
                                 className="btnblue"
@@ -329,7 +330,7 @@ export default function ViewIndicadorListIndicadorListScreen() {
                                             <td style={{textAlign: 'center'}}>{bool(row.fl_semana) ? 'Sim' : 'Não'}</td>
                                             <td style={{textAlign: 'center'}}>{bool(row.fl_dia) ? 'Sim' : 'Não'}</td>
                                             <td style={{textAlign: 'center', whiteSpace: 'nowrap'}}>
-                                                {can('UPDATE') && (
+                                                {can('UPDATE', outcome) && (
                                                     <button
                                                         type="button"
                                                         className="btngreen"
@@ -339,7 +340,7 @@ export default function ViewIndicadorListIndicadorListScreen() {
                                                         Alterar
                                                     </button>
                                                 )}
-                                                {can('UPDATE') && (
+                                                {can('UPDATE', outcome) && (
                                                     <button
                                                         type="button"
                                                         className="btnblue"

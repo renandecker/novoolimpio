@@ -50,12 +50,6 @@ public class ConfiguracaoParcelaController {
         return service.delete(id);
     }
 
-    @GET
-    @Path("/carregar-novo-cancelamento")
-    public Uni<Void> carregarNovoCancelamento() {
-        return service.carregarNovoCancelamento();
-    }
-
 
     @GET
     @Path("/buscar-conf")

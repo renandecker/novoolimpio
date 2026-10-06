@@ -137,36 +137,21 @@ public class PessoaFisicaService {
     }
 
 
-    // Migrado de PessoaFisicaController.autoCompleteTodos (src/main/java/br/com/sol7/olimpio/control/controllers/basico/PessoaFisicaController.java:639, camada controller)
-    // Logica original (adaptar):
-    // public List<Pessoa> autoCompleteTodos(String query) {
-    //         return pessoaFisicaService.autoCompleteTodos(query);
-    //     }
     public Uni<List<Long>> autoCompleteTodos(String query) {
-        // Obs: depende do usuario logado (unidades disponiveis) para filtrar
-        return Uni.createFrom().item(java.util.List.of());
+        String q = query == null ? "" : query.toLowerCase();
+        return repository.autoCompleteTodos(q);
     }
 
 
-    // Migrado de PessoaFisicaController.autoCompleteContratoTodos (src/main/java/br/com/sol7/olimpio/control/controllers/basico/PessoaFisicaController.java:643, camada controller)
-    // Logica original (adaptar):
-    // public List<Pessoa> autoCompleteContratoTodos(String query) {
-    //         return contratoService.autoCompleteAluno(query);
-    //     }
     public Uni<List<Long>> autoCompleteContratoTodos(String query) {
-        // Obs: depende do microservico educacao (Contrato) - contratoService.autoCompleteAluno
-        return Uni.createFrom().item(java.util.List.of());
+        return repository.find("pessoa.tipo = 'J' and lower(pessoa.nome) like ?1", "%" + query.toLowerCase() + "%").list()
+                .map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
-    // Migrado de PessoaFisicaController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/basico/PessoaFisicaController.java:648, camada controller)
-    // Logica original (adaptar):
-    // public List<Pessoa> autoComplete(String query) {
-    //         return pessoaFisicaService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
-        // Obs: depende do usuario logado (unidades disponiveis) para filtrar
-        return Uni.createFrom().item(java.util.List.of());
+        String q = query == null ? "" : query.toLowerCase();
+        return repository.autoComplete(q);
     }
 
 

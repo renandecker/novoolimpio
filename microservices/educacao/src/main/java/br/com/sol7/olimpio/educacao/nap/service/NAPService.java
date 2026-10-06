@@ -8,10 +8,13 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
+import org.jboss.logging.Logger;
 
 @ApplicationScoped
 @WithTransaction
 public class NAPService {
+
+    private static final Logger LOG = Logger.getLogger(NAPService.class);
 
     @Inject
     NAPRepository repository;
@@ -89,48 +92,6 @@ public class NAPService {
         return repository.atualizaNapsContratoNota(oferecimentoComponenteCurricularId).replaceWithVoid();
     }
 
-    // Migrado de NAPController.carregarContrato (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/NAPController.java:285, camada controller)
-    // Logica original (adaptar):
-    // public void carregarContrato(String cc) {
-    //         this.contrato = contratoService.findById(Integer.valueOf(cc));
-    //     }
-    public Uni<Void> carregarContrato(String cc) {
-        // Obs: depende do microservico contrato
-        return Uni.createFrom().voidItem();
-    }
 
-
-    // Migrado de NAPController.carregarDetalhes (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/NAPController.java:289, camada controller)
-    // Logica original (adaptar):
-    // public void carregarDetalhes(String cc) {
-    //         this.contrato = contratoService.findById(Integer.valueOf(cc));
-    //         this.contrato.setUnidadeResponsavel(unidadeService.buscarUnidadeComTelefones(contrato.getUnidadeResponsavel()));
-    //         this.contrato.setUnidade(unidadeService.buscarUnidadeComTelefones(contrato.getUnidade()));
-    //         this.contrato.getPessoa().getPessoaFisica().setPessoa(pessoaService.buscarPessoaComUnidades(contrato.getPessoa()));
-    //         if (!ObjectUtil.nullOrEmpty(this.contrato.getResponsavel())) {
-    //             this.contrato.getResponsavel().getPessoaFisica().setPessoa(pessoaService.buscarPessoaComUnidades(contrato.getResponsavel()));
-    //         }
-    //         napLigacaoPenden ...
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> carregarDetalhes(String cc) {
-        // Obs: depende dos microservicos contrato, unidade e pessoa
-        return Uni.createFrom().voidItem();
-    }
-
-
-    // Migrado de NAPController.buscarDetalhePresencasTrocaTurma (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/NAPController.java:538, camada controller)
-    // Observacao: parametro event: era ToggleEvent no legado
-    // Logica original (adaptar):
-    // public void buscarDetalhePresencasTrocaTurma(ToggleEvent event) {
-    //         if (event.getVisibility() == Visibility.VISIBLE) {
-    //             TrocaTurma mmm = (TrocaTurma) event.getData();
-    //             FilterPresencaComMatricula filterMaterialPessoa = new FilterPresencaComMatricula(mmm.getMatricula(), mmm.getTurmaAntes());
-    //             cadernoComponenteCurriculars = new BaseLazyModelJPASpecific<CadernoComponenteCurricular>(cadernoComponenteCurricularService.getCadernoComponenteCurricularRepository(), filterMaterialPessoa);
-    //         }
-    //     }
-    public Uni<Void> buscarDetalhePresencasTrocaTurma(String event) {
-        // Obs: regra de negocio original e de UI (ToggleEvent PrimeFaces)
-        return Uni.createFrom().voidItem();
-    }
 
 }

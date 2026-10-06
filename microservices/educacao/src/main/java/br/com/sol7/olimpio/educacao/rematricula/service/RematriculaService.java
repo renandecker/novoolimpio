@@ -56,15 +56,4 @@ public class RematriculaService {
         return new RematriculaResponse(e.id, e.nome, e.dadosJson);
     }
 
-    // Migrado de RematriculaController.buscarRequisitos (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/RematriculaController.java:198, camada controller)
-    // Observacao: parametro curriculoId: era Curriculo (referencia por id)
-    // Logica original (adaptar):
-    // private void buscarRequisitos(Curriculo curriculo) {
-    //         requisitosRequisitoMatriz = MatriculaController.adicionarRequisitosMatriz(curriculo, curriculoService, requisitoMatrizService);
-    //     }
-    public Uni<Void> buscarRequisitos(Long curriculoId) {
-        // Obs: depende do microservico curriculo (RequisitoMatriz)
-        return Uni.createFrom().voidItem();
-    }
-
 }

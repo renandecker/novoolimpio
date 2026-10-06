@@ -50,26 +50,6 @@ public class GestaoAlunoController {
         return service.delete(id);
     }
 
-    @GET
-    @Path("/carregar-pre-cancelamentos-contrato")
-    public Uni<Void> carregarPreCancelamentosContrato(@QueryParam("contratoId") Long contratoId) {
-        return service.carregarPreCancelamentosContrato(contratoId);
-    }
-
-
-    @GET
-    @Path("/carregar-pre-cancelamentos-matricula")
-    public Uni<Void> carregarPreCancelamentosMatricula(@QueryParam("matriculaId") Long matriculaId) {
-        return service.carregarPreCancelamentosMatricula(matriculaId);
-    }
-
-
-    @GET
-    @Path("/verificar-c-onfigura-parcela-global")
-    public Uni<Void> verificarCOnfiguraParcelaGlobal() {
-        return service.verificarCOnfiguraParcelaGlobal();
-    }
-
 
     @POST
     @Path("/atualizar-data-vencimento")
@@ -79,7 +59,7 @@ public class GestaoAlunoController {
             try {
                 date = new java.text.SimpleDateFormat("yyyy-MM-dd").parse(novaData);
             } catch (java.text.ParseException e) {
-                throw new jakarta.ws.rs.BadRequestException("Formato de data inválido. Use yyyy-MM-dd");
+                throw new jakarta.ws.rs.BadRequestException("Formato de data invÃ¡lido. Use yyyy-MM-dd");
             }
         }
         return service.atualizarDataVencimento(parcelaId, date);
@@ -166,7 +146,7 @@ public class GestaoAlunoController {
             try {
                 date = new java.text.SimpleDateFormat("yyyy-MM-dd").parse(dataPrimeiraParcela);
             } catch (java.text.ParseException e) {
-                throw new jakarta.ws.rs.BadRequestException("Formato de data inválido. Use yyyy-MM-dd");
+                throw new jakarta.ws.rs.BadRequestException("Formato de data invÃ¡lido. Use yyyy-MM-dd");
             }
         }
         return service.buscarDiasPagamento(unidadeId, date, prazoReparcSegunda);
@@ -247,13 +227,6 @@ public class GestaoAlunoController {
     @Path("/carregar-responsaveis")
     public Uni<List<Long>> carregarResponsaveis(@QueryParam("alunoId") Long alunoId) {
         return service.carregarResponsaveis(alunoId);
-    }
-
-
-    @GET
-    @Path("/verificar-acesso")
-    public Uni<Boolean> verificarAcesso(@QueryParam("tipo") String tipo, @QueryParam("modulo") String modulo) {
-        return service.verificarAcesso(tipo, modulo);
     }
 
 }

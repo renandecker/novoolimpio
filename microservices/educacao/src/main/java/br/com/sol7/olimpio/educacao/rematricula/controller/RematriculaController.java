@@ -50,10 +50,4 @@ public class RematriculaController {
         return service.delete(id);
     }
 
-    @GET
-    @Path("/buscar-requisitos")
-    public Uni<Void> buscarRequisitos(@QueryParam("curriculoId") Long curriculoId) {
-        return service.buscarRequisitos(curriculoId);
-    }
-
 }

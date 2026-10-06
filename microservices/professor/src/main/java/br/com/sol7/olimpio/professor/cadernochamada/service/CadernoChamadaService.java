@@ -72,32 +72,8 @@ public class CadernoChamadaService {
         return new CadernoChamadaResponse(e.id, e.nome, e.dadosJson);
     }
 
-    public Uni<Void> carregarHistoricoChamada() {
-        return Uni.createFrom().voidItem();
-    }
-
-    public Uni<Void> carregarPendenciaProfessor() {
-        return Uni.createFrom().voidItem();
-    }
-
-    public Uni<Void> carregarPendencia(Long pessoaId) {
-        return Uni.createFrom().voidItem();
-    }
-
-    public Uni<Void> verificarPendencias() {
-        return Uni.createFrom().voidItem();
-    }
-
-    public Uni<Void> buscarOcorrencia() {
-        return Uni.createFrom().voidItem();
-    }
-
     public Uni<Long> verificarPresenca(Long matriculaId, Long ocorrenciaComponenteCurricularId) {
         return Uni.createFrom().item(null);
-    }
-
-    public Uni<Void> carregarCronograma() {
-        return Uni.createFrom().voidItem();
     }
 
     public Uni<List<Long>> autoComplete(String query) {
@@ -106,10 +82,6 @@ public class CadernoChamadaService {
 
     public Uni<List<Integer>> buscarQuantidadeNotas() {
         return Uni.createFrom().item(java.util.List.of());
-    }
-
-    public Uni<Boolean> verificarAcesso(String tipo, String modulo) {
-        return Uni.createFrom().item(false);
     }
 
 }

@@ -93,25 +93,15 @@ public class PessoaJuridicaService {
     }
 
 
-    // Migrado de PessoaJuridicaController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/basico/PessoaJuridicaController.java:466, camada controller)
-    // Logica original (adaptar):
-    // public List<Pessoa> autoComplete(String query) {
-    //         return pessoaJuridicaService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
-        // Obs: depende do usuario logado (unidades disponiveis) para filtrar
-        return Uni.createFrom().item(java.util.List.of());
+        String q = query == null ? "" : query.toLowerCase();
+        return repository.autoComplete(q);
     }
 
 
-    // Migrado de PessoaJuridicaController.autoCompleteTodos (src/main/java/br/com/sol7/olimpio/control/controllers/basico/PessoaJuridicaController.java:470, camada controller)
-    // Logica original (adaptar):
-    // public List<Pessoa> autoCompleteTodos(String query) {
-    //         return pessoaJuridicaService.autoCompleteTodos(query);
-    //     }
     public Uni<List<Long>> autoCompleteTodos(String query) {
-        // Obs: depende do usuario logado (unidades disponiveis) para filtrar
-        return Uni.createFrom().item(java.util.List.of());
+        String q = query == null ? "" : query.toLowerCase();
+        return repository.autoCompleteTodos(q);
     }
 
 

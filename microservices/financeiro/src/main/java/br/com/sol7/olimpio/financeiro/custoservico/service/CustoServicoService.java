@@ -72,23 +72,6 @@ public class CustoServicoService {
     }
 
 
-    // Migrado de CustoServicoController.buscarMovimentacoes (src/main/java/br/com/sol7/olimpio/control/controllers/financeiro/CustoServicoController.java:102, camada controller)
-    // Observacao: parametro event: era ToggleEvent no legado
-    // Logica original (adaptar):
-    // public void buscarMovimentacoes(ToggleEvent event) {
-    //         if (event.getVisibility() == Visibility.VISIBLE) {
-    //             try {
-    //                 listaDetalheUnidade = custoServicoService.buscarCustoServicoComUnidade((CustoServico) event.getData()).getUnidades();
-    //             } catch (Exception e) {
-    //                 listaDetalheUnidade = new ArrayList<>();
-    //             }
-    //         }
-    //     }
-    public Uni<Void> buscarMovimentacoes(String event) {
-        // Obs: metodo de UI no legado (seta listaDetalheUnidade a partir de buscarCustoServicoComUnidade); sem logica de dados portaivel
-        return Uni.createFrom().voidItem();
-    }
-
     public Uni<Long> buscarCustoServicoComUnidade(Long custoServicoId) {
         return repository.buscarCustoServicoComUnidade(custoServicoId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }

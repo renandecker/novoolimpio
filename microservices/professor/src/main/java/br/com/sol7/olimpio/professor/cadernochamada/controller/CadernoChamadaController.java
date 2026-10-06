@@ -54,51 +54,9 @@ public class CadernoChamadaController {
     }
 
     @GET
-    @Path("/carregar-historico-chamada")
-    public Uni<Void> carregarHistoricoChamada() {
-        return service.carregarHistoricoChamada();
-    }
-
-
-    @GET
-    @Path("/carregar-pendencia-professor")
-    public Uni<Void> carregarPendenciaProfessor() {
-        return service.carregarPendenciaProfessor();
-    }
-
-
-    @GET
-    @Path("/carregar-pendencia")
-    public Uni<Void> carregarPendencia(@QueryParam("pessoaId") Long pessoaId) {
-        return service.carregarPendencia(pessoaId);
-    }
-
-
-    @GET
-    @Path("/verificar-pendencias")
-    public Uni<Void> verificarPendencias() {
-        return service.verificarPendencias();
-    }
-
-
-    @GET
-    @Path("/buscar-ocorrencia")
-    public Uni<Void> buscarOcorrencia() {
-        return service.buscarOcorrencia();
-    }
-
-
-    @GET
     @Path("/verificar-presenca")
     public Uni<Long> verificarPresenca(@QueryParam("matriculaId") Long matriculaId, @QueryParam("ocorrenciaComponenteCurricularId") Long ocorrenciaComponenteCurricularId) {
         return service.verificarPresenca(matriculaId, ocorrenciaComponenteCurricularId);
-    }
-
-
-    @GET
-    @Path("/carregar-cronograma")
-    public Uni<Void> carregarCronograma() {
-        return service.carregarCronograma();
     }
 
 
@@ -113,13 +71,6 @@ public class CadernoChamadaController {
     @Path("/buscar-quantidade-notas")
     public Uni<List<Integer>> buscarQuantidadeNotas() {
         return service.buscarQuantidadeNotas();
-    }
-
-
-    @GET
-    @Path("/verificar-acesso")
-    public Uni<Boolean> verificarAcesso(@QueryParam("tipo") String tipo, @QueryParam("modulo") String modulo) {
-        return service.verificarAcesso(tipo, modulo);
     }
 
 }

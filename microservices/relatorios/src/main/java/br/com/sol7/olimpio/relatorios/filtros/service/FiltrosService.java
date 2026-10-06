@@ -322,62 +322,7 @@ public class FiltrosService {
     }
 
 
-    // Migrado de FiltrosController.carregarTipo (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/FiltrosController.java:276, camada controller)
-    // Logica original (adaptar):
-    // public void carregarTipo() {
-    //         listTipoFiltro = new ArrayList<>();
-    //         listTipoFiltro.add(TipoFiltro.NENHUM);
-    //         if (!ObjectUtil.nullOrEmpty(getEntity().getDimensao())) {
-    //             listTipoFiltro.add(TipoFiltro.NORMAL);
-    //             if (!getEntity().getDimensao().getTipoInfo().equals("DESCRITIVO")) {
-    //                 listTipoFiltro.add(TipoFiltro.FAIXA);
-    //                 listTipoFiltro.add(TipoFiltro.PERIODICO);
-    //             } else {
-    //                 listTipoFiltro.add(TipoFiltro.FIXO);
-    //                 listTipoFiltro.add(TipoFiltro.MULTIPLO);
-    //             }
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> carregarTipo() {
-        // Obs: logica de UI do controlador JSF legado (monta listTipoFiltro na tela com base no estado da entidade), sem equivalente reativo
-        return Uni.createFrom().voidItem();
-    }
 
-
-    // Migrado de FiltrosController.carregarOperacaoQuery (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/FiltrosController.java:487, camada controller)
-    // Logica original (adaptar):
-    // public void carregarOperacaoQuery() {
-    //         listOperation = new ArrayList<>();
-    //         listOperation.add(QueryOperation.EQ);
-    //         listOperation.add(QueryOperation.NOT_EQUAL);
-    //         listOperation.add(QueryOperation.GREATER_THAN);
-    //         listOperation.add(QueryOperation.GREATER_THAN_OR_EQUAL);
-    //         listOperation.add(QueryOperation.LESS_THAN);
-    //         listOperation.add(QueryOperation.LESS_THAN_OR_EQUAL);
-    //     }
-    public Uni<Void> carregarOperacaoQuery() {
-        // Obs: logica de UI do controlador JSF legado (monta listOperation na tela), sem equivalente reativo
-        return Uni.createFrom().voidItem();
-    }
-
-
-    // Migrado de FiltrosController.buscarDadosTipo (src/main/java/br/com/sol7/olimpio/control/controllers/relatorios/FiltrosController.java:692, camada controller)
-    // Logica original (adaptar):
-    // public void buscarDadosTipo() {
-    //         if (getEntity().getTipo() != null && getEntity().isFixo()) {
-    //             if (getEntity().getDimensao().getTipoInfo().equals("TEMPO")) {
-    //                 periodosDinamicos = montaPeriodoDinamico();
-    //                 carregarOperacaoQuery();
-    //             } else {
-    //                 filtrosRelatorioWapper.setListaTodosSelected(new ArrayList<>());
-    //                 conexaoBancos = new JdbcTemplate(dataSource);
-    //                 colunaTabelaWapperLazyDataModel = new RelatorioTabelaDimenaoLazyModel(hibernateService, conexaoBancos, getEntity().getDimensao(), "");
-    //             }
-    //         }
-    //     }
-    public Uni<Void> buscarDadosTipo() {
-        // Obs: logica de UI do controlador JSF legado (JdbcTemplate/RelatorioTabelaDimenaoLazyModel e estado da tela), sem equivalente reativo
-        return Uni.createFrom().voidItem();
-    }
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 

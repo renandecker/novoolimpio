@@ -64,12 +64,6 @@ public class MetaController {
         return service.delete(id);
     }
 
-    @POST
-    @Path("/atualizar-operadores")
-    public Uni<Void> atualizarOperadores(@QueryParam("event") String event) {
-        return service.atualizarOperadores(event);
-    }
-
     @GET
     @Path("/buscar-meta-operador-dia")
     public Uni<Integer> buscarMetaOperadorDia(@QueryParam("data") Date data, @QueryParam("operadorId") Long operadorId) {

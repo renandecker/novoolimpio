@@ -2,11 +2,21 @@ import {keepPreviousData, useMutation, useQuery, useQueryClient} from '@tanstack
 import {api} from '../services/api';
 import type {ApiItem, ApiRequest, PagedResponse, ModulePermissions, SearchFilterRequest, SortRequest} from '../types/types';
 
-export interface PerfilModuloPermissions {
+/**
+ * Resposta de GET /api/basico/verificar-acesso. O outcome identifica a tela em
+ * bas_modulo e as flags vem dos booleanos de bas_perfil_modulo dos perfis do
+ * usuario autenticado.
+ */
+export interface VerificarAcessoResponse {
+    outcome: string;
+    admin: boolean;
+    conhecido: boolean;
+    leitura: boolean;
     novo: boolean;
     editar: boolean;
     remover: boolean;
     relatorio: boolean;
+    permissoes: string[];
 }
 
 export const useModulePaged = (

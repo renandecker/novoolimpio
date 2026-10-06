@@ -152,18 +152,6 @@ public class CoordenadorController {
     }
 
     @GET
-    @Path("/buscar-ligacoes-prioritarias")
-    public Uni<Void> buscarLigacoesPrioritariasLegacy() {
-        return Uni.createFrom().voidItem();
-    }
-
-    @GET
-    @Path("/buscar-ligacoes")
-    public Uni<Void> buscarLigacoesLegacy(@QueryParam("opId") Long opId) {
-        return Uni.createFrom().voidItem();
-    }
-
-    @GET
     @Path("/telefonos-prospecto")
     public Uni<List<String>> telefonesProspecto(@QueryParam("prospectoId") Long prospectoId) {
         return service.telefonesProspecto(prospectoId);

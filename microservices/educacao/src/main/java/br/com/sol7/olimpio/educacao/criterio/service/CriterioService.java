@@ -119,28 +119,17 @@ public class CriterioService {
     }
 
 
-    // Migrado de CriterioController.autoCompleteCurriculo (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/CriterioController.java:135, camada controller)
-    // Logica original (adaptar):
-    // public List<Curriculo> autoCompleteCurriculo(String query) {
-    //         if (!query.equals("")) {
-    //             return curriculoService.autoCompleteComUnidades(query, usuarioLogadoController.getUnidadesDisponiveis());
-    //         }
-    //         return curriculoService.autoCompleteComUnidades(usuarioLogadoController.getUnidadesDisponiveis());
-    //     }
     public Uni<List<Long>> autoCompleteCurriculo(String query) {
-        // Obs: depende do estado da tela (unidades disponiveis do usuario logado, curriculoService)
-        return Uni.createFrom().item(java.util.List.of());
+        String q = query == null ? "" : query.toLowerCase();
+        return repository.find("lower(nome) like ?1", "%" + q + "%").list()
+                .map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
-    // Migrado de CriterioController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/CriterioController.java:260, camada controller)
-    // Logica original (adaptar):
-    // public List<DiaSemana> autoComplete(String query) {
-    //         return diaSemanaService.autocomplete(query);
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
-        // Obs: depende do microservico basico (diaSemanaService.autocomplete)
-        return Uni.createFrom().item(java.util.List.of());
+        String q = query == null ? "" : query.toLowerCase();
+        return repository.find("lower(nome) like ?1", "%" + q + "%").list()
+                .map(list -> list.stream().map(x -> x.id).toList());
     }
 
     public Uni<Long> buscarCriterioComDiasSemana(Long curriculoId, Long unidadeId) {

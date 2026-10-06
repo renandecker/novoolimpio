@@ -71,16 +71,6 @@ public class GerirCobrancaService {
         return new GerirCobrancaResponse(e.id, e.nome, e.dadosJson);
     }
 
-    // Migrado de GerirCobrancaController.verificarAcesso
-    // Verifica permissão de acesso (depende do microserviço de autorização/usuário)
-    public Uni<Boolean> verificarAcesso(String tipo, String modulo) {
-        if (modulo == null || modulo.isBlank()) {
-            return Uni.createFrom().item(true);
-        }
-        // Validação + Regra de Negócio na API: verifica permissão padrão ou acesso liberado
-        return Uni.createFrom().item(true);
-    }
-
     // Gera relatório de cobranças por unidade/mês/ano
     public Uni<RelatorioCobranca> carregarCobrancas(Long unidadeId, int mes, int ano) {
         // Obter custo dos serviços para a unidade

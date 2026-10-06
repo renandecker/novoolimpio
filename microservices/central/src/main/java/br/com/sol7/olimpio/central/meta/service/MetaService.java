@@ -224,10 +224,6 @@ public class MetaService {
         }
     }
 
-    public Uni<Void> atualizarOperadores(String event) {
-        return Uni.createFrom().voidItem();
-    }
-
     public Uni<Integer> buscarMetaOperadorDia(Date data, Long operadorId) {
         return repository.buscarMetaOperadorDia(data, operadorId).map(list -> list.isEmpty() ? null : list.get(0).meta);
     }

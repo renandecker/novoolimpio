@@ -50,24 +50,4 @@ public class NAPController {
         return service.delete(id);
     }
 
-    @GET
-    @Path("/carregar-contrato")
-    public Uni<Void> carregarContrato(@QueryParam("cc") String cc) {
-        return service.carregarContrato(cc);
-    }
-
-
-    @GET
-    @Path("/carregar-detalhes")
-    public Uni<Void> carregarDetalhes(@QueryParam("cc") String cc) {
-        return service.carregarDetalhes(cc);
-    }
-
-
-    @GET
-    @Path("/buscar-detalhe-presencas-troca-turma")
-    public Uni<Void> buscarDetalhePresencasTrocaTurma(@QueryParam("event") String event) {
-        return service.buscarDetalhePresencasTrocaTurma(event);
-    }
-
 }

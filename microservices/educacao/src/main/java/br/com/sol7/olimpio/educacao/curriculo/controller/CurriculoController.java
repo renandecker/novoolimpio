@@ -85,13 +85,6 @@ public class CurriculoController {
 
 
     @GET
-    @Path("/buscar-produto")
-    public Uni<Void> buscarProduto() {
-        return service.buscarProduto();
-    }
-
-
-    @GET
     @Path("/auto-complete-produto")
     public Uni<List<Long>> autoCompleteProduto(@QueryParam("query") String query) {
         return service.autoCompleteProduto(query);

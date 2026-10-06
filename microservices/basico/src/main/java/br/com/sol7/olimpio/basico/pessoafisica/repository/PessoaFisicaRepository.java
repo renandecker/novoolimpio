@@ -42,6 +42,51 @@ public class PessoaFisicaRepository implements PanacheRepository<PessoaFisica> {
     }
 
 
+    // Variante sem filtro por unidade, projeta somente o id (contrato Uni<List<Long>> do service).
+    // Sem a juncao com bas_unidade nao ha parametro de unidades disponivel; segue o mesmo formato
+    // ja usado por autoCompleteTestemunha(String), tambem sem filtro de unidade.
+    // NOT EXISTS em vez de NOT IN: id_pessoa nulo em edc_professor zeraria o NOT IN inteiro.
+    public static final String SQL_AUTO_COMPLETE_IDS =
+            "SELECT DISTINCT p.id FROM bas_pessoa p " +
+            "LEFT JOIN bas_pessoa_fisica j_p_pessoaFisica ON j_p_pessoaFisica.id_pessoa = p.id " +
+            "WHERE (lower(j_p_pessoaFisica.nome) like '%' || ?1 || '%' " +
+            "OR j_p_pessoaFisica.cpf like '%' || ?1 || '%' " +
+            "OR replace(replace(j_p_pessoaFisica.cpf,'.',''),'-','') like '%' || ?1 || '%' " +
+            "OR lower(j_p_pessoaFisica.nome||j_p_pessoaFisica.cpf) like '%' || lower(?1) || '%' " +
+            "OR lower(j_p_pessoaFisica.nome||' ('||j_p_pessoaFisica.cpf||')') like '%' || lower(?1) || '%' " +
+            "OR replace(replace(lower(j_p_pessoaFisica.nome||' '||j_p_pessoaFisica.cpf),'(',''),')','') like '%' || lower(?1) || '%') " +
+            "AND NOT EXISTS (SELECT 1 FROM edc_professor pr WHERE pr.id_pessoa = p.id) LIMIT 10";
+
+    // Mesma consulta sem a exclusao de professor (equivalente ao SQL_AUTO_COMPLETE_TODOS original).
+    public static final String SQL_AUTO_COMPLETE_TODOS_IDS =
+            "SELECT DISTINCT p.id FROM bas_pessoa p " +
+            "LEFT JOIN bas_pessoa_fisica j_p_pessoaFisica ON j_p_pessoaFisica.id_pessoa = p.id " +
+            "WHERE (lower(j_p_pessoaFisica.nome) like '%' || ?1 || '%' " +
+            "OR j_p_pessoaFisica.cpf like '%' || ?1 || '%' " +
+            "OR replace(replace(j_p_pessoaFisica.cpf,'.',''),'-','') like '%' || ?1 || '%' " +
+            "OR lower(j_p_pessoaFisica.nome||j_p_pessoaFisica.cpf) like '%' || lower(?1) || '%' " +
+            "OR lower(j_p_pessoaFisica.nome||' ('||j_p_pessoaFisica.cpf||')') like '%' || lower(?1) || '%' " +
+            "OR replace(replace(lower(j_p_pessoaFisica.nome||' '||j_p_pessoaFisica.cpf),'(',''),')','') like '%' || lower(?1) || '%') LIMIT 10";
+
+    public Uni<java.util.List<Long>> autoComplete(String query) {
+        return ids(SQL_AUTO_COMPLETE_IDS, query);
+    }
+
+    public Uni<java.util.List<Long>> autoCompleteTodos(String query) {
+        return ids(SQL_AUTO_COMPLETE_TODOS_IDS, query);
+    }
+
+    private Uni<java.util.List<Long>> ids(String sql, String query) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql)
+                        .setParameter(1, query)
+                        .getResultList())
+                .map(rows -> rows.stream()
+                        .map(row -> row instanceof Number n ? n.longValue() : Long.valueOf(row.toString()))
+                        .toList());
+    }
+
+
     // select p from Pessoa p inner join p.unidades u where (lower(p.pessoaFisica.nome) like '%' || ?1 || '%' OR str(p.id) = ?1) and u.ativo = true order by p.pessoaFisica.nome
     public static final String SQL_AUTO_COMPLETE_ACAO =
             "SELECT p.* FROM bas_pessoa p INNER JOIN bas_pessoa_unidade p_u_jt ON p_u_jt.id_pessoa = p.id INNER JOIN bas_unidade u ON u.id = p_u_jt.id_unidade LEFT JOIN bas_pessoa_fisica j_p_pessoaFisica ON j_p_pessoaFisica.id_pessoa = p.id WHERE (lower(j_p_pessoaFisica.nome) like '%' || ?1 || '%' OR CAST(p.id AS text) = ?1) and u.fl_ativo = true ORDER BY j_p_pessoaFisica.nome LIMIT 10";

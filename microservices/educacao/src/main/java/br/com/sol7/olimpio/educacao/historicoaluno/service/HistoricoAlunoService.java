@@ -67,23 +67,6 @@ public class HistoricoAlunoService {
     }
 
 
-    // Migrado de HistoricoAlunoController.carregarUsuarioAgenda (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/HistoricoAlunoController.java:100, camada controller)
-    // Logica original (adaptar):
-    // public void carregarUsuarioAgenda() {
-    //         usuarioAgenda = new UsuarioAgenda();
-    //         Usuario usuarioCarregado = usuarioService.buscarUsuarioComAgendas(usuarioLogadoController.getUsuario());
-    //         for (UsuarioAgenda ua : usuarioCarregado.getUsuarioAgendas()) {
-    //             if (ObjectUtil.nullOrEmpty(usuarioCarregado.getUsuarioAgendas())) {
-    //                 usuarioAgenda = ua;
-    //                 break;
-    //             }
-    //         }
-    //     }
-    public Uni<Void> carregarUsuarioAgenda() {
-        // Obs: depende do microservico basico (usuarioService.buscarUsuarioComAgendas)
-        return Uni.createFrom().voidItem();
-    }
-
     public Uni<Long> buscarHistoricoAlunoComCompromissos(Long historico) {
         return repository.buscarHistoricoAlunoComCompromissos(historico).map(list -> list.isEmpty() ? null : list.get(0).id);
     }

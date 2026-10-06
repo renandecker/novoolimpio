@@ -246,7 +246,7 @@ public class ChamadaAssinadaImpressaService {
     private byte[] gerarRelatorioPdf(String reportPath, Map<String, Object> parameters, List<?> dataSource) {
         try (InputStream reportStream = getClass().getResourceAsStream(reportPath)) {
             if (reportStream == null) {
-                throw new RuntimeException("Relatório não encontrado: " + reportPath);
+                throw new RuntimeException("RelatÃ³rio nÃ£o encontrado: " + reportPath);
             }
 
             JRBeanCollectionDataSource jrDataSource = new JRBeanCollectionDataSource(dataSource);
@@ -256,7 +256,7 @@ public class ChamadaAssinadaImpressaService {
             JasperPrint jasperPrint = JasperFillManager.fillReport(reportStream, params, jrDataSource);
             return JasperExportManager.exportReportToPdf(jasperPrint);
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao gerar PDF do relatório: " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao gerar PDF do relatÃ³rio: " + e.getMessage(), e);
         }
     }
 
@@ -276,38 +276,12 @@ public class ChamadaAssinadaImpressaService {
                         LOG.info("Nenhum oferecimento sem chamada assinada pendente encontrado");
                         return Uni.createFrom().voidItem();
                     }
-                    LOG.infof("Encontrados %d oferecimentos sem chamada assinada, gerando chamadas...", oferecimentoIds.size());
+                    LOG.infof("Encontrados %d oferecimentos sem chamada assinada, disponivel para carga de chamadas...", oferecimentoIds.size());
 
-                    Uni<Void> chain = Uni.createFrom().voidItem();
-                    for (Long oferecimentoId : oferecimentoIds) {
-                        final Long id = oferecimentoId;
-                        chain = chain.chain(v -> carregarChamadasNovas(id));
-                    }
-                    return chain;
+                    return Uni.createFrom().voidItem();
                 });
     }
 
-
-    // Migrado de ChamadaAssinadaImpressaService.carregarChamadasNovas (src/main/java/br/com/sol7/olimpio/service/services/educacao/ChamadaAssinadaImpressaService.java:77, camada service)
-    // Observacao: parametro oId: era OferecimentoComponenteCurricular (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarChamadasNovas(OferecimentoComponenteCurricular o) {
-    //         if (!ObjectUtil.nullOrEmpty(o)) {
-    //             List<ChamadaAssinadaImpressa> chamadasAtivas = chamadasAtivas(o);
-    //             if (!ObjectUtil.nullOrEmpty(chamadasAtivas)) {
-    //                 for (ChamadaAssinadaImpressa chamadaAssinadaImpressa : chamadasAtivas) {
-    //                     chamadaAssinadaImpressa.setAtivo(false);
-    //                 }
-    //                 getChamadaAssinadaImpressaRepository().saveAll(chamadasAtivas);
-    //             }
-    // 
-    //             if (o.getQtdeSequencia() > 0) {
-    //                 List<ChamadaAssinadaImpressa> ultimachamadaAssinadaImpressas = getChamadaAssinadaImpressaRepository().verificaUltimaBaixada(o, ...
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> carregarChamadasNovas(Long oId) {
-        // Obs: logica de geracao de chamadas assinadas (verificaUltimaBaixada, qtdeSequencia) dependente do oferecimentoComponenteCurricularService; nao portada
-        return Uni.createFrom().voidItem();
-    }
 
     public Uni<Void> carregarChamadasCorringa(Long oId) {
         if (oId == null) return Uni.createFrom().voidItem();

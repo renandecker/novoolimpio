@@ -53,10 +53,4 @@ public class RelatorioController {
         return service.delete(id);
     }
 
-    @GET
-    @Path("/carregar-relatorio")
-    public Uni<Void> carregarRelatorio() {
-        return service.carregarRelatorio();
-    }
-
 }

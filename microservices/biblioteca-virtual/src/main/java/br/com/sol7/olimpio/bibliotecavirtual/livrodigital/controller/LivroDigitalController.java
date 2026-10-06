@@ -5,7 +5,6 @@ import br.com.sol7.olimpio.bibliotecavirtual.livrodigital.dto.LivroDigitalRespon
 import br.com.sol7.olimpio.bibliotecavirtual.livrodigital.service.LivroDigitalService;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.SearchFilterRequest;
-import br.com.sol7.olimpio.shared.action.GenericActionController;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -17,7 +16,7 @@ import java.util.List;
 @Path("/api/biblioteca-virtual/livro-digital")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class LivroDigitalController extends GenericActionController {
+public class LivroDigitalController {
 
     @Inject
     LivroDigitalService service;

@@ -102,7 +102,12 @@ if [ ! -f "$ENV_FILE" ]; then
     echo "DATABASE_PASSWORD=postgres" >> "$ENV_FILE"
     echo "" >> "$ENV_FILE"
     echo "# JWT" >> "$ENV_FILE"
-    echo "JWT_SECRET=troque-esta-chave-em-producao-olimpio" >> "$ENV_FILE"
+    if command -v openssl &> /dev/null; then
+        echo "JWT_SECRET=$(openssl rand -hex 48)" >> "$ENV_FILE"
+    else
+        echo "JWT_SECRET=$(head -c 48 /dev/urandom | od -An -tx1 | tr -d ' \n')" >> "$ENV_FILE"
+    fi
+    echo "[OK] JWT_SECRET gerado. Use o mesmo valor em todos os servicos."
     echo "" >> "$ENV_FILE"
     echo "# Kafka" >> "$ENV_FILE"
     echo "KAFKA_BOOTSTRAP_SERVERS=localhost:9092" >> "$ENV_FILE"

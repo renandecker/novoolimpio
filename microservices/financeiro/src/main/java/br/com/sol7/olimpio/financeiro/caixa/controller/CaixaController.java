@@ -91,13 +91,6 @@ public class CaixaController {
 
 
     @GET
-    @Path("/buscar-detalhe-caixa-parcelas")
-    public Uni<Void> buscarDetalheCaixaParcelas(@QueryParam("event") String event) {
-        return service.buscarDetalheCaixaParcelas(event);
-    }
-
-
-    @GET
     @Path("/auto-complete-movimento")
     public Uni<List<Long>> autoCompleteMovimento(@QueryParam("query") String query, @QueryParam("tipoMovimentoId") Long tipoMovimentoId) {
         return service.autoCompleteMovimento(query, tipoMovimentoId);
@@ -140,13 +133,6 @@ public class CaixaController {
             @QueryParam("caixaId") Long caixaId,
             @QueryParam("caixaUnico") boolean caixaUnico) {
         return service.buscarNumeroParcela(numeroLancamento, caixaId, caixaUnico);
-    }
-
-
-    @GET
-    @Path("/buscar-parcela")
-    public Uni<Void> buscarParcela() {
-        return service.buscarParcela();
     }
 
 
@@ -247,7 +233,7 @@ public class CaixaController {
                             fileName = "caixa-relatorio.docx";
                             break;
                         default:
-                            throw new IllegalArgumentException("Formato não suportado: " + format);
+                            throw new IllegalArgumentException("Formato nÃ£o suportado: " + format);
                     }
                     return Response.ok(bytes)
                             .header("Content-Type", contentType)

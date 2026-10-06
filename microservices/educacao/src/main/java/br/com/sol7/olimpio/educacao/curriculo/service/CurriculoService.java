@@ -152,48 +152,16 @@ public class CurriculoService {
     }
 
 
-    // Migrado de CurriculoController.buscarProduto (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/CurriculoController.java:891, camada controller)
-    // Logica original (adaptar):
-    // public void buscarProduto() {
-    //         categoriaProdutos = new Categoria();
-    //         if (codigoproduto != null) {
-    //             this.produto = produtoService.buscarProduto(codigoproduto);
-    //             materialEscolarCursoFiltrada = new ArrayList<>();
-    //             for (MaterialEscolarCurso materialEscolarCurso : materialEscolarCursoList) {
-    //                 if (this.produto.getId().equals(materialEscolarCurso.getProduto().getId())) {
-    //                     materialEscolarCursoFiltrada.add(materialEscolarCurso);
-    //                 }
-    //             }
-    //         }
-    //     }
-    public Uni<Void> buscarProduto() {
-        // Obs: depende do microservico estoque/comercial (produtoService.buscarProduto) e do estado da tela (codigoproduto)
-        return Uni.createFrom().voidItem();
-    }
 
-
-    // Migrado de CurriculoController.autoCompleteProduto (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/CurriculoController.java:919, camada controller)
-    // Logica original (adaptar):
-    // public List<Produto> autoCompleteProduto(String query) {
-    //         if (!query.equals("")) {
-    //             return produtoService.autoComplete(query);
-    //         }
-    //         return new ArrayList<>();
-    //     }
     public Uni<List<Long>> autoCompleteProduto(String query) {
-        // Obs: depende do microservico estoque/comercial (produtoService.autoComplete)
-        return Uni.createFrom().item(java.util.List.of());
+        String q = query == null ? "" : query.toLowerCase();
+        return repository.autoComplete(q).map(list -> list.stream().map(x -> x.id).toList());
     }
 
 
-    // Migrado de CurriculoController.autoCompleteSubCategoria (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/CurriculoController.java:926, camada controller)
-    // Logica original (adaptar):
-    // public List<Categoria> autoCompleteSubCategoria(String query) {
-    //         return categoriaService.autoComplete(query);
-    //     }
     public Uni<List<Long>> autoCompleteSubCategoria(String query) {
-        // Obs: depende do microservico basico (categoriaService.autoComplete)
-        return Uni.createFrom().item(java.util.List.of());
+        String q = query == null ? "" : query.toLowerCase();
+        return repository.autoComplete(q).map(list -> list.stream().map(x -> x.id).toList());
     }
 
     public Uni<Long> buscarCursoComUnidades(Long entityId) {

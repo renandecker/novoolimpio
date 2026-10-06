@@ -42,7 +42,7 @@ import {
 
 import type {ApiItem} from '../../../shared/types/types.ts';
 
-import {PerfilModuloPermissions} from '../../../shared/hooks/useModulePaged';
+import {VerificarAcessoResponse} from '../../../shared/hooks/useModulePaged';
 
 
 
@@ -200,7 +200,7 @@ type ActionKey = (typeof ACTION_GROUPS)[number]['items'][number]['key'] | null;
 
 
 
-const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
 
 
 
@@ -860,7 +860,7 @@ function ContractsTable({searchedIds, onBuscarContratos, usuarioId}: {
 
     // Busca permissões do bas_perfil_modulo para esta tela/outcome
 
-    const [perfilModuloPermissions, setPerfilModuloPermissions] = useState<PerfilModuloPermissions | null>(null);
+    const [perfilModuloPermissions, setPerfilModuloPermissions] = useState<VerificarAcessoResponse | null>(null);
 
     const [perfilModuloLoading, setPerfilModuloLoading] = useState(false);
 
@@ -874,7 +874,8 @@ function ContractsTable({searchedIds, onBuscarContratos, usuarioId}: {
 
             try {
 
-                const response = await api.get<PerfilModuloPermissions>(`/api/permissao/permissoes?caminho=${outcome}`);
+                const response = await api.get<VerificarAcessoResponse>(
+                    `/api/basico/verificar-acesso?outcome=${encodeURIComponent(outcome)}`);
 
                 setPerfilModuloPermissions(response.data);
 

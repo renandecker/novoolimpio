@@ -5,7 +5,6 @@ import br.com.sol7.olimpio.bibliotecavirtual.emprestimodigital.dto.EmprestimoDig
 import br.com.sol7.olimpio.bibliotecavirtual.emprestimodigital.service.EmprestimoDigitalService;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.SearchFilterRequest;
-import br.com.sol7.olimpio.shared.action.GenericActionController;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -18,7 +17,7 @@ import java.util.List;
 @Path("/api/biblioteca-virtual/emprestimo-digital")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class EmprestimoDigitalController extends GenericActionController {
+public class EmprestimoDigitalController {
 
     @Inject
     EmprestimoDigitalService service;

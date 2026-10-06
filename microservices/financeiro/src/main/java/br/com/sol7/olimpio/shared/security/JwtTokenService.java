@@ -22,7 +22,9 @@ public class JwtTokenService {
     private static final long TTL_SECONDS = 60 * 60 * 8;
 
     private String secret() {
-        return System.getenv().getOrDefault("JWT_SECRET", "troque-esta-chave-em-producao-olimpio");
+        String value = System.getenv("JWT_SECRET");
+        if (value == null || value.isBlank()) throw new IllegalStateException("JWT_SECRET nao definido");
+        return value;
     }
 
     public IssuedToken issue(String subject, Set<String> permissions) {

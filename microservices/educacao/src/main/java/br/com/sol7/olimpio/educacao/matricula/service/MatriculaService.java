@@ -130,7 +130,7 @@ public class MatriculaService {
     // private OferecimentoComponenteCurricularWrapper verificaRequisito(OferecimentoComponenteCurricularWrapper wrapper, List<RequisitoMatriz> requisitosMatriz) {
     //         for (RequisitoMatriz requisitoMatriz : requisitosMatriz) {
     //             if (requisitoMatriz.getMatrizCurricular().getComponenteCurricular().equals(wrapper.getOferecimentoComponenteCurricular().getComponenteCurricular())) {
-    //                 //TODO: setar disabled e habilitar quando selecionar seu pré requisito.
+    //                 //TODO: setar disabled e habilitar quando selecionar seu prÃ© requisito.
     //                 wrapper.setDisabledRequisito(true);
     //                 wrapper.setMotivo(wrapper.getMotivo() + "Precisa do requisito " + requisitoMatriz.getMatrizCurricularRequisito().getComponenteCurricular().getDescricao() + " ...
     public Uni<String> verificaRequisito(String wrapper, List<Long> requisitosMatriz) {
@@ -139,58 +139,7 @@ public class MatriculaService {
     }
 
 
-    // Migrado de MatriculaController.buscarRequisitos (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/MatriculaController.java:1262, camada controller)
-    // Observacao: parametro curriculoId: era Curriculo (referencia por id)
-    // Logica original (adaptar):
-    // private void buscarRequisitos(Curriculo curriculo) {
-    //         requisitosRequisitoMatriz = adicionarRequisitosMatriz(curriculo, curriculoService, requisitoMatrizService);;
-    //     }
-    public Uni<Void> buscarRequisitos(Long curriculoId) {
-        // Obs: depende do microservico curriculo (RequisitoMatriz)
-        return Uni.createFrom().voidItem();
-    }
 
-
-    // Migrado de MatriculaController.buscarDiasPagamento (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/MatriculaController.java:1813, camada controller)
-    // Logica original (adaptar):
-    // public void buscarDiasPagamento() {
-    //         diasPagamento = new ArrayList<>();
-    //         if (!ObjectUtil.nullOrEmpty(dataPrimeiraParcela)) {
-    //             List<DiaPagamento> dias = diaPagamentoService.findAll();
-    //             Date dataInicial = dataPrimeiraParcela;
-    //             Date dataFinal = DateUtil.somarDias(dataPrimeiraParcela, configuracaoParcela.getPrazoParcSegunda());
-    //             diasPagamento = GestaoAlunoController.gerarDataParcela(dias, dataInicial, dataFinal);
-    //         }
-    //         if (!ObjectUtil.nullOrEmpty(parcelasSelecionadas)) {
-    //             if (parcelasSelecionadas.size() == 1) {
-    //                 if (parcelasSelecionadas.get(0).getParcela() > 0) {
-    //                     parcelasSelecionad ...
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> buscarDiasPagamento() {
-        // Obs: regra de negocio original e de UI e depende do microservico financeiro (DiaPagamento)
-        return Uni.createFrom().voidItem();
-    }
-
-
-    // Migrado de MatriculaController.buscarParcelas (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/MatriculaController.java:1839, camada controller)
-    // Logica original (adaptar):
-    // public void buscarParcelas() {
-    //         descontoBolsa = false;
-    //         parcelasSelecionadas = new ArrayList<>();
-    //         Parcela parcela = new Parcela();
-    //         if (!ObjectUtil.nullOrEmpty(taxaCursos)) {
-    //             parcela.setParcela(0);
-    //             parcela.setDataVencimento(new Date());
-    //             parcela.setContrato(getEntity().getContrato());
-    //             if (getEntity().getContrato().getTaxaCurso() != null) {
-    //                 getEntity().getContrato().setValorTaxa(getEntity().getContrato().getTaxaCurso().getValor());
-    //                 parcela.setValor(getEntity().getContrato().getTaxaCurso().getValor());
-    //             }
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> buscarParcelas() {
-        // Obs: regra de negocio original e de UI (parcelasSelecionadas)
-        return Uni.createFrom().voidItem();
-    }
 
 
     // Migrado de MatriculaController.buscarValorCurso (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/MatriculaController.java:1997, camada controller)
@@ -297,9 +246,9 @@ public class MatriculaService {
 
                         return new InfoPessoaFisicaResponse(
                                 deMenor ? "DE MENOR" : "DE MAIOR",
-                                financeiro ? "COM DÍVIDAS" : "SEM DÍVIDAS",
-                                aluno ? "SIM" : "NÃO",
-                                atualizar ? "SIM" : "NÃO");
+                                financeiro ? "COM DÃVIDAS" : "SEM DÃVIDAS",
+                                aluno ? "SIM" : "NÃƒO",
+                                atualizar ? "SIM" : "NÃƒO");
                     });
         });
     }

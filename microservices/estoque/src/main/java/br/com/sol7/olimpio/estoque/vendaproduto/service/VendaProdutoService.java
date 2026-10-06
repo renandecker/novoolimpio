@@ -82,47 +82,6 @@ public class VendaProdutoService {
     }
 
 
-    // Migrado de VendaProdutoController.carregarVendas (src/main/java/br/com/sol7/olimpio/control/controllers/estoque/VendaProdutoController.java:282, camada controller)
-    // Observacao: parametro unidadeId: era Unidade (referencia por id)
-    // Logica original (adaptar):
-    // public void carregarVendas(Unidade unidade) {
-    //         produtoCompradoListCarinho = new ArrayList<>();
-    //         controleEstoqueList = new ArrayList<>();
-    //         produtoCompradoListFiltrada = new ArrayList<>();
-    //         if (unidade != null) {
-    //             configuracaoEstoque = configuracaoEstoqueService.buscarConfiguracaoComUnidadeUsuario(unidade);
-    //             controleEstoqueList = controleEstoqueService.buscarItenUnidade(unidade);
-    // 
-    //             for (ControleEstoque controleEstoque : controleEstoqueList) {
-    //                 ProdutoComprado produtoComprado = new ProdutoComprado();
-    //                 produtoComprado.setControleEstoque(controleEstoque);
-    //                 produtoComprado.setQuantidade(0);
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> carregarVendas(Long unidadeId) {
-        // Obs: logica de UI do controlador JSF legado (lista ProdutoComprado/carrinho), sem equivalente reativo
-        return Uni.createFrom().voidItem();
-    }
-
-
-    // Migrado de VendaProdutoController.buscarProduto (src/main/java/br/com/sol7/olimpio/control/controllers/estoque/VendaProdutoController.java:494, camada controller)
-    // Logica original (adaptar):
-    // public void buscarProduto() {
-    //         categoriaProdutos = new Categoria();
-    //         if (codigoproduto != null) {
-    //             ControleEstoque controleEstoque = controleEstoqueService.buscarProdutoEstoque(codigoproduto);
-    //             this.controleEstoque = controleEstoque;
-    //             produtoCompradoListFiltrada = new ArrayList<>();
-    //             for (ProdutoComprado produtoComprado : produtoCompradoList) {
-    //                 if (controleEstoque.getProduto().getId().equals(produtoComprado.getControleEstoque().getProduto().getId())) {
-    //                     produtoCompradoListFiltrada.add(produtoComprado);
-    //                 }
-    //             }
-    //         }
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> buscarProduto() {
-        // Obs: logica de UI do controlador JSF legado (filtro por codigoproduto), sem equivalente reativo
-        return Uni.createFrom().voidItem();
-    }
 
 
     // Migrado de VendaProdutoController.buscarFormasPagamento (src/main/java/br/com/sol7/olimpio/control/controllers/estoque/VendaProdutoController.java:513, camada controller)

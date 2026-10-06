@@ -742,23 +742,6 @@ public class OferecimentoComponenteCurricularService {
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularController.verificarCadernoOferecimento (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/OferecimentoComponenteCurricularController.java:366, camada controller)
-    // Logica original (adaptar):
-    // private void verificarCadernoOferecimento() {
-    //         boolean verificarOcorrencia = false;
-    //         if (!ObjectUtil.nullOrEmpty(ocorrenciaComponenteCurricularsRemover)) {
-    //             cadernoComponenteCurricularListConflito = new ArrayList<>();
-    //             List<CadernoComponenteCurricular> cadernos = cadernoComponenteCurricularService.buscarCadernoChamadaComOcorrenciasPresencasFeitas(ocorrenciaComponenteCurricularsRemover);
-    //             if (!ObjectUtil.nullOrEmpty(cadernos)) {
-    //                 for (CadernoComponenteCurricular cadernoComponenteCurricular : cadernos) {
-    //                     if (cadernoComponenteCurricular.getPresenca() != 'n') {
-    //                         cadernoComponenteCurricularLis ...
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> verificarCadernoOferecimento() {
-        // Obs: logica de UI do controller JSF (depende do CadernoComponenteCurricularService)
-        return Uni.createFrom().voidItem();
-    }
-
 
     // Migrado de OferecimentoComponenteCurricularController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/OferecimentoComponenteCurricularController.java:630, camada controller)
     // Logica original (adaptar):
@@ -791,24 +774,6 @@ public class OferecimentoComponenteCurricularService {
         return Uni.createFrom().item(java.util.List.of());
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularController.buscarInformacoesOferecimentos (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/OferecimentoComponenteCurricularController.java:670, camada controller)
-    // Observacao: parametro oferecimentoComponenteCurricularId: era OferecimentoComponenteCurricular (referencia por id)
-    // Logica original (adaptar):
-    // public void buscarInformacoesOferecimentos(OferecimentoComponenteCurricular oferecimentoComponenteCurricular) {
-    //         this.oferecimentoComponenteCurricular = oferecimentoComponenteCurricular;
-    //         ocorrenciaComponenteCurricularsDialogo = ocorrenciaComponenteCurricularService.buscarOcorrenciaPorOferecimento(oferecimentoComponenteCurricular);
-    //         diaAulasDialogo = diaAulaService.buscaDiasAulaOferecimentoList(oferecimentoComponenteCurricular);
-    //     }
-    public Uni<Void> buscarInformacoesOferecimentos(Long oferecimentoComponenteCurricularId) {
-        // Obs: logica de UI do controller JSF (depende do OcorrenciaComponenteCurricularService e DiaAulaService)
-        return Uni.createFrom().voidItem();
-    }
-
-    public Uni<Void> gerarAula() {
-        // Obs: logica de UI do controller JSF (gera OcorrenciaComponenteCurricular/DiaAula)
-        return Uni.createFrom().voidItem();
-    }
 
     public Uni<List<Long>> buscarMatrizCurricular(Long curriculoId) {
         return repository.buscarMatrizCurricular(curriculoId).map(list -> list.stream()
@@ -886,43 +851,10 @@ public class OferecimentoComponenteCurricularService {
     }
 
 
-    // Migrado de OferecimentoComponenteCurricularService.verificarDisciplina (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:280, camada service)
-    // Logica original (adaptar):
-    // public void verificarDisciplina() {
-    //         try {
-    //             hibernateService.executeUpdateSQL(" UPDATE edc_oferecimento_componente_curricular o" +
-    //                     "  SET status = 'CANCELADA' where (o.status = 'PENDENTE' or o.status = 'LIBERADA') and o.inscritos = 0 " +
-    //                     "  and (select count(oco) from edc_ocorrencia_componente_curricular oco where oco.fl_ativo = true " +
-    //                     "  and oco.data < current_date and oco.id_oferecimento_componente_curricular = o.id) > " +
-    //                     "  (select c.qtd_aulas_tolerancia_matricula from edc_criterio c where c.id_curriculo  = o.id_curso order by c.id desc limit 1)");
-    // 
-    //             hibernateService.executeUpda ...
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> verificarDisciplina() {
-        // Obs: rotina de manutencao com multiplos UPDATEs nativos (edc_oferecimento/ocorrencia/criterio/matricula)
-        return Uni.createFrom().voidItem();
-    }
-
     public Uni<Long> buscarOferecimentoComDiasAula(Long entityId) {
         return repository.buscarOferecimentoComDiasAula(entityId).map(list -> list.isEmpty() ? null : list.get(0).id);
     }
 
-
-    // Migrado de OferecimentoComponenteCurricularService.verificarchamadaAssinada (src/main/java/br/com/sol7/olimpio/service/services/educacao/OferecimentoComponenteCurricularService.java:346, camada service)
-    // Logica original (adaptar):
-    // public void verificarchamadaAssinada() {
-    //         hibernateService.executeUpdateSQL("update edc_oferecimento_componente_curricular set qtde_sequencia = 1 where qtde_sequencia = 0");
-    //         List<Integer> oferecimentoComponenteCurriculars = (List<Integer>) hibernateService.executeSQL(" select o.id FROM edc_oferecimento_componente_curricular o where  " +
-    //                 " o.data_inicio <= current_date and o.status != 'CANCELADA' and" +
-    //                 " not exists(select cha.id from edc_chamada_assinada_impressa cha where cha.id_oferecimento_componente_curricular = o.id)" +
-    //                 " order by o.data_inicio");
-    // 
-    //         for (Integer ii : oferecimentoComponenteCurriculars) {
-    //             Of ...
-    public Uni<Void> verificarchamadaAssinada() {
-        // Obs: depende do ChamadaAssinadaImpressaService (carregarChamadasNormais) com loop sobre oferecimentos
-        return Uni.createFrom().voidItem();
-    }
 
     public Uni<Void> ajustesreplica() {
         // Obs: rotina de manutencao com UPDATEs nativos e dependencia do DiaAulaService (dias de aula)

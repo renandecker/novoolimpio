@@ -91,7 +91,7 @@ if not exist "%PASTA%\%.env" (
     echo DATABASE_PASSWORD=postgres >> "%PASTA%\%.env"
     echo >> "%PASTA%\%.env"
     echo # JWT >> "%PASTA%\%.env"
-    echo JWT_SECRET=troque-esta-chave-em-producao-olimpio >> "%PASTA%\%.env"
+    for /f "delims=" %%S in ('powershell -NoProfile -Command "[guid]::NewGuid().ToString()+[guid]::NewGuid().ToString()"') do >>"%PASTA%\.env" echo JWT_SECRET=%%S
     echo >> "%PASTA%\%.env"
     echo # Kafka >> "%PASTA%\%.env"
     echo KAFKA_BOOTSTRAP_SERVERS=localhost:9092 >> "%PASTA%\%.env"

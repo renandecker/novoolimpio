@@ -42,6 +42,52 @@ public class PessoaJuridicaRepository implements PanacheRepository<PessoaJuridic
     }
 
 
+    // Variante sem filtro por unidade, projeta somente o id (contrato Uni<List<Long>> do service).
+    // Sem a juncao com bas_unidade nao ha parametro de unidades disponivel.
+    // NOT EXISTS em vez de NOT IN: id_pessoa nulo em edc_professor zeraria o NOT IN inteiro.
+    public static final String SQL_AUTO_COMPLETE_IDS =
+            "SELECT DISTINCT p.id FROM bas_pessoa p " +
+            "LEFT JOIN bas_pessoa_juridica j_p_pessoaJuridica ON j_p_pessoaJuridica.id_pessoa = p.id " +
+            "WHERE (lower(j_p_pessoaJuridica.nome_fantasia) like '%' || ?1 || '%' " +
+            "OR j_p_pessoaJuridica.cnpj like '%' || ?1 || '%' " +
+            "OR lower(j_p_pessoaJuridica.razao_social) like '%' || ?1 || '%' " +
+            "OR replace(replace(j_p_pessoaJuridica.cnpj,'.',''),'-','') like '%' || ?1 || '%' " +
+            "OR lower(j_p_pessoaJuridica.nome_fantasia||j_p_pessoaJuridica.cnpj) like '%' || lower(?1) || '%' " +
+            "OR lower(j_p_pessoaJuridica.nome_fantasia||' ('||j_p_pessoaJuridica.cnpj||')') like '%' || lower(?1) || '%' " +
+            "OR replace(replace(lower(j_p_pessoaJuridica.nome_fantasia||' '||j_p_pessoaJuridica.cnpj),'(',''),')','') like '%' || lower(?1) || '%') " +
+            "AND NOT EXISTS (SELECT 1 FROM edc_professor pr WHERE pr.id_pessoa = p.id) LIMIT 10";
+
+    // Mesma consulta sem a exclusao de professor (equivalente ao SQL_AUTO_COMPLETE_TODOS original).
+    public static final String SQL_AUTO_COMPLETE_TODOS_IDS =
+            "SELECT DISTINCT p.id FROM bas_pessoa p " +
+            "LEFT JOIN bas_pessoa_juridica j_p_pessoaJuridica ON j_p_pessoaJuridica.id_pessoa = p.id " +
+            "WHERE (lower(j_p_pessoaJuridica.nome_fantasia) like '%' || ?1 || '%' " +
+            "OR j_p_pessoaJuridica.cnpj like '%' || ?1 || '%' " +
+            "OR lower(j_p_pessoaJuridica.razao_social) like '%' || ?1 || '%' " +
+            "OR replace(replace(j_p_pessoaJuridica.cnpj,'.',''),'-','') like '%' || ?1 || '%' " +
+            "OR lower(j_p_pessoaJuridica.nome_fantasia||j_p_pessoaJuridica.cnpj) like '%' || lower(?1) || '%' " +
+            "OR lower(j_p_pessoaJuridica.nome_fantasia||' ('||j_p_pessoaJuridica.cnpj||')') like '%' || lower(?1) || '%' " +
+            "OR replace(replace(lower(j_p_pessoaJuridica.nome_fantasia||' '||j_p_pessoaJuridica.cnpj),'(',''),')','') like '%' || lower(?1) || '%') LIMIT 10";
+
+    public Uni<java.util.List<Long>> autoComplete(String query) {
+        return ids(SQL_AUTO_COMPLETE_IDS, query);
+    }
+
+    public Uni<java.util.List<Long>> autoCompleteTodos(String query) {
+        return ids(SQL_AUTO_COMPLETE_TODOS_IDS, query);
+    }
+
+    private Uni<java.util.List<Long>> ids(String sql, String query) {
+        return io.quarkus.hibernate.reactive.panache.Panache.getSession()
+                .chain(session -> session.createNativeQuery(sql)
+                        .setParameter(1, query)
+                        .getResultList())
+                .map(rows -> rows.stream()
+                        .map(row -> row instanceof Number n ? n.longValue() : Long.valueOf(row.toString()))
+                        .toList());
+    }
+
+
     // select p from PessoaJuridica pj inner join pj.pessoa p left join p.unidades u where u.ativo = true and pj.cnpj = ?1
     public static final String SQL_BUSCAR_PESSOA_COM_CNPJ =
             "SELECT p.* FROM bas_pessoa_juridica pj INNER JOIN bas_pessoa p ON p.id = pj.id_pessoa LEFT JOIN bas_pessoa_unidade p_u_jt ON p_u_jt.id_pessoa = p.id LEFT JOIN bas_unidade u ON u.id = p_u_jt.id_unidade WHERE u.fl_ativo = true and pj.cnpj = ?1";

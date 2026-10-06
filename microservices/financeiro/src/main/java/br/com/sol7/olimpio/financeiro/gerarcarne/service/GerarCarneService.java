@@ -62,13 +62,13 @@ public class GerarCarneService {
         return new GerarCarneResponse(e.id, e.nome, e.dadosJson);
     }
 
-    // ===== MÉTODOS MIGRADOS DO GERARCARNE SERVICE ORIGINAL =====
+    // ===== MÃ‰TODOS MIGRADOS DO GERARCARNE SERVICE ORIGINAL =====
 
-    // Cria um objeto Carne para impressão do boleto/carnê
+    // Cria um objeto Carne para impressÃ£o do boleto/carnÃª
     public Uni<Carne> criarCarne(ParcelaDTO parcela, int total, String logoPath, String pagoPath) {
-        // Nota: Esta implementação requer dados de outros microserviços (Contrato, Pessoa, VendaProduto)
-        // O método original acessava: parcela.getContrato().getPessoa().getLogradouro().getBairro().getCidade(), etc.
-        // No microserviço financeiro, esses dados devem vir via DTO ou chamada cross-service
+        // Nota: Esta implementaÃ§Ã£o requer dados de outros microserviÃ§os (Contrato, Pessoa, VendaProduto)
+        // O mÃ©todo original acessava: parcela.getContrato().getPessoa().getLogradouro().getBairro().getCidade(), etc.
+        // No microserviÃ§o financeiro, esses dados devem vir via DTO ou chamada cross-service
 
         Carne carne = new Carne();
 
@@ -77,12 +77,12 @@ public class GerarCarneService {
             carne.setTipoPag("Contrato");
             // carne.setAluno(parcela.getContrato().getPessoa().getPessoaFisica().getNome());
             // carne.setCodAluno(parcela.getContrato().getPessoa().getPessoaFisica().getId().toString());
-            // Preencher endereço, bairro, escola, etc. via cross-service
+            // Preencher endereÃ§o, bairro, escola, etc. via cross-service
             carne.setContrato(parcela.contratoId().toString());
 
             if (parcela.parcela() == 0) {
                 carne.setParcela("0");
-                carne.setDesconto("Taxa Inscrição");
+                carne.setDesconto("Taxa InscriÃ§Ã£o");
             } else {
                 carne.setParcela(parcela.parcelaSequencia() + " de " + total);
                 if (parcela.desconto() == null) {
@@ -92,11 +92,11 @@ public class GerarCarneService {
                             parcela.valorDesconto(), parcela.valorMultaJuros(), parcela.codigoVerificador(), parcela.unidadeId(), parcela.diasTolerancia());
                 }
                 BigDecimal descontoValor = parcela.valor().multiply(parcela.desconto()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_DOWN);
-                carne.setDesconto("Até o vencimento, bonificação desconto de R$ " + descontoValor.setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ","));
+                carne.setDesconto("AtÃ© o vencimento, bonificaÃ§Ã£o desconto de R$ " + descontoValor.setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ","));
             }
 
-            // SPC - dias de tolerância
-            // carne.setSpc("Com atraso de " + parcela.getContrato().getValorCurso().getDiasSpc() + " dia(s), você será incluído no SPC");
+            // SPC - dias de tolerÃ¢ncia
+            // carne.setSpc("Com atraso de " + parcela.getContrato().getValorCurso().getDiasSpc() + " dia(s), vocÃª serÃ¡ incluÃ­do no SPC");
 
         } else if (parcela.vendaProdutoId() != null) {
             // Dados de venda de produto
@@ -106,7 +106,7 @@ public class GerarCarneService {
 
             if (parcela.parcela() == 0) {
                 carne.setParcela("0");
-                carne.setDesconto("Venda À Vista");
+                carne.setDesconto("Venda Ã€ Vista");
             } else {
                 carne.setParcela(parcela.parcelaSequencia() + " de " + total);
                 if (parcela.desconto() == null) {
@@ -116,18 +116,18 @@ public class GerarCarneService {
                             parcela.valorDesconto(), parcela.valorMultaJuros(), parcela.codigoVerificador(), parcela.unidadeId(), parcela.diasTolerancia());
                 }
                 BigDecimal descontoValor = parcela.valor().multiply(parcela.desconto()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_DOWN);
-                carne.setDesconto("Até o vencimento, bonificação desconto de R$ " + descontoValor.setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ","));
+                carne.setDesconto("AtÃ© o vencimento, bonificaÃ§Ã£o desconto de R$ " + descontoValor.setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ","));
             }
 
-            // SPC - dias de tolerância da forma de pagamento
-            // carne.setSpc("Com atraso de " + parcela.getVendaProduto().getFormaPagamento().getDiasSpc() + " dia(s), você será incluído no SPC");
+            // SPC - dias de tolerÃ¢ncia da forma de pagamento
+            // carne.setSpc("Com atraso de " + parcela.getVendaProduto().getFormaPagamento().getDiasSpc() + " dia(s), vocÃª serÃ¡ incluÃ­do no SPC");
         }
 
         // Valores comuns
         carne.setValorDocumento(parcela.valor().setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ","));
-        carne.setJuros("Após o vencimento cobrar juros de " + parcela.juros().setScale(2, RoundingMode.HALF_DOWN).toString() + "%");
+        carne.setJuros("ApÃ³s o vencimento cobrar juros de " + parcela.juros().setScale(2, RoundingMode.HALF_DOWN).toString() + "%");
         carne.setLancamento(parcela.id().toString());
-        carne.setMulta("Após o vencimento multa de " + parcela.multa().setScale(2, RoundingMode.HALF_DOWN).toString() + "%");
+        carne.setMulta("ApÃ³s o vencimento multa de " + parcela.multa().setScale(2, RoundingMode.HALF_DOWN).toString() + "%");
 
         float jurosMulta = obterMultaJuros(parcela).floatValue();
         float desconto = obterDesconto(parcela).floatValue();
@@ -137,10 +137,10 @@ public class GerarCarneService {
 
         carne.setVencimento(new SimpleDateFormat("dd/MM/yyyy").format(parcela.dataVencimento()));
 
-        // Logo e pago file paths - apenas caminhos, a impressão real é no frontend
+        // Logo e pago file paths - apenas caminhos, a impressÃ£o real Ã© no frontend
         carne.setImagem(logoPath);
 
-        // Se já foi pago, não gera carne
+        // Se jÃ¡ foi pago, nÃ£o gera carne
         if (parcela.dataPagamento() != null) {
             return Uni.createFrom().item(null);
         }
@@ -152,22 +152,22 @@ public class GerarCarneService {
         return criarCarne(parcela, total, logoPath, pagoPath)
                 .onItem().transform(carne -> {
                     if (carne != null) {
-                        carne.setDesconto("Este carne é resultado de um Reparcelamento.");
+                        carne.setDesconto("Este carne Ã© resultado de um Reparcelamento.");
                     }
                     return carne;
                 });
     }
 
     // Migrado de GerarCarneService.criarListaCarne
-    // Cria lista de carnês para um contrato
+    // Cria lista de carnÃªs para um contrato
     public Uni<List<Carne>> criarListaCarne(Long contratoId, String logoPath, String pagoPath) {
-        // Requer ParcelaService do microserviço comercial
+        // Requer ParcelaService do microserviÃ§o comercial
         // List<Parcela> parcelas = parcelaService.obterParcela(contrato);
-        // Para implementação no microserviço financeiro, precisaria de integração cross-service
+        // Para implementaÃ§Ã£o no microserviÃ§o financeiro, precisaria de integraÃ§Ã£o cross-service
         return Uni.createFrom().item(new ArrayList<>());
     }
 
-    // Calcula desconto aplicável a uma parcela baseado na data atual, feriados, fim de semana
+    // Calcula desconto aplicÃ¡vel a uma parcela baseado na data atual, feriados, fim de semana
     public BigDecimal obterDesconto(ParcelaDTO parcela) {
         if (parcela == null || parcela.parcela() == 0) {
             return BigDecimal.ZERO;
@@ -194,12 +194,12 @@ public class GerarCarneService {
                 && mesmoDia(parcela.dataVencimento(), DateUtil.somarDias(currentDate, -1))) {
             aplicarDesconto = true;
         }
-        // Vencimento no sábado (dia 7) e hoje é sexta ou sábado
+        // Vencimento no sÃ¡bado (dia 7) e hoje Ã© sexta ou sÃ¡bado
         else if (diaSemana == Calendar.SATURDAY &&
                 (mesmoDia(parcela.dataVencimento(), DateUtil.somarDias(currentDate, -2)) || currentDate.before(parcela.dataVencimento()))) {
             aplicarDesconto = true;
         }
-        // Vencimento no domingo (dia 1) e hoje é sábado ou domingo
+        // Vencimento no domingo (dia 1) e hoje Ã© sÃ¡bado ou domingo
         else if (diaSemana == Calendar.SUNDAY &&
                 (mesmoDia(parcela.dataVencimento(), DateUtil.somarDias(currentDate, -1)) || currentDate.before(parcela.dataVencimento()))) {
             aplicarDesconto = true;
@@ -240,7 +240,7 @@ public class GerarCarneService {
         if (diaSemana == Calendar.SUNDAY && mesmoDia(parcela.dataVencimento(), DateUtil.somarDias(currentDate, -1))) {
             diaNaoUtil = true;
         }
-        // Sábado (dia 7) e vencimento foi anteontem
+        // SÃ¡bado (dia 7) e vencimento foi anteontem
         if (diaSemana == Calendar.SATURDAY && mesmoDia(parcela.dataVencimento(), DateUtil.somarDias(currentDate, -2))) {
             diaNaoUtil = true;
         }
@@ -282,16 +282,16 @@ public class GerarCarneService {
     }
 
     // Migrado de GerarCarneService.obterValoresCancelamento
-    // Obtém valores para requerimento de cancelamento (contrato ou matrícula)
-    // Nota: O original usa SQL nativo dinâmico com variáveis de cancelamento
-    // Esta implementação simplificada retorna estrutura vazia - requer implementação completa com JDBC/JPA
+    // ObtÃ©m valores para requerimento de cancelamento (contrato ou matrÃ­cula)
+    // Nota: O original usa SQL nativo dinÃ¢mico com variÃ¡veis de cancelamento
+    // Esta implementaÃ§Ã£o simplificada retorna estrutura vazia - requer implementaÃ§Ã£o completa com JDBC/JPA
     public Uni<RequerimentoCancelamentoDTO> obterValoresCancelamento(Long contratoId, Long matriculaId) {
-        // Requer execução de SQL dinâmico baseado em CancelamentoVariavel
+        // Requer execuÃ§Ã£o de SQL dinÃ¢mico baseado em CancelamentoVariavel
         // Por enquanto retorna DTO vazio
         return Uni.createFrom().item(new RequerimentoCancelamentoDTO());
     }
 
-    // ===== MÉTODOS AUXILIARES =====
+    // ===== MÃ‰TODOS AUXILIARES =====
 
     private boolean mesmoDia(Date data1, Date data2) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
@@ -508,12 +508,7 @@ public class GerarCarneService {
         }
     }
 
-    // ===== MÉTODOS PARA COMPATIBILIDADE COM CONTROLLER =====
-
-    // Migrado de GerarCarneController.carregarNovaParcela
-    public Uni<Void> carregarNovaParcela() {
-        return Uni.createFrom().voidItem();
-    }
+    // ===== MÃ‰TODOS PARA COMPATIBILIDADE COM CONTROLLER =====
 
     // Migrado de GerarCarneController.imprimirSelecionadas
     public Uni<String> imprimirSelecionadas() {
@@ -550,34 +545,9 @@ public class GerarCarneService {
         return Uni.createFrom().item(null);
     }
 
-    // Migrado de GerarCarneController.carregarSituacao
-    public Uni<Void> carregarSituacao() {
-        return Uni.createFrom().voidItem();
-    }
-
-    // Migrado de GerarCarneController.atualizarValorCancelamento
-    public Uni<Void> atualizarValorCancelamento(Long parcelaId) {
-        return Uni.createFrom().voidItem();
-    }
-
-    // Migrado de GerarCarneController.carregarRequerimentoCancelamentoContrato
-    public Uni<Void> carregarRequerimentoCancelamentoContrato(Long contratoId) {
-        return Uni.createFrom().voidItem();
-    }
-
     // Migrado de GerarCarneController.verificarPreCancelamento
     public Uni<Boolean> verificarPreCancelamento(Long cancelamentoId) {
         return Uni.createFrom().item(false);
-    }
-
-    // Migrado de GerarCarneController.gerarRequerimentoCancelamento
-    public Uni<Void> gerarRequerimentoCancelamento(Long cancelamentoId) {
-        return Uni.createFrom().voidItem();
-    }
-
-    // Migrado de GerarCarneController.carregarRequerimentoCancelamentoMatricula
-    public Uni<Void> carregarRequerimentoCancelamentoMatricula(Long matriculaId) {
-        return Uni.createFrom().voidItem();
     }
 
     // Migrado de GerarCarneController.gerarPrevisaoContratual
@@ -628,9 +598,9 @@ public class GerarCarneService {
         }
     }
 
-    // ===== DEPENDÊNCIAS CROSS-SERVICE (STUBS) =====
+    // ===== DEPENDÃŠNCIAS CROSS-SERVICE (STUBS) =====
 
-    // Precisa ser implementado via cliente HTTP/gRPC para microserviço básico
+    // Precisa ser implementado via cliente HTTP/gRPC para microserviÃ§o bÃ¡sico
     public interface FeriadoService {
         Uni<List<FeriadoDTO>> buscarFeriadosComUnidadeData(Long unidadeId, Date data);
     }
@@ -646,7 +616,7 @@ public class GerarCarneService {
     public record FeriadoDTO(Long id, String descricao, Date data, Long unidadeId) {
     }
 
-    // Utilitário de datas (migração do DateUtil original)
+    // UtilitÃ¡rio de datas (migraÃ§Ã£o do DateUtil original)
     public static class DateUtil {
         public static Date somarDias(Date data, int dias) {
             Calendar cal = Calendar.getInstance();

@@ -107,10 +107,6 @@ public class ProfessorService {
         e.dataFim = r.dataFim();
     }
 
-    public Uni<Void> buscarDetalhes(String event) {
-        return Uni.createFrom().voidItem();
-    }
-
     public Uni<List<ProfessorAutoCompleteResponse>> autoCompleteProfessor(String query) {
         if (query == null || query.trim().length() < 3) {
             return Uni.createFrom().item(java.util.List.of());
@@ -124,10 +120,6 @@ public class ProfessorService {
                     return new ProfessorAutoCompleteResponse(id, nome);
                 })
                 .toList());
-    }
-
-    public Uni<Void> carregarProfessor(Long professorId) {
-        return Uni.createFrom().voidItem();
     }
 
     public Uni<Long> buscarProfessorComUnidades(Long entityId) {

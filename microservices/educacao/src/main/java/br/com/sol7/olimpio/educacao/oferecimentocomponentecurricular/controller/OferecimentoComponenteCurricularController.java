@@ -60,13 +60,6 @@ public class OferecimentoComponenteCurricularController {
 
 
     @GET
-    @Path("/verificar-caderno-oferecimento")
-    public Uni<Void> verificarCadernoOferecimento() {
-        return service.verificarCadernoOferecimento();
-    }
-
-
-    @GET
     @Path("/auto-complete")
     public Uni<List<Long>> autoComplete(@QueryParam("query") String query) {
         return service.autoComplete(query);
@@ -80,17 +73,10 @@ public class OferecimentoComponenteCurricularController {
     }
 
 
-    @GET
-    @Path("/buscar-informacoes-oferecimentos")
-    public Uni<Void> buscarInformacoesOferecimentos(@QueryParam("oferecimentoComponenteCurricularId") Long oferecimentoComponenteCurricularId) {
-        return service.buscarInformacoesOferecimentos(oferecimentoComponenteCurricularId);
-    }
-
-
     @POST
     @Path("/gerar-aula")
-    public Uni<Void> gerarAula() {
-        return service.gerarAula();
+    public Uni<Integer> gerarAula(@QueryParam("novoOferecimentoComponenteCurricularId") Long novoOferecimentoComponenteCurricularId, @QueryParam("dataInicio") Date dataInicio, @QueryParam("diasAulaSelecionado") List<Long> diasAulaSelecionado) {
+        return service.gerarAula(novoOferecimentoComponenteCurricularId, dataInicio, diasAulaSelecionado);
     }
 
 
@@ -207,13 +193,6 @@ public class OferecimentoComponenteCurricularController {
 
 
     @GET
-    @Path("/verificar-disciplina")
-    public Uni<Void> verificarDisciplina() {
-        return service.verificarDisciplina();
-    }
-
-
-    @GET
     @Path("/buscar-oferecimento-com-dias-aula")
     public Uni<Long> buscarOferecimentoComDiasAula(@QueryParam("entityId") Long entityId) {
         return service.buscarOferecimentoComDiasAula(entityId);
@@ -229,13 +208,6 @@ public class OferecimentoComponenteCurricularController {
     @Path("/buscar-dias-aula-por-oferecimento")
     public Uni<List<DiaAulaResponse>> buscarDiasAulaPorOferecimento(@QueryParam("oferecimentoComponenteCurricularId") Long oferecimentoComponenteCurricularId) {
         return service.buscarDiasAulaPorOferecimento(oferecimentoComponenteCurricularId);
-    }
-
-
-    @GET
-    @Path("/verificarchamada-assinada")
-    public Uni<Void> verificarchamadaAssinada() {
-        return service.verificarchamadaAssinada();
     }
 
 
@@ -257,13 +229,6 @@ public class OferecimentoComponenteCurricularController {
     @Path("/auto-complete-com-unidade-chamada-assinada")
     public Uni<List<Long>> autoCompleteComUnidadeChamadaAssinada(@QueryParam("query") String query, @QueryParam("unidades") List<Long> unidades) {
         return service.autoCompleteComUnidadeChamadaAssinada(query, unidades);
-    }
-
-
-    @POST
-    @Path("/gerar-aula2")
-    public Uni<Void> gerarAula2(@QueryParam("novoOferecimentoComponenteCurricularId") Long novoOferecimentoComponenteCurricularId, @QueryParam("dataInicio") Date dataInicio, @QueryParam("diasAulaSelecionado") List<Long> diasAulaSelecionado) {
-        return service.gerarAula(novoOferecimentoComponenteCurricularId, dataInicio, diasAulaSelecionado).replaceWithVoid();
     }
 
 

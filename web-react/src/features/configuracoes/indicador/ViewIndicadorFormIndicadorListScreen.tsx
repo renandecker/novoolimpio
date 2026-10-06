@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {PermissionGate, usePermissions} from '../../../shared/services/permissions';
+import {PermissionGate, useCurrentOutcome, usePermissions} from '../../../shared/services/permissions';
 import {BooleanField} from '../../../shared/components/BooleanField';
 import {api} from '../../../shared/services/api';
 import {INDICADOR_API, INDICADOR_META_SOURCE, bool, fetchIndicadorMetas, num, rec, str} from '../meta/metaDinamica';
@@ -29,6 +29,7 @@ export default function ViewIndicadorFormIndicadorListScreen() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const {can} = usePermissions();
+    const outcome = useCurrentOutcome();
 
     const id = num(searchParams.get('id'));
     const [carregando, setCarregando] = useState(false);
@@ -269,7 +270,7 @@ export default function ViewIndicadorFormIndicadorListScreen() {
                                                 type="button"
                                                 className="btnstop"
                                                 onClick={() => removerMeta(meta)}
-                                                disabled={!can('DELETE')}
+                                                disabled={!can('DELETE', outcome)}
                                             >
                                                 Remover
                                             </button>
@@ -290,7 +291,7 @@ export default function ViewIndicadorFormIndicadorListScreen() {
                         >
                             Voltar
                         </button>
-                        {can('CREATE') || can('UPDATE') ? (
+                        {can('CREATE', outcome) || can('UPDATE', outcome) ? (
                             <button
                                 type="button"
                                 className="btngreen"

@@ -5,7 +5,6 @@ import br.com.sol7.olimpio.biblioteca.exemplar.dto.ExemplarResponse;
 import br.com.sol7.olimpio.biblioteca.exemplar.service.ExemplarService;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.SearchFilterRequest;
-import br.com.sol7.olimpio.shared.action.GenericActionController;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -17,7 +16,7 @@ import java.util.List;
 @Path("/api/biblioteca-fisica/exemplar")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ExemplarController extends GenericActionController {
+public class ExemplarController {
 
     @Inject
     ExemplarService service;

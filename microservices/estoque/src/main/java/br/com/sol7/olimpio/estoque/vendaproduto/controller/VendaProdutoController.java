@@ -58,20 +58,6 @@ public class VendaProdutoController {
 
 
     @GET
-    @Path("/carregar-vendas")
-    public Uni<Void> carregarVendas(@QueryParam("unidadeId") Long unidadeId) {
-        return service.carregarVendas(unidadeId);
-    }
-
-
-    @GET
-    @Path("/buscar-produto")
-    public Uni<Void> buscarProduto() {
-        return service.buscarProduto();
-    }
-
-
-    @GET
     @Path("/buscar-formas-pagamento")
     public Uni<List<Long>> buscarFormasPagamento() {
         return service.buscarFormasPagamento();

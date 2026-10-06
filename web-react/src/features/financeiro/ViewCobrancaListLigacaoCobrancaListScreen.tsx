@@ -1,17 +1,16 @@
-﻿import {useQuery} from '@tanstack/react-query';
+import {useQuery} from '@tanstack/react-query';
 import {api} from '../../shared/services/api';
 import {PermissionGate} from '../../shared/services/permissions';
-import {DataTable, type DataTableColumn, type DataTableRowAction} from '../../shared/components/DataTable';
+import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
 import {Tabs} from '../../shared/components/Tabs';
 import type {ApiItem} from '../../shared/types/index';
-import {executeAction} from '../../shared/services/actions';
 
 interface EtapaCobranca {
     id: number;
     descricao: string;
 }
 
-const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
 
 const formatDate = (value: unknown): string => {
     if (value === null || value === undefined || value === '') return '';
@@ -39,38 +38,6 @@ const COBRANCA_COLUMNS: DataTableColumn[] = [
     {key: 'ativo', label: 'Ativo'},
 ];
 
-const extraRowActions: DataTableRowAction[] = [
-    {
-        key: 'detalhes',
-        title: 'Detalhes',
-        icon: <i className="fa fa-info-circle"/>,
-        permission: 'READ',
-        onClick: async (item) => {
-            const r = asRecord(item);
-            await executeAction('ligacao-cobranca', 'carregarDetalhes', JSON.stringify({contrato: r.contratoId ?? r.contrato}), 'financeiro');
-        },
-    },
-    {
-        key: 'ligacao',
-        title: 'Ligação',
-        icon: <i className="fa fa-phone"/>,
-        permission: 'EXECUTE',
-        onClick: async (item) => {
-            const r = asRecord(item);
-            await executeAction('ligacao-cobranca', 'iniciarLigacao', JSON.stringify({cobranca: r.id ?? r.cobranca, contrato: r.contratoId ?? r.contrato}), 'financeiro');
-        },
-    },
-    {
-        key: 'email',
-        title: 'E-mail',
-        icon: <i className="fa fa-envelope"/>,
-        permission: 'EXECUTE',
-        onClick: async (item) => {
-            await executeAction('ligacao-cobranca', 'prepararEnvioEmail', JSON.stringify({id: asRecord(item).id}), 'financeiro');
-        },
-    },
-];
-
 export default function ViewCobrancaListLigacaoCobrancaListScreen() {
     const etapasQuery = useQuery({
         queryKey: ['etapas-cobranca'],
@@ -94,7 +61,6 @@ export default function ViewCobrancaListLigacaoCobrancaListScreen() {
                                      params={{etapasCobrancaId: etapa.id}}
                                      columns={COBRANCA_COLUMNS}
                                      maxMainColumns={COBRANCA_COLUMNS.length}
-                                     extraRowActions={extraRowActions}
                                      outcome="view/cobranca/listLigacaoCobranca/actions"
                                      module="financeiro"
                                      hideCreate={true}

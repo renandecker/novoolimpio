@@ -72,27 +72,6 @@ public class MatriculaController {
 
 
     @GET
-    @Path("/buscar-requisitos")
-    public Uni<Void> buscarRequisitos(@QueryParam("curriculoId") Long curriculoId) {
-        return service.buscarRequisitos(curriculoId);
-    }
-
-
-    @GET
-    @Path("/buscar-dias-pagamento")
-    public Uni<Void> buscarDiasPagamento() {
-        return service.buscarDiasPagamento();
-    }
-
-
-    @GET
-    @Path("/buscar-parcelas")
-    public Uni<Void> buscarParcelas() {
-        return service.buscarParcelas();
-    }
-
-
-    @GET
     @Path("/buscar-valor-curso")
     public Uni<Long> buscarValorCurso() {
         return service.buscarValorCurso();

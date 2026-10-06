@@ -5,7 +5,6 @@ import br.com.sol7.olimpio.biblioteca.obra.dto.ObraResponse;
 import br.com.sol7.olimpio.biblioteca.obra.service.ObraService;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.SearchFilterRequest;
-import br.com.sol7.olimpio.shared.action.GenericActionController;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -17,7 +16,7 @@ import java.util.List;
 @Path("/api/biblioteca-fisica/obra")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ObraController extends GenericActionController {
+public class ObraController {
 
     @Inject
     ObraService service;

@@ -10,14 +10,19 @@ export default function PermissionBridge({children}: { children: ReactNode }) {
     const permissions = session?.permissions ?? ['READ'];
     const jwtModulePermissions = (session?.modulePermissions ?? {}) as ModulePermissions;
     const serverQuery = useQuery({
-        queryKey: ['permissao-me', session?.username],
-        queryFn: async () => (await api.get<ModulePermissions>('/api/permissao/me')).data,
+        queryKey: ['verificar-acesso-todas', session?.username],
+        queryFn: async () => (await api.get<ModulePermissions>('/api/basico/verificar-acesso/todas')).data,
         enabled: Boolean(session),
         retry: false,
         staleTime: 24 * 60 * 60 * 1000,
         gcTime: 24 * 60 * 60 * 1000,
     });
-    const modulePermissions = serverQuery.data ?? jwtModulePermissions;
+    // Um mapa vazio nao substitui o claim do JWT: sem isso uma falha de consulta
+    // apagaria as permissoes por tela que vieram no token e a interface cairia
+    // para somente as permissoes globais.
+    const modulePermissions = Object.keys(serverQuery.data ?? {}).length > 0
+        ? (serverQuery.data as ModulePermissions)
+        : jwtModulePermissions;
     return (
         <PermissionProvider permissions={permissions} modulePermissions={modulePermissions}>
             {children}

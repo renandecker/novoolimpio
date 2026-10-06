@@ -1,6 +1,6 @@
 import {Fragment, useCallback, useEffect, useMemo, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {PermissionGate, usePermissions} from '../../../shared/services/permissions';
+import {PermissionGate, useCurrentOutcome, usePermissions} from '../../../shared/services/permissions';
 import {Tabs} from '../../../shared/components/Tabs';
 import {api} from '../../../shared/services/api';
 import {useModulePaged} from '../../../shared/hooks/useModulePaged';
@@ -79,6 +79,7 @@ function MetasDaMeta({metaId}: { metaId: number }) {
 function ListagemMetasDinamicas() {
     const navigate = useNavigate();
     const {can} = usePermissions();
+    const outcome = useCurrentOutcome();
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(10);
     const [busca, setBusca] = useState('');
@@ -170,7 +171,7 @@ function ListagemMetasDinamicas() {
                                     <td style={{textAlign: 'center'}}>{str(row.ano)}</td>
                                     <td style={{textAlign: 'center'}}>{mesLabel(row.mes) || 'Todos os meses'}</td>
                                     <td style={{textAlign: 'center', whiteSpace: 'nowrap'}}>
-                                        {can('UPDATE') && (
+                                        {can('UPDATE', outcome) && (
                                             <>
                                                 <button
                                                     type="button"
@@ -190,7 +191,7 @@ function ListagemMetasDinamicas() {
                                                 </button>
                                             </>
                                         )}
-                                        {can('DELETE') && (
+                                        {can('DELETE', outcome) && (
                                             <button
                                                 type="button"
                                                 className="btnred"

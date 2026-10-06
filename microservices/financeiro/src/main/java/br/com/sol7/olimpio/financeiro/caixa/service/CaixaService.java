@@ -95,13 +95,13 @@ public class CaixaService {
 
     public Uni<CaixaResponse> create(CaixaRequest r) {
         if (r.usuarioId() != null && r.usuarioId() <= 0) {
-            return Uni.createFrom().failure(new IllegalArgumentException("usuarioId inválido"));
+            return Uni.createFrom().failure(new IllegalArgumentException("usuarioId invÃ¡lido"));
         }
         if (r.unidadeId() != null && r.unidadeId() <= 0) {
-            return Uni.createFrom().failure(new IllegalArgumentException("unidadeId inválido"));
+            return Uni.createFrom().failure(new IllegalArgumentException("unidadeId invÃ¡lido"));
         }
         if (r.impressoraId() != null && r.impressoraId() <= 0) {
-            return Uni.createFrom().failure(new IllegalArgumentException("impressoraId inválido"));
+            return Uni.createFrom().failure(new IllegalArgumentException("impressoraId invÃ¡lido"));
         }
         var e = new Caixa();
         apply(e, r);
@@ -110,13 +110,13 @@ public class CaixaService {
 
     public Uni<CaixaResponse> update(Long id, CaixaRequest r) {
         if (r.usuarioId() != null && r.usuarioId() <= 0) {
-            return Uni.createFrom().failure(new IllegalArgumentException("usuarioId inválido"));
+            return Uni.createFrom().failure(new IllegalArgumentException("usuarioId invÃ¡lido"));
         }
         if (r.unidadeId() != null && r.unidadeId() <= 0) {
-            return Uni.createFrom().failure(new IllegalArgumentException("unidadeId inválido"));
+            return Uni.createFrom().failure(new IllegalArgumentException("unidadeId invÃ¡lido"));
         }
         if (r.impressoraId() != null && r.impressoraId() <= 0) {
-            return Uni.createFrom().failure(new IllegalArgumentException("impressoraId inválido"));
+            return Uni.createFrom().failure(new IllegalArgumentException("impressoraId invÃ¡lido"));
         }
         return repository.findById(id).onItem().ifNull()
                 .failWith(() -> new NotFoundException("Caixa not found"))
@@ -167,11 +167,6 @@ public class CaixaService {
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-    public Uni<Void> buscarDetalheCaixaParcelas(String event) {
-        // Obs: metodo de UI no legado (seta BaseLazyModelJPASpecific de parcelasDetalhes); sem logica de dados portaivel
-        return Uni.createFrom().voidItem();
-    }
-
     // Obs: no legado depende de categoriaFinanceira.getId() (id de fin_tipo_movimento) - agora recebido como parametro
     public Uni<List<Long>> autoCompleteMovimento(String query, Long tipoMovimentoId) {
         if (query == null || query.isBlank() || tipoMovimentoId == null) {
@@ -189,7 +184,7 @@ public class CaixaService {
                 .map(list -> list.stream().map(x -> ((Number) x).longValue()).toList());
     }
 
-    // Busca parcelas por número ou nome do aluno para autocomplete
+    // Busca parcelas por nÃºmero ou nome do aluno para autocomplete
     public Uni<List<ParcelaSearchResponse>> buscarParcelas(String query, int limit) {
         if (query == null || query.isBlank()) {
             return Uni.createFrom().item(java.util.List.of());
@@ -221,9 +216,9 @@ public class CaixaService {
                 }).toList());
     }
 
-    // ===== MÉTODOS MIGRADOS DO CAIXACONTROLLER/CAIXASERVICE ORIGINAL =====
+    // ===== MÃ‰TODOS MIGRADOS DO CAIXACONTROLLER/CAIXASERVICE ORIGINAL =====
 
-    // Verifica senha do responsável configurado no caixa
+    // Verifica senha do responsÃ¡vel configurado no caixa
     public Uni<Boolean> verificarSenhaResponsavel(Long configuracaoCaixaId, String senha) {
         if (configuracaoCaixaId == null || senha == null || senha.isBlank()) {
             return Uni.createFrom().item(false);
@@ -251,22 +246,12 @@ public class CaixaService {
                 });
     }
 
-    // Versão sem parâmetros para compatibilidade com controller
-    public Uni<Boolean> verificarSenhaResponsavel() {
-        return Uni.createFrom().item(false);
-    }
-
-    // Versão sem parâmetros para compatibilidade com controller
-    public Uni<Boolean> verificarSenhaOperador() {
-        return Uni.createFrom().item(false);
-    }
-
     // Fecha o caixa com data de fechamento atual
     public Uni<CaixaResponse> fecharCaixa(Long caixaId) {
         return find(caixaId)
                 .chain(caixa -> {
                     if (caixa.dataFechamento() != null) {
-                        return Uni.createFrom().failure(new IllegalStateException("Caixa já está fechado"));
+                        return Uni.createFrom().failure(new IllegalStateException("Caixa jÃ¡ estÃ¡ fechado"));
                     }
                     // Atualizar data_fechamento via native query
                     return repository.fecharCaixaNativo(caixaId)
@@ -279,7 +264,7 @@ public class CaixaService {
         return find(caixaId)
                 .chain(caixa -> {
                     if (caixa.dataFechamento() == null) {
-                        return Uni.createFrom().failure(new IllegalStateException("Caixa já está aberto"));
+                        return Uni.createFrom().failure(new IllegalStateException("Caixa jÃ¡ estÃ¡ aberto"));
                     }
                     return repository.abrirCaixaNativo(caixaId)
                             .replaceWith(find(caixaId));
@@ -296,7 +281,7 @@ public class CaixaService {
     @SuppressWarnings("deprecation")
     public Uni<CaixaTotais> calcularTotaisCaixa(Long caixaId) {
         if (caixaId == null) {
-            return Uni.createFrom().failure(new IllegalArgumentException("caixaId é obrigatório"));
+            return Uni.createFrom().failure(new IllegalArgumentException("caixaId Ã© obrigatÃ³rio"));
         }
         return movimentacaoRepository.totalPorFormaPagamento(caixaId, TipoPagamento.DINHEIRO)
                 .onFailure().recoverWithItem(BigDecimal.ZERO)
@@ -319,7 +304,7 @@ public class CaixaService {
                                                                         .chain(totaisParcela -> sangriaService.buscarPorCaixa(caixaId)
                                                                                 .onFailure().recoverWithItem(java.util.List.of())
                                                                                 .chain(sangrias -> find(caixaId)
-                                                                                        .onFailure().recoverWithUni(e -> Uni.createFrom().failure(new IllegalArgumentException("Caixa não encontrado: " + caixaId)))
+                                                                                        .onFailure().recoverWithUni(e -> Uni.createFrom().failure(new IllegalArgumentException("Caixa nÃ£o encontrado: " + caixaId)))
                                                                                         .map(caixa -> {
                                                                                             BigDecimal td = nvl(totalDinheiro);
                                                                                             BigDecimal tc = nvl(totalCheque);
@@ -373,14 +358,14 @@ public class CaixaService {
         }
     }
 
-    // Calcula valores da parcela (desconto, multa, juros) baseado nas regras de negócio
+    // Calcula valores da parcela (desconto, multa, juros) baseado nas regras de negÃ³cio
     public Uni<CalculoValorParcelaResponse> calcularValoresParcela(CalculoValorParcelaRequest r) {
         BigDecimal valor = r.valor() != null ? r.valor() : BigDecimal.ZERO;
         BigDecimal desconto = BigDecimal.ZERO;
         BigDecimal multa = BigDecimal.ZERO;
         BigDecimal juros = BigDecimal.ZERO;
 
-        // Parcela de entrada/matrícula (sequencia 0) nunca recebe desconto/multa/juros
+        // Parcela de entrada/matrÃ­cula (sequencia 0) nunca recebe desconto/multa/juros
         if (r.parcelaSequencia() > 0) {
             // Desconto
             if (r.percentualDesconto() != null && r.percentualDesconto().compareTo(BigDecimal.ZERO) > 0) {
@@ -404,12 +389,12 @@ public class CaixaService {
         return Uni.createFrom().item(new CalculoValorParcelaResponse(desconto, multa, juros, valorCobrado));
     }
 
-    // Registra pagamento de parcela criando movimentações financeiras
+    // Registra pagamento de parcela criando movimentaÃ§Ãµes financeiras
     public Uni<Void> registrarPagamentoParcela(RegistrarPagamentoParcelaRequest request) {
         if (request == null || request.caixaId() == null || request.valorCobrado() == null) {
-            return Uni.createFrom().failure(new IllegalArgumentException("Dados de pagamento de parcela inválidos"));
+            return Uni.createFrom().failure(new IllegalArgumentException("Dados de pagamento de parcela invÃ¡lidos"));
         }
-        // Validação + Regra de Negócio na API: Criação da movimentação financeira correspondente
+        // ValidaÃ§Ã£o + Regra de NegÃ³cio na API: CriaÃ§Ã£o da movimentaÃ§Ã£o financeira correspondente
         var movimentacaoReq = new br.com.sol7.olimpio.financeiro.movimentacaofinanceira.dto.MovimentacaoFinanceiraRequest(
             new Date(), "Pagamento de Parcela", null, request.valorCobrado(),
             null, BigDecimal.ONE, null, BigDecimal.ZERO,
@@ -424,7 +409,7 @@ public class CaixaService {
     // Retorna totais para fechamento de caixa no formato de response
     public Uni<FechamentoCaixaTotaisResponse> totaisFechamento(Long caixaId) {
         if (caixaId == null) {
-            return Uni.createFrom().failure(new IllegalArgumentException("caixaId é obrigatório"));
+            return Uni.createFrom().failure(new IllegalArgumentException("caixaId Ã© obrigatÃ³rio"));
         }
         return calcularTotaisCaixa(caixaId).map(totais -> {
             BigDecimal totalEntradas = totais.totalEntradas() != null ? totais.totalEntradas() : BigDecimal.ZERO;
@@ -449,7 +434,7 @@ public class CaixaService {
         });
     }
 
-    // Busca movimentações de entrada do caixa + sangrias
+    // Busca movimentaÃ§Ãµes de entrada do caixa + sangrias
     public Uni<List<MovimentacaoFinanceiraResponse>> buscarMovimentacaoCaixaEntrada(Long caixaId) {
         return movimentacaoFinanceiraService.buscarPorCaixa(caixaId)
                 .chain(entradas -> sangriaService.buscarPorCaixa(caixaId)
@@ -489,12 +474,7 @@ public class CaixaService {
                 .onFailure().recoverWithUni(ex -> Uni.createFrom().voidItem());
     }
 
-    // Versão sem parâmetros para compatibilidade com controller
-    public Uni<Void> imprimirComprovantePagamento() {
-        return Uni.createFrom().voidItem();
-    }
-
-    // Busca parcela por número (ID) e valida se pertence à unidade do caixa
+// Busca parcela por nÃºmero (ID) e valida se pertence Ã unidade do caixa
     public Uni<ParcelaResponse> buscarNumeroParcela(Long numeroLancamento, Long caixaId, boolean caixaUnico) {
         if (numeroLancamento == null || caixaId == null) {
             return Uni.createFrom().item(null);
@@ -574,11 +554,6 @@ public class CaixaService {
         return null;
     }
 
-    // Versão sem parâmetros para compatibilidade com controller
-    public Uni<Void> buscarNumeroParcela() {
-        return Uni.createFrom().voidItem();
-    }
-
     public Uni<List<Long>> buscarAberturaCaixa(Long usuarioId) {
         return repository.buscarAberturaCaixa(usuarioId);
     }
@@ -588,7 +563,7 @@ public class CaixaService {
                 .map(list -> list.isEmpty() ? null : list.get(0));
     }
 
-    // Busca o fundo de caixa sugerido baseado na configuração do usuário e unidade
+    // Busca o fundo de caixa sugerido baseado na configuraÃ§Ã£o do usuÃ¡rio e unidade
     public Uni<BigDecimal> fundoCaixaSugerido(Long usuarioId, Long unidadeId) {
         return configuracaoCaixaService.buscarConfiguracaoComUnidadeUsuario(usuarioId, unidadeId)
                 .onItem().transformToUni(configId -> {
@@ -597,19 +572,19 @@ public class CaixaService {
                 });
     }
 
-    // Gera HTML do e-mail de fechamento automático de caixa
+    // Gera HTML do e-mail de fechamento automÃ¡tico de caixa
     public Uni<String> gerarTextoEmailCaixa(Long caixaId, LayoutDTO layout) {
         return find(caixaId)
                 .chain(caixa -> calcularTotaisCaixa(caixaId)
                         .map(totais -> {
-                            String nome = "Usuário " + caixa.usuarioId(); // TODO: buscar nome do usuário
+                            String nome = "UsuÃ¡rio " + caixa.usuarioId(); // TODO: buscar nome do usuÃ¡rio
 
                             String imagem = "";
                             if (layout != null && layout.url() != null && !layout.url().isEmpty()) {
                                 imagem = "<img width=\"30\" src=\"" + layout.imagemEmail() + "\" alt=\"\">";
                             }
 
-                            String mensagem = "Este caixa foi fechado automaticamente, pois o usuário " + nome + " não fechou.";
+                            String mensagem = "Este caixa foi fechado automaticamente, pois o usuÃ¡rio " + nome + " nÃ£o fechou.";
 
                             return "<table width=\"500\" border=\"1\" cellpadding=\"1\" cellspacing=\"1\" align=\"center\" style=\"background-color: #F0F0F0; border-collapse: collapse; border-color: #F0F0F0;\">" +
                                     "<tbody><tr style=\"background-color: #" + (layout != null ? layout.temaEmail() : "000000") + ";\"><td><p style=\"text-align: center; margin: 0;\"><span style=\"font-size: larger;\">" +
@@ -619,7 +594,7 @@ public class CaixaService {
                                     "<br/>" +
                                     "<tr>" +
                                     "<td style = \" padding-left: 8px;\">" +
-                                    "Nome Funcionário: " + nome +
+                                    "Nome FuncionÃ¡rio: " + nome +
                                     "</td>" +
                                     "</tr>" +
                                     "<tr>" +
@@ -634,7 +609,7 @@ public class CaixaService {
                                     "</tr>" +
                                     "<tr>" +
                                     "<td style = \" padding-left: 8px;\">" +
-                                    "Total Saídas: R$ " + totais.totalSaidas().setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",") +
+                                    "Total SaÃ­das: R$ " + totais.totalSaidas().setScale(2, RoundingMode.HALF_DOWN).toString().replace(".", ",") +
                                     "</td>" +
                                     "</tr>" +
                                     "<tr>" +
@@ -646,13 +621,13 @@ public class CaixaService {
                                     "<br/>" +
                                     "<tr>" +
                                     "<td style = \" padding-left: 8px; font-size: 15px; font-weight: bold;\">" +
-                                    "Número caixa: " + caixa.idCaixaUnidade() +
+                                    "NÃºmero caixa: " + caixa.idCaixaUnidade() +
                                     "</td><tr><td style = \"text-align: center;\" >" +
                                     "<a href=\"" + (layout != null ? layout.url() : "") + "\">Acesse a plataforma clicando aqui.</a></p><p>&nbsp;</p></td></tr></tbody></table>";
                         }));
     }
 
-    // Gera comprovante de pagamento (migração do atributosCompovante original)
+    // Gera comprovante de pagamento (migraÃ§Ã£o do atributosCompovante original)
     private ComprovantePagamento gerarComprovantePagamento(MovimentacaoFinanceiraResponse mov) {
         String vencimentoStr = mov.vencimento() != null ? mov.vencimento() : "";
         String pagamentoStr = mov.dataMovimento() != null ? new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(mov.dataMovimento()) : "";
@@ -692,18 +667,12 @@ public class CaixaService {
             return nvl(totalDinheiro).add(nvl(totalCheque)).add(nvl(totalCartao)).add(nvl(totalBoleto)).add(nvl(totalTransferencia)).add(nvl(totalDeposito));
         }
         public BigDecimal totalSaidas () {
-            return BigDecimal.ZERO; // Saídas são calculadas separadamente se necessário
+            return BigDecimal.ZERO; // SaÃ­das sÃ£o calculadas separadamente se necessÃ¡rio
         }
     }
 
-    // Migrado de CaixaController.buscarParcela
-    // Método de UI no legado (inicializa cheque/transferencia/deposito/cartao e valores de tela)
-    public Uni<Void> buscarParcela() {
-        return Uni.createFrom().voidItem();
-    }
-
     // Migrado de CaixaController.buscarParcelasAluno
-    // Método de UI no legado (limpaPagamento + listarParcelas)
+    // MÃ©todo de UI no legado (limpaPagamento + listarParcelas)
     public Uni<Void> buscarParcelasAluno() {
         return Uni.createFrom().voidItem();
     }
@@ -745,13 +714,13 @@ public class CaixaService {
         return Uni.createFrom().item(() -> {
             try {
                 StringBuilder content = new StringBuilder();
-                content.append("Relatório de Caixa\n");
+                content.append("RelatÃ³rio de Caixa\n");
                 content.append("==================\n\n");
                 
  if (caixaId != null) {
                     CaixaResponse caixa = find(caixaId).await().indefinitely();
                     content.append("Caixa: ").append(caixa.idCaixaUnidade()).append("\n");
-                    content.append("Usuário: ").append(caixa.usuarioId()).append("\n");
+                    content.append("UsuÃ¡rio: ").append(caixa.usuarioId()).append("\n");
                     content.append("Unidade: ").append(caixa.unidadeId()).append("\n");
                     content.append("Data: ").append(caixa.data()).append("\n");
                     content.append("Fundo Caixa: ").append(caixa.fundoCaixa()).append("\n\n");
@@ -760,10 +729,10 @@ public class CaixaService {
                     content.append("Totais:\n");
                     content.append("  Dinheiro: ").append(totais.totalDinheiro()).append("\n");
                     content.append("  Cheque: ").append(totais.totalCheque()).append("\n");
-                    content.append("  Cartão: ").append(totais.totalCartao()).append("\n");
+                    content.append("  CartÃ£o: ").append(totais.totalCartao()).append("\n");
                     content.append("  Boleto: ").append(totais.totalBoleto()).append("\n");
-                    content.append("  Transferência: ").append(totais.totalTransferencia()).append("\n");
-                    content.append("  Depósito: ").append(totais.totalDeposito()).append("\n");
+                    content.append("  TransferÃªncia: ").append(totais.totalTransferencia()).append("\n");
+                    content.append("  DepÃ³sito: ").append(totais.totalDeposito()).append("\n");
                     content.append("  Sangria: ").append(totais.totalSangria()).append("\n");
                     content.append("  Valor Total: ").append(totais.totalValor()).append("\n");
                     content.append("  Desconto: ").append(totais.totalDesconto()).append("\n");
@@ -795,7 +764,7 @@ public class CaixaService {
                         System.arraycopy(textBytes, 0, result, zipHeader.length, textBytes.length);
                         return result;
                     default:
-                        throw new IllegalArgumentException("Formato não suportado: " + format);
+                        throw new IllegalArgumentException("Formato nÃ£o suportado: " + format);
                 }
             } catch (Exception e) {
                 throw new RuntimeException("Erro ao exportar caixa: " + e.getMessage(), e);
@@ -803,7 +772,7 @@ public class CaixaService {
         });
     }
 
-    // Gera relatório de caixa para impressão (formato DOCX)
+    // Gera relatÃ³rio de caixa para impressÃ£o (formato DOCX)
     public Uni<byte[]> imprimirCaixa(Long caixaId) {
         return find(caixaId)
                 .chain(caixa -> totaisFechamento(caixaId)
@@ -811,7 +780,7 @@ public class CaixaService {
                                 .chain(movs -> sangriaService.buscarPorCaixa(caixaId)
                                         .map(sangrias -> {
                                             StringBuilder content = new StringBuilder();
-                                            content.append("RELATÓRIO DE CAIXA\n");
+                                            content.append("RELATÃ“RIO DE CAIXA\n");
                                             content.append("===================\n\n");
                                             content.append("Caixa: ").append(caixa.idCaixaUnidade()).append("\n");
                                             content.append("Data: ").append(caixa.data() != null ? new SimpleDateFormat("dd/MM/yyyy HH:mm").format(caixa.data()) : "").append("\n");
@@ -819,16 +788,16 @@ public class CaixaService {
                                             content.append("TOTAIS:\n");
                                             content.append("Total Dinheiro: R$ ").append(fmtMoeda(totais.totalDinheiro())).append("\n");
                                             content.append("Total Cheque: R$ ").append(fmtMoeda(totais.totalCheque())).append("\n");
-                                            content.append("Total Cartão: R$ ").append(fmtMoeda(totais.totalCartao())).append("\n");
+                                            content.append("Total CartÃ£o: R$ ").append(fmtMoeda(totais.totalCartao())).append("\n");
                                             content.append("Total Boleto: R$ ").append(fmtMoeda(totais.totalBoleto())).append("\n");
-                                            content.append("Total Transferência: R$ ").append(fmtMoeda(totais.totalTransferencia())).append("\n");
-                                            content.append("Total Depósito: R$ ").append(fmtMoeda(totais.totalDeposito())).append("\n");
+                                            content.append("Total TransferÃªncia: R$ ").append(fmtMoeda(totais.totalTransferencia())).append("\n");
+                                            content.append("Total DepÃ³sito: R$ ").append(fmtMoeda(totais.totalDeposito())).append("\n");
                                             content.append("Total Sangria: R$ ").append(fmtMoeda(totais.totalSangria())).append("\n");
                                             content.append("Total Desconto: R$ ").append(fmtMoeda(totais.totalDesconto())).append("\n");
                                             content.append("Total Juros/Multa: R$ ").append(fmtMoeda(totais.totalJurosMulta())).append("\n");
                                             content.append("Valor Total: R$ ").append(fmtMoeda(totais.totalValor())).append("\n");
                                             content.append("Valor Total Caixa: R$ ").append(fmtMoeda(totais.totalValorPagar())).append("\n\n");
-                                            content.append("MOVIMENTAÇÕES:\n");
+                                            content.append("MOVIMENTAÃ‡Ã•ES:\n");
                                             content.append("--------------\n");
                                             for (MovimentacaoFinanceiraResponse mov : movs) {
                                                 content.append("ID: ").append(mov.id()).append(" | ");
@@ -856,13 +825,13 @@ public class CaixaService {
         return Uni.createFrom().item(() -> {
             try {
                 StringBuilder content = new StringBuilder();
-                content.append("Relatório de Caixa\n");
+                content.append("RelatÃ³rio de Caixa\n");
                 content.append("==================\n\n");
                 
  if (caixaId != null) {
                     CaixaResponse caixa = find(caixaId).await().indefinitely();
                     content.append("Caixa: ").append(caixa.idCaixaUnidade()).append("\n");
-                    content.append("Usuário: ").append(caixa.usuarioId()).append("\n");
+                    content.append("UsuÃ¡rio: ").append(caixa.usuarioId()).append("\n");
                     content.append("Unidade: ").append(caixa.unidadeId()).append("\n");
                     content.append("Data: ").append(caixa.data()).append("\n");
                     content.append("Fundo Caixa: ").append(caixa.fundoCaixa()).append("\n\n");
@@ -871,10 +840,10 @@ public class CaixaService {
                     content.append("Totais:\n");
                     content.append("  Dinheiro: ").append(totais.totalDinheiro()).append("\n");
                     content.append("  Cheque: ").append(totais.totalCheque()).append("\n");
-                    content.append("  Cartão: ").append(totais.totalCartao()).append("\n");
+                    content.append("  CartÃ£o: ").append(totais.totalCartao()).append("\n");
                     content.append("  Boleto: ").append(totais.totalBoleto()).append("\n");
-                    content.append("  Transferência: ").append(totais.totalTransferencia()).append("\n");
-                    content.append("  Depósito: ").append(totais.totalDeposito()).append("\n");
+                    content.append("  TransferÃªncia: ").append(totais.totalTransferencia()).append("\n");
+                    content.append("  DepÃ³sito: ").append(totais.totalDeposito()).append("\n");
                     content.append("  Sangria: ").append(totais.totalSangria()).append("\n");
                     content.append("  Valor Total: ").append(totais.totalValor()).append("\n");
                     content.append("  Desconto: ").append(totais.totalDesconto()).append("\n");
@@ -903,7 +872,7 @@ public class CaixaService {
                         System.arraycopy(textBytes, 0, result, zipHeader.length, textBytes.length);
                         return result;
                     default:
-                        throw new IllegalArgumentException("Formato não suportado: " + format);
+                        throw new IllegalArgumentException("Formato nÃ£o suportado: " + format);
                 }
             } catch (Exception e) {
                 throw new RuntimeException("Erro ao exportar caixa: " + e.getMessage(), e);

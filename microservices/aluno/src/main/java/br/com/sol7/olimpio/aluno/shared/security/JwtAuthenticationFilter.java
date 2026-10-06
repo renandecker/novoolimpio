@@ -10,6 +10,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 
 import java.util.Map;
+import java.util.Set;
 
 @Provider
 @Priority(Priorities.AUTHENTICATION)
@@ -30,7 +31,7 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
         try {
             var claims = jwt.verify(authorization.substring(7));
             String required = requiredPermission(context, path);
-            if (!claims.permissions().contains(required)) {
+            if (!isAuthorized(claims, required, context.getMethod(), path)) {
                 reject(context, Response.Status.FORBIDDEN, "Permissão insuficiente: " + required);
                 return;
             }
@@ -43,8 +44,22 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
         }
     }
 
+    /**
+     * Aceita a permissao global do token ou a permissao da tela que usa o recurso,
+     * aplicando no backend a mesma regra de {@code bas_perfil_modulo} que a interface
+     * usa. Recurso sem tela mapeada cai so na permissao global.
+     */
+    private boolean isAuthorized(JwtTokenService.Claims claims, String required, String method, String path) {
+        if (claims.permissions().contains(required)) return true;
+        for (String outcome : OutcomeRoutes.outcomesOf(method, path)) {
+            Set<String> concedidas = claims.modulePermissions().get(outcome);
+            if (concedidas != null && concedidas.contains(required)) return true;
+        }
+        return false;
+    }
+
     private String requiredPermission(ContainerRequestContext context, String path) {
-        if (path.startsWith("api/view") || path.contains("/actions/")) return "READ";
+        if (path.startsWith("api/view") || path.endsWith("/search")) return "READ";
         if (context.getMethod().equals("POST") && path.matches("api/aluno/avaliacoes/\\d+/responder.*")) return "READ";
         return switch (context.getMethod()) {
             case "POST" ->"CREATE";

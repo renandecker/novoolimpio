@@ -5,6 +5,7 @@ import {PermissionGate, usePermissions, useCurrentOutcome} from '../../../shared
 import {api} from '../../../shared/services/api';
 
 import {useModulePaged} from '../../../shared/hooks/useModulePaged';
+  import type {VerificarAcessoResponse} from '../../../shared/hooks/useModulePaged';
 
 import type {ApiItem} from '../../../shared/types/types.ts';
 
@@ -20,7 +21,7 @@ import {ExportDropdown} from '../../../shared/components/ExportDropdown';
 
 
 
-const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
 
 
 
@@ -182,7 +183,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
 
 
 
-    const [perfilModuloPermissions, setPerfilModuloPermissions] = useState<any>(null);
+    const [perfilModuloPermissions, setPerfilModuloPermissions] = useState<VerificarAcessoResponse | null>(null);
 
     const [perfilModuloLoading, setPerfilModuloLoading] = useState(false);
 
@@ -196,7 +197,8 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoComp
 
             try {
 
-                const response = await api.get(`/api/permissao/permissoes?caminho=${outcome}`);
+                const response = await api.get<VerificarAcessoResponse>(
+                    `/api/basico/verificar-acesso?outcome=${encodeURIComponent(outcome)}`);
 
                 setPerfilModuloPermissions(response.data);
 

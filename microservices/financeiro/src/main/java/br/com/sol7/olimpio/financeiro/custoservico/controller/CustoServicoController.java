@@ -50,12 +50,6 @@ public class CustoServicoController {
         return service.delete(id);
     }
 
-    @GET
-    @Path("/buscar-movimentacoes")
-    public Uni<Void> buscarMovimentacoes(@QueryParam("event") String event) {
-        return service.buscarMovimentacoes(event);
-    }
-
 
     @GET
     @Path("/buscar-custo-servico-com-unidade")

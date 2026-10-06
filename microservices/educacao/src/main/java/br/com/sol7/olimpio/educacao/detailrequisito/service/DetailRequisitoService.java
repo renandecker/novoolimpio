@@ -56,14 +56,10 @@ public class DetailRequisitoService {
         return new DetailRequisitoResponse(e.id, e.nome, e.dadosJson);
     }
 
-    // Migrado de DetailRequisitoController.autoComplete (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/DetailRequisitoController.java:31, camada controller)
-    // Logica original (adaptar):
-    // public List<MatrizCurricular> autoComplete(String query) {
-    //         return curriculoController.getMatrizCurriculares();
-    //     }
     public Uni<List<Long>> autoComplete(String query) {
-        // Obs: depende do microservico curriculo (MatrizCurricular)
-        return Uni.createFrom().item(java.util.List.of());
+        String q = query == null ? "" : query.toLowerCase();
+        return repository.find("lower(nome) like ?1", "%" + q + "%").list()
+                .map(list -> list.stream().map(x -> x.id).toList());
     }
 
 

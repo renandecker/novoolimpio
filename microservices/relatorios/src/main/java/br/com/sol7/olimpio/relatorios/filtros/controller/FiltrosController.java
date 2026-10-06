@@ -109,27 +109,6 @@ public class FiltrosController {
         return service.autoCompleteOrganograma(query);
     }
 
-
-    @GET
-    @Path("/carregar-tipo")
-    public Uni<Void> carregarTipo() {
-        return service.carregarTipo();
-    }
-
-
-    @GET
-    @Path("/carregar-operacao-query")
-    public Uni<Void> carregarOperacaoQuery() {
-        return service.carregarOperacaoQuery();
-    }
-
-
-    @GET
-    @Path("/buscar-dados-tipo")
-    public Uni<Void> buscarDadosTipo() {
-        return service.buscarDadosTipo();
-    }
-
     @GET
     @Path("/viewTabela")
     public Uni<List<FiltroRelatorioWrapperDTO>> getFiltersForViewTabela(@QueryParam("tabelaId") Long tabelaId) {

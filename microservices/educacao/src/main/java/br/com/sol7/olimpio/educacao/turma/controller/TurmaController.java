@@ -50,19 +50,6 @@ public class TurmaController {
         return service.delete(id);
     }
 
-    @GET
-    @Path("/carregar-informacoes")
-    public Uni<Void> carregarInformacoes(@QueryParam("oferecimentoComponenteCurricularId") Long oferecimentoComponenteCurricularId) {
-        return service.carregarInformacoes(oferecimentoComponenteCurricularId);
-    }
-
-
-    @GET
-    @Path("/verificar-aprovacao")
-    public Uni<Void> verificarAprovacao() {
-        return service.verificarAprovacao();
-    }
-
 
     @POST
     @Path("/gerar-documento-troca-turma-todos")
@@ -75,55 +62,6 @@ public class TurmaController {
     @Path("/gerar-documento-troca-turma")
     public Uni<String> gerarDocumentoTrocaTurma() {
         return service.gerarDocumentoTrocaTurma();
-    }
-
-
-    @GET
-    @Path("/buscar-criterios")
-    public Uni<Void> buscarCriterios() {
-        return service.buscarCriterios();
-    }
-
-
-    @POST
-    @Path("/gerar-aula")
-    public Uni<Void> gerarAula() {
-        return service.gerarAula();
-    }
-
-
-    @GET
-    @Path("/carregar-todas-turmas")
-    public Uni<Void> carregarTodasTurmas(@QueryParam("contratoId") Long contratoId) {
-        return service.carregarTodasTurmas(contratoId);
-    }
-
-
-    @GET
-    @Path("/carregar-turmas-disponiveis")
-    public Uni<Void> carregarTurmasDisponiveis(@QueryParam("matriculaId") Long matriculaId) {
-        return service.carregarTurmasDisponiveis(matriculaId);
-    }
-
-
-    @GET
-    @Path("/carregar-componentes-disponiveis")
-    public Uni<Void> carregarComponentesDisponiveis(@QueryParam("matriculaId") Long matriculaId) {
-        return service.carregarComponentesDisponiveis(matriculaId);
-    }
-
-
-    @GET
-    @Path("/carregar-trocar-turma-matricula")
-    public Uni<Void> carregarTrocarTurmaMatricula(@QueryParam("matriculaId") Long matriculaId) {
-        return service.carregarTrocarTurmaMatricula(matriculaId);
-    }
-
-
-    @GET
-    @Path("/carregar-trocar-turma-contrato")
-    public Uni<Void> carregarTrocarTurmaContrato(@QueryParam("contratoId") Long contratoId) {
-        return service.carregarTrocarTurmaContrato(contratoId);
     }
 
 }

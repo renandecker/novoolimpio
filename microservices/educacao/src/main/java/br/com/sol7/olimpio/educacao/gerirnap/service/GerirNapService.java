@@ -77,36 +77,5 @@ public class GerirNapService {
     }
 
 
-    // Migrado de GerirNapController.verificarAcesso (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GerirNapController.java:86, camada controller)
-    // Observacao: parametro tipo: era TipoAcesso no legado; parametro modulo: era ModuloFacade no legado
-    // Logica original (adaptar):
-    // protected boolean verificarAcesso(TipoAcesso tipo, ModuloFacade modulo) {
-    //         return JSFUtil.getUsuarioLogado().verificarAcesso(tipo, modulo);
-    //     }
-    public Uni<Boolean> verificarAcesso(String tipo, String modulo) {
-        // Obs: depende do usuario logado (JSFUtil.getUsuarioLogado().verificarAcesso, microservico de autenticacao)
-        return Uni.createFrom().item(false);
-    }
-
-
-    // Migrado de GerirNapController.carregarNap (src/main/java/br/com/sol7/olimpio/control/controllers/educacao/GerirNapController.java:90, camada controller)
-    // Logica original (adaptar):
-    // public void carregarNap() {
-    //         gerirNaps = new ArrayList<GerirNap>();
-    //         gerirNapsPessoas = new ArrayList<GerirNapPessoa>();
-    //        /* conexaoOlimpio = new JdbcTemplate(dataSource);
-    // 
-    //         try {
-    //             conexaoOlimpio.query("SELECT distinct bpf.nome, to_char(eocc.data, 'dd/MM/YYYY'), count(ligacao.id) as ligacao, count(bp.email.id) as email  " +
-    //                             " from edc_contrato contrato " +
-    //                             " inner join edc_matricula matricula on matricula.id_contrato = contrato.id" +
-    //                             " inner join bas_pessoa bp on contrato.id_pessoa = bp.id " +
-    //                             " inner join bas_pessoa_fisica bpf on bp.id = bpf.i ...
-    // // ... (truncado, ver fonte original)
-    public Uni<Void> carregarNap() {
-        // Obs: SQL nativa multi-tabela (bas_pessoa, edc_contrato, edc_matricula, ligacoes/emails de NAP) via JdbcTemplate; nao portada
-        return Uni.createFrom().voidItem();
-    }
-
 }
 

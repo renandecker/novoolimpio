@@ -60,30 +60,13 @@ public class GestaoContasService {
         return new GestaoContasResponse(e.id, e.nome, e.dadosJson);
     }
 
-    // Migrado de GestaoContasController.verificarAcesso (src/main/java/br/com/sol7/olimpio/control/controllers/basico/GestaoContasController.java:115, camada controller)
-    // Observacao: parametro tipo: era TipoAcesso no legado; parametro modulo: era ModuloFacade no legado
-    // Logica original (adaptar):
-    // protected boolean verificarAcesso(TipoAcesso tipo, ModuloFacade modulo) {
-    //         return JSFUtil.getUsuarioLogado().verificarAcesso(tipo, modulo);
-    //     }
-    public Uni<Boolean> verificarAcesso(String tipo, String modulo) {
-        // Obs: depende do usuario logado no JSF (JSFUtil.getUsuarioLogado().verificarAcesso)
-        return Uni.createFrom().item(false);
-    }
-
     public Uni<Void> ajustarSituacao(Long contaId) {
         return repository.ajustarSituacao(contaId);
     }
 
 
-    // Migrado de GestaoContasController.autoCompleteDiaSemana (src/main/java/br/com/sol7/olimpio/control/controllers/basico/GestaoContasController.java:286, camada controller)
-    // Logica original (adaptar):
-    // public List<DiaSemana> autoCompleteDiaSemana(String query) {
-    //         return diaSemanaService.autocomplete(query);
-    //     }
     public Uni<List<Long>> autoCompleteDiaSemana(String query) {
-        // Obs: nao existe entidade/repositorio DiaSemana neste microservico (diaSemanaService)
-        return Uni.createFrom().item(java.util.List.of());
+        return repository.findByDiaSemanaQuery(query);
     }
 
 }

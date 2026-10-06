@@ -53,8 +53,8 @@ public class FundoCaixaController {
 
     @GET
     @Path("/verificar-senha-responsavel")
-    public Uni<Boolean> verificarSenhaResponsavel() {
-        return service.verificarSenhaResponsavel();
+    public Uni<Boolean> verificarSenhaResponsavel(@QueryParam("configuracaoCaixaId") Long configuracaoCaixaId, @QueryParam("senha") String senha) {
+        return service.verificarSenhaResponsavel(configuracaoCaixaId, senha);
     }
 
 
@@ -67,8 +67,8 @@ public class FundoCaixaController {
 
     @POST
     @Path("/imprimir-segunda-via")
-    public Uni<Void> imprimirSegundaVia() {
-        return service.imprimirSegundaVia();
+    public Uni<Void> imprimirSegundaVia(@QueryParam("movimentacaoFinanceiraId") Long movimentacaoFinanceiraId, @QueryParam("usuarioId") Long usuarioId) {
+        return service.imprimirSegundaVia(movimentacaoFinanceiraId, usuarioId);
     }
 
 

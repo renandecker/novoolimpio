@@ -50,12 +50,6 @@ public class HistoricoAlunoController {
         return service.delete(id);
     }
 
-    @GET
-    @Path("/carregar-usuario-agenda")
-    public Uni<Void> carregarUsuarioAgenda() {
-        return service.carregarUsuarioAgenda();
-    }
-
 
     @GET
     @Path("/buscar-historico-aluno-com-compromissos")

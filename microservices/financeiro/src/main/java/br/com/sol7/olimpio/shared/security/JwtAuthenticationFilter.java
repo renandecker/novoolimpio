@@ -10,6 +10,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 
 import java.util.Map;
+import java.util.Set;
 
 @Provider
 @Priority(Priorities.AUTHENTICATION)
@@ -30,7 +31,7 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
         try {
             var claims = jwt.verify(authorization.substring(7));
             String required = requiredPermission(context, path);
-            if (!claims.permissions().contains(required)) {
+            if (!isAuthorized(claims, required, context.getMethod(), path)) {
                 reject(context, Response.Status.FORBIDDEN, "Permissão insuficiente: " + required);
                 return;
             }
@@ -43,13 +44,22 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
     }
 
     private String requiredPermission(ContainerRequestContext context, String path) {
-        if (path.startsWith("api/view") || path.contains("/actions/")) return "READ";
-        return switch (context.getMethod()) {
-            case "POST" ->"CREATE";
-            case "PUT","PATCH" ->"UPDATE";
-            case "DELETE" ->"DELETE";
-            default ->"READ";
-        } ;
+        return EndpointPermissions.required(context.getMethod(), path);
+    }
+
+    /**
+     * Uma requisicao e autorizada quando a permissao vem das permissoes globais do
+     * token ou quando a tela que usa o recurso libera a permissao. O segundo caso
+     * aplica a regra de negocio bas_perfil_modulo tambem no backend, e nao apenas
+     * na interface. Recurso sem tela mapeada cai so no primeiro caso.
+     */
+    private boolean isAuthorized(JwtTokenService.Claims claims, String required, String method, String path) {
+        if (claims.permissions().contains(required)) return true;
+        for (String outcome : OutcomeRoutes.outcomesOf(method, path)) {
+            Set<String> concedidas = claims.modulePermissions().get(outcome);
+            if (concedidas != null && concedidas.contains(required)) return true;
+        }
+        return false;
     }
 
     private void reject(ContainerRequestContext context, Response.Status status, String error) {

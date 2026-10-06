@@ -91,13 +91,6 @@ public class ChamadaAssinadaImpressaController {
 
 
     @GET
-    @Path("/carregar-chamadas-novas")
-    public Uni<Void> carregarChamadasNovas(@QueryParam("oId") Long oId) {
-        return service.carregarChamadasNovas(oId);
-    }
-
-
-    @GET
     @Path("/carregar-chamadas-corringa")
     public Uni<Void> carregarChamadasCorringa(@QueryParam("oId") Long oId) {
         return service.carregarChamadasCorringa(oId);

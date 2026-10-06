@@ -85,34 +85,6 @@ public class CobrancaService {
     }
 
 
-    // Migrado de CobrancaController.carregarContrato (src/main/java/br/com/sol7/olimpio/control/controllers/financeiro/CobrancaController.java:733, camada controller)
-    // Logica original (adaptar):
-    // public void carregarContrato(String cc) {
-    //         this.contrato = contratoService.findById(Integer.valueOf(cc));
-    //     }
-    // Obs: depende do microservico educacao/central (contratoService) - Contrato nao existe neste microservico
-    public Uni<Void> carregarContrato(String cc) {
-        return Uni.createFrom().voidItem();
-    }
-
-
-    // Migrado de CobrancaController.carregarDetalhes (src/main/java/br/com/sol7/olimpio/control/controllers/financeiro/CobrancaController.java:737, camada controller)
-    // Logica original (adaptar):
-    // public void carregarDetalhes(String cc) {
-    //         this.contrato = contratoService.findContratoById(Integer.valueOf(cc));
-    //         this.contrato.setUnidadeResponsavel(unidadeService.buscarUnidadeComTelefones(contrato.getUnidadeResponsavel()));
-    //         this.contrato.setUnidade(unidadeService.buscarUnidadeComTelefones(contrato.getUnidade()));
-    //         this.contrato.getPessoa().getPessoaFisica().setPessoa(pessoaService.buscarPessoaComUnidades(contrato.getPessoa()));
-    //         if (!ObjectUtil.nullOrEmpty(this.contrato.getResponsavel())) {
-    //             this.contrato.getResponsavel().getPessoaFisica().setPessoa(pessoaService.buscarPessoaComUnidades(contrato.getResponsavel()));
-    //         }
-    // 
-    //         FilterL ...
-    // // ... (truncado, ver fonte original)
-    // Obs: depende do microservico educacao/central (contratoService, unidadeService, pessoaService) e e metodo de UI (montagem de tela)
-    public Uni<Void> carregarDetalhes(String cc) {
-        return Uni.createFrom().voidItem();
-    }
 
 
     // Migrado de CobrancaService.buscarCobranca (src/main/java/br/com/sol7/olimpio/service/services/financeiro/CobrancaService.java:74, camada service)

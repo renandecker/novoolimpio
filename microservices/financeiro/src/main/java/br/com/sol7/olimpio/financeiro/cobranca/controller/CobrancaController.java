@@ -62,20 +62,6 @@ public class CobrancaController {
 
 
     @GET
-    @Path("/carregar-contrato")
-    public Uni<Void> carregarContrato(@QueryParam("cc") String cc) {
-        return service.carregarContrato(cc);
-    }
-
-
-    @GET
-    @Path("/carregar-detalhes")
-    public Uni<Void> carregarDetalhes(@QueryParam("cc") String cc) {
-        return service.carregarDetalhes(cc);
-    }
-
-
-    @GET
     @Path("/buscar-cobranca")
     public Uni<Float> buscarCobranca(@QueryParam("parcelaId") Long parcelaId) {
         return service.buscarCobranca(parcelaId);

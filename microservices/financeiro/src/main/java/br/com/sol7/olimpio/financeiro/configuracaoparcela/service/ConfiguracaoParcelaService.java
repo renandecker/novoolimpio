@@ -95,18 +95,6 @@ public class ConfiguracaoParcelaService {
     }
 
 
-    // Migrado de ConfiguracaoParcelaController.carregarNovoCancelamento (src/main/java/br/com/sol7/olimpio/control/controllers/financeiro/ConfiguracaoParcelaController.java:166, camada controller)
-    // Logica original (adaptar):
-    // public void carregarNovoCancelamento() {
-    //         cancelamento = new Cancelamento();
-    //         cancelamento.setPerfis(new ArrayList<>());
-    //         cancelamento.setUnidades(new ArrayList<>());
-    //     }
-    // Obs: metodo de UI (inicializacao de tela do Cancelamento), sem logica de dados portavel
-    public Uni<Void> carregarNovoCancelamento() {
-        return Uni.createFrom().voidItem();
-    }
-
     public Uni<Long> buscarConf(Long unidadeId) {
         return repository.find("unidadeId = ?1 order by id desc", unidadeId).firstResult().map(x -> x == null ? null : x.id);
     }

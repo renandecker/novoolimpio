@@ -50,17 +50,4 @@ public class GerirNapController {
         return service.delete(id);
     }
 
-    @GET
-    @Path("/verificar-acesso")
-    public Uni<Boolean> verificarAcesso(@QueryParam("tipo") String tipo, @QueryParam("modulo") String modulo) {
-        return service.verificarAcesso(tipo, modulo);
-    }
-
-
-    @GET
-    @Path("/carregar-nap")
-    public Uni<Void> carregarNap() {
-        return service.carregarNap();
-    }
-
 }

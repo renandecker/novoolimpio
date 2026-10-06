@@ -5,7 +5,6 @@ import br.com.sol7.olimpio.bibliotecavirtual.licencaacervo.dto.LicencaAcervoResp
 import br.com.sol7.olimpio.bibliotecavirtual.licencaacervo.service.LicencaAcervoService;
 import br.com.sol7.olimpio.shared.PagedResponse;
 import br.com.sol7.olimpio.shared.SearchFilterRequest;
-import br.com.sol7.olimpio.shared.action.GenericActionController;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -16,7 +15,7 @@ import jakarta.ws.rs.core.Response;
 @Path("/api/biblioteca-virtual/licenca")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class LicencaAcervoController extends GenericActionController {
+public class LicencaAcervoController {
 
     @Inject
     LicencaAcervoService service;

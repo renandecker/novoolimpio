@@ -50,12 +50,6 @@ public class GerarCarneController {
         return service.delete(id);
     }
 
-    @GET
-    @Path("/carregar-nova-parcela")
-    public Uni<Void> carregarNovaParcela() {
-        return service.carregarNovaParcela();
-    }
-
 
     @POST
     @Path("/imprimir-selecionadas")
@@ -107,44 +101,9 @@ public class GerarCarneController {
 
 
     @GET
-    @Path("/carregar-situacao")
-    public Uni<Void> carregarSituacao() {
-        return service.carregarSituacao();
-    }
-
-
-    @POST
-    @Path("/atualizar-valor-cancelamento")
-    public Uni<Void> atualizarValorCancelamento(@QueryParam("parcelaId") Long parcelaId) {
-        return service.atualizarValorCancelamento(parcelaId);
-    }
-
-
-    @GET
-    @Path("/carregar-requerimento-cancelamento-contrato")
-    public Uni<Void> carregarRequerimentoCancelamentoContrato(@QueryParam("contratoId") Long contratoId) {
-        return service.carregarRequerimentoCancelamentoContrato(contratoId);
-    }
-
-
-    @GET
     @Path("/verificar-pre-cancelamento")
     public Uni<Boolean> verificarPreCancelamento(@QueryParam("cancelamentoId") Long cancelamentoId) {
         return service.verificarPreCancelamento(cancelamentoId);
-    }
-
-
-    @POST
-    @Path("/gerar-requerimento-cancelamento")
-    public Uni<Void> gerarRequerimentoCancelamento(@QueryParam("cancelamentoId") Long cancelamentoId) {
-        return service.gerarRequerimentoCancelamento(cancelamentoId);
-    }
-
-
-    @GET
-    @Path("/carregar-requerimento-cancelamento-matricula")
-    public Uni<Void> carregarRequerimentoCancelamentoMatricula(@QueryParam("matriculaId") Long matriculaId) {
-        return service.carregarRequerimentoCancelamentoMatricula(matriculaId);
     }
 
 
