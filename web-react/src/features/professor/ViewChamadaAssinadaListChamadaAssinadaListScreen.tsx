@@ -1,9 +1,9 @@
-﻿import {api} from '../../shared/services/api';
+import {api} from '../../shared/services/api';
 import {PermissionGate} from '../../shared/services/permissions';
 import {DataTable, type DataTableColumn, type DataTableRowAction} from '../../shared/components/DataTable';
 import type {ApiItem} from '../../shared/types/index';
 
-const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
 
 const formatDate = (value: unknown): string => {
     if (value === null || value === undefined) return '';

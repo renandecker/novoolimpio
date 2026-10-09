@@ -1,4 +1,4 @@
-﻿import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import type {ReactNode} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {PermissionGate} from '../../shared/services/permissions';
@@ -12,7 +12,7 @@ const SIM = 'Sim';
 const NAO = 'Não';
 
 const simNao = (chave: string) => (item: ApiItem): ReactNode => {
-    const valor = (item as unknown as Record<string, unknown>)[chave];
+    const valor = (item as unknown as Record<string, any>)[chave];
     return valor === true ? SIM : NAO;
 };
 
@@ -151,7 +151,7 @@ function UsuariosDialog({state, onClose}: { state: UsuariosDialogState; onClose:
                                 </tr>
                             ) : (
                                 fatia.map((usuario) => {
-                                    const registro = usuario as unknown as Record<string, unknown>;
+                                    const registro = usuario as unknown as Record<string, any>;
                                     const usuarioId = Number(registro.id);
                                     return (
                                         <tr key={usuarioId}>

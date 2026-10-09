@@ -1,4 +1,4 @@
-﻿import {useRef, useState, useEffect} from 'react';
+import {useRef, useState, useEffect} from 'react';
 
 
 import {
@@ -559,7 +559,7 @@ function GestaoTab({onAbrirDetalhe, detalheFixo}: {
 
     const isAdmin = session?.hierarquia === 'ADMIN';
 
-    const professorLogadoId = session?.professorId;
+
 
 
 

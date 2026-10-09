@@ -1,4 +1,13 @@
-export type ApiItem = { id: number; nome: string; dadosJson?: string };
+/**
+ * Linha generica de CRUD. As colunas vem do backend e variam por recurso, entao
+ * o registro aceita propriedades adicionais alem de id/nome/dadosJson.
+ */
+export type ApiItem = {
+    id: number;
+    nome: string;
+    dadosJson?: string;
+    [key: string]: any;
+};
 export type ApiRequest = Omit<ApiItem, 'id'>;
 export type PagedResponse<T> = { content: T[]; totalElements: number; page: number; size: number; totalPages: number };
 export type SortRequest = { field?: string; direction?: 'asc' | 'desc' };

@@ -50,8 +50,9 @@ public class NotificacaoRegraService {
         entity.tipoRegra = request.tipoRegra();
         entity.canal = request.canal();
         entity.destinatario = request.destinatario();
+        entity.destinatarioProfessor = Boolean.TRUE.equals(request.destinatarioProfessor());
         entity.valorLimite = request.valorLimite();
-        entity.ativo = true;
+        entity.ativo = request.ativo() == null || request.ativo();
 
         return repository.persist(entity).replaceWith(() -> toResponse(entity));
     }
@@ -65,7 +66,9 @@ public class NotificacaoRegraService {
                     entity.tipoRegra = request.tipoRegra();
                     entity.canal = request.canal();
                     entity.destinatario = request.destinatario();
+                    entity.destinatarioProfessor = Boolean.TRUE.equals(request.destinatarioProfessor());
                     entity.valorLimite = request.valorLimite();
+                    entity.ativo = request.ativo() == null || request.ativo();
                 })
                 .map(this::toResponse);
     }
@@ -88,6 +91,7 @@ public class NotificacaoRegraService {
                 e.tipoRegra,
                 e.canal,
                 e.destinatario,
+                e.destinatarioProfessor,
                 e.valorLimite,
                 e.ativo,
                 e.createdAt,

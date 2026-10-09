@@ -117,12 +117,8 @@ export default function ViewAgendaCalendarioAgendaListScreen() {
                 const {data} = await api.get<number[]>(`/api/basico/usuario/${usuarioId}/agendas`);
                 return Array.isArray(data) ? data.map(Number) : [];
             } catch {
-                try {
-                    const {data} = await api.get<number[]>('/api/basico/usuario/buscar-agendas-disponiveis', {params: {usuarioId}});
-                    return Array.isArray(data) ? data.map(Number) : [];
-                } catch {
-                    return [] as number[];
-                }
+                // Sem permissão/erro: nunca vazar a lista completa; vazio é o estado seguro.
+                return [] as number[];
             }
         },
         enabled: !isAdmin && !!usuarioId,
@@ -147,6 +143,33 @@ export default function ViewAgendaCalendarioAgendaListScreen() {
         queryKey: ['calendarioAgenda-pessoas'],
         queryFn: async () => (await api.get<Array<{id: number; nome?: string; pessoaFisica?: {nome?: string; cpf?: string}; pessoaJuridica?: {nomeFantasia?: string; cnpj?: string}}>>('/api/view/pessoa/listPessoa')).data ?? [],
     });
+
+    const agendasPermitidas = useMemo(() => {
+        const todas = agendasQuery.data ?? [];
+        if (isAdmin) return todas;
+        const ids = agendasPermitidasQuery.data;
+        if (!ids || ids.length === 0) return [] as AgendaBasica[];
+        const permitidas = new Set(ids.map(Number));
+        return todas.filter(a => permitidas.has(Number(a.id)));
+    }, [agendasQuery.data, agendasPermitidasQuery.data, isAdmin]);
+
+    const agendaMap = useMemo(() => {
+        const map = new Map<number, AgendaBasica>();
+        for (const a of agendasPermitidas) map.set(Number(a.id), a);
+        return map;
+    }, [agendasPermitidas]);
+
+    const horarioMap = useMemo(() => {
+        const map = new Map<number, string>();
+        for (const h of horariosQuery.data ?? []) map.set(Number(h.id), h.hora);
+        return map;
+    }, [horariosQuery.data]);
+
+    const unidadeMap = useMemo(() => {
+        const map = new Map<number, UnidadeView>();
+        for (const u of unidadesQuery.data ?? []) map.set(Number(u.id), u);
+        return map;
+    }, [unidadesQuery.data]);
 
     const pessoaNomeMap = useMemo(() => {
         const map = new Map<number, string>();
@@ -199,18 +222,15 @@ export default function ViewAgendaCalendarioAgendaListScreen() {
 
     const compromissosFiltrados = useMemo(() => {
         let list = compromissosQuery.data ?? [];
-        if (!selectedAgenda?.id && !isAdmin && agendasPermitidasQuery.data && agendasPermitidasQuery.data.length > 0) {
-            const ids = new Set(agendasPermitidasQuery.data.map(Number));
+        if (!selectedAgenda?.id && !isAdmin) {
+            const ids = new Set(agendaMap.keys());
             list = list.filter(c => c.agendaId == null || ids.has(Number(c.agendaId)));
-        }
-        if (!selectedAgenda?.id && !isAdmin && agendaMap.size > 0) {
-            list = list.filter(c => c.agendaId == null || agendaMap.has(Number(c.agendaId)));
         }
         if (selectedPessoa?.id) {
             list = list.filter(c => Number(c.pessoaId) === Number(selectedPessoa.id));
         }
         return list;
-    }, [compromissosQuery.data, selectedAgenda, selectedPessoa, isAdmin, agendasPermitidasQuery.data, agendaMap]);
+    }, [compromissosQuery.data, selectedAgenda, selectedPessoa, isAdmin, agendaMap]);
 
     const events: ScheduleEventData[] = useMemo(() => {
         return compromissosFiltrados.map(c => {

@@ -23,6 +23,7 @@ export default function ViewRegraNotificacaoListRegraListScreen() {
         destinatario: string;
         destinatarioProfessor: boolean;
         valorLimite: number;
+        ativo: boolean;
     }>({
         nome: '',
         descricao: '',
@@ -31,15 +32,12 @@ export default function ViewRegraNotificacaoListRegraListScreen() {
         destinatario: 'ALUNO',
         destinatarioProfessor: false,
         valorLimite: 0,
+        ativo: true,
     });
 
     const query = useQuery({
         queryKey: ['regras', 'list', page, size],
         queryFn: () => listRegrasNotificacoes(page, size),
-    });
-
-    const markRead = useMutation({
-        mutationFn: () => { /* não usado aqui */ },
     });
 
     const createMutation = useMutation({
@@ -55,6 +53,7 @@ export default function ViewRegraNotificacaoListRegraListScreen() {
                 destinatario: 'ALUNO',
                 destinatarioProfessor: false,
                 valorLimite: 0,
+                ativo: true,
             });
         },
     });
@@ -204,13 +203,12 @@ export default function ViewRegraNotificacaoListRegraListScreen() {
                         width: '100%',
                         height: '100%',
                         backgroundColor: 'rgba(0,0,0,0.5)',
-                        display: 'flex',
+                        display: modalOpen ? 'flex' : 'none',
                         alignItems: 'center',
                         justifyContent: 'center',
                         zIndex: 1000,
                         padding: '20px',
                     }}
-                    visible={modalOpen}
                 >
                     <div
                         style={{

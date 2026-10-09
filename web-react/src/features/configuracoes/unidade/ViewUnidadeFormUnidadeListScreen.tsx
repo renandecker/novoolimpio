@@ -68,6 +68,9 @@ const num = (v: string): number | null => (v !== '' && !isNaN(Number(v)) ? Numbe
 
 const bool = (v: unknown): boolean => v === true || v === 'true';
 
+/** Relações podem chegar como objeto ({id}) ou como id cru; extrai o id. */
+const relId = (v: unknown): unknown => (v && typeof v === 'object' ? (v as {id?: unknown}).id : v);
+
 
 
 export default function ViewUnidadeFormUnidadeListScreen() {
@@ -290,13 +293,13 @@ export default function ViewUnidadeFormUnidadeListScreen() {
 
                     inscricaoEstadual: str(unidade.inscricaoEstadual),
 
-                    layout: str(unidade.layout?.id ?? unidade.layout),
+                    layout: str(relId(unidade.layout)),
 
-                    responsavel: str(unidade.responsavel?.id ?? unidade.responsavel),
+                    responsavel: str(relId(unidade.responsavel)),
 
                     email: str(unidade.email),
 
-                    tipoUnidade: str(unidade.tipoUnidade?.id ?? unidade.tipoUnidade),
+                    tipoUnidade: str(relId(unidade.tipoUnidade)),
 
                     ativo: bool(unidade.ativo),
 
@@ -310,21 +313,21 @@ export default function ViewUnidadeFormUnidadeListScreen() {
 
                     cep: str(unidade.cep),
 
-                    cidade: str(unidade.cidade?.id ?? unidade.cidade),
+                    cidade: str(relId(unidade.cidade)),
 
-                    bairro: str(unidade.bairro?.id ?? unidade.bairro),
+                    bairro: str(relId(unidade.bairro)),
 
-                    logradouro: str(unidade.logradouro?.id ?? unidade.logradouro),
+                    logradouro: str(relId(unidade.logradouro)),
 
                     numero: str(unidade.numero),
 
-                    regiao: str(unidade.regiao?.id ?? unidade.regiao),
+                    regiao: str(relId(unidade.regiao)),
 
                     pontoReferencia: str(unidade.pontoReferencia),
 
                     area: str(unidade.area),
 
-                    turnoFuncionario: str(unidade.turnoFuncionario?.id ?? unidade.turnoFuncionario),
+                    turnoFuncionario: str(relId(unidade.turnoFuncionario)),
 
                 });
 

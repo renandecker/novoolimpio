@@ -3,7 +3,6 @@ import {api} from '../../../shared/services/api';
 import {PermissionGate} from '../../../shared/services/permissions';
 import {useAuth} from '../../auth/auth';
 import {Tabs} from '../../../shared/components/Tabs';
-import {AutoComplete} from '../../../shared/components/AutoComplete';
 import {Plus, Save, X, FilePlus2, Pencil, Trash2} from 'lucide-react';
 
 type RespostaTipo = 'SELECAO' | 'ESCOLHA' | 'TEXTO' | 'ARQUIVO';
@@ -113,13 +112,12 @@ function CriarPergunta() {
             <Aviso tipo={aviso.tipo} texto={aviso.texto}/>
 
             <div className="gp-procurar">
-                <AutoComplete
+                <label htmlFor="gp-pergunta">Pergunta:</label>
+                <input
                     id="gp-pergunta"
-                    label="Pergunta:"
-                    placeholder="Digite a pergunta..."
                     value={pergunta}
-                    onChange={setPergunta}
-                    fetchOptions={(query: string) => Promise.resolve([])}
+                    onChange={(e) => setPergunta(e.target.value)}
+                    placeholder="Digite a pergunta..."
                 />
             </div>
 
@@ -286,7 +284,7 @@ function ListarPerguntas() {
         try {
             const {data} = await api.get<AvaliacaoPergunta[]>(
                 '/api/professor/avaliacao-pergunta',
-                isAdmin ? {} : {params: {professorId: session?.id}}
+                isAdmin ? {} : {params: {professorId: session?.idUsuario}}
             );
             setPerguntas(data);
         } catch (e) {

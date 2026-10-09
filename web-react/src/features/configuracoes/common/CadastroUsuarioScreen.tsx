@@ -412,7 +412,7 @@ export default function CadastroUsuarioScreen() {
 
         return agendas.map((a) => {
 
-            const id = String((a as unknown as Record<string, unknown>).id ?? '');
+            const id = String((a as unknown as Record<string, any>).id ?? '');
 
             const encontrado = catalogo.get(id);
 

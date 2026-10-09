@@ -1,4 +1,4 @@
-﻿import {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import type {ReactNode} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {api} from '../../shared/services/api';
@@ -52,6 +52,8 @@ export interface ContratoFinanceiro {
 export interface Parcela {
     id: number;
     contratoId: number | null;
+    pessoaId: number;
+    idParcelaPix: number | null;
     parcela: number | null;
     parcelaSequencia: number | null;
     multa: number;
@@ -73,6 +75,9 @@ export interface Parcela {
     situacao: string;
     situacaoCor: string;
 }
+
+/** Campos da parcela usados pelo modal de PIX. */
+export type ParcelaPix = Pick<Parcela, 'id' | 'idParcelaPix' | 'valor' | 'dataVencimento' | 'dataPagamento' | 'contratoId' | 'descricao' | 'pessoaId'>;
 
 export interface Financeiro {
     resumo: ResumoFinanceiro;
@@ -545,7 +550,7 @@ export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
         queryFn: async () => (await api.get<Financeiro>(`/api/aluno/gestao/${pessoaId}/financeiro`)).data,
     });
     const [pixModalOpen, setPixModalOpen] = useState(false);
-    const [selectedParcela, setSelectedParcela] = useState<Parcela | null>(null);
+    const [selectedParcela, setSelectedParcela] = useState<ParcelaPix | null>(null);
 
     if (q.isLoading) return <ModalFrame titulo="Situação Financeira" onClose={onClose}><Carregando/></ModalFrame>;
     if (q.isError || !q.data) return <ModalFrame titulo="Situação Financeira" onClose={onClose}><Erro
@@ -553,7 +558,7 @@ export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
     const {resumo, contratos, parcelasMes, parcelasMatricula, parcelasProdutos, parcelasCanceladas} = q.data;
     const todasParcelas = [...parcelasMes, ...parcelasMatricula, ...parcelasProdutos, ...parcelasCanceladas];
 
-    const handlePixClick = (parcela: Parcela) => {
+    const handlePixClick = (parcela: ParcelaPix) => {
         if (parcela.dataPagamento) return; // Não mostrar botão para parcelas pagas
         setSelectedParcela(parcela);
         setPixModalOpen(true);
@@ -571,11 +576,12 @@ export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
         const dataPagamento = linha.dataPagamento as string | null;
         if (dataPagamento) return null; // Não mostrar botão para parcelas pagas
 
-        const parcela: Parcela = {
+        const parcela: ParcelaPix = {
             id,
             idParcelaPix,
             valor: linha.valor as number | null,
             dataVencimento: linha.dataVencimento as string | null,
+            dataPagamento,
             contratoId: linha.contratoId as number | null,
             descricao: linha.descricao as string,
             pessoaId,
@@ -649,7 +655,7 @@ export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
                                             render: (linha) => `${linha.ultimaParcelaSequencia ?? '—'} · ${fmtData(linha.ultimaParcelaData as string | null)} · ${fmtMoeda(linha.ultimaParcelaValor as number | null)}`
                                         },
                                     ]}
-                                    linhas={contratos as unknown as Record<string, unknown>[]}
+                                    linhas={contratos as unknown as Record<string, any>[]}
                                 />
                             </>
                         ),
@@ -679,7 +685,7 @@ export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
                                     },
                                     {key: 'acoes', label: 'Ações', render: renderAcoes},
                                 ]}
-                                linhas={parcelasMes as unknown as Record<string, unknown>[]}
+                                linhas={parcelasMes as unknown as Record<string, any>[]}
                             />
                         ),
                     },
@@ -708,7 +714,7 @@ export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
                                     },
                                     {key: 'acoes', label: 'Ações', render: renderAcoes},
                                 ]}
-                                linhas={todasParcelas as unknown as Record<string, unknown>[]}
+                                linhas={todasParcelas as unknown as Record<string, any>[]}
                             />
                         ),
                     },
@@ -740,7 +746,7 @@ export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
                                     },
                                     {key: 'acoes', label: 'Ações', render: renderAcoes},
                                 ]}
-                                linhas={parcelasMatricula as unknown as Record<string, unknown>[]}
+                                linhas={parcelasMatricula as unknown as Record<string, any>[]}
                             />
                         ),
                     },
@@ -771,7 +777,7 @@ export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
                                     },
                                     {key: 'acoes', label: 'Ações', render: renderAcoes},
                                 ]}
-                                linhas={parcelasProdutos as unknown as Record<string, unknown>[]}
+                                linhas={parcelasProdutos as unknown as Record<string, any>[]}
                             />
                         ),
                     },
@@ -782,7 +788,7 @@ export function SituacaoFinanceiraModal({pessoaId, onClose}: GestaoModalProps) {
                             <TabelaDadosPaginada
                                 vazio="Nenhuma parcela cancelada."
                                 colunas={CANCELADA_COLUNAS}
-                                linhas={parcelasCanceladas as unknown as Record<string, unknown>[]}
+                                linhas={parcelasCanceladas as unknown as Record<string, any>[]}
                             />
                         ),
                     },
@@ -870,13 +876,13 @@ export function HistoricoNapModal({pessoaId, onClose}: GestaoModalProps) {
                         key: 'ligacao',
                         label: 'Ligação',
                         content: <TabelaDadosPaginada vazio="Nenhuma ligação encontrada." colunas={NAP_COLUNAS}
-                                                      linhas={q.data.ligacoes as unknown as Record<string, unknown>[]}/>,
+                                                      linhas={q.data.ligacoes as unknown as Record<string, any>[]}/>,
                     },
                     {
                         key: 'email',
                         label: 'E-mail',
                         content: <TabelaDadosPaginada vazio="Nenhum e-mail encontrado." colunas={NAP_EMAIL_COLUNAS}
-                                                      linhas={q.data.emails as unknown as Record<string, unknown>[]}/>,
+                                                      linhas={q.data.emails as unknown as Record<string, any>[]}/>,
                     },
                 ]}
             />
@@ -920,13 +926,13 @@ export function HistoricoCobrancaModal({pessoaId, onClose}: GestaoModalProps) {
                         key: 'ligacao',
                         label: 'Ligação',
                         content: <TabelaDadosPaginada vazio="Nenhuma ligação encontrada." colunas={COBRANCA_COLUNAS}
-                                                      linhas={q.data.ligacoes as unknown as Record<string, unknown>[]}/>,
+                                                      linhas={q.data.ligacoes as unknown as Record<string, any>[]}/>,
                     },
                     {
                         key: 'email',
                         label: 'E-mail',
                         content: <TabelaDadosPaginada vazio="Nenhum e-mail encontrado." colunas={COBRANCA_EMAIL_COLUNAS}
-                                                      linhas={q.data.emails as unknown as Record<string, unknown>[]}/>,
+                                                      linhas={q.data.emails as unknown as Record<string, any>[]}/>,
                     },
                 ]}
             />
@@ -947,7 +953,7 @@ function GrausDeNotas({boletim}: { boletim: Boletim }) {
                             {key: 'peso', label: 'Peso'},
                             {key: 'nota', label: 'Nota obtida'},
                         ]}
-                        linhas={grau.notas as unknown as Record<string, unknown>[]}
+                        linhas={grau.notas as unknown as Record<string, any>[]}
                     />
                 </div>
             ))}
@@ -1097,7 +1103,7 @@ export function PresencasModal({pessoaId, onClose}: GestaoModalProps) {
                                                     },
                                                     {key: 'componente', label: 'Componente'},
                                                 ]}
-                                                linhas={frequencia.ocorrencias as unknown as Record<string, unknown>[]}
+                                                linhas={frequencia.ocorrencias as unknown as Record<string, any>[]}
                                             />
                                         </>
                                     ),
@@ -1126,15 +1132,15 @@ export function PresencasModal({pessoaId, onClose}: GestaoModalProps) {
                                     {
                                         key: 'turmaAntes',
                                         label: 'Turma Anterior',
-                                        render: (linha) => linha.turmaAntes ?? '—'
+                                        render: (linha) => (linha.turmaAntes != null ? String(linha.turmaAntes) : '—')
                                     },
                                     {
                                         key: 'turmaDepois',
                                         label: 'Turma Nova',
-                                        render: (linha) => linha.turmaDepois ?? '—'
+                                        render: (linha) => (linha.turmaDepois != null ? String(linha.turmaDepois) : '—')
                                     },
                                 ]}
-                                linhas={trocasTurma as unknown as Record<string, unknown>[]}
+                                linhas={trocasTurma as unknown as Record<string, any>[]}
                             />
                         ),
                     },
@@ -1167,7 +1173,7 @@ export function HistoricoAlunoModal({pessoaId, onClose}: GestaoModalProps) {
                     {key: 'descricao', label: 'Descrição'},
                     {key: 'usuarioNome', label: 'Usuário'},
                 ]}
-                linhas={registros as unknown as Record<string, unknown>[]}
+                linhas={registros as unknown as Record<string, any>[]}
             />
         </ModalFrame>
     );
@@ -1179,7 +1185,7 @@ interface DesistenteModalProps {
 }
 
 export function DesistenteModal({contratoId, onClose}: DesistenteModalProps) {
-    const [motivoId, setMotivoId] = useState<number | ''>('');
+    const [motivoId, setMotivoId] = useState('');
     const [descricao, setDescricao] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -1283,15 +1289,7 @@ export function DesistenteModal({contratoId, onClose}: DesistenteModalProps) {
 interface PixQrCodeModalProps {
     isOpen: boolean;
     onClose: () => void;
-    parcela: {
-        id: number;
-        idParcelaPix: number | null;
-        valor: number | null;
-        dataVencimento: string | null;
-        contratoId: number | null;
-        descricao: string;
-        pessoaId: number;
-    } | null;
+    parcela: ParcelaPix | null;
 }
 
 function PixQrCodeModal({isOpen, onClose, parcela}: PixQrCodeModalProps) {

@@ -80,6 +80,8 @@ interface SalaRow {
 
     id: number;
 
+    unidadeId?: number | null;
+
     numero?: number;
 
     descricao?: string;
@@ -2002,21 +2004,21 @@ useEffect(() => {
 
                         <label className="ofc-toggle">
 
-                            <input
-                                type="radio"
+<input
+                                type="checkbox"
                                 name="registraFrequencia"
-                                checked={data.entity?.registraFrequencia !== false}
-                                onChange={() => updateField('entity', {...dataRef.current.entity, registraFrequencia: !data.entity?.registraFrequencia})}
+                                checked={data.registraFrequencia !== false}
+                                onChange={() => updateField('registraFrequencia', !data.registraFrequencia)}
 
                             /> Sim</label>
 
                         <label className="ofc-toggle">
 
-                            <input
-                                type="radio"
+<input
+                                type="checkbox"
                                 name="possuiAvaliacao"
-                                checked={data.entity?.possuiAvaliacao !== false}
-                                onChange={() => updateField('entity', {...dataRef.current.entity, possuiAvaliacao: !data.entity?.possuiAvaliacao})}
+                                checked={data.possuiAvaliacao !== false}
+                                onChange={() => updateField('possuiAvaliacao', !data.possuiAvaliacao)}
 
                             /> Sim</label>
 

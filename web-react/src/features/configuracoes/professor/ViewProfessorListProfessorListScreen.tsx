@@ -6,7 +6,7 @@ import type {ApiItem} from '../../../shared/types/types.ts';
 
 
 
-const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
 
 
 

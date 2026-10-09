@@ -1,4 +1,4 @@
-﻿import {api} from '../../shared/services/api';
+import {api} from '../../shared/services/api';
 import type {PagedResponse} from '../../shared/types/types';
 
 export type RegraNotificacao = {
@@ -8,6 +8,7 @@ export type RegraNotificacao = {
     tipoRegra: string;
     canal: string;
     destinatario: string | null;
+    destinatarioProfessor: boolean;
     valorLimite: number | null;
     ativo: boolean;
     createdAt: string;
@@ -25,7 +26,9 @@ export const createRegraNotificacao = async (regra: {
     tipoRegra: string;
     canal: string;
     destinatario: string;
+    destinatarioProfessor: boolean;
     valorLimite: number;
+    ativo: boolean;
 }): Promise<RegraNotificacao> =>
     (await api.post('/api/notificacoes/regras', regra)).data;
 
@@ -35,7 +38,9 @@ export const updateRegraNotificacao = async (id: number, regra: {
     tipoRegra: string;
     canal: string;
     destinatario: string;
+    destinatarioProfessor: boolean;
     valorLimite: number;
+    ativo: boolean;
 }): Promise<RegraNotificacao> =>
     (await api.put(`/api/notificacoes/regras/${id}`, regra)).data;
 

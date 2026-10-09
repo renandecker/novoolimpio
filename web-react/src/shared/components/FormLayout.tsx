@@ -1,4 +1,5 @@
-﻿import {ReactNode, useEffect, useState} from 'react';
+import {ReactNode, useEffect, useState} from 'react';
+import type {ElementType} from 'react';
 import {Tabs} from './Tabs';
 import type {TabItem} from './Tabs';
 import {BooleanField} from './BooleanField';
@@ -6,6 +7,7 @@ import {BooleanField} from './BooleanField';
 export interface FormTabConfig {
     key: string;
     label: string;
+    icon?: ElementType;
     fields?: FormFieldConfig[];
     content?: ReactNode;
     customContent?: ReactNode;
@@ -25,6 +27,8 @@ export interface FormFieldConfig {
     autoCompleteSearchKeys?: string[];
     autoCompleteColumns?: any[];
     readOnly?: boolean;
+    help?: string;
+    rows?: number;
 }
 
 export interface FormLayoutProps {
@@ -83,6 +87,7 @@ export function FormLayout({
         const tabItems: TabItem[] = tabs.map((tab) => ({
             key: tab.key,
             label: tab.label,
+            icon: tab.icon ? <tab.icon size={14}/> : undefined,
             content: tab.content ?? (
                 <>
                     {(tab.fields ?? []).length > 0 && (
@@ -93,6 +98,9 @@ export function FormLayout({
                                         {field.label} {field.required && <span style={{color: '#C90000', marginLeft: '2px'}}>*</span>}
                                     </span>
                                     {renderField(field, handleChange, values[field.name])}
+                                    {field.help && (
+                                        <span className="form-field-help" id={`help-${field.name}`}>{field.help}</span>
+                                    )}
                                 </label>
                             ))}
                         </div>
@@ -189,7 +197,7 @@ function renderField(field: FormFieldConfig, onChange: (name: string, value: unk
                     style={gridColumnStyle}
                     value={String(currentValue)}
                     onChange={(e) => onChange(field.name, e.target.value)}
-                    readOnly={field.readOnly}
+                    disabled={field.readOnly}
                 >
                     <option value="">-- Selecione --</option>
                     {field.options?.map((opt) => (
@@ -203,10 +211,12 @@ function renderField(field: FormFieldConfig, onChange: (name: string, value: unk
                 <textarea
                     className="form-input"
                     style={{minHeight: '80px', resize: 'vertical', ...gridColumnStyle}}
+                    rows={field.rows}
                     value={String(currentValue)}
                     onChange={(e) => onChange(field.name, e.target.value)}
                     placeholder={field.placeholder}
                     readOnly={field.readOnly}
+                    aria-describedby={field.help ? `help-${field.name}` : undefined}
                 />
             );
 

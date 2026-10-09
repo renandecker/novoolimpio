@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sidebar } from '../../shared/components/Sidebar';
+import Sidebar from '../../shared/components/Sidebar';
 import { Header } from '../../components/Header.jsx';
 import { StatCard } from '../../components/StatCard';
 import { SalesChart } from '../../components/SalesChart';

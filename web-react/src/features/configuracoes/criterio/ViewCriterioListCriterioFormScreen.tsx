@@ -130,13 +130,13 @@ const soNumeros = (value: string): string => value.replace(/\D/g, '');
 
 const cursoLabel = (row: CurriculoRow): string => {
 
-    const nome = pick(row as unknown as Record<string, unknown>, ['curso_descricao', 'cursoDescricao']);
+    const nome = pick(row as unknown as Record<string, any>, ['curso_descricao', 'cursoDescricao']);
 
-    const sucinto = pick(row as unknown as Record<string, unknown>, ['sucinto']);
+    const sucinto = pick(row as unknown as Record<string, any>, ['sucinto']);
 
     if (nome && sucinto) return `${nome}: ${sucinto}`;
 
-    return pick(row as unknown as Record<string, unknown>, ['descricao', 'sucinto', 'sigla']) || `#${row.id}`;
+    return pick(row as unknown as Record<string, any>, ['descricao', 'sucinto', 'sigla']) || `#${row.id}`;
 
 };
 
@@ -144,7 +144,7 @@ const cursoLabel = (row: CurriculoRow): string => {
 
 const unidadeLabel = (row: UnidadeRow): string =>
 
-    pick(row as unknown as Record<string, unknown>, ['sucinto', 'nomeFantasia', 'nome_fantasia']) || `#${row.id}`;
+    pick(row as unknown as Record<string, any>, ['sucinto', 'nomeFantasia', 'nome_fantasia']) || `#${row.id}`;
 
 
 

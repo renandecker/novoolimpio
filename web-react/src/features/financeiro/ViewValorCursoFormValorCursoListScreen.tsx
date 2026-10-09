@@ -1,4 +1,4 @@
-﻿import {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
 import {PermissionGate} from '../../shared/services/permissions';
@@ -54,7 +54,7 @@ const formatValor = (v: unknown): string => {
     return new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(n);
 };
 
-const itemId = (item: ApiItem): number => Number((item as unknown as Record<string, unknown>).id);
+const itemId = (item: ApiItem): number => Number((item as unknown as Record<string, any>).id);
 
 const curriculoLabel = (item: ApiItem): string => {
     const r = rec(item);

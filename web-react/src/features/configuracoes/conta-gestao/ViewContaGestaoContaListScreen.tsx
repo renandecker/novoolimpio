@@ -9,7 +9,7 @@ import {ModuleFilter} from '../../../shared/components/ModuleFilter';
 import BreadCrumb from '../../../shared/components/BreadCrumb';
 import {swalConfirm} from '../../../shared/components/swal';
 
-const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
 
 const formatCurrency = (value: unknown): string => {
     if (value === null || value === undefined) return '';

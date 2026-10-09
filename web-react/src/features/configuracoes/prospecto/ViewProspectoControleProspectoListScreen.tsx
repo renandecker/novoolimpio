@@ -211,7 +211,7 @@ export default function ViewProspectoControleProspectoListScreen() {
                 </table>
 
                 {/* Modal Ajustar Prospecto */}
-                <Modal isOpen={ajustarModalOpen} onClose={() => setAjustarModalOpen(false)} title="Ajustar prospecto">
+                <Modal open={ajustarModalOpen} onClose={() => setAjustarModalOpen(false)} title="Ajustar prospecto">
                     {ajustarItem && (
                         <div>
                             <p style={{ fontSize: '16px', fontWeight: 'bold' }}>
@@ -237,7 +237,7 @@ export default function ViewProspectoControleProspectoListScreen() {
                 </Modal>
 
                 {/* Modal Ajustar Prospectos Selecionados */}
-                <Modal isOpen={ajustarSelecionarModalOpen} onClose={() => setAjustarSelecionarModalOpen(false)} title="Prospectos encontrados">
+                <Modal open={ajustarSelecionarModalOpen} onClose={() => setAjustarSelecionarModalOpen(false)} title="Prospectos encontrados">
                     {ajustarItem && (
                         <div>
                             <p style={{ fontSize: '16px', fontWeight: 'bold' }}>
@@ -300,7 +300,7 @@ export default function ViewProspectoControleProspectoListScreen() {
                 </Modal>
 
                 {/* Modal Detalhes Prospecto */}
-                <Modal isOpen={detailModalOpen} onClose={() => setDetailModalOpen(false)} title="Informações Prospecto">
+                <Modal open={detailModalOpen} onClose={() => setDetailModalOpen(false)} title="Informações Prospecto">
                     <div dangerouslySetInnerHTML={{ __html: detailHtml }} />
                 </Modal>
             </main>

@@ -1,4 +1,4 @@
-import {useEffect, useState, useCallback} from 'react';
+import {useEffect, useState, useCallback, useRef} from 'react';
 
 
 
@@ -10,7 +10,7 @@ import {PermissionGate} from '../../../shared/services/permissions';
 
 import {api} from '../../../shared/services/api';
 
-import {AutoComplete} from '../../../shared/components/AutoComplete';
+import {AutoComplete, type AutoCompleteOption} from '../../../shared/components/AutoComplete';
 
 import type {ApiItem} from '../../../shared/types/types.ts';
 
@@ -74,13 +74,16 @@ export default function ViewOperacionalFormOperacionalListScreen() {
 
     const [direcionamento, setDirecionamento] = useState<Direcionamento>('INTERNO');
 
-    const [coordenadorId, setCoordenadorId] = useState<number | null>(null);
+    const [coordenador, setCoordenador] = useState<AutoCompleteOption | null>(null);
+    const coordenadorId = coordenador?.id ?? null;
+    const usuariosRef = useRef<Map<number, UsuarioItem>>(new Map());
 
     const [status, setStatus] = useState<StatusPacote>('AGUARDANDO');
 
     const [operacionalUsuarios, setOperacionalUsuarios] = useState<OperacionalUsuarioItem[]>([]);
 
     const [usuarioSelecionado, setUsuarioSelecionado] = useState<UsuarioItem | null>(null);
+    const [usuarioOpcao, setUsuarioOpcao] = useState<AutoCompleteOption | null>(null);
 
     const [loading, setLoading] = useState(false);
 
@@ -146,7 +149,7 @@ export default function ViewOperacionalFormOperacionalListScreen() {
 
                 setDirecionamento(ent.direcionamento ?? 'INTERNO');
 
-                setCoordenadorId(ent.coordenadorId ?? null);
+                setCoordenador(ent.coordenadorId ? {id: ent.coordenadorId, label: ''} : null);
 
                 setStatus((ent.status as StatusPacote) ?? 'AGUARDANDO');
 
@@ -322,7 +325,7 @@ export default function ViewOperacionalFormOperacionalListScreen() {
 
                 setDirecionamento('INTERNO');
 
-                setCoordenadorId(null);
+                setCoordenador(null);
 
                 setStatus('AGUARDANDO');
 
@@ -346,7 +349,7 @@ export default function ViewOperacionalFormOperacionalListScreen() {
 
 
 
-    const coordenadorSearch = useCallback(async (query: string) => {
+    const buscarUsuarios = useCallback(async (query: string): Promise<AutoCompleteOption[]> => {
 
         if (!query || query.length < 2) return [];
 
@@ -354,7 +357,11 @@ export default function ViewOperacionalFormOperacionalListScreen() {
 
             const resp = await api.get<UsuarioItem[]>(`/api/basico/usuario/autocomplete?q=${encodeURIComponent(query)}`);
 
-            return resp.data ?? [];
+            const itens = resp.data ?? [];
+
+            itens.forEach((u) => usuariosRef.current.set(u.id, u));
+
+            return itens.map((u) => ({id: u.id, label: u.login}));
 
         } catch {
 
@@ -366,19 +373,27 @@ export default function ViewOperacionalFormOperacionalListScreen() {
 
 
 
-    const usuarioSearch = useCallback(async (query: string) => {
+    const buscarUsuarioPorId = useCallback(async (id: number): Promise<AutoCompleteOption | null> => {
 
-        if (!query || query.length < 2) return [];
+        const emCache = usuariosRef.current.get(id);
+
+        if (emCache) return {id: emCache.id, label: emCache.login};
 
         try {
 
-            const resp = await api.get<UsuarioItem[]>(`/api/basico/usuario/autocomplete?q=${encodeURIComponent(query)}`);
+            const resp = await api.get<UsuarioItem>(`/api/basico/usuario/${id}`);
 
-            return resp.data ?? [];
+            const u = resp.data;
+
+            if (!u?.id) return null;
+
+            usuariosRef.current.set(u.id, u);
+
+            return {id: u.id, label: u.login};
 
         } catch {
 
-            return [];
+            return null;
 
         }
 
@@ -493,7 +508,7 @@ export default function ViewOperacionalFormOperacionalListScreen() {
 
                         <label className="form-field">
                             <span className="form-label">Coordenador</span>
-                            <AutoComplete id="inputCoordenador:coordenador" search={coordenadorSearch} value={coordenadorId ? {id: coordenadorId, login: '', nome: ''} : null} onSelect={u => setCoordenadorId(u?.id ?? null)} onClear={() => setCoordenadorId(null)} getLabel={u => u?.login ?? ''} placeholder="Digite o login do coordenador" style={{width: '100%'}} />
+                            <AutoComplete id="inputCoordenador:coordenador" fetchOptions={buscarUsuarios} fetchById={buscarUsuarioPorId} minChars={2} value={coordenador} onChange={setCoordenador} placeholder="Digite o login do coordenador" style={{width: '100%'}} />
                         </label>
 
                         <label className="form-field">
@@ -517,15 +532,21 @@ export default function ViewOperacionalFormOperacionalListScreen() {
 
                             <AutoComplete
 
-                                search={usuarioSearch}
+                                fetchOptions={buscarUsuarios}
 
-                                value={usuarioSelecionado}
+                                fetchById={buscarUsuarioPorId}
 
-                                onSelect={setUsuarioSelecionado}
+                                minChars={2}
 
-                                onClear={() => setUsuarioSelecionado(null)}
+                                value={usuarioOpcao}
 
-                                getLabel={u => u?.login ?? ''}
+                                onChange={(opcao) => {
+
+                                    setUsuarioOpcao(opcao);
+
+                                    setUsuarioSelecionado(opcao ? usuariosRef.current.get(opcao.id) ?? {id: opcao.id, login: opcao.label} : null);
+
+                                }}
 
                                 placeholder="Digite o login do operador"
 

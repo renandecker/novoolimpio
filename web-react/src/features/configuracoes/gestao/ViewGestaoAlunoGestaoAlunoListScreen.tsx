@@ -761,7 +761,7 @@ function MatriculasTable({contratoId, acessoTudo, acessoRelatorios, acessoNovo, 
                                                                        key: 'cancelamento',
                                                                        label: 'Cancelamento',
                                                                        className: 'btnred',
-                                                                       disabled: m.inscricao === false || m.statusMatricula === 'CANCELADO',
+                                                                       disabled: m.statusMatricula === 'CANCELADO',
                                                                        onSelect: () => setCancelando(true),
                                                                    }]}/>
                                                       </div>

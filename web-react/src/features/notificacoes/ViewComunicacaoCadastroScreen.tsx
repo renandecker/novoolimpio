@@ -3,7 +3,6 @@ import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {PermissionGate} from '../../shared/services/permissions';
 import {MasterDetail} from '../../shared/components/MasterDetail';
 import {Tabs} from '../../shared/components/Tabs';
-import {FormLayout} from '../../shared/components/FormLayout';
 import {FormField} from '../../shared/components/FormField';
 import {Swal} from '../../shared/components/swal';
 import {api} from '../../shared/services/api';
@@ -173,7 +172,7 @@ export default function ViewComunicacaoCadastroScreen() {
                 <h1>Cadastro de Comunicação</h1>
                 <div className="comunicacao-cadastro">
                     <form onSubmit={handleSubmit} className="comunicacao-form">
-                        <FormLayout>
+                        <div className="form-grid">
                             <FormField label="Título *" name="titulo" required>
                                 <input
                                     type="text"
@@ -184,7 +183,7 @@ export default function ViewComunicacaoCadastroScreen() {
                                 />
                             </FormField>
 
-                            <FormField label="Mensagem" name="mensagem" fullWidth>
+                            <FormField label="Mensagem" name="mensagem">
                                 <textarea
                                     value={formData.mensagem}
                                     onChange={e => setFormData({...formData, mensagem: e.target.value})}
@@ -222,7 +221,7 @@ export default function ViewComunicacaoCadastroScreen() {
                                 />
                             </FormField>
 
-                            <FormField label="Canais de Notificação" name="canais" fullWidth>
+                            <FormField label="Canais de Notificação" name="canais">
                                 <fieldset style={{border: '1px solid #ddd', borderRadius: '8px', padding: '16px'}}>
                                     <legend style={{fontWeight: 600, marginBottom: '12px', padding: '0 8px'}}>Selecione os canais de entrega</legend>
                                     <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px'}}>
@@ -285,7 +284,7 @@ export default function ViewComunicacaoCadastroScreen() {
                                     </div>
                                 </fieldset>
                             </FormField>
-                        </FormLayout>
+                        </div>
 
                         <div className="comunicacao-destinatarios">
                             <h2>Destinatários</h2>

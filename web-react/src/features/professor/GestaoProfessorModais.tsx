@@ -145,7 +145,7 @@ export function InformacoesConteudo({turmaId}: { turmaId: number }) {
                     {key: 'professorCelular', label: 'Celular'},
                     {key: 'professorEmail', label: 'E-mail'},
                 ]}
-                linhas={[info as unknown as Record<string, unknown>]}
+                linhas={[info as unknown as Record<string, any>]}
             />
 
             <h3>Dias de aula</h3>
@@ -156,7 +156,7 @@ export function InformacoesConteudo({turmaId}: { turmaId: number }) {
                     {key: 'diaSemana', label: 'Dia da semana'},
                     {key: 'turno', label: 'Turno'},
                 ]}
-                linhas={(info.diasAula ?? []) as unknown as Record<string, unknown>[]}
+                linhas={(info.diasAula ?? []) as unknown as Record<string, any>[]}
             />
 
             <h3>Alunos</h3>
@@ -172,7 +172,7 @@ export function InformacoesConteudo({turmaId}: { turmaId: number }) {
                     {key: 'contratanteTelefone', label: 'Telefone Contratante'},
                     {key: 'contratanteCelular', label: 'Celular Contratante'},
                 ]}
-                linhas={(info.alunos ?? []) as unknown as Record<string, unknown>[]}
+                linhas={(info.alunos ?? []) as unknown as Record<string, any>[]}
             />
         </>
     );

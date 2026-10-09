@@ -1,4 +1,4 @@
-import {useState, useCallback} from 'react';
+import {useState, useCallback, useRef} from 'react';
 import {PermissionGate} from '../../../shared/services/permissions';
 import {ModuleTabs} from '../../../shared/components/ModuleTabs';
 import {DataTable} from '../../../shared/components/DataTable';
@@ -158,6 +158,7 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
   const [uploadArquivoOpen, setUploadArquivoOpen] = useState(false);
   const [uploadArquivoFile, setUploadArquivoFile] = useState<string>('');
   const [selectedTurma, setSelectedTurma] = useState<TurmaOption | null>(null);
+  const turmasRef = useRef<TurmaOption[]>([]);
   const [diasAula, setDiasAula] = useState<OcorrenciaItem[]>([]);
   const [digitalizacaoChamadas, setDigitalizacaoChamadas] = useState<ChamadaItem[]>([]);
   const [selectedChamada, setSelectedChamada] = useState<ChamadaItem | null>(null);
@@ -183,6 +184,7 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
       const response = await api.get<TurmaOption[]>(API_PATHS.view.digitalizacaoDocumento.turmasDisponiveis, {
         params: {query},
       });
+      turmasRef.current = response.data;
       return response.data.map((item) => ({
         id: item.id,
         label: `${item.componente} - ${item.unidade} - ${item.curso} (Seq: ${item.sequencia})`,
@@ -197,7 +199,8 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
 
   const onTurmaSelect = useCallback(async (option: AutoCompleteOption | null) => {
     if (option) {
-      const turma = { id: option.id, label: option.label } as TurmaOption;
+      const turma = turmasRef.current.find((t) => t.id === option.id);
+      if (!turma) return;
       setSelectedTurma(turma);
       try {
         const response = await api.post<CarregarDiasAulaResponse>(
@@ -333,7 +336,7 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
         <div>
           <p>O arquivo só pode ser no formato PNG com o código do contrato, caso seja mais de uma página será ('contrato'-página)</p>
           <FileUploadBase
-            files={uploadArquivoFile ? [{name: 'arquivo', size: 0}] as any : []}
+            value={uploadArquivoFile}
             onFilesChange={async (newFiles) => {
               if (newFiles.length > 0) {
                 const file = newFiles[0];
@@ -385,7 +388,7 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                 {!selectedChamada.local && (
                   <>
                     <FileUploadBase
-                      files={inserirChamadaFile ? [{name: 'arquivo', size: 0}] as any : []}
+                      value={inserirChamadaFile}
                       onFilesChange={async (newFiles) => {
                         if (newFiles.length > 0) {
                           const file = newFiles[0];
@@ -437,7 +440,7 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                         <th>Matrícula</th>
                         <th>Aluno</th>
                         {ocorrenciaComponenteCurriculars.map((aula) => (
-                          <th key={aula.data} style={{textAlign: 'center'}}>
+                          <th key={aula.id} style={{textAlign: 'center'}}>
                             {formatDate(aula.data)}
                           </th>
                         ))}
@@ -447,10 +450,10 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                       {matriculas.map((matricula) => (
                         <tr key={matricula.id}>
                           <td>{matricula.id}</td>
-                          <td>{matricula.contrato.pessoa.pessoaFisica.nome}</td>
+                          <td>{matricula.alunoNome}</td>
                           {ocorrenciaComponenteCurriculars.map((aula) => (
-                            <td key={aula.data} style={{textAlign: 'center'}}>
-                              <span className={aula.presenca}>{PRESENCA_COR[aula.presenca] ?? aula.presenca}</span>
+                            <td key={aula.id} style={{textAlign: 'center'}}>
+                              <span>-</span>
                             </td>
                           ))}
                         </tr>
@@ -704,7 +707,7 @@ export default function ViewDigitalizacaoDocumentoDigitalizacaoDocumentoListScre
                           </label>
                         </div>
                         <FileUploadBase
-                          files={documentoAlunoFile ? [{name: 'arquivo', size: 0}] as any : []}
+                          value={documentoAlunoFile}
                           onFilesChange={async (newFiles) => {
                             if (newFiles.length > 0) {
                               const file = newFiles[0];

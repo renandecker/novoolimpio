@@ -315,7 +315,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
         setSalvando(true);
         try {
             const payload: Record<string, unknown> = {
-                ...semId(formData.entity as unknown as Record<string, unknown>),
+                ...semId(formData.entity as unknown as Record<string, any>),
                 dataCancelamento: formData.entity.dataCancelamento || null,
                 possuiRematricula: formData.entity.possuiRematricula ?? false,
             };

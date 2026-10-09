@@ -7,7 +7,7 @@ import {Wizard} from '../../../shared/components/Wizard';
 import {api} from '../../../shared/services/api';
 import type {ApiItem} from '../../../shared/types/types.ts';
 
-const asRecord = (item: ApiItem | null) => (item ?? {}) as Record<string, unknown>;
+const asRecord = (item: ApiItem | null) => (item ?? {}) as Record<string, any>;
 
 const val = (v: unknown): string => (v === null || v === undefined ? '-' : String(v));
 

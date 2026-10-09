@@ -28,6 +28,8 @@ export interface DataTableColumnOption {
 export interface DataTableColumn {
     key: string;
     label: string;
+    /** Largura fixa da coluna (ex.: '60px'). */
+    width?: string;
     options?: DataTableColumnOption[];
     render?: (item: ApiItem) => ReactNode;
 }
@@ -82,7 +84,7 @@ export interface UsePagedHookResult {
 
 export type UsePagedHook = (page: number, size: number, params?: Record<string, unknown>, filters?: SearchFilterRequest, sort?: SortRequest) => UsePagedHookResult;
 
-interface DataTableProps {
+export interface DataTableProps {
     path?: string;
     columns?: DataTableColumn[];
     params?: Record<string, unknown>;
@@ -110,6 +112,11 @@ interface DataTableProps {
     data?: ApiItem[];
     /** Hook personalizado para paginação (ex.: useIndicadorGaugePaged) */
     useCustomPaged?: UsePagedHook;
+    /** Clique em uma linha (modo dados locais). */
+    onRowClick?: (item: ApiItem) => void;
+    /** Expansão customizada por linha (renderiza renderExpandedRow abaixo da linha). */
+    expandableRows?: boolean;
+    renderExpandedRow?: (item: ApiItem) => ReactNode;
 }
 
 const toTitle = (value: string) =>
@@ -277,7 +284,7 @@ interface FilterModalState {
     filters: SearchFilterRequest;
 }
 
-export function DataTable({path = '', columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, hideUpdate = false, hideDelete = false, hideView = false, editNavigateTo, createNavigateTo, extraToolbarButtons, extraRowActions, extraRowMenus, data, useCustomPaged}: DataTableProps) {
+export function DataTable({path = '', columns, params, module = 'basico', outcome, combos, colorColumns, maxMainColumns, preview, hideCreate = false, hideUpdate = false, hideDelete = false, hideView = false, editNavigateTo, createNavigateTo, extraToolbarButtons, extraRowActions, extraRowMenus, data, useCustomPaged, onRowClick, expandableRows = false, renderExpandedRow}: DataTableProps) {
     const navigate = useNavigate();
     const [sortField, setSortField] = useState<string>('id');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -482,7 +489,7 @@ export function DataTable({path = '', columns, params, module = 'basico', outcom
         });
     }
 
-    const headerCount = (expandable ? 1 : 0) + 1 + cols.length + actionColumns.length;
+    const headerCount = ((expandable ? 1 : 0) + (expandableRows ? 1 : 0)) + 1 + cols.length + actionColumns.length;
 
     const apiErrorMessage = (error: unknown) =>
         (error as { response?: { data?: { error?: string } } })?.response?.data?.error
@@ -619,16 +626,17 @@ export function DataTable({path = '', columns, params, module = 'basico', outcom
                     <thead>
                     <tr>
                         {expandable && <th className="col-toggle"></th>}
+                        {expandableRows && <th className="col-toggle"></th>}
                         <th className="col-id" onClick={() => handleSort('id')} style={{cursor: 'pointer', userSelect: 'none'}}>
                             Id {sortField === 'id' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}
                         </th>
                         {mainCols.map((column) => (
-                            <th key={column.key} onClick={() => handleSort(column.key)} style={{cursor: 'pointer', userSelect: 'none'}}>
+                            <th key={column.key} onClick={() => handleSort(column.key)} style={{cursor: 'pointer', userSelect: 'none', width: column.width}}>
                                 {column.label} {sortField === column.key ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}
                             </th>
                         ))}
                         {!expandable && subCols.map((column) => (
-                            <th key={column.key} onClick={() => handleSort(column.key)} style={{cursor: 'pointer', userSelect: 'none'}}>
+                            <th key={column.key} onClick={() => handleSort(column.key)} style={{cursor: 'pointer', userSelect: 'none', width: column.width}}>
                                 {column.label} {sortField === column.key ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}
                             </th>
                         ))}
@@ -651,16 +659,32 @@ export function DataTable({path = '', columns, params, module = 'basico', outcom
                             const rowKey = String(item.id);
                             const isOpen = Boolean(expanded[rowKey]);
                             const row = (
-                                <tr key={`${rowKey}-row`}>
+                                <tr key={`${rowKey}-row`} onClick={onRowClick ? () => onRowClick(item) : undefined} style={onRowClick ? {cursor: 'pointer'} : undefined}>
                                     {expandable && (
                                         <td className="col-toggle">
                                             <button
                                                 type="button"
                                                 className="btn-row-toggle"
                                                 title={isOpen ? 'Recolher' : 'Expandir'}
-                                                onClick={() =>
-                                                    setExpanded((prev) => ({...prev, [rowKey]: !prev[rowKey]}))
-                                                }
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setExpanded((prev) => ({...prev, [rowKey]: !prev[rowKey]}));
+                                                }}
+                                            >
+                                                {isOpen ? '▾' : '▸'}
+                                            </button>
+                                        </td>
+                                    )}
+                                    {expandableRows && (
+                                        <td className="col-toggle">
+                                            <button
+                                                type="button"
+                                                className="btn-row-toggle"
+                                                title={isOpen ? 'Recolher' : 'Expandir'}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setExpanded((prev) => ({...prev, [rowKey]: !prev[rowKey]}));
+                                                }}
                                             >
                                                 {isOpen ? '▾' : '▸'}
                                             </button>
@@ -668,16 +692,27 @@ export function DataTable({path = '', columns, params, module = 'basico', outcom
                                     )}
                                     <td className="col-id">{item.id}</td>
                                     {mainCols.map((column) => (
-                                        <td key={column.key}>{renderCell(item, column, colorColumnSet)}</td>
+                                        <td key={column.key} style={{width: column.width}}>{renderCell(item, column, colorColumnSet)}</td>
                                     ))}
                                     {!expandable && subCols.map((column) => (
-                                        <td key={column.key}>{renderCell(item, column, colorColumnSet)}</td>
+                                        <td key={column.key} style={{width: column.width}}>{renderCell(item, column, colorColumnSet)}</td>
                                     ))}
                                     {actionColumns.map((column) => (
                                         <td key={column.key} className="col-actions">{column.render(item)}</td>
                                     ))}
                                 </tr>
                             );
+                            if (expandableRows) {
+                                if (!isOpen) return [row];
+                                return [
+                                    row,
+                                    <tr key={`${rowKey}-detail`} className="row-detail">
+                                        <td colSpan={headerCount}>
+                                            {renderExpandedRow ? renderExpandedRow(item) : null}
+                                        </td>
+                                    </tr>,
+                                ];
+                            }
                             if (!expandable || !isOpen) return [row];
                             return [
                                 row,

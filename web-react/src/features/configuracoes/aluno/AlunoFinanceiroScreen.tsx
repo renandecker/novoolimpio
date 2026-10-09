@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react';
+import {useAuth} from '../../auth/auth';
 
 
 import {Smartphone} from 'lucide-react';
@@ -167,6 +168,8 @@ export default function AlunoFinanceiroScreen() {
     const [error, setError] = useState('');
 
     const [busy, setBusy] = useState(true);
+    const {session} = useAuth();
+    const idUsuario = session?.idUsuario;
 
 
 
@@ -174,21 +177,9 @@ export default function AlunoFinanceiroScreen() {
 
         let active = true;
 
-        // Fetch pessoaId from perfil
+        // pessoaId vem do usuario autenticado; /api/aluno/perfil nao retorna id.
 
-        alunoApi.perfil()
-
-            .then(perfil => {
-
-                if (active) setPessoaId(Number(perfil.id ?? 0));
-
-            })
-
-            .catch(() => {
-
-                // ignore
-
-            });
+        if (active) setPessoaId(idUsuario ?? 0);
 
         alunoApi
 
@@ -218,7 +209,7 @@ export default function AlunoFinanceiroScreen() {
 
         };
 
-    }, []);
+    }, [idUsuario]);
 
 
 

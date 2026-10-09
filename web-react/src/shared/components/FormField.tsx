@@ -154,7 +154,6 @@ export const FormField: React.FC<FormFieldProps> = ({
     const commonProps = {
       id: fieldId,
       name,
-      value: type === 'checkbox' ? undefined : value,
       onChange: handleChange,
       onFocus,
       onBlur,
@@ -164,11 +163,12 @@ export const FormField: React.FC<FormFieldProps> = ({
       'aria-invalid': !!error,
       'aria-describedby': [errorId, helpId].filter(Boolean).join(' ') || undefined,
     };
+    const textValue = typeof value === 'boolean' ? String(value) : value;
 
     switch (type) {
       case 'select':
         return (
-          <select {...commonProps} multiple={multiple}>
+          <select {...commonProps} value={textValue} multiple={multiple}>
             <option value="">-- Selecione --</option>
             {options.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -182,6 +182,7 @@ export const FormField: React.FC<FormFieldProps> = ({
         return (
           <textarea
             {...commonProps}
+            value={textValue}
             placeholder={placeholder}
             rows={rows}
             minLength={minLength}
@@ -222,6 +223,7 @@ export const FormField: React.FC<FormFieldProps> = ({
           <input
             {...commonProps}
             type={type}
+            value={textValue}
             placeholder={placeholder}
             min={min}
             max={max}

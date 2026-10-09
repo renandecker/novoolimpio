@@ -177,4 +177,3 @@ export function GaugeChart({ config, value, minValue, maxValue, label, width = 3
 }
 
 export { GAUGE_COLORS };
-export type { GaugeConfig, GaugeChartProps };

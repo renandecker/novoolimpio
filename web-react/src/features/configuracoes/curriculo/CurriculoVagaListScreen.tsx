@@ -256,7 +256,8 @@ export default function CurriculoVagaListScreen() {
 
 
 
-    const getEmptyFormData = (): VagaFormData => ({
+    function getEmptyFormData(): VagaFormData {
+        return ({
 
         nome: '',
 
@@ -298,6 +299,8 @@ export default function CurriculoVagaListScreen() {
 
     });
 
+}
+
 
 
     const openCreate = () => {
@@ -318,7 +321,7 @@ export default function CurriculoVagaListScreen() {
 
     const openEdit = (item: ApiItem) => {
 
-        const rec = item as unknown as Record<string, unknown>;
+        const rec = item as unknown as Record<string, any>;
 
         setFormData({
 
@@ -344,21 +347,21 @@ export default function CurriculoVagaListScreen() {
 
             fl_email: rec.fl_email as boolean ?? true,
 
-            perfis: (rec.perfis as Array<number> ?? []).map(id => ({id, label: `#${id}`})),
+            perfis: (rec.perfis as Array<number> ?? []).map(id => ({id, label: `#${id}`, nome: `#${id}`})),
 
             unidade: (rec.unidades as Array<number> ?? [])[0] ? {id: (rec.unidades as Array<number> ?? [])[0], label: `#${(rec.unidades as Array<number> ?? [])[0]}`} : null,
 
-            empresas: (rec.empresas as Array<number> ?? []).map(id => ({id, label: `#${id}`})),
+            empresas: (rec.empresas as Array<number> ?? []).map(id => ({id, label: `#${id}`, nome: `#${id}`})),
 
-            usuarios: (rec.usuarios as Array<number> ?? []).map(id => ({id, label: `#${id}`})),
+            usuarios: (rec.usuarios as Array<number> ?? []).map(id => ({id, label: `#${id}`, nome: `#${id}`})),
 
-            oferecimentos: (rec.oferecimentos as Array<number> ?? []).map(id => ({id, label: `#${id}`})),
+            oferecimentos: (rec.oferecimentos as Array<number> ?? []).map(id => ({id, label: `#${id}`, nome: `#${id}`})),
 
-            componentes: (rec.componentes as Array<number> ?? []).map(id => ({id, label: `#${id}`})),
+            componentes: (rec.componentes as Array<number> ?? []).map(id => ({id, label: `#${id}`, nome: `#${id}`})),
 
-            curriculos: (rec.curriculos as Array<number> ?? []).map(id => ({id, label: `#${id}`})),
+            curriculos: (rec.curriculos as Array<number> ?? []).map(id => ({id, label: `#${id}`, nome: `#${id}`})),
 
-            grupos: (rec.grupos as Array<number> ?? []).map(id => ({id, label: `#${id}`})),
+            grupos: (rec.grupos as Array<number> ?? []).map(id => ({id, label: `#${id}`, nome: `#${id}`})),
 
         });
 
@@ -545,7 +548,7 @@ export default function CurriculoVagaListScreen() {
 
                         columns={USUARIO_COLUMNS}
 
-                        items={formData.id_usuario ? [{id: formData.id_usuario, label: `#${formData.id_usuario}`}] : []}
+                        items={formData.id_usuario ? [{id: formData.id_usuario, label: `#${formData.id_usuario}`, nome: `#${formData.id_usuario}`}] : []}
 
                         onChange={items => updateField('id_usuario', items[0]?.id ?? null)}
 

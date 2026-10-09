@@ -1,4 +1,4 @@
-﻿import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {PermissionGate} from '../../shared/services/permissions';
 import {MasterDetail} from '../../shared/components/MasterDetail';
@@ -157,7 +157,7 @@ export default function ViewComponenteCurricularFormComponenteCurricularListScre
         setSalvando(true);
         try {
             const payload: Record<string, unknown> = {
-                ...semId(data.entity as unknown as Record<string, unknown>),
+                ...semId(data.entity as unknown as Record<string, any>),
                 baseTecnologicas,
                 cronogramas: cronogramas.map(({key, ...resto}) => resto),
                 referenciasBibliograficas,

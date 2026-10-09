@@ -78,6 +78,8 @@ interface UnidadeRow {
 
     nomeFantasia?: string;
 
+    fl_ativo?: boolean;
+
 }
 
 
@@ -107,6 +109,8 @@ interface OferecimentoWrapperRow {
     id: number;
 
     grupoId?: number;
+
+    grupo?: {id: number; nome?: string; descricao?: string; sucinto?: string};
 
     componenteCurricularId?: number;
 
@@ -220,8 +224,9 @@ interface MaterialRow {
 
 interface MaterialEscolarMatriculaRow {
 
-    controleEstoque?: {
+    controleEstoqueId?: number;
 
+    controleEstoque?: {
         id: number;
 
         produto?: {id: number; identificador?: string; valor?: number; imagem?: string};
@@ -315,6 +320,8 @@ interface MatriculaData {
     valores: {
 
         formaPagamentoId?: number;
+
+        tipoFormaPagamento?: string;
 
         dataPrimeiraParcela?: string;
 
@@ -596,7 +603,7 @@ export default function ViewMatriculaWizardScreen() {
 
             });
 
-            return rows.data;
+            return rows;
 
         },
 
@@ -620,7 +627,7 @@ export default function ViewMatriculaWizardScreen() {
 
             });
 
-            return rows.data;
+            return rows;
 
         },
 
@@ -644,7 +651,7 @@ export default function ViewMatriculaWizardScreen() {
 
             });
 
-            return rows.data;
+            return rows;
 
         },
 
@@ -668,7 +675,7 @@ export default function ViewMatriculaWizardScreen() {
 
             });
 
-            return rows.data;
+            return rows;
 
         },
 
@@ -746,11 +753,11 @@ export default function ViewMatriculaWizardScreen() {
 
             });
 
-            updateValoresField('parcelas', parcelas.data ?? []);
+            updateValoresField('parcelas', parcelas ?? []);
 
-            if (parcelas.data && parcelas.data.length > 0) {
+            if (parcelas && parcelas.length > 0) {
 
-                updateEntityField('dataPrimeiraParcela', isoDate(parcelas.data[0].dataVencimento));
+                updateEntityField('dataPrimeiraParcela', isoDate(parcelas[0].dataVencimento));
 
             }
 

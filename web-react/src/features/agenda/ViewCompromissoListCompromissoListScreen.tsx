@@ -1,4 +1,4 @@
-﻿import {useState} from 'react';
+import {useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {useNavigate} from 'react-router-dom';
 import {PermissionGate} from '../../shared/services/permissions';
@@ -7,7 +7,7 @@ import type {ApiItem} from '../../shared/types/types.ts';
 import {api} from '../../shared/services/api';
 import {swalConfirm, appAlert} from '../../shared/components/swal';
 
-const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
 
 const formatDate = (value: unknown): string => {
     if (value === null || value === undefined) return '';

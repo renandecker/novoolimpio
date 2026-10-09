@@ -4,7 +4,7 @@ import {PermissionGate} from '../../../shared/services/permissions';
 
 import {ModuleTabs} from '../../../shared/components/ModuleTabs';
 
-import type {DataTableColumn} from '../../../shared/components/DataTable';
+import type {DataTableColumn, DataTableRowAction, UsePagedHook} from '../../../shared/components/DataTable';
 
 import type {ApiItem} from '../../../shared/types/types.ts';
 
@@ -18,7 +18,50 @@ import {DataTable} from '../../../shared/components/DataTable';
 
 import {formatDate} from '../../../shared/utils/dateUtils';
 
-const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
+
+const noopMutate = () => {};
+
+/**
+ * Adaptador de paginação servidor para a aba "Ajuste Feriado Oferecimento".
+ * O DataTable mantém o controle de page/size e este hook apenas busca a página.
+ */
+const useAjustesPaged: UsePagedHook = (page, size) => {
+    const [itens, setItens] = useState<ApiItem[]>([]);
+    const [total, setTotal] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isError, setIsError] = useState(false);
+
+    useEffect(() => {
+        let cancelado = false;
+        setIsLoading(true);
+        setIsError(false);
+        api.get<{content: ApiItem[]; totalElements: number}>('/api/basico/feriado/ajustes/paged', {params: {page, size}})
+            .then(({data}) => {
+                if (cancelado) return;
+                setItens(data?.content ?? []);
+                setTotal(data?.totalElements ?? 0);
+            })
+            .catch(() => {
+                if (!cancelado) setIsError(true);
+            })
+            .finally(() => {
+                if (!cancelado) setIsLoading(false);
+            });
+        return () => { cancelado = true; };
+    }, [page, size]);
+
+    return {
+        data: {content: itens, totalElements: total, totalPages: Math.max(1, Math.ceil(total / size))},
+        isLoading,
+        isError,
+        isFetching: isLoading,
+        refetch: () => {},
+        create: {mutate: noopMutate},
+        update: {mutate: noopMutate},
+        remove: {mutate: noopMutate},
+    };
+};
 
 const apiErrorMessage = (error: unknown): string =>
     (error as { response?: { data?: { error?: string } } })?.response?.data?.error
@@ -90,7 +133,7 @@ export default function ViewFeriadoListFeriadoListScreen() {
     const [calendarioEventos, setCalendarioEventos] = useState<any[]>([]);
     const [calendarioLoading, setCalendarioLoading] = useState(false);
     
-    const [selectedAjusteId, setSelectedAjusteId] = useState<Long | null>(null);
+    const [selectedAjusteId, setSelectedAjusteId] = useState<number | null>(null);
     const [ocorrenciasAjustar, setOcorrenciasAjustar] = useState<ApiItem[]>([]);
     const [ocorrenciasAjustarLoading, setOcorrenciasAjustarLoading] = useState(false);
     const [ocorrenciasNaoAjustar, setOcorrenciasNaoAjustar] = useState<ApiItem[]>([]);
@@ -114,11 +157,11 @@ export default function ViewFeriadoListFeriadoListScreen() {
     const loadAjustes = async (page: number = 0, size: number = 10) => {
         setAjustesLoading(true);
         try {
-            const {data} = await api.get<{items: ApiItem[], total: number}>(`/api/basico/feriado/ajustes/paged`, {
+            const {data} = await api.get<{content: ApiItem[], totalElements: number}>(`/api/basico/feriado/ajustes/paged`, {
                 params: {page, size}
             });
-            setAjustes(data.items ?? []);
-            setAjustesTotal(data.total ?? 0);
+            setAjustes(data.content ?? []);
+            setAjustesTotal(data.totalElements ?? 0);
             setAjustesPage(page);
         } catch (error) {
             setAviso(`Falha ao carregar ajustes: ${apiErrorMessage(error)}`);
@@ -139,7 +182,7 @@ export default function ViewFeriadoListFeriadoListScreen() {
         }
     };
 
-    const loadOcorrenciasAjustar = async (ajusteId: Long) => {
+    const loadOcorrenciasAjustar = async (ajusteId: number) => {
         setOcorrenciasAjustarLoading(true);
         try {
             const {data} = await api.get<ApiItem[]>(`/api/basico/feriado/ajustes/${ajusteId}/ocorrencias-ajustar`);
@@ -151,7 +194,7 @@ export default function ViewFeriadoListFeriadoListScreen() {
         }
     };
 
-    const loadOcorrenciasNaoAjustar = async (ajusteId: Long) => {
+    const loadOcorrenciasNaoAjustar = async (ajusteId: number) => {
         setOcorrenciasNaoAjustarLoading(true);
         try {
             const {data} = await api.get<ApiItem[]>(`/api/basico/feriado/ajustes/${ajusteId}/ocorrencias-nao-ajustar`);
@@ -186,6 +229,16 @@ export default function ViewFeriadoListFeriadoListScreen() {
         }
     };
 
+    const ajusteRowActions: DataTableRowAction[] = [
+        {
+            key: 'ocorrencias',
+            title: 'Ver Ocorrências',
+            className: 'btnyellow',
+            icon: <i className="fa fa-search"/>,
+            onClick: (item) => handleAjusteRowClick(item),
+        },
+    ];
+
     const renderTabContent = (tabKey: string) => {
         switch (tabKey) {
             case 'calendario':
@@ -202,16 +255,13 @@ export default function ViewFeriadoListFeriadoListScreen() {
                 return (
                     <div className="tab-content">
                         <DataTable
-                            items={ajustes}
+                            useCustomPaged={useAjustesPaged}
                             columns={AJUSTE_COLUMNS}
-                            loading={ajustesLoading}
-                            total={ajustesTotal}
-                            page={ajustesPage}
-                            pageSize={ajustesSize}
-                            onPageChange={setAjustesPage}
-                            onPageSizeChange={setAjustesSize}
-                            onRowClick={handleAjusteRowClick}
-                            rowKey="id"
+                            hideCreate
+                            hideUpdate
+                            hideDelete
+                            hideView
+                            extraRowActions={ajusteRowActions}
                         />
                     </div>
                 );
@@ -220,10 +270,12 @@ export default function ViewFeriadoListFeriadoListScreen() {
                     <div className="tab-content">
                         {selectedAjusteId ? (
                             <DataTable
-                                items={ocorrenciasAjustar}
+                                data={ocorrenciasAjustar}
                                 columns={OCORRENCIA_COLUMNS}
-                                loading={ocorrenciasAjustarLoading}
-                                rowKey="id"
+                                hideCreate
+                                hideUpdate
+                                hideDelete
+                                hideView
                             />
                         ) : (
                             <p className="data-table-notice">Selecione um ajuste na aba "Ajuste Feriado Oferecimento" para visualizar as ocorrências a ajustar.</p>
@@ -235,10 +287,12 @@ export default function ViewFeriadoListFeriadoListScreen() {
                     <div className="tab-content">
                         {selectedAjusteId ? (
                             <DataTable
-                                items={ocorrenciasNaoAjustar}
+                                data={ocorrenciasNaoAjustar}
                                 columns={OCORRENCIA_COLUMNS}
-                                loading={ocorrenciasNaoAjustarLoading}
-                                rowKey="id"
+                                hideCreate
+                                hideUpdate
+                                hideDelete
+                                hideView
                             />
                         ) : (
                             <p className="data-table-notice">Selecione um ajuste na aba "Ajuste Feriado Oferecimento" para visualizar as ocorrências não ajustar.</p>

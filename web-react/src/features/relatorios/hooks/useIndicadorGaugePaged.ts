@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../../shared/services/api';
-import type { ApiItem, ApiRequest, PagedResponse, SearchFilterRequest, SortRequest } from '../../shared/types/types';
+import type { ApiItem, ApiRequest, PagedResponse, SearchFilterRequest, SortRequest } from '../../../shared/types/types';
 
 export interface PerfilModuloPermissions {
     novo: boolean;

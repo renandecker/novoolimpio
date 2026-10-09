@@ -1,9 +1,10 @@
-﻿import {useState, useCallback, useMemo} from 'react';
+import {useState, useCallback, useMemo} from 'react';
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {api} from '../../shared/services/api';
 import {PermissionGate} from '../../shared/services/permissions';
 import {ScheduleWeekView, mondayOf, toIsoDate, parseDate, addDays, monthRangeForWeek, type ScheduleEventData} from '../../shared/components/WeeklyGrid';
 import {DataTable, type DataTableColumn, type DataTableRowAction} from '../../shared/components/DataTable';
+import type {ApiItem} from '../../shared/types/types';
 import {Tabs} from '../../shared/components/Tabs';
 import {Modal} from '../../shared/components/Modal';
 import {AutoComplete, type AutoCompleteOption} from '../../shared/components/AutoComplete';
@@ -359,7 +360,7 @@ export default function ViewAgendaCompromissosScreen() {
     }, []);
 
     const openCreateForm = useCallback(() => {
-        setFormData({ativo: true, tipoHorario: 'unidade'});
+        setFormData({ativo: true});
         setFormHorarios([]);
         setFormTipoHorario('unidade');
         setIsEditing(false);
@@ -428,6 +429,12 @@ export default function ViewAgendaCompromissosScreen() {
         setOpenModal('nextStatus');
     }, []);
 
+    const statusOptions = useMemo<StatusCompromisso[]>(() => {
+        const statuses = agendasQuery.data?.flatMap(a => a.status || []) || [];
+        const unique = new Map(statuses.map(s => [s.descricao, s]));
+        return Array.from(unique.values());
+    }, [agendasQuery.data]);
+
     const LEGENDA = useMemo(() => {
         const statuses = agendasQuery.data?.flatMap(a => a.status || []) || [];
         const unique = new Map(statuses.map(s => [s.descricao, s]));
@@ -462,7 +469,8 @@ export default function ViewAgendaCompromissosScreen() {
         return result;
     }, [compromissosQuery.data, selectedPessoa]);
 
-    const asRecord = (item: Compromisso) => item as unknown as Record<string, unknown>;
+    const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
+    const asCompromisso = (item: ApiItem) => item as unknown as Compromisso;
 
     const extraRowActions: DataTableRowAction[] = useMemo(() => [
         {
@@ -471,7 +479,7 @@ export default function ViewAgendaCompromissosScreen() {
             className: 'btnyellow',
             icon: <i className="fa fa-info-circle"/>,
             visible: (item) => Boolean(asRecord(item).observacao),
-            onClick: (item) => handleRowClick(item),
+            onClick: (item) => handleRowClick(asCompromisso(item)),
         },
         {
             key: 'resultados',
@@ -479,7 +487,7 @@ export default function ViewAgendaCompromissosScreen() {
             className: 'btnyellow',
             icon: <i className="fa fa-search"/>,
             visible: (item) => Boolean(asRecord(item).resultados?.length),
-            onClick: (item) => handleRowClick(item),
+            onClick: (item) => handleRowClick(asCompromisso(item)),
         },
         {
             key: 'prospecto',
@@ -498,7 +506,7 @@ export default function ViewAgendaCompromissosScreen() {
             className: 'btnorange',
             icon: <i className="fa fa-exchange"/>,
             permission: 'CREATE',
-            onClick: (item) => handleOpenChangeStatus(item),
+            onClick: (item) => handleOpenChangeStatus(asCompromisso(item)),
         },
         {
             key: 'proximoStatus',
@@ -507,7 +515,7 @@ export default function ViewAgendaCompromissosScreen() {
             icon: <i className="fa fa-forward"/>,
             permission: 'UPDATE',
             visible: (item) => asRecord(item).statusCompromisso?.proxStatusCompromisso !== null && asRecord(item).statusCompromisso?.proxStatusCompromisso !== undefined,
-            onClick: (item) => handleOpenNextStatus(item),
+            onClick: (item) => handleOpenNextStatus(asCompromisso(item)),
         },
         {
             key: 'fechar',
@@ -516,7 +524,7 @@ export default function ViewAgendaCompromissosScreen() {
             icon: <i className="fa fa-times"/>,
             permission: 'DELETE',
             visible: (item) => asRecord(item).ativo !== false,
-            onClick: (item) => handleOpenCloseCompromisso(item),
+            onClick: (item) => handleOpenCloseCompromisso(asCompromisso(item)),
         },
     ], []);
 
@@ -659,13 +667,13 @@ export default function ViewAgendaCompromissosScreen() {
                     <div className="list-view">
                         <DataTable
                             columns={COLUMNS}
-                            data={filteredCompromissos}
-                            loading={compromissosQuery.isLoading}
-                            error={compromissosQuery.isError ? 'Erro ao carregar compromissos.' : null}
-                            onRowClick={handleRowClick}
+                            data={filteredCompromissos as unknown as ApiItem[]}
+                            onRowClick={(item) => handleRowClick(asCompromisso(item))}
                             extraRowActions={extraRowActions}
                             expandableRows
-                            renderExpandedRow={(compromisso) => (
+                            renderExpandedRow={(item) => {
+                                const compromisso = asCompromisso(item);
+                                return (
                                 <div className="expanded-row">
                                     <h4>Histórico de Status</h4>
                                     {compromisso.compromissoStatusUsuarios && compromisso.compromissoStatusUsuarios.length > 0 ? (
@@ -708,9 +716,10 @@ export default function ViewAgendaCompromissosScreen() {
                                                 ))}
                                             </ul>
                                         </div>
-                                    )}
+)}
                                 </div>
-                            )}
+                                );
+                            }}
                         />
                     </div>
                 )}

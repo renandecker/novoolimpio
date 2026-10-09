@@ -88,7 +88,7 @@ export default function ViewFeriadoFormFeriadoListScreen() {
                 setNome(String(ent.nome ?? ''));
                 setDescricao(String(ent.descricao ?? ''));
                 setTipoFeriao(String(ent.tipo_feriao ?? ''));
-                setDataFeriado(formatarData(ent.dt_feriado));
+                setDataFeriado(formatarData(ent.dt_feriado == null ? null : String(ent.dt_feriado)));
                 setNacional(Boolean(ent.fl_nacional ?? false));
                 setTodosCursos(Boolean(ent.fl_tipo_curso ?? false));
                 setFeriadoFixo(Boolean(ent.fl_feriado_fixo ?? false));
@@ -270,6 +270,7 @@ export default function ViewFeriadoFormFeriadoListScreen() {
                                         <span className="form-label">Tipo Cursos</span>
                                         <AutoComplete
                                             placeholder="Digite para buscar (mínimo 3 caracteres)"
+                                            multiple
                                             value={tipoCursos}
                                             onChange={setTipoCursos}
                                             fetchOptions={buscarTipoCursos}
@@ -283,6 +284,7 @@ export default function ViewFeriadoFormFeriadoListScreen() {
                                         <span className="form-label">Unidade</span>
                                         <AutoComplete
                                             placeholder="Digite para buscar (mínimo 3 caracteres)"
+                                            multiple
                                             value={unidades}
                                             onChange={setUnidades}
                                             fetchOptions={buscarUnidades}

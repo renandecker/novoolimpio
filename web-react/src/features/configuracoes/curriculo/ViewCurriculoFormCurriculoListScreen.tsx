@@ -1,4 +1,4 @@
-﻿import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {X, Plus} from 'lucide-react';
 import {ProdutoSelectionModal} from '../produto/ProdutoSelectionModal';
@@ -688,7 +688,7 @@ export default function ViewCurriculoFormCurriculoListScreen() {
 
             const payload: Record<string, unknown> = {
 
-                ...semId(formData.entity as unknown as Record<string, unknown>),
+                ...semId(formData.entity as unknown as Record<string, any>),
 
                 dataCancelamento: formData.entity.dataCancelamento || null,
 

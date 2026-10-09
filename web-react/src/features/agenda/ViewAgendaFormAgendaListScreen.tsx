@@ -1,4 +1,4 @@
-﻿import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
 import {PermissionGate} from '../../shared/services/permissions';
@@ -60,7 +60,7 @@ const RESULTADO_COLUMNS: MasterDetailColumn[] = [
     {
         key: 'venda',
         label: 'Venda',
-        render: (item) => ((item as unknown as Record<string, unknown>).venda === true ? 'Sim' : 'Não'),
+        render: (item) => ((item as unknown as Record<string, any>).venda === true ? 'Sim' : 'Não'),
     },
 ];
 
@@ -149,7 +149,7 @@ export default function ViewAgendaFormAgendaListScreen() {
     const nomeStatusPorId = useMemo(() => {
         const mapa = new Map<string, string>();
         for (const item of statusQuery.data ?? []) {
-            mapa.set(String(item.id), str((item as unknown as Record<string, unknown>).descricao));
+            mapa.set(String(item.id), str((item as unknown as Record<string, any>).descricao));
         }
         return mapa;
     }, [statusQuery.data]);
@@ -162,7 +162,7 @@ export default function ViewAgendaFormAgendaListScreen() {
         {
             key: 'proxStatusCompromissoId',
             label: 'Próximo Status',
-            render: (item) => nomeStatusPorId.get(str((item as unknown as Record<string, unknown>).proxStatusCompromissoId)) ?? '',
+            render: (item) => nomeStatusPorId.get(str((item as unknown as Record<string, any>).proxStatusCompromissoId)) ?? '',
         },
     ];
 
@@ -188,7 +188,7 @@ export default function ViewAgendaFormAgendaListScreen() {
             return false;
         }
         const terminaNosUltimos = statusSelecionados.some((item) =>
-            String((item as unknown as Record<string, unknown>).proxStatusCompromissoId) === form.statusCompromissoUltimoId);
+            String((item as unknown as Record<string, any>).proxStatusCompromissoId) === form.statusCompromissoUltimoId);
         if (!terminaNosUltimos) {
             alert('Troca de status sem o ultimo status compromisso');
             return false;
@@ -236,8 +236,8 @@ export default function ViewAgendaFormAgendaListScreen() {
     };
 
     const unidades = [...(unidadesQuery.data ?? [])].sort((a, b) => {
-        const ra = a as unknown as Record<string, unknown>;
-        const rb = b as unknown as Record<string, unknown>;
+        const ra = a as unknown as Record<string, any>;
+        const rb = b as unknown as Record<string, any>;
         return String(ra.sucinto ?? '').localeCompare(String(rb.sucinto ?? ''));
     });
 
@@ -264,7 +264,7 @@ export default function ViewAgendaFormAgendaListScreen() {
                                         onChange={(e) => set('unidadeId', e.target.value)}>
                                     <option value="">-- Selecione --</option>
                                     {unidades.map((unidade) => {
-                                        const registro = unidade as unknown as Record<string, unknown>;
+                                        const registro = unidade as unknown as Record<string, any>;
                                         return (
                                             <option key={String(registro.id)} value={String(registro.id)}>
                                                 {String(registro.sucinto || registro.nomeFantasia || `#${registro.id}`)}
@@ -280,7 +280,7 @@ export default function ViewAgendaFormAgendaListScreen() {
                                     <option value="">-- Selecione --</option>
                                     {(tiposQuery.data ?? []).map((tipo) => (
                                         <option key={String(tipo.id)} value={String(tipo.id)}>
-                                            {str((tipo as unknown as Record<string, unknown>).descricao)}
+                                            {str((tipo as unknown as Record<string, any>).descricao)}
                                         </option>
                                     ))}
                                 </select>
@@ -292,7 +292,7 @@ export default function ViewAgendaFormAgendaListScreen() {
                                     <option value="">-- Selecione --</option>
                                     {(statusQuery.data ?? []).map((status) => (
                                         <option key={String(status.id)} value={String(status.id)}>
-                                            {str((status as unknown as Record<string, unknown>).descricao)}
+                                            {str((status as unknown as Record<string, any>).descricao)}
                                         </option>
                                     ))}
                                 </select>
@@ -304,7 +304,7 @@ export default function ViewAgendaFormAgendaListScreen() {
                                     <option value="">-- Selecione --</option>
                                     {(statusQuery.data ?? []).map((status) => (
                                         <option key={String(status.id)} value={String(status.id)}>
-                                            {str((status as unknown as Record<string, unknown>).descricao)}
+                                            {str((status as unknown as Record<string, any>).descricao)}
                                         </option>
                                     ))}
                                 </select>

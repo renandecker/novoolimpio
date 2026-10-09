@@ -14,7 +14,7 @@ import type {AutoCompleteOption} from '../../../shared/components/AutoComplete';
 
 
 
-const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
 
 
 

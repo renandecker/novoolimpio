@@ -64,7 +64,7 @@ export default function ViewPerfilFormPerfilListScreen() {
                 {name: 'id', label: 'ID', type: 'text', readOnly: true},
                 {name: 'descricao', label: 'Descrição *', required: true, span: 3},
                 {name: 'hierarquia', label: 'Hierarquia *', type: 'select', options: HIERARQUIA_OPTIONS, required: true},
-                {name: 'comunicar', label: 'Comunicar', type: 'checkbox'},
+                {name: 'comunicar', label: 'Comunicar', type: 'boolean'},
                 {name: 'modulo', label: 'Minha Página Inicial', type: 'select', options: [], span: 3},
             ],
             content: (
@@ -94,7 +94,8 @@ export default function ViewPerfilFormPerfilListScreen() {
                         </label>
                         <label className="form-field" style={{display: 'flex', alignItems: 'flex-end'}}>
                             <button type="button" className="btn-form-save" onClick={() => {
-                                const novo = {...moduloSelecionado, id: Date.now()};
+                                const rotuloModulo = str(moduloSelecionado.modulo_rotulo ?? moduloSelecionado.modulo);
+                                const novo: ApiItem = {...moduloSelecionado, id: Date.now(), nome: rotuloModulo, modulo_rotulo: rotuloModulo};
                                 setPerfisModulos([...perfisModulos, novo]);
                                 setModuloSelecionado({novo: true, editar: true, remover: true, relatorio: true, modulo: ''});
                             }}>Adicionar</button>
@@ -149,7 +150,7 @@ export default function ViewPerfilFormPerfilListScreen() {
                     id: str(perfil.id),
                     descricao: str(perfil.descricao),
                     hierarquia: str(perfil.hierarquia),
-                    modulo: str(perfil.modulo?.id ?? perfil.modulo),
+                    modulo: str((perfil.modulo as {id?: unknown} | null | undefined)?.id ?? perfil.modulo),
                     comunicar: bool(perfil.comunicar),
                     favorito_nome: '',
                     favorito_modulo: '',

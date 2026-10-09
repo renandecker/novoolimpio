@@ -420,7 +420,7 @@ export default function ViewOperacionalListOperacionalListScreen() {
 
                 {/* Modal Ver Filtros */}
 
-                <Modal open={verFiltrosOpen} onClose={() => setVerFiltrosOpen(false)} title="Filtros" size="large">
+                <Modal open={verFiltrosOpen} onClose={() => setVerFiltrosOpen(false)} title="Filtros" size="xl">
 
                     {loading && <p style={{textAlign: 'center', padding: '20px'}}>Carregando...</p>}
 
@@ -512,7 +512,7 @@ export default function ViewOperacionalListOperacionalListScreen() {
 
                 {/* Modal Ver Ligações / Pie Chart */}
 
-                <Modal open={verLigacoesOpen} onClose={() => setVerLigacoesOpen(false)} title="Resultados Prospectos" size="large">
+                <Modal open={verLigacoesOpen} onClose={() => setVerLigacoesOpen(false)} title="Resultados Prospectos" size="xl">
 
                     {loading && <p style={{textAlign: 'center', padding: '20px'}}>Carregando...</p>}
 
@@ -678,7 +678,7 @@ export default function ViewOperacionalListOperacionalListScreen() {
 
                 {/* Modal Confirm Remover Prospectos */}
 
-                <Modal open={confirmRemoverOpen} onClose={() => setConfirmRemoverOpen(false)} title="Atenção!" size="small">
+                <Modal open={confirmRemoverOpen} onClose={() => setConfirmRemoverOpen(false)} title="Atenção!" size="sm">
 
                     <div style={{display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px'}}>
 

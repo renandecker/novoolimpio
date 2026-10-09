@@ -16,7 +16,7 @@ import type { ApiItem } from '../../../shared/types/types.ts';
 
 
 
-const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
 
 
 
@@ -256,7 +256,7 @@ export default function ViewTurnoUsuarioListTurnoUsuarioListScreen() {
 
             const idSet = new Set(turnoIds.map((n) => String(n)));
 
-            const filtrados = allTurnos.filter((t) => idSet.has(String((t as unknown as Record<string, unknown>).id ?? (t as unknown as Record<string, unknown>).id_turno)));
+            const filtrados = allTurnos.filter((t) => idSet.has(String((t as unknown as Record<string, any>).id ?? (t as unknown as Record<string, any>).id_turno)));
 
             // fallback: busca individual se lista filtrada vazia
 
@@ -330,7 +330,7 @@ export default function ViewTurnoUsuarioListTurnoUsuarioListScreen() {
 
         if (next.length > listaTurnos.length) {
 
-            const added = next.find((n) => !listaTurnos.some((o) => String(asRecord(o).id ?? (o as unknown as Record<string, unknown>).id) === String(asRecord(n).id ?? (n as unknown as Record<string, unknown>).id)));
+            const added = next.find((n) => !listaTurnos.some((o) => String(asRecord(o).id ?? (o as unknown as Record<string, any>).id) === String(asRecord(n).id ?? (n as unknown as Record<string, any>).id)));
 
             if (added) {
 
@@ -428,7 +428,7 @@ export default function ViewTurnoUsuarioListTurnoUsuarioListScreen() {
 
         try {
 
-            const turnoTrabalhoIds = listaTurnos.map((t) => Number((asRecord(t).id ?? (t as unknown as Record<string, unknown>).id) as number)).filter((n) => !Number.isNaN(n));
+            const turnoTrabalhoIds = listaTurnos.map((t) => Number((asRecord(t).id ?? (t as unknown as Record<string, any>).id) as number)).filter((n) => !Number.isNaN(n));
 
             await api.post('/api/central/turno-usuario/salvar', { usuarioId: operador.id, turnoTrabalhoIds });
 

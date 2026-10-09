@@ -16,7 +16,7 @@ export default function ViewAcaoListAcaoListScreen() {
     return <PermissionGate permission="READ">
         <main>
             <h1>Ação</h1>
-            <DataTable path="/api/comercial/acao" columns={COLUMNS} searchKeys={['descricao']} />
+            <DataTable path="/api/comercial/acao" columns={COLUMNS}/>
         </main>
     </PermissionGate>
 }

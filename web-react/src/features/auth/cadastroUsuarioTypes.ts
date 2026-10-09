@@ -203,8 +203,8 @@ export function num(v: string): number | null {
   return v !== '' && !isNaN(Number(v)) ? Number(v) : null;
 }
 
-export function semId<T extends Record<string, unknown>>(obj: T | null): Partial<T> {
-  const copia = { ...(obj ?? {}) };
+export function semId<T extends object>(obj: T | null): Omit<T, 'id'> {
+  const copia = {...(obj ?? {})} as T & { id?: unknown };
   delete copia.id;
-  return copia;
+  return copia as Omit<T, 'id'>;
 }

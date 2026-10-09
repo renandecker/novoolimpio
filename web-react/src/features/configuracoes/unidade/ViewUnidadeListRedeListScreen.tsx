@@ -2,7 +2,7 @@ import {PermissionGate} from '../../../shared/services/permissions';
 import {DataTable, type DataTableColumn} from '../../../shared/components/DataTable';
 import type {ApiItem} from '../../../shared/types/types.ts';
 
-const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
 
 const COLUMNS: DataTableColumn[] = [
     {key: 'usuario_descricao', label: 'Login', render: (item) => String(asRecord(item).usuario_descricao ?? asRecord(item).usuario_login ?? asRecord(item).usuario ?? '')},

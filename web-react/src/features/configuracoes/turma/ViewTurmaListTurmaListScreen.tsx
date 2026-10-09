@@ -39,7 +39,7 @@ import {
 
 import '../../professor/GestaoProfessor.css';
 
-const asRecord = (item: ApiItem) => (item ?? {}) as Record<string, unknown>;
+const asRecord = (item: ApiItem) => (item ?? {}) as Record<string, any>;
 
 /* Formatação de data dd/MM/yyyy (espelha formatDate das telas de referência). */
 const formatDate = (value: unknown): string => {

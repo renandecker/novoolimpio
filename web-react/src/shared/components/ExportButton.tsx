@@ -1,4 +1,4 @@
-﻿import {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import {api} from '../services/api';
 
 interface ExportButtonProps {
@@ -30,7 +30,7 @@ export function ExportButton({reportId, reportType, data, onSuccess}: ExportButt
     }, [showModal, reportId, reportType]);
 
     const handleExport = async () => {
-        if (exportType !== 'EXCEL' && !selectedTemplate) {
+        if (!selectedTemplate) {
             setError('Selecione um template');
             return;
         }
@@ -102,7 +102,7 @@ export function ExportButton({reportId, reportType, data, onSuccess}: ExportButt
                                 {error && <p style={{color: 'red'}}>{error}</p>}
                                 <div className="modal-actions form-footer">
                                     <button type="button" className="btn-form-back btnyellow" onClick={() => setShowModal(false)}>Cancelar</button>
-                                    <button type="button" className="btnstop" onClick={handleExport} disabled={loading || (exportType !== 'EXCEL' && !selectedTemplate)}>
+                                    <button type="button" className="btnstop" onClick={handleExport} disabled={loading || !selectedTemplate}>
                                         {loading ? 'Exportando...' : `Exportar ${exportType}`}
                                     </button>
                                 </div>

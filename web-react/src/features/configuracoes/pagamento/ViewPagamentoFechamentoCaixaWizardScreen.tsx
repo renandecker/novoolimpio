@@ -907,7 +907,7 @@ const fetchBandeira = fetchAutoComplete('/api/view/bandeira/listBandeira', 'id',
 
             updateFields({
                 historico: '', valorExtra: '', movimentoId: '', categoriaFinanceiraId: '',
-                tipoHistoricoId: '', documentoExtra: '', quantidadeExtra: '', especiesExtra: ''
+                tipoHistoricoId: '', documentoExtra: '', quantidadeExtra: '', especieExtra: ''
             });
 
         } catch (e: any) {

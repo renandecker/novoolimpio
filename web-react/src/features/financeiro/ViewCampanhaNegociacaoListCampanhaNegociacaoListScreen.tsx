@@ -2,7 +2,7 @@ import {PermissionGate} from '../../shared/services/permissions';
 import {DataTable, type DataTableColumn} from '../../shared/components/DataTable';
 import type {ApiItem} from '../../shared/types/index';
 
-const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
 
 const COLUMNS: DataTableColumn[] = [
     {key: 'descricao', label: 'Descrição'},

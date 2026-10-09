@@ -213,7 +213,7 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
 
                 const res = await api.get<PagedResp>('/api/view/coordenador/listCoordenador/paged', { params: { page, size } });
 
-                const content = (res.data.content as unknown as Record<string, unknown>[]).map(r => ({
+                const content = (res.data.content as unknown as Record<string, any>[]).map(r => ({
 
                     id: Number(r.id),
 
@@ -825,7 +825,7 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
 
                                 {(ligacoesQ.data as unknown[] ?? []).length === 0 ? <tr><td colSpan={9} style={{ padding: 12, textAlign: 'center', color: '#777' }}>{ligacoesQ.isLoading ? 'Carregando...' : 'Nenhum registro'}</td></tr> :
 
-                                    (ligacoesQ.data as unknown as Record<string, unknown>[]).map((r: Record<string, unknown>, i: number) => (
+                                    (ligacoesQ.data as unknown as Record<string, any>[]).map((r: Record<string, unknown>, i: number) => (
 
                                         <tr key={i} style={{ borderTop: '1px solid #eee' }}>
 
@@ -881,7 +881,7 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
 
                                 {(ordemQ.data as unknown[] ?? []).length === 0 ? <tr><td colSpan={2} style={{ padding: 12, textAlign: 'center', color: '#777' }}>{ordemQ.isLoading ? 'Carregando...' : 'Nenhum registro'}</td></tr> :
 
-                                    (ordemQ.data as unknown as Record<string, unknown>[]).map((r: Record<string, unknown>, i: number) => (
+                                    (ordemQ.data as unknown as Record<string, any>[]).map((r: Record<string, unknown>, i: number) => (
 
                                         <tr key={i} style={{ borderTop: '1px solid #eee' }}><td style={{ padding: 6 }}>{String(r.prospectoNome ?? '')}</td><td style={{ padding: 6 }}>{String(r.prospectoNome ?? '')}</td></tr>
 
@@ -921,7 +921,7 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
 
                                 {(prioriQ.data as unknown[] ?? []).length === 0 ? <tr><td colSpan={6} style={{ padding: 12, textAlign: 'center', color: '#777' }}>{prioriQ.isLoading ? 'Carregando...' : 'Nenhum registro'}</td></tr> :
 
-                                    (prioriQ.data as unknown as Record<string, unknown>[]).map((r: Record<string, unknown>, i: number) => (
+                                    (prioriQ.data as unknown as Record<string, any>[]).map((r: Record<string, unknown>, i: number) => (
 
                                         <tr key={i} style={{ borderTop: '1px solid #eee' }}>
 
@@ -975,7 +975,7 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
 
                                 {(pausaQ.data as unknown[] ?? []).length === 0 ? <tr><td colSpan={7} style={{ padding: 12, textAlign: 'center', color: '#777' }}>{pausaQ.isLoading ? 'Carregando...' : 'Nenhum registro'}</td></tr> :
 
-                                    (pausaQ.data as unknown as Record<string, unknown>[]).map((r: Record<string, unknown>, i: number) => (
+                                    (pausaQ.data as unknown as Record<string, any>[]).map((r: Record<string, unknown>, i: number) => (
 
                                         <tr key={i} style={{ borderTop: '1px solid #eee' }}>
 
@@ -1021,7 +1021,7 @@ export default function ViewCoordenadorListCoordenadorListScreen() {
 
                                 {(agendQ.data as unknown[] ?? []).length === 0 ? <tr><td colSpan={4} style={{ padding: 12, textAlign: 'center', color: '#777' }}>{agendQ.isLoading ? 'Carregando...' : 'Nenhum registro'}</td></tr> :
 
-                                    (agendQ.data as unknown as Record<string, unknown>[]).map((r: Record<string, unknown>, i: number) => (
+                                    (agendQ.data as unknown as Record<string, any>[]).map((r: Record<string, unknown>, i: number) => (
 
                                         <tr key={i} style={{ borderTop: '1px solid #eee' }}>
 

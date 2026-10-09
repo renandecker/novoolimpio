@@ -1,4 +1,4 @@
-import {useState, useMemo} from 'react';
+import {useState, useMemo, type ReactNode} from 'react';
 import {PermissionGate, useCurrentOutcome} from '../../../shared/services/permissions';
 import {api} from '../../../shared/services/api';
 import {useModulePaged} from '../../../shared/hooks/useModulePaged';
@@ -7,10 +7,9 @@ import type {SearchFilterRequest} from '../../../shared/types/types';
 import {legacyClassName} from '../../../shared/components/DataTable';
 import {ModuleFilter} from '../../../shared/components/ModuleFilter';
 import BreadCrumb from '../../../shared/components/BreadCrumb';
-import {AlertDialogProvider, useAlertDialog} from '../../../shared/components/AlertDialog';
 import {swalConfirm} from '../../../shared/components/swal';
 
-const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
 
 const formatDate = (value: unknown): string => {
     if (value === null || value === undefined) return '';
@@ -66,10 +65,8 @@ type ControlePagamentoRow = {
 
 export default function ViewContaControlePagamentoListScreen() {
     const outcome = useCurrentOutcome();
-    const alertDialog = useAlertDialog();
     const [filterParams, setFilterParams] = useState<SearchFilterRequest>({filters: {}});
     const [notice, setNotice] = useState<string>('');
-    const [selectedItem, setSelectedItem] = useState<ControlePagamentoRow | null>(null);
     const [showCalcOverlay, setShowCalcOverlay] = useState<{open: boolean; item: ControlePagamentoRow | null}>({open: false, item: null});
 
     const q = useModulePaged('/api/view/conta/controlePagamento', 0, 10, undefined, filterParams);
@@ -99,25 +96,18 @@ export default function ViewContaControlePagamentoListScreen() {
         }
     };
 
-    const handleRemover = (item: ControlePagamentoRow) => {
-        setSelectedItem(item);
-        alertDialog.open({
-            title: 'Atenção!',
-            message: 'Deseja realmente remover este controle de pagamento?',
-            onConfirm: async () => {
-                try {
-                    await api.delete(`/api/conta/controlePagamento/${item.id}`);
-                    setNotice('Controle de pagamento removido com sucesso');
-                    q.refetch();
-                } catch (error: any) {
-                    setNotice(`Erro: ${error.response?.data?.error ?? error.message}`);
-                }
-            },
-        });
+    const handleRemover = async (item: ControlePagamentoRow) => {
+        if (!(await swalConfirm('Deseja realmente remover este controle de pagamento?', {title: 'Atenção!', confirmText: 'Remover', danger: true}))) return;
+        try {
+            await api.delete(`/api/conta/controlePagamento/${item.id}`);
+            setNotice('Controle de pagamento removido com sucesso');
+            q.refetch();
+        } catch (error: any) {
+            setNotice(`Erro: ${error.response?.data?.error ?? error.message}`);
+        }
     };
 
     return (
-        <AlertDialogProvider>
             <PermissionGate permission="READ">
                 <main>
                     <div className="page-header">
@@ -162,7 +152,7 @@ export default function ViewContaControlePagamentoListScreen() {
                                                 <tr key={id} style={{backgroundColor: overdue && !dataAplicada ? '#fff3cd' : undefined}}>
                                                     {COLUMNS.map((column) => {
                                                         const value = row[column.key];
-                                                        let cellValue = String(value ?? '');
+                                                        let cellValue: ReactNode = String(value ?? '');
                                                         if (overdue && !dataAplicada && column.key === 'dataConta') {
                                                             cellValue = <span style={{color: '#C90000', fontWeight: 'bold'}}>{formatDate(value)}</span>;
                                                         }
@@ -254,6 +244,5 @@ export default function ViewContaControlePagamentoListScreen() {
                     )}
                 </main>
             </PermissionGate>
-        </AlertDialogProvider>
     );
 }

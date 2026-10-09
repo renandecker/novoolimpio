@@ -2,7 +2,7 @@ import {PermissionGate} from '../../../shared/services/permissions';
 import {DataTable, type DataTableColumn} from '../../../shared/components/DataTable';
 import type {ApiItem} from '../../../shared/types/types.ts';
 
-const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
 
 const formatDate = (value: unknown): string => {
     if (value === null || value === undefined) return '';

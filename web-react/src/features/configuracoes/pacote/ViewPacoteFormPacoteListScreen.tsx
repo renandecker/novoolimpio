@@ -16,7 +16,7 @@ import {Tabs, type TabItem} from '../../../shared/components/Tabs';
 
 import {MasterDetail} from '../../../shared/components/MasterDetail';
 
-import {AutoComplete} from '../../../shared/components/AutoComplete';
+import {AutoComplete, type AutoCompleteOption} from '../../../shared/components/AutoComplete';
 
 import type {ApiItem} from '../../../shared/types/types.ts';
 
@@ -24,6 +24,8 @@ import {BooleanField} from '../../../shared/components/BooleanField';
 
 const str = (v: unknown): string => (v === null || v === undefined ? '' : String(v));
 const num = (v: string): number | null => (v !== '' && !isNaN(Number(v)) ? Number(v) : null);
+const optFromLabel = (id: number | undefined, label: string | undefined): AutoCompleteOption | null =>
+    (id === undefined || id === null || !label ? null : {id, label});
 
 const toDateInput = (v: unknown): string => {
     if (!v) return '';
@@ -116,8 +118,8 @@ interface FiltroLigacaoItem {
 interface FiltroAcademicoItem {
     key: string;
     tipoFiltro?: number;
-    curriculo?: {sucinto: string; curso: {nome: string}};
-    componenteCurricular?: {descricao: string};
+    curriculo?: {id?: number; sucinto: string; curso: {nome: string}};
+    componenteCurricular?: {id?: number; descricao: string};
     status?: string;
     operacao?: string;
     data?: string;
@@ -224,7 +226,7 @@ export default function ViewPacoteFormPacoteListScreen() {
         setSalvando(true);
         try {
             const payload = {
-                ...semId(formData.entity as unknown as Record<string, unknown>),
+                ...semId(formData.entity as unknown as Record<string, any>),
                 filtrosAcao: formData.filtrosAcao,
                 filtrosCampo: formData.filtrosCampo,
                 filtrosLigacao: formData.filtrosLigacao,
@@ -432,11 +434,11 @@ export default function ViewPacoteFormPacoteListScreen() {
                                 <div className="form-field">
                                     <span className="form-label">Filtrar por Nota do Prospecto</span>
                                     <select className="form-input form-select"
-                                            value={str(data.filtrosCampo.find(f => f.campo?.nome === 'nota')?.operacao ?? 'EQ')}
+                                            value={str(data.filtrosCampo.find(f => f.campo?.rotulo === 'nota')?.operacao ?? 'EQ')}
                                             onChange={e => {
                                                 const op = e.target.value;
                                                 updateField('filtrosCampo', data.filtrosCampo.map(f =>
-                                                    f.campo?.nome === 'nota' ? {...f, operacao: op} : f
+                                                    f.campo?.rotulo === 'nota' ? {...f, operacao: op} : f
                                                 ));
                                             }}>
                                         {OPERACOES.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -445,11 +447,11 @@ export default function ViewPacoteFormPacoteListScreen() {
                                 <div className="form-field">
                                     <span className="form-label">Nota</span>
                                     <input className="form-input" type="number" min={0} max={10} step={1}
-                                           value={str(data.filtrosCampo.find(f => f.campo?.nome === 'nota')?.valor ?? '')}
+                                           value={str(data.filtrosCampo.find(f => f.campo?.rotulo === 'nota')?.valor ?? '')}
                                            onChange={e => {
                                                const val = e.target.value;
                                                updateField('filtrosCampo', data.filtrosCampo.map(f =>
-                                                   f.campo?.nome === 'nota' ? {...f, valor: val} : f
+                                                   f.campo?.rotulo === 'nota' ? {...f, valor: val} : f
                                                ));
                                            }} />
                                 </div>
@@ -686,44 +688,42 @@ export default function ViewPacoteFormPacoteListScreen() {
                                 <label className="form-field">
                                     <span className="form-label">Curso</span>
                                     <AutoComplete
-                                        value={str(data.filtrosAcademico[data.filtrosAcademico.length - 1]?.curriculo?.sucinto ?? '')}
-                                        onChange={async (val) => {
+                                        value={optFromLabel(data.filtrosAcademico[data.filtrosAcademico.length - 1]?.curriculo?.id, data.filtrosAcademico[data.filtrosAcademico.length - 1]?.curriculo?.sucinto)}
+                                        onChange={(opt) => {
                                             if (data.filtrosAcademico.length > 0) {
                                                 const novos = [...data.filtrosAcademico];
-                                                novos[novos.length - 1] = {...novos[novos.length - 1], curriculo: {sucinto: val, curso: {nome: ''}}};
+                                                novos[novos.length - 1] = {...novos[novos.length - 1], curriculo: {id: opt?.id, sucinto: opt?.label ?? '', curso: {nome: ''}}};
                                                 updateField('filtrosAcademico', novos);
                                             }
                                         }}
-                                        fetchSuggestions={async (query) => {
+                                        fetchOptions={async (query) => {
                                             if (query.length < 3) return [];
                                             try {
                                                 const res = await api.get<ApiItem[]>('/api/educacao/curriculo', {params: {q: query}});
-                                                return (res.data ?? []).map(c => ({id: c.id, label: (c as any).sucinto ?? (c as any).nome ?? `Curso #${c.id}`}));
+                                                return (res.data ?? []).map(c => ({id: c.id, label: (c as ApiItem).sucinto ?? (c as ApiItem).nome ?? `Curso #${c.id}`}));
                                             } catch { return []; }
                                         }}
-                                        getOptionLabel={opt => opt.label}
                                     />
                                 </label>
 
                                 <label className="form-field">
                                     <span className="form-label">Componente Curricular</span>
                                     <AutoComplete
-                                        value={str(data.filtrosAcademico[data.filtrosAcademico.length - 1]?.componenteCurricular?.descricao ?? '')}
-                                        onChange={async (val) => {
+                                        value={optFromLabel(data.filtrosAcademico[data.filtrosAcademico.length - 1]?.componenteCurricular?.id, data.filtrosAcademico[data.filtrosAcademico.length - 1]?.componenteCurricular?.descricao)}
+                                        onChange={(opt) => {
                                             if (data.filtrosAcademico.length > 0) {
                                                 const novos = [...data.filtrosAcademico];
-                                                novos[novos.length - 1] = {...novos[novos.length - 1], componenteCurricular: {descricao: val}};
+                                                novos[novos.length - 1] = {...novos[novos.length - 1], componenteCurricular: {id: opt?.id, descricao: opt?.label ?? ''}};
                                                 updateField('filtrosAcademico', novos);
                                             }
                                         }}
-                                        fetchSuggestions={async (query) => {
+                                        fetchOptions={async (query) => {
                                             if (query.length < 3) return [];
                                             try {
                                                 const res = await api.get<ApiItem[]>('/api/educacao/componente-curricular', {params: {q: query}});
-                                                return (res.data ?? []).map(c => ({id: c.id, label: (c as any).descricao ?? `Componente #${c.id}`}));
+                                                return (res.data ?? []).map(c => ({id: c.id, label: (c as ApiItem).descricao ?? `Componente #${c.id}`}));
                                             } catch { return []; }
                                         }}
-                                        getOptionLabel={opt => opt.label}
                                     />
                                 </label>
 
@@ -834,36 +834,32 @@ export default function ViewPacoteFormPacoteListScreen() {
                     <label className="form-field">
                         <span className="form-label">Coordenador</span>
                         <AutoComplete
-                            value={str(data.operacional.coordenadorNome ?? '')}
-                            onChange={async (val) => {
-                                updateField('operacional', {...data.operacional, coordenadorNome: val});
-                            }}
-                            fetchSuggestions={async (query) => {
+                            value={optFromLabel(data.operacional.coordenadorId, data.operacional.coordenadorNome)}
+                            onChange={(opt) => updateField('operacional', {...data.operacional, coordenadorId: opt?.id, coordenadorNome: opt?.label})}
+                            fetchOptions={async (query) => {
                                 if (query.length < 3) return [];
                                 try {
                                     const res = await api.get<ApiItem[]>('/api/basico/usuario', {params: {q: query}});
-                                    return (res.data ?? []).map(u => ({id: u.id, label: (u as any).login ?? (u as any).nome ?? `Usuário #${u.id}`}));
+                                    return (res.data ?? []).map(u => ({id: u.id, label: (u as ApiItem).login ?? (u as ApiItem).nome ?? `Usuário #${u.id}`}));
                                 } catch { return []; }
                             }}
-                            getOptionLabel={opt => opt.label}
-                            onSelect={opt => updateField('operacional', {...data.operacional, coordenadorId: opt.id, coordenadorNome: opt.label})}
                         />
                     </label>
 
                     <label className="form-field">
                         <span className="form-label">Equipe (Operadores)</span>
                         <AutoComplete
-                            value=""
-                            onChange={async () => {}}
-                            fetchSuggestions={async (query) => {
+                            value={null}
+                            onChange={(opt) => {
+                                if (opt) addUsuario({id: opt.id, login: opt.label, nome: opt.label});
+                            }}
+                            fetchOptions={async (query) => {
                                 if (query.length < 3) return [];
                                 try {
                                     const res = await api.get<ApiItem[]>('/api/basico/usuario', {params: {q: query}});
-                                    return (res.data ?? []).map(u => ({id: u.id, label: (u as any).login ?? (u as any).nome ?? `Usuário #${u.id}`}));
+                                    return (res.data ?? []).map(u => ({id: u.id, label: (u as ApiItem).login ?? (u as ApiItem).nome ?? `Usuário #${u.id}`}));
                                 } catch { return []; }
                             }}
-                            getOptionLabel={opt => opt.label}
-                            onSelect={addUsuario}
                         />
                     </label>
 
@@ -908,7 +904,7 @@ export default function ViewPacoteFormPacoteListScreen() {
     }
 
     return (
-        <PermissionGate permission="WRITE">
+        <PermissionGate permission="READ">
             <main style={{padding: '20px', maxWidth: '1200px', margin: '0 auto'}}>
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
                     <h1>{idEdicao ? 'Editar Pacote' : 'Novo Pacote'}</h1>

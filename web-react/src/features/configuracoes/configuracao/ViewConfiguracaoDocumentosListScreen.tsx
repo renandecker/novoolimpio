@@ -1,9 +1,4 @@
-import {useEffect, useState} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {api} from '../../../shared/services/api';
-import {DataTable, type DataTableProps} from '../../../shared/components/DataTable';
-import type {ApiItem} from '../../../shared/types/types.ts';
-import {useModulePaged} from '../../../shared/hooks/useModulePaged';
+import {DataTable} from '../../../shared/components/DataTable';
 
 const DOCUMENTOS_COLUMNS = [
     {key: 'nome', label: 'Nome'},
@@ -12,31 +7,10 @@ const DOCUMENTOS_COLUMNS = [
     {key: 'ativo', label: 'Ativo'},
 ];
 
-interface DocumentoItem {
-    id: number;
-    nome: string;
-    descricao: string | null;
-    tipoRelatorio: string | null;
-    ativo: boolean;
-    arquivoNome: string | null;
-}
-
 function ViewConfiguracaoDocumentosListScreen() {
-    const {data, isLoading, isError} = useModulePaged<DocumentoItem>('/api/view/configuracao/documentos', 1, 10);
-    const items = data?.content ?? [];
-    const totalElements = data?.totalElements ?? 0;
-
-    if (isLoading) return <div>Carregando...</div>;
-    if (isError) return <div>Erro ao carregar documentos.</div>;
-    if (items.length === 0) return <div>Nenhum documento configurado.</div>;
-
     return (
         <div className="data-table">
-            <DataTable
-                columns={DOCUMENTOS_COLUMNS}
-                items={items}
-                path="/api/view/configuracao/documentos"
-            />
+            <DataTable path="/api/view/configuracao/documentos" columns={DOCUMENTOS_COLUMNS}/>
         </div>
     );
 }

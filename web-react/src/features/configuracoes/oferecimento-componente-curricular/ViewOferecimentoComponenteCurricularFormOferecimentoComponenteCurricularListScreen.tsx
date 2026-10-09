@@ -536,9 +536,23 @@ const [modalOfertaOpen, setModalOfertaOpen] = useState(false);
 
 
 
-    const updateField = useCallback(<K extends keyof OferecimentoCCData>(key: K, value: OferecimentoCCData[K]) => {
+const updateField = useCallback((path: string, value: unknown) => {
 
-        setData(prev => ({...prev, [key]: value}));
+        setData(prev => {
+
+            if (!path.includes('.')) return {...prev, [path]: value};
+
+            const [raiz, ...resto] = path.split('.');
+
+            return {
+
+                ...prev,
+
+                [raiz]: {...(prev as Record<string, any>)[raiz], [resto.join('.')]: value},
+
+            };
+
+        });
 
     }, []);
 
@@ -1113,7 +1127,7 @@ const fetchProfessor = async (query: string, diaSemanaId?: number, turnoId?: num
 
                 const existente = gruposDisponiveis.find((g) => (g.nome ?? '').toLowerCase() === nome.toLowerCase());
 
-                grupoId = existente ? existente.id : (await api.post('/api/educacao/grupo', {nome, unidadeId: e.unidadeId, curriculoId: e.curriculoId}))?.id;
+                grupoId = existente ? existente.id : (await api.post<{id: number}>('/api/educacao/grupo', {nome, unidadeId: e.unidadeId, curriculoId: e.curriculoId}))?.data?.id;
 
                 if (!grupoId) { alert('Não foi possível criar o grupo'); return; }
 

@@ -10,6 +10,7 @@ public record NotificacaoRegraResponse(
         String tipoRegra,
         String canal,
         String destinatario,
+        boolean destinatarioProfessor,
         Double valorLimite,
         boolean ativo,
         OffsetDateTime createdAt,

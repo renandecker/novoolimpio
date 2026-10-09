@@ -1,4 +1,4 @@
-﻿import {useState, useMemo} from 'react';
+import {useState, useMemo} from 'react';
 import {PermissionGate, useCurrentOutcome} from '../../shared/services/permissions';
 import {api} from '../../shared/services/api';
 import {useModulePaged} from '../../shared/hooks/useModulePaged';
@@ -8,7 +8,7 @@ import {legacyClassName} from '../../shared/components/DataTable';
 import {ModuleFilter} from '../../shared/components/ModuleFilter';
 import {swalConfirm} from '../../shared/components/swal';
 
-const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
 
 const formatDate = (value: unknown): string => {
     if (value === null || value === undefined) return '';

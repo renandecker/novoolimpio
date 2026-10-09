@@ -1,4 +1,5 @@
-﻿import {useEffect, useRef, useState, useCallback} from 'react';
+import {useEffect, useRef, useState, useCallback} from 'react';
+import type {CSSProperties} from 'react';
 import './AutoComplete.css';
 
 export interface AutoCompleteOption {
@@ -6,32 +7,51 @@ export interface AutoCompleteOption {
     label: string;
 }
 
-interface AutoCompleteProps {
+interface AutoCompleteBaseProps {
     id?: string;
     label?: string;
     placeholder?: string;
-    value: AutoCompleteOption | null;
-    onChange: (option: AutoCompleteOption | null) => void;
     fetchOptions: (query: string) => Promise<AutoCompleteOption[]>;
     fetchById?: (id: number) => Promise<AutoCompleteOption | null>;
     minChars?: number;
     disabled?: boolean;
     minDropdownResults?: number;
+    required?: boolean;
+    style?: CSSProperties;
 }
 
-export function AutoComplete({
-                                  id,
-                                  label,
-                                  placeholder,
-                                  value,
-                                  onChange,
-                                  fetchOptions,
-                                  fetchById,
-                                  minChars = 3,
-                                  disabled = false,
-                                  minDropdownResults = 10,
-                              }: AutoCompleteProps) {
-    const [text, setText] = useState(value?.label ?? '');
+type AutoCompleteProps = AutoCompleteBaseProps & (
+    | {
+        multiple?: false;
+        value: AutoCompleteOption | null;
+        onChange: (option: AutoCompleteOption | null) => void;
+    }
+    | {
+        multiple: true;
+        value: AutoCompleteOption[];
+        onChange: (options: AutoCompleteOption[]) => void;
+    }
+);
+
+export function AutoComplete(props: AutoCompleteProps) {
+    const {
+              id,
+              label,
+              placeholder,
+              fetchOptions,
+              fetchById,
+              minChars = 3,
+              disabled = false,
+              minDropdownResults = 10,
+              required = false,
+              style,
+          } = props as AutoCompleteBaseProps;
+    const multiple = props.multiple === true;
+    const value = (props.value ?? null) as AutoCompleteOption | AutoCompleteOption[] | null;
+    const onChange = props.onChange as (option: AutoCompleteOption | AutoCompleteOption[] | null) => void;
+    const selected = multiple ? ((value ?? []) as AutoCompleteOption[]) : [];
+    const single = multiple ? null : (value as AutoCompleteOption | null);
+    const [text, setText] = useState(multiple ? '' : single?.label ?? '');
     const [options, setOptions] = useState<AutoCompleteOption[]>([]);
     const [open, setOpen] = useState(false);
     const [highlighted, setHighlighted] = useState(-1);
@@ -43,15 +63,17 @@ export function AutoComplete({
     fetchByIdRef.current = fetchById;
 
     useEffect(() => {
-        if (value?.id && !value?.label && fetchByIdRef.current) {
+        if (multiple) return;
+        const opt = single;
+        if (opt?.id && !opt?.label && fetchByIdRef.current) {
             setCarregando(true);
-            fetchByIdRef.current(value.id)
-                .then((opt) => {
-                    if (opt) setText(opt.label);
+            fetchByIdRef.current(opt.id)
+                .then((found) => {
+                    if (found) setText(found.label);
                 })
                 .finally(() => setCarregando(false));
         } else {
-            setText(value?.label ?? '');
+            setText(opt?.label ?? '');
         }
     }, [value]);
 
@@ -115,14 +137,26 @@ export function AutoComplete({
     }, [disabled, minDropdownResults, fetchOptions]);
 
     function selecionar(option: AutoCompleteOption) {
+        if (multiple) {
+            const jaSelecionado = selected.some((o) => o.id === option.id);
+            onChange(jaSelecionado ? selected.filter((o) => o.id !== option.id) : [...selected, option]);
+            setText('');
+            setOpen(false);
+            setHighlighted(-1);
+            return;
+        }
         onChange(option);
         setText(option.label);
         setOpen(false);
         setHighlighted(-1);
     }
 
+    function removerSelecionado(option: AutoCompleteOption) {
+        onChange(selected.filter((o) => o.id !== option.id));
+    }
+
     function limpar() {
-        onChange(null);
+        onChange(multiple ? [] : null);
         setText('');
         setOptions([]);
         setOpen(false);
@@ -147,8 +181,21 @@ export function AutoComplete({
     }
 
     return (
-        <div className="autocomplete" ref={rootRef}>
+        <div className="autocomplete" ref={rootRef} style={style}>
             {label && <span className="autocomplete-label">{label}</span>}
+            {multiple && selected.length > 0 && (
+                <div className="autocomplete-chips">
+                    {selected.map((option) => (
+                        <span key={option.id} className="autocomplete-chip">
+                            {option.label}
+                            <button type="button" className="autocomplete-chip-remove" title="Remover"
+                                    onClick={() => removerSelecionado(option)}>
+                                ✕
+                            </button>
+                        </span>
+                    ))}
+                </div>
+            )}
             <div className="autocomplete-input-wrap">
                 <input
                     id={id}
@@ -156,10 +203,11 @@ export function AutoComplete({
                     className="autocomplete-input"
                     value={text}
                     placeholder={placeholder}
+                    required={required}
                     disabled={disabled}
                     onChange={(event) => {
                         setText(event.target.value);
-                        onChange(null);
+                        if (!multiple) onChange(null);
                         setHighlighted(-1);
                         pesquisar(event.target.value);
                     }}
@@ -168,7 +216,7 @@ export function AutoComplete({
                     }}
                     onKeyDown={onKeyDown}
                 />
-                {value && (
+                {(value || selected.length > 0) && (
                     <button type="button" className="autocomplete-btn autocomplete-btn-clear" title="Limpar"
                             onClick={limpar}>
                         ✕

@@ -1,6 +1,7 @@
-﻿import {useState} from 'react';
+import {useState} from 'react';
 import type {FormEvent} from 'react';
 import {api} from '../../shared/services/api';
+import {AutoComplete} from './AutoComplete';
 
 export interface Endereco {
     id?: number;
@@ -290,8 +291,6 @@ export function AjusteLogradouroModal({
     logradouroId?: number;
     onSave: (logradouro: Logradouro) => void;
 }) {
-    if (!open) return null;
-
     const [form, setForm] = useState<Partial<Logradouro>>({
         id: logradouroId,
         cep: cep,
@@ -306,6 +305,21 @@ export function AjusteLogradouroModal({
     const [bairroOpt, setBairroOpt] = useState<AutoCompleteOption | null>(null);
     const [salvando, setSalvando] = useState(false);
     const [aviso, setAviso] = useState('');
+    const [showNovoBairro, setShowNovoBairro] = useState(false);
+    const [novoBairroNome, setNovoBairroNome] = useState('');
+
+    if (!open) return null;
+
+    const handleSalvarBairro = async () => {
+        if (!novoBairroNome.trim() || !cidadeOpt?.id) return;
+        const bairroSalvo = await salvarBairro({descricao: novoBairroNome.trim(), cidadeId: cidadeOpt.id});
+        if (bairroSalvo) {
+            setBairroOpt({id: bairroSalvo.id!, label: bairroSalvo.descricao});
+            setForm(prev => ({...prev, bairroId: bairroSalvo.id!}));
+            setShowNovoBairro(false);
+            setNovoBairroNome('');
+        }
+    };
 
     const handleBuscar = async () => {
         setAviso('');
@@ -356,6 +370,7 @@ export function AjusteLogradouroModal({
     };
 
     return (
+        <>
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal form-modal" style={{maxWidth: '600px'}} onClick={(e) => e.stopPropagation()}>
                 <div className="div_form">
@@ -453,6 +468,35 @@ export function AjusteLogradouroModal({
                 </div>
             </div>
         </div>
+            {showNovoBairro && (
+                <div className="modal-overlay" onClick={() => setShowNovoBairro(false)}>
+                    <div className="modal form-modal" style={{maxWidth: '400px'}} onClick={(e) => e.stopPropagation()}>
+                        <div className="div_form">
+                            <div className="form-title">Novo Bairro</div>
+                            <div className="form-grid">
+                                <label className="form-field">
+                                    <span className="form-label">Bairro *</span>
+                                    <input
+                                        className="form-input"
+                                        placeholder="Nome do bairro"
+                                        value={novoBairroNome}
+                                        onChange={(e) => setNovoBairroNome(e.target.value)}
+                                    />
+                                </label>
+                            </div>
+                            <div className="form-buttons">
+                                <button type="button" className="btnblue" onClick={handleSalvarBairro} disabled={!novoBairroNome.trim()}>
+                                    Salvar
+                                </button>
+                                <button type="button" className="btnyellow" onClick={() => setShowNovoBairro(false)}>
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 }
 
@@ -467,8 +511,6 @@ export function NovoLogradouroModal({
     cep: string;
     onSave: (logradouro: Logradouro) => void;
 }) {
-    if (!open) return null;
-
     const [form, setForm] = useState<Partial<Logradouro>>({
         cep: cep,
         descricao: '',
@@ -484,6 +526,8 @@ export function NovoLogradouroModal({
     const [aviso, setAviso] = useState('');
     const [showNovoBairro, setShowNovoBairro] = useState(false);
     const [novoBairroNome, setNovoBairroNome] = useState('');
+
+    if (!open) return null;
 
     const handleBuscar = async () => {
         setAviso('');

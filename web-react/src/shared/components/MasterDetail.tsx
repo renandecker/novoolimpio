@@ -1,4 +1,4 @@
-﻿import {useMemo, useRef, useState} from 'react';
+import {useMemo, useRef, useState} from 'react';
 import type {ReactNode} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {api} from '../services/api';
@@ -33,7 +33,7 @@ const toTitle = (value: string) =>
         .replace(/_/g, ' ')
         .replace(/^./, (c) => c.toUpperCase());
 
-const asRecord = (item: ApiItem) => item as unknown as Record<string, unknown>;
+const asRecord = (item: ApiItem) => item as unknown as Record<string, any>;
 
 const fkBase = (key: string): string | null => (key.startsWith('id_') ? key.slice(3) : null);
 

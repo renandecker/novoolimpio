@@ -56,7 +56,7 @@ export function ReportButton() {
 
     const isSearching = debouncedSearch.length > 0;
 
-    const isAdmin = session?.perfis?.includes('ADMIN') || false;
+    const isAdmin = session?.hierarquia === 'ADMIN';
 
     const list = useQuery({
         queryKey: ['relatorios', 'disponiveis', page, debouncedSearch],

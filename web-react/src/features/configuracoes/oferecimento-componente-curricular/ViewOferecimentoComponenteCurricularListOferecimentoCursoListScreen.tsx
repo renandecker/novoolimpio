@@ -11,7 +11,7 @@ import type {ApiItem} from '../../../shared/types/types.ts';
 
 import {legacyClassName} from '../../../shared/components/DataTable';
 
-import {PAGE_SIZES} from '../../../shared/components/DataTable';
+import {PAGE_SIZES, type DataTableColumn} from '../../../shared/components/DataTable';
 
 import {RowMenu, type RowMenuItem} from '../../../shared/components/RowMenu';
 
@@ -49,7 +49,7 @@ interface OferecimentoRow {
 }
 
 
-const COLUMNS = [
+const COLUMNS: DataTableColumn[] = [
 
     {key: 'id', label: 'ID'},
 
@@ -563,7 +563,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
 
                                             <tbody>
 
-                                            <tr><td colspan="3" style="text-align:center;color:#666">Dados de dias de aula carregados do servidor</td></tr>
+                                            <tr><td colSpan={3} style={{textAlign: 'center', color: '#666'}}>Dados de dias de aula carregados do servidor</td></tr>
 
                                             </tbody>
 
@@ -581,7 +581,7 @@ export default function ViewOferecimentoComponenteCurricularListOferecimentoCurs
 
                                             <tbody>
 
-                                            <tr><td colspan="5" style="text-align:center;color:#666">Componentes carregados do servidor</td></tr>
+                                            <tr><td colSpan={5} style={{textAlign: 'center', color: '#666'}}>Componentes carregados do servidor</td></tr>
 
                                             </tbody>
 

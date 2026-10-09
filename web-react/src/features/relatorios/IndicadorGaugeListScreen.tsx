@@ -14,7 +14,9 @@ export default function IndicadorGaugeListScreen() {
       title: 'Visualizar',
       icon: <BarChart2 size={16} />,
       permission: 'EXECUTE',
-      onClick: (item) => window.open(`/view/indicador/viewIndicadorGauge/${item.id}`, '_blank'),
+      onClick: (item) => {
+        window.open(`/view/indicador/viewIndicadorGauge/${item.id}`, '_blank');
+      },
     },
   ];
 
